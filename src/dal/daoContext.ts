@@ -1,41 +1,7 @@
-import { DAOCache } from "./cache";
-import { DAO } from './dao';
+import { DAO } from './dao'
 
-type SecurityContextGenerator<SecurityContext> = () => SecurityContext;
-
-function isSecurityContextGenerator<T>(sc: T | SecurityContextGenerator<T>): sc is SecurityContextGenerator<T> {
-    return typeof sc === 'function';
-}
-
-export abstract class AbstractDAOContext<SecurityContext> {
-
-    protected theCache?: DAOCache;
-    protected theSecurityContext?: SecurityContext | SecurityContextGenerator<SecurityContext>;
-
-    constructor(options?: { pageSize?: number, cache?: DAOCache, securityContext?: SecurityContext | (() => SecurityContext) }) {
-        this.theCache = options?.cache;
-        this.theSecurityContext = options?.securityContext;
-    }
-
-    public cache(): DAOCache | undefined {
-        return this.theCache;
-    }
-
-    public securityContext(securityContext?: SecurityContext): SecurityContext | undefined {
-
-        if (securityContext) {
-            this.theSecurityContext = securityContext;
-        }
-
-        if (this.theSecurityContext && isSecurityContextGenerator(this.theSecurityContext)) {
-            return this.theSecurityContext();
-        } else {
-            return this.theSecurityContext;
-        }
-    }
-
-    public dao(daoName: string): DAO<any, any, any, any, any, any, any, any, never> {
-        return (this as any)[daoName];
-    }
-
+export abstract class AbstractDAOContext {
+  public dao(daoName: string): DAO<any, any, any, any, any, any, any, any, never> {
+    return (this as any)[daoName]
+  }
 }

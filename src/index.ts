@@ -13,7 +13,6 @@ export * from "./utils/types";
 export * from "./utils/utils";
 export * from "./dal/daoContext";
 export * from "./dal/dao";
-export * from "./dal/cache";
 export * from "./dal/mongoose";
 export * from "./dal/mongoose.geo";
 export * from "./dal/mongoose.localizedString";

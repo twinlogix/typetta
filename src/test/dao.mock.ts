@@ -9,7 +9,7 @@ import { LocalizedStringSchema } from "../";
 import * as types from './models.mock';
 import { v4 } from 'uuid';
 import { Model, Document, Types } from 'mongoose';
-import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, DAOCache, OneKey, SortDirection, overrideAssociations } from '../';
+import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '../';
 
 export type SecurityContext = {
     userId: string
@@ -61,7 +61,7 @@ export interface CityDAOParams<SecurityContext> extends DAOParams<types.City, 'i
 
 export class CityDAO<SecurityContext = any> extends AbstractMongooseDAO<types.City, 'id', true, CityFilter, CitySort, CityUpdate, CityExcludedFields, SecurityContext> {
 
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & CityDAOParams<SecurityContext>) {
+    public constructor(params: { daoContext: AbstractDAOContext } & CityDAOParams<SecurityContext>) {
         super({
             dbModel: CityModel,
             idField: 'id',
@@ -109,7 +109,7 @@ export interface AddressDAOParams<SecurityContext> extends DAOParams<types.Addre
 
 export class AddressDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Address, 'id', true, AddressFilter, AddressSort, AddressUpdate, AddressExcludedFields, SecurityContext> {
 
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & AddressDAOParams<SecurityContext>) {
+    public constructor(params: { daoContext: AbstractDAOContext } & AddressDAOParams<SecurityContext>) {
         super({
             dbModel: AddressModel,
             idField: 'id',
@@ -179,7 +179,7 @@ export interface OrganizationDAOParams<SecurityContext> extends DAOParams<types.
 
 export class OrganizationDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, SecurityContext> {
 
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & OrganizationDAOParams<SecurityContext>) {
+    public constructor(params: { daoContext: AbstractDAOContext } & OrganizationDAOParams<SecurityContext>) {
         super({
             dbModel: OrganizationModel,
             idField: 'id',
@@ -284,7 +284,7 @@ export interface UserDAOParams<SecurityContext> extends DAOParams<types.User, 'i
 
 export class UserDAO<SecurityContext = any> extends AbstractMongooseDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExludedFields, SecurityContext> {
 
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & UserDAOParams<SecurityContext>) {
+    public constructor(params: { daoContext: AbstractDAOContext } & UserDAOParams<SecurityContext>) {
         super({
             dbModel: UserModel,
             idField: 'id',
@@ -297,14 +297,11 @@ export class UserDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Us
             ),
         });
     }
-
 }
 
 
 
-export interface DAOContextParams<SecurityContext> {
-    cache?: DAOCache,
-    securityContext?: SecurityContext | (() => SecurityContext),
+export interface DAOContextParams {
     daoOverrides?: {
         city?: CityDAOParams<SecurityContext>,
         address?: AddressDAOParams<SecurityContext>,
@@ -313,14 +310,14 @@ export interface DAOContextParams<SecurityContext> {
     }
 };
 
-export class DAOContext<SecurityContext = any> extends AbstractDAOContext<SecurityContext> {
+export class DAOContext<SecurityContext = any> extends AbstractDAOContext {
 
     private _city: CityDAO<SecurityContext> | undefined;
     private _address: AddressDAO<SecurityContext> | undefined;
     private _organization: OrganizationDAO<SecurityContext> | undefined;
     private _user: UserDAO<SecurityContext> | undefined;
 
-    private daoOverrides: DAOContextParams<SecurityContext>['daoOverrides'];
+    private daoOverrides: DAOContextParams['daoOverrides'];
 
     get city() {
         if (!this._city) {
@@ -347,9 +344,8 @@ export class DAOContext<SecurityContext = any> extends AbstractDAOContext<Securi
         return this._user;
     }
 
-    constructor(options?: DAOContextParams<SecurityContext>) {
-        super(options);
+    constructor(options?: DAOContextParams) {
+        super()
         this.daoOverrides = options?.daoOverrides;
     }
-
 }

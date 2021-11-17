@@ -9,8 +9,8 @@ import _ from 'lodash'
 
 export type GraphQLContext
     <
-    DAOContext extends AbstractDAOContext<any>,
-    SecureDAOContext extends AbstractDAOContext<any>
+    DAOContext extends AbstractDAOContext,
+    SecureDAOContext extends AbstractDAOContext
     > = {
 
         request: Request,

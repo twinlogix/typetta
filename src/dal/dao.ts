@@ -1,721 +1,714 @@
-import DataLoader from "dataloader";
-import objectHash from 'object-hash';
-import { AbstractDAOContext } from "./daoContext";
-import { ConditionalPartialBy } from "../utils/utils";
-import { PartialDeep } from "type-fest";
-import { deepMerge, getTraversing, setTraversing } from '@twinlogix/tl-commons';
-import { Projection, ModelProjection, StaticProjection, GenericProjection } from "../utils/types";
-import { projection, getProjection, isProjectionIntersected } from "../utils/projection";
-import _ from "lodash";
+import DataLoader from 'dataloader'
+import objectHash from 'object-hash'
+import { AbstractDAOContext } from './daoContext'
+import { ConditionalPartialBy } from '../utils/utils'
+import { PartialDeep } from 'type-fest'
+import { deepMerge, getTraversing, setTraversing } from '@twinlogix/tl-commons'
+import { Projection, ModelProjection, StaticProjection, GenericProjection } from '../utils/types'
+import { projection, getProjection, isProjectionIntersected } from '../utils/projection'
+import _ from 'lodash'
 
-export enum SortDirection { ASC = 1, DESC = -1 }
+export enum SortDirection {
+  ASC = 1,
+  DESC = -1,
+}
 
 export type LogicalOperators<FilterType> = {
-    $and?: LogicalOperators<FilterType>[] | FilterType[],
-    $not?: LogicalOperators<FilterType> | FilterType,
-    $nor?: LogicalOperators<FilterType>[] | FilterType[],
-    $or?: LogicalOperators<FilterType>[] | FilterType[],
+  $and?: LogicalOperators<FilterType>[] | FilterType[]
+  $not?: LogicalOperators<FilterType> | FilterType
+  $nor?: LogicalOperators<FilterType>[] | FilterType[]
+  $or?: LogicalOperators<FilterType>[] | FilterType[]
 }
 
 export type ComparisonOperators<FieldType> = {
-    $eq?: FieldType,
-    $gt?: FieldType,
-    $gte?: FieldType,
-    $in?: FieldType[],
-    $lt?: FieldType
-    $lte?: FieldType
-    $ne?: FieldType
-    $nin?: FieldType[],
+  $eq?: FieldType
+  $gt?: FieldType
+  $gte?: FieldType
+  $in?: FieldType[]
+  $lt?: FieldType
+  $lte?: FieldType
+  $ne?: FieldType
+  $nin?: FieldType[]
 }
 
 export type ElementOperators<FieldType> = {
-    $exists?: Boolean,
-    // $type
+  $exists?: Boolean
+  // $type
 }
 
 export type EvaluationOperators<FieldType> = {
-    // $expr?
-    // $jsonSchema
-    // $mod
-    // $regex
-    $text?: {
-        $search: String
-        $language?: String
-        $caseSensitive?: Boolean
-        $diacriticSensitive?: Boolean
-    }
-    // $where
+  // $expr?
+  // $jsonSchema
+  // $mod
+  // $regex
+  $text?: {
+    $search: String
+    $language?: String
+    $caseSensitive?: Boolean
+    $diacriticSensitive?: Boolean
+  }
+  // $where
 }
 
 export type GeospathialOperators<FieldType> = {
-    // $geoIntersect
-    // $geoWithin
-    $near?: {
-        $geometry: {
-            type: 'Point',
-            coordinates: number[]
-        },
-        $maxDistance?: number,
-        $minDistance: number
-    },
-    $nearSphere?: {
-        $geometry: {
-            type: 'Point',
-            coordinates: number[]
-        },
-        $maxDistance?: number,
-        $minDistance: number
+  // $geoIntersect
+  // $geoWithin
+  $near?: {
+    $geometry: {
+      type: 'Point'
+      coordinates: number[]
     }
+    $maxDistance?: number
+    $minDistance: number
+  }
+  $nearSphere?: {
+    $geometry: {
+      type: 'Point'
+      coordinates: number[]
+    }
+    $maxDistance?: number
+    $minDistance: number
+  }
 }
 
 export type ArrayOperators<FieldType> = {
-    $all?: FieldType[],
-    // $elemMatch
-    $size: number
+  $all?: FieldType[]
+  // $elemMatch
+  $size: number
 }
 
 export type ReadOptions = {
-    secure?: boolean
-    _?: any
+  secure?: boolean
+  _?: any
 }
 
 export type ReadFromCacheOptions<ProjectionType> = ReadOptions & {
-    onlyFromCache?: boolean
-    projections?: ProjectionType
+  onlyFromCache?: boolean
+  projections?: ProjectionType
 }
 
 export type WriteOptions = {
-    secure?: boolean
-    _?: any
+  secure?: boolean
+  _?: any
 }
 
-export type ReferenceChecksResponse<T> = true | {
-    association: DAOAssociation,
-    record: PartialDeep<T>,
-    failedReferences: any[]
-}[];
+export type ReferenceChecksResponse<T> =
+  | true
+  | {
+      association: DAOAssociation
+      record: PartialDeep<T>
+      failedReferences: any[]
+    }[]
 
 export enum DAOAssociationType {
-    ONE_TO_ONE,
-    ONE_TO_MANY,
+  ONE_TO_ONE,
+  ONE_TO_MANY,
 }
 
 export enum DAOAssociationReference {
-    INNER,
-    FOREIGN,
+  INNER,
+  FOREIGN,
 }
 
 export type DAOAssociation = {
-    type: DAOAssociationType,
-    reference: DAOAssociationReference,
-    field: string, //TODO: use recursivekeyof
-    refFrom: string,
-    refTo: string,
-    dao: string,
-    buildFilter?: (keys: any[]) => any,
-    hasKey?: (record: any, key: any) => boolean
-    extractField?: string
-};
-
-export type DAOComputedFields<ModelType, P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType>> = {
-    fieldsProjection: Projection<ModelType>,
-    requiredProjection: P,
-    compute: (record: ModelProjection<ModelType, P>) => Promise<PartialDeep<ModelType>>
-};
-
-export function projectionDependency<M, P extends StaticProjection<M>>(args: { 
-    fieldsProjection : Projection<M>, 
-    requiredProjection: P
-}) : DAOMiddleware<M, any, true, any, any, never> {
-    return {
-      beforeFind: async (filter, projection) => {
-        if (isProjectionIntersected(projection ? projection as GenericProjection : true, args.fieldsProjection ? args.fieldsProjection as GenericProjection : true)) {
-          return { additiveProjection: args.requiredProjection };
-        }
-      },
-    }
+  type: DAOAssociationType
+  reference: DAOAssociationReference
+  field: string //TODO: use recursivekeyof
+  refFrom: string
+  refTo: string
+  dao: string
+  buildFilter?: (keys: any[]) => any
+  hasKey?: (record: any, key: any) => boolean
+  extractField?: string
 }
 
-export function buildComputedField<M, P extends StaticProjection<M>>(args: { 
-    fieldsProjection: Projection<M>, 
-    requiredProjection: P, 
-    compute:(record: ModelProjection<M, P>) => Promise<PartialDeep<M>>}): 
-    DAOMiddleware<M, any, true, any, any, never> {
-    return {
-        beforeFind: projectionDependency(args).beforeFind,
-        afterFind: async (filter, projection, result) => {
-            if (result && isProjectionIntersected(projection ? projection as GenericProjection : true, args.fieldsProjection ? args.fieldsProjection as GenericProjection : true)) {
-                return { additiveResult: await args.compute(result as ModelProjection<M, P>) }
-            }
-        }
-    }
+export type DAOComputedFields<ModelType, P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType>> = {
+  fieldsProjection: Projection<ModelType>
+  requiredProjection: P
+  compute: (record: ModelProjection<ModelType, P>) => Promise<PartialDeep<ModelType>>
+}
+
+export function projectionDependency<M, P extends StaticProjection<M>>(args: { fieldsProjection: Projection<M>; requiredProjection: P }): DAOMiddleware<M, any, true, any, any, never> {
+  return {
+    beforeFind: async (filter, projection) => {
+      if (isProjectionIntersected(projection ? (projection as GenericProjection) : true, args.fieldsProjection ? (args.fieldsProjection as GenericProjection) : true)) {
+        return { additiveProjection: args.requiredProjection }
+      }
+    },
+  }
+}
+
+export function buildComputedField<M, P extends StaticProjection<M>>(args: { fieldsProjection: Projection<M>; requiredProjection: P; compute: (record: ModelProjection<M, P>) => Promise<PartialDeep<M>> }): DAOMiddleware<M, any, true, any, any, never> {
+  return {
+    beforeFind: projectionDependency(args).beforeFind,
+    afterFind: async (filter, projection, result) => {
+      if (result && isProjectionIntersected(projection ? (projection as GenericProjection) : true, args.fieldsProjection ? (args.fieldsProjection as GenericProjection) : true)) {
+        return { additiveResult: await args.compute(result as ModelProjection<M, P>) }
+      }
+    },
+  }
 }
 
 export type DAOResolver = {
-    load: (parents: any[], projections: any) => Promise<any[]>,
-    match: (source: any, value: any) => boolean;
-};
+  load: (parents: any[], projections: any) => Promise<any[]>
+  match: (source: any, value: any) => boolean
+}
 
 export interface DAO<DBRef, DBObj, ModelType, IDKey extends keyof Omit<ModelType, ExcludedFields>, IDAutogenerated extends boolean, FilterType, SortType, UpdateType, ExcludedFields extends keyof ModelType> {
-    find<P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType> = true>(conditions: FilterType, projections?: P, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelProjection<ModelType, P>[]>;
-    findOne<P  extends true | StaticProjection<ModelType> | undefined | Projection<ModelType> = true>(conditions: FilterType, projections?: P, options?: ReadOptions): Promise<ModelProjection<ModelType, P> | null>;
-    findPage(conditions: FilterType, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<{ totalCount: number, records: ModelType[] }>;
-    findByQuery(query: (dbRef: DBRef, dbProjections: any, dbSorts?: any, start?: number, limit?: number, options?: any) => Promise<DBObj[]>, projections?: Projection<ModelType>, options?: ReadOptions): Promise<ModelType[]>;
-    load(keys: any[], buildFilter: (keys: any[]) => FilterType, hasKey: (record: ModelType, key: any) => boolean, projections?: Projection<ModelType>, loaderIdetifier?: string, options?: ReadOptions): Promise<(ModelType | null | Error)[]>;
-    checkReferences(records: PartialDeep<ModelType> | PartialDeep<ModelType>[], options?: ReadOptions): Promise<ReferenceChecksResponse<ModelType>>
-    exists(conditions: FilterType, options?: ReadOptions): Promise<boolean>;
-    count(conditions: FilterType, options?: ReadOptions): Promise<number>;
+  find<P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType> = true>(conditions: FilterType, projections?: P, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelProjection<ModelType, P>[]>
+  findOne<P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType> = true>(conditions: FilterType, projections?: P, options?: ReadOptions): Promise<ModelProjection<ModelType, P> | null>
+  findPage(conditions: FilterType, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<{ totalCount: number; records: ModelType[] }>
+  findByQuery(query: (dbRef: DBRef, dbProjections: any, dbSorts?: any, start?: number, limit?: number, options?: any) => Promise<DBObj[]>, projections?: Projection<ModelType>, options?: ReadOptions): Promise<ModelType[]>
+  load(keys: any[], buildFilter: (keys: any[]) => FilterType, hasKey: (record: ModelType, key: any) => boolean, projections?: Projection<ModelType>, loaderIdetifier?: string, options?: ReadOptions): Promise<(ModelType | null | Error)[]>
+  checkReferences(records: PartialDeep<ModelType> | PartialDeep<ModelType>[], options?: ReadOptions): Promise<ReferenceChecksResponse<ModelType>>
+  exists(conditions: FilterType, options?: ReadOptions): Promise<boolean>
+  count(conditions: FilterType, options?: ReadOptions): Promise<number>
 
-    insert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>, options?: WriteOptions): Promise<ModelType>;
-    update<T extends Pick<ModelType, IDKey>>(record: T, changes: UpdateType, options?: WriteOptions): Promise<void>;
-    updateOne(filter: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void>;
-    updateMany(filter: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void>;
-    replace<T extends Pick<ModelType, IDKey>>(from: T, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void>;
-    replaceOne(filter: FilterType, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void>;
-    delete<T extends Pick<ModelType, IDKey>>(record: T, options?: WriteOptions): Promise<void>;
-    deleteOne(filter: FilterType, options?: WriteOptions): Promise<void>;
-    deleteMany(filter: FilterType, options?: WriteOptions): Promise<void>;
+  insert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>, options?: WriteOptions): Promise<ModelType>
+  update<T extends Pick<ModelType, IDKey>>(record: T, changes: UpdateType, options?: WriteOptions): Promise<void>
+  updateOne(filter: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void>
+  updateMany(filter: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void>
+  replace<T extends Pick<ModelType, IDKey>>(from: T, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void>
+  replaceOne(filter: FilterType, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void>
+  delete<T extends Pick<ModelType, IDKey>>(record: T, options?: WriteOptions): Promise<void>
+  deleteOne(filter: FilterType, options?: WriteOptions): Promise<void>
+  deleteMany(filter: FilterType, options?: WriteOptions): Promise<void>
 }
 
 export type DAOMiddleware<ModelType, IDKey extends keyof Omit<ModelType, ExcludedFields>, IDAutogenerated extends boolean, FilterType, UpdateType, ExcludedFields extends keyof ModelType> = {
-    beforeFind?: (filter: Readonly<FilterType> | undefined | null, projection: Readonly<Projection<ModelType>> | undefined | null) => Promise<void | { error: Error } | { additiveProjection: Projection<ModelType> }>;
-    afterFind?: (filter: Readonly<FilterType> | undefined | null, projection: Readonly<Projection<ModelType>> | undefined | null, result: Readonly<PartialDeep<ModelType>> | null) => Promise<void | { additiveResult: PartialDeep<ModelType> }>;
+  beforeFind?: (filter: Readonly<FilterType> | undefined | null, projection: Readonly<Projection<ModelType>> | undefined | null) => Promise<void | { error: Error } | { additiveProjection: Projection<ModelType> }>
+  afterFind?: (filter: Readonly<FilterType> | undefined | null, projection: Readonly<Projection<ModelType>> | undefined | null, result: Readonly<PartialDeep<ModelType>> | null) => Promise<void | { additiveResult: PartialDeep<ModelType> }>
 
-    beforeInsert?: (record: Readonly<ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>>) => Promise<void | { error: Error } | { record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated> }>;
-    afterInsert?: (record: Readonly<ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>>, result: Readonly<ModelType>) => Promise<void>;
+  beforeInsert?: (record: Readonly<ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>>) => Promise<void | { error: Error } | { record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated> }>
+  afterInsert?: (record: Readonly<ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>>, result: Readonly<ModelType>) => Promise<void>
 
-    beforeUpdate?: (filter: Readonly<FilterType>, changes: Readonly<UpdateType>) => Promise<void | { cancel: boolean, error?: Error } | { changes: UpdateType }>;
-    afterUpdate?: (filter: Readonly<FilterType>, changes: Readonly<UpdateType>) => Promise<void>;
+  beforeUpdate?: (filter: Readonly<FilterType>, changes: Readonly<UpdateType>) => Promise<void | { cancel: boolean; error?: Error } | { changes: UpdateType }>
+  afterUpdate?: (filter: Readonly<FilterType>, changes: Readonly<UpdateType>) => Promise<void>
 
-    beforeReplace?: (filter: Readonly<FilterType>, to: Readonly<Omit<ModelType, ExcludedFields>>) => Promise<void | { cancel: boolean, error?: Error } | { to: Omit<ModelType, ExcludedFields> }>;
-    afterReplace?: (filter: Readonly<FilterType>, to: Readonly<Omit<ModelType, ExcludedFields>>) => Promise<void>;
+  beforeReplace?: (filter: Readonly<FilterType>, to: Readonly<Omit<ModelType, ExcludedFields>>) => Promise<void | { cancel: boolean; error?: Error } | { to: Omit<ModelType, ExcludedFields> }>
+  afterReplace?: (filter: Readonly<FilterType>, to: Readonly<Omit<ModelType, ExcludedFields>>) => Promise<void>
 
-    beforeDelete?: (filter: Readonly<FilterType>) => Promise<void | { cancel: boolean, error?: Error }>;
-    afterDelete?: (filter: Readonly<FilterType>) => Promise<void>;
+  beforeDelete?: (filter: Readonly<FilterType>) => Promise<void | { cancel: boolean; error?: Error }>
+  afterDelete?: (filter: Readonly<FilterType>) => Promise<void>
 }
 
 export interface DAOParams<ModelType, IDKey extends keyof Omit<ModelType, ExcludedFields>, IDAutogenerated extends boolean, FilterType, UpdateType, ExcludedFields extends keyof ModelType, SecurityContext> {
-    pageSize?: number;
-    associations?: DAOAssociation[];
-    middlewares?: DAOMiddleware<ModelType, IDKey, IDAutogenerated, FilterType, UpdateType, ExcludedFields>[];
+  pageSize?: number
+  associations?: DAOAssociation[]
+  middlewares?: DAOMiddleware<ModelType, IDKey, IDAutogenerated, FilterType, UpdateType, ExcludedFields>[]
 }
 
 export abstract class AbstractDAO<DBRef, DBObj, ModelType, IDKey extends keyof Omit<ModelType, ExcludedFields>, IDAutogenerated extends boolean, FilterType, SortType, UpdateType, ExcludedFields extends keyof ModelType, SecurityContext> implements DAO<DBRef, DBObj, ModelType, IDKey, IDAutogenerated, FilterType, SortType, UpdateType, ExcludedFields> {
+  protected idField: IDKey
+  protected daoContext: AbstractDAOContext
+  protected associations: DAOAssociation[]
+  protected middlewares: DAOMiddleware<ModelType, IDKey, IDAutogenerated, FilterType, UpdateType, ExcludedFields>[]
+  protected pageSize: number
+  protected resolvers: { [key: string]: DAOResolver | undefined }
+  protected dataLoaders: Map<string, DataLoader<ModelType[IDKey], ModelType[] | null>>
 
-    protected idField: IDKey;
-    protected daoContext: AbstractDAOContext<SecurityContext>;
-    protected associations: DAOAssociation[];
-    protected middlewares: DAOMiddleware<ModelType, IDKey, IDAutogenerated, FilterType, UpdateType, ExcludedFields>[]
-    protected pageSize: number;
-    protected resolvers: any;
-    protected dataLoaders: Map<string, DataLoader<ModelType[IDKey], ModelType[] | null>>;
+  protected constructor({ idField, daoContext, pageSize = 50, associations = [], middlewares = [] }: { idField: IDKey; daoContext: AbstractDAOContext } & DAOParams<ModelType, IDKey, boolean, FilterType, any, ExcludedFields, SecurityContext>) {
+    this.dataLoaders = new Map<string, DataLoader<ModelType[IDKey], ModelType[]>>()
+    this.idField = idField
+    this.daoContext = daoContext
+    this.pageSize = pageSize
+    this.resolvers = {}
+    this.associations = associations
+    this.associations.forEach((association) => this.addResolver(association))
+    this.middlewares = middlewares
+  }
 
-    protected constructor({
-        idField,
-        daoContext,
-        pageSize = 50,
-        associations = [],
-        middlewares = [],
-    }: { idField: IDKey, daoContext: AbstractDAOContext<SecurityContext> } & DAOParams<ModelType, IDKey, boolean, FilterType, any, ExcludedFields, SecurityContext>) {
+  protected elabConditions(conditions: FilterType, secure?: boolean): FilterType {
+    return conditions
+  }
 
-        this.dataLoaders = new Map<string, DataLoader<ModelType[IDKey], ModelType[]>>();
+  protected async elabProjections(conditions: FilterType, projections?: Projection<ModelType>, secure?: boolean): Promise<Projection<ModelType> | undefined> {
+    const newProjections = await this.beforeFind(conditions, projections ?? true)
+    return newProjections
+  }
 
-        this.idField = idField;
-        this.daoContext = daoContext;
-        this.pageSize = pageSize;
-
-        this.resolvers = {};
-        this.associations = associations;
-        this.associations.forEach(association => this.addResolver(association))
-
-        this.middlewares = middlewares
+  protected async elabRecords(records: ModelType[], conditions?: FilterType, projections?: Projection<ModelType>, secure?: boolean): Promise<ModelType[]> {
+    for (let i = 0; i < records.length; i++) {
+      records[i] = (await this.afterFind(conditions, projections, records[i]))!
     }
+    //Promise.all(records.map(async r => (await this.afterFind(conditions, projections, r))!))
+    return records
+  }
 
-    protected elabConditions(conditions: FilterType, secure?: boolean): FilterType {
-        return conditions
-    }
+  protected async elabRecord(record: ModelType | null, conditions?: FilterType, projections?: Projection<ModelType>, secure?: boolean): Promise<ModelType | null> {
+    return await this.afterFind(conditions, projections, record)
+  }
 
-    protected async elabProjections(conditions: FilterType, projections?: Projection<ModelType>, secure?: boolean): Promise<Projection<ModelType> | undefined> {
-        const newProjections = await this.beforeFind(conditions, projections ?? true)
-        return newProjections
-    }
-
-    protected async elabRecords(records: ModelType[], conditions?: FilterType, projections?: Projection<ModelType>, secure?: boolean): Promise<ModelType[]> {
-        for(let i = 0; i < records.length; i++) {
-            records[i] = (await this.afterFind(conditions, projections, records[i]))!
+  private async beforeFind(filter: FilterType | undefined | null, proj: Projection<ModelType>): Promise<Projection<ModelType>> {
+    for (const middleware of this.middlewares) {
+      if (middleware.beforeFind) {
+        const res = await middleware.beforeFind(filter, proj as Readonly<Projection<ModelType>>)
+        if (res && 'error' in res) {
+          throw res.error
+        } else if (res && 'additiveProjection' in res) {
+          //@ts-ignore
+          proj = projection<ModelType>().merge(proj, res.additiveProjection)
         }
-        //Promise.all(records.map(async r => (await this.afterFind(conditions, projections, r))!))
-        return records
+      }
     }
+    return proj
+  }
 
-    protected async elabRecord(record: ModelType | null, conditions?: FilterType, projections?: Projection<ModelType>, secure?: boolean): Promise<ModelType | null> {
-        return await this.afterFind(conditions, projections, record)
-    }
-
-    private async beforeFind(filter: FilterType | undefined | null, proj: Projection<ModelType>): Promise<Projection<ModelType>> {
-        for(const middleware of this.middlewares) {
-            if(middleware.beforeFind) {
-                const res = await middleware.beforeFind(filter, proj as Readonly<Projection<ModelType>>);
-                if(res && 'error' in res) {
-                    throw res.error
-                } else if (res && 'additiveProjection' in res) {
-                    //@ts-ignore
-                    proj = projection<ModelType>().merge(proj, res.additiveProjection) 
-                }
-            }
+  private async afterFind(filter: FilterType | undefined | null, proj: Projection<ModelType> | undefined | null, result: ModelType | null): Promise<ModelType | null> {
+    for (const middleware of this.middlewares) {
+      if (middleware.afterFind) {
+        const res = await middleware.afterFind(filter as Readonly<FilterType>, proj as Readonly<Projection<ModelType>>, result as Readonly<PartialDeep<ModelType>>)
+        if (res) {
+          result = deepMerge(result, res.additiveResult)
         }
-        return proj
+      }
     }
+    return result
+  }
 
-    private async afterFind(filter: FilterType | undefined | null, proj: Projection<ModelType> | undefined | null, result: ModelType | null): Promise<ModelType | null> {
-        for(const middleware of this.middlewares) {
-            if(middleware.afterFind) {
-                const res = await middleware.afterFind(filter as Readonly<FilterType>, proj as Readonly<Projection<ModelType>>, result as Readonly<PartialDeep<ModelType>>)
-                if(res) {
-                    result = deepMerge(result, res.additiveResult)
-                }
-            }
-        }
-        return result
-    }
+  async find<P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType> = true>(conditions: FilterType, projections?: P, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelProjection<ModelType, P>[]> {
+    return (await this.elabRecords(await this._find(this.elabConditions(conditions, options?.secure), await this.elabProjections(conditions, projections, options?.secure), sorts, start, limit, options), conditions, projections, options?.secure)) as ModelProjection<ModelType, P>[]
+  }
 
-    async find<P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType> = true>(conditions: FilterType, projections?: P, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelProjection<ModelType, P>[]> {
-        return (await this.elabRecords(await this._find(this.elabConditions(conditions, options?.secure), await this.elabProjections(conditions, projections, options?.secure), sorts, start, limit, options), conditions, projections, options?.secure)) as ModelProjection<ModelType, P>[]
-    }
+  async findOne<P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType> = true>(conditions: FilterType, projections?: P, options?: ReadOptions): Promise<ModelProjection<ModelType, P> | null> {
+    return (await this.elabRecord(await this._findOne(this.elabConditions(conditions, options?.secure), await this.elabProjections(conditions, projections, options?.secure), options), conditions, projections, options?.secure)) as ModelProjection<ModelType, P>
+  }
 
-    async findOne<P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType>  = true>(conditions: FilterType, projections?: P, options?: ReadOptions): Promise<ModelProjection<ModelType, P> | null> {
-        return (await this.elabRecord(await this._findOne(this.elabConditions(conditions, options?.secure), await this.elabProjections(conditions, projections, options?.secure), options), conditions, projections, options?.secure)) as ModelProjection<ModelType, P>
-    }
+  async findByQuery(query: (dbRef: DBRef, dbProjections: any, dbSorts?: any, start?: number, limit?: number, options?: any) => Promise<DBObj[]>, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelType[]> {
+    return this.elabRecords(await this._findByQuery(query, projections, sorts, start, limit, options))
+  }
 
-    async findByQuery(query: (dbRef: DBRef, dbProjections: any, dbSorts?: any, start?: number, limit?: number, options?: any) => Promise<DBObj[]>, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelType[]> {
-        return this.elabRecords(await this._findByQuery(query, projections, sorts, start, limit, options));
-    }
+  async findPage(conditions: FilterType, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<{ totalCount: number; records: ModelType[] }> {
+    const page = await this._findPage(this.elabConditions(conditions, options?.secure), await this.elabProjections(conditions, projections, options?.secure), sorts, start, limit, options)
+    page.records = await this.elabRecords(page.records, conditions, projections, options?.secure)
+    return page
+  }
 
-    async findPage(conditions: FilterType, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<{ totalCount: number, records: ModelType[] }> {
-        const page = await this._findPage(this.elabConditions(conditions, options?.secure), await this.elabProjections(conditions, projections, options?.secure), sorts, start, limit, options);
-        page.records = await this.elabRecords(page.records, conditions, projections, options?.secure);
-        return page;
-    }
+  async exists(conditions: FilterType, options?: ReadOptions): Promise<boolean> {
+    return this._exists(this.elabConditions(conditions, options?.secure), options)
+  }
 
-    async exists(conditions: FilterType, options?: ReadOptions): Promise<boolean> {
-        return this._exists(this.elabConditions(conditions, options?.secure), options);
-    }
+  async count(conditions: FilterType, options?: ReadOptions): Promise<number> {
+    return this._count(this.elabConditions(conditions, options?.secure), options)
+  }
 
-    async count(conditions: FilterType, options?: ReadOptions): Promise<number> {
-        return this._count(this.elabConditions(conditions, options?.secure), options);
-    }
+  // -----------------------------------------------------------------------
+  // ------------------------------ ABSTRACTS ------------------------------
+  // -----------------------------------------------------------------------
+  protected abstract _find(conditions: FilterType, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelType[]>
 
-    // -----------------------------------------------------------------------
-    // ------------------------------ ABSTRACTS ------------------------------
-    // -----------------------------------------------------------------------
-    protected abstract _find(conditions: FilterType, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelType[]>;
+  protected abstract _findOne(conditions: FilterType, projections?: Projection<ModelType>, options?: ReadOptions): Promise<ModelType | null>
 
-    protected abstract _findOne(conditions: FilterType, projections?: Projection<ModelType>, options?: ReadOptions): Promise<ModelType | null>;
+  protected abstract _findPage(conditions: FilterType, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<{ totalCount: number; records: ModelType[] }>
 
-    protected abstract _findPage(conditions: FilterType, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<{ totalCount: number, records: ModelType[] }>;
+  protected abstract _findByQuery(query: (dbRef: DBRef, dbProjections: any) => Promise<DBObj[]>, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelType[]>
 
-    protected abstract _findByQuery(query: (dbRef: DBRef, dbProjections: any) => Promise<DBObj[]>, projections?: Projection<ModelType>, sorts?: SortType, start?: number, limit?: number, options?: ReadOptions): Promise<ModelType[]>;
+  protected abstract _exists(conditions: FilterType, options?: ReadOptions): Promise<boolean>
 
-    protected abstract _exists(conditions: FilterType, options?: ReadOptions): Promise<boolean>;
+  protected abstract _count(conditions: FilterType, options?: ReadOptions): Promise<number>
 
-    protected abstract _count(conditions: FilterType, options?: ReadOptions): Promise<number>;
-
-    async checkReferences(records: PartialDeep<ModelType> | PartialDeep<ModelType>[], options?: ReadOptions): Promise<ReferenceChecksResponse<ModelType>> {
-        const errors = [];
-        if (records) {
-            const inputRecords = records instanceof Array ? records : [records];
-            for (const association of this.associations) {
-                if (association.reference === DAOAssociationReference.INNER) {
-                    const associationProjection = {};
-                    setTraversing(associationProjection, association.refTo, true);
-                    const resolver: DAOResolver = getTraversing(this.resolvers, association.field)[0];
-
-                    const associationFieldPathSplitted = association.field.split('.');
-                    associationFieldPathSplitted.pop();
-                    const parentPath = associationFieldPathSplitted.join('.');
-                    const parents = getTraversing(inputRecords, parentPath);
-                    const associatedRecords = await resolver.load(parents, associationProjection);
-
-                    for (const inputRecord of inputRecords) {
-                        const notFoundRefsFrom = getTraversing(inputRecord, association.refFrom)
-                            .filter(refFrom => {
-                                return !associatedRecords.find(associatedRecord =>
-                                    associatedRecord && getTraversing(associatedRecord, association.refTo).length > 0 &&
-                                    refFrom === getTraversing(associatedRecord, association.refTo)[0]
-                                )
-                            });
-                        if (notFoundRefsFrom.length > 0) {
-                            errors.push({ association, record: inputRecord, failedReferences: notFoundRefsFrom });
-                        }
-                    }
-                }
-            }
-        }
-        if (errors.length > 0) {
-            return errors;
-        } else {
-            return true;
-        }
-    }
-
-    // -----------------------------------------------------------------------
-    // ---------------------------- ASSOCIATIONS -----------------------------
-    // -----------------------------------------------------------------------
-    async load(keys: any[], buildFilter: (keys: any[]) => FilterType, hasKey: (record: ModelType, key: any) => boolean, projections: Projection<ModelType>, loaderIdetifier: string = '', options?: ReadOptions): Promise<(ModelType | null | Error)[]> {
-        const dataLoader = this.getDataLoader(buildFilter, hasKey, projections, loaderIdetifier);
-        const loadedResults = (await dataLoader.loadMany(keys));
-        const results = [];
-        for (const loadedResult of loadedResults) {
-            if (loadedResult instanceof Error) {
-                throw loadedResult;
-            } else if (loadedResult !== null) {
-                results.push(...loadedResult);
-            }
-        }
-        return this.elabRecords(results, undefined, projections, options?.secure);
-    }
-
-    protected getDataLoader(buildFilter: (keys: any[]) => FilterType, hasKey: (record: ModelType, key: any) => boolean, projections: Projection<ModelType>, loaderIdetifier: string): DataLoader<any, ModelType[] | null> {
-        const hash = loaderIdetifier + '-' + objectHash(projections || null, { respectType: false, unorderedArrays: true });
-        const dataLoader = this.dataLoaders.get(hash);
-        if (dataLoader) {
-            return dataLoader;
-        } else {
-            const newDataLoader = new DataLoader<any, ModelType[] | null>(
-                async keys => {
-                    const filter = buildFilter(keys as ModelType[IDKey][]);
-                    const loadedResults: any[] = await this.find(filter, projections);
-                    const orderedResults = [];
-                    for (const key of keys) {
-                        orderedResults.push(loadedResults.filter(loadedResult => hasKey(loadedResult, key)) || null);
-                    }
-                    return orderedResults;
-                },
-                {
-                    maxBatchSize: this.pageSize
-                }
-            );
-            this.dataLoaders.set(hash, newDataLoader)
-            return newDataLoader;
-        }
-    }
-
-    protected async resolveAssociations(dbObjects: any[], projections?: Projection<ModelType>): Promise<ModelType[]> {
-        for (const association of this.associations) {
-            if (projections) {
-                let associationProjection = getProjection(projections as GenericProjection, association.field);
-                if (associationProjection && projections !== true) {
-                    if (associationProjection !== true) {
-                        if (association.reference === DAOAssociationReference.INNER) {
-                            setTraversing(associationProjection, association.refTo, true);
-                        } else if (association.reference === DAOAssociationReference.FOREIGN) {
-                            setTraversing(associationProjection, association.refFrom, true);
-                        }
-                    }
-                    const resolver: DAOResolver = getTraversing(this.resolvers, association.field)[0];
-
-                    const associationFieldPathSplitted = association.field.split('.');
-                    const associationField = associationFieldPathSplitted.pop();
-                    if (associationField) {
-                        const parentPath = associationFieldPathSplitted.join('.');
-                        const parents = getTraversing(dbObjects.filter(dbObject => dbObject != null), parentPath);
-                        const associatedRecords = await resolver.load(parents, associationProjection);
-                        parents.forEach(parent => {
-                            if (association.type === DAOAssociationType.ONE_TO_ONE) {
-                                parent[associationField] = associatedRecords.find((value) => {
-                                    return resolver.match(parent, value)
-                                }) || null;
-                            } else if (association.type === DAOAssociationType.ONE_TO_MANY) {
-                                parent[associationField] = associatedRecords.filter((value) => {
-                                    return resolver.match(parent, value)
-                                }) || null;
-                            }
-                        })
-                    }
-                }
-            }
-        }
-        return dbObjects;
-    }
-
-    protected addResolver(association: DAOAssociation) {
-        let resolver;
-
+  async checkReferences(records: PartialDeep<ModelType> | PartialDeep<ModelType>[], options?: ReadOptions): Promise<ReferenceChecksResponse<ModelType>> {
+    const errors = []
+    if (records) {
+      const inputRecords = records instanceof Array ? records : [records]
+      for (const association of this.associations) {
         if (association.reference === DAOAssociationReference.INNER) {
-            const refFrom = association.refFrom.split('.').pop();
-            const refTo = association.refTo;
-            const linkedDAO = association.dao;
-            if (refFrom) {
-                if (association.type === DAOAssociationType.ONE_TO_ONE) {
-                    resolver = {
-                        load: async (parents: any[], projections: any) => {
-                            const ids = parents.map(parent => parent[refFrom])
-                                .filter((value, index, self) => (value !== null && value !== undefined && self.indexOf(value) === index));
+          const associationProjection = {}
+          setTraversing(associationProjection, association.refTo, true)
+          const resolver: DAOResolver = this.resolvers[association.field]!
 
-                            return this.daoContext.dao(linkedDAO).load(
-                                ids,
-                                association.buildFilter || ((keys: any[]): FilterType => {
-                                    // @ts-ignore
-                                    return { [refTo]: { $in: keys } };
-                                }),
-                                association.hasKey || ((record: ModelType, key: any): boolean => {
-                                    return (record as any)[refTo] === key
-                                }),
-                                projections,
-                                refTo
-                            );
-                        },
-                        match: (source: any, value: any): boolean => {
-                            return source[refFrom] === value[refTo];
-                        }
-                    };
-                } else if (association.type === DAOAssociationType.ONE_TO_MANY) {
-                    resolver = {
-                        load: async (parents: any[], projections: any) => {
-                            const ids = parents.map(parent => parent[refFrom])
-                                .filter(value => value !== null && value !== undefined)
-                                .reduce((a, c) => [...a, ...c], [])
-                                .filter((value: any[], index: number, self: any) => self.indexOf(value) === index);
+          const associationFieldPathSplitted = association.field.split('.')
+          associationFieldPathSplitted.pop()
+          const parentPath = associationFieldPathSplitted.join('.')
+          const parents = getTraversing(inputRecords, parentPath)
+          const associatedRecords = await resolver.load(parents, associationProjection)
 
-                            return this.daoContext.dao(linkedDAO).load(
-                                ids,
-                                association.buildFilter || ((keys: any[]): FilterType => {
-                                    // @ts-ignore
-                                    return { [refTo]: { $in: keys } };
-                                }),
-                                association.hasKey || ((record: ModelType, key: any): boolean => {
-                                    return (record as any)[refTo] === key
-                                }),
-                                projections,
-                                refTo
-                            );
-                        },
-                        match: (source: any, value: any): boolean => {
-                            return source[refFrom] && source[refFrom].includes(value[refTo]);
-                        }
-                    };
-                }
+          for (const inputRecord of inputRecords) {
+            const notFoundRefsFrom = getTraversing(inputRecord, association.refFrom).filter((refFrom) => {
+              return !associatedRecords.find((associatedRecord) => associatedRecord && getTraversing(associatedRecord, association.refTo).length > 0 && refFrom === getTraversing(associatedRecord, association.refTo)[0])
+            })
+            if (notFoundRefsFrom.length > 0) {
+              errors.push({ association, record: inputRecord, failedReferences: notFoundRefsFrom })
             }
-        } else if (association.reference === DAOAssociationReference.FOREIGN) {
-            const refFrom = association.refFrom;
-            const refTo = association.refTo.split('.').pop();
-            const linkedDAO = association.dao;
-            if (refTo) {
-                resolver = {
-                    load: async (parents: any[], projections: any) => {
-                        const ids = parents.map(parent => parent[refTo])
-                            .filter((value, index, self) => (value !== null && value !== undefined && self.indexOf(value) === index));
+          }
+        }
+      }
+    }
+    if (errors.length > 0) {
+      return errors
+    } else {
+      return true
+    }
+  }
 
-                        return this.daoContext.dao(linkedDAO).load(
-                            ids,
-                            association.buildFilter || ((keys: any[]): FilterType => {
-                                // @ts-ignore
-                                return { [refFrom]: { $in: keys } };
-                            }),
-                            association.hasKey || ((record: ModelType, key: any): boolean => {
-                                return (record as any)[refFrom] === key
-                            }),
-                            projections,
-                            refFrom
-                        );
-                    },
-                    match: (source: any, value: any): boolean => {
-                        const tmp = getTraversing(value, refFrom);
-                        return tmp.includes(source[refTo]);
-                    }
-                };
+  // -----------------------------------------------------------------------
+  // ---------------------------- ASSOCIATIONS -----------------------------
+  // -----------------------------------------------------------------------
+  async load(keys: any[], buildFilter: (keys: any[]) => FilterType, hasKey: (record: ModelType, key: any) => boolean, projections: Projection<ModelType>, loaderIdetifier: string = '', options?: ReadOptions): Promise<(ModelType | null | Error)[]> {
+    const dataLoader = this.getDataLoader(buildFilter, hasKey, projections, loaderIdetifier)
+    const loadedResults = await dataLoader.loadMany(keys)
+    const results = []
+    for (const loadedResult of loadedResults) {
+      if (loadedResult instanceof Error) {
+        throw loadedResult
+      } else if (loadedResult !== null) {
+        results.push(...loadedResult)
+      }
+    }
+    return this.elabRecords(results, undefined, projections, options?.secure)
+  }
+
+  protected getDataLoader(buildFilter: (keys: any[]) => FilterType, hasKey: (record: ModelType, key: any) => boolean, projections: Projection<ModelType>, loaderIdetifier: string): DataLoader<any, ModelType[] | null> {
+    const hash = loaderIdetifier + '-' + objectHash(projections || null, { respectType: false, unorderedArrays: true })
+    const dataLoader = this.dataLoaders.get(hash)
+    if (dataLoader) {
+      return dataLoader
+    } else {
+      const newDataLoader = new DataLoader<any, ModelType[] | null>(
+        async (keys) => {
+          const filter = buildFilter(keys as ModelType[IDKey][])
+          const loadedResults: any[] = await this.find(filter, projections)
+          const orderedResults = []
+          for (const key of keys) {
+            orderedResults.push(loadedResults.filter((loadedResult) => hasKey(loadedResult, key)) || null)
+          }
+          return orderedResults
+        },
+        {
+          maxBatchSize: this.pageSize,
+        },
+      )
+      this.dataLoaders.set(hash, newDataLoader)
+      return newDataLoader
+    }
+  }
+
+  protected async resolveAssociations(dbObjects: any[], projections?: Projection<ModelType>): Promise<ModelType[]> {
+    for (const association of this.associations) {
+      if (projections) {
+        let associationProjection = getProjection(projections as GenericProjection, association.field)
+        if (associationProjection && projections !== true) {
+          if (associationProjection !== true) {
+            if (association.reference === DAOAssociationReference.INNER) {
+              setTraversing(associationProjection, association.refTo, true)
+            } else if (association.reference === DAOAssociationReference.FOREIGN) {
+              setTraversing(associationProjection, association.refFrom, true)
             }
+          }
+          const resolver: DAOResolver = this.resolvers[association.field]!
+
+          const associationFieldPathSplitted = association.field.split('.')
+          const associationField = associationFieldPathSplitted.pop()
+          if (associationField) {
+            const parentPath = associationFieldPathSplitted.join('.')
+            const parents = getTraversing(
+              dbObjects.filter((dbObject) => dbObject != null),
+              parentPath,
+            )
+            const associatedRecords = await resolver.load(parents, associationProjection)
+            parents.forEach((parent) => {
+              if (association.type === DAOAssociationType.ONE_TO_ONE) {
+                parent[associationField] =
+                  associatedRecords.find((value) => {
+                    return resolver.match(parent, value)
+                  }) || null
+              } else if (association.type === DAOAssociationType.ONE_TO_MANY) {
+                parent[associationField] =
+                  associatedRecords.filter((value) => {
+                    return resolver.match(parent, value)
+                  }) || null
+              }
+            })
+          }
         }
-        setTraversing(this.resolvers, association.field, resolver);
+      }
     }
+    return dbObjects
+  }
 
-    protected idFilter<T extends Pick<ModelType, IDKey>>(model: T): FilterType {
-        return { [this.idField]: model[this.idField] } as unknown as FilterType;
-    }
+  protected addResolver(association: DAOAssociation) {
+    let resolver
 
-    private async beforeInsert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>): Promise<ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>> {
-        for(const middleware of this.middlewares) {
-            if(middleware.beforeInsert) {
-                //TODO: why readonly not compiling?
-                //@ts-ignore
-                const res = await middleware.beforeInsert(record);
-                if(res && 'error' in res) {
-                    throw res.error
-                } else if(res && 'record' in res) {
-                    record = res.record
-                }
-            }
+    if (association.reference === DAOAssociationReference.INNER) {
+      const refFrom = association.refFrom.split('.').pop()
+      const refTo = association.refTo
+      const linkedDAO = association.dao
+      if (refFrom) {
+        if (association.type === DAOAssociationType.ONE_TO_ONE) {
+          resolver = {
+            load: async (parents: any[], projections: any) => {
+              const ids = parents.map((parent) => parent[refFrom]).filter((value, index, self) => value !== null && value !== undefined && self.indexOf(value) === index)
+
+              return this.daoContext.dao(linkedDAO).load(
+                ids,
+                association.buildFilter ||
+                  ((keys: any[]): FilterType => {
+                    // @ts-ignore
+                    return { [refTo]: { $in: keys } }
+                  }),
+                association.hasKey ||
+                  ((record: ModelType, key: any): boolean => {
+                    return (record as any)[refTo] === key
+                  }),
+                projections,
+                refTo,
+              )
+            },
+            match: (source: any, value: any): boolean => {
+              return source[refFrom] === value[refTo]
+            },
+          }
+        } else if (association.type === DAOAssociationType.ONE_TO_MANY) {
+          resolver = {
+            load: async (parents: any[], projections: any) => {
+              const ids = parents
+                .map((parent) => parent[refFrom])
+                .filter((value) => value !== null && value !== undefined)
+                .reduce((a, c) => [...a, ...c], [])
+                .filter((value: any[], index: number, self: any) => self.indexOf(value) === index)
+
+              return this.daoContext.dao(linkedDAO).load(
+                ids,
+                association.buildFilter ||
+                  ((keys: any[]): FilterType => {
+                    // @ts-ignore
+                    return { [refTo]: { $in: keys } }
+                  }),
+                association.hasKey ||
+                  ((record: ModelType, key: any): boolean => {
+                    return (record as any)[refTo] === key
+                  }),
+                projections,
+                refTo,
+              )
+            },
+            match: (source: any, value: any): boolean => {
+              return source[refFrom] && source[refFrom].includes(value[refTo])
+            },
+          }
         }
-        return record
-    }
+      }
+    } else if (association.reference === DAOAssociationReference.FOREIGN) {
+      const refFrom = association.refFrom
+      const refTo = association.refTo.split('.').pop()
+      const linkedDAO = association.dao
+      if (refTo) {
+        resolver = {
+          load: async (parents: any[], projections: any) => {
+            const ids = parents.map((parent) => parent[refTo]).filter((value, index, self) => value !== null && value !== undefined && self.indexOf(value) === index)
 
-    private async afterInsert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>, result: ModelType) {
-        for(const middleware of this.middlewares) {
-            if(middleware.afterInsert) {
-                //TODO: why readonly not compiling?
-                //@ts-ignore
-                await middleware.afterInsert(record, result)
-            }
+            return this.daoContext.dao(linkedDAO).load(
+              ids,
+              association.buildFilter ||
+                ((keys: any[]): FilterType => {
+                  // @ts-ignore
+                  return { [refFrom]: { $in: keys } }
+                }),
+              association.hasKey ||
+                ((record: ModelType, key: any): boolean => {
+                  return (record as any)[refFrom] === key
+                }),
+              projections,
+              refFrom,
+            )
+          },
+          match: (source: any, value: any): boolean => {
+            const tmp = getTraversing(value, refFrom)
+            return tmp.includes(source[refTo])
+          },
         }
+      }
     }
+    this.resolvers[association.field] = resolver
+  }
 
-    async insert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>, options?: WriteOptions): Promise<ModelType> {
-        const newRecord = await this.beforeInsert(record);
-        const result = await this._insert(newRecord, options);
-        await this.afterInsert(newRecord, result)
-        return result
-    }
+  protected idFilter<T extends Pick<ModelType, IDKey>>(model: T): FilterType {
+    return { [this.idField]: model[this.idField] } as unknown as FilterType
+  }
 
-    private async beforeUpdate(filter: FilterType, changes: UpdateType): Promise<UpdateType | null> {
-        for(const middleware of this.middlewares) {
-            if(middleware.beforeUpdate) {
-                const res = await middleware.beforeUpdate(filter, changes);
-                if(res && 'cancel' in res && res.cancel) {
-                    if(res.error) {
-                        throw res.error
-                    } else {
-                        return null
-                    }
-                } else if(res && 'changes' in res) {
-                    changes = res.changes
-                }
-            }
+  private async beforeInsert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>): Promise<ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>> {
+    for (const middleware of this.middlewares) {
+      if (middleware.beforeInsert) {
+        //TODO: why readonly not compiling?
+        //@ts-ignore
+        const res = await middleware.beforeInsert(record)
+        if (res && 'error' in res) {
+          throw res.error
+        } else if (res && 'record' in res) {
+          record = res.record
         }
-        return changes
+      }
     }
+    return record
+  }
 
-    private async afterUpdate(filter: FilterType, changes: UpdateType) {
-        for(const middleware of this.middlewares) {
-            if(middleware.afterUpdate) {
-                await middleware.afterUpdate(filter, changes);
-            }
+  private async afterInsert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>, result: ModelType) {
+    for (const middleware of this.middlewares) {
+      if (middleware.afterInsert) {
+        //TODO: why readonly not compiling?
+        //@ts-ignore
+        await middleware.afterInsert(record, result)
+      }
+    }
+  }
+
+  async insert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>, options?: WriteOptions): Promise<ModelType> {
+    const newRecord = await this.beforeInsert(record)
+    const result = await this._insert(newRecord, options)
+    await this.afterInsert(newRecord, result)
+    return result
+  }
+
+  private async beforeUpdate(filter: FilterType, changes: UpdateType): Promise<UpdateType | null> {
+    for (const middleware of this.middlewares) {
+      if (middleware.beforeUpdate) {
+        const res = await middleware.beforeUpdate(filter, changes)
+        if (res && 'cancel' in res && res.cancel) {
+          if (res.error) {
+            throw res.error
+          } else {
+            return null
+          }
+        } else if (res && 'changes' in res) {
+          changes = res.changes
         }
+      }
     }
+    return changes
+  }
 
-    async update<T extends Pick<ModelType, IDKey>>(record: T, changes: UpdateType, options?: WriteOptions): Promise<void> {
-        const filter = this.idFilter(record)
-        const newChanges = await this.beforeUpdate(filter, changes);
-        if(newChanges) {
-            await this._updateOne(this.elabConditions(filter, options?.secure), newChanges, (options || {})._);
-            await this.afterUpdate(filter, newChanges);
+  private async afterUpdate(filter: FilterType, changes: UpdateType) {
+    for (const middleware of this.middlewares) {
+      if (middleware.afterUpdate) {
+        await middleware.afterUpdate(filter, changes)
+      }
+    }
+  }
+
+  async update<T extends Pick<ModelType, IDKey>>(record: T, changes: UpdateType, options?: WriteOptions): Promise<void> {
+    const filter = this.idFilter(record)
+    const newChanges = await this.beforeUpdate(filter, changes)
+    if (newChanges) {
+      await this._updateOne(this.elabConditions(filter, options?.secure), newChanges, (options || {})._)
+      await this.afterUpdate(filter, newChanges)
+    }
+  }
+
+  async updateOne(conditions: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void> {
+    const newChanges = await this.beforeUpdate(conditions, changes)
+    if (newChanges) {
+      await this._updateOne(this.elabConditions(conditions, options?.secure), newChanges, options)
+      await this.afterUpdate(conditions, newChanges)
+    }
+  }
+
+  async updateMany(conditions: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void> {
+    const newChanges = await this.beforeUpdate(conditions, changes)
+    if (newChanges) {
+      await this._updateMany(this.elabConditions(conditions, options?.secure), newChanges, options)
+      await this.afterUpdate(conditions, newChanges)
+    }
+  }
+
+  private async beforeReplace(filter: FilterType, to: Omit<ModelType, ExcludedFields>): Promise<Omit<ModelType, ExcludedFields> | null> {
+    for (const middleware of this.middlewares) {
+      if (middleware.beforeReplace) {
+        const res = await middleware.beforeReplace(filter, to)
+        if (res && 'cancel' in res && res.cancel) {
+          if (res.error) {
+            throw res.error
+          } else {
+            return null
+          }
+        } else if (res && 'to' in res) {
+          to = res.to
         }
+      }
     }
+    return to
+  }
 
-    async updateOne(conditions: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void> {
-        const newChanges = await this.beforeUpdate(conditions, changes);
-        if(newChanges) {
-            await this._updateOne(this.elabConditions(conditions, options?.secure), newChanges, options);
-            await this.afterUpdate(conditions, newChanges);
+  private async afterReplace(filter: FilterType, to: Omit<ModelType, ExcludedFields>) {
+    for (const middleware of this.middlewares) {
+      if (middleware.afterReplace) {
+        await middleware.afterReplace(filter, to)
+      }
+    }
+  }
+
+  async replace<T extends Pick<ModelType, IDKey>>(from: T, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void> {
+    const filter = this.idFilter(from)
+    const newTo = await this.beforeReplace(filter, to)
+    if (newTo) {
+      await this._replaceOne(this.elabConditions(filter, options?.secure), newTo, options)
+      await this.afterReplace(filter, newTo)
+    }
+  }
+
+  async replaceOne(conditions: FilterType, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void> {
+    const newTo = await this.beforeReplace(conditions, to)
+    if (newTo) {
+      await this._replaceOne(this.elabConditions(conditions, options?.secure), newTo, options)
+      await this.afterReplace(conditions, newTo)
+    }
+  }
+
+  private async beforeDelete(filter: FilterType): Promise<true | null> {
+    for (const middleware of this.middlewares) {
+      if (middleware.beforeDelete) {
+        const res = await middleware.beforeDelete(filter)
+        if (res && res.cancel) {
+          if (res.error) {
+            throw res.error
+          } else {
+            return null
+          }
         }
+      }
     }
+    return true
+  }
 
-    async updateMany(conditions: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void> {
-        const newChanges = await this.beforeUpdate(conditions, changes);
-        if(newChanges) {
-            await this._updateMany(this.elabConditions(conditions, options?.secure), newChanges, options);
-            await this.afterUpdate(conditions, newChanges);
-        }
+  private async afterDelete(filter: FilterType) {
+    for (const middleware of this.middlewares) {
+      if (middleware.afterDelete) {
+        await middleware.afterDelete(filter)
+      }
     }
+  }
 
-    private async beforeReplace(filter: FilterType, to: Omit<ModelType, ExcludedFields>): Promise<Omit<ModelType, ExcludedFields> | null> {
-        for(const middleware of this.middlewares) {
-            if(middleware.beforeReplace) {
-                const res = await middleware.beforeReplace(filter, to);
-                if(res && 'cancel' in res && res.cancel) {
-                    if(res.error) {
-                        throw res.error
-                    } else {
-                        return null
-                    }
-                } else if (res && 'to' in res) {
-                    to = res.to
-                }
-            }
-        }
-        return to
+  async delete<T extends Pick<ModelType, IDKey>>(record: T, options?: WriteOptions): Promise<void> {
+    const filter = this.idFilter(record)
+    const procede = await this.beforeDelete(filter)
+    if (procede) {
+      await this._deleteOne(this.elabConditions(filter, options?.secure), options)
+      await this.afterDelete(filter)
     }
+  }
 
-    private async afterReplace(filter: FilterType, to: Omit<ModelType, ExcludedFields>) {
-        for(const middleware of this.middlewares) {
-            if(middleware.afterReplace) {
-                await middleware.afterReplace(filter, to);
-            }
-        }
+  async deleteOne(conditions: FilterType, options?: WriteOptions): Promise<void> {
+    const procede = await this.beforeDelete(conditions)
+    if (procede) {
+      await this._deleteOne(this.elabConditions(conditions, options?.secure), options)
+      await this.afterDelete(conditions)
     }
+  }
 
-    async replace<T extends Pick<ModelType, IDKey>>(from: T, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void> {
-        const filter = this.idFilter(from)
-        const newTo = await this.beforeReplace(filter, to);
-        if(newTo) {
-            await this._replaceOne(this.elabConditions(filter, options?.secure), newTo, options);
-            await this.afterReplace(filter, newTo);
-        }
+  async deleteMany(conditions: FilterType, options?: WriteOptions): Promise<void> {
+    const procede = await this.beforeDelete(conditions)
+    if (procede) {
+      await this._deleteMany(this.elabConditions(conditions, options?.secure), options)
+      await this.afterDelete(conditions)
     }
+  }
 
-    async replaceOne(conditions: FilterType, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void> {
-        const newTo = await this.beforeReplace(conditions, to);
-        if(newTo) {
-            await this._replaceOne(this.elabConditions(conditions, options?.secure), newTo, options);
-            await this.afterReplace(conditions, newTo);
-        }
-    }
-
-    private async beforeDelete(filter: FilterType): Promise<true | null> {
-        for(const middleware of this.middlewares) {
-            if(middleware.beforeDelete) {
-                const res = await middleware.beforeDelete(filter);
-                if(res && res.cancel) {
-                    if(res.error) {
-                        throw res.error
-                    } else {
-                        return null
-                    }
-                }
-            }
-        }
-        return true
-    }
-
-    private async afterDelete(filter: FilterType) {
-        for(const middleware of this.middlewares) {
-            if(middleware.afterDelete) {
-                await middleware.afterDelete(filter);
-            }
-        }
-    }
-
-    async delete<T extends Pick<ModelType, IDKey>>(record: T, options?: WriteOptions): Promise<void> {
-        const filter = this.idFilter(record)
-        const procede = await this.beforeDelete(filter);
-        if(procede) {
-            await this._deleteOne(this.elabConditions(filter, options?.secure), options);
-            await this.afterDelete(filter);
-        }
-    }
-
-    async deleteOne(conditions: FilterType, options?: WriteOptions): Promise<void> {
-        const procede = await this.beforeDelete(conditions);
-        if(procede) {
-            await this._deleteOne(this.elabConditions(conditions, options?.secure), options);
-            await this.afterDelete(conditions);
-        }
-    }
-
-    async deleteMany(conditions: FilterType, options?: WriteOptions): Promise<void> {
-        const procede = await this.beforeDelete(conditions);
-        if(procede) {
-            await this._deleteMany(this.elabConditions(conditions, options?.secure), options);
-            await this.afterDelete(conditions);
-        }
-    }
-
-    // -----------------------------------------------------------------------
-    // ------------------------------ ABSTRACTS ------------------------------
-    // -----------------------------------------------------------------------
-    protected abstract _insert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>, options?: WriteOptions): Promise<ModelType>;
-    protected abstract _updateOne(filter: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void>;
-    protected abstract _updateMany(filter: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void>;
-    protected abstract _replaceOne(filter: FilterType, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void>;
-    protected abstract _deleteOne(filter: FilterType, options?: WriteOptions): Promise<void>;
-    protected abstract _deleteMany(filter: FilterType, options?: WriteOptions): Promise<void>;
+  // -----------------------------------------------------------------------
+  // ------------------------------ ABSTRACTS ------------------------------
+  // -----------------------------------------------------------------------
+  protected abstract _insert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IDAutogenerated>, options?: WriteOptions): Promise<ModelType>
+  protected abstract _updateOne(filter: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void>
+  protected abstract _updateMany(filter: FilterType, changes: UpdateType, options?: WriteOptions): Promise<void>
+  protected abstract _replaceOne(filter: FilterType, to: Omit<ModelType, ExcludedFields>, options?: WriteOptions): Promise<void>
+  protected abstract _deleteOne(filter: FilterType, options?: WriteOptions): Promise<void>
+  protected abstract _deleteMany(filter: FilterType, options?: WriteOptions): Promise<void>
 }
