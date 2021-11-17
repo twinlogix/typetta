@@ -3,14 +3,14 @@ import { Schema, model } from 'mongoose'
 import { PointSchema } from '../'
 import { Coordinates } from '@twinlogix/tl-commons'
 import { LocalizedString } from '@twinlogix/tl-commons'
-import { LocalizedStringSchema } from '../dal/mongoose/mongoose.localizedString';
+import { LocalizedStringSchema } from '../dal/mongoose/localizedString';
 ;(Schema.Types as any).PointSchema = PointSchema
 ;(Schema.Types as any).LocalizedStringSchema = LocalizedStringSchema
 import * as types from './models.mock'
 import { v4 } from 'uuid'
 import { Model, Document, Types } from 'mongoose'
 import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '../'
-import { AbstractMongooseDAO } from '../dal/mongoose/mongoose';
+import { AbstractMongooseDAO } from '../dal/mongoose/dao';
 
 export type SecurityContext = {
   userId: string
