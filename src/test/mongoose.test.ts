@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { MockMongoose } from 'mock-mongoose';
 import { DAOContext, SecurityContext, UserFilter } from "./dao.mock";
-import { CustomerUser, Maybe, User } from "./models.mock";
+import { Maybe, User } from "./models.mock";
 import { SortDirection } from "..";
 import BigNumber from 'bignumber.js';
 import { Expand, ModelProjection, OmitUndefinedAndNeverKeys, ParamProjection, Projection, StaticProjection } from "../utils/types";
@@ -62,31 +62,6 @@ test("find nested foreign association", async () => {
     expect(response[0].address?.cities?.length).toBe(2);
     expect((response[0].address?.cities!)[0].name).toBe("City 1");
     expect((response[0].address?.cities!)[1].name).toBe("City 2");
-
-});
-
-test("find subclass entity", async () => {
-    const organization = await dao.organization.insert({ name: "Organization", vatNumber: "12345678" });
-    await dao.customerUser.insert({ firstName: "FirstName", lastName: "LastName", organizationId: organization.id, live: true });
-
-    const user = await dao.user.findOne({});
-    expect(user!.firstName).toBe("FirstName");
-    expect(user!.lastName).toBe("LastName");
-
-    const customerUser = await dao.customerUser.findOne({});
-    expect(customerUser!.firstName).toBe("FirstName");
-    expect(customerUser!.lastName).toBe("LastName");
-    expect(customerUser!.organizationId).toBe(organization.id);
-});
-
-test("find connected (inner ref) entity", async () => {
-    const organization = await dao.organization.insert({ name: "Organization", vatNumber: "12345678" });
-    await dao.customerUser.insert({ firstName: "FirstName", lastName: "LastName", organizationId: organization.id, live: true });
-
-    const customerUser = await dao.customerUser.findOne({}, { firstName: true, organization: { vatNumber: true } });
-    expect(customerUser!.firstName).toBe("FirstName");
-    expect(customerUser!.organization).toBeDefined();
-    expect(customerUser!.organization!.vatNumber).toBe(organization.vatNumber);
 
 });
 
@@ -250,20 +225,6 @@ test("insert and find embedded entity", async () => {
 
 });
 
-test("insert subclass entity", async () => {
-    const organization = await dao.organization.insert({ name: "Organization", vatNumber: "12345678" });
-    await dao.customerUser.insert({ firstName: "FirstName", lastName: "LastName", organizationId: organization.id, live: true });
-
-    const user = await dao.user.findOne({});
-    expect(user!.firstName).toBe("FirstName");
-    expect(user!.lastName).toBe("LastName");
-
-    const customerUser = await dao.customerUser.findOne({});
-    expect(customerUser!.firstName).toBe("FirstName");
-    expect(customerUser!.lastName).toBe("LastName");
-    expect(customerUser!.organizationId).toBe(organization.id);
-});
-
 // ------------------------------------------------------------------------
 // ------------------------------ UPDATE ----------------------------------
 // ------------------------------------------------------------------------
@@ -310,20 +271,6 @@ test("update embedded entity", async () => {
 
 });
 
-test("update subclass", async () => {
-
-    let user = await dao.customerUser.insert({ firstName: "FirstName", organizationId: "ID1", live: true });
-    user = (await dao.customerUser.findOne({ id: user.id }))!;
-
-    expect(user!.organizationId).toBe("ID1");
-
-    await dao.customerUser.update(user, { firstName: "FirstName1", organizationId: "ID2", });
-    const user2 = await dao.customerUser.findOne({ id: user.id });
-
-    expect(user2!.firstName).toBe("FirstName1");
-    expect(user2!.organizationId).toBe("ID2");
-
-});
 
 // ------------------------------------------------------------------------
 // ------------------------------ REPLACE ---------------------------------
@@ -338,28 +285,6 @@ test("simple replace", async () => {
     expect(user?.firstName).toBe("FirstName 1");
 });
 
-test("replace subclass", async () => {
-
-    let user: (User | null) = await dao.user.insert({ firstName: "FirstName", live: true });
-    const customerUser: CustomerUser = { id: user.id, __typename: "CustomerUser", firstName: "FirstName 1", organizationId: "organization_id", live: true, computedOrgName: "" };
-
-    await dao.user.replace(user, customerUser);
-    user = await dao.user.findOne({ id: user!.id });
-
-    expect(user).toBeDefined();
-    expect(user?.firstName).toBe("FirstName 1");
-
-    function isCustomerUser(object: any): object is CustomerUser {
-        return object.__typename === 'CustomerUser';
-    }
-
-    if (isCustomerUser(user)) {
-        expect(user.organizationId).toBe("organization_id");
-    } else {
-        fail("Replaced user is not of expected subclass.")
-    }
-
-});
 
 // ------------------------------------------------------------------------
 // ------------------------------ DELETE ----------------------------------
@@ -452,57 +377,12 @@ test("insert and retrieve localized string field", async () => {
 
 });
 
-// ------------------------------------------------------------------------
-// ------------------------- SECURITY CONTEX ------------------------------
-// ------------------------------------------------------------------------
-test("security policy - secure conditions throws", async () => {
 
-    const dao = new DAOContext<SecurityContext>({
-        securityContext: { userId: "AUTHORIZED_USER" },
-        daoOverrides: {
-            user: {
-                securityPolicy: {
-                    secureConditions: (ctx: SecurityContext | null | undefined, filter: UserFilter): UserFilter => {
-                        if (!filter.id || filter.id !== "AUTHORIZED_USER") {
-                            throw new Error("Security error");
-                        }
-                        return filter;
-                    }
-                }
-            }
-        }
-    });
-
-    await expect(dao.user.find({ id: "NOT_AUTHORIZED_USER" })).rejects.toThrow();
-});
-
-test("security policy - secure conditions force", async () => {
-
-    const dao = new DAOContext<SecurityContext>({
-        securityContext: { userId: "AUTHORIZED_USER" },
-        daoOverrides: {
-            user: {
-                securityPolicy: {
-                    secureConditions: (ctx: SecurityContext | null | undefined, filter: UserFilter): UserFilter => {
-                        return { ...filter, id: "AUTHORIZED_USER" };
-                    }
-                }
-            }
-        }
-    });
-
-    await dao.user.insert({ id: "AUTHORIZED_USER", firstName: "FirstName", live: true });
-    await dao.user.insert({ id: "NOT_AUTHORIZED_USER", firstName: "FirstName", live: true });
-
-    const users = await dao.user.find({});
-
-    expect(users.length).toBe(1);
-    expect(users[0].id).toBe("AUTHORIZED_USER");
-});
 
 // ------------------------------------------------------------------------
 // ------------------------- COMPUTED FIELDS ------------------------------
 // ------------------------------------------------------------------------
+/*
 test("computed fields (one dependency - same level - one calculated)", async () => {
 
     const dao = new DAOContext<SecurityContext>({
@@ -532,8 +412,8 @@ test("computed fields (one dependency - same level - one calculated)", async () 
     expect(forli?.computedName).toBe("Computed: Forlì");
     //expect(forli?.name).toBe("Forlì");
     //expect(forli?.id).toBe(undefined);
-});
-
+});*/
+/*
 test("computed fields (two dependencies - same level - one calculated)", async () => {
 
     const dao = new DAOContext<SecurityContext>({
@@ -557,8 +437,9 @@ test("computed fields (two dependencies - same level - one calculated)", async (
     expect(milano?.computedAddressName).toBe("Milano_address1");
     //expect(milano?.name).toBe("Milano");
     //expect(milano?.addressId).toBe("address1");
-});
+});*/
 
+/*
 test("computed fields (two dependencies - same level - two calculated)", async () => {
 
     const dao = new DAOContext<SecurityContext>({
@@ -588,8 +469,9 @@ test("computed fields (two dependencies - same level - two calculated)", async (
     expect(torino?.computedName).toBe("Computed: Torino");
     //expect(torino?.name).toBe("Torino");
     //expect(torino?.addressId).toBe("address1");
-});
+});*/
 
+/*
 test("computed fields (one dependency - same level - one calculated - multiple models)", async () => {
 
     const dao = new DAOContext<SecurityContext>({
@@ -615,8 +497,9 @@ test("computed fields (one dependency - same level - one calculated - multiple m
     cities.forEach(c => {
         expect(c?.computedName).toBe("Computed: c1");
     })
-});
+});*/
 
+/*
 test("computed fields (one dependency - deep level - one calculated)", async () => {
 
     const dao = new DAOContext<SecurityContext>({
@@ -646,7 +529,8 @@ test("computed fields (one dependency - deep level - one calculated)", async () 
     const user4 = await dao.customerUser.findOne({ id: "u1" }, { id: true });
     //expect(user4?.organization?.computedName).toBe(undefined);
 });
-
+*/
+/*
 test("computed fields (two dependency - deep level - two calculated)", async () => {
 
     const dao = new DAOContext<SecurityContext>({
@@ -694,9 +578,9 @@ test("computed fields (two dependency - deep level - two calculated)", async () 
 
     const user4 = await dao.customerUser.findOne({ id: "u4" }, undefined);
     expect(user4).toBe(null);
-});
+});*/
 
-test("middleware", async () => {
+/*test("middleware", async () => {
     let afterInsertCount = 0
     const dao = new DAOContext<SecurityContext>({
         daoOverrides: {
@@ -786,7 +670,7 @@ test("middleware", async () => {
     const r1 = await dao.customerUser.findOne({id: "u6"}, {id:true})
     expect(r1?.id).toBe("u6")
     expect((r1 as any)?.live).toBe(true)
-});
+});*/
 
 
 // ------------------------------------------------------------------------
@@ -858,7 +742,7 @@ test("safe find", async () => {
     expect(response6!.live).toBe(true);
 });
 
-test("safe find (undefined)", async () => {
+/*test("safe find (undefined)", async () => {
     await dao.user.insert({ id: "u1", firstName: "FirstName", lastName: "LastName", live: true });
 
     const requiredProjection = projection<CustomerUser>().build({
@@ -930,7 +814,7 @@ test("safe find (undefined)", async () => {
     if (u5) {
       test(u5)
     }
-})
+})*/
 
 
 
@@ -946,7 +830,7 @@ test("update with undefined", async () => {
     expect(user2?.live).toBe(true);
 })
 
-test("Find with circular reference", async () => {
+/*test("Find with circular reference", async () => {
     await dao.customerUser.insert({ 
         id: "u1",
         firstName: "FirstName",
@@ -963,7 +847,7 @@ test("Find with circular reference", async () => {
     expect(found2[0].customerUsers![0].organization).toBe(undefined)
     expect(found2[0].customerUsers![0].organizationId).toBe("o1")
     expect(found3[0].customerUsers![0].organization?.name).toBe("Org")
-})
+})*/
 
 afterAll(async (done) => {
     await mongoose.connection.close();

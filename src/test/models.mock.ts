@@ -17,9 +17,6 @@ export type Scalars = {
     Decimal: BigNumber;
 };
 
-
-
-
 export type UsernamePasswordCredentials = {
     __typename?: 'UsernamePasswordCredentials';
     username: Scalars['String'];
@@ -45,8 +42,6 @@ export type Organization = {
     __typename?: 'Organization';
     id: Scalars['ID'];
     name: Scalars['String'];
-    customerUsersId?: Maybe<Array<Scalars['ID']>>;
-    customerUsers?: Maybe<Array<CustomerUser>>;
 
     vatNumber?: Maybe<Scalars['String']>;
     address?: Maybe<Address>;
@@ -63,20 +58,4 @@ export type User = {
     title?: Maybe<Scalars['LocalizedString']>;
     amounts?: Maybe<Array<Scalars['Decimal']>>;
     amount?: Maybe<Scalars['Decimal']>;
-};
-
-export type CustomerUser = User & {
-    __typename?: 'CustomerUser';
-    id: Scalars['ID'];
-    usernamePasswordCredentials?: Maybe<UsernamePasswordCredentials>;
-    firstName?: Maybe<Scalars['String']>;
-    lastName?: Maybe<Scalars['String']>;
-    live: Scalars['Boolean'];
-    localization?: Maybe<Scalars['Coordinates']>;
-    title?: Maybe<Scalars['LocalizedString']>;
-    amounts?: Maybe<Array<Scalars['Decimal']>>;
-    amount?: Maybe<Scalars['Decimal']>;
-    computedOrgName: Scalars['String'];
-    organizationId?: Maybe<Scalars['ID']>;
-    organization?: Maybe<Organization>;
 };

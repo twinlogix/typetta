@@ -9,7 +9,7 @@ import { LocalizedStringSchema } from "../";
 import * as types from './models.mock';
 import { v4 } from 'uuid';
 import { Model, Document, Types } from 'mongoose';
-import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractMongooseSubClassDAO, AbstractMongooseSuperClassDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, DAOCache, OneKey, SortDirection, overrideAssociations } from '../';
+import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, DAOCache, OneKey, SortDirection, overrideAssociations } from '../';
 
 export type SecurityContext = {
     userId: string
@@ -282,94 +282,12 @@ export type UserExludedFields = never
 
 export interface UserDAOParams<SecurityContext> extends DAOParams<types.User, 'id', true, UserFilter, UserUpdate, UserExludedFields, SecurityContext> { }
 
-export class UserDAO<SecurityContext = any> extends AbstractMongooseSuperClassDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExludedFields, SecurityContext> {
+export class UserDAO<SecurityContext = any> extends AbstractMongooseDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExludedFields, SecurityContext> {
 
     public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & UserDAOParams<SecurityContext>) {
         super({
             dbModel: UserModel,
             idField: 'id',
-            subclasses: [
-                { typename: 'CustomerUser', dbname: 'customerUser', fields: ['computedOrgName', 'organizationId', 'organization'] }
-            ],
-            ...params,
-            associations: overrideAssociations(
-                [
-                    { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'customerUser.organization', refFrom: 'customerUser.organizationId', refTo: 'id', dao: 'organization' }
-                ],
-                params?.associations
-            ),
-        });
-    }
-
-}
-
-
-
-//--------------------------------------------------------------------------------
-//--------------------------------- CUSTOMERUSER ---------------------------------
-//--------------------------------------------------------------------------------
-
-type CustomerUserFilterFields = {
-    'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'usernamePasswordCredentials.username'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'usernamePasswordCredentials.password'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'firstName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'lastName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'live'?: boolean | null | ComparisonOperators<boolean> | ElementOperators<boolean> | EvaluationOperators<boolean>,
-    'localization'?: Coordinates | null | ComparisonOperators<Coordinates> | ElementOperators<Coordinates> | EvaluationOperators<Coordinates>,
-    'title'?: LocalizedString | null | ComparisonOperators<LocalizedString> | ElementOperators<LocalizedString> | EvaluationOperators<LocalizedString>,
-    'amounts'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber> | ArrayOperators<BigNumber>,
-    'amount'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>,
-    'computedOrgName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'organizationId'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    _?: any,
-};
-export type CustomerUserFilter = CustomerUserFilterFields & LogicalOperators<CustomerUserFilterFields>;
-
-export type CustomerUserSortKeys =
-    'id' |
-    'usernamePasswordCredentials.username' |
-    'usernamePasswordCredentials.password' |
-    'firstName' |
-    'lastName' |
-    'live' |
-    'localization' |
-    'title' |
-    'amounts' |
-    'amount' |
-    'computedOrgName' |
-    'organizationId';
-export type CustomerUserSort = OneKey<CustomerUserSortKeys, SortDirection> | OneKey<CustomerUserSortKeys, SortDirection>[] | { sorts?: OneKey<CustomerUserSortKeys, SortDirection>[], _?: any };
-
-export type CustomerUserUpdate = {
-    'id'?: string,
-    'usernamePasswordCredentials'?: types.UsernamePasswordCredentials | null,
-    'usernamePasswordCredentials.username'?: string,
-    'usernamePasswordCredentials.password'?: string,
-    'firstName'?: string | null,
-    'lastName'?: string | null,
-    'live'?: boolean,
-    'localization'?: Coordinates | null,
-    'title'?: LocalizedString | null,
-    'amounts'?: Array<BigNumber> | null,
-    'amount'?: BigNumber | null,
-    'computedOrgName'?: string | null,
-    'organizationId'?: string | null,
-    _?: any,
-};
-
-export type CustomerUserExcludedFields = 'computedOrgName'
-export interface CustomerUserDAOParams<SecurityContext> extends DAOParams<types.CustomerUser, 'id', true, CustomerUserFilter, CustomerUserUpdate, CustomerUserExcludedFields, SecurityContext> { }
-
-export class CustomerUserDAO<SecurityContext = any> extends AbstractMongooseSubClassDAO<types.CustomerUser, 'id', true, CustomerUserFilter, CustomerUserSort, CustomerUserUpdate, CustomerUserExcludedFields, SecurityContext> {
-
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & CustomerUserDAOParams<SecurityContext>) {
-        super({
-            dbModel: UserModel,
-            idField: 'id',
-            subclassTypename: 'CustomerUser',
-            subclassDBName: 'customerUser',
-            subclassFields: ['computedOrgName', 'organizationId', 'organization'],
             ...params,
             associations: overrideAssociations(
                 [
@@ -391,7 +309,6 @@ export interface DAOContextParams<SecurityContext> {
         city?: CityDAOParams<SecurityContext>,
         address?: AddressDAOParams<SecurityContext>,
         organization?: OrganizationDAOParams<SecurityContext>,
-        customerUser?: CustomerUserDAOParams<SecurityContext>,
         user?: UserDAOParams<SecurityContext>
     }
 };
@@ -401,7 +318,6 @@ export class DAOContext<SecurityContext = any> extends AbstractDAOContext<Securi
     private _city: CityDAO<SecurityContext> | undefined;
     private _address: AddressDAO<SecurityContext> | undefined;
     private _organization: OrganizationDAO<SecurityContext> | undefined;
-    private _customerUser: CustomerUserDAO<SecurityContext> | undefined;
     private _user: UserDAO<SecurityContext> | undefined;
 
     private daoOverrides: DAOContextParams<SecurityContext>['daoOverrides'];
@@ -423,12 +339,6 @@ export class DAOContext<SecurityContext = any> extends AbstractDAOContext<Securi
             this._organization = new OrganizationDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.organization });
         }
         return this._organization;
-    }
-    get customerUser() {
-        if (!this._customerUser) {
-            this._customerUser = new CustomerUserDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.customerUser });
-        }
-        return this._customerUser;
     }
     get user() {
         if (!this._user) {

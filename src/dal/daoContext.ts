@@ -1,5 +1,5 @@
 import { DAOCache } from "./cache";
-import { DAO, ReadDAO } from './dao';
+import { DAO } from './dao';
 
 type SecurityContextGenerator<SecurityContext> = () => SecurityContext;
 
@@ -34,7 +34,7 @@ export abstract class AbstractDAOContext<SecurityContext> {
         }
     }
 
-    public dao(daoName: string): ReadDAO<any, any, any, any, any, any> | DAO<any, any, any, any, any, any, any, any, never> {
+    public dao(daoName: string): DAO<any, any, any, any, any, any, any, any, never> {
         return (this as any)[daoName];
     }
 
