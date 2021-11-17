@@ -1,14 +1,14 @@
 import { Document, Model, Types } from 'mongoose';
-import { mongooseProjection, addAssociationRefToProjection, ConditionalPartialBy } from "../utils/utils";
+import { mongooseProjection, addAssociationRefToProjection, ConditionalPartialBy } from "../../utils/utils";
 import {
     DAOAssociationReference,
     ReadOptions, WriteOptions, AbstractDAO, DAOParams,
-} from "./dao";
+} from "../dao";
 import { PartialDeep } from "type-fest";
 import { deepCopy, setTraversing, replaceType } from '@twinlogix/tl-commons';
 import Bignumber from 'bignumber.js';
-import { AbstractDAOContext } from './daoContext';
-import { Projection } from '../utils/types';
+import { AbstractDAOContext } from '../daoContext';
+import { Projection } from '../../utils/types';
 
 export abstract class AbstractMongooseDAO
     <
