@@ -127,17 +127,17 @@ test("find with simple sorts", async () => {
         await dao.user.insert({ firstName: "" + i, lastName: "" + (9 - i), live: true });
     }
 
-    response = await dao.user.findMany({ sort: [{ firstName: SortDirection.DESC }]});
+    response = await dao.user.findMany({ sorts: [{ firstName: SortDirection.DESC }]});
     expect(response[0].firstName).toBe("9");
     expect(response[1].firstName).toBe("8");
 
-    response = await dao.user.findMany({ sort: { firstName: SortDirection.DESC }});
+    response = await dao.user.findMany({ sorts: { firstName: SortDirection.DESC }});
     expect(response[0].firstName).toBe("9");
 
-    response = await dao.user.findMany({ sort: [{ firstName: SortDirection.DESC }]});
+    response = await dao.user.findMany({ sorts: [{ firstName: SortDirection.DESC }]});
     expect(response[0].firstName).toBe("9");
 
-    response = await dao.user.findMany({ sort: [{ firstName: SortDirection.ASC }]});
+    response = await dao.user.findMany({ sorts: [{ firstName: SortDirection.ASC }]});
     expect(response[0].firstName).toBe("0");
     expect(response[1].firstName).toBe("1");
 
@@ -151,7 +151,7 @@ test("find with multiple sorts", async () => {
         await dao.user.insert({ firstName: "1", lastName: "" + (9 - i), live: true });
     }
 
-    response = await dao.user.findMany({ sort: [{ firstName: SortDirection.DESC }, { lastName: SortDirection.DESC }]});
+    response = await dao.user.findMany({ sorts: [{ firstName: SortDirection.DESC }, { lastName: SortDirection.DESC }]});
     expect(response[0].lastName).toBe("9");
     expect(response[1].lastName).toBe("8");
 
