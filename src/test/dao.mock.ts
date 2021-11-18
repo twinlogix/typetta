@@ -271,7 +271,7 @@ export interface DAOContextParams {
   }
 }
 
-export class DAOContext<SecurityContext = any> extends AbstractDAOContext {
+export class DAOContext extends AbstractDAOContext {
   private _city: CityDAO | undefined
   private _address: AddressDAO | undefined
   private _organization: OrganizationDAO | undefined
