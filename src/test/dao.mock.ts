@@ -12,9 +12,7 @@ import { Model, Document, Types } from 'mongoose'
 import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '../'
 import { AbstractMongooseDAO } from '../dal/mongoose/dao';
 
-export type SecurityContext = {
-  userId: string
-}
+export type OptionType = { mongoose?: any }
 
 //--------------------------------------------------------------------------------
 //------------------------- USERNAMEPASSWORDCREDENTIALS --------------------------
@@ -54,9 +52,9 @@ export type CityUpdate = {
   _?: any
 }
 
-export interface CityDAOParams extends DAOParams<types.City, 'id', true, CityFilter, CityUpdate, CityExcludedFields, CitySort> {}
+export interface CityDAOParams extends DAOParams<types.City, 'id', true, CityFilter, CityUpdate, CityExcludedFields, CitySort, OptionType> {}
 
-export class CityDAO extends AbstractMongooseDAO<types.City, 'id', true, CityFilter, CitySort, CityUpdate, CityExcludedFields> {
+export class CityDAO extends AbstractMongooseDAO<types.City, 'id', true, CityFilter, CitySort, CityUpdate, CityExcludedFields, OptionType> {
   public constructor(params: { daoContext: AbstractDAOContext } & CityDAOParams) {
     super({
       dbModel: CityModel,
@@ -95,9 +93,9 @@ export type AddressUpdate = {
 
 export type AddressExcludedFields = never
 
-export interface AddressDAOParams extends DAOParams<types.Address, 'id', true, AddressFilter, AddressUpdate, AddressExcludedFields, AddressSort> {}
+export interface AddressDAOParams extends DAOParams<types.Address, 'id', true, AddressFilter, AddressUpdate, AddressExcludedFields, AddressSort, OptionType> {}
 
-export class AddressDAO extends AbstractMongooseDAO<types.Address, 'id', true, AddressFilter, AddressSort, AddressUpdate, AddressExcludedFields> {
+export class AddressDAO extends AbstractMongooseDAO<types.Address, 'id', true, AddressFilter, AddressSort, AddressUpdate, AddressExcludedFields, OptionType> {
   public constructor(params: { daoContext: AbstractDAOContext } & AddressDAOParams) {
     super({
       dbModel: AddressModel,
@@ -155,9 +153,9 @@ export type OrganizationUpdate = {
 
 export type OrganizationExcludedFields = 'computedName'
 
-export interface OrganizationDAOParams extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort> {}
+export interface OrganizationDAOParams extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, OptionType> {}
 
-export class OrganizationDAO extends AbstractMongooseDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields> {
+export class OrganizationDAO extends AbstractMongooseDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, OptionType> {
   public constructor(params: { daoContext: AbstractDAOContext } & OrganizationDAOParams) {
     super({
       dbModel: OrganizationModel,
@@ -249,9 +247,9 @@ export type UserUpdate = {
 
 export type UserExludedFields = never
 
-export interface UserDAOParams extends DAOParams<types.User, 'id', true, UserFilter, UserUpdate, UserExludedFields, UserSort> {}
+export interface UserDAOParams extends DAOParams<types.User, 'id', true, UserFilter, UserUpdate, UserExludedFields, UserSort, OptionType> {}
 
-export class UserDAO extends AbstractMongooseDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExludedFields> {
+export class UserDAO extends AbstractMongooseDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExludedFields, OptionType> {
   public constructor(params: { daoContext: AbstractDAOContext } & UserDAOParams) {
     super({
       dbModel: UserModel,

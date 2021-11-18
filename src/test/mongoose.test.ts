@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import { MockMongoose } from 'mock-mongoose'
-import { DAOContext, SecurityContext, UserFilter } from './dao.mock'
+import { DAOContext, UserFilter } from './dao.mock'
 import { Maybe, User } from './models.mock'
 import { SortDirection } from '..'
 import BigNumber from 'bignumber.js'
