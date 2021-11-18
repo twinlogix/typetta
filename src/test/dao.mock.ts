@@ -54,10 +54,10 @@ export type CityUpdate = {
   _?: any
 }
 
-export interface CityDAOParams<SecurityContext> extends DAOParams<types.City, 'id', true, CityFilter, CityUpdate, CityExcludedFields, SecurityContext> {}
+export interface CityDAOParams extends DAOParams<types.City, 'id', true, CityFilter, CityUpdate, CityExcludedFields, CitySort> {}
 
-export class CityDAO<SecurityContext = any> extends AbstractMongooseDAO<types.City, 'id', true, CityFilter, CitySort, CityUpdate, CityExcludedFields, SecurityContext> {
-  public constructor(params: { daoContext: AbstractDAOContext } & CityDAOParams<SecurityContext>) {
+export class CityDAO extends AbstractMongooseDAO<types.City, 'id', true, CityFilter, CitySort, CityUpdate, CityExcludedFields> {
+  public constructor(params: { daoContext: AbstractDAOContext } & CityDAOParams) {
     super({
       dbModel: CityModel,
       idField: 'id',
@@ -95,10 +95,10 @@ export type AddressUpdate = {
 
 export type AddressExcludedFields = never
 
-export interface AddressDAOParams<SecurityContext> extends DAOParams<types.Address, 'id', true, AddressFilter, AddressUpdate, AddressExcludedFields, SecurityContext> {}
+export interface AddressDAOParams extends DAOParams<types.Address, 'id', true, AddressFilter, AddressUpdate, AddressExcludedFields, AddressSort> {}
 
-export class AddressDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Address, 'id', true, AddressFilter, AddressSort, AddressUpdate, AddressExcludedFields, SecurityContext> {
-  public constructor(params: { daoContext: AbstractDAOContext } & AddressDAOParams<SecurityContext>) {
+export class AddressDAO extends AbstractMongooseDAO<types.Address, 'id', true, AddressFilter, AddressSort, AddressUpdate, AddressExcludedFields> {
+  public constructor(params: { daoContext: AbstractDAOContext } & AddressDAOParams) {
     super({
       dbModel: AddressModel,
       idField: 'id',
@@ -155,10 +155,10 @@ export type OrganizationUpdate = {
 
 export type OrganizationExcludedFields = 'computedName'
 
-export interface OrganizationDAOParams<SecurityContext> extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationUpdate, OrganizationExcludedFields, SecurityContext> {}
+export interface OrganizationDAOParams extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort> {}
 
-export class OrganizationDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, SecurityContext> {
-  public constructor(params: { daoContext: AbstractDAOContext } & OrganizationDAOParams<SecurityContext>) {
+export class OrganizationDAO extends AbstractMongooseDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields> {
+  public constructor(params: { daoContext: AbstractDAOContext } & OrganizationDAOParams) {
     super({
       dbModel: OrganizationModel,
       idField: 'id',
@@ -249,10 +249,10 @@ export type UserUpdate = {
 
 export type UserExludedFields = never
 
-export interface UserDAOParams<SecurityContext> extends DAOParams<types.User, 'id', true, UserFilter, UserUpdate, UserExludedFields, SecurityContext> {}
+export interface UserDAOParams extends DAOParams<types.User, 'id', true, UserFilter, UserUpdate, UserExludedFields, UserSort> {}
 
-export class UserDAO<SecurityContext = any> extends AbstractMongooseDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExludedFields, SecurityContext> {
-  public constructor(params: { daoContext: AbstractDAOContext } & UserDAOParams<SecurityContext>) {
+export class UserDAO extends AbstractMongooseDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExludedFields> {
+  public constructor(params: { daoContext: AbstractDAOContext } & UserDAOParams) {
     super({
       dbModel: UserModel,
       idField: 'id',
@@ -264,42 +264,42 @@ export class UserDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Us
 
 export interface DAOContextParams {
   daoOverrides?: {
-    city?: CityDAOParams<SecurityContext>
-    address?: AddressDAOParams<SecurityContext>
-    organization?: OrganizationDAOParams<SecurityContext>
-    user?: UserDAOParams<SecurityContext>
+    city?: CityDAOParams
+    address?: AddressDAOParams
+    organization?: OrganizationDAOParams
+    user?: UserDAOParams
   }
 }
 
 export class DAOContext<SecurityContext = any> extends AbstractDAOContext {
-  private _city: CityDAO<SecurityContext> | undefined
-  private _address: AddressDAO<SecurityContext> | undefined
-  private _organization: OrganizationDAO<SecurityContext> | undefined
-  private _user: UserDAO<SecurityContext> | undefined
+  private _city: CityDAO | undefined
+  private _address: AddressDAO | undefined
+  private _organization: OrganizationDAO | undefined
+  private _user: UserDAO | undefined
 
   private daoOverrides: DAOContextParams['daoOverrides']
 
   get city() {
     if (!this._city) {
-      this._city = new CityDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.city })
+      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city })
     }
     return this._city
   }
   get address() {
     if (!this._address) {
-      this._address = new AddressDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.address })
+      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address })
     }
     return this._address
   }
   get organization() {
     if (!this._organization) {
-      this._organization = new OrganizationDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.organization })
+      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization })
     }
     return this._organization
   }
   get user() {
     if (!this._user) {
-      this._user = new UserDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.user })
+      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user })
     }
     return this._user
   }
