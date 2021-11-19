@@ -1,12 +1,15 @@
 import { TypeScriptMongoosePluginConfig } from '../config'
 import { TsMongooseGeneratorField, TsMongooseGeneratorNode } from '../generator'
 
+type AddtionalPluginConfig = {
+  optionsType?: string
+}
 export abstract class TsMongooseAbstractGenerator {
-  protected _config: TypeScriptMongoosePluginConfig
+  protected _config: TypeScriptMongoosePluginConfig & AddtionalPluginConfig
   protected _objectId
   protected _tsTypesImport
 
-  constructor(config: TypeScriptMongoosePluginConfig) {
+  constructor(config: TypeScriptMongoosePluginConfig & AddtionalPluginConfig) {
     this._config = config
     this._objectId = this._resolveObjectId(this._config.objectIdType)
     this._tsTypesImport = this._config.tsTypesImport ? this._config.tsTypesImport : './types'

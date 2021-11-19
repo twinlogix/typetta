@@ -485,12 +485,14 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 test('middleware', async () => {
   let operationCount = 0
   const dao = new DAOContext({
+    defaultOptions: { test: 'test' },
     daoOverrides: {
       user: {
         middlewares: [
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
           {
             beforeInsert: async (params) => {
+              expect(params.options?.test).toBe('test')
               if (params.record.id === 'u1' && params.record.firstName === 'Mario') {
                 throw new Error('is Mario')
               }
