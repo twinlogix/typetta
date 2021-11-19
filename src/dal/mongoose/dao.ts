@@ -1,11 +1,12 @@
 import { Document, Model, Types } from 'mongoose'
 import { mongooseProjection, addAssociationRefToProjection, ConditionalPartialBy } from '../../utils/utils'
-import { DAOAssociationReference, AbstractDAO, DAOParams, FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../dao'
+import { DAOAssociationReference, DAOParams, FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../dao'
 import { PartialDeep } from 'type-fest'
 import { deepCopy, setTraversing, replaceType } from '@twinlogix/tl-commons'
 import Bignumber from 'bignumber.js'
 import { AbstractDAOContext } from '../daoContext'
 import { AnyProjection, ModelProjection, Projection } from '../../utils/types'
+import { AbstractDAO } from '../daoAbstract'
 
 export abstract class AbstractMongooseDAO<
   ModelType,
