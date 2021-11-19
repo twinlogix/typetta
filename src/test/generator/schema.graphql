@@ -11,7 +11,7 @@ type City @mongoEntity {
   id: ID! @id
   name: String!
   addressId: String!
-  computedName: String! @mongoExclude
+  computedName: String @mongoExclude
   computedAddressName: String @mongoExclude
 }
 
@@ -28,7 +28,7 @@ type Organization @mongoEntity {
   computedName: String @mongoExclude
 }
 
-interface User @mongoEntity {
+type User @mongoEntity {
   id: ID! @id
   usernamePasswordCredentials: UsernamePasswordCredentials
   firstName: String
@@ -38,19 +38,4 @@ interface User @mongoEntity {
   title: LocalizedString
   amounts: [Decimal!]
   amount: Decimal
-}
-
-type CustomerUser implements User {
-  id: ID!
-  usernamePasswordCredentials: UsernamePasswordCredentials
-  firstName: String
-  lastName: String
-  live: Boolean!
-  localization: Coordinates
-  title: LocalizedString
-  amounts: [Decimal!]
-  amount: Decimal
-  computedOrgName: String
-  organizationId: ID
-  organization: Organization @mongoInnerRef
 }

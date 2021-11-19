@@ -2,14 +2,14 @@ import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
 import { Schema, model, Connection } from 'mongoose';
-import { PointSchema } from "@twinlogix/tl-graphql-tools";
+import { PointSchema } from "../../dal/mongoose/point";
 (Schema.Types as any).PointSchema = PointSchema;
-import { LocalizedStringSchema } from "@twinlogix/tl-graphql-tools";
+import { LocalizedStringSchema } from "../../dal/mongoose/localizedString";
 (Schema.Types as any).LocalizedStringSchema = LocalizedStringSchema;
-import * as types from './typescript';
+import * as types from './models.mock';
 import { v4 } from 'uuid';
 import { Model, Document, Types } from 'mongoose';
-import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractMongooseSubClassDAO, AbstractMongooseSuperClassDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, DAOCache, OneKey, SortDirection, overrideAssociations } from '@twinlogix/tl-graphql-tools';
+import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 
 //--------------------------------------------------------------------------------
 //----------------------------------- ADDRESS ------------------------------------
@@ -36,11 +36,11 @@ export type AddressUpdate = {
     _?: any,
 };
 
-export interface AddressDAOParams<SecurityContext> extends DAOParams<types.Address, 'id', true, AddressFilter, AddressUpdate, AddressExcludedFields, SecurityContext>{}
+export interface AddressDAOParams extends DAOParams<types.Address, 'id', true, AddressFilter, AddressUpdate, AddressExcludedFields, AddressSort, { mongoose?: any }>{}
 
-export class AddressDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Address, 'id', true, AddressFilter, AddressSort, AddressUpdate, AddressExcludedFields, SecurityContext> {
+export class AddressDAO extends AbstractMongooseDAO<types.Address, 'id', true, AddressFilter, AddressSort, AddressUpdate, AddressExcludedFields, { mongoose?: any }> {
     
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & AddressDAOParams<SecurityContext>, connection?: Connection){
+    public constructor(params: { daoContext: AbstractDAOContext } & AddressDAOParams, connection?: Connection){
         super({     
             dbModel: connection ? connection.model<Document>('Address', AddressSchema) : model<Document>('Address', AddressSchema), 
             idField: 'id', 
@@ -48,8 +48,7 @@ export class AddressDAO<SecurityContext = any> extends AbstractMongooseDAO<types
             associations: overrideAssociations(
                 [
                     { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
-                ], 
-                params?.associations
+                ]
             ), 
         });
     }
@@ -91,11 +90,11 @@ export type CityUpdate = {
     _?: any,
 };
 
-export interface CityDAOParams<SecurityContext> extends DAOParams<types.City, 'id', true, CityFilter, CityUpdate, CityExcludedFields, SecurityContext>{}
+export interface CityDAOParams extends DAOParams<types.City, 'id', true, CityFilter, CityUpdate, CityExcludedFields, CitySort, { mongoose?: any }>{}
 
-export class CityDAO<SecurityContext = any> extends AbstractMongooseDAO<types.City, 'id', true, CityFilter, CitySort, CityUpdate, CityExcludedFields, SecurityContext> {
+export class CityDAO extends AbstractMongooseDAO<types.City, 'id', true, CityFilter, CitySort, CityUpdate, CityExcludedFields, { mongoose?: any }> {
     
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & CityDAOParams<SecurityContext>, connection?: Connection){
+    public constructor(params: { daoContext: AbstractDAOContext } & CityDAOParams, connection?: Connection){
         super({     
             dbModel: connection ? connection.model<Document>('City', CitySchema) : model<Document>('City', CitySchema), 
             idField: 'id', 
@@ -103,88 +102,7 @@ export class CityDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Ci
             associations: overrideAssociations(
                 [
                     
-                ], 
-                params?.associations
-            ), 
-        });
-    }
-    
-}
-
-
-
-//--------------------------------------------------------------------------------
-//--------------------------------- CUSTOMERUSER ---------------------------------
-//--------------------------------------------------------------------------------
-
-export type CustomerUserExcludedFields = never
-
-type CustomerUserFilterFields = {
-    'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'usernamePasswordCredentials.username'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'usernamePasswordCredentials.password'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'firstName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'lastName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'live'?: boolean | null | ComparisonOperators<boolean> | ElementOperators<boolean> | EvaluationOperators<boolean>,
-    'localization'?: Coordinates | null | ComparisonOperators<Coordinates> | ElementOperators<Coordinates> | EvaluationOperators<Coordinates>,
-    'title'?: LocalizedString | null | ComparisonOperators<LocalizedString> | ElementOperators<LocalizedString> | EvaluationOperators<LocalizedString>,
-    'amounts'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>| ArrayOperators<BigNumber>,
-    'amount'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>,
-    'computedOrgName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    'organizationId'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-    _?: any,
-};
-export type CustomerUserFilter = CustomerUserFilterFields & LogicalOperators<CustomerUserFilterFields>;
-
-export type CustomerUserSortKeys = 
-    'id'|
-    'usernamePasswordCredentials.username'|
-    'usernamePasswordCredentials.password'|
-    'firstName'|
-    'lastName'|
-    'live'|
-    'localization'|
-    'title'|
-    'amounts'|
-    'amount'|
-    'computedOrgName'|
-    'organizationId';
-export type CustomerUserSort = OneKey<CustomerUserSortKeys, SortDirection> | OneKey<CustomerUserSortKeys, SortDirection>[] | { sorts?: OneKey<CustomerUserSortKeys, SortDirection>[],  _?: any };
-
-export type CustomerUserUpdate = {
-    'id'?: string,
-    'usernamePasswordCredentials'?: types.UsernamePasswordCredentials | null,
-    'usernamePasswordCredentials.username'?: string,
-    'usernamePasswordCredentials.password'?: string,
-    'firstName'?: string | null,
-    'lastName'?: string | null,
-    'live'?: boolean,
-    'localization'?: Coordinates | null,
-    'title'?: LocalizedString | null,
-    'amounts'?: Array<BigNumber> | null,
-    'amount'?: BigNumber | null,
-    'computedOrgName'?: string | null,
-    'organizationId'?: string | null,
-    _?: any,
-};
-
-export interface CustomerUserDAOParams<SecurityContext> extends DAOParams<types.CustomerUser, 'id', true, CustomerUserFilter, CustomerUserUpdate, CustomerUserExcludedFields, SecurityContext>{}
-
-export class CustomerUserDAO<SecurityContext = any> extends AbstractMongooseSubClassDAO<types.CustomerUser, 'id', true, CustomerUserFilter, CustomerUserSort, CustomerUserUpdate, CustomerUserExcludedFields, SecurityContext> {
-    
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & CustomerUserDAOParams<SecurityContext>, connection?: Connection){
-        super({     
-            dbModel: connection ? connection.model<Document>('User', UserSchema) : model<Document>('User', UserSchema), 
-            idField: 'id',
-            subclassTypename: 'CustomerUser',
-            subclassDBName: 'customerUser',
-            subclassFields: ['computedOrgName','organizationId','organization'], 
-            ...params, 
-            associations: overrideAssociations(
-                [
-                    { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'customerUser.organization', refFrom: 'customerUser.organizationId', refTo: 'id', dao: 'organization' }
-                ], 
-                params?.associations
+                ]
             ), 
         });
     }
@@ -239,11 +157,11 @@ export type OrganizationUpdate = {
     _?: any,
 };
 
-export interface OrganizationDAOParams<SecurityContext> extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationUpdate, OrganizationExcludedFields, SecurityContext>{}
+export interface OrganizationDAOParams extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoose?: any }>{}
 
-export class OrganizationDAO<SecurityContext = any> extends AbstractMongooseDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, SecurityContext> {
+export class OrganizationDAO extends AbstractMongooseDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { mongoose?: any }> {
     
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & OrganizationDAOParams<SecurityContext>, connection?: Connection){
+    public constructor(params: { daoContext: AbstractDAOContext } & OrganizationDAOParams, connection?: Connection){
         super({     
             dbModel: connection ? connection.model<Document>('Organization', OrganizationSchema) : model<Document>('Organization', OrganizationSchema), 
             idField: 'id', 
@@ -251,8 +169,7 @@ export class OrganizationDAO<SecurityContext = any> extends AbstractMongooseDAO<
             associations: overrideAssociations(
                 [
                     { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
-                ], 
-                params?.associations
+                ]
             ), 
         });
     }
@@ -266,7 +183,6 @@ export class OrganizationDAO<SecurityContext = any> extends AbstractMongooseDAO<
 //--------------------------------------------------------------------------------
 
 export const UserSchema : Schema = new Schema({
-    __typename: { type: String, required: false },
     id: { type: String, required: true, default: v4 },
     usernamePasswordCredentials: {
         type: new Schema(
@@ -285,16 +201,6 @@ export const UserSchema : Schema = new Schema({
     title: { type: LocalizedStringSchema, required: false },
     amounts: [{ type: Types.Decimal128, required: false }],
     amount: { type: Types.Decimal128, required: false },
-    customerUser: {
-        type: new Schema(
-            {
-                computedOrgName: { type: String, required: false },
-                organizationId: { type: String, required: false },
-            },
-            { _id: false }
-        ),
-        required: false
-    },
 }, {collection: 'users'});
 
 export type UserExcludedFields = never
@@ -342,23 +248,19 @@ export type UserUpdate = {
     _?: any,
 };
 
-export interface UserDAOParams<SecurityContext> extends DAOParams<types.User, 'id', true, UserFilter, UserUpdate, UserExcludedFields, SecurityContext>{}
+export interface UserDAOParams extends DAOParams<types.User, 'id', true, UserFilter, UserUpdate, UserExcludedFields, UserSort, { mongoose?: any }>{}
 
-export class UserDAO<SecurityContext = any> extends AbstractMongooseSuperClassDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExcludedFields, SecurityContext> {
+export class UserDAO extends AbstractMongooseDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExcludedFields, { mongoose?: any }> {
     
-    public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & UserDAOParams<SecurityContext>, connection?: Connection){
+    public constructor(params: { daoContext: AbstractDAOContext } & UserDAOParams, connection?: Connection){
         super({     
             dbModel: connection ? connection.model<Document>('User', UserSchema) : model<Document>('User', UserSchema), 
             idField: 'id', 
-            subclasses: [
-                { typename: 'CustomerUser', dbname: 'customerUser', fields: ['computedOrgName','organizationId','organization'] }
-            ], 
             ...params, 
             associations: overrideAssociations(
                 [
-                    { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'customerUser.organization', refFrom: 'customerUser.organizationId', refTo: 'id', dao: 'organization' }
-                ], 
-                params?.associations
+                    
+                ]
             ), 
         });
     }
@@ -375,64 +277,54 @@ export class UserDAO<SecurityContext = any> extends AbstractMongooseSuperClassDA
 
 
 
-export interface DAOContextParams<SecurityContext> {
-    cache?: DAOCache, 
-    securityContext?: SecurityContext | (() => SecurityContext), 
+export interface DAOContextParams {
     daoOverrides?: { 
-        address?: AddressDAOParams<SecurityContext>,
-        city?: CityDAOParams<SecurityContext>,
-        customerUser?: CustomerUserDAOParams<SecurityContext>,
-        organization?: OrganizationDAOParams<SecurityContext>,
-        user?: UserDAOParams<SecurityContext> 
+        address?: AddressDAOParams,
+        city?: CityDAOParams,
+        organization?: OrganizationDAOParams,
+        user?: UserDAOParams 
     }, 
     connection?: Connection
 };
 
-export class DAOContext<SecurityContext = any> extends AbstractDAOContext<SecurityContext> {
+export class DAOContext extends AbstractDAOContext {
 
-    private _address: AddressDAO<SecurityContext> | undefined;
-    private _city: CityDAO<SecurityContext> | undefined;
-    private _customerUser: CustomerUserDAO<SecurityContext> | undefined;
-    private _organization: OrganizationDAO<SecurityContext> | undefined;
-    private _user: UserDAO<SecurityContext> | undefined;
+    private _address: AddressDAO | undefined;
+    private _city: CityDAO | undefined;
+    private _organization: OrganizationDAO | undefined;
+    private _user: UserDAO | undefined;
     
-    private daoOverrides: DAOContextParams<SecurityContext>['daoOverrides'];
+    private daoOverrides: DAOContextParams['daoOverrides'];
     private connection: Connection | undefined
     
     get address() {
         if(!this._address) {
-            this._address = new AddressDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.address }, this.connection);
+            this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address }, this.connection);
         }
         return this._address;
     }
     get city() {
         if(!this._city) {
-            this._city = new CityDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.city }, this.connection);
+            this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city }, this.connection);
         }
         return this._city;
     }
-    get customerUser() {
-        if(!this._customerUser) {
-            this._customerUser = new CustomerUserDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.customerUser }, this.connection);
-        }
-        return this._customerUser;
-    }
     get organization() {
         if(!this._organization) {
-            this._organization = new OrganizationDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.organization }, this.connection);
+            this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization }, this.connection);
         }
         return this._organization;
     }
     get user() {
         if(!this._user) {
-            this._user = new UserDAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.user }, this.connection);
+            this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user }, this.connection);
         }
         return this._user;
     }
     
-    constructor(options?: DAOContextParams<SecurityContext>) {
-        super(options);
-        this.daoOverrides = options?.daoOverrides;
+    constructor(options?: DAOContextParams) {
+        super()
+        this.daoOverrides = options?.daoOverrides
         this.connection = options?.connection
     }
 

@@ -28,26 +28,10 @@ export type City = {
   id: Scalars['ID'];
   name: Scalars['String'];
   addressId: Scalars['String'];
-  computedName: Scalars['String'];
+  computedName?: Maybe<Scalars['String']>;
   computedAddressName?: Maybe<Scalars['String']>;
 };
 
-
-export type CustomerUser = User & {
-  __typename?: 'CustomerUser';
-  id: Scalars['ID'];
-  usernamePasswordCredentials?: Maybe<UsernamePasswordCredentials>;
-  firstName?: Maybe<Scalars['String']>;
-  lastName?: Maybe<Scalars['String']>;
-  live: Scalars['Boolean'];
-  localization?: Maybe<Scalars['Coordinates']>;
-  title?: Maybe<Scalars['LocalizedString']>;
-  amounts?: Maybe<Array<Scalars['Decimal']>>;
-  amount?: Maybe<Scalars['Decimal']>;
-  computedOrgName?: Maybe<Scalars['String']>;
-  organizationId?: Maybe<Scalars['ID']>;
-  organization?: Maybe<Organization>;
-};
 
 
 
@@ -61,6 +45,7 @@ export type Organization = {
 };
 
 export type User = {
+  __typename?: 'User';
   id: Scalars['ID'];
   usernamePasswordCredentials?: Maybe<UsernamePasswordCredentials>;
   firstName?: Maybe<Scalars['String']>;

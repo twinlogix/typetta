@@ -1,5 +1,5 @@
 {
-  "name": "@twinlogix/tl-graphql-tools",
+  "name": "@twinlogix/typetta",
   "version": "0.5.4-beta.13",
   "description": "",
   "main": "lib/index.js",
@@ -7,17 +7,17 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --detectOpenHandles",
-    "generate": "graphql-codegen --config test/codegen.yml"
+    "generate": "graphql-codegen --config src/test/generator/codegen.yml"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/twinlogix/tl-graphql-tools.git"
+    "url": "git+https://github.com/twinlogix/typetta.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/twinlogix/tl-graphql-tools/issues"
+    "url": "https://github.com/twinlogix/typetta/issues"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
@@ -45,6 +45,7 @@
     "uuid": "^8.3.2"
   },
   "dependencies": {
+    "@twinlogix/typetta": ".",
     "@graphql-codegen/typescript": "^1.17.9",
     "@graphql-codegen/visitor-plugin-common": "^1.17.14",
     "graphql-db-projection": "^1.0.17",

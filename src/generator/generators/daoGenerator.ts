@@ -5,7 +5,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
   public generateImports(): string[] {
     return [
       "import { Model, Document, Types } from 'mongoose';",
-      "import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractMongooseSubClassDAO, AbstractMongooseSuperClassDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, DAOCache, OneKey, SortDirection, overrideAssociations } from '@twinlogix/tl-graphql-tools';",
+      "import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
     ]
   }
 
@@ -28,42 +28,39 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
       .concat(Array.from(interfacesMap.values()))
       .filter((node) => this._isEntity(node, interfacesMap))
       .map((node) => {
-        return `${this._toFirstLower(node.name)}?: ${node.name}DAOParams<SecurityContext>`
+        return `${this._toFirstLower(node.name)}?: ${node.name}DAOParams`
       })
       .join(',\n')
 
-    const daoContextParamsExport = `export interface DAOContextParams<SecurityContext> {\n${this.indentMultiline(
-      `cache?: DAOCache, \nsecurityContext?: SecurityContext | (() => SecurityContext), \ndaoOverrides?: { \n${this.indentMultiline(contextDAOParamsDeclarations)} \n}, \nconnection?: Connection`,
+    const daoContextParamsExport = `export interface DAOContextParams {\n${this.indentMultiline(
+      `daoOverrides?: { \n${this.indentMultiline(contextDAOParamsDeclarations)} \n}, \nconnection?: Connection`,
     )}\n};`
 
     const daoDeclarations = Array.from(typesMap.values())
       .concat(Array.from(interfacesMap.values()))
       .filter((node) => this._isEntity(node, interfacesMap))
       .map((node) => {
-        return `private _${this._toFirstLower(node.name)}: ${node.name}DAO<SecurityContext> | undefined;`
+        return `private _${this._toFirstLower(node.name)}: ${node.name}DAO | undefined;`
       })
       .join('\n')
 
-    const daoOverridesDeclaration = `private daoOverrides: DAOContextParams<SecurityContext>['daoOverrides'];\n` + `private connection: Connection | undefined`
+    const daoOverridesDeclaration = `private daoOverrides: DAOContextParams['daoOverrides'];\n` + `private connection: Connection | undefined`
 
     const daoGetters = Array.from(typesMap.values())
       .concat(Array.from(interfacesMap.values()))
       .filter((node) => this._isEntity(node, interfacesMap))
       .map((node) => {
-        const daoInit = `this._${this._toFirstLower(node.name)} = new ${node.name}DAO<SecurityContext>({ daoContext: this, ...this.daoOverrides?.${this._toFirstLower(node.name)} }, this.connection);`
-        const daoGet = `if(!this._${this._toFirstLower(node.name)}) {\n${this.indentMultiline(daoInit)}\n}\nreturn this._${this._toFirstLower(node.name)};`
+        const daoInit = `this._${this._toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, ...this.daoOverrides?.${this._toFirstLower(node.name)} }, this.connection);`
+        const daoGet = `if(!this._${this._toFirstLower(node.name)}) {\n${this.indentMultiline(daoInit)}\n}\nreturn this._${this._toFirstLower(node.name)}${false ? '.apiV1' : ''};`
         return `get ${this._toFirstLower(node.name)}() {\n${this.indentMultiline(daoGet)}\n}`
       })
       .join('\n')
 
-    const daoContructor =
-      'constructor(options?: DAOContextParams<SecurityContext>) {\n' +
-      this.indentMultiline('super(options);\nthis.daoOverrides = options?.daoOverrides;\nthis.connection = options?.connection') +
-      '\n}'
+    const daoContructor = 'constructor(options?: DAOContextParams) {\n' + this.indentMultiline('super()\nthis.daoOverrides = options?.daoOverrides\nthis.connection = options?.connection') + '\n}'
 
     const declarations = [daoDeclarations, daoOverridesDeclaration, daoGetters, daoContructor].join('\n\n')
 
-    const daoExport = 'export class DAOContext<SecurityContext = any> extends AbstractDAOContext<SecurityContext> {\n\n' + this.indentMultiline(declarations) + '\n\n}'
+    const daoExport = 'export class DAOContext extends AbstractDAOContext {\n\n' + this.indentMultiline(declarations) + '\n\n}'
 
     return [[daoContextParamsExport, daoExport].join('\n\n')]
   }
@@ -172,7 +169,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
 
   public _generateDAOParams(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
     const idField = this._findID(node, interfacesMap)
-    const daoParams = `export interface ${node.name}DAOParams<SecurityContext> extends DAOParams<types.${node.name}, '${idField.name}', ${idField.isAutogenerated}, ${node.name}Filter, ${node.name}Update, ${node.name}ExcludedFields, SecurityContext>{}`
+    const daoParams = `export interface ${node.name}DAOParams extends DAOParams<types.${node.name}, '${idField.name}', ${idField.isAutogenerated}, ${node.name}Filter, ${node.name}Update, ${node.name}ExcludedFields, ${node.name}Sort, { mongoose?: any }>{}`
     return daoParams
   }
 
@@ -190,21 +187,21 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     autoGeneratedParam = `${idField.isAutogenerated}, `
     if (node.type === 'interface') {
       // INTERFACE
-      abstractClassName = 'AbstractMongooseSuperClassDAO'
+      throw `Interface not supported: ${node.name}`
     } else if (node.type === 'type') {
       if (node.isEntity) {
         // SIMPLE ENTITY
         abstractClassName = 'AbstractMongooseDAO'
       } else {
         // SUBCLASS
-        abstractClassName = 'AbstractMongooseSubClassDAO'
+        throw `Subclass not supported: ${node.name}`
       }
     }
     daoBody += '\n' + this._generateConstructorMethod(node, typesMap, interfacesMap) + '\n'
     daoBody = this.indentMultiline(daoBody)
 
     return (
-      `export class ${node.name}DAO<SecurityContext = any> extends ${abstractClassName}<types.${node.name}, '${idField.name}', ${autoGeneratedParam}${node.name}Filter, ${node.name}Sort, ${node.name}Update, ${node.name}ExcludedFields, SecurityContext> {\n` +
+      `export class ${node.name}DAO extends ${abstractClassName}<types.${node.name}, '${idField.name}', ${autoGeneratedParam}${node.name}Filter, ${node.name}Sort, ${node.name}Update, ${node.name}ExcludedFields, { mongoose?: any }> {\n` +
       daoBody +
       '\n}'
     )
@@ -216,7 +213,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     const nodeName = this._findEntityNode(node, interfacesMap).name
     const dbModel = `connection ? connection.model<Document>('${nodeName}', ${nodeName}Schema) : model<Document>('${nodeName}', ${nodeName}Schema)`
     const generatedAssociations = `[\n${this.indentMultiline(this._generateAssociations(node, typesMap, interfacesMap).join(',\n'))}\n]`
-    const associations = `associations: overrideAssociations(\n${this.indentMultiline(`${generatedAssociations}, \nparams?.associations`)}\n),`
+    const associations = `associations: overrideAssociations(\n${this.indentMultiline(`${generatedAssociations}`)}\n),`
     if (node.type === 'interface') {
       // INTERFACE
       const superclassConstructorBody = this._generateSuperClassConstructorBody(node, typesMap, interfacesMap)
@@ -231,11 +228,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
         constructorBody += `super({ ${this.indentMultiline(`\ndbModel: ${dbModel}, \nidField: '${idField.name}',\n${subclassConstructorBody}, \n...params, \n${associations}`)} \n});`
       }
     }
-    return (
-      `public constructor(params: { daoContext: AbstractDAOContext<SecurityContext> } & ${node.name}DAOParams<SecurityContext>, connection?: Connection){\n` +
-      this.indentMultiline(constructorBody) +
-      '\n}'
-    )
+    return `public constructor(params: { daoContext: AbstractDAOContext } & ${node.name}DAOParams, connection?: Connection){\n` + this.indentMultiline(constructorBody) + '\n}'
   }
 
   private _generateAssociations(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>, path: string = ''): string[] {
