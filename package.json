@@ -6,7 +6,8 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles",
+    "generate": "graphql-codegen --config test/codegen.yml"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,8 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "devDependencies": {
+    "@graphql-codegen/add": "^1.17.7",
+    "@graphql-codegen/cli": "^1.17.8",
     "@types/deepmerge": "^2.2.0",
     "@types/express": "4.17.1",
     "@types/graphql": "14.5.0",
@@ -42,6 +45,10 @@
     "uuid": "^8.3.2"
   },
   "dependencies": {
+    "@graphql-codegen/typescript": "^1.17.9",
+    "@graphql-codegen/visitor-plugin-common": "^1.17.14",
+    "graphql-db-projection": "^1.0.17",
+    "@graphql-toolkit/common": "^0.10.7",
     "@twinlogix/tl-commons": "0.0.5",
     "@types/lodash": "^4.14.172",
     "@types/lru-cache": "^5.1.0",

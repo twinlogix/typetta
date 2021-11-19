@@ -1,0 +1,56 @@
+scalar Coordinates
+scalar LocalizedString
+scalar Decimal
+
+type UsernamePasswordCredentials {
+  username: String!
+  password: String!
+}
+
+type City @mongoEntity {
+  id: ID! @id
+  name: String!
+  addressId: String!
+  computedName: String! @mongoExclude
+  computedAddressName: String @mongoExclude
+}
+
+type Address @mongoEntity {
+  id: ID! @id
+  cities: [City!] @mongoForeignRef(refFrom: "addressId")
+}
+
+type Organization @mongoEntity {
+  id: ID! @id
+  name: String!
+  vatNumber: String
+  address: Address
+  computedName: String @mongoExclude
+}
+
+interface User @mongoEntity {
+  id: ID! @id
+  usernamePasswordCredentials: UsernamePasswordCredentials
+  firstName: String
+  lastName: String
+  live: Boolean!
+  localization: Coordinates
+  title: LocalizedString
+  amounts: [Decimal!]
+  amount: Decimal
+}
+
+type CustomerUser implements User {
+  id: ID!
+  usernamePasswordCredentials: UsernamePasswordCredentials
+  firstName: String
+  lastName: String
+  live: Boolean!
+  localization: Coordinates
+  title: LocalizedString
+  amounts: [Decimal!]
+  amount: Decimal
+  computedOrgName: String
+  organizationId: ID
+  organization: Organization @mongoInnerRef
+}

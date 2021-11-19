@@ -149,7 +149,7 @@ export abstract class AbstractMongooseDAO<
     return { totalCount, records }
   }
 
-  protected async findByQuery<P extends AnyProjection<ModelType>>(
+  public async findByQuery<P extends AnyProjection<ModelType>>(
     query: (dbRef: Model<Document>, dbProjections: any, dbSorts?: any, start?: number, limit?: number, options?: any) => Promise<Document[]>,
     projection?: P,
     sorts?: SortType,
