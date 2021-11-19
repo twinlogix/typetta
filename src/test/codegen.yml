@@ -1,8 +1,8 @@
 overwrite: true
-schema: "src/test/generator/schema.graphql"
+schema: "src/test/schema.graphql"
 documents: null
 generates:
-  src/test/generator/models.mock.ts:
+  src/test/models.mock.ts:
     plugins:
       - add: 'import BigNumber from "bignumber.js";'
       - add: 'import {Coordinates} from "@twinlogix/tl-commons";'
@@ -15,7 +15,7 @@ generates:
         Decimal: BigNumber
         Coordinates: Coordinates
         LocalizedString: LocalizedString
-  src/test/generator/dao.mock.ts:
+  src/test/dao.mock.ts:
     config:
       schemaImport: "./schema.graphql"
       tsTypesImport: ./models.mock
@@ -30,8 +30,8 @@ generates:
       mongooseScalars:
         Date: Date
         Decimal: Types.Decimal128
-        Coordinates: PointSchema from ../../dal/mongoose/point
-        LocalizedString: LocalizedStringSchema from ../../dal/mongoose/localizedString
+        Coordinates: PointSchema from ../dal/mongoose/point
+        LocalizedString: LocalizedStringSchema from ../dal/mongoose/localizedString
     plugins:
       - add: 'import BigNumber from "bignumber.js";'
       - add: 'import {Coordinates} from "@twinlogix/tl-commons";'
