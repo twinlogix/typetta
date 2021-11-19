@@ -36,51 +36,23 @@ export abstract class TsMongooseAbstractGenerator {
     return res
   }
 
-  protected _findEntityNode(node: TsMongooseGeneratorNode, interfacesMap: Map<String, TsMongooseGeneratorNode>): TsMongooseGeneratorField {
-    let res = null
-    if (node.isEntity) {
-      res = node
-    } else {
-      const entityInterfaces = node.interfaces.map((interf) => interfacesMap.get(interf)).filter((interf) => interf!.isEntity)
-      if (entityInterfaces.length == 1) {
-        res = entityInterfaces[0]
-      }
-    }
-    //@ts-ignore
-    return res
+  protected _findID(node: TsMongooseGeneratorNode): TsMongooseGeneratorField | undefined {
+    return node.fields.find((field) => field.isID)
   }
 
-  protected _findID(node: TsMongooseGeneratorNode, interfacesMap: Map<String, TsMongooseGeneratorNode>): TsMongooseGeneratorField {
-    let res = node.fields.find((field) => field.isID)
-    if (!res) {
-      const ids = node.interfaces.map((interf) => interfacesMap.get(interf)).map((interf) => interf!.fields.find((field) => field.isID))
-      if (ids.length == 1) {
-        res = ids[0]
-      }
-    }
-    //@ts-ignore
-    return res
-  }
-
-  protected _findNode(code: string, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): TsMongooseGeneratorNode {
-    let res = typesMap.get(code)
-    if (!res) {
-      res = interfacesMap.get(code)
-    }
-    //@ts-ignore
-    return res
+  protected _findNode(code: string | undefined, typesMap: Map<String, TsMongooseGeneratorNode>): TsMongooseGeneratorNode | undefined {
+    return code ? typesMap.get(code) : undefined
   }
 
   protected indentMultiline(str: string, count = 1): string {
-    const indentation = new Array(count).fill('    ').join('')
+    const indentation = '  '.repeat(count)
     const replaceWith = '\n' + indentation
-
     return indentation + str.replace(/\n/g, replaceWith)
   }
 
   public abstract generateImports(): string[]
 
-  public abstract generateDefinition(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string
+  public abstract generateDefinition(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string
 
-  public abstract generateExports(typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string[]
+  public abstract generateExports(typesMap: Map<String, TsMongooseGeneratorNode>): string[]
 }

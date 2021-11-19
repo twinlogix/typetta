@@ -33,17 +33,11 @@ export class TsMongooseGenerator {
   }
 
   public generate(nodes: TsMongooseGeneratorNode[]): string {
-    nodes = nodes.filter((node) => node.type)
-
-    const interfacesMap = new Map<string, TsMongooseGeneratorNode>()
-    nodes.filter((node) => node.type === 'interface').forEach((interf) => interfacesMap.set(interf.code, interf))
-
     const typesMap = new Map<string, TsMongooseGeneratorNode>()
     nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.code, type))
 
-    this.checkIds(typesMap, interfacesMap)
-    this.checkReferences(typesMap, interfacesMap)
-    this.checkSubClassesMongoDirectives(typesMap, interfacesMap)
+    this.checkIds(typesMap)
+    this.checkReferences(typesMap)
 
     const imports = this._generators
       .map((generator) => {
@@ -51,15 +45,21 @@ export class TsMongooseGenerator {
       })
       .reduce((a, c) => [...a, ...c], [])
 
-    const definitions = nodes.map((node) => {
-      const definition = this._generators
-        .map((generator) => generator.generateDefinition(node, typesMap, interfacesMap))
-        .filter((definition) => definition !== '')
-        .join('\n\n')
-      return [this._generateTitle(node), definition].join('\n\n')
-    })
+    const definitions = nodes
+      .filter((node) => node.type)
+      .flatMap((node) => {
+        const definition = this._generators
+          .map((generator) => generator.generateDefinition(node, typesMap))
+          .filter((definition) => definition !== '')
+          .join('\n\n')
+        if (definition.trim().length === 0) {
+          return []
+        } else {
+          return [[this._generateTitle(node), definition].join('\n\n')]
+        }
+      })
 
-    const exports = this._generators.map((generator) => generator.generateExports(typesMap, interfacesMap))
+    const exports = this._generators.map((generator) => generator.generateExports(typesMap))
 
     return [imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
   }
@@ -71,91 +71,57 @@ export class TsMongooseGenerator {
     return comment
   }
 
-  private checkIds(typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>) {
+  private checkIds(typesMap: Map<String, TsMongooseGeneratorNode>) {
     Array.from(typesMap.values())
-      .concat(Array.from(interfacesMap.values()))
-      .filter((type) => this._isEntity(type, interfacesMap))
+      .filter((type) => type.isEntity)
       .forEach((type) => {
-        const id = this._findID(type, interfacesMap)
+        const id = this._findID(type)
         if (!id) {
           throw new Error(`Type ${type.name} requires an @id field being a @mongoEntity.`)
         }
       })
   }
 
-  private checkReferences(typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>) {
-    Array.from(typesMap.values())
-      .concat(Array.from(interfacesMap.values()))
-      .forEach((type) => {
-        type.fields.forEach((field) => {
-          if (typeof field.type !== 'string') {
-            if (field.type.innerRef) {
-              const refType = this._findNode(field.type.innerRef, typesMap, interfacesMap)
-              if (!refType) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} that cannot be resolved.`)
-              }
-              if (!this._isEntity(refType, interfacesMap)) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} that isn't a mongoEntity.`)
-              }
-              if (field.type.refFrom) {
-                const refFromField = this._findField(type, field.type.refFrom, typesMap, interfacesMap)
-                if (!refFromField) {
-                  throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refFrom ${field.type.refFrom} that cannot be resolved.`)
-                }
-              }
-              if (field.type.refTo) {
-                const refToField = this._findField(refType, field.type.refTo, typesMap, interfacesMap)
-                if (!refToField) {
-                  throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refTo ${field.type.refTo} that cannot be resolved.`)
-                }
-              }
-            } else if (field.type.foreignRef) {
-              const refType = this._findNode(field.type.foreignRef, typesMap, interfacesMap)
-              if (!refType) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} that cannot be resolved.`)
-              }
-              if (field.type.refFrom) {
-                const refFromField = this._findField(refType, field.type.refFrom, typesMap, interfacesMap)
-                if (!refFromField) {
-                  throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refFrom ${field.type.refFrom} that cannot be resolved.`)
-                }
-              }
-              if (field.type.refTo) {
-                const refToField = this._findField(type, field.type.refTo, typesMap, interfacesMap)
-                if (!refToField) {
-                  throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refTo ${field.type.refTo} that cannot be resolved.`)
-                }
-              }
-            }
-          }
-        })
-      })
-  }
-
-  private checkSubClassesMongoDirectives(typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>) {
+  private checkReferences(typesMap: Map<String, TsMongooseGeneratorNode>) {
     Array.from(typesMap.values()).forEach((type) => {
-      const interfacesFieldsMap = new Map<string, TsMongooseGeneratorField>()
-      type.interfaces
-        .map((interf) => interfacesMap.get(interf)!.fields)
-        .reduce((a, c) => [...a, ...c], [])
-        .forEach((field) => interfacesFieldsMap.set(field.name, field))
-
-      type.fields.forEach((typeField) => {
-        const interfaceField = interfacesFieldsMap.get(typeField.name)
-        if (interfaceField) {
-          if (typeof interfaceField.type === 'string') {
-            if (typeof typeField.type !== 'string' || interfaceField.type !== typeField.type) {
-              throw new Error(`${typeField.name} field type of ${type.name} differs from the type of the same field in its interface.`)
+      type.fields.forEach((field) => {
+        if (typeof field.type !== 'string') {
+          if (field.type.innerRef) {
+            const refType = this._findNode(field.type.innerRef, typesMap)
+            if (!refType) {
+              throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} that cannot be resolved.`)
             }
-          } else if (interfaceField.type.embed) {
-            if (typeof typeField.type === 'string' || typeField.type.embed !== interfaceField.type.embed) {
-              throw new Error(`${typeField.name} field of ${type.name} can't override the mongo directive of its interface.`)
+            if (!refType.isEntity) {
+              throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} that isn't a mongoEntity.`)
             }
-          } else if (interfaceField.type.foreignRef || interfaceField.type.innerRef) {
-            if (typeof typeField.type === 'string' || typeField.type.foreignRef || typeField.type.innerRef) {
-              throw new Error(`${typeField.name} field of ${type.name} can't override the mongo directive of its interface.`)
-            } else {
-              typeField.type = interfaceField.type
+            if (field.type.refFrom) {
+              const refFromField = this._findField(type, field.type.refFrom, typesMap)
+              if (!refFromField) {
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refFrom ${field.type.refFrom} that cannot be resolved.`)
+              }
+            }
+            if (field.type.refTo) {
+              const refToField = this._findField(refType, field.type.refTo, typesMap)
+              if (!refToField) {
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refTo ${field.type.refTo} that cannot be resolved.`)
+              }
+            }
+          } else if (field.type.foreignRef) {
+            const refType = this._findNode(field.type.foreignRef, typesMap)
+            if (!refType) {
+              throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} that cannot be resolved.`)
+            }
+            if (field.type.refFrom) {
+              const refFromField = this._findField(refType, field.type.refFrom, typesMap)
+              if (!refFromField) {
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refFrom ${field.type.refFrom} that cannot be resolved.`)
+              }
+            }
+            if (field.type.refTo) {
+              const refToField = this._findField(type, field.type.refTo, typesMap)
+              if (!refToField) {
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refTo ${field.type.refTo} that cannot be resolved.`)
+              }
             }
           }
         }
@@ -163,52 +129,26 @@ export class TsMongooseGenerator {
     })
   }
 
-  protected _isEntity(node: TsMongooseGeneratorNode, interfacesMap: Map<String, TsMongooseGeneratorNode>): boolean {
-    let res = node.isEntity
-    if (!res) {
-      res = node.interfaces.filter((interf) => interfacesMap.get(interf)!.isEntity).length > 0
-    }
-    return res
+  protected _findID(node: TsMongooseGeneratorNode): TsMongooseGeneratorField | undefined {
+    return node.fields.find((field) => field.isID)
   }
 
-  protected _findID(node: TsMongooseGeneratorNode, interfacesMap: Map<String, TsMongooseGeneratorNode>): TsMongooseGeneratorField {
-    let res = node.fields.find((field) => field.isID)
-    if (!res) {
-      const ids = node.interfaces.map((interf) => interfacesMap.get(interf)).map((interf) => interf!.fields.find((field) => field.isID))
-      if (ids.length == 1) {
-        res = ids[0]
-      }
-    }
-    //@ts-ignore
-    return res
+  protected _findNode(code: string, typesMap: Map<String, TsMongooseGeneratorNode>): TsMongooseGeneratorNode | undefined {
+    return typesMap.get(code)
   }
 
-  protected _findNode(code: string, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): TsMongooseGeneratorNode {
-    let res = typesMap.get(code)
-    if (!res) {
-      res = interfacesMap.get(code)
-    }
-    //@ts-ignore
-    return res
-  }
-
-  protected _findField(
-    node: TsMongooseGeneratorNode,
-    fieldPath: string,
-    typesMap: Map<String, TsMongooseGeneratorNode>,
-    interfacesMap: Map<String, TsMongooseGeneratorNode>,
-    //@ts-ignore
-  ): TsMongooseGeneratorField {
+  protected _findField(node: TsMongooseGeneratorNode, fieldPath: string, typesMap: Map<String, TsMongooseGeneratorNode>): TsMongooseGeneratorField | undefined {
     const fieldPathSplitted = fieldPath.split('.')
-    if (fieldPathSplitted.length == 1) {
-      return node.fields.find((f) => f.name === fieldPathSplitted[0])!
+    if (fieldPathSplitted.length === 1) {
+      return node.fields.find((f) => f.name === fieldPathSplitted[0])
     } else {
       const key = fieldPathSplitted.shift()
-      const tmpField = node.fields.find((f) => f.name === key)!
-      if (typeof tmpField.type !== 'string' && tmpField.type.embed) {
-        const embeddedType = this._findNode(tmpField.type.embed, typesMap, interfacesMap)
-        return this._findField(embeddedType, fieldPathSplitted.join('.'), typesMap, interfacesMap)
+      const tmpField = node.fields.find((f) => f.name === key)
+      if (tmpField && typeof tmpField.type !== 'string' && tmpField.type.embed) {
+        const embeddedType = this._findNode(tmpField.type.embed, typesMap)
+        return embeddedType && this._findField(embeddedType, fieldPathSplitted.join('.'), typesMap)
       }
+      return tmpField
     }
   }
 }

@@ -9,24 +9,24 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     ]
   }
 
-  public generateDefinition(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
-    if (this._isEntity(node, interfacesMap)) {
-      const daoExluded = this._generateDAOExluded(node, typesMap, interfacesMap)
-      const daoFilter = this._generateDAOFilter(node, typesMap, interfacesMap)
-      const daoSort = this._generateDAOSort(node, typesMap, interfacesMap)
-      const daoUpdate = this._generateDAOUpdate(node, typesMap, interfacesMap)
-      const daoParams = this._generateDAOParams(node, typesMap, interfacesMap)
-      const dao = this._generateDAO(node, typesMap, interfacesMap)
+  public generateDefinition(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
+    if (node.isEntity) {
+      const daoExluded = this._generateDAOExludedFields(node)
+      const daoFilter = this._generateDAOFilter(node, typesMap)
+      const daoSort = this._generateDAOSort(node, typesMap)
+      const daoUpdate = this._generateDAOUpdate(node, typesMap)
+      const daoParams = this._generateDAOParams(node, typesMap)
+      const dao = this._generateDAO(node, typesMap)
       return [daoExluded, daoFilter, daoSort, daoUpdate, daoParams, dao].join('\n\n')
     } else {
       return ''
     }
   }
 
-  public generateExports(typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string[] {
+  public generateExports(typesMap: Map<String, TsMongooseGeneratorNode>): string[] {
     const contextDAOParamsDeclarations = Array.from(typesMap.values())
-      .concat(Array.from(interfacesMap.values()))
-      .filter((node) => this._isEntity(node, interfacesMap))
+      .concat([])
+      .filter((node) => node.isEntity)
       .map((node) => {
         return `${this._toFirstLower(node.name)}?: ${node.name}DAOParams`
       })
@@ -37,8 +37,8 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     )}\n};`
 
     const daoDeclarations = Array.from(typesMap.values())
-      .concat(Array.from(interfacesMap.values()))
-      .filter((node) => this._isEntity(node, interfacesMap))
+      .concat(Array.from(new Map().values()))
+      .filter((node) => node.isEntity)
       .map((node) => {
         return `private _${this._toFirstLower(node.name)}: ${node.name}DAO | undefined;`
       })
@@ -47,8 +47,8 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     const daoOverridesDeclaration = `private daoOverrides: DAOContextParams['daoOverrides'];\n` + `private connection: Connection | undefined`
 
     const daoGetters = Array.from(typesMap.values())
-      .concat(Array.from(interfacesMap.values()))
-      .filter((node) => this._isEntity(node, interfacesMap))
+      .concat(Array.from(new Map().values()))
+      .filter((node) => node.isEntity)
       .map((node) => {
         const daoInit = `this._${this._toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, ...this.daoOverrides?.${this._toFirstLower(node.name)} }, this.connection);`
         const daoGet = `if(!this._${this._toFirstLower(node.name)}) {\n${this.indentMultiline(daoInit)}\n}\nreturn this._${this._toFirstLower(node.name)}${false ? '.apiV1' : ''};`
@@ -69,7 +69,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
   //----------------------------------------------- FILTER --------------------------------------------------
   //---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOExluded(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
+  public _generateDAOExludedFields(node: TsMongooseGeneratorNode): string {
     const daoFilterFieldsBody = node.fields
       .filter((n) => n.isExcluded)
       .map((n) => `'${n.name}'`)
@@ -78,46 +78,43 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     return [daoExludedFields].join('\n')
   }
 
-  public _generateDAOFilter(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
-    const daoFilterFieldsBody = this.indentMultiline(this._generateDAOFilterFields(node, typesMap, interfacesMap).concat(['_?: any,']).join(',\n'))
+  public _generateDAOFilter(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
+    const daoFilterFieldsBody = this.indentMultiline(this._generateDAOFilterFields(node, typesMap).concat(['_?: any,']).join(',\n'))
     const daoFilterFields = `type ${node.name}FilterFields = {\n` + daoFilterFieldsBody + `\n};`
     const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields>;`
 
     return [daoFilterFields, daoFilter].join('\n')
   }
 
-  public _generateDAOFilterFields(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>, path: String = ''): string[] {
-    //@ts-ignore
-    return (
-      node.fields
-        .filter((field) => (typeof field.type == 'string' || field.type.embed) && !field.isExcluded)
-        .map((field) => {
-          let fieldName = path
-          if (typeof field.type == 'string') {
-            fieldName += field.name
-            const arrayOperators = field.isList ? `| ArrayOperators<${field.type}>` : ''
-            return [`'${fieldName}'?: ${field.type} | null | ComparisonOperators<${field.type}> | ElementOperators<${field.type}> | EvaluationOperators<${field.type}>` + arrayOperators]
-          } else if (field.type.embed) {
-            const embeddedType = this._findNode(field.type.embed, typesMap, interfacesMap)
-            return this._generateDAOFilterFields(embeddedType, typesMap, interfacesMap, path + field.name + '.')
-          }
-        })
-        //@ts-ignore
-        .reduce((a, c) => [...a, ...c], [])
-    )
+  public _generateDAOFilterFields(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: String = ''): string[] {
+    return node.fields
+      .filter((field) => (typeof field.type == 'string' || field.type.embed) && !field.isExcluded)
+      .map((field) => {
+        let fieldName = path
+        if (typeof field.type == 'string') {
+          fieldName += field.name
+          const arrayOperators = field.isList ? `| ArrayOperators<${field.type}>` : ''
+          return [`'${fieldName}'?: ${field.type} | null | ComparisonOperators<${field.type}> | ElementOperators<${field.type}> | EvaluationOperators<${field.type}>` + arrayOperators]
+        } else if (field.type.embed) {
+          const embeddedType = this._findNode(field.type.embed, typesMap)!
+          return this._generateDAOFilterFields(embeddedType, typesMap, path + field.name + '.')
+        }
+        return [] //TODO ??
+      })
+      .reduce((a, c) => [...a, ...c], [])
   }
 
   //---------------------------------------------------------------------------------------------------------
   //------------------------------------------------ SORT ---------------------------------------------------
   //---------------------------------------------------------------------------------------------------------
-  public _generateDAOSort(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
-    const daoSortFields = this.indentMultiline(this._generateDAOSortFields(node, typesMap, interfacesMap).join('|\n'))
+  public _generateDAOSort(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
+    const daoSortFields = this.indentMultiline(this._generateDAOSortFields(node, typesMap).join('|\n'))
     const daoSortKeys = `export type ${node.name}SortKeys = \n${daoSortFields};`
     const daoSort = `export type ${node.name}Sort = OneKey<${node.name}SortKeys, SortDirection> | OneKey<${node.name}SortKeys, SortDirection>[] | { sorts?: OneKey<${node.name}SortKeys, SortDirection>[],  _?: any };`
     return `${daoSortKeys}\n${daoSort}`
   }
 
-  public _generateDAOSortFields(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>, path: String = ''): string[] {
+  public _generateDAOSortFields(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: String = ''): string[] {
     //@ts-ignore
     return node.fields
       .filter((field) => (typeof field.type == 'string' || field.type.embed) && !field.isExcluded)
@@ -127,9 +124,10 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
           fieldName += field.name
           return [`'${fieldName}'`]
         } else if (field.type.embed) {
-          const embeddedType = this._findNode(field.type.embed, typesMap, interfacesMap)
-          return this._generateDAOSortFields(embeddedType, typesMap, interfacesMap, path + field.name + '.')
+          const embeddedType = this._findNode(field.type.embed, typesMap)!
+          return this._generateDAOSortFields(embeddedType, typesMap, path + field.name + '.')
         }
+        return [] //TODO ??
       })
       .reduce((a, c) => [...a, ...c], [])
   }
@@ -138,14 +136,14 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
   //----------------------------------------------- UPDATE --------------------------------------------------
   //---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOUpdate(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
-    const daoUpdateFieldsBody = this.indentMultiline(this._generateDAOUpdateFields(node, typesMap, interfacesMap).concat(['_?: any,']).join(',\n'))
+  public _generateDAOUpdate(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
+    const daoUpdateFieldsBody = this.indentMultiline(this._generateDAOUpdateFields(node, typesMap).concat(['_?: any,']).join(',\n'))
     const daoUpdate = `export type ${node.name}Update = {\n` + daoUpdateFieldsBody + `\n};`
 
     return daoUpdate
   }
 
-  public _generateDAOUpdateFields(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>, path: String = ''): string[] {
+  public _generateDAOUpdateFields(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: String = ''): string[] {
     //@ts-ignore
     return node.fields
       .filter((field) => (typeof field.type == 'string' || field.type.embed) && !field.isExcluded)
@@ -155,10 +153,11 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
           const fieldType = field.isList ? `Array<${field.type}>` : field.type
           return [`'${fieldName}'?: ${fieldType}${field.required ? '' : ' | null'}`]
         } else if (field.type.embed) {
-          const embeddedType = this._findNode(field.type.embed, typesMap, interfacesMap)
+          const embeddedType = this._findNode(field.type.embed, typesMap)!
           const fieldType = field.isList ? `Array<types.${embeddedType.name}>` : `types.${embeddedType.name}`
-          return [`'${fieldName}'?: ${fieldType}${field.required ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, interfacesMap, path + field.name + '.')]
+          return [`'${fieldName}'?: ${fieldType}${field.required ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, path + field.name + '.')]
         }
+        return [] //TODO ??
       })
       .reduce((a, c) => [...a, ...c], [])
   }
@@ -167,8 +166,8 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
   //----------------------------------------------- PARAMS --------------------------------------------------
   //---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOParams(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
-    const idField = this._findID(node, interfacesMap)
+  public _generateDAOParams(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
+    const idField = this._findID(node)!
     const daoParams = `export interface ${node.name}DAOParams extends DAOParams<types.${node.name}, '${idField.name}', ${idField.isAutogenerated}, ${node.name}Filter, ${node.name}Update, ${node.name}ExcludedFields, ${node.name}Sort, { mongoose?: any }>{}`
     return daoParams
   }
@@ -177,8 +176,8 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
   //------------------------------------------------ DAO ----------------------------------------------------
   //---------------------------------------------------------------------------------------------------------
 
-  public _generateDAO(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
-    const idField = this._findID(node, interfacesMap)
+  public _generateDAO(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
+    const idField = this._findID(node)!
     let abstractClassName
     let autoGeneratedParam
 
@@ -197,7 +196,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
         throw `Subclass not supported: ${node.name}`
       }
     }
-    daoBody += '\n' + this._generateConstructorMethod(node, typesMap, interfacesMap) + '\n'
+    daoBody += '\n' + this._generateConstructorMethod(node, typesMap) + '\n'
     daoBody = this.indentMultiline(daoBody)
 
     return (
@@ -207,74 +206,35 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     )
   }
 
-  private _generateConstructorMethod(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>): string {
-    let constructorBody = ''
-    const idField = this._findID(node, interfacesMap)
-    const nodeName = this._findEntityNode(node, interfacesMap).name
-    const dbModel = `connection ? connection.model<Document>('${nodeName}', ${nodeName}Schema) : model<Document>('${nodeName}', ${nodeName}Schema)`
-    const generatedAssociations = `[\n${this.indentMultiline(this._generateAssociations(node, typesMap, interfacesMap).join(',\n'))}\n]`
+  private _generateConstructorMethod(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
+    const idField = this._findID(node)!
+    const dbModel = `connection ? connection.model<Document>('${node.name}', ${node.name}Schema) : model<Document>('${node.name}', ${node.name}Schema)`
+    const generatedAssociations = `[\n${this.indentMultiline(this._generateAssociations(node, typesMap).join(',\n'))}\n]`
     const associations = `associations: overrideAssociations(\n${this.indentMultiline(`${generatedAssociations}`)}\n),`
-    if (node.type === 'interface') {
-      // INTERFACE
-      const superclassConstructorBody = this._generateSuperClassConstructorBody(node, typesMap, interfacesMap)
-      constructorBody += `super({ ${this.indentMultiline(`\ndbModel: ${dbModel}, \nidField: '${idField.name}', \n${superclassConstructorBody}, \n...params, \n${associations}`)} \n});`
-    } else if (node.type === 'type') {
-      if (node.isEntity) {
-        // SIMPLE ENTITY
-        constructorBody += `super({ ${this.indentMultiline(`\ndbModel: ${dbModel}, \nidField: '${idField.name}', \n...params, \n${associations}`)} \n});`
-      } else {
-        // SUBCLASS
-        const subclassConstructorBody = this._generateSubClassConstructorBody(node, interfacesMap)
-        constructorBody += `super({ ${this.indentMultiline(`\ndbModel: ${dbModel}, \nidField: '${idField.name}',\n${subclassConstructorBody}, \n...params, \n${associations}`)} \n});`
-      }
-    }
+    // SIMPLE ENTITY
+    const constructorBody = `super({ ${this.indentMultiline(`\ndbModel: ${dbModel}, \nidField: '${idField.name}', \n...params, \n${associations}`)} \n});`
     return `public constructor(params: { daoContext: AbstractDAOContext } & ${node.name}DAOParams, connection?: Connection){\n` + this.indentMultiline(constructorBody) + '\n}'
   }
 
-  private _generateAssociations(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, interfacesMap: Map<String, TsMongooseGeneratorNode>, path: string = ''): string[] {
+  private _generateAssociations(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: string = ''): string[] {
     //@ts-ignore
     let associations = []
     //@ts-ignore
     associations = associations.concat(
       node.fields
         .map((field) => {
-          let prefix = ''
-          if (node.interfaces && node.interfaces.length > 0 && !this._isInheritedField(field, node, interfacesMap)) {
-            prefix = this._toFirstLower(node.name) + '.'
-          }
-          const association = this._generateAssociation(field, node, typesMap, interfacesMap, prefix + path)
-          return this._generateAssociation(field, node, typesMap, interfacesMap, prefix + path)
+          return this._generateAssociation(field, node, typesMap, path)
         })
         .reduce((a, c) => [...a, ...c], []),
     )
-
-    if (node.type === 'interface') {
-      const subtypes = Array.from(typesMap.values()).filter((type) => type.interfaces.includes(node.name))
-      subtypes.forEach((subtype) => {
-        //@ts-ignore
-        associations = associations.concat(
-          this._findSubTypeFields(subtype, interfacesMap)
-            .map((field) => {
-              return this._generateAssociation(field, node, typesMap, interfacesMap, this._toFirstLower(subtype.name) + '.' + path)
-            })
-            .reduce((a, c) => [...a, ...c], []),
-        )
-      })
-    }
     return associations
   }
 
-  private _generateAssociation(
-    field: TsMongooseGeneratorField,
-    node: TsMongooseGeneratorNode,
-    typesMap: Map<String, TsMongooseGeneratorNode>,
-    interfacesMap: Map<String, TsMongooseGeneratorNode>,
-    path: string = '',
-  ): string[] {
+  private _generateAssociation(field: TsMongooseGeneratorField, node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: string = ''): string[] {
     if (typeof field.type !== 'string') {
       if (field.type.innerRef) {
-        const linkedType = this._findNode(field.type.innerRef, typesMap, interfacesMap)
-        const linkedTypeIdField = this._findID(linkedType, interfacesMap)
+        const linkedType = this._findNode(field.type.innerRef, typesMap)!
+        const linkedTypeIdField = this._findID(linkedType)!
         const type = field.isList ? 'DAOAssociationType.ONE_TO_MANY' : 'DAOAssociationType.ONE_TO_ONE'
         const reference = 'DAOAssociationReference.INNER'
         const refField = path + field.name
@@ -283,7 +243,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
         const dao = this._toFirstLower(field.type.innerRef)
         return [`{ type: ${type}, reference: ${reference}, field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}' }`]
       } else if (field.type.foreignRef) {
-        const idField = this._findID(node, interfacesMap)
+        const idField = this._findID(node)!
         const type = field.isList ? 'DAOAssociationType.ONE_TO_MANY' : 'DAOAssociationType.ONE_TO_ONE'
         const reference = 'DAOAssociationReference.FOREIGN'
         const refField = path + field.name
@@ -292,8 +252,8 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
         const dao = this._toFirstLower(field.type.foreignRef)
         return [`{ type: ${type}, reference: ${reference}, field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}' }`]
       } else if (field.type.embed) {
-        const embeddedType = this._findNode(field.type.embed, typesMap, interfacesMap)
-        return this._generateAssociations(embeddedType, typesMap, interfacesMap, path + field.name + '.')
+        const embeddedType = this._findNode(field.type.embed, typesMap)!
+        return this._generateAssociations(embeddedType, typesMap, path + field.name + '.')
       }
     }
     return []

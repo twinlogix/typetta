@@ -150,24 +150,18 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptMongoosePluginConfi
     return resFields
   }
 
-  _InterfaceOrTypeDefinition(node: InterfaceTypeDefinitionNode | ObjectTypeDefinitionNode): TsMongooseGeneratorNode {
+  ObjectTypeDefinition(node: ObjectTypeDefinitionNode): TsMongooseGeneratorNode {
     const plainName = this.convertName(node, { useTypesPrefix: false })
     const prefixedName = this.convertName(node)
 
     const entityDirective = this._getDirectiveFromAstNode(node, Directives.ENTITY)
 
-    let collection
-    if (entityDirective) {
-      collection = this._getDirectiveArgValue<string>(entityDirective, 'collection')
-    }
-    if (!collection) {
-      collection = this._toFirstLower(plainName) + 's'
-    }
+    const collection = (entityDirective && this._getDirectiveArgValue<string>(entityDirective, 'collection')) || this._toFirstLower(plainName) + 's'
 
     const fields = this._buildFields(node.fields!)
 
     return {
-      type: undefined,
+      type: 'type',
       code: plainName,
       name: plainName,
       prefixedName: prefixedName,
@@ -176,15 +170,5 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptMongoosePluginConfi
       interfaces: [],
       fields: fields,
     }
-  }
-
-  InterfaceTypeDefinition(node: InterfaceTypeDefinitionNode): TsMongooseGeneratorNode {
-    return { ...this._InterfaceOrTypeDefinition(node), type: 'interface' }
-  }
-
-  ObjectTypeDefinition(node: ObjectTypeDefinitionNode): TsMongooseGeneratorNode {
-    const definition = this._InterfaceOrTypeDefinition(node)
-    const interfaces = node.interfaces!.map((i) => i.name.value)
-    return { ...definition, interfaces, type: 'type' }
   }
 }

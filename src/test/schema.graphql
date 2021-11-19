@@ -15,7 +15,7 @@ type City @mongoEntity {
   computedAddressName: String @mongoExclude
 }
 
-type Address @mongoEntity {
+type Address @mongoEntity(collection: "addresses") {
   id: ID! @id
   cities: [City!] @mongoForeignRef(refFrom: "addressId")
 }

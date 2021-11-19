@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --detectOpenHandles",
-    "generate": "graphql-codegen --config src/test/generator/codegen.yml"
+    "generate": "graphql-codegen --config src/test/codegen.yml"
   },
   "repository": {
     "type": "git",
