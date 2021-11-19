@@ -3,7 +3,7 @@ import { MockMongoose } from 'mock-mongoose'
 import { DAOContext, UserFilter } from './dao.mock'
 import { Maybe, User } from './models.mock'
 import BigNumber from 'bignumber.js'
-import { projection, SortDirection,  Projection, StaticProjection,  buildComputedField, projectionDependency } from '@twinlogix/typetta'
+import { projection, SortDirection, Projection, StaticProjection, buildComputedField, projectionDependency } from '@twinlogix/typetta'
 import { Test, typeAssert } from './utils.test'
 import { PartialDeep } from 'type-fest'
 

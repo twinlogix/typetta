@@ -16,7 +16,7 @@ export abstract class TsMongooseAbstractGenerator {
     return typeName.charAt(0).toLowerCase() + typeName.slice(1)
   }
 
-  protected _resolveObjectId(pointer: string | null | undefined): { identifier: string; module: string } {
+  protected _resolveObjectId(pointer: string | null | undefined): { identifier: string; module: string | null } {
     if (!pointer) {
       return { identifier: 'ObjectID', module: 'mongodb' }
     }
@@ -24,7 +24,6 @@ export abstract class TsMongooseAbstractGenerator {
       const [path, module] = pointer.split('#')
       return { identifier: path, module }
     }
-    //@ts-ignore
     return { identifier: pointer, module: null }
   }
 

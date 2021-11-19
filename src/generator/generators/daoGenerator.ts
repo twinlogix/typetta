@@ -115,7 +115,6 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
   }
 
   public _generateDAOSortFields(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: String = ''): string[] {
-    //@ts-ignore
     return node.fields
       .filter((field) => (typeof field.type == 'string' || field.type.embed) && !field.isExcluded)
       .map((field) => {
@@ -144,7 +143,6 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
   }
 
   public _generateDAOUpdateFields(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: String = ''): string[] {
-    //@ts-ignore
     return node.fields
       .filter((field) => (typeof field.type == 'string' || field.type.embed) && !field.isExcluded)
       .map((field) => {
@@ -217,17 +215,11 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
   }
 
   private _generateAssociations(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: string = ''): string[] {
-    //@ts-ignore
-    let associations = []
-    //@ts-ignore
-    associations = associations.concat(
-      node.fields
-        .map((field) => {
-          return this._generateAssociation(field, node, typesMap, path)
-        })
-        .reduce((a, c) => [...a, ...c], []),
-    )
-    return associations
+    return node.fields
+      .map((field) => {
+        return this._generateAssociation(field, node, typesMap, path)
+      })
+      .reduce((a, c) => [...a, ...c], [])
   }
 
   private _generateAssociation(field: TsMongooseGeneratorField, node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>, path: string = ''): string[] {

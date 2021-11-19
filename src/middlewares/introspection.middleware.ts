@@ -1,114 +1,115 @@
-import { createHash } from 'crypto';
-import { NextFunction, Request, Response } from 'express';
-import LRU from 'lru-cache';
+import { createHash } from 'crypto'
+import { NextFunction, Request, Response } from 'express'
+import LRU from 'lru-cache'
 
 interface IntrospectionResponse {
-    data: {
-        __schema: {
-            queryType?: {
-                name: string;
-            };
-            mutationType?: {
-                name: string;
-            };
-            types: {
-                kind: string;
-                name: string;
-                fields:
-                    | {
-                    name: string;
-                }[]
-                    | null;
-                inputFields:
-                    | {
-                    name: string;
-                }[]
-                    | null;
-            }[];
-        };
-    };
+  data: {
+    __schema: {
+      queryType?: {
+        name: string
+      }
+      mutationType?: {
+        name: string
+      }
+      types: {
+        kind: string
+        name: string
+        fields:
+          | {
+              name: string
+            }[]
+          | null
+        inputFields:
+          | {
+              name: string
+            }[]
+          | null
+      }[]
+    }
+  }
 }
 
 export type BlacklistEntry = {
-    type: string;
-    field: string;
-};
-
-export type Blacklist = BlacklistEntry[];
-
-export function withBlacklist(blacklist: Blacklist, response: unknown): IntrospectionResponse {
-    const responseTyped = response as IntrospectionResponse;
-
-    return {
-        ...responseTyped,
-        data: {
-            ...responseTyped.data,
-            __schema: {
-                ...responseTyped.data.__schema,
-                types: responseTyped.data.__schema.types.reduce((prev, type) => {
-                    if(type.fields) {
-                        const fields = type.fields.filter(field => {
-                            return !blacklist.find(b => b.type === type.name && b.field === field.name)
-                        }) || [];
-
-                        return [
-                            ...prev,
-                            {
-                                ...type,
-                                fields,
-                            }
-                        ];
-                    } else {
-                        return [...prev, type];
-                    }
-                }, [] as IntrospectionResponse['data']['__schema']['types']),
-            },
-        },
-    };
+  type: string
+  field: string
 }
 
-export function introspectionMiddleware(blacklist: Blacklist)  {
-    const cache = new LRU<string, IntrospectionResponse>(10);
+export type Blacklist = BlacklistEntry[]
 
-    return function blacklistMiddleware(req: Request, res: Response, next: NextFunction) {
-        const isIntrospection = req.body.operationName === 'IntrospectionQuery';
+export function withBlacklist(blacklist: Blacklist, response: unknown): IntrospectionResponse {
+  const responseTyped = response as IntrospectionResponse
 
-        if (!isIntrospection) {
-            next();
-            return;
-        }
+  return {
+    ...responseTyped,
+    data: {
+      ...responseTyped.data,
+      __schema: {
+        ...responseTyped.data.__schema,
+        types: responseTyped.data.__schema.types.reduce((prev, type) => {
+          if (type.fields) {
+            const fields =
+              type.fields.filter((field) => {
+                return !blacklist.find((b) => b.type === type.name && b.field === field.name)
+              }) || []
 
-        const { send } = res;
+            return [
+              ...prev,
+              {
+                ...type,
+                fields,
+              },
+            ]
+          } else {
+            return [...prev, type]
+          }
+        }, [] as IntrospectionResponse['data']['__schema']['types']),
+      },
+    },
+  }
+}
 
-        // Prevent infinite recursion
-        let sent = false;
+export function introspectionMiddleware(blacklist: Blacklist) {
+  const cache = new LRU<string, IntrospectionResponse>(10)
 
-        res.send = function sendWithBlacklist(bodyRaw: string): Response {
-            if (sent) {
-                send.call(this, bodyRaw);
-                return res;
-            }
+  return function blacklistMiddleware(req: Request, res: Response, next: NextFunction) {
+    const isIntrospection = req.body.operationName === 'IntrospectionQuery'
 
-            const hash = createHash('sha256').update(JSON.stringify(req.body)).digest('hex');
-            const cached = cache.get(hash);
+    if (!isIntrospection) {
+      next()
+      return
+    }
 
-            if (cached !== undefined) {
-                sent = true;
-                send.call(this, cached);
-                return res;
-            }
+    const { send } = res
 
-            const body: IntrospectionResponse = JSON.parse(bodyRaw);
-            const result = withBlacklist(blacklist, body);
+    // Prevent infinite recursion
+    let sent = false
 
-            cache.set(hash, result);
-            sent = true;
+    res.send = function sendWithBlacklist(bodyRaw: string): Response {
+      if (sent) {
+        send.call(this, bodyRaw)
+        return res
+      }
 
-            send.call(this, result);
+      const hash = createHash('sha256').update(JSON.stringify(req.body)).digest('hex')
+      const cached = cache.get(hash)
 
-            return res;
-        };
+      if (cached !== undefined) {
+        sent = true
+        send.call(this, cached)
+        return res
+      }
 
-        next();
-    };
+      const body: IntrospectionResponse = JSON.parse(bodyRaw)
+      const result = withBlacklist(blacklist, body)
+
+      cache.set(hash, result)
+      sent = true
+
+      send.call(this, result)
+
+      return res
+    }
+
+    next()
+  }
 }

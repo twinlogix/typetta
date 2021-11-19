@@ -65,10 +65,20 @@ export class TsMongooseGenerator {
   }
 
   private _generateTitle(node: TsMongooseGeneratorNode): string {
-    let comment = '//' + '-'.repeat(80) + '\n'
-    comment += '//' + '-'.repeat((80 - node.name.length - ((node.name.length % 2) + 1)) / 2) + ' ' + node.name.toUpperCase() + ' ' + '-'.repeat((80 - node.name.length - 1) / 2) + '\n'
-    comment += '//' + '-'.repeat(80)
-    return comment
+    return (
+      '//' +
+      '-'.repeat(80) +
+      '\n' +
+      '//' +
+      '-'.repeat((80 - node.name.length - ((node.name.length % 2) + 1)) / 2) +
+      ' ' +
+      node.name.toUpperCase() +
+      ' ' +
+      '-'.repeat((80 - node.name.length - 1) / 2) +
+      '\n' +
+      '//' +
+      '-'.repeat(80)
+    )
   }
 
   private checkIds(typesMap: Map<String, TsMongooseGeneratorNode>) {

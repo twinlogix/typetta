@@ -4,7 +4,7 @@ export type DeepReadonly<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>
 }
 
-export type AnyProjection<ModelType> = true | StaticProjection<ModelType> | undefined | Projection<ModelType> 
+export type AnyProjection<ModelType> = true | StaticProjection<ModelType> | undefined | Projection<ModelType>
 
 /**
  * Generic definition of projection.
@@ -45,18 +45,22 @@ export type MergeGenericProjection<T1 extends GenericProjection, T2 extends Gene
   ? T2
   : T2 extends false
   ? T1
-  : Expand<
-      {
-        [K in keyof T1 | keyof T2]: T1 extends Record<K, any> ? (T2 extends Record<K, any> ? MergeGenericProjection<T1[K], T2[K]> : T1[K]) : T2 extends Record<K, any> ? T2[K] : never
-      }
-    >
+  : Expand<{
+      [K in keyof T1 | keyof T2]: T1 extends Record<K, any> ? (T2 extends Record<K, any> ? MergeGenericProjection<T1[K], T2[K]> : T1[K]) : T2 extends Record<K, any> ? T2[K] : never
+    }>
 
 /**
  * Given a model M and a projection P returns the mapepd model to the projection.
  * If a StaticProjection was given the projection information is carried at compilation time by this type.
  * It is used as return type in all the finds operations.
  */
-export type ModelProjection<M, P extends StaticProjection<M> | Projection<M> | true | undefined> = P extends true ? M & { __projection: 'all' } : P extends undefined ? M & { __projection: 'all' } : P extends StaticProjection<M> ? Expand<StaticModelProjection<M, P>> : PartialDeep<M> & { __projection: 'unknown' }
+export type ModelProjection<M, P extends StaticProjection<M> | Projection<M> | true | undefined> = P extends true
+  ? M & { __projection: 'all' }
+  : P extends undefined
+  ? M & { __projection: 'all' }
+  : P extends StaticProjection<M>
+  ? Expand<StaticModelProjection<M, P>>
+  : PartialDeep<M> & { __projection: 'unknown' }
 
 /**
  * Given a model M and a StaticProjection P returns the mapepd model to the projection.
@@ -80,11 +84,9 @@ type StaticModelProjection<M, P extends StaticProjection<M>> = M extends null
     : never
   : M extends object
   ? Expand<
-      OmitUndefinedAndNeverKeys<
-        {
-          [K in keyof M]: P extends Record<K, true> ? M[K] : P extends Record<K, StaticProjection<M[K]>> ? StaticModelProjection<M[K], P[K]> : never
-        }
-      >
+      OmitUndefinedAndNeverKeys<{
+        [K in keyof M]: P extends Record<K, true> ? M[K] : P extends Record<K, StaticProjection<M[K]>> ? StaticModelProjection<M[K], P[K]> : never
+      }>
     > & { __projection: P }
   : never
 
@@ -104,11 +106,9 @@ type StaticModelProjectionParam<M, P extends StaticProjection<M>> = M extends nu
     : never
   : M extends object
   ? Expand<
-      OmitUndefinedAndNeverKeys<
-        {
-          [K in keyof M]: P extends Record<K, true> ? M[K] : P extends Record<K, StaticProjection<M[K]>> ? StaticModelProjectionParam<M[K], P[K]> : never
-        }
-      >
+      OmitUndefinedAndNeverKeys<{
+        [K in keyof M]: P extends Record<K, true> ? M[K] : P extends Record<K, StaticProjection<M[K]>> ? StaticModelProjectionParam<M[K], P[K]> : never
+      }>
     > & { __projection?: P }
   : never
 
