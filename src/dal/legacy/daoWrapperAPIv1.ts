@@ -1,6 +1,6 @@
-import { AnyProjection, ModelProjection } from '../../utils/types'
 import { ConditionalPartialBy } from '../../utils/utils'
-import { AbstractDAO } from '../dao/dao.abstracts'
+import { AbstractDAO } from '../dao/dao'
+import { AnyProjection, ModelProjection } from '../dao/projections/projections.types'
 
 export class DAOWrapperAPIv1<
   ModelType,

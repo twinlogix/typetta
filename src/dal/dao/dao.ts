@@ -3,27 +3,13 @@ import objectHash from 'object-hash'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { PartialDeep } from 'type-fest'
 import { deepCopy, deepMerge, getTraversing, setTraversing } from '@twinlogix/tl-commons'
-import { Projection, ModelProjection, GenericProjection, AnyProjection } from '../../utils/types'
-import { getProjection } from '../../utils/projection'
 import _ from 'lodash'
 import { DAOWrapperAPIv1 } from '../legacy/daoWrapperAPIv1'
-import {
-  DAO,
-  DAOAssociation,
-  DAOMiddleware,
-  DAOResolver,
-  DAOParams,
-  FindParams,
-  FindOneParams,
-  FilterParams,
-  DAOAssociationReference,
-  DAOAssociationType,
-  InsertParams,
-  UpdateParams,
-  ReplaceParams,
-  DeleteParams,
-  ReferenceChecksResponse,
-} from './dao.types'
+import { DAO, DAOParams, DAOResolver, DeleteParams, FilterParams, FindOneParams, FindParams, InsertParams, ReferenceChecksResponse, ReplaceParams, UpdateParams } from './dao.types'
+import { DAOAssociation, DAOAssociationReference, DAOAssociationType } from './associations/associations.types'
+import { DAOMiddleware } from './middlewares/middlewares.types'
+import { AnyProjection, GenericProjection, ModelProjection, Projection } from './projections/projections.types'
+import { getProjection } from './projections/projections.utils'
 
 export abstract class AbstractDAO<
   ModelType,

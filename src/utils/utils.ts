@@ -1,24 +1,11 @@
 import { Schema } from 'mongoose'
 import { Request, Response } from 'express'
 import { AbstractDAOContext } from '../dal/daoContext/daoContext'
-import { ComparisonOperators, ElementOperators, EvaluationOperators, SortDirection, DAOAssociation } from '../dal/dao/dao.types'
 import { setTraversing } from '@twinlogix/tl-commons'
-import { Projection } from './types'
 import _ from 'lodash'
-
-export type GraphQLContext<DAOContext extends AbstractDAOContext, SecureDAOContext extends AbstractDAOContext> = {
-  request: Request
-  response: Response
-  dao: DAOContext
-  secureDao: SecureDAOContext
-}
-
-export type RequestArgs<Filter, Sort> = {
-  start?: number
-  limit?: number
-  filter?: Filter
-  sorts?: Sort[]
-}
+import { SortDirection } from '../dal/dao/sorts/sorts.types'
+import { Projection } from '../dal/dao/projections/projections.types'
+import { ComparisonOperators, ElementOperators, EvaluationOperators } from '../dal/dao/filters/filters.types'
 
 export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T
 
@@ -26,24 +13,7 @@ export type OneKey<K extends string, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
 }[K]
 
-export function overrideAssociations(associations1: DAOAssociation[] = [], associations2: DAOAssociation[] = []): DAOAssociation[] {
-  return [...associations2, ...associations1.filter((association1) => !associations2.find((association2) => association1.field === association2.field))]
-}
 
-export function addAssociationRefToProjection(associationFieldPath: string, refPath: string, projections: any, originalProjections: any = projections) {
-  const associationFieldPathSplitted = associationFieldPath.split('.')
-  if (associationFieldPathSplitted.length === 1) {
-    if (projections[associationFieldPathSplitted[0]]) {
-      setTraversing(originalProjections, refPath, true)
-    }
-  } else {
-    if (projections[associationFieldPathSplitted[0]] === true) {
-      setTraversing(originalProjections, refPath, true)
-    } else if (typeof projections[associationFieldPathSplitted[0]] === 'object') {
-      addAssociationRefToProjection(associationFieldPathSplitted.slice(1).join('.'), refPath, projections[associationFieldPathSplitted[0]], originalProjections)
-    }
-  }
-}
 
 export function flattenSorts<SortInput extends { [key: string]: SortDirection | null | undefined }, SortKey extends string>(
   sorts?: SortInput[],
