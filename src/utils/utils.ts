@@ -1,9 +1,8 @@
 import { Schema } from 'mongoose'
 import { Request, Response } from 'express'
-import { AbstractDAOContext } from '../dal/daoContext'
-import { ComparisonOperators, ElementOperators, EvaluationOperators, SortDirection } from '..'
+import { AbstractDAOContext } from '../dal/daoContext/daoContext'
+import { ComparisonOperators, ElementOperators, EvaluationOperators, SortDirection, DAOAssociation } from '../dal/dao/dao.types'
 import { setTraversing } from '@twinlogix/tl-commons'
-import { DAOAssociation } from '../dal/dao'
 import { Projection } from './types'
 import _ from 'lodash'
 
@@ -99,7 +98,7 @@ export function hasFieldFilter<
   FieldType,
   FieldName extends string,
   Filter extends { [P in FieldName]?: FieldType | null | ComparisonOperators<FieldType> | ElementOperators<FieldType> | EvaluationOperators<FieldType> },
->(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
+  >(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
   return (
     (id &&
       conditions[fieldName] &&
