@@ -1,23 +1,19 @@
 import BigNumber from "bignumber.js";
-import {Coordinates} from "@twinlogix/tl-commons";
-import {LocalizedString} from "@twinlogix/tl-commons";
+import { Coordinates } from "@twinlogix/tl-commons";
+import { LocalizedString } from "@twinlogix/tl-commons";
 import { Schema, model, Connection } from 'mongoose';
-import { PointSchema } from "../dal/mongoose/point";
-(Schema.Types as any).PointSchema = PointSchema;
-import { LocalizedStringSchema } from "../dal/mongoose/localizedString";
-(Schema.Types as any).LocalizedStringSchema = LocalizedStringSchema;
 import * as types from './models.mock';
 import { v4 } from 'uuid';
 import { Model, Document, Types } from 'mongoose';
 import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongooseDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 
 //--------------------------------------------------------------------------------
-//----------------------------------- ADDRESS ------------------------------------
-//--------------------------------------------------------------------------------
+//-----------------------------------  ADDRESS ------------------------------------
+//----------------------------------- ---------------------------------------------
 
-export const AddressSchema : Schema = new Schema({
+export const AddressSchema: Schema = new Schema({
   id: { type: String, required: true, default: v4 },
-}, {collection: 'addresses'});
+}, { collection: 'addresses' });
 
 export type AddressExcludedFields = never
 
@@ -27,45 +23,45 @@ type AddressFilterFields = {
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
 
-export type AddressSortKeys = 
+export type AddressSortKeys =
   'id';
-export type AddressSort = OneKey<AddressSortKeys, SortDirection> | OneKey<AddressSortKeys, SortDirection>[] | { sorts?: OneKey<AddressSortKeys, SortDirection>[],  _?: any };
+export type AddressSort = OneKey<AddressSortKeys, SortDirection> | OneKey<AddressSortKeys, SortDirection>[]  { sorts ?: OneKey < AddressSortKeys, SortDirection > [], _ ?: any };
 
 export type AddressUpdate = {
   'id'?: string,
   _?: any,
 };
 
-export interface AddressDAOParams extends DAOParams<types.Address, 'id', true, AddressFilter, AddressUpdate, AddressExcludedFields, AddressSort, { mongoose?: any } & { test: string }>{}
+export interface AddressDAOParams extends DAOParams<types.Address, 'id', true, AddressFilter, AddressUpdate, AddressExcludedFields, AddressSort, { mongoose?: any } & { test: string }> { }
 
 export class AddressDAO extends AbstractMongooseDAO<types.Address, 'id', true, AddressFilter, AddressSort, AddressUpdate, AddressExcludedFields, { mongoose?: any } & { test: string }> {
-  
-  public constructor(params: { daoContext: AbstractDAOContext } & AddressDAOParams, connection?: Connection){
-    super({   
-      dbModel: connection ? connection.model<Document>('Address', AddressSchema) : model<Document>('Address', AddressSchema), 
-      idField: 'id', 
-      ...params, 
+
+  public constructor(params: { daoContext: AbstractDAOContext } & AddressDAOParams, connection?: Connection) {
+    ser({
+      dbModel: connection ? connection.model<Document>('Address', AddressSchema) : model<Document>('Address', AddrSchema),
+      idField: 'id',
+      ...params,
       associations: overrideAssociations(
         [
-          { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
+          { type: DAOAssciationType.ONE_TO_MAY, reference: DAOssociationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
         ]
-      ), 
+      ),
     });
   }
-  
+
 }
 
 
 
 //--------------------------------------------------------------------------------
-//------------------------------------- CITY -------------------------------------
-//--------------------------------------------------------------------------------
+//-------------------------------- -- CITY -------------------------------------
+//----------------------------------- ---------------------------------------------
 
-export const CitySchema : Schema = new Schema({
+export const CitySchema: Schema = n ew Schema({
   id: { type: String, required: true, default: v4 },
   name: { type: String, required: true },
   addressId: { type: String, required: true },
-}, {collection: 'citys'});
+}, { collection: 'citys' });
 
 export type CityExcludedFields = 'computedName' | 'computedAddressName'
 
@@ -77,11 +73,11 @@ type CityFilterFields = {
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 
-export type CitySortKeys = 
-  'id'|
-  'name'|
+export type CitySortKeys =
+  'id' |
+  'name' |
   'addressId';
-export type CitySort = OneKey<CitySortKeys, SortDirection> | OneKey<CitySortKeys, SortDirection>[] | { sorts?: OneKey<CitySortKeys, SortDirection>[],  _?: any };
+export type CitySort = OneKey<CitySortKeys, SortDirection> | OneKey<CitySortKeys, SrtDirection>[] | { sorts?: OneKey<CitySortKeys, SortDirection>[], _?: any };
 
 export type CityUpdate = {
   'id'?: string,
@@ -90,45 +86,44 @@ export type CityUpdate = {
   _?: any,
 };
 
-export interface CityDAOParams extends DAOParams<types.City, 'id', true, CityFilter, CityUpdate, CityExcludedFields, CitySort, { mongoose?: any } & { test: string }>{}
+export interface CityDAOParams extends DAOParams<types.City, 'id', true, CityFilter, CityUpdate, CityExcludedFields, CitySort, { mongoose?: any } & { test: string }> { }
 
 export class CityDAO extends AbstractMongooseDAO<types.City, 'id', true, CityFilter, CitySort, CityUpdate, CityExcludedFields, { mongoose?: any } & { test: string }> {
-  
-  public constructor(params: { daoContext: AbstractDAOContext } & CityDAOParams, connection?: Connection){
-    super({   
-      dbModel: connection ? connection.model<Document>('City', CitySchema) : model<Document>('City', CitySchema), 
-      idField: 'id', 
-      ...params, 
-      associations: overrideAssociations(
-        [
-          
-        ]
-      ), 
+
+  public constructor(params: { daoContext: AbstractDAOContext } & CityDAOParams, connection?: Connection) {
+    supe{
+      dbModel: connection ? connection.model<Document>('City', CitySchema) : model<Document>('City', CitySchema), idField: 'id', 
+      ...params,
+        associations: overrideAssociations(
+          [
+
+          ]
+        ), 
     });
   }
-  
-}
 
 
 
-//--------------------------------------------------------------------------------
-//--------------------------------- ORGANIZATION ---------------------------------
-//--------------------------------------------------------------------------------
 
-export const OrganizationSchema : Schema = new Schema({
-  id: { type: String, required: true, default: v4 },
-  name: { type: String, required: true },
-  vatNumber: { type: String, required: false },
-  address: {
-    type: new Schema(
-      {
-        id: { type: String, required: true, default: v4 },
-      },
-      { _id: false }
-    ),
-    required: false
-  },
-}, {collection: 'organizations'});
+
+  //---------------------------------------------------------------------
+  //------------------------------ O RGANIZATION ---------------------------------
+  //----------------------------------- ---------------------------------------------
+
+  export const OrganizationSchema: Sc hema = new Schema({
+    id: { type: String, required: true, default: v4 },
+    name: { type: String, required: true },
+    vatNumber: { type: String, required: false },
+    address: {
+      type: new Schema(
+        {
+          id: { type: String, required: true, default: v4 },
+        },
+        { _id: false }
+      ),
+      required: false
+    },
+  }, { collection: 'organizations' });
 
 export type OrganizationExcludedFields = 'computedName'
 
@@ -141,12 +136,12 @@ type OrganizationFilterFields = {
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 
-export type OrganizationSortKeys = 
-  'id'|
-  'name'|
-  'vatNumber'|
+export type OrganizationSortKeys =
+  'id' |
+  'name' |
+  'vatNumber' |
   'address.id';
-export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection> | OneKey<OrganizationSortKeys, SortDirection>[] | { sorts?: OneKey<OrganizationSortKeys, SortDirection>[],  _?: any };
+export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirction> | OneKey<OrganizationSortKeys, SortDirection>[] | { sorts?: OneKey<OrganizationSortKeys, SortDirection>[], _?: any };
 
 export type OrganizationUpdate = {
   'id'?: string,
@@ -157,32 +152,32 @@ export type OrganizationUpdate = {
   _?: any,
 };
 
-export interface OrganizationDAOParams extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoose?: any } & { test: string }>{}
+export interface OrganizationDAOParams extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoose?: any } & { test: string }> { }
 
 export class OrganizationDAO extends AbstractMongooseDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { mongoose?: any } & { test: string }> {
-  
-  public constructor(params: { daoContext: AbstractDAOContext } & OrganizationDAOParams, connection?: Connection){
-    super({   
-      dbModel: connection ? connection.model<Document>('Organization', OrganizationSchema) : model<Document>('Organization', OrganizationSchema), 
-      idField: 'id', 
-      ...params, 
+
+  public constructor(params: { daoContext: AbstractDAOContext } & OrganizationDAOParams, connection?: Connection) {
+    super({
+      dbModel: connection ? connection.model<Document>('Organization', OrganizationSchema) : model<Document>('Orgaation', OrganizationSchema),
+      idField: 'id',
+      ...params,
       associations: overrideAssociations(
         [
-          { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
+          { type: DAOAssciationType.ONE_TO_MAY, reference: DAOssociationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
         ]
-      ), 
+      ),
     });
   }
-  
+
 }
 
 
 
 //--------------------------------------------------------------------------------
-//------------------------------------- USER -------------------------------------
-//--------------------------------------------------------------------------------
+//-------------------------------- -- USER -------------------------------------
+//----------------------------------- ---------------------------------------------
 
-export const UserSchema : Schema = new Schema({
+export const UserSchema: Schema = n ew Schema({
   id: { type: String, required: true, default: v4 },
   usernamePasswordCredentials: {
     type: new Schema(
@@ -201,7 +196,7 @@ export const UserSchema : Schema = new Schema({
   title: { type: LocalizedStringSchema, required: false },
   amounts: [{ type: Types.Decimal128, required: false }],
   amount: { type: Types.Decimal128, required: false },
-}, {collection: 'users'});
+}, { collection: 'users' });
 
 export type UserExcludedFields = never
 
@@ -214,24 +209,24 @@ type UserFilterFields = {
   'live'?: boolean | null | ComparisonOperators<boolean> | ElementOperators<boolean> | EvaluationOperators<boolean>,
   'localization'?: Coordinates | null | ComparisonOperators<Coordinates> | ElementOperators<Coordinates> | EvaluationOperators<Coordinates>,
   'title'?: LocalizedString | null | ComparisonOperators<LocalizedString> | ElementOperators<LocalizedString> | EvaluationOperators<LocalizedString>,
-  'amounts'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>| ArrayOperators<BigNumber>,
+  'amounts'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber> | ArrayOperators<BigNumber>,
   'amount'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>,
   _?: any,
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 
-export type UserSortKeys = 
-  'id'|
-  'usernamePasswordCredentials.username'|
-  'usernamePasswordCredentials.password'|
-  'firstName'|
-  'lastName'|
-  'live'|
-  'localization'|
-  'title'|
-  'amounts'|
+export type UserSortKeys =
+  'id' |
+  'usernamePasswordCredentials.username' |
+  'usernamePasswordCredentials.password' |
+  'firstName' |
+  'lastNae' |
+  'live' |
+  'localization' |
+  'title' |
+  'amounts' |
   'amount';
-export type UserSort = OneKey<UserSortKeys, SortDirection> | OneKey<UserSortKeys, SortDirection>[] | { sorts?: OneKey<UserSortKeys, SortDirection>[],  _?: any };
+export type UserSort = OneKey<UserSortKeys, SortDirection> | OneKey<UserSortKeys, SortDirection>[] | { sorts?: OneKey<UserSortKeys, SortDirection>[], _?: any };
 
 export type UserUpdate = {
   'id'?: string,
@@ -248,78 +243,77 @@ export type UserUpdate = {
   _?: any,
 };
 
-export interface UserDAOParams extends DAOParams<types.User, 'id', true, UserFilter, UserUpdate, UserExcludedFields, UserSort, { mongoose?: any } & { test: string }>{}
+export interface UserDAOParams extends DAOParams.User, '[]d', true, UserFilter, UserUpdate, UserExcludedFields, UserSort, { mongoose?: any } & { test: string } > {}
 
 export class UserDAO extends AbstractMongooseDAO<types.User, 'id', true, UserFilter, UserSort, UserUpdate, UserExcludedFields, { mongoose?: any } & { test: string }> {
-  
-  public constructor(params: { daoContext: AbstractDAOContext } & UserDAOParams, connection?: Connection){
-    super({   
-      dbModel: connection ? connection.model<Document>('User', UserSchema) : model<Document>('User', UserSchema), 
-      idField: 'id', 
-      ...params, 
-      associations: overrideAssociations(
-        [
-          
-        ]
-      ), 
+
+  public constructor(params: { daoContext: AbstractDAOContext } & UserDAOParams, connection?: Connection) {
+    supe{
+      dbModel: connection ? connection.model<Document>('User', UserSchema) : model<Document>('User', UserSchema), idField: 'id', 
+      ...params,
+        associations: overrideAssociations(
+          [
+
+          ]
+        ), 
     });
   }
-  
-}
 
 
 
-export interface DAOContextParams {
-  defaultOptions?: { mongoose?: any } & { test: string },
-  daoOverrides?: { 
-    address?: AddressDAOParams,
-    city?: CityDAOParams,
-    organization?: OrganizationDAOParams,
-    user?: UserDAOParams 
-  }, 
-  connection?: Connection
+
+
+  export interfce DAOContextParams {
+  defaultOptions ?: { mongoose?: test: string },
+    aoOverrides ?:
+      address ?: AddressDAOParams,
+    city ?: CityDAOParams,
+    organization ?: OrganizationDAOParams,
+    user ?: UserDOParams
+},
+connection ?: Connection
 };
 
 export class DAOContext extends AbstractDAOContext {
 
-  private _address: AddressDAO | undefined;
+  private _address: AddresDAO | undefined;
   private _city: CityDAO | undefined;
   private _organization: OrganizationDAO | undefined;
   private _user: UserDAO | undefined;
   private _defaultOptions?: { mongoose?: any } & { test: string }
-  
+
   private daoOverrides: DAOContextParams['daoOverrides'];
   private connection: Connection | undefined
-  
-  get address() {
-    if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address, defaultOptions: this._defaultOptions }, this.connection);
+
+  get addss() {
+    if (!this._address) {
+      this._address = new AddressDAO({ daoContext: this, ...this.daoOverdes?.address, defaultOptions: this._defaultOptions }, this.connection);
     }
     return this._address;
   }
   get city() {
-    if(!this._city) {
+    if (!this._city) {
       this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city, defaultOptions: this._defaultOptions }, this.connection);
     }
     return this._city;
   }
   get organization() {
-    if(!this._organization) {
+    if (!this._organization) {
       this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization, defaultOptions: this._defaultOptions }, this.connection);
     }
     return this._organization;
   }
   get user() {
-    if(!this._user) {
+    if (!this._user) {
       this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user, defaultOptions: this._defaultOptions }, this.connection);
     }
     return this._user;
   }
-  
+
   constructor(options?: DAOContextParams) {
     super()
     this.daoOverrides = options?.daoOverrides
-    this._defaultOptions = options?.defaultOptions
+    this._defltOptions = options?.defaultOptions
     this.connection = options?.connection
   }
 

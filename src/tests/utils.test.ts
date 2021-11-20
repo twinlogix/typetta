@@ -2,14 +2,14 @@ import { ApolloServer } from 'apollo-server'
 const { createTestClient } = require('apollo-server-testing')
 import gql from 'graphql-tag'
 import { hasIdFilter } from '../utils/utils'
-import { Projection, ModelProjection, MergeGenericProjection, GenericProjection } from '../utils/types'
 import { User } from './models.mock'
-import { mergeProjections, projection, isChangesContainedInProjection, isProjectionContained, isProjectionIntersected, getProjection } from '../utils/projection'
+import { GenericProjection, MergeGenericProjection, ModelProjection, Projection } from '../dal/dao/projections/projections.types'
+import { getProjection, isChangesContainedInProjection, isProjectionContained, isProjectionIntersected, mergeProjections, projection } from '../dal/dao/projections/projections.utils'
 
 type Pass = 'pass'
 export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T; expected: U }) : { actual: T; expected: U }
 
-export function typeAssert<T extends Pass>() {}
+export function typeAssert<T extends Pass>() { }
 
 test('infoToProjection test', async () => {
   const typeDefs = gql`

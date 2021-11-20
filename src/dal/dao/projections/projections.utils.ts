@@ -1,6 +1,7 @@
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
 import { GenericProjection, MergeGenericProjection, Projection, StaticGenericProjection, StaticProjection } from './projections.types'
 import _ from 'lodash'
+import { DAOMiddleware } from '../middlewares/middlewares.types'
 
 type SelectProjection<M, P1 extends StaticProjection<M> | Projection<M>, P2 extends StaticProjection<M> | Projection<M>> = P1 extends StaticGenericProjection
   ? P2 extends StaticGenericProjection
