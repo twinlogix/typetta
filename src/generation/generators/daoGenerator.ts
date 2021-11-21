@@ -1,7 +1,7 @@
-import { TsMongooseAbstractGenerator } from './abstractGenerator'
-import { TsMongooseGeneratorField, TsMongooseGeneratorNode } from '../generator'
+import { TsTypettaAbstractGenerator } from './abstractGenerator'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from '../generator'
 
-export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
+export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(): string[] {
     return [
       "import { Model, Document, Types } from 'mongoose';",
@@ -9,8 +9,8 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     ]
   }
 
-  public generateDefinition(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
-    if (node.isEntity) {
+  public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    if (this._isEntity(node)) {
       const daoExluded = this._generateDAOExludedFields(node)
       const daoFilter = this._generateDAOFilter(node, typesMap)
       const daoSort = this._generateDAOSort(node, typesMap)
@@ -23,7 +23,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     }
   }
 
-  public generateExports(typesMap: Map<String, TsMongooseGeneratorNode>): string[] {
+  public generateExports(typesMap: Map<String, TsTypettaGeneratorNode>): string[] {
     const contextDAOParamsDeclarations = Array.from(typesMap.values())
       .concat([])
       .filter((node) => node.isEntity)
@@ -66,9 +66,9 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     return [[daoContextParamsExport, daoExport].join('\n\n')]
   }
 
-  //---------------------------------------------------------------------------------------------------------
-  //----------------------------------------------- FILTER --------------------------------------------------
-  //---------------------------------------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- FILTER --------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAOExludedFields(node: TsMongooseGeneratorNode): string {
     const daoFilterFieldsBody = node.fields
@@ -100,14 +100,14 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
           const embeddedType = this._findNode(field.type.embed, typesMap)!
           return this._generateDAOFilterFields(embeddedType, typesMap, path + field.name + '.')
         }
-        return [] //TODO ??
+        return [] // TODO ??
       })
       .reduce((a, c) => [...a, ...c], [])
   }
 
-  //---------------------------------------------------------------------------------------------------------
-  //------------------------------------------------ SORT ---------------------------------------------------
-  //---------------------------------------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+  // ------------------------------------------------ SORT ---------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
   public _generateDAOSort(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
     const daoSortFields = this.indentMultiline(this._generateDAOSortFields(node, typesMap).join('|\n'))
     const daoSortKeys = `export type ${node.name}SortKeys = \n${daoSortFields};`
@@ -127,14 +127,14 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
           const embeddedType = this._findNode(field.type.embed, typesMap)!
           return this._generateDAOSortFields(embeddedType, typesMap, path + field.name + '.')
         }
-        return [] //TODO ??
+        return [] // TODO ??
       })
       .reduce((a, c) => [...a, ...c], [])
   }
 
-  //---------------------------------------------------------------------------------------------------------
-  //----------------------------------------------- UPDATE --------------------------------------------------
-  //---------------------------------------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- UPDATE --------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAOUpdate(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
     const daoUpdateFieldsBody = this.indentMultiline(this._generateDAOUpdateFields(node, typesMap).concat(['_?: any,']).join(',\n'))
@@ -147,7 +147,7 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     return node.fields
       .filter((field) => (typeof field.type == 'string' || field.type.embed) && !field.isExcluded)
       .map((field) => {
-        let fieldName = path + field.name
+        const fieldName = path + field.name
         if (typeof field.type == 'string') {
           const fieldType = field.isList ? `Array<${field.type}>` : field.type
           return [`'${fieldName}'?: ${fieldType}${field.required ? '' : ' | null'}`]
@@ -156,14 +156,14 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
           const fieldType = field.isList ? `Array<types.${embeddedType.name}>` : `types.${embeddedType.name}`
           return [`'${fieldName}'?: ${fieldType}${field.required ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, path + field.name + '.')]
         }
-        return [] //TODO ??
+        return [] // TODO ??
       })
       .reduce((a, c) => [...a, ...c], [])
   }
 
-  //---------------------------------------------------------------------------------------------------------
-  //----------------------------------------------- PARAMS --------------------------------------------------
-  //---------------------------------------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- PARAMS --------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAOParams(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
     const idField = this._findID(node)!
@@ -171,9 +171,9 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     return daoParams
   }
 
-  //---------------------------------------------------------------------------------------------------------
-  //------------------------------------------------ DAO ----------------------------------------------------
-  //---------------------------------------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+  // ------------------------------------------------ DAO ----------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAO(node: TsMongooseGeneratorNode, typesMap: Map<String, TsMongooseGeneratorNode>): string {
     const idField = this._findID(node)!
@@ -185,14 +185,14 @@ export class TsMongooseDAOGenerator extends TsMongooseAbstractGenerator {
     autoGeneratedParam = `${idField.isAutogenerated}, `
     if (node.type === 'interface') {
       // INTERFACE
-      throw `Interface not supported: ${node.name}`
+      throw new Error(`Interface not supported: ${node.name}`)
     } else if (node.type === 'type') {
       if (node.isEntity) {
         // SIMPLE ENTITY
         abstractClassName = 'AbstractMongooseDAO'
       } else {
         // SUBCLASS
-        throw `Subclass not supported: ${node.name}`
+        throw new Error(`Subclass not supported: ${node.name}`)
       }
     }
     daoBody += '\n' + this._generateConstructorMethod(node, typesMap) + '\n'
