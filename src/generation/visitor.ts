@@ -3,6 +3,7 @@ import autoBind from 'auto-bind'
 import { Directives, TypeScriptTypettaPluginConfig } from './config'
 import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
+import { toFirstLower } from './utils'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
@@ -14,10 +15,6 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     } as Partial<ParsedConfig> as any)
 
     autoBind(this)
-  }
-
-  private _toFirstLower(typeName: string) {
-    return typeName.charAt(0).toLowerCase() + typeName.slice(1)
   }
 
   private _resolveDirectiveValue<T>(valueNode: ValueNode): T | undefined | null {
@@ -129,10 +126,10 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     const prefixedName = this.convertName(node)
 
     const mongoEntityDirective = this._getDirectiveFromAstNode(node, Directives.MONGO_ENTITY)
-    const collection = (mongoEntityDirective && this._getDirectiveArgValue<string>(mongoEntityDirective, 'collection')) || this._toFirstLower(plainName) + 's'
+    const collection = (mongoEntityDirective && this._getDirectiveArgValue<string>(mongoEntityDirective, 'collection')) || toFirstLower(plainName) + 's'
 
     const sqlEntityDirective = this._getDirectiveFromAstNode(node, Directives.SQL_ENTITY)
-    const table = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'table')) || this._toFirstLower(plainName) + 's'
+    const table = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'table')) || toFirstLower(plainName) + 's'
 
     const fields = this._buildFields(node.fields!)
 

@@ -31,6 +31,6 @@ export const addToSchema = DIRECTIVES
 
 export const validate: PluginValidateFn<any> = async (schema: GraphQLSchema, documents: Types.DocumentFile[], config: any, outputFile: string) => {
   if (extname(outputFile) !== '.ts' && extname(outputFile) !== '.tsx') {
-    throw new Error(`Plugin "typescript-mongoose" requires extension to be ".ts" or ".tsx"!`)
+    throw new Error(`Plugin "typescript-typetta" requires extension to be ".ts" or ".tsx"!`)
   }
 }

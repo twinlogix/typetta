@@ -1,6 +1,7 @@
 import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
 import { TypeScriptTypettaPluginConfig } from './config'
+import { findField, findID, findNode, isForeignRef, isInnerRef } from './utils';
 
 export type EmbedFieldType = { embed: string };
 export type InnerRefFieldType = { innerRef: string; refFrom?: string; refTo?: string };
@@ -85,7 +86,7 @@ export class TsTypettaGenerator {
     Array.from(typesMap.values())
       .filter((type) => type.mongoEntity || type.sqlEntity)
       .forEach((type) => {
-        const id = this._findID(type)
+        const id = findID(type)
         if (!id) {
           throw new Error(`Type ${type.name} requires an @id field being a @mongoEntity.`)
         }
@@ -96,8 +97,8 @@ export class TsTypettaGenerator {
     Array.from(typesMap.values()).forEach((type) => {
       type.fields.forEach((field) => {
         if (typeof field.type !== 'string') {
-          if (this._isInnerRef(field.type)) {
-            const refType = this._findNode(field.type.innerRef, typesMap)
+          if (isInnerRef(field.type)) {
+            const refType = findNode(field.type.innerRef, typesMap)
             if (!refType) {
               throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} that cannot be resolved.`)
             }
@@ -105,30 +106,30 @@ export class TsTypettaGenerator {
               throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} that isn't an entity.`)
             }
             if (field.type.refFrom) {
-              const refFromField = this._findField(type, field.type.refFrom, typesMap)
+              const refFromField = findField(type, field.type.refFrom, typesMap)
               if (!refFromField) {
                 throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refFrom ${field.type.refFrom} that cannot be resolved.`)
               }
             }
             if (field.type.refTo) {
-              const refToField = this._findField(refType, field.type.refTo, typesMap)
+              const refToField = findField(refType, field.type.refTo, typesMap)
               if (!refToField) {
                 throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refTo ${field.type.refTo} that cannot be resolved.`)
               }
             }
-          } else if (this._isForeignRef(field.type)) {
-            const refType = this._findNode(field.type.foreignRef, typesMap)
+          } else if (isForeignRef(field.type)) {
+            const refType = findNode(field.type.foreignRef, typesMap)
             if (!refType) {
               throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} that cannot be resolved.`)
             }
             if (field.type.refFrom) {
-              const refFromField = this._findField(refType, field.type.refFrom, typesMap)
+              const refFromField = findField(refType, field.type.refFrom, typesMap)
               if (!refFromField) {
                 throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refFrom ${field.type.refFrom} that cannot be resolved.`)
               }
             }
             if (field.type.refTo) {
-              const refToField = this._findField(type, field.type.refTo, typesMap)
+              const refToField = findField(type, field.type.refTo, typesMap)
               if (!refToField) {
                 throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refTo ${field.type.refTo} that cannot be resolved.`)
               }
@@ -139,38 +140,4 @@ export class TsTypettaGenerator {
     })
   }
 
-  protected _findID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField | undefined {
-    return node.fields.find((field) => field.isID)
-  }
-
-  protected _findNode(code: string, typesMap: Map<String, TsTypettaGeneratorNode>): TsTypettaGeneratorNode | undefined {
-    return typesMap.get(code)
-  }
-
-  protected _findField(node: TsTypettaGeneratorNode, fieldPath: string, typesMap: Map<String, TsTypettaGeneratorNode>): TsTypettaGeneratorField | undefined {
-    const fieldPathSplitted = fieldPath.split('.')
-    if (fieldPathSplitted.length === 1) {
-      return node.fields.find((f) => f.name === fieldPathSplitted[0])
-    } else {
-      const key = fieldPathSplitted.shift()
-      const tmpField = node.fields.find((f) => f.name === key)
-      if (tmpField && this._isEmbed(tmpField.type)) {
-        const embeddedType = this._findNode(tmpField.type.embed, typesMap)
-        return embeddedType && this._findField(embeddedType, fieldPathSplitted.join('.'), typesMap)
-      }
-      return tmpField
-    }
-  }
-
-  protected _isEmbed(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is EmbedFieldType {
-    return (type as EmbedFieldType).embed !== undefined;
-  }
-
-  protected _isInnerRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is InnerRefFieldType {
-    return (type as InnerRefFieldType).innerRef !== undefined;
-  }
-
-  protected _isForeignRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is ForeignRefFieldType {
-    return (type as ForeignRefFieldType).foreignRef !== undefined;
-  }
 }
