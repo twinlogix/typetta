@@ -1,3 +1,4 @@
+import { DataTypeAdapter, Schema } from '../dal/drivers/drivers.types'
 import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
 
 export function toFirstLower(typeName: string) {
@@ -47,4 +48,41 @@ export function indentMultiline(str: string, count = 1): string {
   const indentation = '  '.repeat(count)
   const replaceWith = '\n' + indentation
   return indentation + str.replace(/\n/g, replaceWith)
+}
+
+/**
+ * Transforms object from database representation to model representation or vice versa.
+ * @param adapters the adapters map
+ * @param direction the direction of the transformation
+ * @param object the object to transform
+ * @param schema the model schema
+ * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
+ * @returns a new transformed object
+ */
+export function transformObject<T extends object, ScalarsType>(
+  adapters: Map<keyof ScalarsType, DataTypeAdapter<ScalarsType, keyof ScalarsType, any>>,
+  direction: 'dbToModel' | 'modelToDB',
+  object: T,
+  schema: Schema<ScalarsType>,
+  embeddedOverride?: DataTypeAdapter<ScalarsType, keyof ScalarsType, any>,
+): T {
+  const result: any = {}
+  Object.entries(object).map(([k, v]) => {
+    if (k in schema) {
+      const schemaField = schema[k]
+      if ('scalar' in schemaField) {
+        const adapter = adapters.get(schemaField.scalar)
+        result[k] = adapter ? adapter[direction](v) : v
+      } else {
+        if (embeddedOverride) {
+          result[k] = embeddedOverride[direction](v)
+        } else {
+          result[k] = transformObject(adapters, direction, v, schemaField.embedded, embeddedOverride)
+        }
+      }
+    } else {
+      result[k] = v
+    }
+  })
+  return result
 }
