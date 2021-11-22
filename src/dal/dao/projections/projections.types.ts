@@ -1,5 +1,5 @@
 import { PartialDeep, Primitive } from 'type-fest'
-import { Expand, OmitUndefinedAndNeverKeys } from '../../../utils/types'
+import { Expand, OmitUndefinedAndNeverKeys } from '../../../utils/utils.types'
 
 export type AnyProjection<ModelType> = true | StaticProjection<ModelType> | undefined | Projection<ModelType>
 

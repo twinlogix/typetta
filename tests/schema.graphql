@@ -11,13 +11,13 @@ type City @mongoEntity {
   id: ID! @id
   name: String!
   addressId: String!
-  computedName: String @mongoExclude
-  computedAddressName: String @mongoExclude
+  computedName: String @exclude
+  computedAddressName: String @exclude
 }
 
 type Address @mongoEntity(collection: "addresses") {
   id: ID! @id
-  cities: [City!] @mongoForeignRef(refFrom: "addressId")
+  cities: [City!] @foreignRef(refFrom: "addressId")
 }
 
 type Organization @mongoEntity {
@@ -25,7 +25,7 @@ type Organization @mongoEntity {
   name: String!
   vatNumber: String
   address: Address
-  computedName: String @mongoExclude
+  computedName: String @exclude
 }
 
 type User @mongoEntity {

@@ -1,4 +1,4 @@
-export * from './utils/types'
+export * from './utils/utils.types'
 export * from './utils/utils'
 export * from './dal/daoContext/daoContext'
 export * from './dal/dao/dao'
