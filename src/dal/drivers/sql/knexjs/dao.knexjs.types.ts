@@ -28,6 +28,6 @@ export type KnexJsDAOParams<
     ScalarsType
   > &
   {
-    collectionName: string;
+    tableName: string;
     knex: Knex<any, unknown[]>
   }

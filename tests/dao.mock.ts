@@ -3,7 +3,7 @@ import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
 import { MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
-import { Collection } from 'mongodb';
+import { Db } from 'mongodb';
 import { Knex } from 'knex';
 
 //--------------------------------------------------------------------------------
@@ -281,14 +281,14 @@ export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilt
   
 }
 
-export interface DAOContextParams {
+export type DAOContextParams = {
   daoOverrides?: { 
     address?: AddressDAOParams,
     city?: CityDAOParams,
     organization?: OrganizationDAOParams,
-    user?: UserDAOParams 
-  }, 
-  connection?: Connection
+    user?: UserDAOParams
+  },
+  mongoDB: Db
 };
 
 export class DAOContext extends AbstractDAOContext {
@@ -299,29 +299,29 @@ export class DAOContext extends AbstractDAOContext {
   private _user: UserDAO | undefined;
   
   private daoOverrides: DAOContextParams['daoOverrides'];
-  private connection: Connection | undefined
+  private mongoDB: Db;
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address }, this.connection);
+      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address ,collection: this.mongoDB.collection('addresses') });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city }, this.connection);
+      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city ,collection: this.mongoDB.collection('citys') });
     }
     return this._city;
   }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization }, this.connection);
+      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization ,collection: this.mongoDB.collection('organizations') });
     }
     return this._organization;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user }, this.connection);
+      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user ,collection: this.mongoDB.collection('users') });
     }
     return this._user;
   }
@@ -329,7 +329,7 @@ export class DAOContext extends AbstractDAOContext {
   constructor(options?: DAOContextParams) {
     super()
     this.daoOverrides = options?.daoOverrides
-    this.connection = options?.connection
+    this.mongoDB = options?.mongoDB
   }
 
 }
