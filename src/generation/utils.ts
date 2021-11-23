@@ -30,19 +30,19 @@ export function findField(node: TsTypettaGeneratorNode, fieldPath: string, types
 }
 
 export function isEmbed(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is EmbedFieldType {
-  return (type as EmbedFieldType).embed !== undefined;
+  return (type as EmbedFieldType).embed !== undefined
 }
 
 export function isInnerRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is InnerRefFieldType {
-  return (type as InnerRefFieldType).innerRef !== undefined;
+  return (type as InnerRefFieldType).innerRef !== undefined
 }
 
 export function isForeignRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is ForeignRefFieldType {
-  return (type as ForeignRefFieldType).foreignRef !== undefined;
+  return (type as ForeignRefFieldType).foreignRef !== undefined
 }
 
 export function isEntity(node: TsTypettaGeneratorNode): boolean {
-  return node.mongoEntity !== undefined || node.sqlEntity !== undefined;
+  return node.mongoEntity !== undefined || node.sqlEntity !== undefined
 }
 
 export function indentMultiline(str: string, count = 1): string {
@@ -71,14 +71,30 @@ export function transformObject<T, ScalarsType>(
   Object.entries(object).map(([k, v]) => {
     if (k in schema) {
       const schemaField = schema[k]
-      if ('scalar' in schemaField) {
-        const adapter = adapters.get(schemaField.scalar)
-        result[k] = adapter ? adapter[direction](v) : v
+      if (!schemaField.required && (v === null || v === undefined)) {
+        result[k] = v
       } else {
-        if (embeddedOverride) {
-          result[k] = embeddedOverride[direction](v)
+        if ('scalar' in schemaField) {
+          const adapter = adapters.get(schemaField.scalar)
+          if (Array.isArray(v) && schemaField.array) {
+            result[k] = adapter ? v.map((v) => adapter[direction](v)) : v
+          } else {
+            result[k] = adapter ? adapter[direction](v) : v
+          }
         } else {
-          result[k] = transformObject(adapters, direction, v, schemaField.embedded, embeddedOverride)
+          if (embeddedOverride) {
+            if (Array.isArray(v) && schemaField.array) {
+              result[k] = v.map((v) => embeddedOverride[direction](v))
+            } else {
+              result[k] = embeddedOverride[direction](v)
+            }
+          } else {
+            if (Array.isArray(v) && schemaField.array) {
+              result[k] = v.map((v) => transformObject(adapters, direction, v, schemaField.embedded, embeddedOverride))
+            } else {
+              result[k] = transformObject(adapters, direction, v, schemaField.embedded, embeddedOverride)
+            }
+          }
         }
       }
     } else {
