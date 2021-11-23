@@ -1,19 +1,23 @@
 import { Knex } from 'knex'
 import { ComparisonOperators, ElementOperators, EvaluationOperators, LogicalOperators } from '../../../dao/filters/filters.types'
+import { GenericProjection } from '../../../dao/projections/projections.types'
+import { SortDirection } from '../../../dao/sorts/sorts.types'
 import { DataTypeAdapter, Schema } from '../../drivers.types'
 
-type AbstractFilter =
+export type AbstractFilter =
   | {
       [key: string]: any | null | ComparisonOperators<any> | ElementOperators<any> | EvaluationOperators<any>
     }
   | LogicalOperators<any>
+
+
 
 export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar extends keyof ScalarsType>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   filter: AbstractFilter,
   schema: Schema<ScalarsType>,
   adapters: Map<keyof ScalarsType, DataTypeAdapter<ScalarsType, keyof ScalarsType, any>>,
-): void {
+): Knex.QueryBuilder<TRecord, TResult> {
   Object.entries(filter).forEach(([k, v]) => {
     if (k in schema) {
       const schemaField = schema[k]
@@ -65,4 +69,28 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar exten
       })
     }
   })
+  return builder
+}
+
+export function buildSelect<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, projection: GenericProjection): Knex.QueryBuilder<TRecord, TResult> {
+  if (projection === false) {
+    builder.select([])
+  } else if (projection === true) {
+    builder.select()
+  } else {
+    builder.select(
+      Object.entries(projection).flatMap(([k, v]) => {
+        return v ? [k] : []
+      }),
+    )
+  }
+  return builder
+}
+
+export function buildSort<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, sorts: { [key: string]: SortDirection }[]): Knex.QueryBuilder<TRecord, TResult> {
+  sorts.forEach((s) => {
+    const [sortKey, sortDirection] = Object.entries(s)[0]
+    builder.orderBy(sortKey, sortDirection === SortDirection.ASC ? 'asc' : 'desc')
+  })
+  return builder
 }
