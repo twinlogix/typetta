@@ -1,15 +1,13 @@
 import { DAOParams, FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
 import { PartialDeep } from 'type-fest'
-import { deepCopy, setTraversing, replaceType } from '@twinlogix/tl-commons'
-import Bignumber from 'bignumber.js'
 import { AbstractDAOContext } from '../../../daoContext/daoContext'
 import { AbstractDAO } from '../../../dao/dao'
-import { AnyProjection, GenericProjection, ModelProjection, Projection } from '../../../dao/projections/projections.types'
+import { GenericProjection, Projection } from '../../../dao/projections/projections.types'
 import knex, { Knex } from 'knex'
 import { ComparisonOperators, ElementOperators, EvaluationOperators } from '../../../dao/filters/filters.types'
-import { Schema } from '../../drivers.types'
 import { AbstractSort, buildSelect, buildSort, buildWhereConditions } from './utils'
 import { transformObject } from '../../../../generation/utils'
+import { Schema } from '../../../dao/schemas/schemas.types'
 
 type AbstractFilter = {
   [key: string]: any | null | ComparisonOperators<any> | ElementOperators<any> | EvaluationOperators<any>

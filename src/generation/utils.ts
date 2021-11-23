@@ -1,4 +1,5 @@
-import { DataTypeAdapter, Schema } from '../dal/drivers/drivers.types'
+import { Schema } from '../dal/dao/schemas/schemas.types'
+import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
 
 export function toFirstLower(typeName: string) {

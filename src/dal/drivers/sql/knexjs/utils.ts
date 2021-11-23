@@ -1,13 +1,14 @@
 import { Knex } from 'knex'
 import { ComparisonOperators, ElementOperators, EvaluationOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
+import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
-import { DataTypeAdapter, Schema } from '../../drivers.types'
+import { DataTypeAdapter } from '../../drivers.types'
 
 export type AbstractFilter =
   | {
-      [key: string]: any | null | ComparisonOperators<any> | ElementOperators<any> | EvaluationOperators<any>
-    }
+    [key: string]: any | null | ComparisonOperators<any> | ElementOperators<any> | EvaluationOperators<any>
+  }
   | LogicalOperators<any>
 
 export type AbstractSort = { [key: string]: SortDirection }
@@ -27,17 +28,17 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar exten
             const adapter = adapters.get(schemaField.scalar)
             const av = adapter ? (Array.isArray(fv) ? fv.map((fve) => adapter.modelToDB(fve as ScalarsType[Scalar])) : adapter.modelToDB(fv as ScalarsType[Scalar])) : fv
             // prettier-ignore
-            switch (fk) { //TODO: text search
-                case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k) ; break
-                case '$eq': builder.where(k, av); break
-                case '$in': builder.whereIn(k, av as Array<any>); break
-                case '$gte': builder.where(k, '>=', av); break
-                case '$gt': builder.where(k, '>', av); break
-                case '$lte': builder.where(k, '<=', av); break
-                case '$lt': builder.where(k, '<', av); break
-                case '$ne': builder.not.where(k, av); break
-                case '$nin': builder.not.whereIn(k, av as Array<any>); break
-              }
+            switch (fk) { // TODO: text search
+              case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
+              case '$eq': builder.where(k, av); break
+              case '$in': builder.whereIn(k, av as any[]); break
+              case '$gte': builder.where(k, '>=', av); break
+              case '$gt': builder.where(k, '>', av); break
+              case '$lte': builder.where(k, '<=', av); break
+              case '$lt': builder.where(k, '<', av); break
+              case '$ne': builder.not.where(k, av); break
+              case '$nin': builder.not.whereIn(k, av as any[]); break
+            }
           })
         } else {
           if (v === null) {
@@ -53,15 +54,15 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar exten
       }
     } else if (k === '$or') {
       builder.orWhere((qb) => {
-        ;(v as Array<AbstractFilter>).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
       })
     } else if (k === '$and') {
       builder.andWhere((qb) => {
-        ;(v as Array<AbstractFilter>).forEach((filter) => buildWhereConditions(qb, filter, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb, filter, schema, adapters))
       })
     } else if (k === '$nor') {
       builder.not.orWhere((qb) => {
-        ;(v as Array<AbstractFilter>).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
       })
     } else if (k === '$not') {
       builder.whereNot((qb) => {

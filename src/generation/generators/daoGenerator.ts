@@ -5,19 +5,22 @@ import { TsTypettaAbstractGenerator } from './abstractGenerator'
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(): string[] {
     return [
-      "import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractTypettaDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
+      "import { DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongoDAO, AbstractSQLDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
+      `import * as types from '${this._config.tsTypesImport}';`,
     ]
   }
 
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     if (isEntity(node)) {
       const daoExcluded = this._generateDAOExludedFields(node)
+      const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoFilter = this._generateDAOFilter(node, typesMap)
+      const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSort = this._generateDAOSort(node, typesMap)
       const daoUpdate = this._generateDAOUpdate(node, typesMap)
       const daoParams = this._generateDAOParams(node, typesMap)
       const dao = this._generateDAO(node, typesMap)
-      return [daoExcluded, daoFilter, daoSort, daoUpdate, daoParams, dao].join('\n\n')
+      return [daoExcluded, daoFilter, daoProjection, daoSort, daoUpdate, daoParams, dao].join('\n\n')
     } else {
       return ''
     }
@@ -33,7 +36,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .join(',\n')
 
     const daoContextParamsExport = `export interface DAOContextParams {\n${indentMultiline(
-      `defaultOptions?: ${this._getOptionsType()},\ndaoOverrides?: { \n${indentMultiline(
+      `daoOverrides?: { \n${indentMultiline(
         contextDAOParamsDeclarations,
       )} \n}, \nconnection?: Connection`,
     )}\n};`
@@ -43,7 +46,6 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .map((node) => {
         return `private _${toFirstLower(node.name)}: ${node.name}DAO | undefined;`
       })
-      .concat([`private _defaultOptions?: ${this._getOptionsType()}`])
       .join('\n')
 
     const daoOverridesDeclaration = `private daoOverrides: DAOContextParams['daoOverrides'];\n` + `private connection: Connection | undefined`
@@ -51,13 +53,13 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const daoGetters = Array.from(typesMap.values())
       .filter((node) => isEntity(node))
       .map((node) => {
-        const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, ...this.daoOverrides?.${toFirstLower(node.name)}, defaultOptions: this._defaultOptions }, this.connection);`
+        const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, ...this.daoOverrides?.${toFirstLower(node.name)} }, this.connection);`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}${false ? '.apiV1' : ''};`
         return `get ${toFirstLower(node.name)}() {\n${indentMultiline(daoGet)}\n}`
       })
       .join('\n')
 
-    const daoContructor = 'constructor(options?: DAOContextParams) {\n' + indentMultiline('super()\nthis.daoOverrides = options?.daoOverrides\nthis._defaultOptions = options?.defaultOptions\nthis.connection = options?.connection') + '\n}'
+    const daoContructor = 'constructor(options?: DAOContextParams) {\n' + indentMultiline('super()\nthis.daoOverrides = options?.daoOverrides\nthis.connection = options?.connection') + '\n}'
 
     const declarations = [daoDeclarations, daoOverridesDeclaration, daoGetters, daoContructor].join('\n\n')
 
@@ -67,7 +69,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   }
 
   // ---------------------------------------------------------------------------------------------------------
-  // ----------------------------------------------- FILTER --------------------------------------------------
+  // ----------------------------------------------- EXCLUDED ------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAOExludedFields(node: TsTypettaGeneratorNode): string {
@@ -79,8 +81,40 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     return [daoExludedFields].join('\n')
   }
 
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- SCHEMA --------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
+  public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'));
+    const daoSchema = `export type ${node.name}Schema = {\n` + daoSchemaBody + `\n};`;
+    return daoSchema;
+  }
+
+  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
+    return node.fields
+      .filter((field) => (typeof field.type === 'string' || isEmbed(field.type)) && !field.isExcluded)
+      .map((field) => {
+        let fieldName = path
+        if (typeof field.type === 'string') {
+          fieldName += field.name
+          return [`'${fieldName}': { scalar: Scalars['${field.type}']${field.isRequired ? ', required: true' : ''}${field.isList ? ', array: true' : ''}}`]
+        } else if (isEmbed(field.type)) {
+          const embeddedType = findNode(field.type.embed, typesMap)!
+          const embeddedFields = indentMultiline(this._generateDAOFilterFields(embeddedType, typesMap, path + field.name + '.').join('\n'));
+          return [`'${fieldName}': { embedded: { ${embeddedFields} }, required: true' : ''}${field.isList ? ', array: true' : ''}}`]
+        }
+        return []
+      })
+      .reduce((a, c) => [...a, ...c], [])
+  }
+
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- FILTER --------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
   public _generateDAOFilter(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap).concat(['_?: any,']).join(',\n'))
+    const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap).join(',\n'))
     const daoFilterFields = `type ${node.name}FilterFields = {\n` + daoFilterFieldsBody + `\n};`
     const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields>;`
 
@@ -92,7 +126,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .filter((field) => (typeof field.type === 'string' || isEmbed(field.type)) && !field.isExcluded)
       .map((field) => {
         let fieldName = path
-        if (typeof field.type == 'string') {
+        if (typeof field.type === 'string') {
           fieldName += field.name
           const arrayOperators = field.isList ? `| ArrayOperators<${field.type}>` : ''
           return [`'${fieldName}'?: ${field.type} | null | ComparisonOperators<${field.type}> | ElementOperators<${field.type}> | EvaluationOperators<${field.type}>` + arrayOperators]
@@ -106,28 +140,57 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   }
 
   // ---------------------------------------------------------------------------------------------------------
+  // --------------------------------------------- PROJECTION ------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
+  public _generateDAOProjection(node: TsTypettaGeneratorNode, typesMap: Map<String, TsTypettaGeneratorNode>): string {
+    const daoProjectionBody = indentMultiline(this._generateDAOProjectionFields(node, typesMap));
+    const daoProjection = `export type ${node.name}Projection = {\n` + daoProjectionBody + `\n};`;
+    return daoProjection;
+  }
+
+  public _generateDAOProjectionFields(node: TsTypettaGeneratorNode, typesMap: Map<String, TsTypettaGeneratorNode>): string {
+    return node.fields
+      .map(field => {
+        if (typeof field.type === 'string') {
+          return `${field.name}?: boolean,`;
+        } else if (isInnerRef(field.type)) {
+          const linkedType = findNode(field.type.innerRef, typesMap)!;
+          return `${field.name}?: ${linkedType.name}Projection | boolean,`;
+        } else if (isForeignRef(field.type)) {
+          const linkedType = findNode(field.type.foreignRef, typesMap)!;
+          return `${field.name}?: ${linkedType.name}Projection | boolean,`;
+        } else if (isEmbed(field.type)) {
+          const embeddedType = findNode(field.type.embed, typesMap)!;
+          const embeddedProjection = indentMultiline(this._generateDAOProjectionFields(embeddedType, typesMap));
+          return `${field.name}?: {\n${embeddedProjection}\n} | boolean,`;
+        }
+      }).join('\n');
+  }
+
+  // ---------------------------------------------------------------------------------------------------------
   // ------------------------------------------------ SORT ---------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
   public _generateDAOSort(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSortFields = indentMultiline(this._generateDAOSortFields(node, typesMap).join('|\n'))
     const daoSortKeys = `export type ${node.name}SortKeys = \n${daoSortFields};`
-    const daoSort = `export type ${node.name}Sort = OneKey<${node.name}SortKeys, SortDirection> | OneKey<${node.name}SortKeys, SortDirection>[] | { sorts?: OneKey<${node.name}SortKeys, SortDirection>[],  _?: any };`
+    const daoSort = `export type ${node.name}Sort = OneKey<${node.name}SortKeys, SortDirection>;`
     return `${daoSortKeys}\n${daoSort}`
   }
 
   public _generateDAOSortFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
     return node.fields
-      .filter((field) => (typeof field.type == 'string' || isEmbed(field.type)) && !field.isExcluded)
+      .filter((field) => (typeof field.type === 'string' || isEmbed(field.type)) && !field.isExcluded)
       .map((field) => {
         let fieldName = path
-        if (typeof field.type == 'string') {
+        if (typeof field.type === 'string') {
           fieldName += field.name
           return [`'${fieldName}'`]
         } else if (isEmbed(field.type)) {
           const embeddedType = findNode(field.type.embed, typesMap)!
           return this._generateDAOSortFields(embeddedType, typesMap, path + field.name + '.')
         }
-        return [] // TODO ??
+        return []
       })
       .reduce((a, c) => [...a, ...c], [])
   }
@@ -137,7 +200,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAOUpdate(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoUpdateFieldsBody = indentMultiline(this._generateDAOUpdateFields(node, typesMap).concat(['_?: any,']).join(',\n'))
+    const daoUpdateFieldsBody = indentMultiline(this._generateDAOUpdateFields(node, typesMap).join(',\n'))
     const daoUpdate = `export type ${node.name}Update = {\n` + daoUpdateFieldsBody + `\n};`
 
     return daoUpdate
@@ -145,10 +208,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
   public _generateDAOUpdateFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
     return node.fields
-      .filter((field) => (typeof field.type == 'string' || isEmbed(field.type)) && !field.isExcluded)
+      .filter((field) => (typeof field.type === 'string' || isEmbed(field.type)) && !field.isExcluded)
       .map((field) => {
         const fieldName = path + field.name
-        if (typeof field.type == 'string') {
+        if (typeof field.type === 'string') {
           const fieldType = field.isList ? `Array<${field.type}>` : field.type
           return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
         } else if (isEmbed(field.type)) {
@@ -156,7 +219,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
           const fieldType = field.isList ? `Array<types.${embeddedType.name}>` : `types.${embeddedType.name}`
           return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, path + field.name + '.')]
         }
-        return [] // TODO ??
+        return []
       })
       .reduce((a, c) => [...a, ...c], [])
   }
@@ -167,7 +230,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
   public _generateDAOParams(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const idField = findID(node)!
-    const daoParams = `export interface ${node.name}DAOParams extends DAOParams<types.${node.name}, '${idField.name}', ${node.name}Filter, ${node.name}Update, ${node.name}ExcludedFields, ${node.name}Sort, ${this._getOptionsType()}>{}`
+    const daoParams = `export interface ${node.name}DAOParams extends DAOParams<types.${node.name}, '${idField.name}', ${node.name}Filter, ${node.name}Update, ${node.name}ExcludedFields, ${node.name}Sort, ${this._getOptionsType(node)}>{}`
     return daoParams
   }
 
@@ -181,7 +244,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const daoBody = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap) + '\n');
 
     return (
-      `export class ${node.name}DAO extends ${daoName}<types.${node.name}, '${idField.name}', ${node.name}Filter, ${node.name}Sort, ${node.name}Update, ${node.name}ExcludedFields, ${this._getOptionsType()}> {\n` +
+      `export class ${node.name}DAO extends ${daoName}<types.${node.name}, '${idField.name}', ${idField.isAutogenerated ? 'true' : 'false'}, ${node.name}Filter, ${node.name}Projection, ${node.name}Sort, ${node.name}Update, ${node.name}ExcludedFields, ${this._getOptionsType(node)}> {\n` +
       daoBody +
       '\n}'
     )
@@ -189,11 +252,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
   private _generateConstructorMethod(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const idField = findID(node)!
-    const dbModel = `connection ? connection.model<Document>('${node.name}', ${node.name}Schema) : model<Document>('${node.name}', ${node.name}Schema)`
     const generatedAssociations = `[\n${indentMultiline(this._generateAssociations(node, typesMap).join(',\n'))}\n]`
     const associations = `associations: overrideAssociations(\n${indentMultiline(`${generatedAssociations}`)}\n),`
-    // SIMPLE ENTITY
-    const constructorBody = `super({ ${indentMultiline(`\ndbModel: ${dbModel}, \nidField: '${idField.name}', \n...params, \n${associations}`)} \n});`
+    const constructorBody = `super({ ${indentMultiline(`\nidField: '${idField.name}', \n...params, \n${associations}`)} \n});`
     return `public constructor(params: { daoContext: AbstractDAOContext } & ${node.name}DAOParams, connection?: Connection){\n` + indentMultiline(constructorBody) + '\n}'
   }
 
@@ -234,7 +295,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     return []
   }
 
-  private _getOptionsType(): string {
-    return this._config.optionsType ? `{ mongodb?: any, sql?: any } & ${this._config.optionsType}` : '{ mongodb?: any, sql?: any }'
+  private _getOptionsType(node: TsTypettaGeneratorNode): string {
+    const dbOptionType = node.mongoEntity ? '{ mongoDB?: any }' : node.sqlEntity ? '{ SQL?: any }' : '{}';
+    return this._config.optionsType ? `${dbOptionType} & ${this._config.optionsType}` : dbOptionType;
   }
 }
