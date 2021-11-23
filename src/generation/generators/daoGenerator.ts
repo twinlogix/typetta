@@ -95,14 +95,12 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     return node.fields
       .filter((field) => (typeof field.type === 'string' || isEmbed(field.type)) && !field.isExcluded)
       .map((field) => {
-        let fieldName = path
         if (typeof field.type === 'string') {
-          fieldName += field.name
-          return [`'${fieldName}': { scalar: Scalars['${field.type}']${field.isRequired ? ', required: true' : ''}${field.isList ? ', array: true' : ''}}`]
+          return [`'${field.name}': { scalar: Scalars['${field.type}']${field.isRequired ? ', required: true' : ''}${field.isList ? ', array: true' : ''}}`]
         } else if (isEmbed(field.type)) {
           const embeddedType = findNode(field.type.embed, typesMap)!
           const embeddedFields = indentMultiline(this._generateDAOFilterFields(embeddedType, typesMap, path + field.name + '.').join('\n'));
-          return [`'${fieldName}': { embedded: { ${embeddedFields} }, required: true' : ''}${field.isList ? ', array: true' : ''}}`]
+          return [`'${field.name}': { embedded: { ${embeddedFields} }, required: true' : ''}${field.isList ? ', array: true' : ''}}`]
         }
         return []
       })
