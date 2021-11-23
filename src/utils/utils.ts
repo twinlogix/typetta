@@ -1,11 +1,8 @@
-import { Schema } from 'mongoose'
-import { Request, Response } from 'express'
-import { AbstractDAOContext } from '../dal/daoContext/daoContext'
-import { setTraversing } from '@twinlogix/tl-commons'
 import _ from 'lodash'
 import { SortDirection } from '../dal/dao/sorts/sorts.types'
 import { Projection } from '../dal/dao/projections/projections.types'
 import { ComparisonOperators, ElementOperators, EvaluationOperators } from '../dal/dao/filters/filters.types'
+import { Schema } from 'mongoose'
 
 export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T
 

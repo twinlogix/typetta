@@ -56,7 +56,7 @@ export abstract class AbstractMongooseDAO<
     return replaceType(
       obj,
       (o: any): o is Bignumber => o instanceof Bignumber,
-      (o: Bignumber) => Types.Decimal128.fromString(o.toString()),
+      (o: Bignumber) => (Types.Decimal128 as any).fromString(o.toString()),
     )
   }
 

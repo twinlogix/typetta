@@ -19,8 +19,8 @@ export const plugin: PluginFunction<TypeScriptTypettaPluginConfig> = async (sche
 
 export const DIRECTIVES = `
   directive @${Directives.ID} on FIELD_DEFINITION
-  directive @${Directives.MONGO_ENTITY}(collection: String) OBJECT
-  directive @${Directives.SQL_ENTITY}(table: String) OBJECT
+  directive @${Directives.MONGO_ENTITY}(collection: String) on OBJECT
+  directive @${Directives.SQL_ENTITY}(table: String) on OBJECT
   directive @${Directives.EMBEDDED} on FIELD_DEFINITION
   directive @${Directives.INNER_REF}(refFrom: String, refTo: String) on FIELD_DEFINITION
   directive @${Directives.FOREIGN_REF}(refFrom: String!, refTo: String) on FIELD_DEFINITION
