@@ -6,7 +6,7 @@ export abstract class AbstractDAOContext {
   public constructor(adapters: Map<any, DataTypeAdapter<any, any, any>>) {
     this.adapters = adapters
   }
-  public dao(daoName: string): AbstractDAO<any, any, any, any, any, any, never, any> {
+  public dao(daoName: string): AbstractDAO<any, any, any, any, any, any, any, never, any, any> {
     return (this as any)[daoName]
   }
 }
