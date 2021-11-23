@@ -10,7 +10,7 @@ export type AbstractFilter =
     }
   | LogicalOperators<any>
 
-
+export type AbstractSort = { [key: string]: SortDirection }
 
 export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar extends keyof ScalarsType>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
@@ -87,7 +87,7 @@ export function buildSelect<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord
   return builder
 }
 
-export function buildSort<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, sorts: { [key: string]: SortDirection }[]): Knex.QueryBuilder<TRecord, TResult> {
+export function buildSort<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, sorts: AbstractSort[]): Knex.QueryBuilder<TRecord, TResult> {
   sorts.forEach((s) => {
     const [sortKey, sortDirection] = Object.entries(s)[0]
     builder.orderBy(sortKey, sortDirection === SortDirection.ASC ? 'asc' : 'desc')
