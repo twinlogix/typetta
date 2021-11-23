@@ -52,7 +52,8 @@
     "knex": "0.95.14",
     "lodash": "4.17.21",
     "object-hash": "^2.1.1",
-    "type-fest": "0.16.0"
+    "type-fest": "0.16.0",
+    "mongodb": "4.2.0"
   },
   "jest": {
     "rootDir": "./src",
