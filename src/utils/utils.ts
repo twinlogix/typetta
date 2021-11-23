@@ -28,31 +28,6 @@ export function flattenSorts<SortInput extends { [key: string]: SortDirection | 
     .flat()
 }
 
-// export function mongooseProjection<T>(projections: Projection<T>, mongooseSchema: Schema, prefix: string = '') {
-//   if (projections) {
-//     let mongooseProjections: any = {}
-//     Object.entries(projections).forEach(([key, value]) => {
-//       if (value === true) {
-//         if (mongooseSchema.path(key)) {
-//           mongooseProjections[prefix + key] = 1
-//         }
-//       } else if (typeof value === 'object') {
-//         if (mongooseSchema.path(key)) {
-//           const schemaType: any = mongooseSchema.path(key)
-//           if (schemaType.schema) {
-//             mongooseProjections = { ...mongooseProjections, ...mongooseProjection(value, schemaType.schema, prefix + key + '.') }
-//           } else {
-//             mongooseProjections[prefix + key] = 1
-//           }
-//         }
-//       }
-//     })
-//     return mongooseProjections
-//   } else {
-//     return null
-//   }
-// }
-
 export function hasIdFilter<IDType, Filter extends { id?: IDType | null | ComparisonOperators<IDType> | ElementOperators<IDType> | EvaluationOperators<IDType> }>(
   conditions: Filter,
   id: IDType | null,

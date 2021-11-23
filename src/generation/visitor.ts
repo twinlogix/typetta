@@ -116,6 +116,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
 
       resFields.push({
         name: field.name.value,
+        graphqlType: coreType.name.value,
         type: resFieldType,
         isRequired: field.type.kind === Kind.NON_NULL_TYPE,
         isID: idDirective != null,

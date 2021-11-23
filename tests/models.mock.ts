@@ -20,43 +20,43 @@ export type Scalars = {
 
 export type Address = {
   __typename?: 'Address';
-  id: Scalars['ID'];
   cities?: Maybe<Array<City>>;
+  id: Scalars['ID'];
 };
 
 export type City = {
   __typename?: 'City';
+  addressId: Scalars['String'];
+  computedAddressName?: Maybe<Scalars['String']>;
+  computedName?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
-  addressId: Scalars['String'];
-  computedName?: Maybe<Scalars['String']>;
-  computedAddressName?: Maybe<Scalars['String']>;
 };
 
 export type Organization = {
   __typename?: 'Organization';
+  address?: Maybe<Address>;
+  computedName?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
   vatNumber?: Maybe<Scalars['String']>;
-  address?: Maybe<Address>;
-  computedName?: Maybe<Scalars['String']>;
 };
 
 export type User = {
   __typename?: 'User';
-  id: Scalars['ID'];
-  usernamePasswordCredentials?: Maybe<UsernamePasswordCredentials>;
+  amount?: Maybe<Scalars['Decimal']>;
+  amounts?: Maybe<Array<Scalars['Decimal']>>;
   firstName?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
   lastName?: Maybe<Scalars['String']>;
   live: Scalars['Boolean'];
   localization?: Maybe<Scalars['Coordinates']>;
   title?: Maybe<Scalars['LocalizedString']>;
-  amounts?: Maybe<Array<Scalars['Decimal']>>;
-  amount?: Maybe<Scalars['Decimal']>;
+  usernamePasswordCredentials?: Maybe<UsernamePasswordCredentials>;
 };
 
 export type UsernamePasswordCredentials = {
   __typename?: 'UsernamePasswordCredentials';
-  username: Scalars['String'];
   password: Scalars['String'];
+  username: Scalars['String'];
 };
