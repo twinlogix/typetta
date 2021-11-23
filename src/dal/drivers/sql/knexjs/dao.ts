@@ -72,6 +72,7 @@ export class AbstractKnexJsDAO<
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
     const query = buildSort(where, (params.sorts || []) as AbstractSort[])
+    const lol = query.toQuery().toString()
     const records = await query.limit(params.limit || this.pageSize).offset(params.start || 0)
     return this.dbToModel(records)
   }
@@ -87,13 +88,21 @@ export class AbstractKnexJsDAO<
     return record ? record : null
   }
 
-  protected async _findPage<P extends AnyProjection<ModelType, ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<{ totalCount: number; records: PartialDeep<ModelType>[] }> {
+  protected async _findPage<P extends AnyProjection<ModelType, ProjectionType>>(
+    params: FindParams<FilterType, P, SortType, OptionsType>,
+  ): Promise<{ totalCount: number; records: PartialDeep<ModelType>[] }> {
     const totalCount = await this._count({ ...params })
     if (totalCount === 0) {
       return { totalCount, records: [] }
     }
     const records = await this.getRecords(params)
     return { totalCount, records }
+  }
+
+  public async execQuery(build: (qb: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>): Promise<unknown> {
+    const query = build(this.qb())
+    const result = await query
+    return result
   }
 
   protected async _exists(params: FilterParams<FilterType, OptionsType>): Promise<boolean> {

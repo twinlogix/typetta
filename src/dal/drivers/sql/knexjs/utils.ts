@@ -7,12 +7,13 @@ import { DataTypeAdapter } from '../../drivers.types'
 
 export type AbstractFilter =
   | {
-    [key: string]: any | null | ComparisonOperators<any> | ElementOperators<any> | EvaluationOperators<any>
-  }
+      [key: string]: any | null | ComparisonOperators<any> | ElementOperators<any> | EvaluationOperators<any>
+    }
   | LogicalOperators<any>
 
 export type AbstractSort = { [key: string]: SortDirection }
 
+//TODO: array fitlering not supported
 export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar extends keyof ScalarsType>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   filter: AbstractFilter,
@@ -50,30 +51,33 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar exten
           }
         }
       } else {
-        throw new Error('Where conditions on embedded types are not supported yet.')
+        throw new Error('Filtering on embedded types is not supported.')
       }
     } else if (k === '$or') {
       builder.orWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
       })
     } else if (k === '$and') {
       builder.andWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb, filter, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb, filter, schema, adapters))
       })
     } else if (k === '$nor') {
       builder.not.orWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
       })
     } else if (k === '$not') {
       builder.whereNot((qb) => {
         buildWhereConditions(qb, v as AbstractFilter, schema, adapters)
       })
+    } else {
+      throw new Error(`${k} is not a scalr in the schema. (Filtering on embedded types is not supported.)`)
     }
   })
   return builder
 }
 
-export function buildSelect<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, projection: GenericProjection): Knex.QueryBuilder<TRecord, TResult> {
+//TODO: array not supported
+export function buildSelect<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuilder<TRecord, TResult>, projection: GenericProjection): Knex.QueryBuilder<TRecord, TResult> {
   if (projection === false) {
     builder.select([])
   } else if (projection === true) {
