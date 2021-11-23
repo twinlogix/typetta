@@ -20,7 +20,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       const daoUpdate = this._generateDAOUpdate(node, typesMap)
       const daoParams = this._generateDAOParams(node, typesMap)
       const dao = this._generateDAO(node, typesMap)
-      return [daoExcluded, daoFilter, daoProjection, daoSort, daoUpdate, daoParams, dao].join('\n\n')
+      return [daoExcluded, daoSchema, daoFilter, daoProjection, daoSort, daoUpdate, daoParams, dao].join('\n\n')
     } else {
       return ''
     }
