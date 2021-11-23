@@ -60,7 +60,7 @@ export function indentMultiline(str: string, count = 1): string {
  * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
  * @returns a new transformed object
  */
-export function transformObject<T extends object, ScalarsType>(
+export function transformObject<T, ScalarsType>(
   adapters: Map<keyof ScalarsType, DataTypeAdapter<ScalarsType, keyof ScalarsType, any>>,
   direction: 'dbToModel' | 'modelToDB',
   object: T,
