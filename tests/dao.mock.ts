@@ -1,9 +1,10 @@
 import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
-import { Schema, DAOParams, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, GeospathialOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
-import { Connection } from 'mongodb';
+import { Collection } from 'mongodb';
+import { Knex } from 'knex';
 
 //--------------------------------------------------------------------------------
 //----------------------------------- ADDRESS ------------------------------------
@@ -33,14 +34,14 @@ export type AddressUpdate = {
   'id'?: string
 };
 
-export interface AddressDAOParams extends DAOParams<types.Address, 'id', true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { mongoDB?: any } & { test: string }>{}
+export type AddressDAOParams = MongoDBDAOParams<types.Address, 'id', true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { mongoDB?: any } & { test: string }, types.Scalars>;
 
 export class AddressDAO extends AbstractMongoDBDAO<types.Address, 'id', true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
-  public constructor(params: { daoContext: AbstractDAOContext } & AddressDAOParams, connection?: Connection){
+  public constructor(params: AddressDAOParams){
     super({   
-      idField: 'id', 
       ...params, 
+      idField: 'id', 
       associations: overrideAssociations(
         [
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
@@ -92,14 +93,14 @@ export type CityUpdate = {
   'name'?: string
 };
 
-export interface CityDAOParams extends DAOParams<types.City, 'id', true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { mongoDB?: any } & { test: string }>{}
+export type CityDAOParams = MongoDBDAOParams<types.City, 'id', true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { mongoDB?: any } & { test: string }, types.Scalars>;
 
 export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
-  public constructor(params: { daoContext: AbstractDAOContext } & CityDAOParams, connection?: Connection){
+  public constructor(params: CityDAOParams){
     super({   
-      idField: 'id', 
       ...params, 
+      idField: 'id', 
       associations: overrideAssociations(
         [
           
@@ -119,7 +120,11 @@ export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', true, CityFilt
 export type OrganizationExcludedFields = 'computedName'
 
 export const organizationSchema : Schema<types.Scalars>= {
-  'address': { embedded: {  'id': { scalar: 'ID', required: true}}},
+  'address': {
+    embedded: {
+      'id': { scalar: 'ID', required: true}
+    }
+  },
   'id': { scalar: 'ID', required: true},
   'name': { scalar: 'String', required: true},
   'vatNumber': { scalar: 'String'}
@@ -159,14 +164,14 @@ export type OrganizationUpdate = {
   'vatNumber'?: string | null
 };
 
-export interface OrganizationDAOParams extends DAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoDB?: any } & { test: string }>{}
+export type OrganizationDAOParams = MongoDBDAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoDB?: any } & { test: string }, types.Scalars>;
 
 export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
-  public constructor(params: { daoContext: AbstractDAOContext } & OrganizationDAOParams, connection?: Connection){
+  public constructor(params: OrganizationDAOParams){
     super({   
-      idField: 'id', 
       ...params, 
+      idField: 'id', 
       associations: overrideAssociations(
         [
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
@@ -194,8 +199,12 @@ export const userSchema : Schema<types.Scalars>= {
   'live': { scalar: 'Boolean', required: true},
   'localization': { scalar: 'Coordinates'},
   'title': { scalar: 'LocalizedString'},
-  'usernamePasswordCredentials': { embedded: {  'password': { scalar: 'String', required: true}
-    'username': { scalar: 'String', required: true}}}
+  'usernamePasswordCredentials': {
+    embedded: {
+      'password': { scalar: 'String', required: true},
+      'username': { scalar: 'String', required: true}
+    }
+  }
 };
 
 type UserFilterFields = {
@@ -254,14 +263,14 @@ export type UserUpdate = {
   'usernamePasswordCredentials.username'?: string
 };
 
-export interface UserDAOParams extends DAOParams<types.User, 'id', true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { mongoDB?: any } & { test: string }>{}
+export type UserDAOParams = MongoDBDAOParams<types.User, 'id', true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { mongoDB?: any } & { test: string }, types.Scalars>;
 
 export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
-  public constructor(params: { daoContext: AbstractDAOContext } & UserDAOParams, connection?: Connection){
+  public constructor(params: UserDAOParams){
     super({   
-      idField: 'id', 
       ...params, 
+      idField: 'id', 
       associations: overrideAssociations(
         [
           
