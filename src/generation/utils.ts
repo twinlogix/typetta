@@ -60,13 +60,13 @@ export function indentMultiline(str: string, count = 1): string {
  * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
  * @returns a new transformed object
  */
-export function transformObject<T, ScalarsType>(
+export function transformObject<From, To, ScalarsType>(
   adapters: Map<keyof ScalarsType, DataTypeAdapter<ScalarsType, keyof ScalarsType, any>>,
   direction: 'dbToModel' | 'modelToDB',
-  object: T,
+  object: From,
   schema: Schema<ScalarsType>,
   embeddedOverride?: DataTypeAdapter<ScalarsType, keyof ScalarsType, any>,
-): T {
+): To {
   const result: any = {}
   Object.entries(object).map(([k, v]) => {
     if (k in schema) {

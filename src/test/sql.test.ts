@@ -112,15 +112,13 @@ export type UserUpdate = {
   amount?: BigNumber | null
 }
 
-export interface UserDAOParams extends DAOParams<User, 'id', false, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { knex?: any } & { test: string }> {}
+export interface UserDAOParams extends DAOParams<User, 'id', false, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { knex?: any } & { test: string }, Scalars> {}
 
 //@ts-ignore
 export class UserDAO extends AbstractKnexJsDAO<User, 'id', false, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { knex?: any } & { test: string }, Scalars> {
   public constructor(params: { daoContext: AbstractDAOContext; knex: Knex<any, unknown[]> } & UserDAOParams) {
     super({
-      idField: 'id',
-      schema: userSchema,
-      collectionName: 'users',
+      tableName: 'users',
       associations: overrideAssociations([]),
       ...params,
     })
@@ -193,7 +191,7 @@ test('asd', async () => {
       ],
     ]),
   )
-  const dao = new UserDAO({ daoContext: context, knex: knexInstance })
+  const dao = new UserDAO({ daoContext: context, knex: knexInstance, idField: 'id', schema: userSchema })
 
   if (createSchema) {
     const ins = await dao.insertOne({
