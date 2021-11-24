@@ -1,9 +1,9 @@
-import { Knex } from 'knex'
 import { ComparisonOperators, ElementOperators, EvaluationOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
 import { DataTypeAdapter } from '../../drivers.types'
+import { Knex } from 'knex'
 
 export type AbstractFilter =
   | {

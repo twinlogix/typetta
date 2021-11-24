@@ -55,7 +55,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       })
       .join('\n')
 
-    const mongoDBFields = hasMongoDBEntites ? '\nprivate mongoDB: Db;' : '';
+    const mongoDBFields = hasMongoDBEntites ? '\nprivate mongoDB: Db | undefined;' : '';
     const knexJsFields = hasSQLEntities ? '\nprivate knex: Knex;' : '';
     const daoOverridesDeclaration = `private daoOverrides: DAOContextParams['daoOverrides'];${mongoDBFields}${knexJsFields}`
 
@@ -66,7 +66,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
           node.sqlEntity ?
             `,knex: this.knex, tableName: ${node.sqlEntity?.table}` :
             node.mongoEntity ?
-              `,collection: this.mongoDB.collection('${node.mongoEntity?.collection}')` :
+              `,collection: this.mongoDB!.collection('${node.mongoEntity?.collection}')` :
               ''
         );
         const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, ...this.daoOverrides?.${toFirstLower(node.name)} ${daoImplementationInit} });`

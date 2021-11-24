@@ -1,15 +1,12 @@
-import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
-import { PartialDeep } from 'type-fest'
-import { AbstractDAOContext } from '../../../daoContext/daoContext'
-import { AbstractDAO } from '../../../dao/dao'
-import { AnyProjection, GenericProjection, Projection } from '../../../dao/projections/projections.types'
-import { Knex } from 'knex'
-import { ComparisonOperators, ElementOperators, EvaluationOperators } from '../../../dao/filters/filters.types'
-import { AbstractSort, buildSelect, buildSort, buildWhereConditions } from './utils.knexjs'
 import { transformObject } from '../../../../generation/utils'
-import { Schema } from '../../../dao/schemas/schemas.types'
+import { AbstractDAO } from '../../../dao/dao'
+import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
+import { ComparisonOperators, ElementOperators, EvaluationOperators } from '../../../dao/filters/filters.types'
+import { AnyProjection, GenericProjection, Projection } from '../../../dao/projections/projections.types'
 import { KnexJsDAOParams } from './dao.knexjs.types'
-import { ConditionalPartialBy } from '../../../../utils/utils'
+import { AbstractSort, buildSelect, buildSort, buildWhereConditions } from './utils.knexjs'
+import { Knex } from 'knex'
+import { PartialDeep } from 'type-fest'
 
 type AbstractFilter = {
   [key: string]: any | null | ComparisonOperators<any> | ElementOperators<any> | EvaluationOperators<any>
@@ -66,7 +63,6 @@ export class AbstractKnexJsDAO<
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
     const query = buildSort(where, (params.sorts || []) as AbstractSort[])
-    const lol = query.toQuery().toString()
     const records = await query.limit(params.limit || this.pageSize).offset(params.start || 0)
     return this.dbToModel(records)
   }

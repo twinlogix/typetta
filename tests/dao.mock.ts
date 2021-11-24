@@ -307,35 +307,39 @@ export class DAOContext extends AbstractDAOContext {
   private _user: UserDAO | undefined;
   
   private daoOverrides: DAOContextParams['daoOverrides'];
-  private mongoDB: Db;
+  private mongoDB: Db | undefined;
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address ,collection: this.mongoDB.collection('addresses') });
+      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address ,collection: this.mongoDB!.collection('addresses') });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city ,collection: this.mongoDB.collection('citys') });
+      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city ,collection: this.mongoDB!.collection('citys') });
     }
     return this._city;
   }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization ,collection: this.mongoDB.collection('organizations') });
+      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization ,collection: this.mongoDB!.collection('organizations') });
     }
     return this._organization;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user ,collection: this.mongoDB.collection('users') });
+      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user ,collection: this.mongoDB!.collection('users') });
     }
     return this._user;
   }
   
   constructor(options?: DAOContextParams) {
-    super()
+    super(new Map([['Decimal', {
+      scalar: 'Decimal',
+      dbToModel: (o) => new BigNumber(o),
+      modelToDB: (o) => o
+    }]]))
     this.daoOverrides = options?.daoOverrides
     this.mongoDB = options?.mongoDB
   }
