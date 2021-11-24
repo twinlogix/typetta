@@ -5,7 +5,7 @@ import { AbstractDAO } from '../../../dao/dao'
 import { AnyProjection, GenericProjection, Projection } from '../../../dao/projections/projections.types'
 import { transformObject } from '../../../../generation/utils'
 import { Schema } from '../../../dao/schemas/schemas.types'
-import { Collection } from 'mongodb'
+import { Collection, Document, WithId, Filter, FindCursor } from 'mongodb'
 import { MongoDBDAOParams } from './dao.mongodb.types'
 
 export class AbstractMongoDBDAO<
@@ -55,7 +55,9 @@ export class AbstractMongoDBDAO<
     this.collection = collection
   }
 
-  // private dbToModel(objects: PartialDeep<ModelType>[]): PartialDeep<ModelType>[] {
+  // private dbToModel(objects: FindCursor<WithId<Document>>[]): PartialDeep<ModelType>[] {
+  //   objects.
+  //     return[]
   // }
 
   // private modelToDb<T>(object: T): T {
@@ -64,7 +66,9 @@ export class AbstractMongoDBDAO<
   // private buildSelect<P extends AnyProjection<ModelType, ProjectionType>>(projection?: P, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
   // }
 
-  // private buildWhere(filter?: FilterType, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+  // private buildFilter(filter?: FilterType): Filter<WithId<Document>> {
+  //   // TODO
+  //   return {}
   // }
 
   // private async getRecords<P extends AnyProjection<ModelType, ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
@@ -72,7 +76,15 @@ export class AbstractMongoDBDAO<
 
   protected async _find<P extends AnyProjection<ModelType, ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
     // TODO
-    return []
+    // return this.dbToModel(
+    //   await this.collection.find(
+    //     this.buildFilter(params.filter),
+    //     {
+    //       ...params.options?.mongoDB
+    //     }
+    //   ).toArray()
+    // )
+    return [];
   }
 
   protected async _findOne<P extends AnyProjection<ModelType, ProjectionType>>(params: FindOneParams<FilterType, P, OptionsType>): Promise<PartialDeep<ModelType> | null> {

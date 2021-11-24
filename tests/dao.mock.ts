@@ -34,7 +34,8 @@ export type AddressUpdate = {
   'id'?: string
 };
 
-export type AddressDAOParams = MongoDBDAOParams<types.Address, 'id', true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type AddressDAOAllParams = MongoDBDAOParams<types.Address, 'id', true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+export type AddressDAOParams = Omit<AddressDAOAllParams, 'idField' | 'schema'> & Partial<Pick<AddressDAOAllParams, 'idField' | 'schema'>>;
 
 export class AddressDAO extends AbstractMongoDBDAO<types.Address, 'id', true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
@@ -42,6 +43,7 @@ export class AddressDAO extends AbstractMongoDBDAO<types.Address, 'id', true, Ad
     super({   
       ...params, 
       idField: 'id', 
+      schema: addressSchema, 
       associations: overrideAssociations(
         [
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
@@ -93,7 +95,8 @@ export type CityUpdate = {
   'name'?: string
 };
 
-export type CityDAOParams = MongoDBDAOParams<types.City, 'id', true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type CityDAOAllParams = MongoDBDAOParams<types.City, 'id', true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { mongoDB?: any } & { test: string }, types.Scalars>;
+export type CityDAOParams = Omit<CityDAOAllParams, 'idField' | 'schema'> & Partial<Pick<CityDAOAllParams, 'idField' | 'schema'>>;
 
 export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
@@ -101,6 +104,7 @@ export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', true, CityFilt
     super({   
       ...params, 
       idField: 'id', 
+      schema: citySchema, 
       associations: overrideAssociations(
         [
           
@@ -164,7 +168,8 @@ export type OrganizationUpdate = {
   'vatNumber'?: string | null
 };
 
-export type OrganizationDAOParams = MongoDBDAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type OrganizationDAOAllParams = MongoDBDAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+export type OrganizationDAOParams = Omit<OrganizationDAOAllParams, 'idField' | 'schema'> & Partial<Pick<OrganizationDAOAllParams, 'idField' | 'schema'>>;
 
 export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
@@ -172,6 +177,7 @@ export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id'
     super({   
       ...params, 
       idField: 'id', 
+      schema: organizationSchema, 
       associations: overrideAssociations(
         [
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
@@ -263,7 +269,8 @@ export type UserUpdate = {
   'usernamePasswordCredentials.username'?: string
 };
 
-export type UserDAOParams = MongoDBDAOParams<types.User, 'id', true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type UserDAOAllParams = MongoDBDAOParams<types.User, 'id', true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+export type UserDAOParams = Omit<UserDAOAllParams, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams, 'idField' | 'schema'>>;
 
 export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
@@ -271,6 +278,7 @@ export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilt
     super({   
       ...params, 
       idField: 'id', 
+      schema: userSchema, 
       associations: overrideAssociations(
         [
           
@@ -283,10 +291,10 @@ export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilt
 
 export type DAOContextParams = {
   daoOverrides?: { 
-    address?: AddressDAOParams,
-    city?: CityDAOParams,
-    organization?: OrganizationDAOParams,
-    user?: UserDAOParams
+    address?: Partial<AddressDAOParams>,
+    city?: Partial<CityDAOParams>,
+    organization?: Partial<OrganizationDAOParams>,
+    user?: Partial<UserDAOParams>
   },
   mongoDB: Db
 };
