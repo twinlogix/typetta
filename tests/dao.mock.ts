@@ -337,7 +337,7 @@ export class DAOContext extends AbstractDAOContext {
   constructor(options?: DAOContextParams) {
     super()
     this.daoOverrides = options?.daoOverrides
-    this.mongoDB = options?.mongoDB
+    this.mongoDB = options?.mongoDB!
   }
 
 }

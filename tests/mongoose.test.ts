@@ -1,29 +1,28 @@
-import { MongoClient, Db } from 'mongodb';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import { DAOContext } from './dao.mock'
+import { MongoClient, Db } from 'mongodb'
+import { MongoMemoryServer } from 'mongodb-memory-server'
+import { DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { projection, SortDirection, Projection, StaticProjection, buildComputedField, projectionDependency } from '@twinlogix/typetta'
 import { Test, typeAssert } from './utils.test'
 import { PartialDeep } from 'type-fest'
 
-
-let con: MongoClient;
-let mongoServer: MongoMemoryServer;
-let db: Db;
-let dao;
+let con: MongoClient
+let mongoServer: MongoMemoryServer
+let db: Db
+let dao: DAOContext
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  con = await MongoClient.connect(mongoServer.getUri(), {});
-  db = con.db('test');
-  dao = new DAOContext({ mongoDB: db });
+  mongoServer = await MongoMemoryServer.create()
+  con = await MongoClient.connect(mongoServer.getUri(), {})
+  db = con.db('test')
+  dao = new DAOContext({ mongoDB: db })
 })
 
 beforeEach(async () => {
-  const collections = await db.collections();
+  const collections = await db.collections()
   for (const collection of collections) {
-    await collection.deleteMany({});
+    await collection.deleteMany({})
   }
 })
 
@@ -127,7 +126,7 @@ test('find with simple sorts', async () => {
   expect(response[0].firstName).toBe('9')
   expect(response[1].firstName).toBe('8')
 
-  response = await dao.user.findAll({ sorts: { firstName: SortDirection.DESC } })
+  response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.DESC }] })
   expect(response[0].firstName).toBe('9')
 
   response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.DESC }] })
@@ -618,7 +617,7 @@ test('safe find', async () => {
   expect(response2!.live).toBe(true)
 
   //Dynamic projection
-  const proj: Projection<User> = { firstName: true, live: true }
+  const proj: UserProjection = { firstName: true, live: true }
   const response3 = await dao.user.findOne({ projection: proj })
   typeAssert<Test<typeof response3, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
   expect(response3).toBeDefined()
@@ -654,7 +653,7 @@ test('safe find', async () => {
 
   //Info to projection
   const response6 = await dao.user.findOne({ projection: true })
-  typeAssert<Test<typeof response6, (User & { __projection: 'all' }) | (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
+  typeAssert<Test<typeof response6, (User & { __projection: 'all' }) | null>>()
   expect(response6).toBeDefined()
   expect(response6!.firstName).toBe('FirstName')
   expect(response6!.live).toBe(true)
@@ -678,9 +677,9 @@ test('Find with circular reference', async () => {
 
 afterAll(async () => {
   if (con) {
-    await con.close();
+    await con.close()
   }
   if (mongoServer) {
-    await mongoServer.stop();
+    await mongoServer.stop()
   }
-});
+})
