@@ -41,10 +41,12 @@ export class AbstractKnexJsDAO<
     return this.knex(this.tableName)
   }
 
-  private dbToModel(objects: any[]): PartialDeep<ModelType>[] {
-    return objects.map((obj) =>
-      transformObject<any, PartialDeep<ModelType>, ScalarsType>(this.daoContext.adapters, 'dbToModel', obj as PartialDeep<ModelType>, this.schema, this.daoContext.adapters.get('JSON')),
-    )
+  private dbsToModels(objects: any[]): PartialDeep<ModelType>[] {
+    return objects.map((o) => this.dbToModel(o))
+  }
+
+  private dbToModel(object: any): PartialDeep<ModelType> {
+    return transformObject(this.daoContext.adapters, 'dbToModel', object, this.schema, this.daoContext.adapters.get('JSON'))
   }
 
   private modelToDb(object: PartialDeep<ModelType>): any {
@@ -64,7 +66,7 @@ export class AbstractKnexJsDAO<
     const where = this.buildWhere(params.filter, select)
     const query = buildSort(where, (params.sorts || []) as AbstractSort[])
     const records = await query.limit(params.limit || this.pageSize).offset(params.start || 0)
-    return this.dbToModel(records)
+    return this.dbsToModels(records)
   }
 
   protected async _find<P extends AnyProjection<ModelType, ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
@@ -75,7 +77,7 @@ export class AbstractKnexJsDAO<
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
     const record = await where.first()
-    return record ? record : null
+    return record ? this.dbToModel(record) : null
   }
 
   protected async _findPage<P extends AnyProjection<ModelType, ProjectionType>>(

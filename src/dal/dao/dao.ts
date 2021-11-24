@@ -102,14 +102,16 @@ export abstract class AbstractDAO<
   async findAll<P extends AnyProjection<ModelType, ProjectionType> = true>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<ModelProjection<ModelType, P>[]> {
     const newParams = await this.beforeFind(params)
     const records = await this._find(newParams)
-    return this.elabRecords(params, records)
+    const resolvedRecors = await this.resolveAssociations(records, params.projection)
+    return this.elabRecords(params, resolvedRecors)
   }
 
   async findOne<P extends AnyProjection<ModelType, ProjectionType> = true>(params: FindOneParams<FilterType, P, OptionsType>): Promise<ModelProjection<ModelType, P> | null> {
     const newParams = await this.beforeFind({ ...params })
     const record = await this._findOne(newParams)
     if (record) {
-      return (await this.elabRecords({ ...params }, [record]))[0]
+      const resolvedRecors = await this.resolveAssociations([record], params.projection)
+      return (await this.elabRecords({ ...params }, resolvedRecors))[0]
     }
     return null
   }
@@ -224,7 +226,7 @@ export abstract class AbstractDAO<
     }
   }
 
-  protected async resolveAssociations(dbObjects: any[], projections?: ProjectionType): Promise<ModelType[]> {
+  protected async resolveAssociations(dbObjects: any[], projections?: AnyProjection<ModelType, ProjectionType>): Promise<PartialDeep<ModelType>[]> {
     for (const association of this.associations) {
       if (projections) {
         const associationProjection = getProjection(projections as GenericProjection, association.field)
