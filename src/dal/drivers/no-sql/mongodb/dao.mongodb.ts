@@ -7,6 +7,8 @@ import { MongoDBDAOParams } from './dao.mongodb.types'
 import { Collection, Document, WithId, Filter, UpdateOptions, FindOptions, OptionalId, InsertOneOptions } from 'mongodb'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
+import { adaptFilter } from './utils.mongodb'
+import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 
 export class AbstractMongoDBDAO<
   ModelType extends object,
@@ -48,7 +50,7 @@ export class AbstractMongoDBDAO<
 
   private buildFilter(filter?: FilterType): Filter<Document> {
     if (filter) {
-      return filter as Filter<Document>
+      return adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters)
     }
     return {}
   }

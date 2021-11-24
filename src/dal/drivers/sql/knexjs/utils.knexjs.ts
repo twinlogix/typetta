@@ -5,11 +5,9 @@ import { SortDirection } from '../../../dao/sorts/sorts.types'
 import { DataTypeAdapter } from '../../drivers.types'
 import { Knex } from 'knex'
 
-export type AbstractFilter =
-  | {
-      [key: string]: any | null | ComparisonOperators<any> | ElementOperators<any> | EvaluationOperators<any>
-    }
-  | LogicalOperators<any>
+export type AbstractFilter = {
+  [key: string]: unknown | null | ComparisonOperators<unknown> | ElementOperators<unknown> | EvaluationOperators<unknown>
+} & LogicalOperators<unknown>
 
 export type AbstractSort = { [key: string]: SortDirection }
 
@@ -24,9 +22,9 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar exten
     if (k in schema) {
       const schemaField = schema[k]
       if ('scalar' in schemaField) {
-        if (typeof v === 'object' && v !== null) {
+        if (typeof v === 'object' && v !== null && ('$exists' in v || '$eq' in v || '$in' in v || '$gte' in v || '$gt' in v || '$lte' in v || '$lt' in v || '$ne' in v || '$nin' in v)) {
+          const adapter = adapters.get(schemaField.scalar)
           Object.entries(v).forEach(([fk, fv]) => {
-            const adapter = adapters.get(schemaField.scalar)
             const av = adapter ? (Array.isArray(fv) ? fv.map((fve) => adapter.modelToDB(fve as ScalarsType[Scalar])) : adapter.modelToDB(fv as ScalarsType[Scalar])) : fv
             // prettier-ignore
             switch (fk) { // TODO: text search
@@ -70,14 +68,14 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar exten
         buildWhereConditions(qb, v as AbstractFilter, schema, adapters)
       })
     } else {
-      throw new Error(`${k} is not a scalr in the schema. (Filtering on embedded types is not supported.)`)
+      throw new Error(`${k} is not a scalar in the schema. (Filtering on embedded types is not supported.)`)
     }
   })
   return builder
 }
 
 //TODO: array not supported
-export function buildSelect<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuilder<TRecord, TResult>, projection: GenericProjection): Knex.QueryBuilder<TRecord, TResult> {
+export function buildSelect<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, projection: GenericProjection): Knex.QueryBuilder<TRecord, TResult> {
   if (projection === false) {
     builder.select([])
   } else if (projection === true) {
