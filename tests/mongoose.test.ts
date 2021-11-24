@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-import { MockMongoose } from 'mock-mongoose'
+import { MongoClient, Db } from 'mongodb';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { DAOContext, UserFilter } from './dao.mock'
 import { Maybe, User } from './models.mock'
 import BigNumber from 'bignumber.js'
@@ -7,19 +7,24 @@ import { projection, SortDirection, Projection, StaticProjection, buildComputedF
 import { Test, typeAssert } from './utils.test'
 import { PartialDeep } from 'type-fest'
 
-const mockMongoose: MockMongoose = new MockMongoose(mongoose)
-const dao = new DAOContext()
 
-beforeAll((done) => {
-  mockMongoose.prepareStorage().then(async () => {
-    await mongoose.connect('mongodb://test-host/test-db')
-    done()
-  })
+let con: MongoClient;
+let mongoServer: MongoMemoryServer;
+let db: Db;
+let dao;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  con = await MongoClient.connect(mongoServer.getUri(), {});
+  db = con.db('test');
+  dao = new DAOContext({ mongoDB: db });
 })
 
-beforeEach(async (done) => {
-  await mockMongoose.helper.reset()
-  done()
+beforeEach(async () => {
+  const collections = await db.collections();
+  for (const collection of collections) {
+    await collection.deleteMany({});
+  }
 })
 
 // ------------------------------------------------------------------------
@@ -351,6 +356,7 @@ test('insert and retrieve localized string field', async () => {
 
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       city: {
         middlewares: [
@@ -377,6 +383,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       city: {
         middlewares: [
@@ -396,6 +403,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       city: {
         middlewares: [
@@ -421,6 +429,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       city: {
         middlewares: [
@@ -445,6 +454,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 
 test('computed fields (one dependency - deep level - one calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       organization: {
         middlewares: [
@@ -462,6 +472,7 @@ test('computed fields (one dependency - deep level - one calculated)', async () 
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       organization: {
         middlewares: [
@@ -485,7 +496,7 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 test('middleware', async () => {
   let operationCount = 0
   const dao = new DAOContext({
-    defaultOptions: { test: 'test' },
+    mongoDB: db,
     daoOverrides: {
       user: {
         middlewares: [
@@ -642,7 +653,7 @@ test('safe find', async () => {
   expect(response5!.live).toBe(true)
 
   //Info to projection
-  const response6 = await dao.user.findOne<Projection<User>>({ projection: true })
+  const response6 = await dao.user.findOne({ projection: true })
   typeAssert<Test<typeof response6, (User & { __projection: 'all' }) | (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
   expect(response6).toBeDefined()
   expect(response6!.firstName).toBe('FirstName')
@@ -665,8 +676,11 @@ test('Find with circular reference', async () => {
   //TODO
 })
 
-afterAll(async (done) => {
-  await mongoose.connection.close()
-  await mockMongoose.killMongo()
-  await done()
-})
+afterAll(async () => {
+  if (con) {
+    await con.close();
+  }
+  if (mongoServer) {
+    await mongoServer.stop();
+  }
+});
