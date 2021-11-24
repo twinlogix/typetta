@@ -1,25 +1,29 @@
-import mongoose from 'mongoose'
-import { MockMongoose } from 'mock-mongoose'
-import { DAOContext, UserFilter } from './dao.mock'
-import { Maybe, User } from './models.mock'
+import { MongoClient, Db } from 'mongodb'
+import { MongoMemoryServer } from 'mongodb-memory-server'
+import { DAOContext, UserProjection } from './dao.mock'
+import { User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { projection, SortDirection, Projection, StaticProjection, buildComputedField, projectionDependency } from '@twinlogix/typetta'
 import { Test, typeAssert } from './utils.test'
 import { PartialDeep } from 'type-fest'
 
-const mockMongoose: MockMongoose = new MockMongoose(mongoose)
-const dao = new DAOContext()
+let con: MongoClient
+let mongoServer: MongoMemoryServer
+let db: Db
+let dao: DAOContext
 
-beforeAll((done) => {
-  mockMongoose.prepareStorage().then(async () => {
-    await mongoose.connect('mongodb://test-host/test-db')
-    done()
-  })
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create()
+  con = await MongoClient.connect(mongoServer.getUri(), {})
+  db = con.db('test')
+  dao = new DAOContext({ mongoDB: db })
 })
 
-beforeEach(async (done) => {
-  await mockMongoose.helper.reset()
-  done()
+beforeEach(async () => {
+  const collections = await db.collections()
+  for (const collection of collections) {
+    await collection.deleteMany({})
+  }
 })
 
 // ------------------------------------------------------------------------
@@ -47,6 +51,7 @@ test('simple find', async () => {
 })
 
 test('find nested foreign association', async () => {
+  await dao.address.apiV1.insert({ id: 'address1' })
   await dao.organization.apiV1.insert({ id: 'organization1', name: 'Organization 1', address: { id: 'address1' } })
   await dao.city.apiV1.insert({ id: 'city1', name: 'City 1', addressId: 'address1' })
   await dao.city.apiV1.insert({ id: 'city2', name: 'City 2', addressId: 'address1' })
@@ -122,7 +127,7 @@ test('find with simple sorts', async () => {
   expect(response[0].firstName).toBe('9')
   expect(response[1].firstName).toBe('8')
 
-  response = await dao.user.findAll({ sorts: { firstName: SortDirection.DESC } })
+  response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.DESC }] })
   expect(response[0].firstName).toBe('9')
 
   response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.DESC }] })
@@ -351,6 +356,7 @@ test('insert and retrieve localized string field', async () => {
 
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       city: {
         middlewares: [
@@ -377,6 +383,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       city: {
         middlewares: [
@@ -396,6 +403,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       city: {
         middlewares: [
@@ -421,6 +429,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       city: {
         middlewares: [
@@ -445,6 +454,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 
 test('computed fields (one dependency - deep level - one calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       organization: {
         middlewares: [
@@ -462,6 +472,7 @@ test('computed fields (one dependency - deep level - one calculated)', async () 
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
   const dao = new DAOContext({
+    mongoDB: db,
     daoOverrides: {
       organization: {
         middlewares: [
@@ -485,14 +496,14 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 test('middleware', async () => {
   let operationCount = 0
   const dao = new DAOContext({
-    defaultOptions: { test: 'test' },
+    mongoDB: db,
     daoOverrides: {
       user: {
         middlewares: [
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
           {
             beforeInsert: async (params) => {
-              expect(params.options?.test).toBe('test')
+              //expect(params.options?.test).toBe('test') //TODO
               if (params.record.id === 'u1' && params.record.firstName === 'Mario') {
                 throw new Error('is Mario')
               }
@@ -607,7 +618,7 @@ test('safe find', async () => {
   expect(response2!.live).toBe(true)
 
   //Dynamic projection
-  const proj: Projection<User> = { firstName: true, live: true }
+  const proj: UserProjection = { firstName: true, live: true }
   const response3 = await dao.user.findOne({ projection: proj })
   typeAssert<Test<typeof response3, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
   expect(response3).toBeDefined()
@@ -642,8 +653,8 @@ test('safe find', async () => {
   expect(response5!.live).toBe(true)
 
   //Info to projection
-  const response6 = await dao.user.findOne<Projection<User>>({ projection: true })
-  typeAssert<Test<typeof response6, (User & { __projection: 'all' }) | (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
+  const response6 = await dao.user.findOne({ projection: true })
+  typeAssert<Test<typeof response6, (User & { __projection: 'all' }) | null>>()
   expect(response6).toBeDefined()
   expect(response6!.firstName).toBe('FirstName')
   expect(response6!.live).toBe(true)
@@ -657,7 +668,7 @@ test('update with undefined', async () => {
     live: true,
   })
   await dao.user.updateOne({ filter: { id: user.id }, changes: { live: undefined } })
-  const user2 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true } })
+  const user2 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true, id: true } })
   expect(user2?.live).toBe(true)
 })
 
@@ -665,8 +676,11 @@ test('Find with circular reference', async () => {
   //TODO
 })
 
-afterAll(async (done) => {
-  await mongoose.connection.close()
-  await mockMongoose.killMongo()
-  await done()
+afterAll(async () => {
+  if (con) {
+    await con.close()
+  }
+  if (mongoServer) {
+    await mongoServer.stop()
+  }
 })

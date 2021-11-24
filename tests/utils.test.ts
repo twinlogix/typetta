@@ -1,10 +1,8 @@
 import { ApolloServer } from 'apollo-server'
 const { createTestClient } = require('apollo-server-testing')
 import gql from 'graphql-tag'
-import { hasIdFilter } from '../utils/utils'
 import { User } from './models.mock'
-import { GenericProjection, MergeGenericProjection, ModelProjection, Projection } from '../dal/dao/projections/projections.types'
-import { getProjection, isChangesContainedInProjection, isProjectionContained, isProjectionIntersected, mergeProjections, projection } from '../dal/dao/projections/projections.utils'
+import { hasIdFilter, GenericProjection, MergeGenericProjection, ModelProjection, Projection, getProjection, isChangesContainedInProjection, isProjectionContained, isProjectionIntersected, mergeProjections, projection } from '@twinlogix/typetta'
 
 type Pass = 'pass'
 export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T; expected: U }) : { actual: T; expected: U }
