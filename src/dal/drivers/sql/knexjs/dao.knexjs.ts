@@ -116,7 +116,7 @@ export class AbstractKnexJsDAO<
       // .returning() is not supported
       return { ...params.record } as Omit<ModelType, ExcludedFields>
     }
-    return this.dbToModel(records)[0] as Omit<ModelType, ExcludedFields>
+    return this.dbToModel(inserted) as Omit<ModelType, ExcludedFields>
   }
 
   protected _updateOne(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
