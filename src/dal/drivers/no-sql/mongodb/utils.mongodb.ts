@@ -1,42 +1,54 @@
 import { MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
-import { Projection } from '../../../dao/projections/projections.types'
+import { AnyProjection, Projection, StaticProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DataTypeAdapter, DefaultModelScalars } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document } from 'mongodb'
 
-export function buildProjections<ModelType>(projections: Projection<ModelType>, schema: Schema<any>, prefix: string = '') {
-  if (projections) {
-    let mongooseProjections: any = {}
-    Object.entries(projections).forEach(([key, value]) => {
-      if (value === true) {
-        if (schema[key]) {
-          mongooseProjections[prefix + key] = 1
-        }
-      } else if (typeof value === 'object') {
-        if (schema[key]) {
-          if ((schema[key] as { embedded: Schema<any> }).embedded) {
-            const subSchema: Schema<any> = (schema[key] as { embedded: Schema<any> }).embedded
-            mongooseProjections = { ...mongooseProjections, ...buildProjections(value, subSchema, prefix + key + '.') }
-          } else {
-            mongooseProjections[prefix + key] = 1
-          }
+export function adaptProjection<ModelType, ProjectionType, ScalarsType>(projection: AnyProjection<ModelType, ProjectionType>, schema: Schema<ScalarsType>): AnyProjection<ModelType, ProjectionType> {
+  if (projection === true || projection === undefined) {
+    return projection
+  }
+  return Object.entries(projection).reduce<object>((result, [k, v]) => {
+    if (k in schema) {
+      const schemaField = schema[k]
+      if ('scalar' in schemaField) {
+        return {
+          ...result,
+          [k]: v,
         }
       }
-    })
-    return mongooseProjections
-  } else {
-    return null
-  }
+      return {
+        ...result,
+        [k]: adaptProjection(v, schemaField.embedded),
+      }
+    }
+    return result
+  }, {} as object) as AnyProjection<ModelType, ProjectionType>
 }
 
-function adaptToSchemaValue<ScalarsType>(
-  value: ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][],
-  schemaField: SchemaField<ScalarsType>,
-  adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
-): unknown {
-  return schemaField.array ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
+export function adaptFilter<FilterType extends AbstractFilter, ScalarsType extends DefaultModelScalars>(
+  filter: FilterType,
+  schema: Schema<ScalarsType>,
+  adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
+): Filter<Document> {
+  return Object.entries(filter).reduce<Filter<Document>>((result, [k, v]) => {
+    if (k in schema) {
+      return {
+        ...result,
+        ...adaptToSchema(k, v, adapters, schema[k]),
+      }
+    } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
+      return {
+        ...result,
+        [k]: (v as AbstractFilter[]).map((filter) => adaptFilter(filter, schema, adapters)),
+      }
+    } else {
+      // k is not in schema and is not a logical operator, ignore
+      return result
+    }
+  }, {})
 }
 
 function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][]>(
@@ -78,25 +90,10 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
   return result
 }
 
-export function adaptFilter<FilterType extends AbstractFilter, ScalarsType extends DefaultModelScalars>(
-  filter: FilterType,
-  schema: Schema<ScalarsType>,
-  adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
-): Filter<Document> {
-  return Object.entries(filter).reduce<Filter<Document>>((result, [k, v]) => {
-    if (k in schema) {
-      return {
-        ...result,
-        ...adaptToSchema(k, v, adapters, schema[k]),
-      }
-    } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
-      return {
-        ...result,
-        [k]: (v as AbstractFilter[]).map((filter) => adaptFilter(filter, schema, adapters)),
-      }
-    } else {
-      // k is not in schema and is not a logical operator, ignore
-      return result
-    }
-  }, {})
+function adaptToSchemaValue<ScalarsType>(
+  value: ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][],
+  schemaField: SchemaField<ScalarsType>,
+  adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
+): unknown {
+  return schemaField.array ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
 }

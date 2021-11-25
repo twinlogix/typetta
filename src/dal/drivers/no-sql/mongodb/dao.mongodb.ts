@@ -6,7 +6,7 @@ import { AnyProjection, Projection } from '../../../dao/projections/projections.
 import { DefaultModelScalars } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOParams } from './dao.mongodb.types'
-import { adaptFilter } from './utils.mongodb'
+import { adaptFilter, adaptProjection } from './utils.mongodb'
 import { Collection, Document, WithId, Filter, UpdateOptions, FindOptions, OptionalId, InsertOneOptions } from 'mongodb'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
@@ -46,7 +46,7 @@ export class AbstractMongoDBDAO<
     if (projection === true) {
       return undefined
     }
-    return projection as Document
+    return adaptProjection(projection, this.schema) as Document
   }
 
   private buildFilter(filter?: FilterType): Filter<Document> {
