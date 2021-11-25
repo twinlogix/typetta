@@ -215,7 +215,7 @@ export const userSchema : Schema<types.Scalars>= {
 
 type UserFilterFields = {
   'amount'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>,
-  'amounts'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>| ArrayOperators<BigNumber>,
+  'amounts'?: BigNumber[] | null | ComparisonOperators<BigNumber[]> | ElementOperators<BigNumber[]> | EvaluationOperators<BigNumber[]> | ArrayOperators<BigNumber[]>,
   'firstName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
   'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
   'lastName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,

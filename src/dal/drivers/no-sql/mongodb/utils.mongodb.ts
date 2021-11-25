@@ -1,6 +1,6 @@
 import { Projection } from '../../../dao/projections/projections.types'
-import { Schema } from '../../../dao/schemas/schemas.types'
-import { DefaultModelScalars } from '../../drivers.types'
+import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
+import { DataTypeAdapter, DefaultModelScalars } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document } from 'mongodb'
@@ -30,7 +30,14 @@ export function buildProjections<ModelType>(projections: Projection<ModelType>, 
   }
 }
 
-// TODO: text search, array filtering
+const singleValueQuery = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne'])
+const arrayValueQuery = new Set(['$in', '$nin', '$all'])
+const otherQuery = new Set(['$size', '$text', '$near', '$nearSphere'])
+
+function adaptValue(value: any, schemaField: SchemaField<any>, adapter: DataTypeAdapter<any, any>): any {
+  return schemaField.array ? (value as Array<any>).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value)
+}
+
 export function adaptFilter<FilterType extends AbstractFilter, ScalarsType extends DefaultModelScalars>(
   filter: FilterType,
   schema: Schema<ScalarsType>,
@@ -41,27 +48,40 @@ export function adaptFilter<FilterType extends AbstractFilter, ScalarsType exten
     if (k in schema) {
       const schemaField = schema[k]
       if ('scalar' in schemaField) {
+        // filter on scalar type
         const adapter = adapters[schemaField.scalar]
-        if (typeof v === 'object' && v !== null && ('$exists' in v || '$eq' in v || '$in' in v || '$gte' in v || '$gt' in v || '$lte' in v || '$lt' in v || '$ne' in v || '$nin' in v)) {
+        if (!adapter) {
+          result[k] = v
+          continue //TODO: throw if adapter is undefined?
+        }
+        if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => singleValueQuery.has(kv) || arrayValueQuery.has(kv) || otherQuery.has(kv))) {
+          //mongodb query
           result[k] = Object.entries(v).reduce((p, [fk, fv]) => {
-            const av = adapter ? (Array.isArray(fv) ? fv.map((fve) => adapter.modelToDB(fve)) : adapter.modelToDB(fv)) : fv
-            return { [fk]: av, ...p }
+            if (singleValueQuery.has(fk)) {
+              return { [fk]: adaptValue(fv, schemaField, adapter), ...p }
+            }
+            if (arrayValueQuery.has(fk)) {
+              return { [fk]: fv.map((fve: any) => adaptValue(fve, schemaField, adapter)), ...p }
+            }
+            return { [fk]: fv, ...p }
           }, {})
+          console.log(result)
         } else {
+          //plain value
           if (v === null) {
             result[k] = null
           } else if (v !== undefined) {
-            const av = adapter ? adapter.modelToDB(v as any) : v
-            result[k] = av
+            result[k] = adaptValue(v, schemaField, adapter)
           }
         }
       } else {
+        // filter on embedded type
         result[k] = adaptFilter(v as AbstractFilter, schemaField.embedded, adapters)
       }
     } else if (k === '$or' || k === '$and' || k === '$nor' || k === '$not') {
       return (result[k] = (v as AbstractFilter[]).map((filter) => adaptFilter(filter, schema, adapters)))
     } else {
-      throw new Error(`${k} is not a scalar in the schema. (Filtering on embedded types is not supported.)`)
+      // k is not in schema, ignore
     }
   }
   return result
