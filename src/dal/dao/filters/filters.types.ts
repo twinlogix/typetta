@@ -7,37 +7,34 @@ export type LogicalOperators<FilterType> = {
   $or?: LogicalOperators<FilterType>[] | FilterType[]
 }
 
-export type ComparisonOperators<FieldType> = {
-  $eq?: FieldType
-  $gt?: FieldType
-  $gte?: FieldType
-  $in?: FieldType[]
-  $lt?: FieldType
-  $lte?: FieldType
-  $ne?: FieldType
-  $nin?: FieldType[]
-}
+export declare type EqualityOperators<FieldType> = {
+  $eq?: FieldType;
+  $in?: FieldType[];
+  $ne?: FieldType;
+  $nin?: FieldType[];
+};
 
-export type ElementOperators<FieldType> = {
+export declare type QuantityOperators<FieldType> = {
+  $gt?: FieldType;
+  $gte?: FieldType;
+  $lt?: FieldType;
+  $lte?: FieldType;
+};
+
+export type ElementOperators = {
   $exists?: boolean
-  // $type
 }
 
-export type EvaluationOperators<FieldType> = {
-  // $expr?
-  // $jsonSchema
-  // $mod
-  // $regex
+export type StringOperators = {
   $text?: {
     $search: string
     $language?: string
     $caseSensitive?: boolean
     $diacriticSensitive?: boolean
   }
-  // $where
 }
 
-export type GeospathialOperators<FieldType> = {
+export type GeospathialOperators = {
   // $geoIntersect
   // $geoWithin
   $near?: {

@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { SortDirection } from '../dal/dao/sorts/sorts.types'
-import { Projection } from '../dal/dao/projections/projections.types'
-import { ComparisonOperators, ElementOperators, EvaluationOperators } from '../dal/dao/filters/filters.types'
+import { QuantityOperators, EqualityOperators, ElementOperators, StringOperators } from '../dal/dao/filters/filters.types'
 
 export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T
 
@@ -28,7 +27,7 @@ export function flattenSorts<SortInput extends { [key: string]: SortDirection | 
     .flat()
 }
 
-export function hasIdFilter<IDType, Filter extends { id?: IDType | null | ComparisonOperators<IDType> | ElementOperators<IDType> | EvaluationOperators<IDType> }>(
+export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators | StringOperators }>(
   conditions: Filter,
   id: IDType | null,
 ): boolean {
@@ -38,17 +37,17 @@ export function hasIdFilter<IDType, Filter extends { id?: IDType | null | Compar
 export function hasFieldFilter<
   FieldType,
   FieldName extends string,
-  Filter extends { [P in FieldName]?: FieldType | null | ComparisonOperators<FieldType> | ElementOperators<FieldType> | EvaluationOperators<FieldType> },
+  Filter extends { [P in FieldName]?: FieldType | null | QuantityOperators<FieldType> | EqualityOperators<FieldType> | ElementOperators | StringOperators },
   >(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
   return (
     (id &&
       conditions[fieldName] &&
       (conditions[fieldName] === id ||
         (typeof conditions[fieldName] === 'object' &&
-          (conditions[fieldName] as ComparisonOperators<FieldType>).$in &&
-          (conditions[fieldName] as ComparisonOperators<FieldType>).$in!.length === 1 &&
-          (conditions[fieldName] as ComparisonOperators<FieldType>).$in![0] === id) ||
-        (typeof conditions[fieldName] === 'object' && (conditions[fieldName] as ComparisonOperators<FieldType>).$eq && (conditions[fieldName] as ComparisonOperators<FieldType>).$eq! === id))) ||
+          (conditions[fieldName] as EqualityOperators<FieldType>).$in &&
+          (conditions[fieldName] as EqualityOperators<FieldType>).$in!.length === 1 &&
+          (conditions[fieldName] as EqualityOperators<FieldType>).$in![0] === id) ||
+        (typeof conditions[fieldName] === 'object' && (conditions[fieldName] as EqualityOperators<FieldType>).$eq && (conditions[fieldName] as EqualityOperators<FieldType>).$eq! === id))) ||
     false
   )
 }

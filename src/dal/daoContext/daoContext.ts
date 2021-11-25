@@ -8,7 +8,7 @@ export abstract class AbstractDAOContext<ScalarsType extends DefaultModelScalars
 
   public constructor(adapters?: DriverDataTypeAdapterMap<ScalarsType>) {
     this.adapters = adapters || {
-      kenxjs: knexJsAdapters,
+      knexjs: knexJsAdapters,
       mongodb: mongoDbAdapters,
     }
   }

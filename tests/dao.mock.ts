@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
-import { MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -17,7 +17,7 @@ export const addressSchema : Schema<types.Scalars>= {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
 
@@ -69,9 +69,9 @@ export const citySchema : Schema<types.Scalars>= {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'name'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>
+  'addressId'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 
@@ -135,10 +135,10 @@ export const organizationSchema : Schema<types.Scalars>= {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'name'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'vatNumber'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>
+  'address.id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 
@@ -214,16 +214,16 @@ export const userSchema : Schema<types.Scalars>= {
 };
 
 type UserFilterFields = {
-  'amount'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>,
-  'amounts'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>| ArrayOperators<BigNumber>,
-  'firstName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'lastName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'live'?: boolean | null | ComparisonOperators<boolean> | ElementOperators<boolean> | EvaluationOperators<boolean>,
-  'localization'?: Coordinates | null | ComparisonOperators<Coordinates> | ElementOperators<Coordinates> | EvaluationOperators<Coordinates>,
-  'title'?: LocalizedString | null | ComparisonOperators<LocalizedString> | ElementOperators<LocalizedString> | EvaluationOperators<LocalizedString>,
-  'usernamePasswordCredentials.password'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'usernamePasswordCredentials.username'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>
+  'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
+  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators| ArrayOperators<BigNumber[]>,
+  'firstName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'lastName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
+  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators| GeospathialOperators,
+  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators,
+  'usernamePasswordCredentials.password'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 

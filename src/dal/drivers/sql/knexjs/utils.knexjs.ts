@@ -1,4 +1,4 @@
-import { ComparisonOperators, ElementOperators, EvaluationOperators, LogicalOperators } from '../../../dao/filters/filters.types'
+import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
@@ -7,7 +7,7 @@ import { Knex } from 'knex'
 import { KnexJSDataTypeAdapterMap } from './adapters.knexjs'
 
 export type AbstractFilter = {
-  [key: string]: unknown | null | ComparisonOperators<unknown> | ElementOperators<unknown> | EvaluationOperators<unknown>
+  [key: string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators
 } & LogicalOperators<unknown>
 
 export type AbstractSort = { [key: string]: SortDirection }
@@ -54,15 +54,15 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
       }
     } else if (k === '$or') {
       builder.orWhere((qb) => {
-        ;(v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
       })
     } else if (k === '$and') {
       builder.andWhere((qb) => {
-        ;(v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb, filter, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb, filter, schema, adapters))
       })
     } else if (k === '$nor') {
       builder.not.orWhere((qb) => {
-        ;(v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
       })
     } else if (k === '$not') {
       builder.whereNot((qb) => {

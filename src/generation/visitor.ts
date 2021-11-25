@@ -1,8 +1,8 @@
 import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 import autoBind from 'auto-bind'
 import { Directives, TypeScriptTypettaPluginConfig } from './config'
-import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
+import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
 import { toFirstLower } from './utils'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
@@ -13,7 +13,6 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     super(pluginConfig, {
       scalars: buildScalars(_schema, pluginConfig.scalars!, DEFAULT_SCALARS),
     } as Partial<ParsedConfig> as any)
-
     autoBind(this)
   }
 
@@ -78,7 +77,8 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       const schemaType = this._schema.getType(coreType.name.value)
 
       let resFieldType
-      if (isObjectType(schemaType) || isInterfaceType(schemaType)) {
+      let isGeoPoint = false;
+      if (isObjectType(schemaType)) {
         const innerRefDirective = this._getDirectiveFromAstNode(field, Directives.INNER_REF)
         const foreignRefDirective = this._getDirectiveFromAstNode(field, Directives.FOREIGN_REF)
 
@@ -98,7 +98,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       } else if (isEnumType(schemaType)) {
         resFieldType = this.scalars.String
       } else {
-        if (this.scalars[coreType.name.value] && this.scalars[coreType.name.value] !== 'any') {
+        if (this.scalars[coreType.name.value]) {
           resFieldType = this.scalars[coreType.name.value]
         } else {
           throw new Error(`Type mapping not found for custom scalar '${coreType.name.value}'.`)
@@ -129,6 +129,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     return resFields
   }
 
+
   ObjectTypeDefinition(node: ObjectTypeDefinitionNode): TsTypettaGeneratorNode {
     const plainName = this.convertName(node, { useTypesPrefix: false })
     const prefixedName = this.convertName(node)
@@ -148,6 +149,17 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       mongoEntity: mongoEntityDirective ? { collection } : undefined,
       sqlEntity: sqlEntityDirective ? { table } : undefined,
       fields,
+    }
+  }
+
+  ScalarTypeDefinition(node: ScalarTypeDefinitionNode): TsTypettaGeneratorScalar {
+
+    const geoPointDirective = this._getDirectiveFromAstNode(node, Directives.GEOPOINT)
+
+    return {
+      type: 'scalar',
+      name: node.name.value,
+      isGeoPoint: geoPointDirective != null
     }
   }
 }

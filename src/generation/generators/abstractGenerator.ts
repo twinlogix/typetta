@@ -1,5 +1,5 @@
 import { TypeScriptTypettaPluginConfig } from '../config'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from '../generator'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
 
 type AddtionalPluginConfig = {
   optionsType?: string
@@ -14,7 +14,7 @@ export abstract class TsTypettaAbstractGenerator {
 
   public abstract generateImports(): string[]
 
-  public abstract generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string
+  public abstract generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string
 
-  public abstract generateExports(typesMap: Map<String, TsTypettaGeneratorNode>): string[]
+  public abstract generateExports(typesMap: Map<String, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string[]
 }
