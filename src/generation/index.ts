@@ -25,6 +25,7 @@ export const DIRECTIVES = `
   directive @${Directives.INNER_REF}(refFrom: String, refTo: String) on FIELD_DEFINITION
   directive @${Directives.FOREIGN_REF}(refFrom: String!, refTo: String) on FIELD_DEFINITION
   directive @${Directives.EXCLUDE} on OBJECT | FIELD_DEFINITION
+  directive @${Directives.GEOPOINT} on SCALAR
 `
 
 export const addToSchema = DIRECTIVES

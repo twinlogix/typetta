@@ -38,7 +38,7 @@ beforeEach(async () => {
         LocalizedString: identityAdapter,
         ID: identityAdapter,
       },
-      kenxjs: {
+      knexjs: {
         ...knexJsAdapters,
         LocalizedString: {
           dbToModel: (o: unknown) => JSON.parse(o as string),

@@ -1,4 +1,4 @@
-scalar Coordinates
+scalar Coordinates @geopoint
 scalar LocalizedString
 scalar Decimal
 

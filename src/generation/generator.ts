@@ -19,12 +19,18 @@ export type TsTypettaGeneratorField = {
 }
 
 export type TsTypettaGeneratorNode = {
-  type?: string
+  type: 'type'
   name: string
   prefixedName: string
   mongoEntity?: { collection: string }
   sqlEntity?: { table: string }
   fields: TsTypettaGeneratorField[]
+}
+
+export type TsTypettaGeneratorScalar = {
+  type: 'scalar'
+  name: string
+  isGeoPoint: boolean
 }
 
 export class TsTypettaGenerator {
@@ -35,9 +41,14 @@ export class TsTypettaGenerator {
     this._generators = [new TsTypettaDAOGenerator(config)]
   }
 
-  public generate(nodes: TsTypettaGeneratorNode[]): string {
+  public generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string {
+
+
     const typesMap = new Map<string, TsTypettaGeneratorNode>()
-    nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type))
+    nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
+
+    const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
+    nodes.filter((node) => node.type === 'scalar').forEach((type) => customScalarsMap.set(type.name, type as TsTypettaGeneratorScalar))
 
     this.checkIds(typesMap)
     this.checkReferences(typesMap)
@@ -48,21 +59,19 @@ export class TsTypettaGenerator {
       })
       .reduce((a, c) => [...a, ...c], [])
 
-    const definitions = nodes
-      .filter((node) => node.type)
-      .flatMap((node) => {
-        const definition = this._generators
-          .map((generator) => generator.generateDefinition(node, typesMap))
-          .filter((definition) => definition !== '')
-          .join('\n\n')
-        if (definition.trim().length === 0) {
-          return []
-        } else {
-          return [[this._generateTitle(node), definition].join('\n\n')]
-        }
-      })
+    const definitions = [...typesMap.values()].flatMap((node) => {
+      const definition = this._generators
+        .map((generator) => generator.generateDefinition(node, typesMap, customScalarsMap))
+        .filter((definition) => definition !== '')
+        .join('\n\n')
+      if (definition.trim().length === 0) {
+        return []
+      } else {
+        return [[this._generateTitle(node), definition].join('\n\n')]
+      }
+    })
 
-    const exports = this._generators.map((generator) => generator.generateExports(typesMap))
+    const exports = this._generators.map((generator) => generator.generateExports(typesMap, customScalarsMap))
 
     return [imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
   }

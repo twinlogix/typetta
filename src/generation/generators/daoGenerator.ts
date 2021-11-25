@@ -1,22 +1,22 @@
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from '../generator'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
 import { findID, findNode, indentMultiline, isEmbed, isEntity, isForeignRef, isInnerRef, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
 
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(): string[] {
     return [
-      "import { DriverDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
+      "import { DriverDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
       `import * as types from '${this._config.tsTypesImport}';`,
       "import { Db } from 'mongodb';",
       "import { Knex } from 'knex';",
     ]
   }
 
-  public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+  public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     if (isEntity(node)) {
       const daoExcluded = this._generateDAOExludedFields(node)
       const daoSchema = this._generateDAOSchema(node, typesMap)
-      const daoFilter = this._generateDAOFilter(node, typesMap)
+      const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSort = this._generateDAOSort(node, typesMap)
       const daoUpdate = this._generateDAOUpdate(node, typesMap)
@@ -131,28 +131,34 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   // ----------------------------------------------- FILTER --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOFilter(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap).join(',\n'))
+  public _generateDAOFilter(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
+    const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap, customScalarsMap).join(',\n'))
     const daoFilterFields = `type ${node.name}FilterFields = {\n` + daoFilterFieldsBody + `\n};`
     const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields>;`
 
     return [daoFilterFields, daoFilter].join('\n')
   }
 
-  public _generateDAOFilterFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
+  public _generateDAOFilterFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>, path: string = ''): string[] {
     return node.fields
       .filter((field) => (typeof field.type === 'string' || isEmbed(field.type)) && !field.isExcluded)
       .map((field) => {
         let fieldName = path
         if (typeof field.type === 'string') {
           fieldName += field.name
-          const arrayOperators = field.isList ? `| ArrayOperators<${field.type}>` : ''
-          return [`'${fieldName}'?: ${field.type} | null | ComparisonOperators<${field.type}> | ElementOperators<${field.type}> | EvaluationOperators<${field.type}>` + arrayOperators]
+          const fieldType = field.isList ? `${field.type}[]` : field.type;
+
+          const stringOperators = field.type === 'string' ? `| StringOperators` : ''
+          const quantityOperators = field.type === 'number' ? `| QuantityOperators` : ''
+          const geoOperators = customScalarsMap.get(field.type)?.isGeoPoint ? `| GeospathialOperators` : ''
+          const arrayOperators = field.isList ? `| ArrayOperators<${fieldType}>` : ''
+
+          return [`'${fieldName}'?: ${fieldType} | null | EqualityOperators<${fieldType}> | ElementOperators` + stringOperators + quantityOperators + geoOperators + arrayOperators]
         } else if (isEmbed(field.type)) {
           const embeddedType = findNode(field.type.embed, typesMap)!
-          return this._generateDAOFilterFields(embeddedType, typesMap, path + field.name + '.')
+          return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.')
         }
-        return [] // TODO ??
+        return []
       })
       .reduce((a, c) => [...a, ...c], [])
   }

@@ -18,4 +18,5 @@ export enum Directives {
   INNER_REF = 'innerRef',
   FOREIGN_REF = 'foreignRef',
   EXCLUDE = 'exclude',
+  GEOPOINT = 'geopoint'
 }
