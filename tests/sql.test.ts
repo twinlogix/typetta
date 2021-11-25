@@ -14,6 +14,9 @@ import {
   AbstractDAOContext,
   overrideAssociations,
   DataTypeAdapter,
+  mongoDbAdapters,
+  knexJsAdapters,
+  identityAdapter,
 } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
@@ -125,19 +128,26 @@ export class UserDAO extends AbstractKnexJsDAO<User, 'id', false, UserFilter, Us
   }
 }
 
-export class DAOContext extends AbstractDAOContext {
+export class DAOContext extends AbstractDAOContext<Scalars> {
   public constructor() {
     super({
-      mongodb: {},
+      mongodb: {
+        ...mongoDbAdapters,
+        Coordinates: identityAdapter,
+        LocalizedString: identityAdapter,
+        ID: identityAdapter,
+      },
       kenxjs: {
+        ...knexJsAdapters,
         LocalizedString: {
           dbToModel: (o: unknown) => JSON.parse(o as string),
           modelToDB: (o: LocalizedString) => JSON.stringify(o),
         },
         Coordinates: {
           dbToModel: (o: unknown) => JSON.parse(o as string),
-          modelToDB: (o: LocalizedString) => JSON.stringify(o),
+          modelToDB: (o: Coordinates) => JSON.stringify(o),
         },
+        ID: identityAdapter,
       },
     })
   }

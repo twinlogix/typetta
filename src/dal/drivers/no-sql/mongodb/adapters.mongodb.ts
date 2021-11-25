@@ -12,7 +12,7 @@ export type DefaultMongoDBScalars = {
 
 export type MongoDBDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = DataTypeAdapterMap<ModelScalars, DefaultMongoDBScalars>
 
-const adapters: MongoDBDataTypeAdapterMap<DefaultModelScalars> = {
+export const mongoDbAdapters: MongoDBDataTypeAdapterMap<DefaultModelScalars> = {
   String: identityAdapter,
   Boolean: identityAdapter,
   Int: {
@@ -30,4 +30,3 @@ const adapters: MongoDBDataTypeAdapterMap<DefaultModelScalars> = {
   JSON: identityAdapter
 }
 
-export default adapters

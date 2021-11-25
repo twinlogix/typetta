@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js'
 
 export type DefaultKnexJsScalars = {
   String: string
-  Boolean: boolean
+  Boolean: number
   Int: number
   Float: number
   Decimal: string
@@ -12,9 +12,12 @@ export type DefaultKnexJsScalars = {
 
 export type KnexJSDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = DataTypeAdapterMap<ModelScalars, DefaultKnexJsScalars>
 
-const adapters: KnexJSDataTypeAdapterMap<DefaultModelScalars> = {
+export const knexJsAdapters: KnexJSDataTypeAdapterMap<DefaultModelScalars> = {
   String: identityAdapter,
-  Boolean: identityAdapter,
+  Boolean: {
+    dbToModel: (o: number) => (o ? true : false),
+    modelToDB: (o: boolean) => (o ? 1 : 0),
+  },
   Int: identityAdapter,
   Float: identityAdapter,
   Decimal: {
@@ -26,5 +29,3 @@ const adapters: KnexJSDataTypeAdapterMap<DefaultModelScalars> = {
     modelToDB: (o: any) => JSON.stringify(o),
   },
 }
-
-export default adapters
