@@ -314,6 +314,15 @@ test('insert and retrieve decimal field', async () => {
   expect(user2!.id!).toBe('ID1')
 })
 
+test('insert and retrieve decimal field 2', async () => {
+  await dao.user.apiV1.insert({ id: 'ID1', live: true, amounts: [new BigNumber(1.1),new BigNumber(2.2)] })
+
+  const user2 = await dao.user.findOne({ filter: { amounts: { $in: [[new BigNumber(1.1), new BigNumber(2.2)]] } }, projection: { id: true, amounts: true } })
+  expect(user2).toBeDefined()
+  expect(user2!.amounts!.length).toBe(2)
+  expect(user2!.id!).toBe('ID1')
+})
+
 test('update and retrieve decimal field', async () => {
   const iuser: User | null = await dao.user.apiV1.insert({ firstName: 'FirstName', live: true, amount: new BigNumber(12.12) })
 
