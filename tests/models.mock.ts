@@ -16,6 +16,7 @@ export type Scalars = {
   Coordinates: Coordinates;
   Decimal: BigNumber;
   LocalizedString: LocalizedString;
+  JSON: any;
 };
 
 export type Address = {

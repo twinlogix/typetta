@@ -335,11 +335,7 @@ export class DAOContext extends AbstractDAOContext {
   }
   
   constructor(options?: DAOContextParams) {
-    super(new Map([['Decimal', {
-      scalar: 'Decimal',
-      dbToModel: (o) => new BigNumber(o),
-      modelToDB: (o) => o
-    }]]))
+    super()
     this.daoOverrides = options?.daoOverrides
     this.mongoDB = options?.mongoDB
   }

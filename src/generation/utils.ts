@@ -1,5 +1,5 @@
 import { Schema } from '../dal/dao/schemas/schemas.types'
-import { DataTypeAdapter } from '../dal/drivers/drivers.types'
+import { DataTypeAdapter, DataTypeAdapterMap } from '../dal/drivers/drivers.types'
 import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
 
 export function toFirstLower(typeName: string) {
@@ -60,12 +60,12 @@ export function indentMultiline(str: string, count = 1): string {
  * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
  * @returns a new transformed object
  */
-export function transformObject<From, To, ScalarsType>(
-  adapters: Map<keyof ScalarsType, DataTypeAdapter<ScalarsType, keyof ScalarsType, any>>,
+export function transformObject<From, To, ModelScalars extends object, DBScalars extends object>(
+  adapters: DataTypeAdapterMap<ModelScalars, DBScalars>,
   direction: 'dbToModel' | 'modelToDB',
   object: From,
-  schema: Schema<ScalarsType>,
-  embeddedOverride?: DataTypeAdapter<ScalarsType, keyof ScalarsType, any>,
+  schema: Schema<ModelScalars>,
+  embeddedOverride?: keyof ModelScalars,
 ): To {
   const result: any = {}
   Object.entries(object).map(([k, v]) => {
@@ -75,7 +75,7 @@ export function transformObject<From, To, ScalarsType>(
         result[k] = v
       } else {
         if ('scalar' in schemaField) {
-          const adapter = adapters.get(schemaField.scalar)
+          const adapter = adapters[schemaField.scalar]
           if (Array.isArray(v) && schemaField.array) {
             result[k] = adapter ? v.map((v) => adapter[direction](v)) : v
           } else {
@@ -84,9 +84,9 @@ export function transformObject<From, To, ScalarsType>(
         } else {
           if (embeddedOverride) {
             if (Array.isArray(v) && schemaField.array) {
-              result[k] = v.map((v) => embeddedOverride[direction](v))
+              result[k] = v.map((v) => adapters[embeddedOverride][direction](v))
             } else {
-              result[k] = embeddedOverride[direction](v)
+              result[k] = adapters[embeddedOverride][direction](v)
             }
           } else {
             if (Array.isArray(v) && schemaField.array) {

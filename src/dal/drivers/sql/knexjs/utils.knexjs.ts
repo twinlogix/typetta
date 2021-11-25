@@ -2,8 +2,9 @@ import { ComparisonOperators, ElementOperators, EvaluationOperators, LogicalOper
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
-import { DataTypeAdapter } from '../../drivers.types'
+import { DefaultModelScalars } from '../../drivers.types'
 import { Knex } from 'knex'
+import { KnexJSDataTypeAdapterMap } from './adapters.knexjs'
 
 export type AbstractFilter = {
   [key: string]: unknown | null | ComparisonOperators<unknown> | ElementOperators<unknown> | EvaluationOperators<unknown>
@@ -12,20 +13,20 @@ export type AbstractFilter = {
 export type AbstractSort = { [key: string]: SortDirection }
 
 //TODO: array fitlering not supported
-export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar extends keyof ScalarsType>(
+export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   filter: AbstractFilter,
   schema: Schema<ScalarsType>,
-  adapters: Map<keyof ScalarsType, DataTypeAdapter<ScalarsType, keyof ScalarsType, any>>,
+  adapters: KnexJSDataTypeAdapterMap<ScalarsType>,
 ): Knex.QueryBuilder<TRecord, TResult> {
   Object.entries(filter).forEach(([k, v]) => {
     if (k in schema) {
       const schemaField = schema[k]
       if ('scalar' in schemaField) {
         if (typeof v === 'object' && v !== null && ('$exists' in v || '$eq' in v || '$in' in v || '$gte' in v || '$gt' in v || '$lte' in v || '$lt' in v || '$ne' in v || '$nin' in v)) {
-          const adapter = adapters.get(schemaField.scalar)
+          const adapter = adapters[schemaField.scalar]
           Object.entries(v).forEach(([fk, fv]) => {
-            const av = adapter ? (Array.isArray(fv) ? fv.map((fve) => adapter.modelToDB(fve as ScalarsType[Scalar])) : adapter.modelToDB(fv as ScalarsType[Scalar])) : fv
+            const av = adapter ? (Array.isArray(fv) ? fv.map((fve) => adapter.modelToDB(fve)) : adapter.modelToDB(fv)) : fv
             // prettier-ignore
             switch (fk) { // TODO: text search
               case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
@@ -43,9 +44,9 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType, Scalar exten
           if (v === null) {
             builder.whereNull(k)
           } else if (v !== undefined) {
-            const adapter = adapters.get(schemaField.scalar)
-            const av = adapter ? adapter.modelToDB(v as ScalarsType[Scalar]) : v
-            builder.where(k, av)
+            const adapter = adapters[schemaField.scalar]
+            const av = adapter ? adapter.modelToDB(v as any) : v
+            builder.where(k, av as any)
           }
         }
       } else {

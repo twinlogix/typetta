@@ -126,8 +126,8 @@ export class UserDAO extends AbstractKnexJsDAO<User, 'id', false, UserFilter, Us
 }
 
 export class DAOContext extends AbstractDAOContext {
-  public constructor(adapters: Map<any, DataTypeAdapter<any, any, any>>) {
-    super(adapters)
+  public constructor() {
+    super()
   }
 }
 
@@ -153,44 +153,7 @@ test('asd', async () => {
     })
   }
 
-  const context = new DAOContext(
-    new Map([
-      [
-        'Coordinates',
-        {
-          scalar: 'Coordinates',
-          dbToModel: (v: string) => JSON.parse(v) as Scalars['Coordinates'],
-          modelToDB: (v: Scalars['Coordinates']) => JSON.stringify(v),
-        },
-      ],
-      [
-        'Boolean',
-        {
-          scalar: 'Boolean',
-          dbToModel: (v: boolean | number) => (typeof v === 'number' ? v > 0 : v),
-          modelToDB: (v: Scalars['Boolean']) => v,
-        },
-      ],
-      [
-        'JSON',
-        {
-          scalar: 'JSON',
-          dbToModel: (v: string) => JSON.parse(v),
-          modelToDB: (v: Scalars['JSON']) => JSON.stringify(v),
-        },
-      ],
-      [
-        'Decimal',
-        {
-          scalar: 'Decimal',
-          dbToModel: (v: any) => {
-            return new BigNumber(v)
-          },
-          modelToDB: (v: Scalars['Decimal']) => v,
-        },
-      ],
-    ]),
-  )
+  const context = new DAOContext()
   const dao = new UserDAO({ daoContext: context, knex: knexInstance, idField: 'id', schema: userSchema })
 
   if (createSchema) {
