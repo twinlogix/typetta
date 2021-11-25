@@ -1,3 +1,4 @@
+import { MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
 import { Projection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DataTypeAdapter, DefaultModelScalars } from '../../drivers.types'
@@ -30,12 +31,51 @@ export function buildProjections<ModelType>(projections: Projection<ModelType>, 
   }
 }
 
-const singleValueQuery = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne'])
-const arrayValueQuery = new Set(['$in', '$nin', '$all'])
-const otherQuery = new Set(['$size', '$text', '$near', '$nearSphere'])
+function adaptToSchemaValue<ScalarsType>(
+  value: ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][],
+  schemaField: SchemaField<ScalarsType>,
+  adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
+): unknown {
+  return schemaField.array ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
+}
 
-function adaptValue(value: any, schemaField: SchemaField<any>, adapter: DataTypeAdapter<any, any>): any {
-  return schemaField.array ? (value as Array<any>).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value)
+function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][]>(
+  key: string,
+  value: unknown,
+  adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
+  schemaField: SchemaField<ScalarsType>,
+): Filter<Document> {
+  const result: Filter<Document> = {}
+  if ('scalar' in schemaField) {
+    // filter on scalar type
+    const adapter = adapters[schemaField.scalar]
+    if (!adapter) {
+      result[key] = value
+      //TODO: throw if adapter is undefined?
+    } else if (typeof value === 'object' && value !== null && Object.keys(value).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
+      //mongodb query
+      result[key] = Object.entries(value).reduce((p, [fk, fv]) => {
+        if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
+          return { [fk]: adaptToSchemaValue(fv as Scalar, schemaField, adapter), ...p }
+        }
+        if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
+          return { [fk]: (fv as Array<Scalar>).map((fve) => adaptToSchemaValue(fve, schemaField, adapter)), ...p }
+        }
+        return { [fk]: fv, ...p }
+      }, {})
+    } else {
+      //plain value
+      if (value === null) {
+        result[key] = null
+      } else if (value !== undefined) {
+        result[key] = adaptToSchemaValue(value as Scalar, schemaField, adapter)
+      }
+    }
+  } else {
+    // filter on embedded type
+    result[key] = adaptFilter(value as AbstractFilter, schemaField.embedded, adapters)
+  }
+  return result
 }
 
 export function adaptFilter<FilterType extends AbstractFilter, ScalarsType extends DefaultModelScalars>(
@@ -43,46 +83,20 @@ export function adaptFilter<FilterType extends AbstractFilter, ScalarsType exten
   schema: Schema<ScalarsType>,
   adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
 ): Filter<Document> {
-  const result: Filter<Document> = {}
-  for (const [k, v] of Object.entries(filter)) {
+  return Object.entries(filter).reduce<Filter<Document>>((result, [k, v]) => {
     if (k in schema) {
-      const schemaField = schema[k]
-      if ('scalar' in schemaField) {
-        // filter on scalar type
-        const adapter = adapters[schemaField.scalar]
-        if (!adapter) {
-          result[k] = v
-          continue //TODO: throw if adapter is undefined?
-        }
-        if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => singleValueQuery.has(kv) || arrayValueQuery.has(kv) || otherQuery.has(kv))) {
-          //mongodb query
-          result[k] = Object.entries(v).reduce((p, [fk, fv]) => {
-            if (singleValueQuery.has(fk)) {
-              return { [fk]: adaptValue(fv, schemaField, adapter), ...p }
-            }
-            if (arrayValueQuery.has(fk)) {
-              return { [fk]: fv.map((fve: any) => adaptValue(fve, schemaField, adapter)), ...p }
-            }
-            return { [fk]: fv, ...p }
-          }, {})
-          console.log(result)
-        } else {
-          //plain value
-          if (v === null) {
-            result[k] = null
-          } else if (v !== undefined) {
-            result[k] = adaptValue(v, schemaField, adapter)
-          }
-        }
-      } else {
-        // filter on embedded type
-        result[k] = adaptFilter(v as AbstractFilter, schemaField.embedded, adapters)
+      return {
+        ...result,
+        ...adaptToSchema(k, v, adapters, schema[k]),
       }
-    } else if (k === '$or' || k === '$and' || k === '$nor' || k === '$not') {
-      return (result[k] = (v as AbstractFilter[]).map((filter) => adaptFilter(filter, schema, adapters)))
+    } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
+      return {
+        ...result,
+        [k]: (v as AbstractFilter[]).map((filter) => adaptFilter(filter, schema, adapters)),
+      }
     } else {
-      // k is not in schema, ignore
+      // k is not in schema and is not a logical operator, ignore
+      return result
     }
-  }
-  return result
+  }, {})
 }

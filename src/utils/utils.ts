@@ -1,15 +1,13 @@
-import _ from 'lodash'
-import { SortDirection } from '../dal/dao/sorts/sorts.types'
-import { Projection } from '../dal/dao/projections/projections.types'
 import { ComparisonOperators, ElementOperators, EvaluationOperators } from '../dal/dao/filters/filters.types'
+import { Projection } from '../dal/dao/projections/projections.types'
+import { SortDirection } from '../dal/dao/sorts/sorts.types'
+import _ from 'lodash'
 
 export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T
 
 export type OneKey<K extends string, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
 }[K]
-
-
 
 export function flattenSorts<SortInput extends { [key: string]: SortDirection | null | undefined }, SortKey extends string>(
   sorts?: SortInput[],
@@ -39,7 +37,7 @@ export function hasFieldFilter<
   FieldType,
   FieldName extends string,
   Filter extends { [P in FieldName]?: FieldType | null | ComparisonOperators<FieldType> | ElementOperators<FieldType> | EvaluationOperators<FieldType> },
-  >(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
+>(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
   return (
     (id &&
       conditions[fieldName] &&
@@ -52,3 +50,8 @@ export function hasFieldFilter<
     false
   )
 }
+
+export const MONGODB_LOGIC_QUERY_PREFIXS = new Set(['$or', '$and', '$not', '$nor'])
+export const MONGODB_SINGLE_VALUE_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne'])
+export const MONGODB_ARRAY_VALUE_QUERY_PREFIXS = new Set(['$in', '$nin', '$all'])
+export const MONGODB_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne', '$in', '$nin', '$all', '$size', '$text', '$near', '$nearSphere'])
