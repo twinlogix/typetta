@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js'
 import { Coordinates } from '@twinlogix/tl-commons'
 import { LocalizedString } from '@twinlogix/tl-commons'
 import {
@@ -16,6 +15,7 @@ import {
   overrideAssociations,
   DataTypeAdapter,
 } from '@twinlogix/typetta'
+import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 
 type Maybe<T> = T | null
@@ -127,7 +127,19 @@ export class UserDAO extends AbstractKnexJsDAO<User, 'id', false, UserFilter, Us
 
 export class DAOContext extends AbstractDAOContext {
   public constructor() {
-    super()
+    super({
+      mongodb: {},
+      kenxjs: {
+        LocalizedString: {
+          dbToModel: (o: unknown) => JSON.parse(o as string),
+          modelToDB: (o: LocalizedString) => JSON.stringify(o),
+        },
+        Coordinates: {
+          dbToModel: (o: unknown) => JSON.parse(o as string),
+          modelToDB: (o: LocalizedString) => JSON.stringify(o),
+        },
+      },
+    })
   }
 }
 
