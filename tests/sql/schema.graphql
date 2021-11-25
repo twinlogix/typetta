@@ -1,0 +1,41 @@
+scalar Coordinates
+scalar LocalizedString
+scalar Decimal
+
+type UsernamePasswordCredentials {
+  username: String!
+  password: String!
+}
+
+type City @sqlEntity {
+  id: ID! @id
+  name: String!
+  addressId: String!
+  computedName: String @exclude
+  computedAddressName: String @exclude
+}
+
+type Address @sqlEntity(table: "addresses") {
+  id: ID! @id
+  cities: [City!] @foreignRef(refFrom: "addressId")
+}
+
+type Organization @sqlEntity {
+  id: ID! @id
+  name: String!
+  vatNumber: String
+  address: Address
+  computedName: String @exclude
+}
+
+type User @sqlEntity {
+  id: ID! @id
+  usernamePasswordCredentials: UsernamePasswordCredentials
+  firstName: String
+  lastName: String
+  live: Boolean!
+  localization: Coordinates
+  title: LocalizedString
+  amounts: [Decimal!]
+  amount: Decimal
+}

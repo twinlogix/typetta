@@ -1,10 +1,11 @@
+import { MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { ComparisonOperators, ElementOperators, EvaluationOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
 import { DefaultModelScalars } from '../../drivers.types'
-import { Knex } from 'knex'
 import { KnexJSDataTypeAdapterMap } from './adapters.knexjs'
+import { Knex } from 'knex'
 
 export type AbstractFilter = {
   [key: string]: unknown | null | ComparisonOperators<unknown> | ElementOperators<unknown> | EvaluationOperators<unknown>
@@ -22,22 +23,27 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   Object.entries(filter).forEach(([k, v]) => {
     if (k in schema) {
       const schemaField = schema[k]
+      if (schemaField.array) {
+        throw new Error(`Array filtering not supported on sql entity yet. (field: ${k})`)
+      }
       if ('scalar' in schemaField) {
-        if (typeof v === 'object' && v !== null && ('$exists' in v || '$eq' in v || '$in' in v || '$gte' in v || '$gt' in v || '$lte' in v || '$lt' in v || '$ne' in v || '$nin' in v)) {
+        if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
           const adapter = adapters[schemaField.scalar]
           Object.entries(v).forEach(([fk, fv]) => {
-            const av = adapter ? (Array.isArray(fv) ? fv.map((fve) => adapter.modelToDB(fve)) : adapter.modelToDB(fv)) : fv
+            const av = () => (adapter ? adapter.modelToDB(fv) : fv)
+            const avs = () => (adapter ? (fv as Array<any>).map((fve) => adapter.modelToDB(fve)) : fv)
             // prettier-ignore
             switch (fk) { // TODO: text search
               case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
-              case '$eq': builder.where(k, av); break
-              case '$in': builder.whereIn(k, av as any[]); break
-              case '$gte': builder.where(k, '>=', av); break
-              case '$gt': builder.where(k, '>', av); break
-              case '$lte': builder.where(k, '<=', av); break
-              case '$lt': builder.where(k, '<', av); break
-              case '$ne': builder.not.where(k, av); break
-              case '$nin': builder.not.whereIn(k, av as any[]); break
+              case '$eq': builder.where(k, av()); break
+              case '$gte': builder.where(k, '>=', av()); break
+              case '$gt': builder.where(k, '>', av()); break
+              case '$lte': builder.where(k, '<=', av()); break
+              case '$lt': builder.where(k, '<', av()); break
+              case '$ne': builder.not.where(k, av()); break
+              case '$in': builder.whereIn(k, avs()); break
+              case '$nin': builder.not.whereIn(k, avs()); break
+              default: throw new Error(`${fk} query is not supported on sql entity yet.`)
             }
           })
         } else {

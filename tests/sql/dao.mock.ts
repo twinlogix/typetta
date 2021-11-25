@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
-import { MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { DriverDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -34,10 +34,10 @@ export type AddressUpdate = {
   'id'?: string
 };
 
-type AddressDAOAllParams = MongoDBDAOParams<types.Address, 'id', true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type AddressDAOAllParams = KnexJsDAOParams<types.Address, 'id', true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { SQL?: any } & { test: string }, types.Scalars>;
 export type AddressDAOParams = Omit<AddressDAOAllParams, 'idField' | 'schema'> & Partial<Pick<AddressDAOAllParams, 'idField' | 'schema'>>;
 
-export class AddressDAO extends AbstractMongoDBDAO<types.Address, 'id', true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class AddressDAO extends AbstractKnexJsDAO<types.Address, 'id', true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: AddressDAOParams){
     super({   
@@ -95,10 +95,10 @@ export type CityUpdate = {
   'name'?: string
 };
 
-type CityDAOAllParams = MongoDBDAOParams<types.City, 'id', true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type CityDAOAllParams = KnexJsDAOParams<types.City, 'id', true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { SQL?: any } & { test: string }, types.Scalars>;
 export type CityDAOParams = Omit<CityDAOAllParams, 'idField' | 'schema'> & Partial<Pick<CityDAOAllParams, 'idField' | 'schema'>>;
 
-export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class CityDAO extends AbstractKnexJsDAO<types.City, 'id', true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: CityDAOParams){
     super({   
@@ -168,10 +168,10 @@ export type OrganizationUpdate = {
   'vatNumber'?: string | null
 };
 
-type OrganizationDAOAllParams = MongoDBDAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type OrganizationDAOAllParams = KnexJsDAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { SQL?: any } & { test: string }, types.Scalars>;
 export type OrganizationDAOParams = Omit<OrganizationDAOAllParams, 'idField' | 'schema'> & Partial<Pick<OrganizationDAOAllParams, 'idField' | 'schema'>>;
 
-export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class OrganizationDAO extends AbstractKnexJsDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: OrganizationDAOParams){
     super({   
@@ -269,10 +269,10 @@ export type UserUpdate = {
   'usernamePasswordCredentials.username'?: string
 };
 
-type UserDAOAllParams = MongoDBDAOParams<types.User, 'id', true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type UserDAOAllParams = KnexJsDAOParams<types.User, 'id', true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { SQL?: any } & { test: string }, types.Scalars>;
 export type UserDAOParams = Omit<UserDAOAllParams, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams, 'idField' | 'schema'>>;
 
-export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class UserDAO extends AbstractKnexJsDAO<types.User, 'id', true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: UserDAOParams){
     super({   
@@ -296,7 +296,8 @@ export type DAOContextParams = {
     organization?: Partial<OrganizationDAOParams>,
     user?: Partial<UserDAOParams>
   },
-  mongoDB: Db
+  knex: Knex,
+  adapters?: DriverDataTypeAdapterMap<types.Scalars>
 };
 
 export class DAOContext extends AbstractDAOContext {
@@ -307,37 +308,37 @@ export class DAOContext extends AbstractDAOContext {
   private _user: UserDAO | undefined;
   
   private daoOverrides: DAOContextParams['daoOverrides'];
-  private mongoDB: Db | undefined;
+  private knex: Knex | undefined;
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address ,collection: this.mongoDB!.collection('addresses') });
+      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address, knex: this.knex!, tableName: 'addresses' });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city ,collection: this.mongoDB!.collection('citys') });
+      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city, knex: this.knex!, tableName: 'citys' });
     }
     return this._city;
   }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization ,collection: this.mongoDB!.collection('organizations') });
+      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization, knex: this.knex!, tableName: 'organizations' });
     }
     return this._organization;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user ,collection: this.mongoDB!.collection('users') });
+      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user, knex: this.knex!, tableName: 'users' });
     }
     return this._user;
   }
   
   constructor(options?: DAOContextParams) {
-    super()
+    super(options?.adapters)
     this.daoOverrides = options?.daoOverrides
-    this.mongoDB = options?.mongoDB
+    this.knex = options?.knex;
   }
 
 }

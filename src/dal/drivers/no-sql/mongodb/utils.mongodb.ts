@@ -1,5 +1,5 @@
 import { MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
-import { AnyProjection, Projection, StaticProjection } from '../../../dao/projections/projections.types'
+import { AnyProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DataTypeAdapter, DefaultModelScalars } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'

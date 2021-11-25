@@ -6,7 +6,7 @@ export type DefaultKnexJsScalars = {
   Boolean: number
   Int: number
   Float: number
-  Decimal: string
+  Decimal: BigNumber; //TODO: find appropriate
   JSON: string
 }
 
@@ -20,10 +20,7 @@ export const knexJsAdapters: KnexJSDataTypeAdapterMap<DefaultModelScalars> = {
   },
   Int: identityAdapter,
   Float: identityAdapter,
-  Decimal: {
-    dbToModel: (o: string) => new BigNumber(o.toString()),
-    modelToDB: (o: BigNumber) => o.toString(),
-  },
+  Decimal: identityAdapter,
   JSON: {
     dbToModel: (o: string) => JSON.parse(o),
     modelToDB: (o: any) => JSON.stringify(o),

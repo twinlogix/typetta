@@ -5,7 +5,7 @@ import { TsTypettaAbstractGenerator } from './abstractGenerator'
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(): string[] {
     return [
-      "import { MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
+      "import { DriverDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
       `import * as types from '${this._config.tsTypesImport}';`,
       "import { Db } from 'mongodb';",
       "import { Knex } from 'knex';",
@@ -44,9 +44,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const daoOverrides = `daoOverrides?: { \n${indentMultiline(contextDAOParamsDeclarations,)}\n}`;
     const mongoDBParams = hasMongoDBEntites ? ',\nmongoDB: Db' : '';
     const knexJsParams = hasSQLEntities ? ',\nknex: Knex' : '';
+    const adaptersParams = ',\nadapters?: DriverDataTypeAdapterMap<types.Scalars>'
 
     const daoContextParamsExport =
-      `export type DAOContextParams = {\n${indentMultiline(`${daoOverrides}${mongoDBParams}${knexJsParams}`)}\n};`;
+      `export type DAOContextParams = {\n${indentMultiline(`${daoOverrides}${mongoDBParams}${knexJsParams}${adaptersParams}`)}\n};`;
 
     const daoDeclarations = Array.from(typesMap.values())
       .filter((node) => isEntity(node))
@@ -56,7 +57,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .join('\n')
 
     const mongoDBFields = hasMongoDBEntites ? '\nprivate mongoDB: Db | undefined;' : '';
-    const knexJsFields = hasSQLEntities ? '\nprivate knex: Knex;' : '';
+    const knexJsFields = hasSQLEntities ? '\nprivate knex: Knex | undefined;' : '';
     const daoOverridesDeclaration = `private daoOverrides: DAOContextParams['daoOverrides'];${mongoDBFields}${knexJsFields}`
 
     const daoGetters = Array.from(typesMap.values())
@@ -64,12 +65,12 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .map((node) => {
         const daoImplementationInit = (
           node.sqlEntity ?
-            `,knex: this.knex, tableName: ${node.sqlEntity?.table}` :
+            `, knex: this.knex!, tableName: '${node.sqlEntity?.table}'` :
             node.mongoEntity ?
-              `,collection: this.mongoDB!.collection('${node.mongoEntity?.collection}')` :
+              `, collection: this.mongoDB!.collection('${node.mongoEntity?.collection}')` :
               ''
         );
-        const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, ...this.daoOverrides?.${toFirstLower(node.name)} ${daoImplementationInit} });`
+        const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, ...this.daoOverrides?.${toFirstLower(node.name)}${daoImplementationInit} });`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}${false ? '.apiV1' : ''};`
         return `get ${toFirstLower(node.name)}() {\n${indentMultiline(daoGet)}\n}`
       })
@@ -77,7 +78,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
     const mongoDBConstructor = hasMongoDBEntites ? '\nthis.mongoDB = options?.mongoDB' : '';
     const knexJsContsructor = hasSQLEntities ? '\nthis.knex = options?.knex;' : '';
-    const daoConstructor = 'constructor(options?: DAOContextParams) {\n' + indentMultiline(`super()\nthis.daoOverrides = options?.daoOverrides${mongoDBConstructor}${knexJsContsructor}`) + '\n}'
+    const daoConstructor = 'constructor(options?: DAOContextParams) {\n' + indentMultiline(`super(options?.adapters)\nthis.daoOverrides = options?.daoOverrides${mongoDBConstructor}${knexJsContsructor}`) + '\n}'
 
     const declarations = [daoDeclarations, daoOverridesDeclaration, daoGetters, daoConstructor].join('\n\n')
 
