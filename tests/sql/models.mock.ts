@@ -15,8 +15,9 @@ export type Scalars = {
   Float: number;
   Coordinates: Coordinates;
   Decimal: BigNumber;
-  LocalizedString: LocalizedString;
   JSON: any;
+  LocalizedString: LocalizedString;
+  Password: string;
 };
 
 export type Address = {
@@ -32,6 +33,14 @@ export type City = {
   computedName?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
+};
+
+export type Device = {
+  __typename?: 'Device';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  user?: Maybe<User>;
+  userId?: Maybe<Scalars['ID']>;
 };
 
 export type Organization = {
@@ -58,6 +67,6 @@ export type User = {
 
 export type UsernamePasswordCredentials = {
   __typename?: 'UsernamePasswordCredentials';
-  password: Scalars['String'];
+  password: Scalars['Password'];
   username: Scalars['String'];
 };

@@ -82,7 +82,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
 }
 
 //TODO: array not supported
-export function buildSelect<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, projection: GenericProjection): Knex.QueryBuilder<TRecord, TResult> {
+export function buildSelect<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuilder<TRecord, TResult>, projection: GenericProjection, schema: Schema<ScalarsType>): Knex.QueryBuilder<TRecord, TResult> {
   if (projection === false) {
     builder.select([])
   } else if (projection === true) {
@@ -90,7 +90,7 @@ export function buildSelect<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord
   } else {
     builder.select(
       Object.entries(projection).flatMap(([k, v]) => {
-        return v ? [k] : []
+        return v && k in schema ? [k] : []
       }),
     )
   }

@@ -1,12 +1,13 @@
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { DAOWrapperAPIv1 } from '../legacy/daoWrapperAPIv1'
+import { addAssociationRefToProjection } from './associations/associations'
 import { DAOAssociation, DAOAssociationReference, DAOAssociationType } from './associations/associations.types'
 import { DAO, DAOParams, DAOResolver, DeleteParams, FilterParams, FindOneParams, FindParams, InsertParams, ReferenceChecksResponse, ReplaceParams, UpdateParams } from './dao.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection, Projection } from './projections/projections.types'
 import { getProjection } from './projections/projections.utils'
 import { Schema } from './schemas/schemas.types'
-import { deepMerge, getTraversing, setTraversing } from '@twinlogix/tl-commons'
+import { deepCopy, deepMerge, getTraversing, setTraversing } from '@twinlogix/tl-commons'
 import DataLoader from 'dataloader'
 import _ from 'lodash'
 import objectHash from 'object-hash'
@@ -59,6 +60,9 @@ export abstract class AbstractDAO<
         beforeUpdate: async (params) => this.addDefaultOptions(params),
         beforeReplace: async (params) => this.addDefaultOptions(params),
         beforeDelete: async (params) => this.addDefaultOptions(params),
+      },
+      {
+        beforeFind: async (params) => ({ ...params, projection: this.elabAssociationProjection(params.projection) }),
       },
       ...middlewares,
     ]
@@ -226,7 +230,19 @@ export abstract class AbstractDAO<
     }
   }
 
-  protected async resolveAssociations(dbObjects: any[], projections?: AnyProjection<ModelType, ProjectionType>): Promise<PartialDeep<ModelType>[]> {
+  private elabAssociationProjection<P extends AnyProjection<ModelType, ProjectionType>>(projection?: P): P | undefined {
+    if (projection === true || !projection) {
+      return projection
+    }
+    const dbProjections = deepCopy(projection) // IMPROVE: make addAssociationRefToProjection functional and stop using side effects
+    this.associations
+      .filter((association) => association.reference === DAOAssociationReference.INNER)
+      .forEach((association) => addAssociationRefToProjection(association.field, association.refFrom, dbProjections))
+    this.associations.filter((association) => association.reference === DAOAssociationReference.FOREIGN).forEach((association) => setTraversing(dbProjections, association.refTo, true))
+    return dbProjections
+  }
+
+  private async resolveAssociations(dbObjects: any[], projections?: AnyProjection<ModelType, ProjectionType>): Promise<PartialDeep<ModelType>[]> {
     for (const association of this.associations) {
       if (projections) {
         const associationProjection = getProjection(projections as GenericProjection, association.field)
@@ -269,7 +285,7 @@ export abstract class AbstractDAO<
     return dbObjects
   }
 
-  protected addResolver(association: DAOAssociation) {
+  private addResolver(association: DAOAssociation) {
     let resolver
 
     if (association.reference === DAOAssociationReference.INNER) {

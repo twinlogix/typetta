@@ -65,7 +65,6 @@ export function transformObject<From, To, ModelScalars extends object, DBScalars
   direction: 'dbToModel' | 'modelToDB',
   object: From,
   schema: Schema<ModelScalars>,
-  embeddedOverride?: keyof ModelScalars,
 ): To {
   const result: any = {}
   Object.entries(object).map(([k, v]) => {
@@ -82,18 +81,10 @@ export function transformObject<From, To, ModelScalars extends object, DBScalars
             result[k] = adapter ? adapter[direction](v) : v
           }
         } else {
-          if (embeddedOverride) {
-            if (Array.isArray(v) && schemaField.array) {
-              result[k] = v.map((v) => adapters[embeddedOverride][direction](v))
-            } else {
-              result[k] = adapters[embeddedOverride][direction](v)
-            }
+          if (Array.isArray(v) && schemaField.array) {
+            result[k] = v.map((v) => transformObject(adapters, direction, v, schemaField.embedded))
           } else {
-            if (Array.isArray(v) && schemaField.array) {
-              result[k] = v.map((v) => transformObject(adapters, direction, v, schemaField.embedded, embeddedOverride))
-            } else {
-              result[k] = transformObject(adapters, direction, v, schemaField.embedded, embeddedOverride)
-            }
+            result[k] = transformObject(adapters, direction, v, schemaField.embedded)
           }
         }
       }

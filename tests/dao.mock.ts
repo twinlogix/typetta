@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
-import { MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, ComparisonOperators, ElementOperators, EvaluationOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { DriverDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -17,7 +17,7 @@ export const addressSchema : Schema<types.Scalars>= {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
 
@@ -69,9 +69,9 @@ export const citySchema : Schema<types.Scalars>= {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'name'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>
+  'addressId'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 
@@ -118,6 +118,66 @@ export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', true, CityFilt
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------ DEVICE ------------------------------------
+//--------------------------------------------------------------------------------
+
+export type DeviceExcludedFields = never
+
+export const deviceSchema : Schema<types.Scalars>= {
+  'id': { scalar: 'ID', required: true},
+  'name': { scalar: 'String', required: true},
+  'userId': { scalar: 'ID'}
+};
+
+type DeviceFilterFields = {
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'userId'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+};
+export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
+
+export type DeviceProjection = {
+  id?: boolean,
+  name?: boolean,
+  user?: UserProjection | boolean,
+  userId?: boolean,
+};
+
+export type DeviceSortKeys = 
+  'id'|
+  'name'|
+  'userId';
+export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
+
+export type DeviceUpdate = {
+  'id'?: string,
+  'name'?: string,
+  'userId'?: string | null
+};
+
+type DeviceDAOAllParams = MongoDBDAOParams<types.Device, 'id', true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+export type DeviceDAOParams = Omit<DeviceDAOAllParams, 'idField' | 'schema'> & Partial<Pick<DeviceDAOAllParams, 'idField' | 'schema'>>;
+
+export class DeviceDAO extends AbstractMongoDBDAO<types.Device, 'id', true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+  
+  public constructor(params: DeviceDAOParams){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: deviceSchema, 
+      associations: overrideAssociations(
+        [
+          { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
+        ]
+      ), 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //--------------------------------- ORGANIZATION ---------------------------------
 //--------------------------------------------------------------------------------
 
@@ -135,10 +195,10 @@ export const organizationSchema : Schema<types.Scalars>= {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'name'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'vatNumber'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>
+  'address.id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 
@@ -207,23 +267,23 @@ export const userSchema : Schema<types.Scalars>= {
   'title': { scalar: 'LocalizedString'},
   'usernamePasswordCredentials': {
     embedded: {
-      'password': { scalar: 'String', required: true},
+      'password': { scalar: 'Password', required: true},
       'username': { scalar: 'String', required: true}
     }
   }
 };
 
 type UserFilterFields = {
-  'amount'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>,
-  'amounts'?: BigNumber | null | ComparisonOperators<BigNumber> | ElementOperators<BigNumber> | EvaluationOperators<BigNumber>| ArrayOperators<BigNumber>,
-  'firstName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'id'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'lastName'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'live'?: boolean | null | ComparisonOperators<boolean> | ElementOperators<boolean> | EvaluationOperators<boolean>,
-  'localization'?: Coordinates | null | ComparisonOperators<Coordinates> | ElementOperators<Coordinates> | EvaluationOperators<Coordinates>,
-  'title'?: LocalizedString | null | ComparisonOperators<LocalizedString> | ElementOperators<LocalizedString> | EvaluationOperators<LocalizedString>,
-  'usernamePasswordCredentials.password'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>,
-  'usernamePasswordCredentials.username'?: string | null | ComparisonOperators<string> | ElementOperators<string> | EvaluationOperators<string>
+  'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
+  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators| ArrayOperators<BigNumber[]>,
+  'firstName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'lastName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
+  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators| GeospathialOperators,
+  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators,
+  'usernamePasswordCredentials.password'?: any | null | EqualityOperators<any> | ElementOperators,
+  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 
@@ -265,7 +325,7 @@ export type UserUpdate = {
   'localization'?: Coordinates | null,
   'title'?: LocalizedString | null,
   'usernamePasswordCredentials'?: types.UsernamePasswordCredentials | null,
-  'usernamePasswordCredentials.password'?: string,
+  'usernamePasswordCredentials.password'?: any,
   'usernamePasswordCredentials.username'?: string
 };
 
@@ -293,16 +353,19 @@ export type DAOContextParams = {
   daoOverrides?: { 
     address?: Partial<AddressDAOParams>,
     city?: Partial<CityDAOParams>,
+    device?: Partial<DeviceDAOParams>,
     organization?: Partial<OrganizationDAOParams>,
     user?: Partial<UserDAOParams>
   },
-  mongoDB: Db
+  mongoDB: Db,
+  adapters?: DriverDataTypeAdapterMap<types.Scalars>
 };
 
 export class DAOContext extends AbstractDAOContext {
 
   private _address: AddressDAO | undefined;
   private _city: CityDAO | undefined;
+  private _device: DeviceDAO | undefined;
   private _organization: OrganizationDAO | undefined;
   private _user: UserDAO | undefined;
   
@@ -311,31 +374,37 @@ export class DAOContext extends AbstractDAOContext {
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address ,collection: this.mongoDB!.collection('addresses') });
+      this._address = new AddressDAO({ daoContext: this, ...this.daoOverrides?.address, collection: this.mongoDB!.collection('addresses') });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city ,collection: this.mongoDB!.collection('citys') });
+      this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city, collection: this.mongoDB!.collection('citys') });
     }
     return this._city;
   }
+  get device() {
+    if(!this._device) {
+      this._device = new DeviceDAO({ daoContext: this, ...this.daoOverrides?.device, collection: this.mongoDB!.collection('devices') });
+    }
+    return this._device;
+  }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization ,collection: this.mongoDB!.collection('organizations') });
+      this._organization = new OrganizationDAO({ daoContext: this, ...this.daoOverrides?.organization, collection: this.mongoDB!.collection('organizations') });
     }
     return this._organization;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user ,collection: this.mongoDB!.collection('users') });
+      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user, collection: this.mongoDB!.collection('users') });
     }
     return this._user;
   }
   
   constructor(options?: DAOContextParams) {
-    super()
+    super(options?.adapters)
     this.daoOverrides = options?.daoOverrides
     this.mongoDB = options?.mongoDB
   }

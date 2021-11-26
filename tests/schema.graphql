@@ -1,10 +1,19 @@
 scalar Coordinates @geopoint
 scalar LocalizedString
 scalar Decimal
+scalar Password
+scalar JSON
+
+type Device @mongoEntity {
+  id: ID! @id
+  name: String!
+  userId: ID
+  user: User @innerRef
+}
 
 type UsernamePasswordCredentials {
   username: String!
-  password: String!
+  password: Password!
 }
 
 type City @mongoEntity {

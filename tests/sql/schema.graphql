@@ -1,10 +1,19 @@
 scalar Coordinates
 scalar LocalizedString
 scalar Decimal
+scalar Password
+scalar JSON
+
+type Device @sqlEntity {
+  id: ID! @id
+  name: String!
+  userId: ID
+  user: User @innerRef
+}
 
 type UsernamePasswordCredentials {
   username: String!
-  password: String!
+  password: Password!
 }
 
 type City @sqlEntity {

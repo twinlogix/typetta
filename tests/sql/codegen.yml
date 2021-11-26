@@ -19,6 +19,7 @@ generates:
         Coordinates: Coordinates
         LocalizedString: LocalizedString
         JSON: any
+        Password: string
   tests/sql/dao.mock.ts:
     config:
       schemaImport: './schema.graphql'
@@ -33,6 +34,7 @@ generates:
         Coordinates: Coordinates
         LocalizedString: LocalizedString
         JSON: any
+        Password: string
     plugins:
       - add:
           content: 'import BigNumber from "bignumber.js";'

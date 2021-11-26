@@ -118,6 +118,66 @@ export class CityDAO extends AbstractKnexJsDAO<types.City, 'id', true, CityFilte
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------ DEVICE ------------------------------------
+//--------------------------------------------------------------------------------
+
+export type DeviceExcludedFields = never
+
+export const deviceSchema : Schema<types.Scalars>= {
+  'id': { scalar: 'ID', required: true},
+  'name': { scalar: 'String', required: true},
+  'userId': { scalar: 'ID'}
+};
+
+type DeviceFilterFields = {
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'userId'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+};
+export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
+
+export type DeviceProjection = {
+  id?: boolean,
+  name?: boolean,
+  user?: UserProjection | boolean,
+  userId?: boolean,
+};
+
+export type DeviceSortKeys = 
+  'id'|
+  'name'|
+  'userId';
+export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
+
+export type DeviceUpdate = {
+  'id'?: string,
+  'name'?: string,
+  'userId'?: string | null
+};
+
+type DeviceDAOAllParams = KnexJsDAOParams<types.Device, 'id', true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, { SQL?: any } & { test: string }, types.Scalars>;
+export type DeviceDAOParams = Omit<DeviceDAOAllParams, 'idField' | 'schema'> & Partial<Pick<DeviceDAOAllParams, 'idField' | 'schema'>>;
+
+export class DeviceDAO extends AbstractKnexJsDAO<types.Device, 'id', true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
+  
+  public constructor(params: DeviceDAOParams){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: deviceSchema, 
+      associations: overrideAssociations(
+        [
+          { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
+        ]
+      ), 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //--------------------------------- ORGANIZATION ---------------------------------
 //--------------------------------------------------------------------------------
 
@@ -207,7 +267,7 @@ export const userSchema : Schema<types.Scalars>= {
   'title': { scalar: 'LocalizedString'},
   'usernamePasswordCredentials': {
     embedded: {
-      'password': { scalar: 'String', required: true},
+      'password': { scalar: 'Password', required: true},
       'username': { scalar: 'String', required: true}
     }
   }
@@ -293,6 +353,7 @@ export type DAOContextParams = {
   daoOverrides?: { 
     address?: Partial<AddressDAOParams>,
     city?: Partial<CityDAOParams>,
+    device?: Partial<DeviceDAOParams>,
     organization?: Partial<OrganizationDAOParams>,
     user?: Partial<UserDAOParams>
   },
@@ -304,6 +365,7 @@ export class DAOContext extends AbstractDAOContext {
 
   private _address: AddressDAO | undefined;
   private _city: CityDAO | undefined;
+  private _device: DeviceDAO | undefined;
   private _organization: OrganizationDAO | undefined;
   private _user: UserDAO | undefined;
   
@@ -321,6 +383,12 @@ export class DAOContext extends AbstractDAOContext {
       this._city = new CityDAO({ daoContext: this, ...this.daoOverrides?.city, knex: this.knex!, tableName: 'citys' });
     }
     return this._city;
+  }
+  get device() {
+    if(!this._device) {
+      this._device = new DeviceDAO({ daoContext: this, ...this.daoOverrides?.device, knex: this.knex!, tableName: 'devices' });
+    }
+    return this._device;
   }
   get organization() {
     if(!this._organization) {

@@ -1,10 +1,12 @@
-import { MongoClient, Db } from 'mongodb'
-import { MongoMemoryServer } from 'mongodb-memory-server'
 import { DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
-import BigNumber from 'bignumber.js'
-import { projection, SortDirection, Projection, StaticProjection, buildComputedField, projectionDependency } from '@twinlogix/typetta'
 import { Test, typeAssert } from './utils.test'
+import { Coordinates, LocalizedString } from '@twinlogix/tl-commons'
+import { projection, SortDirection, Projection, StaticProjection, buildComputedField, projectionDependency, mongoDbAdapters, identityAdapter, knexJsAdapters } from '@twinlogix/typetta'
+import BigNumber from 'bignumber.js'
+import { MongoClient, Db } from 'mongodb'
+import { MongoMemoryServer } from 'mongodb-memory-server'
+import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 
 let con: MongoClient
@@ -16,7 +18,42 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create()
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
-  dao = new DAOContext({ mongoDB: db })
+  dao = new DAOContext({
+    mongoDB: db,
+    adapters: {
+      //TODO: give option to specify only one driver overrides
+      mongodb: {
+        ...mongoDbAdapters,
+        Coordinates: identityAdapter,
+        LocalizedString: identityAdapter,
+        ID: identityAdapter,
+        Password: {
+          dbToModel: (o: unknown) => o as string,
+          modelToDB: (o: string) => sha256(o),
+        },
+      },
+      knexjs: {
+        ...knexJsAdapters,
+        LocalizedString: {
+          dbToModel: (o: unknown) => JSON.parse(o as string),
+          modelToDB: (o: LocalizedString) => JSON.stringify(o),
+        },
+        Coordinates: {
+          dbToModel: (o: unknown) => JSON.parse(o as string),
+          modelToDB: (o: Coordinates) => JSON.stringify(o),
+        },
+        Decimal: {
+          dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
+          modelToDB: (o: BigNumber) => o,
+        },
+        Password: {
+          dbToModel: (o: unknown) => o as string,
+          modelToDB: (o: string) => sha256(o),
+        },
+        ID: identityAdapter,
+      },
+    },
+  })
 })
 
 beforeEach(async () => {
@@ -211,7 +248,33 @@ test('insert and find embedded entity', async () => {
   expect(response.length).toBe(1)
   expect(response[0].usernamePasswordCredentials).toBeDefined()
   expect(response[0].usernamePasswordCredentials!.username).toBe('username')
-  expect(response[0].usernamePasswordCredentials!.password).toBe('password')
+  expect(response[0].usernamePasswordCredentials!.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
+})
+
+test('insert generic test 1', async () => {
+  const ins = await dao.user.insertOne({
+    record: {
+      live: true,
+      localization: { latitude: 1.1, longitude: 2.2 },
+      amount: new BigNumber(11.11),
+      amounts: [new BigNumber(11.11), new BigNumber(12.11)],
+      usernamePasswordCredentials: {
+        username: 'user',
+        password: 'password',
+      },
+    },
+  })
+  expect(ins.usernamePasswordCredentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
+  const all = await dao.user.findAll({ filter: { id: ins.id }, projection: true })
+  expect(all.length).toBe(1)
+  expect(all[0].live).toBe(true)
+  expect(all[0].localization?.latitude).toBe(1.1)
+  expect(all[0].localization?.longitude).toBe(2.2)
+  expect(all[0].amount?.toNumber()).toBe(11.11)
+  expect(all[0].amounts![0].toNumber()).toBe(11.11)
+  expect(all[0].amounts![1].toNumber()).toBe(12.11)
+  expect(all[0].usernamePasswordCredentials?.username).toBe('user')
+  expect(all[0].usernamePasswordCredentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
 })
 
 // ------------------------------------------------------------------------
@@ -241,21 +304,21 @@ test('update embedded entity', async () => {
 
   expect(user2!.usernamePasswordCredentials).toBeDefined()
   expect(user2!.usernamePasswordCredentials!.username).toBe('username')
-  expect(user2!.usernamePasswordCredentials!.password).toBe('password')
+  expect(user2!.usernamePasswordCredentials!.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
 
   await dao.user.apiV1.update(user, { usernamePasswordCredentials: { username: 'newUsername', password: 'newPassword' } })
   const user3 = await dao.user.findOne({ filter: { id: user.id } })
 
   expect(user3!.usernamePasswordCredentials).toBeDefined()
   expect(user3!.usernamePasswordCredentials!.username).toBe('newUsername')
-  expect(user3!.usernamePasswordCredentials!.password).toBe('newPassword')
+  expect(user3!.usernamePasswordCredentials!.password).toBe('5c29a959abce4eda5f0e7a4e7ea53dce4fa0f0abbe8eaa63717e2fed5f193d31')
 
   await dao.user.apiV1.update(user, { 'usernamePasswordCredentials.username': 'newUsername_2' })
   const user4 = await dao.user.findOne({ filter: { id: user.id } })
 
   expect(user4!.usernamePasswordCredentials).toBeDefined()
   expect(user4!.usernamePasswordCredentials!.username).toBe('newUsername_2')
-  expect(user4!.usernamePasswordCredentials!.password).toBe('newPassword')
+  expect(user4!.usernamePasswordCredentials!.password).toBe('5c29a959abce4eda5f0e7a4e7ea53dce4fa0f0abbe8eaa63717e2fed5f193d31')
 })
 
 // ------------------------------------------------------------------------
@@ -315,7 +378,7 @@ test('insert and retrieve decimal field', async () => {
 })
 
 test('insert and retrieve decimal field 2', async () => {
-  await dao.user.apiV1.insert({ id: 'ID1', live: true, amounts: [new BigNumber(1.1),new BigNumber(2.2)] })
+  await dao.user.apiV1.insert({ id: 'ID1', live: true, amounts: [new BigNumber(1.1), new BigNumber(2.2)] })
 
   const user2 = await dao.user.findOne({ filter: { amounts: { $in: [[new BigNumber(1.1), new BigNumber(2.2)]] } }, projection: { id: true, amounts: true } })
   expect(user2).toBeDefined()
@@ -683,6 +746,25 @@ test('update with undefined', async () => {
 
 test('Find with circular reference', async () => {
   //TODO
+})
+
+
+test('Inner ref', async () => {
+  const useri = await dao.user.insertOne({
+    record: {
+      live: true,
+      //localization: { latitude: 1.1, longitude: 2.2 },
+      //amount: new BigNumber(11.11),
+    },
+  })
+  const devicei = await dao.device.insertOne({
+    record: {
+      name: 'Device 1',
+      userId: useri.id,
+    },
+  })
+  const all = await dao.device.findAll({ filter: {}, projection: { name: true, user: { live: true } } })
+  console.log(all)
 })
 
 afterAll(async () => {
