@@ -38,17 +38,7 @@ beforeEach(async () => {
   })
   dao = new DAOContext({ 
     knex: knexInstance,
-    adapters: { //TODO: give option to specify only one driver overrides
-      mongodb: {
-        ...mongoDbAdapters,
-        Coordinates: identityAdapter,
-        LocalizedString: identityAdapter,
-        ID: identityAdapter,
-        Password: {
-          dbToModel: (o: unknown) => o as string,
-          modelToDB: (o: string) => sha256(o),
-        },
-      },
+    adapters: {
       knexjs: {
         ...knexJsAdapters,
         LocalizedString: {

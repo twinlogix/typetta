@@ -21,7 +21,6 @@ beforeAll(async () => {
   dao = new DAOContext({
     mongoDB: db,
     adapters: {
-      //TODO: give option to specify only one driver overrides
       mongodb: {
         ...mongoDbAdapters,
         Coordinates: identityAdapter,
@@ -31,27 +30,7 @@ beforeAll(async () => {
           dbToModel: (o: unknown) => o as string,
           modelToDB: (o: string) => sha256(o),
         },
-      },
-      knexjs: {
-        ...knexJsAdapters,
-        LocalizedString: {
-          dbToModel: (o: unknown) => JSON.parse(o as string),
-          modelToDB: (o: LocalizedString) => JSON.stringify(o),
-        },
-        Coordinates: {
-          dbToModel: (o: unknown) => JSON.parse(o as string),
-          modelToDB: (o: Coordinates) => JSON.stringify(o),
-        },
-        Decimal: {
-          dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
-          modelToDB: (o: BigNumber) => o,
-        },
-        Password: {
-          dbToModel: (o: unknown) => o as string,
-          modelToDB: (o: string) => sha256(o),
-        },
-        ID: identityAdapter,
-      },
+      }
     },
   })
 })

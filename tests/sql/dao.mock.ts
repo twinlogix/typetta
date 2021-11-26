@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
-import { DriverDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -358,7 +358,7 @@ export type DAOContextParams = {
     user?: Partial<UserDAOParams>
   },
   knex: Knex,
-  adapters?: DriverDataTypeAdapterMap<types.Scalars>
+  adapters?: { knexjs?: KnexJSDataTypeAdapterMap<types.Scalars>; mongodb?: MongoDBDataTypeAdapterMap<types.Scalars> }
 };
 
 export class DAOContext extends AbstractDAOContext {

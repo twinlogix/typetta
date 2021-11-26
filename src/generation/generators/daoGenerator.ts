@@ -5,7 +5,7 @@ import { TsTypettaAbstractGenerator } from './abstractGenerator'
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(): string[] {
     return [
-      "import { DriverDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
+      "import { KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
       `import * as types from '${this._config.tsTypesImport}';`,
       "import { Db } from 'mongodb';",
       "import { Knex } from 'knex';",
@@ -44,7 +44,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const daoOverrides = `daoOverrides?: { \n${indentMultiline(contextDAOParamsDeclarations,)}\n}`;
     const mongoDBParams = hasMongoDBEntites ? ',\nmongoDB: Db' : '';
     const knexJsParams = hasSQLEntities ? ',\nknex: Knex' : '';
-    const adaptersParams = ',\nadapters?: DriverDataTypeAdapterMap<types.Scalars>'
+    const adaptersParams = ',\nadapters?: { knexjs?: KnexJSDataTypeAdapterMap<types.Scalars>; mongodb?: MongoDBDataTypeAdapterMap<types.Scalars> }'
 
     const daoContextParamsExport =
       `export type DAOContextParams = {\n${indentMultiline(`${daoOverrides}${mongoDBParams}${knexJsParams}${adaptersParams}`)}\n};`;

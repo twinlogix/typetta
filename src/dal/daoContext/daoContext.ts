@@ -1,15 +1,15 @@
 import { AbstractDAO } from '../dao/dao'
 import { DefaultModelScalars, DriverDataTypeAdapterMap } from '../drivers/drivers.types'
-import { mongoDbAdapters } from '../drivers/no-sql/mongodb/adapters.mongodb'
-import { knexJsAdapters } from '../drivers/sql/knexjs/adapters.knexjs'
+import { mongoDbAdapters, MongoDBDataTypeAdapterMap } from '../drivers/no-sql/mongodb/adapters.mongodb'
+import { knexJsAdapters, KnexJSDataTypeAdapterMap } from '../drivers/sql/knexjs/adapters.knexjs'
 
 export abstract class AbstractDAOContext<ScalarsType extends DefaultModelScalars = DefaultModelScalars> {
   public adapters: DriverDataTypeAdapterMap<any>
 
-  public constructor(adapters?: DriverDataTypeAdapterMap<ScalarsType>) {
-    this.adapters = adapters || {
-      knexjs: knexJsAdapters,
-      mongodb: mongoDbAdapters,
+  public constructor(adapters?: { knexjs?: KnexJSDataTypeAdapterMap<ScalarsType>; mongodb?: MongoDBDataTypeAdapterMap<ScalarsType> }) {
+    this.adapters = {
+      knexjs: adapters?.knexjs || knexJsAdapters,
+      mongodb: adapters?.mongodb || mongoDbAdapters,
     }
   }
 
