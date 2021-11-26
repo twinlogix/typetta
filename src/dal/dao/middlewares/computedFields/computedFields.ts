@@ -1,8 +1,8 @@
-import { deepMerge } from '@twinlogix/tl-commons'
-import { PartialDeep } from 'type-fest'
 import { GenericProjection, ModelProjection, Projection, StaticProjection } from '../../projections/projections.types'
 import { isProjectionIntersected, projectionDependency } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
+import { deepMerge } from '@twinlogix/tl-commons'
+import { PartialDeep } from 'type-fest'
 
 export function buildComputedField<
   ModelType,

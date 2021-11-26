@@ -1,3 +1,4 @@
+import { MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
@@ -5,7 +6,6 @@ import { SortDirection } from '../../../dao/sorts/sorts.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { KnexJSDataTypeAdapterMap } from './adapters.knexjs'
 import { Knex } from 'knex'
-import { MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 
 export type AbstractFilter = {
   [key: string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators
@@ -13,7 +13,7 @@ export type AbstractFilter = {
 
 export type AbstractSort = { [key: string]: SortDirection }
 
-//TODO: array fitlering not supported
+// TODO: array fitlering not supported
 export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   filter: AbstractFilter,
@@ -31,7 +31,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
           const adapter = adapters[schemaField.scalar]
           Object.entries(v).forEach(([fk, fv]) => {
             const av = () => (adapter ? adapter.modelToDB(fv) : fv)
-            const avs = () => (adapter ? (fv as Array<any>).map((fve) => adapter.modelToDB(fve)) : fv)
+            const avs = () => (adapter ? (fv as any[]).map((fve) => adapter.modelToDB(fve)) : fv)
             // prettier-ignore
             switch (fk) { // TODO: text search
               case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
@@ -60,15 +60,15 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
       }
     } else if (k === '$or') {
       builder.orWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
       })
     } else if (k === '$and') {
       builder.andWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb, filter, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb, f, schema, adapters))
       })
     } else if (k === '$nor') {
       builder.not.orWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((filter) => buildWhereConditions(qb.or, filter, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
       })
     } else if (k === '$not') {
       builder.whereNot((qb) => {
@@ -81,8 +81,12 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   return builder
 }
 
-//TODO: array not supported
-export function buildSelect<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuilder<TRecord, TResult>, projection: GenericProjection, schema: Schema<ScalarsType>): Knex.QueryBuilder<TRecord, TResult> {
+// TODO: array not supported
+export function buildSelect<TRecord, TResult, ScalarsType>(
+  builder: Knex.QueryBuilder<TRecord, TResult>,
+  projection: GenericProjection,
+  schema: Schema<ScalarsType>,
+): Knex.QueryBuilder<TRecord, TResult> {
   if (projection === false) {
     builder.select([])
   } else if (projection === true) {

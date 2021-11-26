@@ -1,11 +1,11 @@
+import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
-import { TypeScriptTypettaPluginConfig } from './config'
-import { findField, findID, findNode, isForeignRef, isInnerRef } from './utils';
+import { findField, findID, findNode, isForeignRef, isInnerRef } from './utils'
 
-export type EmbedFieldType = { embed: string };
-export type InnerRefFieldType = { innerRef: string; refFrom?: string; refTo?: string };
-export type ForeignRefFieldType = { foreignRef: string; refFrom?: string; refTo?: string };
+export type EmbedFieldType = { embed: string }
+export type InnerRefFieldType = { innerRef: string; refFrom?: string; refTo?: string }
+export type ForeignRefFieldType = { foreignRef: string; refFrom?: string; refTo?: string }
 
 export type TsTypettaGeneratorField = {
   name: string
@@ -34,7 +34,6 @@ export type TsTypettaGeneratorScalar = {
 }
 
 export class TsTypettaGenerator {
-
   private _generators: TsTypettaAbstractGenerator[]
 
   constructor(config: TypeScriptTypettaPluginConfig) {
@@ -42,8 +41,6 @@ export class TsTypettaGenerator {
   }
 
   public generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string {
-
-
     const typesMap = new Map<string, TsTypettaGeneratorNode>()
     nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
 
@@ -62,7 +59,7 @@ export class TsTypettaGenerator {
     const definitions = [...typesMap.values()].flatMap((node) => {
       const definition = this._generators
         .map((generator) => generator.generateDefinition(node, typesMap, customScalarsMap))
-        .filter((definition) => definition !== '')
+        .filter((def) => def !== '')
         .join('\n\n')
       if (definition.trim().length === 0) {
         return []
@@ -93,7 +90,7 @@ export class TsTypettaGenerator {
     )
   }
 
-  private checkIds(typesMap: Map<String, TsTypettaGeneratorNode>) {
+  private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
     Array.from(typesMap.values())
       .filter((type) => type.mongoEntity || type.sqlEntity)
       .forEach((type) => {
@@ -104,7 +101,7 @@ export class TsTypettaGenerator {
       })
   }
 
-  private checkReferences(typesMap: Map<String, TsTypettaGeneratorNode>) {
+  private checkReferences(typesMap: Map<string, TsTypettaGeneratorNode>) {
     Array.from(typesMap.values()).forEach((type) => {
       type.fields.forEach((field) => {
         if (typeof field.type !== 'string') {
@@ -150,5 +147,4 @@ export class TsTypettaGenerator {
       })
     })
   }
-
 }

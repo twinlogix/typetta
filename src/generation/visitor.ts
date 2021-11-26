@@ -77,7 +77,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       const schemaType = this._schema.getType(coreType.name.value)
 
       let resFieldType
-      let isGeoPoint = false;
+      // let isGeoPoint = false;
       if (isObjectType(schemaType)) {
         const innerRefDirective = this._getDirectiveFromAstNode(field, Directives.INNER_REF)
         const foreignRefDirective = this._getDirectiveFromAstNode(field, Directives.FOREIGN_REF)

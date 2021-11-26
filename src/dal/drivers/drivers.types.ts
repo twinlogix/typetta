@@ -1,6 +1,6 @@
-import BigNumber from "bignumber.js"
-import { MongoDBDataTypeAdapterMap } from "./no-sql/mongodb/adapters.mongodb"
-import { KnexJSDataTypeAdapterMap } from "./sql/knexjs/adapters.knexjs"
+import { MongoDBDataTypeAdapterMap } from './no-sql/mongodb/adapters.mongodb'
+import { KnexJSDataTypeAdapterMap } from './sql/knexjs/adapters.knexjs'
+import BigNumber from 'bignumber.js'
 
 export type DefaultModelScalars = {
   String: string

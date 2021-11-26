@@ -51,7 +51,7 @@ export class AbstractKnexJsDAO<
     const unwrapped = Object.entries(object)
       .filter((v) => v[0] in this.schema && 'embedded' in this.schema[v[0]])
       .reduce((result, [k, v]) => {
-        return { ...result, [k]: this.daoContext.adapters.knexjs['JSON'].dbToModel(v) }
+        return { ...result, [k]: this.daoContext.adapters.knexjs.JSON.dbToModel(v) }
       }, object)
     return transformObject(this.daoContext.adapters.knexjs, 'dbToModel', unwrapped, this.schema)
   }
@@ -61,7 +61,7 @@ export class AbstractKnexJsDAO<
     return Object.entries(transformed)
       .filter((v) => v[0] in this.schema && 'embedded' in this.schema[v[0]])
       .reduce((result, [k, v]) => {
-        return { ...result, [k]: this.daoContext.adapters.knexjs['JSON'].modelToDB(v) }
+        return { ...result, [k]: this.daoContext.adapters.knexjs.JSON.modelToDB(v) }
       }, transformed)
   }
 

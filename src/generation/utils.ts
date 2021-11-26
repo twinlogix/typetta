@@ -1,5 +1,5 @@
 import { Schema } from '../dal/dao/schemas/schemas.types'
-import { DataTypeAdapter, DataTypeAdapterMap } from '../dal/drivers/drivers.types'
+import { DataTypeAdapterMap } from '../dal/drivers/drivers.types'
 import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
 
 export function toFirstLower(typeName: string) {
@@ -10,11 +10,11 @@ export function findID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField | 
   return node.fields.find((field) => field.isID)
 }
 
-export function findNode(code: string, typesMap: Map<String, TsTypettaGeneratorNode>): TsTypettaGeneratorNode | undefined {
+export function findNode(code: string, typesMap: Map<string, TsTypettaGeneratorNode>): TsTypettaGeneratorNode | undefined {
   return typesMap.get(code)
 }
 
-export function findField(node: TsTypettaGeneratorNode, fieldPath: string, typesMap: Map<String, TsTypettaGeneratorNode>): TsTypettaGeneratorField | undefined {
+export function findField(node: TsTypettaGeneratorNode, fieldPath: string, typesMap: Map<string, TsTypettaGeneratorNode>): TsTypettaGeneratorField | undefined {
   const fieldPathSplitted = fieldPath.split('.')
   if (fieldPathSplitted.length === 1) {
     return node.fields.find((f) => f.name === fieldPathSplitted[0])
@@ -67,29 +67,29 @@ export function transformObject<From, To, ModelScalars extends object, DBScalars
   schema: Schema<ModelScalars>,
 ): To {
   const result: any = {}
-  Object.entries(object).map(([k, v]) => {
-    if (k in schema) {
-      const schemaField = schema[k]
-      if (!schemaField.required && (v === null || v === undefined)) {
-        result[k] = v
+  Object.entries(object).map(([key, value]) => {
+    if (key in schema) {
+      const schemaField = schema[key]
+      if (!schemaField.required && (value === null || value === undefined)) {
+        result[key] = value
       } else {
         if ('scalar' in schemaField) {
           const adapter = adapters[schemaField.scalar]
-          if (Array.isArray(v) && schemaField.array) {
-            result[k] = adapter ? v.map((v) => adapter[direction](v)) : v
+          if (Array.isArray(value) && schemaField.array) {
+            result[key] = adapter ? value.map((v) => adapter[direction](v)) : value
           } else {
-            result[k] = adapter ? adapter[direction](v) : v
+            result[key] = adapter ? adapter[direction](value) : value
           }
         } else {
-          if (Array.isArray(v) && schemaField.array) {
-            result[k] = v.map((v) => transformObject(adapters, direction, v, schemaField.embedded))
+          if (Array.isArray(value) && schemaField.array) {
+            result[key] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded))
           } else {
-            result[k] = transformObject(adapters, direction, v, schemaField.embedded)
+            result[key] = transformObject(adapters, direction, value, schemaField.embedded)
           }
         }
       }
     } else {
-      result[k] = v
+      result[key] = value
     }
   })
   return result

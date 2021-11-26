@@ -1,10 +1,10 @@
-import { Types, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin-helpers'
-import { parse, visit, GraphQLSchema } from 'graphql'
-import { printSchemaWithDirectives } from '@graphql-toolkit/common'
-import { extname } from 'path'
-import { TsMongooseVisitor } from './visitor'
 import { TypeScriptTypettaPluginConfig, Directives } from './config'
 import { TsTypettaGenerator } from './generator'
+import { TsMongooseVisitor } from './visitor'
+import { Types, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin-helpers'
+import { printSchemaWithDirectives } from '@graphql-toolkit/common'
+import { parse, visit, GraphQLSchema } from 'graphql'
+import { extname } from 'path'
 
 export const plugin: PluginFunction<TypeScriptTypettaPluginConfig> = async (schema: GraphQLSchema, documents: Types.DocumentFile[], config: TypeScriptTypettaPluginConfig): Promise<string> => {
   const printedSchema = printSchemaWithDirectives(schema)

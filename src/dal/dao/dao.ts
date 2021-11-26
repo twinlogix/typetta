@@ -97,8 +97,8 @@ export abstract class AbstractDAO<
     records: PartialDeep<ModelType>[],
   ): Promise<ModelProjection<ModelType, P>[]> {
     const results = []
-    for (let i = 0; i < records.length; i++) {
-      results.push(await this.afterFind(params, records[i]))
+    for (const record of records) {
+      results.push(await this.afterFind(params, record))
     }
     return results as ModelProjection<ModelType, P>[]
   }

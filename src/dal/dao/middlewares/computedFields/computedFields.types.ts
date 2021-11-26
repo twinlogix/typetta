@@ -1,5 +1,5 @@
-import { PartialDeep } from 'type-fest';
-import { ModelProjection, Projection, StaticProjection } from '../../projections/projections.types';
+import { ModelProjection, Projection, StaticProjection } from '../../projections/projections.types'
+import { PartialDeep } from 'type-fest'
 
 export type DAOComputedFields<ModelType, P extends true | StaticProjection<ModelType> | undefined | Projection<ModelType>> = {
   fieldsProjection: Projection<ModelType>

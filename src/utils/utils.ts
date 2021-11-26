@@ -1,7 +1,5 @@
 import { QuantityOperators, EqualityOperators, ElementOperators, StringOperators } from '../dal/dao/filters/filters.types'
-import { Projection } from '../dal/dao/projections/projections.types'
 import { SortDirection } from '../dal/dao/sorts/sorts.types'
-import { setTraversing } from '@twinlogix/tl-commons'
 import _ from 'lodash'
 
 export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T

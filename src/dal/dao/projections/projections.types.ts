@@ -1,5 +1,5 @@
-import { PartialDeep, Primitive } from 'type-fest'
 import { Expand, OmitUndefinedAndNeverKeys } from '../../../utils/utils.types'
+import { PartialDeep, Primitive } from 'type-fest'
 
 export type AnyProjection<ModelType, ProjectionType> = true | StaticProjection<ModelType> | undefined | ProjectionType
 
@@ -16,8 +16,8 @@ type RecursiveProjection<T> = T extends (infer U)[]
   ? boolean | RecursiveProjection<U>
   : T extends object
   ? {
-    [P in keyof T]?: boolean | RecursiveProjection<T[P]>
-  }
+      [P in keyof T]?: boolean | RecursiveProjection<T[P]>
+    }
   : boolean
 
 /**
@@ -43,8 +43,8 @@ export type MergeGenericProjection<T1 extends GenericProjection, T2 extends Gene
   : T2 extends false
   ? T1
   : Expand<{
-    [K in keyof T1 | keyof T2]: T1 extends Record<K, any> ? (T2 extends Record<K, any> ? MergeGenericProjection<T1[K], T2[K]> : T1[K]) : T2 extends Record<K, any> ? T2[K] : never
-  }>
+      [K in keyof T1 | keyof T2]: T1 extends Record<K, any> ? (T2 extends Record<K, any> ? MergeGenericProjection<T1[K], T2[K]> : T1[K]) : T2 extends Record<K, any> ? T2[K] : never
+    }>
 
 /**
  * Given a model M and a projection P returns the mapepd model to the projection.
@@ -77,14 +77,14 @@ type StaticModelProjection<M, P extends StaticProjection<M>> = M extends null
   ? never
   : M extends (infer U)[]
   ? P extends StaticProjection<U>
-  ? StaticModelProjection<U, P>[]
-  : never
+    ? StaticModelProjection<U, P>[]
+    : never
   : M extends object
   ? Expand<
-    OmitUndefinedAndNeverKeys<{
-      [K in keyof M]: P extends Record<K, true> ? M[K] : P extends Record<K, StaticProjection<M[K]>> ? StaticModelProjection<M[K], P[K]> : never
-    }>
-  > & { __projection: P }
+      OmitUndefinedAndNeverKeys<{
+        [K in keyof M]: P extends Record<K, true> ? M[K] : P extends Record<K, StaticProjection<M[K]>> ? StaticModelProjection<M[K], P[K]> : never
+      }>
+    > & { __projection: P }
   : never
 
 /**
@@ -99,12 +99,12 @@ type StaticModelProjectionParam<M, P extends StaticProjection<M>> = M extends nu
   ? never
   : M extends (infer U)[]
   ? P extends StaticProjection<U>
-  ? StaticModelProjectionParam<U, P>[]
-  : never
+    ? StaticModelProjectionParam<U, P>[]
+    : never
   : M extends object
   ? Expand<
-    OmitUndefinedAndNeverKeys<{
-      [K in keyof M]: P extends Record<K, true> ? M[K] : P extends Record<K, StaticProjection<M[K]>> ? StaticModelProjectionParam<M[K], P[K]> : never
-    }>
-  > & { __projection?: P }
+      OmitUndefinedAndNeverKeys<{
+        [K in keyof M]: P extends Record<K, true> ? M[K] : P extends Record<K, StaticProjection<M[K]>> ? StaticModelProjectionParam<M[K], P[K]> : never
+      }>
+    > & { __projection?: P }
   : never

@@ -6,7 +6,7 @@ export type DefaultKnexJsScalars = {
   Boolean: number
   Int: number
   Float: number
-  Decimal: BigNumber; //TODO: find appropriate
+  Decimal: BigNumber // TODO: find appropriate
   JSON: string
 }
 

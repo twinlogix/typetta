@@ -1,4 +1,5 @@
 import { RawConfig } from '@graphql-codegen/visitor-plugin-common'
+
 export interface TypeScriptTypettaPluginConfig extends RawConfig {
   /**
    * @name tsTypesImport
@@ -18,5 +19,5 @@ export enum Directives {
   INNER_REF = 'innerRef',
   FOREIGN_REF = 'foreignRef',
   EXCLUDE = 'exclude',
-  GEOPOINT = 'geopoint'
+  GEOPOINT = 'geopoint',
 }

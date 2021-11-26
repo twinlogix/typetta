@@ -42,7 +42,7 @@ export function adaptFilter<FilterType extends AbstractFilter, ScalarsType exten
     } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
       return {
         ...result,
-        [k]: (v as AbstractFilter[]).map((filter) => adaptFilter(filter, schema, adapters)),
+        [k]: (v as AbstractFilter[]).map((f) => adaptFilter(f, schema, adapters)),
       }
     } else {
       // k is not in schema and is not a logical operator, ignore
@@ -63,20 +63,20 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
     const adapter = adapters[schemaField.scalar]
     if (!adapter) {
       result[key] = value
-      //TODO: throw if adapter is undefined?
+      // TODO: throw if adapter is undefined?
     } else if (typeof value === 'object' && value !== null && Object.keys(value).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
-      //mongodb query
+      // mongodb query
       result[key] = Object.entries(value).reduce((p, [fk, fv]) => {
         if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
           return { [fk]: adaptToSchemaValue(fv as Scalar, schemaField, adapter), ...p }
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
-          return { [fk]: (fv as Array<Scalar>).map((fve) => adaptToSchemaValue(fve, schemaField, adapter)), ...p }
+          return { [fk]: (fv as Scalar[]).map((fve) => adaptToSchemaValue(fve, schemaField, adapter)), ...p }
         }
         return { [fk]: fv, ...p }
       }, {})
     } else {
-      //plain value
+      // plain value
       if (value === null) {
         result[key] = null
       } else if (value !== undefined) {

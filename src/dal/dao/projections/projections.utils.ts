@@ -1,7 +1,7 @@
-import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
-import { AnyProjection, GenericProjection, MergeGenericProjection, Projection, StaticGenericProjection, StaticProjection } from './projections.types'
-import _ from 'lodash'
 import { DAOMiddleware } from '../middlewares/middlewares.types'
+import { GenericProjection, MergeGenericProjection, Projection, StaticGenericProjection, StaticProjection } from './projections.types'
+import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
+import _ from 'lodash'
 
 type SelectProjection<M, P1 extends StaticProjection<M> | Projection<M>, P2 extends StaticProjection<M> | Projection<M>> = P1 extends StaticGenericProjection
   ? P2 extends StaticGenericProjection
@@ -55,36 +55,36 @@ export function mergeProjections<P1 extends GenericProjection, P2 extends Generi
 function infoToProjection<M>(info: GraphQLResolveInfo, defaults: any, context: FieldNode, type: GraphQLNamedType, schema: GraphQLSchema): Projection<M> {
   if (context.selectionSet) {
     return context.selectionSet.selections.reduce(
-      (projection: any, selection: any) => {
+      (proj: any, selection: any) => {
         switch (selection.kind) {
           case 'Field':
             if (selection && selection.selectionSet && selection.selectionSet.selections) {
-              if (projection[selection.name.value] === true) {
-                return projection
+              if (proj[selection.name.value] === true) {
+                return proj
               } else {
                 if (type instanceof GraphQLObjectType || type instanceof GraphQLInterfaceType) {
                   const field = type.getFields()[selection.name.value]
                   if (field) {
                     const fieldType = getNamedType(field.type)
                     return {
-                      ...projection,
-                      [selection.name.value]: infoToProjection(info, projection[selection.name.value], selection, fieldType, schema),
+                      ...proj,
+                      [selection.name.value]: infoToProjection(info, proj[selection.name.value], selection, fieldType, schema),
                     }
                   }
                 }
               }
             } else {
               return {
-                ...projection,
+                ...proj,
                 [selection.name.value]: true,
               }
             }
           case 'InlineFragment':
             const inlineFragmentRef = selection.typeCondition.name.value
-            return fragmentToProjections(info, projection, selection, inlineFragmentRef, type, schema)
+            return fragmentToProjections(info, proj, selection, inlineFragmentRef, type, schema)
           case 'FragmentSpread':
             const fragmentRef = info.fragments[selection.name.value].typeCondition.name.value
-            return fragmentToProjections(info, projection, info.fragments[selection.name.value], fragmentRef, type, schema)
+            return fragmentToProjections(info, proj, info.fragments[selection.name.value], fragmentRef, type, schema)
           default:
             return {}
         }
@@ -96,29 +96,29 @@ function infoToProjection<M>(info: GraphQLResolveInfo, defaults: any, context: F
   }
 }
 
-function fragmentToProjections(info: any, projection: any, selection: any, fragmentRef: string, type: GraphQLType, schema: GraphQLSchema) {
+function fragmentToProjections(info: any, proj: any, selection: any, fragmentRef: string, type: GraphQLType, schema: GraphQLSchema) {
   const fragmentKey = fragmentRef[0].toLowerCase() + fragmentRef.slice(1)
-  if (projection[fragmentKey] === true) {
-    return projection
+  if (proj[fragmentKey] === true) {
+    return proj
   } else {
     const fragmentType = getNamedType(schema.getType(fragmentRef)!)
     if (fragmentType === type) {
       return {
-        ...projection,
+        ...proj,
         // @ts-ignore
-        ...infoToProjection(info, projection[fragmentKey], selection, fragmentType, schema),
+        ...infoToProjection(info, proj[fragmentKey], selection, fragmentType, schema),
       }
     } else {
-      const fragmentProjections: any = infoToProjection(info, projection[fragmentKey], selection, fragmentType, schema)
+      const fragmentProjections: any = infoToProjection(info, proj[fragmentKey], selection, fragmentType, schema)
       if (type instanceof GraphQLUnionType) {
         const res = {
-          ...projection,
+          ...proj,
           [fragmentKey]: fragmentProjections,
         }
         return res
       } else if (type instanceof GraphQLObjectType || type instanceof GraphQLInterfaceType) {
         const res = {
-          ...projection,
+          ...proj,
           ...Object.keys(fragmentProjections)
             .filter((field) => type.getFields()[field])
             .reduce((obj: any, key) => {
@@ -258,7 +258,7 @@ export function projectionDependency<
         findParams.projection
         return {
           ...findParams,
-          projection: mergeProjections((findParams.projection || true) as GenericProjection, args.requiredProjection as GenericProjection) as any, //TODO: why as P not working?
+          projection: mergeProjections((findParams.projection || true) as GenericProjection, args.requiredProjection as GenericProjection) as any, // TODO: why as P not working?
         }
       }
       return findParams
