@@ -1,8 +1,8 @@
 overwrite: true
-schema: 'tests/schema.graphql'
+schema: 'tests/mongodb/schema.graphql'
 documents: null
 generates:
-  tests/models.mock.ts:
+  tests/mongodb/models.mock.ts:
     plugins:
       - add:
           content: 'import BigNumber from "bignumber.js";'
@@ -18,7 +18,7 @@ generates:
         Decimal: BigNumber
         Coordinates: Coordinates
         LocalizedString: LocalizedString
-  tests/dao.mock.ts:
+  tests/mongodb/dao.mock.ts:
     config:
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock

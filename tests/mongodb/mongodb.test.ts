@@ -1,6 +1,6 @@
 import { DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
-import { Test, typeAssert } from './utils.test'
+import { Test, typeAssert } from '../utils.test'
 import { Coordinates, LocalizedString } from '@twinlogix/tl-commons'
 import { projection, SortDirection, Projection, StaticProjection, buildComputedField, projectionDependency, mongoDbAdapters, identityAdapter, knexJsAdapters } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
