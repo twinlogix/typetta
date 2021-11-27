@@ -47,6 +47,7 @@ export class TsTypettaGenerator {
     const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
     nodes.filter((node) => node.type === 'scalar').forEach((type) => customScalarsMap.set(type.name, type as TsTypettaGeneratorScalar))
 
+    this.checkEntities(typesMap)
     this.checkIds(typesMap)
     this.checkReferences(typesMap)
 
@@ -88,6 +89,14 @@ export class TsTypettaGenerator {
       '//' +
       '-'.repeat(80)
     )
+  }
+
+  private checkEntities(typesMap: Map<string, TsTypettaGeneratorNode>) {
+    Array.from(typesMap.values())
+      .filter((type) => type.mongoEntity && type.sqlEntity)
+      .forEach((type) => {
+        throw new Error(`Type ${type.name} is a @mongoEntity and a @sqlEntity ath the same time. A type can be only on one database at a time.`)
+      })
   }
 
   private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
