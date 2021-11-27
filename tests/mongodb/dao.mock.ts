@@ -178,6 +178,66 @@ export class DeviceDAO extends AbstractMongoDBDAO<types.Device, 'id', true, Devi
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------- DOG --------------------------------------
+//--------------------------------------------------------------------------------
+
+export type DogExcludedFields = never
+
+export const dogSchema : Schema<types.Scalars>= {
+  'id': { scalar: 'ID', required: true},
+  'name': { scalar: 'String', required: true},
+  'ownerId': { scalar: 'ID', required: true}
+};
+
+type DogFilterFields = {
+  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+};
+export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
+
+export type DogProjection = {
+  id?: boolean,
+  name?: boolean,
+  owner?: UserProjection | boolean,
+  ownerId?: boolean,
+};
+
+export type DogSortKeys = 
+  'id'|
+  'name'|
+  'ownerId';
+export type DogSort = OneKey<DogSortKeys, SortDirection>;
+
+export type DogUpdate = {
+  'id'?: string,
+  'name'?: string,
+  'ownerId'?: string
+};
+
+type DogDAOAllParams = MongoDBDAOParams<types.Dog, 'id', true, DogFilter, DogProjection, DogUpdate, DogExcludedFields, DogSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+export type DogDAOParams = Omit<DogDAOAllParams, 'idField' | 'schema'> & Partial<Pick<DogDAOAllParams, 'idField' | 'schema'>>;
+
+export class DogDAO extends AbstractMongoDBDAO<types.Dog, 'id', true, DogFilter, DogProjection, DogSort, DogUpdate, DogExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+  
+  public constructor(params: DogDAOParams){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: dogSchema, 
+      associations: overrideAssociations(
+        [
+          { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user' }
+        ]
+      ), 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //--------------------------------- ORGANIZATION ---------------------------------
 //--------------------------------------------------------------------------------
 
@@ -260,6 +320,7 @@ export const userSchema : Schema<types.Scalars>= {
   'amount': { scalar: 'Decimal'},
   'amounts': { scalar: 'Decimal', array: true},
   'firstName': { scalar: 'String'},
+  'friendsId': { scalar: 'ID', array: true},
   'id': { scalar: 'ID', required: true},
   'lastName': { scalar: 'String'},
   'live': { scalar: 'Boolean', required: true},
@@ -277,6 +338,7 @@ type UserFilterFields = {
   'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
   'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators| ArrayOperators<BigNumber[]>,
   'firstName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators| StringOperators| ArrayOperators<string[]>,
   'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
   'lastName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
   'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
@@ -290,7 +352,10 @@ export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 export type UserProjection = {
   amount?: boolean,
   amounts?: boolean,
+  dogs?: DogProjection | boolean,
   firstName?: boolean,
+  friends?: UserProjection | boolean,
+  friendsId?: boolean,
   id?: boolean,
   lastName?: boolean,
   live?: boolean,
@@ -306,6 +371,7 @@ export type UserSortKeys =
   'amount'|
   'amounts'|
   'firstName'|
+  'friendsId'|
   'id'|
   'lastName'|
   'live'|
@@ -319,6 +385,7 @@ export type UserUpdate = {
   'amount'?: BigNumber | null,
   'amounts'?: Array<BigNumber> | null,
   'firstName'?: string | null,
+  'friendsId'?: Array<string> | null,
   'id'?: string,
   'lastName'?: string | null,
   'live'?: boolean,
@@ -341,7 +408,8 @@ export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilt
       schema: userSchema, 
       associations: overrideAssociations(
         [
-          
+          { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog' },
+          { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.INNER, field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user' }
         ]
       ), 
     });
@@ -354,6 +422,7 @@ export type DAOContextParams = {
     address?: Partial<AddressDAOParams>,
     city?: Partial<CityDAOParams>,
     device?: Partial<DeviceDAOParams>,
+    dog?: Partial<DogDAOParams>,
     organization?: Partial<OrganizationDAOParams>,
     user?: Partial<UserDAOParams>
   },
@@ -366,6 +435,7 @@ export class DAOContext extends AbstractDAOContext {
   private _address: AddressDAO | undefined;
   private _city: CityDAO | undefined;
   private _device: DeviceDAO | undefined;
+  private _dog: DogDAO | undefined;
   private _organization: OrganizationDAO | undefined;
   private _user: UserDAO | undefined;
   
@@ -389,6 +459,12 @@ export class DAOContext extends AbstractDAOContext {
       this._device = new DeviceDAO({ daoContext: this, ...this.daoOverrides?.device, collection: this.mongoDB!.collection('devices') });
     }
     return this._device;
+  }
+  get dog() {
+    if(!this._dog) {
+      this._dog = new DogDAO({ daoContext: this, ...this.daoOverrides?.dog, collection: this.mongoDB!.collection('dogs') });
+    }
+    return this._dog;
   }
   get organization() {
     if(!this._organization) {
