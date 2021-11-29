@@ -1,6 +1,7 @@
 import { QuantityOperators, EqualityOperators, ElementOperators, StringOperators } from '../dal/dao/filters/filters.types'
 import { SortDirection } from '../dal/dao/sorts/sorts.types'
 import _ from 'lodash'
+import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 
 export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T
 
@@ -48,6 +49,17 @@ export function hasFieldFilter<
         (typeof conditions[fieldName] === 'object' && (conditions[fieldName] as EqualityOperators<FieldType>).$eq && (conditions[fieldName] as EqualityOperators<FieldType>).$eq! === id))) ||
     false
   )
+}
+
+export function findSchemaField<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
+  const c = key.split('.')
+  if (c.length === 1) {
+    return c[0] in schema ? schema[c[0]] : null
+  } else {
+    const k = c.shift()!
+    const schemaField = schema[k]
+    return k in schema && 'embedded' in schemaField ? findSchemaField(c.join('.'), schemaField.embedded) : null
+  }
 }
 
 export const MONGODB_LOGIC_QUERY_PREFIXS = new Set(['$or', '$and', '$not', '$nor'])

@@ -11,9 +11,14 @@ type Device @sqlEntity {
   user: User @innerRef
 }
 
+type Another {
+  test: String
+}
+
 type UsernamePasswordCredentials {
   username: String!
   password: Password!
+  another: Another
 }
 
 type City @sqlEntity {
@@ -39,7 +44,7 @@ type Organization @sqlEntity {
 
 type User @sqlEntity {
   id: ID! @id
-  usernamePasswordCredentials: UsernamePasswordCredentials
+  credentials: UsernamePasswordCredentials
   firstName: String
   lastName: String
   live: Boolean!

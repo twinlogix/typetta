@@ -264,74 +264,86 @@ export type UserExcludedFields = never
 export const userSchema : Schema<types.Scalars>= {
   'amount': { scalar: 'Decimal'},
   'amounts': { scalar: 'Decimal', array: true},
+  'credentials': {
+    embedded: {
+      'another': {
+        embedded: {
+          'test': { scalar: 'String'}
+        }
+      },
+      'password': { scalar: 'Password', required: true},
+      'username': { scalar: 'String', required: true}
+    }
+  },
   'firstName': { scalar: 'String'},
   'id': { scalar: 'ID', required: true},
   'lastName': { scalar: 'String'},
   'live': { scalar: 'Boolean', required: true},
   'localization': { scalar: 'Coordinates'},
-  'title': { scalar: 'LocalizedString'},
-  'usernamePasswordCredentials': {
-    embedded: {
-      'password': { scalar: 'Password', required: true},
-      'username': { scalar: 'String', required: true}
-    }
-  }
+  'title': { scalar: 'LocalizedString'}
 };
 
 type UserFilterFields = {
   'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
   'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators| ArrayOperators<BigNumber[]>,
+  'credentials.another.test'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
   'firstName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
   'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
   'lastName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
   'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
   'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators,
-  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators,
-  'usernamePasswordCredentials.password'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 
 export type UserProjection = {
   amount?: boolean,
   amounts?: boolean,
+  credentials?: {
+    another?: {
+      test?: boolean,
+    } | boolean,
+    password?: boolean,
+    username?: boolean,
+  } | boolean,
   firstName?: boolean,
   id?: boolean,
   lastName?: boolean,
   live?: boolean,
   localization?: boolean,
   title?: boolean,
-  usernamePasswordCredentials?: {
-    password?: boolean,
-    username?: boolean,
-  } | boolean,
 };
 
 export type UserSortKeys = 
   'amount'|
   'amounts'|
+  'credentials.another.test'|
+  'credentials.password'|
+  'credentials.username'|
   'firstName'|
   'id'|
   'lastName'|
   'live'|
   'localization'|
-  'title'|
-  'usernamePasswordCredentials.password'|
-  'usernamePasswordCredentials.username';
+  'title';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
 
 export type UserUpdate = {
   'amount'?: BigNumber | null,
   'amounts'?: Array<BigNumber> | null,
+  'credentials'?: types.UsernamePasswordCredentials | null,
+  'credentials.another'?: types.Another | null,
+  'credentials.another.test'?: string | null,
+  'credentials.password'?: string,
+  'credentials.username'?: string,
   'firstName'?: string | null,
   'id'?: string,
   'lastName'?: string | null,
   'live'?: boolean,
   'localization'?: Coordinates | null,
-  'title'?: LocalizedString | null,
-  'usernamePasswordCredentials'?: types.UsernamePasswordCredentials | null,
-  'usernamePasswordCredentials.password'?: string,
-  'usernamePasswordCredentials.username'?: string
+  'title'?: LocalizedString | null
 };
 
 type UserDAOAllParams = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { SQL?: any } & { test: string }, types.Scalars>;

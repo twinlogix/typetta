@@ -26,6 +26,11 @@ export type Address = {
   id: Scalars['ID'];
 };
 
+export type Another = {
+  __typename?: 'Another';
+  test?: Maybe<Scalars['String']>;
+};
+
 export type City = {
   __typename?: 'City';
   addressId: Scalars['String'];
@@ -56,17 +61,18 @@ export type User = {
   __typename?: 'User';
   amount?: Maybe<Scalars['Decimal']>;
   amounts?: Maybe<Array<Scalars['Decimal']>>;
+  credentials?: Maybe<UsernamePasswordCredentials>;
   firstName?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   lastName?: Maybe<Scalars['String']>;
   live: Scalars['Boolean'];
   localization?: Maybe<Scalars['Coordinates']>;
   title?: Maybe<Scalars['LocalizedString']>;
-  usernamePasswordCredentials?: Maybe<UsernamePasswordCredentials>;
 };
 
 export type UsernamePasswordCredentials = {
   __typename?: 'UsernamePasswordCredentials';
+  another?: Maybe<Another>;
   password: Scalars['Password'];
   username: Scalars['String'];
 };

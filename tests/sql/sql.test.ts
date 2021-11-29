@@ -1,7 +1,7 @@
 import { DAOContext } from './dao.mock'
 import { Coordinates } from '@twinlogix/tl-commons'
 import { LocalizedString } from '@twinlogix/tl-commons'
-import { mongoDbAdapters, knexJsAdapters, identityAdapter } from '@twinlogix/typetta'
+import { mongoDbAdapters, knexJsAdapters, identityAdapter, SortDirection } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -21,7 +21,9 @@ beforeEach(async () => {
   knexInstance = knex(config)
   await knexInstance.schema.createTable('users', (table) => {
     table.string('id').primary()
-    table.string('usernamePasswordCredentials').nullable()
+    table.string('credentials_username').nullable()
+    table.string('credentials_password').nullable()
+    table.string('credentials_another_test').nullable()
     table.string('firstName').nullable()
     table.string('lastName').nullable()
     table.boolean('live')
@@ -36,7 +38,7 @@ beforeEach(async () => {
     table.string('name')
     table.string('userId').nullable()
   })
-  dao = new DAOContext({ 
+  dao = new DAOContext({
     knex: knexInstance,
     adapters: {
       knexjs: {
@@ -66,29 +68,45 @@ beforeEach(async () => {
 afterEach(async () => {})
 
 test('Insert and retrieve', async () => {
+  await dao.user.insertOne({
+    record: {
+      live: false,
+      credentials: {
+        username: 'user',
+        password: 'password',
+      },
+    },
+  })
   const ins = await dao.user.insertOne({
     record: {
       live: true,
       localization: { latitude: 1.1, longitude: 2.2 },
       amount: new BigNumber(11.11),
       amounts: [new BigNumber(11.11), new BigNumber(12.11)],
-      usernamePasswordCredentials: {
-        username: 'user',
+      credentials: {
+        username: 'aser',
         password: 'password',
+        another: {
+          test: 'asd',
+        },
       },
     },
   })
-  expect(ins.usernamePasswordCredentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
-  const all = await dao.user.findAll({ filter: { id: ins.id }, projection: true })
-  expect(all.length).toBe(1)
+  expect(ins.credentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
+  const all = await dao.user.findAll({
+    filter: { 'credentials.password': 'password' },
+    projection: true,
+    sorts: [{ 'credentials.username': SortDirection.ASC }],
+  })
+  expect(all.length).toBe(2)
   expect(all[0].live).toBe(true)
   expect(all[0].localization?.latitude).toBe(1.1)
   expect(all[0].localization?.longitude).toBe(2.2)
   expect(all[0].amount?.toNumber()).toBe(11.11)
   expect(all[0].amounts![0].toNumber()).toBe(11.11)
   expect(all[0].amounts![1].toNumber()).toBe(12.11)
-  expect(all[0].usernamePasswordCredentials?.username).toBe('user')
-  expect(all[0].usernamePasswordCredentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
+  expect(all[0].credentials?.username).toBe('aser')
+  expect(all[0].credentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
 })
 
 test('Inner ref', async () => {
@@ -96,7 +114,7 @@ test('Inner ref', async () => {
     record: {
       live: true,
       amount: new BigNumber(11.11),
-      usernamePasswordCredentials: {
+      credentials: {
         username: 'user',
         password: 'password',
       },
@@ -108,9 +126,13 @@ test('Inner ref', async () => {
       userId: useri.id,
     },
   })
-  const device = await dao.device.findOne({ filter: { id: devicei.id }, projection: { name: true, userId: true, user: { live: true, amount: true, usernamePasswordCredentials: { username: true } } } })
+  const device = await dao.device.findOne({
+    filter: { id: devicei.id },
+    projection: { name: true, userId: true, user: { live: true, amount: true, credentials: { username: true, another: { test: true } } } },
+  })
   expect(device?.name).toBe('Device 1')
   expect(device?.user?.amount?.toNumber()).toBe(11.11)
   expect(device?.user?.live).toBe(true)
-  expect(device?.user?.usernamePasswordCredentials?.username).toBe('user')
+  expect(device?.user?.credentials?.username).toBe('user')
+  expect(device?.user?.credentials?.another?.test).toBe(null)
 })

@@ -3,9 +3,10 @@ import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection, Projection } from '../../../dao/projections/projections.types'
+import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { KnexJsDAOParams } from './dao.knexjs.types'
-import { AbstractSort, buildSelect, buildSort, buildWhereConditions } from './utils.knexjs'
+import { AbstractSort, buildSelect, buildSort, buildWhereConditions, concatEmbeddedNames, flat, unflat } from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
 
@@ -48,21 +49,31 @@ export class AbstractKnexJsDAO<
   }
 
   private dbToModel(object: any): PartialDeep<ModelType> {
-    const unwrapped = Object.entries(object)
-      .filter((v) => v[0] in this.schema && 'embedded' in this.schema[v[0]])
-      .reduce((result, [k, v]) => {
-        return { ...result, [k]: this.daoContext.adapters.knexjs.JSON.dbToModel(v) }
-      }, object)
-    return transformObject(this.daoContext.adapters.knexjs, 'dbToModel', unwrapped, this.schema)
+    const unflatted = Object.entries(this.schema).reduce((result, [k, v]) => {
+      if ('embedded' in v) {
+        const toDelete: string[] = []
+        const res = { ...result, [k]: unflat(k, v, object, toDelete) }
+        for (const key of toDelete) {
+          delete (res as any)[key]
+        }
+        return res
+      }
+      return result
+    }, object)
+    return transformObject(this.daoContext.adapters.knexjs, 'dbToModel', unflatted, this.schema)
   }
 
   private modelToDb(object: PartialDeep<ModelType>): any {
     const transformed = transformObject(this.daoContext.adapters.knexjs, 'modelToDB', object, this.schema) as object
-    return Object.entries(transformed)
-      .filter((v) => v[0] in this.schema && 'embedded' in this.schema[v[0]])
-      .reduce((result, [k, v]) => {
-        return { ...result, [k]: this.daoContext.adapters.knexjs.JSON.modelToDB(v) }
-      }, transformed)
+    return Object.entries(transformed).reduce((result, [k, v]) => {
+      const schemaFiled = this.schema[k]
+      if (schemaFiled && 'embedded' in schemaFiled) {
+        const flatted = { ...result, ...flat(k, schemaFiled, v) }
+        delete (flatted as any)[k]
+        return flatted
+      }
+      return result
+    }, transformed)
   }
 
   private buildSelect<P extends AnyProjection<ModelType, ProjectionType>>(projection?: P, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
@@ -125,9 +136,7 @@ export class AbstractKnexJsDAO<
     const records = await this.qb().insert(record, '*')
     const inserted = records[0]
     if (typeof inserted === 'number') {
-      // .returning() is not supported
-      const id = this.dbToModel({ [this.idField]: record[this.idField] })
-      return { ...this.dbToModel(record), ...id } as Omit<ModelType, ExcludedFields>
+      return (await this._findOne({ filter: { [this.idField]: record[this.idField] } as FilterType })) as Omit<ModelType, ExcludedFields>
     }
     return this.dbToModel(inserted) as Omit<ModelType, ExcludedFields>
   }

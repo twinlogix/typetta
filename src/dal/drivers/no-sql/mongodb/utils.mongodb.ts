@@ -1,4 +1,4 @@
-import { MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
+import { findSchemaField, MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DataTypeAdapter, DefaultModelScalars } from '../../drivers.types'
@@ -34,10 +34,11 @@ export function adaptFilter<FilterType extends AbstractFilter, ScalarsType exten
   adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
 ): Filter<Document> {
   return Object.entries(filter).reduce<Filter<Document>>((result, [k, v]) => {
-    if (k in schema) {
+    const schemaField = findSchemaField(k, schema)
+    if (schemaField) {
       return {
         ...result,
-        ...adaptToSchema(k, v, adapters, schema[k]),
+        ...adaptToSchema(k, v, adapters, schemaField),
       }
     } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
       return {
