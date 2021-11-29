@@ -29,9 +29,12 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
       if ('scalar' in schemaField) {
         if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
           const adapter = adapters[schemaField.scalar]
+          if(!adapter) {
+            throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
+          }
           Object.entries(v).forEach(([fk, fv]) => {
-            const av = () => (adapter ? adapter.modelToDB(fv) : fv)
-            const avs = () => (adapter ? (fv as any[]).map((fve) => adapter.modelToDB(fve)) : fv)
+            const av = () => adapter.modelToDB(fv) as any
+            const avs = () => (fv as any[]).map((fve) => adapter.modelToDB(fve) as any)
             // prettier-ignore
             switch (fk) { // TODO: text search
               case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
@@ -51,8 +54,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             builder.whereNull(k)
           } else if (v !== undefined) {
             const adapter = adapters[schemaField.scalar]
-            const av = adapter ? adapter.modelToDB(v as any) : v
-            builder.where(k, av as any)
+            builder.where(k, adapter.modelToDB(v as any) as any)
           }
         }
       } else {

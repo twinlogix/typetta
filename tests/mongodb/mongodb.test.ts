@@ -716,8 +716,9 @@ test('middleware', async () => {
 // ------------------------- COMPUTED FIELDS ------------------------------
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
-  const dao = new DAOContext({
+  const customDao = new DAOContext({
     mongoDB: db,
+    adapters: dao.adapters,
     daoOverrides: {
       city: {
         middlewares: [
@@ -731,11 +732,11 @@ test('computed fields (one dependency - same level - one calculated)', async () 
     },
   })
 
-  await dao.city.insertOne({ record: { id: 'cesena', name: 'Cesena', addressId: 'address1' } })
-  await dao.city.insertOne({ record: { id: 'forlì', name: 'Forlì', addressId: 'address1' } })
+  await customDao.city.insertOne({ record: { id: 'cesena', name: 'Cesena', addressId: 'address1' } })
+  await customDao.city.insertOne({ record: { id: 'forlì', name: 'Forlì', addressId: 'address1' } })
 
-  const cesena = await dao.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true } })
-  const forli = await dao.city.findOne({ filter: { id: 'forlì' }, projection: { computedName: true } })
+  const cesena = await customDao.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true } })
+  const forli = await customDao.city.findOne({ filter: { id: 'forlì' }, projection: { computedName: true } })
 
   expect(cesena?.computedName).toBe('Computed: Cesena')
   expect(cesena?.id).toBe('cesena')
@@ -743,8 +744,9 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 })
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
-  const dao = new DAOContext({
+  const customDao = new DAOContext({
     mongoDB: db,
+    adapters: dao.adapters,
     daoOverrides: {
       city: {
         middlewares: [
@@ -757,14 +759,15 @@ test('computed fields (two dependencies - same level - one calculated)', async (
       },
     },
   })
-  await dao.city.insertOne({ record: { id: 'milano', name: 'Milano', addressId: 'address1' } })
-  const milano = await dao.city.findOne({ filter: { id: 'milano' }, projection: { computedAddressName: true } })
+  await customDao.city.insertOne({ record: { id: 'milano', name: 'Milano', addressId: 'address1' } })
+  const milano = await customDao.city.findOne({ filter: { id: 'milano' }, projection: { computedAddressName: true } })
   expect(milano?.computedAddressName).toBe('Milano_address1')
 })
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
-  const dao = new DAOContext({
+  const customDao = new DAOContext({
     mongoDB: db,
+    adapters: dao.adapters,
     daoOverrides: {
       city: {
         middlewares: [
@@ -782,8 +785,8 @@ test('computed fields (two dependencies - same level - two calculated)', async (
       },
     },
   })
-  await dao.city.insertOne({ record: { id: 'torino', name: 'Torino', addressId: 'address1' } })
-  const torino = await dao.city.findOne({ filter: { id: 'torino' }, projection: { computedName: true, computedAddressName: true } })
+  await customDao.city.insertOne({ record: { id: 'torino', name: 'Torino', addressId: 'address1' } })
+  const torino = await customDao.city.findOne({ filter: { id: 'torino' }, projection: { computedName: true, computedAddressName: true } })
   expect(torino?.computedAddressName).toBe('Torino_address1')
   expect(torino?.computedName).toBe('Computed: Torino')
 })

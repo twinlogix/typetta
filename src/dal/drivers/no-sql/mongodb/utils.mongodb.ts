@@ -62,8 +62,7 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
     // filter on scalar type
     const adapter = adapters[schemaField.scalar]
     if (!adapter) {
-      result[key] = value
-      // TODO: throw if adapter is undefined?
+      throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
     } else if (typeof value === 'object' && value !== null && Object.keys(value).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
       // mongodb query
       result[key] = Object.entries(value).reduce((p, [fk, fv]) => {
