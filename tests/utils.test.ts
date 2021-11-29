@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server'
 const { createTestClient } = require('apollo-server-testing')
 import gql from 'graphql-tag'
-import { User } from './models.mock'
+import { User } from './mongodb/models.mock'
 import { hasIdFilter, GenericProjection, MergeGenericProjection, ModelProjection, Projection, getProjection, isChangesContainedInProjection, isProjectionContained, isProjectionIntersected, mergeProjections, projection } from '@twinlogix/typetta'
 
 type Pass = 'pass'

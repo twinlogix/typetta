@@ -5,6 +5,7 @@ import { KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, 
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
+import { v4 as uuidv4 } from 'uuid'
 
 //--------------------------------------------------------------------------------
 //----------------------------------- ADDRESS ------------------------------------
@@ -34,10 +35,10 @@ export type AddressUpdate = {
   'id'?: string
 };
 
-type AddressDAOAllParams = MongoDBDAOParams<types.Address, 'id', true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type AddressDAOAllParams = MongoDBDAOParams<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { mongoDB?: any } & { test: string }, types.Scalars>;
 export type AddressDAOParams = Omit<AddressDAOAllParams, 'idField' | 'schema'> & Partial<Pick<AddressDAOAllParams, 'idField' | 'schema'>>;
 
-export class AddressDAO extends AbstractMongoDBDAO<types.Address, 'id', true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class AddressDAO extends AbstractMongoDBDAO<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: AddressDAOParams){
     super({   
@@ -49,6 +50,7 @@ export class AddressDAO extends AbstractMongoDBDAO<types.Address, 'id', true, Ad
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -95,10 +97,10 @@ export type CityUpdate = {
   'name'?: string
 };
 
-type CityDAOAllParams = MongoDBDAOParams<types.City, 'id', true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type CityDAOAllParams = MongoDBDAOParams<types.City, 'id', string, true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { mongoDB?: any } & { test: string }, types.Scalars>;
 export type CityDAOParams = Omit<CityDAOAllParams, 'idField' | 'schema'> & Partial<Pick<CityDAOAllParams, 'idField' | 'schema'>>;
 
-export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', string, true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: CityDAOParams){
     super({   
@@ -110,6 +112,7 @@ export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', true, CityFilt
           
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -155,10 +158,10 @@ export type DeviceUpdate = {
   'userId'?: string | null
 };
 
-type DeviceDAOAllParams = MongoDBDAOParams<types.Device, 'id', true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type DeviceDAOAllParams = MongoDBDAOParams<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, { mongoDB?: any } & { test: string }, types.Scalars>;
 export type DeviceDAOParams = Omit<DeviceDAOAllParams, 'idField' | 'schema'> & Partial<Pick<DeviceDAOAllParams, 'idField' | 'schema'>>;
 
-export class DeviceDAO extends AbstractMongoDBDAO<types.Device, 'id', true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class DeviceDAO extends AbstractMongoDBDAO<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: DeviceDAOParams){
     super({   
@@ -170,6 +173,7 @@ export class DeviceDAO extends AbstractMongoDBDAO<types.Device, 'id', true, Devi
           { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -215,10 +219,10 @@ export type DogUpdate = {
   'ownerId'?: string
 };
 
-type DogDAOAllParams = MongoDBDAOParams<types.Dog, 'id', true, DogFilter, DogProjection, DogUpdate, DogExcludedFields, DogSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type DogDAOAllParams = MongoDBDAOParams<types.Dog, 'id', string, true, DogFilter, DogProjection, DogUpdate, DogExcludedFields, DogSort, { mongoDB?: any } & { test: string }, types.Scalars>;
 export type DogDAOParams = Omit<DogDAOAllParams, 'idField' | 'schema'> & Partial<Pick<DogDAOAllParams, 'idField' | 'schema'>>;
 
-export class DogDAO extends AbstractMongoDBDAO<types.Dog, 'id', true, DogFilter, DogProjection, DogSort, DogUpdate, DogExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class DogDAO extends AbstractMongoDBDAO<types.Dog, 'id', string, true, DogFilter, DogProjection, DogSort, DogUpdate, DogExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: DogDAOParams){
     super({   
@@ -230,6 +234,7 @@ export class DogDAO extends AbstractMongoDBDAO<types.Dog, 'id', true, DogFilter,
           { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user' }
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -288,10 +293,10 @@ export type OrganizationUpdate = {
   'vatNumber'?: string | null
 };
 
-type OrganizationDAOAllParams = MongoDBDAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type OrganizationDAOAllParams = MongoDBDAOParams<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { mongoDB?: any } & { test: string }, types.Scalars>;
 export type OrganizationDAOParams = Omit<OrganizationDAOAllParams, 'idField' | 'schema'> & Partial<Pick<OrganizationDAOAllParams, 'idField' | 'schema'>>;
 
-export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: OrganizationDAOParams){
     super({   
@@ -303,6 +308,7 @@ export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id'
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -396,10 +402,10 @@ export type UserUpdate = {
   'usernamePasswordCredentials.username'?: string
 };
 
-type UserDAOAllParams = MongoDBDAOParams<types.User, 'id', true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { mongoDB?: any } & { test: string }, types.Scalars>;
+type UserDAOAllParams = MongoDBDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { mongoDB?: any } & { test: string }, types.Scalars>;
 export type UserDAOParams = Omit<UserDAOAllParams, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams, 'idField' | 'schema'>>;
 
-export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
+export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { mongoDB?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: UserDAOParams){
     super({   
@@ -412,6 +418,7 @@ export class UserDAO extends AbstractMongoDBDAO<types.User, 'id', true, UserFilt
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.INNER, field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user' }
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   

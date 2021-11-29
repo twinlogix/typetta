@@ -5,6 +5,7 @@ import { KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, 
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
+import { v4 as uuidv4 } from 'uuid'
 
 //--------------------------------------------------------------------------------
 //----------------------------------- ADDRESS ------------------------------------
@@ -34,10 +35,10 @@ export type AddressUpdate = {
   'id'?: string
 };
 
-type AddressDAOAllParams = KnexJsDAOParams<types.Address, 'id', true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { SQL?: any } & { test: string }, types.Scalars>;
+type AddressDAOAllParams = KnexJsDAOParams<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, { SQL?: any } & { test: string }, types.Scalars>;
 export type AddressDAOParams = Omit<AddressDAOAllParams, 'idField' | 'schema'> & Partial<Pick<AddressDAOAllParams, 'idField' | 'schema'>>;
 
-export class AddressDAO extends AbstractKnexJsDAO<types.Address, 'id', true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
+export class AddressDAO extends AbstractKnexJsDAO<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: AddressDAOParams){
     super({   
@@ -49,6 +50,7 @@ export class AddressDAO extends AbstractKnexJsDAO<types.Address, 'id', true, Add
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -95,10 +97,10 @@ export type CityUpdate = {
   'name'?: string
 };
 
-type CityDAOAllParams = KnexJsDAOParams<types.City, 'id', true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { SQL?: any } & { test: string }, types.Scalars>;
+type CityDAOAllParams = KnexJsDAOParams<types.City, 'id', string, true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, { SQL?: any } & { test: string }, types.Scalars>;
 export type CityDAOParams = Omit<CityDAOAllParams, 'idField' | 'schema'> & Partial<Pick<CityDAOAllParams, 'idField' | 'schema'>>;
 
-export class CityDAO extends AbstractKnexJsDAO<types.City, 'id', true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
+export class CityDAO extends AbstractKnexJsDAO<types.City, 'id', string, true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: CityDAOParams){
     super({   
@@ -110,6 +112,7 @@ export class CityDAO extends AbstractKnexJsDAO<types.City, 'id', true, CityFilte
           
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -155,10 +158,10 @@ export type DeviceUpdate = {
   'userId'?: string | null
 };
 
-type DeviceDAOAllParams = KnexJsDAOParams<types.Device, 'id', true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, { SQL?: any } & { test: string }, types.Scalars>;
+type DeviceDAOAllParams = KnexJsDAOParams<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, { SQL?: any } & { test: string }, types.Scalars>;
 export type DeviceDAOParams = Omit<DeviceDAOAllParams, 'idField' | 'schema'> & Partial<Pick<DeviceDAOAllParams, 'idField' | 'schema'>>;
 
-export class DeviceDAO extends AbstractKnexJsDAO<types.Device, 'id', true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
+export class DeviceDAO extends AbstractKnexJsDAO<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: DeviceDAOParams){
     super({   
@@ -170,6 +173,7 @@ export class DeviceDAO extends AbstractKnexJsDAO<types.Device, 'id', true, Devic
           { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -228,10 +232,10 @@ export type OrganizationUpdate = {
   'vatNumber'?: string | null
 };
 
-type OrganizationDAOAllParams = KnexJsDAOParams<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { SQL?: any } & { test: string }, types.Scalars>;
+type OrganizationDAOAllParams = KnexJsDAOParams<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, { SQL?: any } & { test: string }, types.Scalars>;
 export type OrganizationDAOParams = Omit<OrganizationDAOAllParams, 'idField' | 'schema'> & Partial<Pick<OrganizationDAOAllParams, 'idField' | 'schema'>>;
 
-export class OrganizationDAO extends AbstractKnexJsDAO<types.Organization, 'id', true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
+export class OrganizationDAO extends AbstractKnexJsDAO<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: OrganizationDAOParams){
     super({   
@@ -243,6 +247,7 @@ export class OrganizationDAO extends AbstractKnexJsDAO<types.Organization, 'id',
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
@@ -329,10 +334,10 @@ export type UserUpdate = {
   'usernamePasswordCredentials.username'?: string
 };
 
-type UserDAOAllParams = KnexJsDAOParams<types.User, 'id', true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { SQL?: any } & { test: string }, types.Scalars>;
+type UserDAOAllParams = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { SQL?: any } & { test: string }, types.Scalars>;
 export type UserDAOParams = Omit<UserDAOAllParams, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams, 'idField' | 'schema'>>;
 
-export class UserDAO extends AbstractKnexJsDAO<types.User, 'id', true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
+export class UserDAO extends AbstractKnexJsDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
   
   public constructor(params: UserDAOParams){
     super({   
@@ -344,6 +349,7 @@ export class UserDAO extends AbstractKnexJsDAO<types.User, 'id', true, UserFilte
           
         ]
       ), 
+      idGenerator: () => uuidv4() 
     });
   }
   
