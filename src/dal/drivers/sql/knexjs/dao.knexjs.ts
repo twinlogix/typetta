@@ -52,11 +52,13 @@ export class AbstractKnexJsDAO<
     const unflatted = Object.entries(this.schema).reduce((result, [k, v]) => {
       if ('embedded' in v) {
         const [obj, toDelete] = unflat(k, v, object)
-        const res = { ...result, [k]: obj }
-        for (const key of toDelete) {
-          delete (res as any)[key]
+        if (obj) {
+          const res = { ...result, [k]: obj }
+          for (const key of toDelete) {
+            delete (res as any)[key]
+          }
+          return res
         }
-        return res
       }
       return result
     }, object)

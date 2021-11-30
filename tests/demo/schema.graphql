@@ -1,0 +1,29 @@
+scalar Decimal
+scalar Password
+scalar DateTime
+scalar JSON
+
+type Credentials {
+    username: String
+    password: Password
+}
+
+type User @sqlEntity {
+  id: ID! @id
+  credentials: Credentials!
+  createdAt: DateTime!
+  firstName: String
+  lastName: String
+  email: String
+  posts: [Post!] @foreignRef(refFrom: "authorId")
+}
+
+type Post @sqlEntity {
+  id: ID! @id
+  createdAt: DateTime!
+  title: String!
+  body: String
+  views: Int!
+  authorId: ID!
+  author: User @innerRef
+}

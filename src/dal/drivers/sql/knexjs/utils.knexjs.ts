@@ -145,19 +145,19 @@ export function flat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schem
   }, {})
 }
 
-export function unflat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object, string[]] {
+export function unflat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
   const res = Object.entries(schemaFiled.embedded).reduce(
     ([record, oldToDelete], [k, v]) => {
       const name = concatEmbeddedNames(prefix, k)
       if ('embedded' in v) {
         const [obj, newToDelete] = unflat(name, v, value, oldToDelete)
-        return [{ ...record, [k]: obj }, newToDelete] as [object, string[]]
+        return [{ ...(record || {}), [k]: obj }, newToDelete] as [object, string[]]
       } else if (name in value) {
-        return [{ ...record, [k]: value[name] }, [...oldToDelete, name]] as [object, string[]]
+        return [{ ...(record || {}), [k]: value[name] }, [...oldToDelete, name]] as [object, string[]]
       }
-      return [record, oldToDelete] as [object, string[]]
+      return [record, oldToDelete] as [object | undefined, string[]]
     },
-    [{}, toDelete] as [object, string[]],
+    [undefined, toDelete] as [object | undefined, string[]],
   )
   return res
 }
