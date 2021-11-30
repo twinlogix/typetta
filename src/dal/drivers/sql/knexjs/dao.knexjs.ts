@@ -51,8 +51,8 @@ export class AbstractKnexJsDAO<
   private dbToModel(object: any): PartialDeep<ModelType> {
     const unflatted = Object.entries(this.schema).reduce((result, [k, v]) => {
       if ('embedded' in v) {
-        const toDelete: string[] = []
-        const res = { ...result, [k]: unflat(k, v, object, toDelete) }
+        const [obj, toDelete] = unflat(k, v, object)
+        const res = { ...result, [k]: obj }
         for (const key of toDelete) {
           delete (res as any)[key]
         }

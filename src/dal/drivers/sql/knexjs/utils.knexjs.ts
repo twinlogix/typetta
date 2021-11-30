@@ -145,18 +145,20 @@ export function flat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schem
   }, {})
 }
 
-//TODO: toDelete has side-effetct!
-export function unflat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: object, toDelete: string[]): object {
-  const res = Object.entries(schemaFiled.embedded).reduce((result, [k, v]) => {
-    const name = concatEmbeddedNames(prefix, k)
-    if ('embedded' in v) {
-      return { ...result, [k]: unflat(name, v, value, toDelete) }
-    } else if (name in value) {
-      toDelete.push(name)
-      return { ...result, [k]: (value as any)[name] }
-    }
-    return result
-  }, {})
+export function unflat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object, string[]] {
+  const res = Object.entries(schemaFiled.embedded).reduce(
+    (t, [k, v]) => {
+      const name = concatEmbeddedNames(prefix, k)
+      if ('embedded' in v) {
+        const [obj, newToDelete] = unflat(name, v, value, t[1])
+        return [{ ...t[0], [k]: obj }, newToDelete] as [object, string[]]
+      } else if (name in value) {
+        return [{ ...t[0], [k]: value[name] }, [...t[1], name]] as [object, string[]]
+      }
+      return t
+    },
+    [{}, toDelete] as [object, string[]],
+  )
   return res
 }
 

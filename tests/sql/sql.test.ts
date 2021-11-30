@@ -106,6 +106,7 @@ test('Insert and retrieve', async () => {
   expect(all[0].amounts![0].toNumber()).toBe(11.11)
   expect(all[0].amounts![1].toNumber()).toBe(12.11)
   expect(all[0].credentials?.username).toBe('aser')
+  expect(all[0].credentials?.another?.test).toBe('asd')
   expect(all[0].credentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
 })
 
