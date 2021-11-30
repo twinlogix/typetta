@@ -6,7 +6,7 @@ import { AnyProjection, GenericProjection, Projection } from '../../../dao/proje
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { KnexJsDAOParams } from './dao.knexjs.types'
-import { AbstractSort, buildSelect, buildSort, buildWhereConditions, concatEmbeddedNames, flat, unflat } from './utils.knexjs'
+import { AbstractSort, buildSelect, buildSort, buildWhereConditions, concatEmbeddedNames, embeddedScalars, flat, unflat } from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
 
@@ -164,5 +164,27 @@ export class AbstractKnexJsDAO<
     const deleteQ = this.qb().delete()
     const where = this.buildWhere(params.filter, deleteQ)
     await where
+  }
+
+  public async createTable(specificTypeMap: Map<keyof ScalarsType, [string, string]>, defaultSpecificType: [string, string]): Promise<void> {
+    await this.knex.schema.createTable(this.tableName, (table) => {
+      Object.entries(this.schema).forEach(([key, schemaField]) => {
+        if ('scalar' in schemaField) {
+          const specificType = specificTypeMap.get(schemaField.scalar) || defaultSpecificType
+          const cb = table.specificType(key, specificType[schemaField.array ? 1 : 0])
+          if (!schemaField.required) {
+            cb.nullable()
+          }
+        } else {
+          embeddedScalars(key, schemaField.embedded).forEach(([subKey, subSchemaField]) => {
+            const specificType = specificTypeMap.get(subSchemaField.scalar) || defaultSpecificType
+            const cb = table.specificType(subKey, specificType[subSchemaField.array ? 1 : 0])
+            if (!subSchemaField.required) {
+              cb.nullable()
+            }
+          })
+        }
+      })
+    })
   }
 }

@@ -1,4 +1,5 @@
 import { DAOContext } from './dao.mock'
+import { Scalars } from './models.mock'
 import { Coordinates } from '@twinlogix/tl-commons'
 import { LocalizedString } from '@twinlogix/tl-commons'
 import { mongoDbAdapters, knexJsAdapters, identityAdapter, SortDirection } from '@twinlogix/typetta'
@@ -19,25 +20,6 @@ beforeAll(async () => {})
 
 beforeEach(async () => {
   knexInstance = knex(config)
-  await knexInstance.schema.createTable('users', (table) => {
-    table.string('id').primary()
-    table.string('credentials_username').nullable()
-    table.string('credentials_password').nullable()
-    table.string('credentials_another_test').nullable()
-    table.string('firstName').nullable()
-    table.string('lastName').nullable()
-    table.boolean('live')
-    table.string('localization').nullable()
-    table.string('title').nullable()
-    table.decimal('amount').nullable()
-    table.specificType('amounts', 'decimal ARRAY')
-  })
-
-  await knexInstance.schema.createTable('devices', (table) => {
-    table.string('id').primary()
-    table.string('name')
-    table.string('userId').nullable()
-  })
   dao = new DAOContext({
     knex: knexInstance,
     adapters: {
@@ -63,6 +45,15 @@ beforeEach(async () => {
       },
     },
   })
+  const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
+    ['Decimal', ['decimal', 'decimal ARRAY']],
+    ['Boolean', ['boolean', 'boolean ARRAY']],
+    ['Float', ['decimal', 'decimal ARRAY']],
+    ['Int', ['integer', 'integer ARRAY']],
+  ])
+  const defaultSpecificType: [string, string] = ['string', 'string ARRAY']
+  await dao.device.createTable(specificTypeMap, defaultSpecificType)
+  await dao.user.createTable(specificTypeMap, defaultSpecificType)
 })
 
 afterEach(async () => {})

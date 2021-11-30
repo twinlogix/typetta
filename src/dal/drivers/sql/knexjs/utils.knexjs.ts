@@ -147,15 +147,15 @@ export function flat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schem
 
 export function unflat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object, string[]] {
   const res = Object.entries(schemaFiled.embedded).reduce(
-    (t, [k, v]) => {
+    ([record, oldToDelete], [k, v]) => {
       const name = concatEmbeddedNames(prefix, k)
       if ('embedded' in v) {
-        const [obj, newToDelete] = unflat(name, v, value, t[1])
-        return [{ ...t[0], [k]: obj }, newToDelete] as [object, string[]]
+        const [obj, newToDelete] = unflat(name, v, value, oldToDelete)
+        return [{ ...record, [k]: obj }, newToDelete] as [object, string[]]
       } else if (name in value) {
-        return [{ ...t[0], [k]: value[name] }, [...t[1], name]] as [object, string[]]
+        return [{ ...record, [k]: value[name] }, [...oldToDelete, name]] as [object, string[]]
       }
-      return t
+      return [record, oldToDelete] as [object, string[]]
     },
     [{}, toDelete] as [object, string[]],
   )
@@ -164,4 +164,13 @@ export function unflat<ScalarsType>(prefix: string, schemaFiled: { embedded: Sch
 
 export function concatEmbeddedNames(prefix: string, name: string) {
   return prefix + '_' + name
+}
+
+export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<ScalarsType>): [string, { scalar: keyof ScalarsType } & { array?: boolean; required?: boolean }][] {
+  return Object.entries(schema).flatMap(([key, schemaField]) => {
+    if ('embedded' in schemaField) {
+      return embeddedScalars(concatEmbeddedNames(prefix, key), schemaField.embedded)
+    }
+    return [[concatEmbeddedNames(prefix, key), schemaField]]
+  })
 }
