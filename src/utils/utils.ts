@@ -1,7 +1,7 @@
 import { QuantityOperators, EqualityOperators, ElementOperators, StringOperators } from '../dal/dao/filters/filters.types'
+import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { SortDirection } from '../dal/dao/sorts/sorts.types'
 import _ from 'lodash'
-import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 
 export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T
 
@@ -59,6 +59,12 @@ export function findSchemaField<ScalarsType>(key: string, schema: Schema<Scalars
     const k = c.shift()!
     const schemaField = schema[k]
     return k in schema && 'embedded' in schemaField ? findSchemaField(c.join('.'), schemaField.embedded) : null
+  }
+}
+
+export function* reversed<T>(array: T[]): Iterable<T> {
+  for (let i = array.length - 1; i >= 0; i--) {
+    yield array[i]
   }
 }
 
