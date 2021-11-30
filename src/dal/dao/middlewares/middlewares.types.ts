@@ -14,12 +14,12 @@ export type DAOMiddleware<
   OptionsType,
   ScalarsType,
 > = {
-  beforeFind?: <P extends AnyProjection<ModelType, ProjectionType>>(
-    params: FindParams<FilterType, P, SortType, OptionsType>,
+  beforeFind?: (
+    params: FindParams<FilterType, ProjectionType, SortType, OptionsType>,
     context: MiddlewareContext<ScalarsType, IDKey>,
-  ) => Promise<FindParams<FilterType, P, SortType, OptionsType>>
-  afterFind?: <P extends AnyProjection<ModelType, ProjectionType>>(
-    params: FindParams<FilterType, P, SortType, OptionsType>,
+  ) => Promise<FindParams<FilterType, ProjectionType, SortType, OptionsType>>
+  afterFind?: (
+    params: FindParams<FilterType, ProjectionType, SortType, OptionsType>,
     result: PartialDeep<ModelType>,
     context: MiddlewareContext<ScalarsType, IDKey>,
   ) => Promise<PartialDeep<ModelType>>
