@@ -134,9 +134,10 @@ export abstract class AbstractDAO<
   ): Promise<{ totalCount: number; records: ModelProjection<ModelType, P>[] }> {
     const newParams = await this.beforeFind(params as FindParams<FilterType, ProjectionType, SortType, OptionsType>)
     const { totalCount, records } = await this._findPage(newParams)
+    const resolvedRecors = await this.resolveAssociations(records, newParams.projection)
     return {
       totalCount,
-      records: await this.elabRecords(params, records as PartialDeep<ModelType>[]),
+      records: await this.elabRecords(params, resolvedRecors),
     }
   }
 
