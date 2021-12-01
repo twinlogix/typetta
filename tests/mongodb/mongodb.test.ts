@@ -1,4 +1,4 @@
-import { DAOContext, UserProjection } from './dao.mock'
+import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
 import { Test, typeAssert } from '../utils.test'
 import { projection, SortDirection, StaticProjection, buildComputedField, projectionDependency, mongoDbAdapters, identityAdapter, knexJsAdapters } from '@twinlogix/typetta'
@@ -751,7 +751,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
       city: {
         middlewares: [
           buildComputedField({
-            fieldsProjection: { computedAddressName: true },
+            fieldsProjection: { computedAddressName: true } as CityProjection,
             requiredProjection: { name: true, addressId: true },
             compute: async (city) => ({ computedAddressName: `${city.name}_${city.addressId}` }),
           }),
