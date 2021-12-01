@@ -87,7 +87,7 @@ export class PostDAO extends AbstractKnexJsDAO<types.Post, 'id', string, true, P
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type UserExcludedFields = never
+export type UserExcludedFields = 'averageViewsPerPost' | 'totalPostsViews'
 
 export const userSchema : Schema<types.Scalars>= {
   'createdAt': { scalar: 'DateTime', required: true},
@@ -116,6 +116,7 @@ type UserFilterFields = {
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 
 export type UserProjection = {
+  averageViewsPerPost?: boolean,
   createdAt?: boolean,
   credentials?: {
     password?: boolean,
@@ -126,6 +127,7 @@ export type UserProjection = {
   id?: boolean,
   lastName?: boolean,
   posts?: PostProjection | boolean,
+  totalPostsViews?: boolean,
 };
 
 export type UserSortKeys = 

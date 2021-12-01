@@ -116,7 +116,7 @@ export abstract class AbstractDAO<
     const newParams = await this.beforeFind(params as FindParams<FilterType, ProjectionType, SortType, OptionsType>)
     const records = await this._find(newParams)
     const resolvedRecors = await this.resolveAssociations(records, newParams.projection)
-    return this.elabRecords(params, resolvedRecors)
+    return this.elabRecords(newParams as FindParams<FilterType, P, SortType, OptionsType>, resolvedRecors)
   }
 
   async findOne<P extends AnyProjection<ModelType, ProjectionType> = true>(params: FindOneParams<FilterType, P, OptionsType> = {}): Promise<ModelProjection<ModelType, P> | null> {
@@ -124,7 +124,7 @@ export abstract class AbstractDAO<
     const record = await this._findOne(newParams)
     if (record) {
       const resolvedRecors = await this.resolveAssociations([record], newParams.projection)
-      return (await this.elabRecords({ ...params }, resolvedRecors))[0]
+      return (await this.elabRecords({ ...(newParams as FindParams<FilterType, P, SortType, OptionsType>) }, resolvedRecors))[0]
     }
     return null
   }

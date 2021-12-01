@@ -38,6 +38,7 @@ export type Post = {
 
 export type User = {
   __typename?: 'User';
+  averageViewsPerPost?: Maybe<Scalars['Float']>;
   createdAt: Scalars['DateTime'];
   credentials: Credentials;
   email?: Maybe<Scalars['String']>;
@@ -45,4 +46,5 @@ export type User = {
   id: Scalars['ID'];
   lastName?: Maybe<Scalars['String']>;
   posts?: Maybe<Array<Post>>;
+  totalPostsViews?: Maybe<Scalars['Int']>;
 };

@@ -1,6 +1,6 @@
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { knexJsAdapters, identityAdapter, SortDirection } from '@twinlogix/typetta'
+import { knexJsAdapters, identityAdapter, SortDirection, buildComputedField } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -19,6 +19,25 @@ beforeAll(async () => {})
 beforeEach(async () => {
   knexInstance = knex(config)
   dao = new DAOContext({
+    daoOverrides: {
+      user: {
+        middlewares: [
+          buildComputedField({
+            fieldsProjection: { averageViewsPerPost: true },
+            requiredProjection: { totalPostsViews: true, posts: {} },
+            compute: async (u) => (
+              { averageViewsPerPost: (u.totalPostsViews || 0) / (u.posts?.length || 1) }),
+          }),
+          buildComputedField({
+            fieldsProjection: { totalPostsViews: true },
+            requiredProjection: { posts: { views: true } },
+            compute: async (u) => ({
+              totalPostsViews: u.posts?.map((p) => p.views).reduce((p, c) => p + c, 0) || 0,
+            }),
+          }),
+        ],
+      },
+    },
     knex: knexInstance,
     adapters: {
       knexjs: {
@@ -83,9 +102,9 @@ test('Demo', async () => {
     },
     projection: {
       firstName: true,
+      averageViewsPerPost: true,
       posts: {
         title: true,
-        views: true,
         author: {
           firstName: true,
         },
