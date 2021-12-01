@@ -146,10 +146,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
           fieldName += field.name
           const fieldType = field.isList ? `${field.type}[]` : field.type
 
-          const stringOperators = field.type === 'string' ? `| StringOperators` : ''
-          const quantityOperators = field.type === 'number' ? `| QuantityOperators` : ''
-          const geoOperators = customScalarsMap.get(field.type)?.isGeoPoint ? `| GeospathialOperators` : ''
-          const arrayOperators = field.isList ? `| ArrayOperators<${fieldType}>` : ''
+          const stringOperators = field.type === 'string' ? ` | StringOperators` : ''
+          const quantityOperators = field.type === 'number' || field.type === 'Date' ? ` | QuantityOperators<${field.type}>` : ''
+          const geoOperators = customScalarsMap.get(field.type)?.isGeoPoint ? ` | GeospathialOperators` : ''
+          const arrayOperators = field.isList ? ` | ArrayOperators<${fieldType}>` : ''
 
           return [`'${fieldName}'?: ${fieldType} | null | EqualityOperators<${fieldType}> | ElementOperators` + stringOperators + quantityOperators + geoOperators + arrayOperators]
         } else if (isEmbed(field.type)) {

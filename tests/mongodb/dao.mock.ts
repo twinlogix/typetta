@@ -18,7 +18,7 @@ export const addressSchema : Schema<types.Scalars>= {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
 
@@ -71,9 +71,9 @@ export const citySchema : Schema<types.Scalars>= {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 
@@ -133,9 +133,9 @@ export const deviceSchema : Schema<types.Scalars>= {
 };
 
 type DeviceFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'userId'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
 
@@ -194,9 +194,9 @@ export const dogSchema : Schema<types.Scalars>= {
 };
 
 type DogFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
 
@@ -260,10 +260,10 @@ export const organizationSchema : Schema<types.Scalars>= {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 
@@ -342,16 +342,16 @@ export const userSchema : Schema<types.Scalars>= {
 
 type UserFilterFields = {
   'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
-  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators| ArrayOperators<BigNumber[]>,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators| StringOperators| ArrayOperators<string[]>,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators,
+  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | ArrayOperators<BigNumber[]>,
+  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | StringOperators | ArrayOperators<string[]>,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
-  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators| GeospathialOperators,
+  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators | GeospathialOperators,
   'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators,
   'usernamePasswordCredentials.password'?: any | null | EqualityOperators<any> | ElementOperators,
-  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators| StringOperators
+  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 

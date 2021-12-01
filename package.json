@@ -9,7 +9,8 @@
     "test": "jest --detectOpenHandles",
     "generate": "npm run generate-mongodb && npm run generate-sql",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
-    "generate-sql": "graphql-codegen --config tests/sql/codegen.yml"
+    "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
+    "generate-demo": "graphql-codegen --config tests/demo/codegen.yml"
   },
   "repository": {
     "type": "git",
