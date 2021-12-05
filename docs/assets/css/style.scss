@@ -1,0 +1,13 @@
+@import '{{ site.theme }}';
+
+a {
+  color: #bf1c31;
+}
+
+header h1 {
+  display: none;
+}
+
+footer p:nth-child(2) {
+  display: none;
+}
