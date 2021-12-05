@@ -3,3 +3,4 @@ plugins:
   - jekyll-remote-theme
 
 theme: jekyll-theme-minimal
+title: Typetta
