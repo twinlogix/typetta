@@ -1,4 +1,7 @@
-@import 'jekyll-theme-minimal';
+---
+---
+
+@import '{{ site.theme }}';
 
 a {
   color: #bf1c31;
