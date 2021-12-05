@@ -1,8 +1,21 @@
 <html>
   <head>
     <title>Typetta</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="menu.css" />
+    <script src="http://www.w3schools.com/lib/w3data.js"></script>
   </head>
   <body>
-    Documentation
+    <div id="menuToggle">
+      <input type="checkbox" />
+      <span></span>
+      <span></span>
+      <span></span>
+      <div w3-include-html="./menu.html"></div>
+      
+    </div>
+    <script>
+      w3IncludeHTML();
+    </script>
   </body>
 </html>
