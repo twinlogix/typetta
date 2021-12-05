@@ -4,8 +4,6 @@ plugins:
 
 theme: jekyll-theme-minimal
 title: Typetta
-logo: /assets/logo.png
 description: Typescript fully typed ORM for SQL and MongoDB.
 show_downloads: true
 google_analytics:
-theme: jekyll-theme-minimal
