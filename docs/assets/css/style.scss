@@ -7,6 +7,12 @@ a {
   color: #bf1c31;
 }
 
+a:hover,
+a:focus {
+  color: #7a1321;
+  font-weight: normal;
+}
+
 header h1 {
   display: none;
 }
