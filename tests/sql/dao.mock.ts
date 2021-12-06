@@ -262,25 +262,26 @@ export class OrganizationDAO extends AbstractKnexJsDAO<types.Organization, 'id',
 export type UserExcludedFields = never
 
 export const userSchema : Schema<types.Scalars>= {
-  'amount': { scalar: 'Decimal'},
-  'amounts': { scalar: 'Decimal', array: true},
+  'amount': { scalar: 'Decimal', alias: 'value' },
+  'amounts': { scalar: 'Decimal', array: true, alias: 'values' },
   'credentials': {
     embedded: {
       'another': {
         embedded: {
-          'test': { scalar: 'String'}
+          'test': { scalar: 'String', alias: 'a'}
         }
       },
-      'password': { scalar: 'Password', required: true},
-      'username': { scalar: 'String', required: true}
-    }
+      'password': { scalar: 'Password', required: true, alias: 'pwd'},
+      'username': { scalar: 'String', required: true, alias: 'usr'}
+    },
+    alias: 'cred'
   },
-  'firstName': { scalar: 'String'},
-  'id': { scalar: 'ID', required: true},
-  'lastName': { scalar: 'String'},
-  'live': { scalar: 'Boolean', required: true},
-  'localization': { scalar: 'Coordinates'},
-  'title': { scalar: 'LocalizedString'}
+  'firstName': { scalar: 'String', alias: 'name' },
+  'id': { scalar: 'ID', required: true, alias: 'ID' },
+  'lastName': { scalar: 'String', alias: 'surname'},
+  'live': { scalar: 'Boolean', required: true, alias: 'active'},
+  'localization': { scalar: 'Coordinates', alias: 'loc'},
+  'title': { scalar: 'LocalizedString', alias: 't'}
 };
 
 type UserFilterFields = {

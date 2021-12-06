@@ -58,7 +58,7 @@ export function findSchemaField<ScalarsType>(key: string, schema: Schema<Scalars
   } else {
     const k = c.shift()!
     const schemaField = schema[k]
-    return k in schema && 'embedded' in schemaField ? findSchemaField(c.join('.'), schemaField.embedded) : null
+    return schemaField && 'embedded' in schemaField ? findSchemaField(c.join('.'), schemaField.embedded) : null
   }
 }
 

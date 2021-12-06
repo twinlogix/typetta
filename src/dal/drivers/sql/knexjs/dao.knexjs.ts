@@ -49,9 +49,9 @@ export class AbstractKnexJsDAO<
   }
 
   private dbToModel(object: any): PartialDeep<ModelType> {
-    const unflatted = Object.entries(this.schema).reduce((result, [k, v]) => {
-      if ('embedded' in v) {
-        const [obj, toDelete] = unflat(k, v, object)
+    const unflatted = Object.entries(this.schema).reduce((result, [k, schemaFiled]) => {
+      if ('embedded' in schemaFiled) {
+        const [obj, toDelete] = unflat(schemaFiled.alias || k, schemaFiled, object)
         if (obj) {
           const res = { ...result, [k]: obj }
           for (const key of toDelete) {
@@ -66,12 +66,12 @@ export class AbstractKnexJsDAO<
   }
 
   private modelToDb(object: PartialDeep<ModelType>): any {
-    const transformed = transformObject(this.daoContext.adapters.knexjs, 'modelToDB', object, this.schema) as object
-    return Object.entries(transformed).reduce((result, [k, v]) => {
-      const schemaFiled = this.schema[k]
-      if (schemaFiled && 'embedded' in schemaFiled) {
-        const flatted = { ...result, ...flat(k, schemaFiled, v) }
-        delete (flatted as any)[k]
+    const transformed = transformObject(this.daoContext.adapters.knexjs, 'modelToDB', object, this.schema) as any
+    return Object.entries(this.schema).reduce((result, [k, schemaFiled]) => {
+      const name = schemaFiled.alias || k
+      if ('embedded' in schemaFiled && name in transformed) {
+        const flatted = { ...result, ...flat(name, schemaFiled, transformed[name]) }
+        delete flatted[name]
         return flatted
       }
       return result
@@ -89,7 +89,7 @@ export class AbstractKnexJsDAO<
   private async getRecords<P extends AnyProjection<ModelType, ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
-    const query = buildSort(where, (params.sorts || []) as unknown as AbstractSort[])
+    const query = buildSort(where, (params.sorts || []) as unknown as AbstractSort[], this.schema)
     const records = await query.limit(params.limit || this.pageSize).offset(params.start || 0)
     return this.dbsToModels(records)
   }
@@ -173,12 +173,12 @@ export class AbstractKnexJsDAO<
       Object.entries(this.schema).forEach(([key, schemaField]) => {
         if ('scalar' in schemaField) {
           const specificType = specificTypeMap.get(schemaField.scalar) || defaultSpecificType
-          const cb = table.specificType(key, specificType[schemaField.array ? 1 : 0])
+          const cb = table.specificType(schemaField.alias || key, specificType[schemaField.array ? 1 : 0])
           if (!schemaField.required) {
             cb.nullable()
           }
         } else {
-          embeddedScalars(key, schemaField.embedded).forEach(([subKey, subSchemaField]) => {
+          embeddedScalars(schemaField.alias || key, schemaField.embedded).forEach(([subKey, subSchemaField]) => {
             const specificType = specificTypeMap.get(subSchemaField.scalar) || defaultSpecificType
             const cb = table.specificType(subKey, specificType[subSchemaField.array ? 1 : 0])
             if (!subSchemaField.required) {
