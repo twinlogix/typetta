@@ -1,4 +1,4 @@
-import { findSchemaField, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
+import { getSchemaFieldTraversing, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
@@ -33,7 +33,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>,
 ): Knex.QueryBuilder<TRecord, TResult> {
   Object.entries(filter).forEach(([k, v]) => {
-    const schemaField = findSchemaField(k, schema)
+    const schemaField = getSchemaFieldTraversing(k, schema)
     if (schemaField) {
       if (schemaField.array) {
         throw new Error(`Array filtering not supported on sql entity yet. (field: ${k})`)
@@ -218,7 +218,7 @@ export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<Scal
 
 export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: KnexJSDataTypeAdapterMap<ScalarsType>): object {
   return Object.entries(update).reduce((p, [k, v]) => {
-    const schemaField = findSchemaField(k, schema)
+    const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
       const adapter = adapters[schemaField.scalar]

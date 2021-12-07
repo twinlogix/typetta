@@ -1,4 +1,4 @@
-import { findSchemaField, modelValueToDbValue, MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
+import { getSchemaFieldTraversing, modelValueToDbValue, MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DefaultModelScalars } from '../../drivers.types'
@@ -47,7 +47,7 @@ export function adaptFilter<FilterType extends AbstractFilter, ScalarsType exten
   adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
 ): Filter<Document> {
   return Object.entries(filter).reduce<Filter<Document>>((result, [k, v]) => {
-    const schemaField = findSchemaField(k, schema)
+    const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField) {
       return {
@@ -106,7 +106,7 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
 
 export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
   return Object.entries(update).reduce((p, [k, v]) => {
-    const schemaField = findSchemaField(k, schema)
+    const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
       const adapter = adapters[schemaField.scalar]

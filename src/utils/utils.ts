@@ -52,14 +52,14 @@ export function hasFieldFilter<
   )
 }
 
-export function findSchemaField<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
+export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
   const c = key.split('.')
   if (c.length === 1) {
     return c[0] in schema ? schema[c[0]] : null
   } else {
     const k = c.shift()!
     const schemaField = schema[k]
-    return schemaField && 'embedded' in schemaField ? findSchemaField(c.join('.'), schemaField.embedded) : null
+    return schemaField && 'embedded' in schemaField ? getSchemaFieldTraversing(c.join('.'), schemaField.embedded) : null
   }
 }
 
