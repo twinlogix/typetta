@@ -78,10 +78,11 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       const schemaType = this._schema.getType(coreType.name.value)
 
       let resFieldType
-      // let isGeoPoint = false;
+      let innerRefDirective
+      let foreignRefDirective
       if (isObjectType(schemaType)) {
-        const innerRefDirective = this._getDirectiveFromAstNode(field, Directives.INNER_REF)
-        const foreignRefDirective = this._getDirectiveFromAstNode(field, Directives.FOREIGN_REF)
+        innerRefDirective = this._getDirectiveFromAstNode(field, Directives.INNER_REF)
+        foreignRefDirective = this._getDirectiveFromAstNode(field, Directives.FOREIGN_REF)
 
         if (innerRefDirective) {
           const innerRef = coreTypeName
@@ -121,6 +122,16 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
           this._getDirectiveArgValue<string>(aliasDirective, 'value')!
           : undefined
       );
+
+      if (aliasDirective && excludeDirective) {
+        throw new Error(`@alias and @exclude directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (aliasDirective && innerRefDirective) {
+        throw new Error(`@alias and @innerRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (aliasDirective && foreignRefDirective) {
+        throw new Error(`@alias and @foreignRef directives of field '${field.name.value}' are incompatible.`)
+      }
 
       resFields.push({
         name: field.name.value,
