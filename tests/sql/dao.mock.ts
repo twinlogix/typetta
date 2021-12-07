@@ -294,50 +294,63 @@ export type UserExcludedFields = never
 
 export const userSchema : Schema<types.Scalars>= {
   'amount': {
-    scalar: 'Decimal'
+    scalar: 'Decimal', 
+    alias: 'value'
   },
   'amounts': {
     scalar: 'Decimal', 
-    array: true
+    array: true, 
+    alias: 'values'
   },
   'credentials': {
     embedded: {
       'another': {
         embedded: {
           'test': {
-            scalar: 'String'
+            scalar: 'String', 
+            alias: 't'
           }
-        }
+        }, 
+        alias: 'a'
       },
       'password': {
         scalar: 'Password', 
-        required: true
+        required: true, 
+        alias: 'pass'
       },
       'username': {
         scalar: 'String', 
-        required: true
+        required: true, 
+        alias: 'user'
       }
-    }
+    }, 
+    alias: 'cred'
   },
   'firstName': {
-    scalar: 'String'
+    scalar: 'String', 
+    alias: 'name'
   },
   'id': {
     scalar: 'ID', 
-    required: true
+    required: true, 
+    alias: 'ID'
   },
   'lastName': {
-    scalar: 'String'
+    scalar: 'String', 
+    alias: 'surname'
   },
   'live': {
     scalar: 'Boolean', 
-    required: true
+    required: true, 
+    alias: 'active'
   },
   'localization': {
-    scalar: 'Coordinates'
+    scalar: 'Coordinates', 
+    alias: 'l'
   },
   'title': {
-    scalar: 'LocalizedString'
+    scalar: 'LocalizedString', 
+    alias: 't'
   }
 };
 

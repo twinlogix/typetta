@@ -1,4 +1,4 @@
-import { findSchemaField, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
+import { findSchemaField, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
@@ -24,6 +24,7 @@ function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType
     return schemaField && 'embedded' in schemaField ? concatEmbeddedNames(n, modelNameToDbName(c.join('.'), schemaField.embedded)) : k + '.' + c.join('.')
   }
 }
+
 // TODO: array fitlering not supported
 export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
@@ -144,36 +145,62 @@ export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuil
   return builder
 }
 
-export function flat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: any): object {
-  return Object.entries(schemaFiled.embedded).reduce((result, [k, subSchemaField]) => {
-    const key = subSchemaField.alias || k
-    if (key in value) {
-      const name = concatEmbeddedNames(prefix, key)
-      if ('embedded' in subSchemaField) {
-        return { ...result, ...flat(name, subSchemaField, value[key]) }
-      } else {
-        return { ...result, [name]: value[key] }
+export function flatEmbdeddedToDb<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
+  function flat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: any): object {
+    return Object.entries(schemaFiled.embedded).reduce((result, [k, subSchemaField]) => {
+      const key = subSchemaField.alias || k
+      if (key in value) {
+        const name = concatEmbeddedNames(prefix, key)
+        if ('embedded' in subSchemaField) {
+          return { ...result, ...flat(name, subSchemaField, value[key]) }
+        } else {
+          return { ...result, [name]: value[key] }
+        }
+      }
+      return result
+    }, {})
+  }
+  return Object.entries(schema).reduce((result, [k, schemaFiled]) => {
+    const name = schemaFiled.alias || k
+    if ('embedded' in schemaFiled && name in object) {
+      const flatted = { ...result, ...flat(name, schemaFiled, object[name]) }
+      delete flatted[name]
+      return flatted
+    }
+    return result
+  }, object)
+}
+
+export function unflatEmbdeddedFromDb<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
+  function unflat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
+    const res = Object.entries(schemaFiled.embedded).reduce(
+      ([record, oldToDelete], [k, subSchemaField]) => {
+        const name = concatEmbeddedNames(prefix, subSchemaField.alias || k)
+        if ('embedded' in subSchemaField) {
+          const [obj, newToDelete] = unflat(name, subSchemaField, value, oldToDelete)
+          return [{ ...(record || {}), [k]: obj }, newToDelete] as [object, string[]]
+        } else if (name in value) {
+          return [{ ...(record || {}), [k]: value[name] }, [...oldToDelete, name]] as [object, string[]]
+        }
+        return [record, oldToDelete] as [object | undefined, string[]]
+      },
+      [undefined, toDelete] as [object | undefined, string[]],
+    )
+    return res
+  }
+  return Object.entries(schema).reduce((result, [k, schemaFiled]) => {
+    if ('embedded' in schemaFiled) {
+      const [obj, toDelete] = unflat(schemaFiled.alias || k, schemaFiled, object)
+      if (obj) {
+        const res = { ...result, [k]: obj }
+        for (const key of toDelete) {
+          delete (res as any)[key]
+        }
+        return res
       }
     }
     return result
-  }, {})
-}
-
-export function unflat<ScalarsType>(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
-  const res = Object.entries(schemaFiled.embedded).reduce(
-    ([record, oldToDelete], [k, subSchemaField]) => {
-      const name = concatEmbeddedNames(prefix, subSchemaField.alias || k)
-      if ('embedded' in subSchemaField) {
-        const [obj, newToDelete] = unflat(name, subSchemaField, value, oldToDelete)
-        return [{ ...(record || {}), [k]: obj }, newToDelete] as [object, string[]]
-      } else if (name in value) {
-        return [{ ...(record || {}), [k]: value[name] }, [...oldToDelete, name]] as [object, string[]]
-      }
-      return [record, oldToDelete] as [object | undefined, string[]]
-    },
-    [undefined, toDelete] as [object | undefined, string[]],
-  )
-  return res
+  }, object)
 }
 
 export function concatEmbeddedNames(prefix: string, name: string) {
@@ -187,4 +214,22 @@ export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<Scal
     }
     return [[concatEmbeddedNames(prefix, schemaField.alias || key), schemaField]]
   })
+}
+
+export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: KnexJSDataTypeAdapterMap<ScalarsType>): any {
+  return Object.entries(update).reduce((p, [k, v]) => {
+    const schemaField = findSchemaField(k, schema)
+    const columnName = modelNameToDbName(k, schema)
+    if (schemaField && 'scalar' in schemaField) {
+      const adapter = adapters[schemaField.scalar]
+      return { [columnName]: modelValueToDbValue(v, schemaField, adapter), ...p }
+    } else if (schemaField) {
+      const adapted = adaptUpdate(v, schemaField.embedded, adapters)
+      return Object.entries(adapted).reduce((sp, [sk, sv]) => {
+        return { [concatEmbeddedNames(columnName, sk)]: sv, ...sp }
+      }, p)
+    } else {
+      return p
+    }
+  }, {})
 }

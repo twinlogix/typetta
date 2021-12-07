@@ -1,12 +1,12 @@
 import { transformObject } from '../../../../generation/utils'
-import { ConditionalPartialBy } from '../../../../utils/utils'
+import { ConditionalPartialBy, findSchemaField } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
 import { AnyProjection, Projection } from '../../../dao/projections/projections.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOParams } from './dao.mongodb.types'
-import { adaptFilter, adaptProjection } from './utils.mongodb'
+import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
 import { Collection, Document, WithId, Filter, UpdateOptions, FindOptions, OptionalId, InsertOneOptions } from 'mongodb'
 import { PartialDeep } from 'type-fest'
 
@@ -46,27 +46,19 @@ export class AbstractMongoDBDAO<
   }
 
   private buildProjection(projection?: AnyProjection<ModelType, ProjectionType>): Document | undefined {
-    if (projection === true) {
-      return undefined
-    }
     return adaptProjection(projection, this.schema) as Document
   }
 
   private buildFilter(filter?: FilterType): Filter<Document> {
-    if (filter) {
-      return adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongodb)
-    }
-    return {}
+    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongodb) : { }
   }
 
   private buildSort(sorts?: SortType[]): [string, 1 | -1][] {
-    return (
-      sorts?.flatMap((s) => {
-        return Object.entries(s).map(([k, v]) => {
-          return [k, v.valueOf()] as [string, 1 | -1]
-        })
-      }) || []
-    )
+    return sorts ? adaptSorts(sorts, this.schema) : []
+  }
+
+  private buildChanges(update: UpdateType) {
+    return adaptUpdate(update, this.schema, this.daoContext.adapters.mongodb)
   }
 
   protected async _find<P extends AnyProjection<ModelType, ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
@@ -116,13 +108,13 @@ export class AbstractMongoDBDAO<
   }
 
   protected async _updateOne(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
-    const changes = this.modelToDb(params.changes)
+    const changes = this.buildChanges(params.changes)
     const filter = this.buildFilter(params.filter)
     await this.collection.updateOne(filter, { $set: changes }, { upsert: false, ignoreUndefined: true, ...params.options?.mongoDB } as UpdateOptions)
   }
 
   protected async _updateMany(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
-    const changes = this.modelToDb(params.changes)
+    const changes = this.buildChanges(params.changes)
     const filter = this.buildFilter(params.filter)
     await this.collection.updateMany(filter, changes, params.options?.mongoDB)
   }

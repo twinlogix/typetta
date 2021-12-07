@@ -1,4 +1,4 @@
-import { findSchemaField, MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
+import { findSchemaField, modelValueToDbValue, MONGODB_ARRAY_VALUE_QUERY_PREFIXS, MONGODB_LOGIC_QUERY_PREFIXS, MONGODB_QUERY_PREFIXS, MONGODB_SINGLE_VALUE_QUERY_PREFIXS } from '../../../../utils/utils'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DataTypeAdapter, DefaultModelScalars } from '../../drivers.types'
@@ -8,24 +8,37 @@ import { Filter, Document } from 'mongodb'
 
 export function adaptProjection<ModelType, ProjectionType, ScalarsType>(projection: AnyProjection<ModelType, ProjectionType>, schema: Schema<ScalarsType>): AnyProjection<ModelType, ProjectionType> {
   if (projection === true || projection === undefined) {
-    return projection
+    return undefined
   }
   return Object.entries(projection).reduce<object>((result, [k, v]) => {
     if (k in schema) {
       const schemaField = schema[k]
+      const name = schemaField.alias || k
       if ('scalar' in schemaField) {
         return {
           ...result,
-          [k]: v,
+          [name]: v,
         }
       }
       return {
         ...result,
-        [k]: adaptProjection(v, schemaField.embedded),
+        [name]: adaptProjection(v, schemaField.embedded),
       }
     }
     return result
   }, {} as object) as AnyProjection<ModelType, ProjectionType>
+}
+
+export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {
+  const c = name.split('.')
+  const k = c.shift()!
+  const schemaField = schema[k]
+  const n = (schemaField && schemaField.alias) || k
+  if (c.length === 0) {
+    return n
+  } else {
+    return schemaField && 'embedded' in schemaField ? n + '.' + modelNameToDbName(c.join('.'), schemaField.embedded) : k + '.' + c.join('.')
+  }
 }
 
 export function adaptFilter<FilterType extends AbstractFilter, ScalarsType extends DefaultModelScalars>(
@@ -35,15 +48,16 @@ export function adaptFilter<FilterType extends AbstractFilter, ScalarsType exten
 ): Filter<Document> {
   return Object.entries(filter).reduce<Filter<Document>>((result, [k, v]) => {
     const schemaField = findSchemaField(k, schema)
+    const columnName = modelNameToDbName(k, schema)
     if (schemaField) {
       return {
         ...result,
-        ...adaptToSchema(k, v, adapters, schemaField),
+        ...adaptToSchema(columnName, v, adapters, schemaField),
       }
     } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
       return {
         ...result,
-        [k]: (v as AbstractFilter[]).map((f) => adaptFilter(f, schema, adapters)),
+        [columnName]: (v as AbstractFilter[]).map((f) => adaptFilter(f, schema, adapters)),
       }
     } else {
       // k is not in schema and is not a logical operator, ignore
@@ -68,10 +82,10 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
       // mongodb query
       result[key] = Object.entries(value).reduce((p, [fk, fv]) => {
         if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
-          return { [fk]: adaptToSchemaValue(fv as Scalar, schemaField, adapter), ...p }
+          return { [fk]: modelValueToDbValue(fv as Scalar, schemaField, adapter), ...p }
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
-          return { [fk]: (fv as Scalar[]).map((fve) => adaptToSchemaValue(fve, schemaField, adapter)), ...p }
+          return { [fk]: (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter)), ...p }
         }
         return { [fk]: fv, ...p }
       }, {})
@@ -80,7 +94,7 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
       if (value === null) {
         result[key] = null
       } else if (value !== undefined) {
-        result[key] = adaptToSchemaValue(value as Scalar, schemaField, adapter)
+        result[key] = modelValueToDbValue(value as Scalar, schemaField, adapter)
       }
     }
   } else {
@@ -90,10 +104,25 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
   return result
 }
 
-function adaptToSchemaValue<ScalarsType>(
-  value: ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][],
-  schemaField: SchemaField<ScalarsType>,
-  adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
-): unknown {
-  return schemaField.array ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
+export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
+  return Object.entries(update).reduce((p, [k, v]) => {
+    const schemaField = findSchemaField(k, schema)
+    const columnName = modelNameToDbName(k, schema)
+    if (schemaField && 'scalar' in schemaField) {
+      const adapter = adapters[schemaField.scalar]
+      return { [columnName]: modelValueToDbValue(v, schemaField, adapter), ...p }
+    } else if (schemaField) {
+      return { [columnName]: adaptUpdate(v, schemaField.embedded, adapters), ...p }
+    } else {
+      return p
+    }
+  }, {})
+}
+
+export function adaptSorts<SortType, ScalarsType>(sorts: SortType[], schema: Schema<ScalarsType>): [string, 1 | -1][] {
+  return sorts.flatMap((s) => {
+    return Object.entries(s).map(([k, v]) => {
+      return [modelNameToDbName(k, schema), v.valueOf()] as [string, 1 | -1]
+    })
+  })
 }
