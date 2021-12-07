@@ -145,8 +145,7 @@ export const deviceSchema : Schema<types.Scalars>= {
   },
   'name': {
     scalar: 'String', 
-    required: true, 
-    alias: 'pippo'
+    required: true
   },
   'userId': {
     scalar: 'ID'
@@ -369,18 +368,22 @@ export const userSchema : Schema<types.Scalars>= {
   },
   'amounts': {
     scalar: 'Decimal', 
-    array: true
+    array: true, 
+    alias: 'amounts'
   },
   'firstName': {
-    scalar: 'String'
+    scalar: 'String', 
+    alias: 'name'
   },
   'friendsId': {
     scalar: 'ID', 
-    array: true
+    array: true, 
+    alias: 'fIds'
   },
   'id': {
     scalar: 'ID', 
-    required: true
+    required: true, 
+    alias: 'ID'
   },
   'lastName': {
     scalar: 'String'
@@ -399,13 +402,16 @@ export const userSchema : Schema<types.Scalars>= {
     embedded: {
       'password': {
         scalar: 'Password', 
-        required: true
+        required: true, 
+        alias: 'pwd'
       },
       'username': {
         scalar: 'String', 
-        required: true
+        required: true, 
+        alias: 'user'
       }
-    }
+    }, 
+    alias: 'cred'
   }
 };
 

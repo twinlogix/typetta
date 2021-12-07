@@ -3,10 +3,9 @@ import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection, Projection } from '../../../dao/projections/projections.types'
-import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { KnexJsDAOParams } from './dao.knexjs.types'
-import { AbstractSort, buildSelect, buildSort, buildWhereConditions, concatEmbeddedNames, embeddedScalars, flat, unflat } from './utils.knexjs'
+import { AbstractSort, adaptUpdate, buildSelect, buildSort, buildWhereConditions, embeddedScalars, flatEmbdeddedFields, unflatEmbdeddedFields } from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
 
@@ -49,33 +48,13 @@ export class AbstractKnexJsDAO<
   }
 
   private dbToModel(object: any): PartialDeep<ModelType> {
-    const unflatted = Object.entries(this.schema).reduce((result, [k, schemaFiled]) => {
-      if ('embedded' in schemaFiled) {
-        const [obj, toDelete] = unflat(schemaFiled.alias || k, schemaFiled, object)
-        if (obj) {
-          const res = { ...result, [k]: obj }
-          for (const key of toDelete) {
-            delete (res as any)[key]
-          }
-          return res
-        }
-      }
-      return result
-    }, object)
+    const unflatted = unflatEmbdeddedFields(this.schema, object)
     return transformObject(this.daoContext.adapters.knexjs, 'dbToModel', unflatted, this.schema)
   }
 
   private modelToDb(object: PartialDeep<ModelType>): any {
-    const transformed = transformObject(this.daoContext.adapters.knexjs, 'modelToDB', object, this.schema) as any
-    return Object.entries(this.schema).reduce((result, [k, schemaFiled]) => {
-      const name = schemaFiled.alias || k
-      if ('embedded' in schemaFiled && name in transformed) {
-        const flatted = { ...result, ...flat(name, schemaFiled, transformed[name]) }
-        delete flatted[name]
-        return flatted
-      }
-      return result
-    }, transformed)
+    const transformed = transformObject(this.daoContext.adapters.knexjs, 'modelToDB', object, this.schema)
+    return flatEmbdeddedFields(this.schema, transformed)
   }
 
   private buildSelect<P extends AnyProjection<ModelType, ProjectionType>>(projection?: P, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
@@ -86,10 +65,18 @@ export class AbstractKnexJsDAO<
     return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knexjs) : qb || this.qb()
   }
 
+  private buildSort(sorts?: SortType[], qb?: Knex.QueryBuilder<any, any>) {
+    return buildSort(qb || this.qb(), (sorts || []) as unknown as AbstractSort[], this.schema)
+  }
+
+  private adaptUpdate(changes: UpdateType): object {
+    return adaptUpdate(changes, this.schema, this.daoContext.adapters.knexjs)
+  }
+
   private async getRecords<P extends AnyProjection<ModelType, ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
-    const query = buildSort(where, (params.sorts || []) as unknown as AbstractSort[], this.schema)
+    const query = this.buildSort(params.sorts, where)
     const records = await query.limit(params.limit || this.pageSize).offset(params.start || 0)
     return this.dbsToModels(records)
   }
@@ -148,7 +135,7 @@ export class AbstractKnexJsDAO<
   }
 
   protected async _updateMany(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
-    const updateObject = this.modelToDb(params.changes as PartialDeep<ModelType>)
+    const updateObject = this.adaptUpdate(params.changes)
     const update = this.qb().update(updateObject)
     const where = this.buildWhere(params.filter, update)
     await where

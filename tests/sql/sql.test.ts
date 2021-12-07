@@ -99,6 +99,14 @@ test('Insert and retrieve', async () => {
   expect(all[0].credentials?.username).toBe('aser')
   expect(all[0].credentials?.another?.test).toBe('asd')
   expect(all[0].credentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
+
+  await dao.user.updateAll({ filter: { id: ins.id }, changes: { 'credentials.password': 'lol' } })
+  const u1 = await dao.user.findOne({ filter: { id: ins.id } })
+  expect(u1?.credentials?.password).toBe('07123e1f482356c415f684407a3b8723e10b2cbbc0b8fcd6282c49d37c9c1abc')
+
+  await dao.user.updateAll({ filter: { id: ins.id }, changes: { credentials: { password: 'asd', username: 'u' } } })
+  const u2 = await dao.user.findOne({ filter: { id: ins.id } })
+  expect(u2?.credentials?.password).toBe('688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c6')
 })
 
 test('Inner ref', async () => {

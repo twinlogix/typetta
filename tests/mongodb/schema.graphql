@@ -12,8 +12,8 @@ type Device @mongoEntity {
 }
 
 type UsernamePasswordCredentials {
-  username: String!
-  password: Password!
+  username: String! @alias(value: "user")
+  password: Password! @alias(value: "pwd")
 }
 
 type City @mongoEntity {
@@ -38,16 +38,16 @@ type Organization @mongoEntity {
 }
 
 type User @mongoEntity {
-  id: ID! @id
-  usernamePasswordCredentials: UsernamePasswordCredentials
-  firstName: String
+  id: ID! @id @alias(value: "ID")
+  usernamePasswordCredentials: UsernamePasswordCredentials @alias(value: "cred")
+  firstName: String @alias(value: "name")
   lastName: String
   live: Boolean!
   localization: Coordinates
   title: LocalizedString
-  amounts: [Decimal!]
+  amounts: [Decimal!] @alias(value: "amounts")
   amount: Decimal
-  friendsId: [ID!]
+  friendsId: [ID!] @alias(value: "fIds")
   friends: [User!] @innerRef
   dogs: [Dog!] @foreignRef(refFrom: "ownerId")
 }
