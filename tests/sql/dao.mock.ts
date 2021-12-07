@@ -14,7 +14,10 @@ import { v4 as uuidv4 } from 'uuid'
 export type AddressExcludedFields = never
 
 export const addressSchema : Schema<types.Scalars>= {
-  'id': { scalar: 'ID', required: true}
+  'id': {
+    scalar: 'ID', 
+    required: true
+  }
 };
 
 type AddressFilterFields = {
@@ -65,9 +68,18 @@ export class AddressDAO extends AbstractKnexJsDAO<types.Address, 'id', string, t
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
 
 export const citySchema : Schema<types.Scalars>= {
-  'addressId': { scalar: 'String', required: true},
-  'id': { scalar: 'ID', required: true},
-  'name': { scalar: 'String', required: true}
+  'addressId': {
+    scalar: 'String', 
+    required: true
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  }
 };
 
 type CityFilterFields = {
@@ -127,9 +139,17 @@ export class CityDAO extends AbstractKnexJsDAO<types.City, 'id', string, true, C
 export type DeviceExcludedFields = never
 
 export const deviceSchema : Schema<types.Scalars>= {
-  'id': { scalar: 'ID', required: true},
-  'name': { scalar: 'String', required: true},
-  'userId': { scalar: 'ID'}
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  },
+  'userId': {
+    scalar: 'ID'
+  }
 };
 
 type DeviceFilterFields = {
@@ -190,12 +210,23 @@ export type OrganizationExcludedFields = 'computedName'
 export const organizationSchema : Schema<types.Scalars>= {
   'address': {
     embedded: {
-      'id': { scalar: 'ID', required: true}
+      'id': {
+        scalar: 'ID', 
+        required: true
+      }
     }
   },
-  'id': { scalar: 'ID', required: true},
-  'name': { scalar: 'String', required: true},
-  'vatNumber': { scalar: 'String'}
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  },
+  'vatNumber': {
+    scalar: 'String'
+  }
 };
 
 type OrganizationFilterFields = {
@@ -262,26 +293,52 @@ export class OrganizationDAO extends AbstractKnexJsDAO<types.Organization, 'id',
 export type UserExcludedFields = never
 
 export const userSchema : Schema<types.Scalars>= {
-  'amount': { scalar: 'Decimal', alias: 'value' },
-  'amounts': { scalar: 'Decimal', array: true, alias: 'values' },
+  'amount': {
+    scalar: 'Decimal'
+  },
+  'amounts': {
+    scalar: 'Decimal', 
+    array: true
+  },
   'credentials': {
     embedded: {
       'another': {
         embedded: {
-          'test': { scalar: 'String', alias: 'a'}
+          'test': {
+            scalar: 'String'
+          }
         }
       },
-      'password': { scalar: 'Password', required: true, alias: 'pwd'},
-      'username': { scalar: 'String', required: true, alias: 'usr'}
-    },
-    alias: 'cred'
+      'password': {
+        scalar: 'Password', 
+        required: true
+      },
+      'username': {
+        scalar: 'String', 
+        required: true
+      }
+    }
   },
-  'firstName': { scalar: 'String', alias: 'name' },
-  'id': { scalar: 'ID', required: true, alias: 'ID' },
-  'lastName': { scalar: 'String', alias: 'surname'},
-  'live': { scalar: 'Boolean', required: true, alias: 'active'},
-  'localization': { scalar: 'Coordinates', alias: 'loc'},
-  'title': { scalar: 'LocalizedString', alias: 't'}
+  'firstName': {
+    scalar: 'String'
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'lastName': {
+    scalar: 'String'
+  },
+  'live': {
+    scalar: 'Boolean', 
+    required: true
+  },
+  'localization': {
+    scalar: 'Coordinates'
+  },
+  'title': {
+    scalar: 'LocalizedString'
+  }
 };
 
 type UserFilterFields = {
