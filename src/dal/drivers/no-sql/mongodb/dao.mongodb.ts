@@ -1,5 +1,5 @@
 import { transformObject } from '../../../../generation/utils'
-import { ConditionalPartialBy, findSchemaField } from '../../../../utils/utils'
+import { ConditionalPartialBy } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
 import { AnyProjection, Projection } from '../../../dao/projections/projections.types'
@@ -50,7 +50,7 @@ export class AbstractMongoDBDAO<
   }
 
   private buildFilter(filter?: FilterType): Filter<Document> {
-    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongodb) : { }
+    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongodb) : {}
   }
 
   private buildSort(sorts?: SortType[]): [string, 1 | -1][] {

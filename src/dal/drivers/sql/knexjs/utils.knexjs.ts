@@ -1,7 +1,7 @@
 import { findSchemaField, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
-import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
+import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { KnexJSDataTypeAdapterMap } from './adapters.knexjs'
@@ -96,24 +96,24 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   return builder
 }
 
-function embeddedColumns<ScalarsType>(prefix: string, schema: Schema<ScalarsType>, projection: GenericProjection): string[] {
-  return Object.entries(schema).flatMap(([k, v]) => {
-    if (projection === true || (typeof projection === 'object' && k in projection)) {
-      if ('embedded' in v) {
-        return embeddedColumns(concatEmbeddedNames(prefix, v.alias || k), v.embedded, projection === true ? projection : projection[k])
-      }
-      return concatEmbeddedNames(prefix, v.alias || k)
-    }
-    return []
-  })
-}
-
 // TODO: array not supported
 export function buildSelect<TRecord, TResult, ScalarsType>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   projection: GenericProjection,
   schema: Schema<ScalarsType>,
 ): Knex.QueryBuilder<TRecord, TResult> {
+  function embeddedColumns(prefix: string, s: Schema<ScalarsType>, proj: GenericProjection): string[] {
+    return Object.entries(s).flatMap(([k, v]) => {
+      if (proj === true || (typeof proj === 'object' && k in proj)) {
+        if ('embedded' in v) {
+          return embeddedColumns(concatEmbeddedNames(prefix, v.alias || k), v.embedded, proj === true ? proj : proj[k])
+        }
+        return concatEmbeddedNames(prefix, v.alias || k)
+      }
+      return []
+    })
+  }
+
   if (projection === false) {
     builder.select([])
   } else if (projection === true) {
@@ -145,7 +145,7 @@ export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuil
   return builder
 }
 
-export function flatEmbdeddedToDb<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
+export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
   function flat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: any): object {
     return Object.entries(schemaFiled.embedded).reduce((result, [k, subSchemaField]) => {
       const key = subSchemaField.alias || k
@@ -171,7 +171,7 @@ export function flatEmbdeddedToDb<ScalarsType>(schema: Schema<ScalarsType>, obje
   }, object)
 }
 
-export function unflatEmbdeddedFromDb<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
+export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
   function unflat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
     const res = Object.entries(schemaFiled.embedded).reduce(
       ([record, oldToDelete], [k, subSchemaField]) => {
@@ -203,7 +203,7 @@ export function unflatEmbdeddedFromDb<ScalarsType>(schema: Schema<ScalarsType>, 
   }, object)
 }
 
-export function concatEmbeddedNames(prefix: string, name: string) {
+function concatEmbeddedNames(prefix: string, name: string) {
   return prefix + '_' + name
 }
 
@@ -216,7 +216,7 @@ export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<Scal
   })
 }
 
-export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: KnexJSDataTypeAdapterMap<ScalarsType>): any {
+export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: KnexJSDataTypeAdapterMap<ScalarsType>): object {
   return Object.entries(update).reduce((p, [k, v]) => {
     const schemaField = findSchemaField(k, schema)
     const columnName = modelNameToDbName(k, schema)

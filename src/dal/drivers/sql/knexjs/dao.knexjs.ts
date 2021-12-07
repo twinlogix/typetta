@@ -3,10 +3,9 @@ import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection, Projection } from '../../../dao/projections/projections.types'
-import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { KnexJsDAOParams } from './dao.knexjs.types'
-import { AbstractSort, adaptUpdate, buildSelect, buildSort, buildWhereConditions, concatEmbeddedNames, embeddedScalars, flatEmbdeddedToDb, unflatEmbdeddedFromDb } from './utils.knexjs'
+import { AbstractSort, adaptUpdate, buildSelect, buildSort, buildWhereConditions, embeddedScalars, flatEmbdeddedFields, unflatEmbdeddedFields } from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
 
@@ -49,13 +48,13 @@ export class AbstractKnexJsDAO<
   }
 
   private dbToModel(object: any): PartialDeep<ModelType> {
-    const unflatted = unflatEmbdeddedFromDb(this.schema, object)
+    const unflatted = unflatEmbdeddedFields(this.schema, object)
     return transformObject(this.daoContext.adapters.knexjs, 'dbToModel', unflatted, this.schema)
   }
 
   private modelToDb(object: PartialDeep<ModelType>): any {
     const transformed = transformObject(this.daoContext.adapters.knexjs, 'modelToDB', object, this.schema)
-    return flatEmbdeddedToDb(this.schema, transformed)
+    return flatEmbdeddedFields(this.schema, transformed)
   }
 
   private buildSelect<P extends AnyProjection<ModelType, ProjectionType>>(projection?: P, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
@@ -68,6 +67,10 @@ export class AbstractKnexJsDAO<
 
   private buildSort(sorts?: SortType[], qb?: Knex.QueryBuilder<any, any>) {
     return buildSort(qb || this.qb(), (sorts || []) as unknown as AbstractSort[], this.schema)
+  }
+
+  private adaptUpdate(changes: UpdateType): object {
+    return adaptUpdate(changes, this.schema, this.daoContext.adapters.knexjs)
   }
 
   private async getRecords<P extends AnyProjection<ModelType, ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
@@ -132,7 +135,7 @@ export class AbstractKnexJsDAO<
   }
 
   protected async _updateMany(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
-    const updateObject = adaptUpdate(params.changes, this.schema, this.daoContext.adapters.knexjs)
+    const updateObject = this.adaptUpdate(params.changes)
     const update = this.qb().update(updateObject)
     const where = this.buildWhere(params.filter, update)
     await where
