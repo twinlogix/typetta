@@ -20,7 +20,7 @@ type City @mongoEntity {
   id: ID! @id
   name: String!
   addressId: String!
-  computedName: String @exclude @alias(value: "pippo")
+  computedName: String @exclude
   computedAddressName: String @exclude
 }
 
