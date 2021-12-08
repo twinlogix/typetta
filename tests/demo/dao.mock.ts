@@ -11,15 +11,32 @@ import { v4 as uuidv4 } from 'uuid'
 //------------------------------------- POST -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type PostExcludedFields = never
+export type PostExcludedFields = 'author'
 
 export const postSchema : Schema<types.Scalars>= {
-  'authorId': { scalar: 'ID', required: true},
-  'body': { scalar: 'String'},
-  'createdAt': { scalar: 'DateTime', required: true},
-  'id': { scalar: 'ID', required: true},
-  'title': { scalar: 'String', required: true},
-  'views': { scalar: 'Int', required: true}
+  'authorId': {
+    scalar: 'ID', 
+    required: true
+  },
+  'body': {
+    scalar: 'String'
+  },
+  'createdAt': {
+    scalar: 'DateTime', 
+    required: true
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'title': {
+    scalar: 'String', 
+    required: true
+  },
+  'views': {
+    scalar: 'Int', 
+    required: true
+  }
 };
 
 type PostFilterFields = {
@@ -60,12 +77,12 @@ export type PostUpdate = {
   'views'?: number
 };
 
-type PostDAOAllParams = KnexJsDAOParams<types.Post, 'id', string, true, PostFilter, PostProjection, PostUpdate, PostExcludedFields, PostSort, { SQL?: any } & { test: string }, types.Scalars>;
-export type PostDAOParams = Omit<PostDAOAllParams, 'idField' | 'schema'> & Partial<Pick<PostDAOAllParams, 'idField' | 'schema'>>;
+type PostDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.Post, 'id', string, true, PostFilter, PostProjection, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
+export type PostDAOParams<OptionType extends { knex : Knex }> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<PostDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class PostDAO extends AbstractKnexJsDAO<types.Post, 'id', string, true, PostFilter, PostProjection, PostSort, PostUpdate, PostExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
+export class PostDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.Post, 'id', string, true, PostFilter, PostProjection, PostSort, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
   
-  public constructor(params: PostDAOParams){
+  public constructor(params: PostDAOParams<OptionType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -87,21 +104,37 @@ export class PostDAO extends AbstractKnexJsDAO<types.Post, 'id', string, true, P
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type UserExcludedFields = 'averageViewsPerPost' | 'totalPostsViews'
+export type UserExcludedFields = 'averageViewsPerPost' | 'posts' | 'totalPostsViews'
 
 export const userSchema : Schema<types.Scalars>= {
-  'createdAt': { scalar: 'DateTime', required: true},
+  'createdAt': {
+    scalar: 'DateTime', 
+    required: true
+  },
   'credentials': {
     embedded: {
-      'password': { scalar: 'Password'},
-      'username': { scalar: 'String'}
-    }
-    , required: true
+      'password': {
+        scalar: 'Password'
+      },
+      'username': {
+        scalar: 'String'
+      }
+    }, 
+    required: true
   },
-  'email': { scalar: 'String'},
-  'firstName': { scalar: 'String'},
-  'id': { scalar: 'ID', required: true},
-  'lastName': { scalar: 'String'}
+  'email': {
+    scalar: 'String'
+  },
+  'firstName': {
+    scalar: 'String'
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'lastName': {
+    scalar: 'String'
+  }
 };
 
 type UserFilterFields = {
@@ -151,12 +184,12 @@ export type UserUpdate = {
   'lastName'?: string | null
 };
 
-type UserDAOAllParams = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, { SQL?: any } & { test: string }, types.Scalars>;
-export type UserDAOParams = Omit<UserDAOAllParams, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams, 'idField' | 'schema'>>;
+type UserDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
+export type UserDAOParams<OptionType extends { knex : Knex }> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class UserDAO extends AbstractKnexJsDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, { SQL?: any } & { test: string }, types.Scalars> {
+export class UserDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
-  public constructor(params: UserDAOParams){
+  public constructor(params: UserDAOParams<OptionType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -172,39 +205,39 @@ export class UserDAO extends AbstractKnexJsDAO<types.User, 'id', string, true, U
   
 }
 
-export type DAOContextParams = {
-  daoOverrides?: { 
-    post?: Partial<PostDAOParams>,
-    user?: Partial<UserDAOParams>
+export type DAOContextParams<OptionType> = {
+  overrides?: { 
+    post?: Partial<PostDAOParams<OptionType & { knex : Knex }>>,
+    user?: Partial<UserDAOParams<OptionType & { knex : Knex }>>
   },
   knex: Knex,
   adapters?: { knexjs?: KnexJSDataTypeAdapterMap<types.Scalars>; mongodb?: MongoDBDataTypeAdapterMap<types.Scalars> }
 };
 
-export class DAOContext extends AbstractDAOContext {
+export class DAOContext<OptionType = never> extends AbstractDAOContext {
 
-  private _post: PostDAO | undefined;
-  private _user: UserDAO | undefined;
+  private _post: PostDAO<OptionType & { knex : Knex }> | undefined;
+  private _user: UserDAO<OptionType & { knex : Knex }> | undefined;
   
-  private daoOverrides: DAOContextParams['daoOverrides'];
+  private overrides: DAOContextParams<OptionType>['overrides'];
   private knex: Knex | undefined;
   
   get post() {
     if(!this._post) {
-      this._post = new PostDAO({ daoContext: this, ...this.daoOverrides?.post, knex: this.knex!, tableName: 'posts' });
+      this._post = new PostDAO({ daoContext: this, ...this.overrides?.post, knex: this.knex!, tableName: 'posts' });
     }
     return this._post;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, ...this.daoOverrides?.user, knex: this.knex!, tableName: 'users' });
+      this._user = new UserDAO({ daoContext: this, ...this.overrides?.user, knex: this.knex!, tableName: 'users' });
     }
     return this._user;
   }
   
-  constructor(options?: DAOContextParams) {
+  constructor(options?: DAOContextParams<OptionType>) {
     super(options?.adapters)
-    this.daoOverrides = options?.daoOverrides
+    this.overrides = options?.overrides
     this.knex = options?.knex;
   }
 

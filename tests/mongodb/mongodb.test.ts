@@ -633,7 +633,7 @@ test('middleware', async () => {
   let operationCount = 0
   const dao = new DAOContext({
     mongoDB: db,
-    daoOverrides: {
+    overrides: {
       user: {
         middlewares: [
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
@@ -708,7 +708,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
   const customDao = new DAOContext({
     mongoDB: db,
     adapters: dao.adapters,
-    daoOverrides: {
+    overrides: {
       city: {
         middlewares: [
           computedField({
@@ -736,7 +736,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
   const customDao = new DAOContext({
     mongoDB: db,
     adapters: dao.adapters,
-    daoOverrides: {
+    overrides: {
       city: {
         middlewares: [
           computedField({
@@ -757,7 +757,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
   const customDao = new DAOContext({
     mongoDB: db,
     adapters: dao.adapters,
-    daoOverrides: {
+    overrides: {
       city: {
         middlewares: [
           computedField({
@@ -783,7 +783,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao = new DAOContext({
     mongoDB: db,
-    daoOverrides: {
+    overrides: {
       city: {
         middlewares: [
           computedField({
@@ -808,7 +808,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 test('computed fields (one dependency - deep level - one calculated)', async () => {
   const dao = new DAOContext({
     mongoDB: db,
-    daoOverrides: {
+    overrides: {
       organization: {
         middlewares: [
           computedField({
@@ -826,7 +826,7 @@ test('computed fields (one dependency - deep level - one calculated)', async () 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
   const dao = new DAOContext({
     mongoDB: db,
-    daoOverrides: {
+    overrides: {
       organization: {
         middlewares: [
           computedField({

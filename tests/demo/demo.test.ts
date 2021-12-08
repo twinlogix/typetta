@@ -6,7 +6,7 @@ import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
 
 let knexInstance: Knex<any, unknown[]>
-let dao: DAOContext
+let dao: DAOContext<any>
 
 const config: Knex.Config = {
   client: 'sqlite3',
@@ -14,12 +14,12 @@ const config: Knex.Config = {
   useNullAsDefault: true,
 }
 
-beforeAll(async () => {})
+beforeAll(async () => { })
 
 beforeEach(async () => {
   knexInstance = knex(config)
   dao = new DAOContext({
-    daoOverrides: {
+    overrides: {
       user: {
         middlewares: [
           computedField({
@@ -70,7 +70,7 @@ beforeEach(async () => {
   await dao.user.createTable(specificTypeMap, defaultSpecificType)
 })
 
-afterEach(async () => {})
+afterEach(async () => { })
 
 test('Demo', async () => {
   const user = await dao.user.insertOne({
