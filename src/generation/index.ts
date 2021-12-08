@@ -1,4 +1,4 @@
-import { TypeScriptTypettaPluginConfig, Directives } from './config'
+import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaGenerator } from './generator'
 import { TsMongooseVisitor } from './visitor'
 import { Types, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin-helpers'
@@ -16,19 +16,6 @@ export const plugin: PluginFunction<TypeScriptTypettaPluginConfig> = async (sche
   const generator = new TsTypettaGenerator(config)
   return generator.generate(visitorResult.definitions)
 }
-
-export const DIRECTIVES = `
-  directive @${Directives.ID}(auto: Boolean) on FIELD_DEFINITION
-  directive @${Directives.MONGO_ENTITY}(collection: String) on OBJECT
-  directive @${Directives.SQL_ENTITY}(table: String) on OBJECT
-  directive @${Directives.EMBEDDED} on FIELD_DEFINITION
-  directive @${Directives.INNER_REF}(refFrom: String, refTo: String) on FIELD_DEFINITION
-  directive @${Directives.FOREIGN_REF}(refFrom: String!, refTo: String) on FIELD_DEFINITION
-  directive @${Directives.EXCLUDE} on OBJECT | FIELD_DEFINITION
-  directive @${Directives.GEOPOINT} on SCALAR
-`
-
-export const addToSchema = DIRECTIVES
 
 export const validate: PluginValidateFn<any> = async (schema: GraphQLSchema, documents: Types.DocumentFile[], config: any, outputFile: string) => {
   if (extname(outputFile) !== '.ts' && extname(outputFile) !== '.tsx') {

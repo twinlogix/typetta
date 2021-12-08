@@ -2,6 +2,7 @@ import { QuantityOperators, EqualityOperators, ElementOperators, StringOperators
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { SortDirection } from '../dal/dao/sorts/sorts.types'
 import _ from 'lodash'
+import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 
 export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T
 
@@ -51,15 +52,23 @@ export function hasFieldFilter<
   )
 }
 
-export function findSchemaField<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
+export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
   const c = key.split('.')
   if (c.length === 1) {
     return c[0] in schema ? schema[c[0]] : null
   } else {
     const k = c.shift()!
     const schemaField = schema[k]
-    return k in schema && 'embedded' in schemaField ? findSchemaField(c.join('.'), schemaField.embedded) : null
+    return schemaField && 'embedded' in schemaField ? getSchemaFieldTraversing(c.join('.'), schemaField.embedded) : null
   }
+}
+
+export function modelValueToDbValue<ScalarsType>(
+  value: ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][],
+  schemaField: SchemaField<ScalarsType>,
+  adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
+): unknown {
+  return schemaField.array ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
 }
 
 export function* reversed<T>(array: T[]): Iterable<T> {
