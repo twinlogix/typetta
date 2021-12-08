@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
-import { KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -38,10 +38,10 @@ export type AddressUpdate = {
   'id'?: string
 };
 
-type AddressDAOAllParams<OptionType extends { mongoDB: Db }> = MongoDBDAOParams<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, OptionType, types.Scalars>;
-export type AddressDAOParams<OptionType extends { mongoDB: Db }> = Omit<AddressDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<AddressDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type AddressDAOAllParams<OptionType> = MongoDBDAOParams<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, OptionType, types.Scalars>;
+export type AddressDAOParams<OptionType> = Omit<AddressDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<AddressDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class AddressDAO<OptionType extends { mongoDB: Db }> extends AbstractMongoDBDAO<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, OptionType, types.Scalars> {
+export class AddressDAO<OptionType extends object> extends AbstractMongoDBDAO<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: AddressDAOParams<OptionType>){
     super({   
@@ -109,10 +109,10 @@ export type CityUpdate = {
   'name'?: string
 };
 
-type CityDAOAllParams<OptionType extends { mongoDB: Db }> = MongoDBDAOParams<types.City, 'id', string, true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, OptionType, types.Scalars>;
-export type CityDAOParams<OptionType extends { mongoDB: Db }> = Omit<CityDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<CityDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type CityDAOAllParams<OptionType> = MongoDBDAOParams<types.City, 'id', string, true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, OptionType, types.Scalars>;
+export type CityDAOParams<OptionType> = Omit<CityDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<CityDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class CityDAO<OptionType extends { mongoDB: Db }> extends AbstractMongoDBDAO<types.City, 'id', string, true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, OptionType, types.Scalars> {
+export class CityDAO<OptionType extends object> extends AbstractMongoDBDAO<types.City, 'id', string, true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: CityDAOParams<OptionType>){
     super({   
@@ -178,10 +178,10 @@ export type DeviceUpdate = {
   'userId'?: string | null
 };
 
-type DeviceDAOAllParams<OptionType extends { mongoDB: Db }> = MongoDBDAOParams<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, OptionType, types.Scalars>;
-export type DeviceDAOParams<OptionType extends { mongoDB: Db }> = Omit<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type DeviceDAOAllParams<OptionType> = MongoDBDAOParams<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, OptionType, types.Scalars>;
+export type DeviceDAOParams<OptionType> = Omit<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class DeviceDAO<OptionType extends { mongoDB: Db }> extends AbstractMongoDBDAO<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, OptionType, types.Scalars> {
+export class DeviceDAO<OptionType extends object> extends AbstractMongoDBDAO<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: DeviceDAOParams<OptionType>){
     super({   
@@ -248,10 +248,10 @@ export type DogUpdate = {
   'ownerId'?: string
 };
 
-type DogDAOAllParams<OptionType extends { mongoDB: Db }> = MongoDBDAOParams<types.Dog, 'id', string, true, DogFilter, DogProjection, DogUpdate, DogExcludedFields, DogSort, OptionType, types.Scalars>;
-export type DogDAOParams<OptionType extends { mongoDB: Db }> = Omit<DogDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<DogDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type DogDAOAllParams<OptionType> = MongoDBDAOParams<types.Dog, 'id', string, true, DogFilter, DogProjection, DogUpdate, DogExcludedFields, DogSort, OptionType, types.Scalars>;
+export type DogDAOParams<OptionType> = Omit<DogDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<DogDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class DogDAO<OptionType extends { mongoDB: Db }> extends AbstractMongoDBDAO<types.Dog, 'id', string, true, DogFilter, DogProjection, DogSort, DogUpdate, DogExcludedFields, OptionType, types.Scalars> {
+export class DogDAO<OptionType extends object> extends AbstractMongoDBDAO<types.Dog, 'id', string, true, DogFilter, DogProjection, DogSort, DogUpdate, DogExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: DogDAOParams<OptionType>){
     super({   
@@ -333,10 +333,10 @@ export type OrganizationUpdate = {
   'vatNumber'?: string | null
 };
 
-type OrganizationDAOAllParams<OptionType extends { mongoDB: Db }> = MongoDBDAOParams<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, OptionType, types.Scalars>;
-export type OrganizationDAOParams<OptionType extends { mongoDB: Db }> = Omit<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type OrganizationDAOAllParams<OptionType> = MongoDBDAOParams<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, OptionType, types.Scalars>;
+export type OrganizationDAOParams<OptionType> = Omit<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class OrganizationDAO<OptionType extends { mongoDB: Db }> extends AbstractMongoDBDAO<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, OptionType, types.Scalars> {
+export class OrganizationDAO<OptionType extends object> extends AbstractMongoDBDAO<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: OrganizationDAOParams<OptionType>){
     super({   
@@ -477,10 +477,10 @@ export type UserUpdate = {
   'usernamePasswordCredentials.username'?: string
 };
 
-type UserDAOAllParams<OptionType extends { mongoDB: Db }> = MongoDBDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType extends { mongoDB: Db }> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type UserDAOAllParams<OptionType> = MongoDBDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
+export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class UserDAO<OptionType extends { mongoDB: Db }> extends AbstractMongoDBDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
+export class UserDAO<OptionType extends object> extends AbstractMongoDBDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: UserDAOParams<OptionType>){
     super({   
@@ -499,72 +499,73 @@ export class UserDAO<OptionType extends { mongoDB: Db }> extends AbstractMongoDB
   
 }
 
-export type DAOContextParams<OptionType> = {
+export type DAOContextParams<OptionsType> = {
+  options?: OptionsType
   overrides?: { 
-    address?: Partial<AddressDAOParams<OptionType & { mongoDB: Db }>>,
-    city?: Partial<CityDAOParams<OptionType & { mongoDB: Db }>>,
-    device?: Partial<DeviceDAOParams<OptionType & { mongoDB: Db }>>,
-    dog?: Partial<DogDAOParams<OptionType & { mongoDB: Db }>>,
-    organization?: Partial<OrganizationDAOParams<OptionType & { mongoDB: Db }>>,
-    user?: Partial<UserDAOParams<OptionType & { mongoDB: Db }>>
+    address?: Partial<AddressDAOParams<OptionsType>>,
+    city?: Partial<CityDAOParams<OptionsType>>,
+    device?: Partial<DeviceDAOParams<OptionsType>>,
+    dog?: Partial<DogDAOParams<OptionsType>>,
+    organization?: Partial<OrganizationDAOParams<OptionsType>>,
+    user?: Partial<UserDAOParams<OptionsType>>
   },
   mongoDB: Db,
-  adapters?: { knexjs?: KnexJSDataTypeAdapterMap<types.Scalars>; mongodb?: MongoDBDataTypeAdapterMap<types.Scalars> }
+  adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>
 };
 
-export class DAOContext<OptionType = never> extends AbstractDAOContext {
+export class DAOContext<OptionType extends object = {}> extends AbstractDAOContext<types.Scalars, OptionType>  {
 
-  private _address: AddressDAO<OptionType & { mongoDB: Db }> | undefined;
-  private _city: CityDAO<OptionType & { mongoDB: Db }> | undefined;
-  private _device: DeviceDAO<OptionType & { mongoDB: Db }> | undefined;
-  private _dog: DogDAO<OptionType & { mongoDB: Db }> | undefined;
-  private _organization: OrganizationDAO<OptionType & { mongoDB: Db }> | undefined;
-  private _user: UserDAO<OptionType & { mongoDB: Db }> | undefined;
+  private _address: AddressDAO<OptionType> | undefined;
+  private _city: CityDAO<OptionType> | undefined;
+  private _device: DeviceDAO<OptionType> | undefined;
+  private _dog: DogDAO<OptionType> | undefined;
+  private _organization: OrganizationDAO<OptionType> | undefined;
+  private _user: UserDAO<OptionType> | undefined;
   
   private overrides: DAOContextParams<OptionType>['overrides'];
-  private mongoDB: Db | undefined;
+  private mongoDB: Db;
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, ...this.overrides?.address, collection: this.mongoDB!.collection('addresses') });
+      this._address = new AddressDAO({ daoContext: this, options: this.options, ...this.overrides?.address, collection: this.mongoDB.collection('addresses') });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, ...this.overrides?.city, collection: this.mongoDB!.collection('citys') });
+      this._city = new CityDAO({ daoContext: this, options: this.options, ...this.overrides?.city, collection: this.mongoDB.collection('citys') });
     }
     return this._city;
   }
   get device() {
     if(!this._device) {
-      this._device = new DeviceDAO({ daoContext: this, ...this.overrides?.device, collection: this.mongoDB!.collection('devices') });
+      this._device = new DeviceDAO({ daoContext: this, options: this.options, ...this.overrides?.device, collection: this.mongoDB.collection('devices') });
     }
     return this._device;
   }
   get dog() {
     if(!this._dog) {
-      this._dog = new DogDAO({ daoContext: this, ...this.overrides?.dog, collection: this.mongoDB!.collection('dogs') });
+      this._dog = new DogDAO({ daoContext: this, options: this.options, ...this.overrides?.dog, collection: this.mongoDB.collection('dogs') });
     }
     return this._dog;
   }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, ...this.overrides?.organization, collection: this.mongoDB!.collection('organizations') });
+      this._organization = new OrganizationDAO({ daoContext: this, options: this.options, ...this.overrides?.organization, collection: this.mongoDB.collection('organizations') });
     }
     return this._organization;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, ...this.overrides?.user, collection: this.mongoDB!.collection('users') });
+      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, collection: this.mongoDB.collection('users') });
     }
     return this._user;
   }
   
-  constructor(options?: DAOContextParams<OptionType>) {
-    super(options?.adapters)
-    this.overrides = options?.overrides
-    this.mongoDB = options?.mongoDB
+  constructor(params: DAOContextParams<OptionType>) {
+    super(params)
+    this.overrides = params.overrides
+    this.mongoDB = params.mongoDB
   }
 
 }

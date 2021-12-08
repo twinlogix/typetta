@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
-import { KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -38,10 +38,10 @@ export type AddressUpdate = {
   'id'?: string
 };
 
-type AddressDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, OptionType, types.Scalars>;
-export type AddressDAOParams<OptionType extends { knex : Knex }> = Omit<AddressDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<AddressDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type AddressDAOAllParams<OptionType> = KnexJsDAOParams<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, OptionType, types.Scalars>;
+export type AddressDAOParams<OptionType> = Omit<AddressDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<AddressDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class AddressDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, OptionType, types.Scalars> {
+export class AddressDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Address, 'id', string, true, AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: AddressDAOParams<OptionType>){
     super({   
@@ -109,10 +109,10 @@ export type CityUpdate = {
   'name'?: string
 };
 
-type CityDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.City, 'id', string, true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, OptionType, types.Scalars>;
-export type CityDAOParams<OptionType extends { knex : Knex }> = Omit<CityDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<CityDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type CityDAOAllParams<OptionType> = KnexJsDAOParams<types.City, 'id', string, true, CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, OptionType, types.Scalars>;
+export type CityDAOParams<OptionType> = Omit<CityDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<CityDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class CityDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.City, 'id', string, true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, OptionType, types.Scalars> {
+export class CityDAO<OptionType extends object> extends AbstractKnexJsDAO<types.City, 'id', string, true, CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: CityDAOParams<OptionType>){
     super({   
@@ -178,10 +178,10 @@ export type DeviceUpdate = {
   'userId'?: string | null
 };
 
-type DeviceDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, OptionType, types.Scalars>;
-export type DeviceDAOParams<OptionType extends { knex : Knex }> = Omit<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type DeviceDAOAllParams<OptionType> = KnexJsDAOParams<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, OptionType, types.Scalars>;
+export type DeviceDAOParams<OptionType> = Omit<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class DeviceDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, OptionType, types.Scalars> {
+export class DeviceDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Device, 'id', string, true, DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: DeviceDAOParams<OptionType>){
     super({   
@@ -263,10 +263,10 @@ export type OrganizationUpdate = {
   'vatNumber'?: string | null
 };
 
-type OrganizationDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, OptionType, types.Scalars>;
-export type OrganizationDAOParams<OptionType extends { knex : Knex }> = Omit<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type OrganizationDAOAllParams<OptionType> = KnexJsDAOParams<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, OptionType, types.Scalars>;
+export type OrganizationDAOParams<OptionType> = Omit<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class OrganizationDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, OptionType, types.Scalars> {
+export class OrganizationDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Organization, 'id', string, true, OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: OrganizationDAOParams<OptionType>){
     super({   
@@ -417,10 +417,10 @@ export type UserUpdate = {
   'title'?: LocalizedString | null
 };
 
-type UserDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType extends { knex : Knex }> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
+export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class UserDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
+export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: UserDAOParams<OptionType>){
     super({   
@@ -438,64 +438,65 @@ export class UserDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsD
   
 }
 
-export type DAOContextParams<OptionType> = {
+export type DAOContextParams<OptionsType> = {
+  options?: OptionsType
   overrides?: { 
-    address?: Partial<AddressDAOParams<OptionType & { knex : Knex }>>,
-    city?: Partial<CityDAOParams<OptionType & { knex : Knex }>>,
-    device?: Partial<DeviceDAOParams<OptionType & { knex : Knex }>>,
-    organization?: Partial<OrganizationDAOParams<OptionType & { knex : Knex }>>,
-    user?: Partial<UserDAOParams<OptionType & { knex : Knex }>>
+    address?: Partial<AddressDAOParams<OptionsType>>,
+    city?: Partial<CityDAOParams<OptionsType>>,
+    device?: Partial<DeviceDAOParams<OptionsType>>,
+    organization?: Partial<OrganizationDAOParams<OptionsType>>,
+    user?: Partial<UserDAOParams<OptionsType>>
   },
   knex: Knex,
-  adapters?: { knexjs?: KnexJSDataTypeAdapterMap<types.Scalars>; mongodb?: MongoDBDataTypeAdapterMap<types.Scalars> }
+  adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>
 };
 
-export class DAOContext<OptionType = never> extends AbstractDAOContext {
+export class DAOContext<OptionType extends object = {}> extends AbstractDAOContext<types.Scalars, OptionType>  {
 
-  private _address: AddressDAO<OptionType & { knex : Knex }> | undefined;
-  private _city: CityDAO<OptionType & { knex : Knex }> | undefined;
-  private _device: DeviceDAO<OptionType & { knex : Knex }> | undefined;
-  private _organization: OrganizationDAO<OptionType & { knex : Knex }> | undefined;
-  private _user: UserDAO<OptionType & { knex : Knex }> | undefined;
+  private _address: AddressDAO<OptionType> | undefined;
+  private _city: CityDAO<OptionType> | undefined;
+  private _device: DeviceDAO<OptionType> | undefined;
+  private _organization: OrganizationDAO<OptionType> | undefined;
+  private _user: UserDAO<OptionType> | undefined;
   
   private overrides: DAOContextParams<OptionType>['overrides'];
-  private knex: Knex | undefined;
+  private knex: Knex;
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, ...this.overrides?.address, knex: this.knex!, tableName: 'addresses' });
+      this._address = new AddressDAO({ daoContext: this, options: this.options, ...this.overrides?.address, knex: this.knex, tableName: 'addresses' });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, ...this.overrides?.city, knex: this.knex!, tableName: 'citys' });
+      this._city = new CityDAO({ daoContext: this, options: this.options, ...this.overrides?.city, knex: this.knex, tableName: 'citys' });
     }
     return this._city;
   }
   get device() {
     if(!this._device) {
-      this._device = new DeviceDAO({ daoContext: this, ...this.overrides?.device, knex: this.knex!, tableName: 'devices' });
+      this._device = new DeviceDAO({ daoContext: this, options: this.options, ...this.overrides?.device, knex: this.knex, tableName: 'devices' });
     }
     return this._device;
   }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, ...this.overrides?.organization, knex: this.knex!, tableName: 'organizations' });
+      this._organization = new OrganizationDAO({ daoContext: this, options: this.options, ...this.overrides?.organization, knex: this.knex, tableName: 'organizations' });
     }
     return this._organization;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, ...this.overrides?.user, knex: this.knex!, tableName: 'users' });
+      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, knex: this.knex, tableName: 'users' });
     }
     return this._user;
   }
   
-  constructor(options?: DAOContextParams<OptionType>) {
-    super(options?.adapters)
-    this.overrides = options?.overrides
-    this.knex = options?.knex;
+  constructor(params: DAOContextParams<OptionType>) {
+    super(params)
+    this.overrides = params.overrides
+    this.knex = params.knex;
   }
 
 }

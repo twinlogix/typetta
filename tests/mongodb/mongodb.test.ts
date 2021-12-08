@@ -20,7 +20,7 @@ beforeAll(async () => {
   dao = new DAOContext({
     mongoDB: db,
     adapters: {
-      mongodb: {
+      mongoDB: {
         ...mongoDbAdapters,
         Coordinates: identityAdapter,
         LocalizedString: identityAdapter,
@@ -699,6 +699,29 @@ test('middleware', async () => {
       },
     },
   })
+})
+
+test('middleware options', async () => {
+  const dao = new DAOContext<{ testType: string }>({
+    options: { testType: "test1" },
+    mongoDB: db,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            beforeInsert: async (params) => {
+              expect(params.options?.testType).toBe("test1");
+              expect(params.options?.testType).toBeDefined();
+              return params;
+            },
+          },
+        ],
+      },
+    },
+  })
+
+  await dao.user.insertOne({ record: { live: true } });
+
 })
 
 // ------------------------------------------------------------------------

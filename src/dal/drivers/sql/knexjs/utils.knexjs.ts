@@ -75,15 +75,15 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
       }
     } else if (k === '$or') {
       builder.orWhere((qb) => {
-        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
       })
     } else if (k === '$and') {
       builder.andWhere((qb) => {
-        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb, f, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb, f, schema, adapters))
       })
     } else if (k === '$nor') {
       builder.not.orWhere((qb) => {
-        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
+        ; (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
       })
     } else if (k === '$not') {
       builder.whereNot((qb) => {

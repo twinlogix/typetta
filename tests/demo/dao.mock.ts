@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import {Coordinates} from "@twinlogix/tl-commons";
 import {LocalizedString} from "@twinlogix/tl-commons";
-import { KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -77,10 +77,10 @@ export type PostUpdate = {
   'views'?: number
 };
 
-type PostDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.Post, 'id', string, true, PostFilter, PostProjection, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
-export type PostDAOParams<OptionType extends { knex : Knex }> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<PostDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type PostDAOAllParams<OptionType> = KnexJsDAOParams<types.Post, 'id', string, true, PostFilter, PostProjection, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
+export type PostDAOParams<OptionType> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<PostDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class PostDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.Post, 'id', string, true, PostFilter, PostProjection, PostSort, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
+export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Post, 'id', string, true, PostFilter, PostProjection, PostSort, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: PostDAOParams<OptionType>){
     super({   
@@ -184,10 +184,10 @@ export type UserUpdate = {
   'lastName'?: string | null
 };
 
-type UserDAOAllParams<OptionType extends { knex : Knex }> = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType extends { knex : Knex }> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
+export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class UserDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
+export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: UserDAOParams<OptionType>){
     super({   
@@ -205,40 +205,41 @@ export class UserDAO<OptionType extends { knex : Knex }> extends AbstractKnexJsD
   
 }
 
-export type DAOContextParams<OptionType> = {
+export type DAOContextParams<OptionsType> = {
+  options?: OptionsType
   overrides?: { 
-    post?: Partial<PostDAOParams<OptionType & { knex : Knex }>>,
-    user?: Partial<UserDAOParams<OptionType & { knex : Knex }>>
+    post?: Partial<PostDAOParams<OptionsType>>,
+    user?: Partial<UserDAOParams<OptionsType>>
   },
   knex: Knex,
-  adapters?: { knexjs?: KnexJSDataTypeAdapterMap<types.Scalars>; mongodb?: MongoDBDataTypeAdapterMap<types.Scalars> }
+  adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>
 };
 
-export class DAOContext<OptionType = never> extends AbstractDAOContext {
+export class DAOContext<OptionType extends object = {}> extends AbstractDAOContext<types.Scalars, OptionType>  {
 
-  private _post: PostDAO<OptionType & { knex : Knex }> | undefined;
-  private _user: UserDAO<OptionType & { knex : Knex }> | undefined;
+  private _post: PostDAO<OptionType> | undefined;
+  private _user: UserDAO<OptionType> | undefined;
   
   private overrides: DAOContextParams<OptionType>['overrides'];
-  private knex: Knex | undefined;
+  private knex: Knex;
   
   get post() {
     if(!this._post) {
-      this._post = new PostDAO({ daoContext: this, ...this.overrides?.post, knex: this.knex!, tableName: 'posts' });
+      this._post = new PostDAO({ daoContext: this, options: this.options, ...this.overrides?.post, knex: this.knex, tableName: 'posts' });
     }
     return this._post;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, ...this.overrides?.user, knex: this.knex!, tableName: 'users' });
+      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, knex: this.knex, tableName: 'users' });
     }
     return this._user;
   }
   
-  constructor(options?: DAOContextParams<OptionType>) {
-    super(options?.adapters)
-    this.overrides = options?.overrides
-    this.knex = options?.knex;
+  constructor(params: DAOContextParams<OptionType>) {
+    super(params)
+    this.overrides = params.overrides
+    this.knex = params.knex;
   }
 
 }
