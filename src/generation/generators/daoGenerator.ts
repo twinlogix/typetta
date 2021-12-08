@@ -91,7 +91,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
   public _generateDAOExludedFields(node: TsTypettaGeneratorNode): string {
     const daoFilterFieldsBody = node.fields
-      .filter((n) => n.isExcluded)
+      .filter((n) => n.isExcluded || (typeof n.type !== 'string' && ('innerRef' in n.type || 'foreignRef' in n.type)))
       .map((n) => `'${n.name}'`)
       .join(' | ')
     const daoExludedFields = `export type ${node.name}ExcludedFields = ${daoFilterFieldsBody ? daoFilterFieldsBody : 'never'}`
