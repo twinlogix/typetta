@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 //----------------------------------- ADDRESS ------------------------------------
 //--------------------------------------------------------------------------------
 
-export type AddressExcludedFields = never
+export type AddressExcludedFields = 'cities'
 
 export const addressSchema : Schema<types.Scalars>= {
   'id': {
@@ -136,7 +136,7 @@ export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', string, true, 
 //------------------------------------ DEVICE ------------------------------------
 //--------------------------------------------------------------------------------
 
-export type DeviceExcludedFields = never
+export type DeviceExcludedFields = 'user'
 
 export const deviceSchema : Schema<types.Scalars>= {
   'id': {
@@ -205,7 +205,7 @@ export class DeviceDAO extends AbstractMongoDBDAO<types.Device, 'id', string, tr
 //------------------------------------- DOG --------------------------------------
 //--------------------------------------------------------------------------------
 
-export type DogExcludedFields = never
+export type DogExcludedFields = 'owner'
 
 export const dogSchema : Schema<types.Scalars>= {
   'id': {
@@ -360,7 +360,7 @@ export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id'
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type UserExcludedFields = never
+export type UserExcludedFields = 'dogs' | 'friends'
 
 export const userSchema : Schema<types.Scalars>= {
   'amount': {

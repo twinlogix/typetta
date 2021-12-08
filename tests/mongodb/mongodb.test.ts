@@ -1,7 +1,7 @@
+import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
-import { Test, typeAssert } from '../utils.test'
-import { projection, SortDirection, StaticProjection, buildComputedField, projectionDependency, mongoDbAdapters, identityAdapter, knexJsAdapters } from '@twinlogix/typetta'
+import { projection, SortDirection, StaticProjection, computedField, mongoDbAdapters, identityAdapter, projectionDependency } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
@@ -29,7 +29,7 @@ beforeAll(async () => {
           dbToModel: (o: unknown) => o as string,
           modelToDB: (o: string) => sha256(o),
         },
-      }
+      },
     },
   })
 })
@@ -53,7 +53,7 @@ test('empty find', async () => {
 })
 
 test('simple findAll', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } });
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
 
   const users = await dao.user.findAll({})
   expect(users.length).toBe(1)
@@ -62,10 +62,10 @@ test('simple findAll', async () => {
 })
 
 test('simple findOne', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } });
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
 
   const user = await dao.user.findOne({})
-  expect(user).toBeDefined();
+  expect(user).toBeDefined()
   expect(user!.firstName).toBe('FirstName')
   expect(user!.lastName).toBe('LastName')
 })
@@ -74,64 +74,58 @@ test('simple findOne', async () => {
 // -------------------------- ASSOCIATIONS --------------------------------
 // ------------------------------------------------------------------------
 test('findOne innerRef association without projection', async () => {
-
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } });
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } });
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
 
   const dog = await dao.dog.findOne({})
   expect(dog!.owner).toBeUndefined()
 })
 
 test('findOne foreignRef association without projection', async () => {
-
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } });
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } });
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
 
   const users = await dao.user.findAll({})
   expect(users[0].dogs).toBeUndefined()
 })
 
 test('findOne simple inner association', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
 
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } });
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } });
-
-  const dog = await dao.dog.findOne({ projection: { owner: { firstName: true } } });
-  expect(dog!.owner).toBeDefined();
-  expect(dog!.owner!.firstName).toBe('FirstName');
+  const dog = await dao.dog.findOne({ projection: { owner: { firstName: true } } })
+  expect(dog!.owner).toBeDefined()
+  expect(dog!.owner!.firstName).toBe('FirstName')
 })
 
 test('findOne simple foreignRef association', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
 
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } });
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } });
-
-  const foundUser = await dao.user.findOne({ projection: { id: true, dogs: { name: true, ownerId: true } } });
-  expect(foundUser!.dogs).toBeDefined();
-  expect(foundUser!.dogs!.length).toBe(1);
-  expect(foundUser!.dogs![0].name).toBe('Charlie');
+  const foundUser = await dao.user.findOne({ projection: { id: true, dogs: { name: true, ownerId: true } } })
+  expect(foundUser!.dogs).toBeDefined()
+  expect(foundUser!.dogs!.length).toBe(1)
+  expect(foundUser!.dogs![0].name).toBe('Charlie')
 })
 
 test('findOne self innerRef association', async () => {
+  const user1 = await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName1', live: true } })
+  const user2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName2', friendsId: [user1.id], live: true } })
 
-  const user1 = await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName1', live: true } });
-  const user2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName2', friendsId: [user1.id], live: true } });
-
-  const foundUser = await dao.user.findOne({ filter: { firstName: 'FirstName2' }, projection: { friends: { firstName: true } } });
-  expect(foundUser!.friends).toBeDefined();
-  expect(foundUser!.friends!.length).toBe(1);
-  expect(foundUser!.friends![0].firstName!).toBe('FirstName1');
+  const foundUser = await dao.user.findOne({ filter: { firstName: 'FirstName2' }, projection: { friends: { firstName: true } } })
+  expect(foundUser!.friends).toBeDefined()
+  expect(foundUser!.friends!.length).toBe(1)
+  expect(foundUser!.friends![0].firstName!).toBe('FirstName1')
 })
 
 test('findOne foreignRef without from and to fields in projection', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
 
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } });
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } });
-
-  const foundUser = await dao.user.findOne({ projection: { dogs: { name: true } } });
-  expect(foundUser!.dogs).toBeDefined();
-  expect(foundUser!.dogs!.length).toBe(1);
-  expect(foundUser!.dogs![0].name).toBe('Charlie');
+  const foundUser = await dao.user.findOne({ projection: { dogs: { name: true } } })
+  expect(foundUser!.dogs).toBeDefined()
+  expect(foundUser!.dogs!.length).toBe(1)
+  expect(foundUser!.dogs![0].name).toBe('Charlie')
 })
 
 test('find nested foreignRef association', async () => {
@@ -225,33 +219,32 @@ test('find with no filter', async () => {
     await dao.user.insertOne({ record: { firstName: '' + i, lastName: '' + (9 - i), live: true } })
   }
 
-  response = await dao.user.findAll();
+  response = await dao.user.findAll()
   expect(response.length).toBe(10)
 
-  response = await dao.user.findAll({});
+  response = await dao.user.findAll({})
   expect(response.length).toBe(10)
 
-  response = await dao.user.findAll({ projection: { id: true } });
+  response = await dao.user.findAll({ projection: { id: true } })
   expect(response.length).toBe(10)
 
   response = await dao.user.findOne()
-  expect(response).toBeDefined();
+  expect(response).toBeDefined()
 
   response = await dao.user.findOne({})
-  expect(response).toBeDefined();
+  expect(response).toBeDefined()
 
   response = await dao.user.findOne({ projection: { id: true } })
-  expect(response).toBeDefined();
+  expect(response).toBeDefined()
 
-  response = await dao.user.findPage();
+  response = await dao.user.findPage()
   expect(response.records.length).toBe(10)
 
-  response = await dao.user.findPage({});
+  response = await dao.user.findPage({})
   expect(response.records.length).toBe(10)
 
-  response = await dao.user.findPage({ projection: { id: true } });
+  response = await dao.user.findPage({ projection: { id: true } })
   expect(response.records.length).toBe(10)
-
 })
 
 test('find with simple filter', async () => {
@@ -261,18 +254,17 @@ test('find with simple filter', async () => {
     await dao.user.insertOne({ record: { firstName: '' + i, lastName: '' + (9 - i), live: true } })
   }
 
-  response = await dao.user.findAll({ filter: { firstName: '1' } });
+  response = await dao.user.findAll({ filter: { firstName: '1' } })
   expect(response.length).toBe(1)
   expect(response[0].firstName).toBe('1')
 
-  response = await dao.user.findOne({ filter: { firstName: '1' } });
+  response = await dao.user.findOne({ filter: { firstName: '1' } })
   expect(response).toBeDefined()
   expect(response!.firstName).toBe('1')
 
-  response = await dao.user.findPage({ filter: { firstName: '1' } });
+  response = await dao.user.findPage({ filter: { firstName: '1' } })
   expect(response.records.length).toBe(1)
   expect(response.records[0].firstName).toBe('1')
-
 })
 
 test('find with $in filter', async () => {
@@ -282,22 +274,21 @@ test('find with $in filter', async () => {
     await dao.user.insertOne({ record: { firstName: '' + i, lastName: '' + (9 - i), live: true } })
   }
 
-  response = await dao.user.findAll({ filter: { firstName: { $in: ['1'] } } });
+  response = await dao.user.findAll({ filter: { firstName: { $in: ['1'] } } })
   expect(response.length).toBe(1)
   expect(response[0].firstName).toBe('1')
 
-  response = await dao.user.findAll({ filter: { firstName: { $in: ['1', '2'] } } });
+  response = await dao.user.findAll({ filter: { firstName: { $in: ['1', '2'] } } })
   expect(response.length).toBe(2)
 
-  response = await dao.user.findAll({ filter: { firstName: { $in: ['1', 'a'] } } });
+  response = await dao.user.findAll({ filter: { firstName: { $in: ['1', 'a'] } } })
   expect(response.length).toBe(1)
 
-  response = await dao.user.findAll({ filter: { firstName: { $in: [] } } });
+  response = await dao.user.findAll({ filter: { firstName: { $in: [] } } })
   expect(response.length).toBe(0)
 
-  response = await dao.user.findAll({ filter: { firstName: { $in: ['a'] } } });
+  response = await dao.user.findAll({ filter: { firstName: { $in: ['a'] } } })
   expect(response.length).toBe(0)
-
 })
 
 // ------------------------------------------------------------------------
@@ -521,7 +512,6 @@ test('update embedded entity', async () => {
   expect(user4!.usernamePasswordCredentials!.password).toBe('5c29a959abce4eda5f0e7a4e7ea53dce4fa0f0abbe8eaa63717e2fed5f193d31')
 })
 
-
 test('update with undefined', async () => {
   const user = await dao.user.insertOne({
     record: {
@@ -529,13 +519,12 @@ test('update with undefined', async () => {
       firstName: 'FirstName',
       lastName: 'LastName',
       live: true,
-    }
+    },
   })
   await dao.user.updateOne({ filter: { id: user.id }, changes: { live: undefined } })
   const user2 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true, id: true } })
   expect(user2?.live).toBe(true)
 })
-
 
 // ------------------------------------------------------------------------
 // ------------------------------ REPLACE ---------------------------------
@@ -722,7 +711,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
     daoOverrides: {
       city: {
         middlewares: [
-          buildComputedField({
+          computedField({
             fieldsProjection: { computedName: true },
             requiredProjection: { name: true },
             compute: async (city) => ({ computedName: `Computed: ${city.name}` }),
@@ -750,7 +739,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
     daoOverrides: {
       city: {
         middlewares: [
-          buildComputedField({
+          computedField({
             fieldsProjection: { computedAddressName: true } as CityProjection,
             requiredProjection: { name: true, addressId: true },
             compute: async (city) => ({ computedAddressName: `${city.name}_${city.addressId}` }),
@@ -771,12 +760,12 @@ test('computed fields (two dependencies - same level - two calculated)', async (
     daoOverrides: {
       city: {
         middlewares: [
-          buildComputedField({
+          computedField({
             fieldsProjection: { computedName: true },
             requiredProjection: { name: true },
             compute: async (city) => ({ computedName: `Computed: ${city.name}` }),
           }),
-          buildComputedField({
+          computedField({
             fieldsProjection: { computedAddressName: true },
             requiredProjection: { name: true, addressId: true },
             compute: async (city) => ({ computedAddressName: `${city.name}_${city.addressId}` }),
@@ -797,7 +786,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
     daoOverrides: {
       city: {
         middlewares: [
-          buildComputedField({
+          computedField({
             fieldsProjection: { computedName: true },
             requiredProjection: { name: true },
             compute: async (city) => ({ computedName: `Computed: ${city.name}` }),
@@ -822,7 +811,7 @@ test('computed fields (one dependency - deep level - one calculated)', async () 
     daoOverrides: {
       organization: {
         middlewares: [
-          buildComputedField({
+          computedField({
             fieldsProjection: { computedName: true },
             requiredProjection: { name: true },
             compute: async (organization) => ({ computedName: `Computed: ${organization.name}` }),
@@ -840,12 +829,12 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
     daoOverrides: {
       organization: {
         middlewares: [
-          buildComputedField({
+          computedField({
             fieldsProjection: { computedName: true },
             requiredProjection: { name: true },
             compute: async (organization) => ({ computedName: `Computed: ${organization.name}` }),
           }),
-          buildComputedField({
+          computedField({
             fieldsProjection: { computedName: true },
             requiredProjection: { name: true },
             compute: async (organization) => ({ computedName: `Computed: ${organization.name}` }),

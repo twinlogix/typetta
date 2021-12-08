@@ -1,6 +1,6 @@
-import { AnyProjection, GenericProjection, Projection, StaticProjection } from '../projections/projections.types'
-import { isProjectionIntersected, mergeProjections } from '../projections/projections.utils'
-import { DAOMiddleware } from './middlewares.types'
+import { AnyProjection, GenericProjection, Projection, StaticProjection } from '../../projections/projections.types'
+import { isProjectionIntersected, mergeProjections } from '../../projections/projections.utils'
+import { DAOMiddleware } from '../middlewares.types'
 
 export function projectionDependency<
   ModelType,
