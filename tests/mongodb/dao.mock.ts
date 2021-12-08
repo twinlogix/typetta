@@ -14,7 +14,10 @@ import { v4 as uuidv4 } from 'uuid'
 export type AddressExcludedFields = never
 
 export const addressSchema : Schema<types.Scalars>= {
-  'id': { scalar: 'ID', required: true}
+  'id': {
+    scalar: 'ID', 
+    required: true
+  }
 };
 
 type AddressFilterFields = {
@@ -65,9 +68,18 @@ export class AddressDAO extends AbstractMongoDBDAO<types.Address, 'id', string, 
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
 
 export const citySchema : Schema<types.Scalars>= {
-  'addressId': { scalar: 'String', required: true},
-  'id': { scalar: 'ID', required: true},
-  'name': { scalar: 'String', required: true}
+  'addressId': {
+    scalar: 'String', 
+    required: true
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  }
 };
 
 type CityFilterFields = {
@@ -127,9 +139,17 @@ export class CityDAO extends AbstractMongoDBDAO<types.City, 'id', string, true, 
 export type DeviceExcludedFields = never
 
 export const deviceSchema : Schema<types.Scalars>= {
-  'id': { scalar: 'ID', required: true},
-  'name': { scalar: 'String', required: true},
-  'userId': { scalar: 'ID'}
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  },
+  'userId': {
+    scalar: 'ID'
+  }
 };
 
 type DeviceFilterFields = {
@@ -188,9 +208,18 @@ export class DeviceDAO extends AbstractMongoDBDAO<types.Device, 'id', string, tr
 export type DogExcludedFields = never
 
 export const dogSchema : Schema<types.Scalars>= {
-  'id': { scalar: 'ID', required: true},
-  'name': { scalar: 'String', required: true},
-  'ownerId': { scalar: 'ID', required: true}
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  },
+  'ownerId': {
+    scalar: 'ID', 
+    required: true
+  }
 };
 
 type DogFilterFields = {
@@ -251,12 +280,23 @@ export type OrganizationExcludedFields = 'computedName'
 export const organizationSchema : Schema<types.Scalars>= {
   'address': {
     embedded: {
-      'id': { scalar: 'ID', required: true}
+      'id': {
+        scalar: 'ID', 
+        required: true
+      }
     }
   },
-  'id': { scalar: 'ID', required: true},
-  'name': { scalar: 'String', required: true},
-  'vatNumber': { scalar: 'String'}
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  },
+  'vatNumber': {
+    scalar: 'String'
+  }
 };
 
 type OrganizationFilterFields = {
@@ -323,20 +363,55 @@ export class OrganizationDAO extends AbstractMongoDBDAO<types.Organization, 'id'
 export type UserExcludedFields = never
 
 export const userSchema : Schema<types.Scalars>= {
-  'amount': { scalar: 'Decimal'},
-  'amounts': { scalar: 'Decimal', array: true},
-  'firstName': { scalar: 'String'},
-  'friendsId': { scalar: 'ID', array: true},
-  'id': { scalar: 'ID', required: true},
-  'lastName': { scalar: 'String'},
-  'live': { scalar: 'Boolean', required: true},
-  'localization': { scalar: 'Coordinates'},
-  'title': { scalar: 'LocalizedString'},
+  'amount': {
+    scalar: 'Decimal'
+  },
+  'amounts': {
+    scalar: 'Decimal', 
+    array: true, 
+    alias: 'amounts'
+  },
+  'firstName': {
+    scalar: 'String', 
+    alias: 'name'
+  },
+  'friendsId': {
+    scalar: 'ID', 
+    array: true, 
+    alias: 'fIds'
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true, 
+    alias: 'ID'
+  },
+  'lastName': {
+    scalar: 'String'
+  },
+  'live': {
+    scalar: 'Boolean', 
+    required: true
+  },
+  'localization': {
+    scalar: 'Coordinates'
+  },
+  'title': {
+    scalar: 'LocalizedString'
+  },
   'usernamePasswordCredentials': {
     embedded: {
-      'password': { scalar: 'Password', required: true},
-      'username': { scalar: 'String', required: true}
-    }
+      'password': {
+        scalar: 'Password', 
+        required: true, 
+        alias: 'pwd'
+      },
+      'username': {
+        scalar: 'String', 
+        required: true, 
+        alias: 'user'
+      }
+    }, 
+    alias: 'cred'
   }
 };
 

@@ -5,20 +5,20 @@ scalar Password
 scalar JSON
 
 type Device @sqlEntity {
-  id: ID! @id
+  id: ID! @id 
   name: String!
   userId: ID
   user: User @innerRef
 }
 
 type Another {
-  test: String
+  test: String @alias(value: "t")
 }
 
 type UsernamePasswordCredentials {
-  username: String!
-  password: Password!
-  another: Another
+  username: String! @alias(value: "user")
+  password: Password! @alias(value: "pass")
+  another: Another @alias(value: "a")
 }
 
 type City @sqlEntity {
@@ -43,13 +43,13 @@ type Organization @sqlEntity {
 }
 
 type User @sqlEntity {
-  id: ID! @id
-  credentials: UsernamePasswordCredentials
-  firstName: String
-  lastName: String
-  live: Boolean!
-  localization: Coordinates
-  title: LocalizedString
-  amounts: [Decimal!]
-  amount: Decimal
+  id: ID! @id @alias(value: "ID")
+  credentials: UsernamePasswordCredentials @alias(value: "cred")
+  firstName: String @alias(value: "name")
+  lastName: String @alias(value: "surname")
+  live: Boolean! @alias(value: "active")
+  localization: Coordinates @alias(value: "l")
+  title: LocalizedString @alias(value: "t")
+  amounts: [Decimal!] @alias(value: "values")
+  amount: Decimal @alias(value: "value")
 }

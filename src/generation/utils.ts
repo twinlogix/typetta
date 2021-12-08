@@ -60,37 +60,43 @@ export function indentMultiline(str: string, count = 1): string {
  * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
  * @returns a new transformed object
  */
-export function transformObject<From, To, ModelScalars extends object, DBScalars extends object>(
+export function transformObject<From extends { [key: string]: any }, To, ModelScalars extends object, DBScalars extends object>(
   adapters: DataTypeAdapterMap<ModelScalars, DBScalars>,
   direction: 'dbToModel' | 'modelToDB',
   object: From,
   schema: Schema<ModelScalars>,
 ): To {
   const result: any = {}
-  Object.entries(object).map(([key, value]) => {
-    if (key in schema) {
-      const schemaField = schema[key]
+  const keySet = new Set(Object.keys(object))
+  for (const [fieldName, schemaField] of Object.entries(schema)) {
+    const sourceName = schemaField.alias && direction === 'dbToModel' ? schemaField.alias : fieldName
+    const destName = schemaField.alias && direction === 'modelToDB' ? schemaField.alias : fieldName
+    if (sourceName in object) {
+      const value = object[sourceName]
+      keySet.delete(sourceName)
       if (!schemaField.required && (value === null || value === undefined)) {
-        result[key] = value
+        result[destName] = value
       } else {
         if ('scalar' in schemaField) {
           const adapter = adapters[schemaField.scalar]
           if (Array.isArray(value) && schemaField.array) {
-            result[key] = adapter ? value.map((v) => adapter[direction](v)) : value
+            result[destName] = adapter ? value.map((v) => adapter[direction](v)) : value
           } else {
-            result[key] = adapter ? adapter[direction](value) : value
+            result[destName] = adapter ? adapter[direction](value) : value
           }
         } else {
           if (Array.isArray(value) && schemaField.array) {
-            result[key] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded))
+            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded))
           } else {
-            result[key] = transformObject(adapters, direction, value, schemaField.embedded)
+            result[destName] = transformObject(adapters, direction, value, schemaField.embedded)
           }
         }
       }
-    } else {
-      result[key] = value
     }
-  })
+  }
+  for (const key of keySet.values()) {
+    // copy remaining unknown key
+    result[key] = object[key]
+  }
   return result
 }

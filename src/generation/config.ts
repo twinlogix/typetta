@@ -10,14 +10,3 @@ export interface TypeScriptTypettaPluginConfig extends RawConfig {
    */
   tsTypesImport?: string
 }
-
-export enum Directives {
-  ID = 'id',
-  MONGO_ENTITY = 'mongoEntity',
-  SQL_ENTITY = 'sqlEntity',
-  EMBEDDED = 'embedded',
-  INNER_REF = 'innerRef',
-  FOREIGN_REF = 'foreignRef',
-  EXCLUDE = 'exclude',
-  GEOPOINT = 'geopoint',
-}
