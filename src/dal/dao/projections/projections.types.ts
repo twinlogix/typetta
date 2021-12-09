@@ -45,7 +45,7 @@ export type ModelProjection<ModelType extends object, ProjectionType extends obj
     ? ModelType & { __projection: 'all' }
     : S extends 'specific'
     ? P extends PartialDeep<ProjectionType>
-      ? Expand<MP<ModelType, P>>
+      ? Expand<StaticModelProjection<ModelType, ProjectionType, P>>
       : never
     : S extends 'unknown'
     ? PartialDeep<ModelType> & { __projection: 'unknown' }
