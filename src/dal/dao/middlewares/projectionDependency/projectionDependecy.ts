@@ -5,8 +5,8 @@ import { DAOMiddleware } from '../middlewares.types'
 
 export function projectionDependency<
   ModelType extends object,
-  P1 extends PartialDeep<ProjectionType>,
-  P2 extends PartialDeep<ProjectionType>,
+  P1 extends AnyProjection<ProjectionType>,
+  P2 extends AnyProjection<ProjectionType>,
   ProjectionType extends object,
   IDKey extends Exclude<keyof ModelType, ExcludedFields>,
   ExcludedFields extends keyof ModelType

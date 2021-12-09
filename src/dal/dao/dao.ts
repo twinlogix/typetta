@@ -145,7 +145,7 @@ export abstract class AbstractDAO<
   async findPage<P extends AnyProjection<ProjectionType>>(
     params: FindParams<FilterType, P, SortType, OptionsType> = {},
   ): Promise<{ totalCount: number; records: ModelProjection<ModelType, ProjectionType, P>[] }> {
-    const newParams = await this.beforeFind(params as FindParams<FilterType, ProjectionType, SortType, OptionsType & DriverOptionType>)
+    const newParams = await this.beforeFind(params)
     const { totalCount, records } = await this._findPage(newParams)
     const resolvedRecors = await this.resolveAssociations(records, newParams.projection)
     return {

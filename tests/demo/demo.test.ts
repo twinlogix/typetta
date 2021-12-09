@@ -21,16 +21,16 @@ beforeEach(async () => {
       user: {
         middlewares: [
           computedField({
-              fieldsProjection: { averageViewsPerPost: true },
-              requiredProjection: { totalPostsViews: true, posts: {} },
+              fieldsProjection: { averageViewsPerPost: true } as const,
+              requiredProjection: { totalPostsViews: true, posts: {} } as const,
               compute: async (u) => ({ averageViewsPerPost: (u.totalPostsViews || 0) / (u.posts?.length || 1) }),
             },
           ),
           computedField({
-            fieldsProjection: { totalPostsViews: true },
-            requiredProjection: { posts: { views: true } },
+            fieldsProjection: { totalPostsViews: true } as const,
+            requiredProjection: { posts: { views: true } } as const,
             compute: async (u) => ({
-              totalPostsViews: u.posts?.map((p) => p.views || 0).reduce((p, c) => p + c, 0) || 0,
+              totalPostsViews: u.posts?.map((p) => p.views).reduce((p, c) => p + c, 0) || 0,
             }),
           }),
         ],
@@ -56,6 +56,7 @@ beforeEach(async () => {
       },
     },
   })
+
   const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
     ['Decimal', ['decimal', 'decimal ARRAY']],
     ['Boolean', ['boolean', 'boolean ARRAY']],
@@ -79,7 +80,7 @@ test('Demo', async () => {
       },
     },
   })
-
+ const num = 1 as const
   for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
     await dao.post.insertOne({
       record: {
@@ -97,7 +98,7 @@ test('Demo', async () => {
       'credentials.username': 'Pippo',
     },
     projection: {
-      firstName: true,
+      firstName: false,
       averageViewsPerPost: true,
       posts: {
         title: true,

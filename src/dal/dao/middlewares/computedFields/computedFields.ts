@@ -7,8 +7,8 @@ import { PartialDeep } from 'type-fest'
 
 export function computedField<
   ModelType extends object,
-  P1 extends PartialDeep<ProjectionType>,
-  P2 extends PartialDeep<ProjectionType>,
+  P1 extends AnyProjection<ProjectionType>,
+  P2 extends AnyProjection<ProjectionType>,
   ProjectionType extends object,
   IDKey extends Exclude<keyof ModelType, ExcludedFields>,
   ExcludedFields extends keyof ModelType

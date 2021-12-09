@@ -1,7 +1,8 @@
 import { Expand, OmitUndefinedAndNeverKeys } from '../../../utils/utils.types'
 import { PartialDeep, Primitive } from 'type-fest'
+import { PartialObjectDeep } from 'type-fest/source/partial-deep'
 
-export type AnyProjection<ProjectionType extends object> = true | undefined | PartialDeep<ProjectionType> | ProjectionType
+export type AnyProjection<ProjectionType extends object> = true | undefined | PartialObjectDeep<ProjectionType>
 
 /**
  * Generic definition of projection.
@@ -74,6 +75,8 @@ type StaticModelProjection<ModelType, ProjectionType, P extends PartialDeep<Proj
       OmitUndefinedAndNeverKeys<{
         [K in keyof ModelType]: P extends Record<K, true>
           ? ModelType[K]
+          : P extends Record<K, false>
+          ? never
           : P extends Record<K, boolean>
           ? ModelType[K] | undefined
           : Required<Exclude<ProjectionType, boolean>> extends Record<K, infer SubProjectinoType>
@@ -102,6 +105,8 @@ type StaticModelProjectionParam<ModelType, ProjectionType, P extends PartialDeep
       OmitUndefinedAndNeverKeys<{
         [K in keyof ModelType]: P extends Record<K, true>
           ? ModelType[K]
+          : P extends Record<K, false>
+          ? never
           : P extends Record<K, boolean>
           ? ModelType[K] | undefined
           : Required<Exclude<ProjectionType, boolean>> extends Record<K, infer SubProjectinoType>

@@ -22,7 +22,7 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
       }
       return {
         ...result,
-        [name]: adaptProjection(v, schemaField.embedded),
+        [name]: adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded),
       }
     }
     return result
