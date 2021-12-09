@@ -202,16 +202,16 @@ test('safe find', async () => {
   expect(response5!.firstName).toBe('FirstName')
   expect(response5!.live).toBe(true)
 
-   // Empty static projection
-   const response6 = await dao.user.findOne({ projection: {} })
-   typeAssert<Test<typeof response6, { __projection: 'empty' } | null>>()
-   expect(response6).toBeDefined()
+  // Empty static projection
+  const response6 = await dao.user.findOne({ projection: {} })
+  typeAssert<Test<typeof response6, { __projection: 'empty' } | null>>()
+  expect(response6).toBeDefined()
 
-   // All undefined projection (TODO)
-   /*
-   const response9 = await dao.user.findOne({ projection: undefined })
-   typeAssert<Test<typeof response9, (User & { __projection: 'all' }) | null>>()
-   expect(response9).toBeDefined()*/
+  // All undefined projection (TODO)
+  /*
+  const response9 = await dao.user.findOne({ projection: undefined })
+  typeAssert<Test<typeof response9, (User & { __projection: 'all' }) | null>>()
+  expect(response9).toBeDefined()*/
 })
 
 // ------------------------------------------------------------------------
@@ -666,11 +666,13 @@ test('middleware', async () => {
               }
               return params
             },
-            afterFind: async (params, result) => {
-              if (params.filter?.id === 'u1' && result.firstName) {
-                return { ...result, firstName: result.firstName + ' OK' }
-              }
-              return result
+            afterFind: async (params, records) => {
+              return records.map(record => {
+                if (params.filter?.id === 'u1' && record.firstName) {
+                  return { ...record, firstName: record.firstName + ' OK' }
+                }
+                return record;
+              })
             },
             beforeUpdate: async (params) => {
               if (params.filter?.id === 'u1') {
