@@ -90,26 +90,22 @@ export abstract class AbstractDAO<
     return enrichedParams
   }
 
-  protected async afterFind(params: FindParams<FilterType, AnyProjection<ModelType, ProjectionType>, SortType, OptionsType & DriverOptionType>, result: PartialDeep<ModelType>): Promise<PartialDeep<ModelType>> {
+  protected async afterFind(params: FindParams<FilterType, AnyProjection<ModelType, ProjectionType>, SortType, OptionsType & DriverOptionType>, records: PartialDeep<ModelType>[]): Promise<PartialDeep<ModelType>[]> {
     const contextOptions = this.createContextOptions()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterFind) {
-        result = await middleware.afterFind(params, result, contextOptions)
+        records = await middleware.afterFind(params, records, contextOptions)
       }
     }
-    return result
+    return records
   }
 
   private async elabRecords(
     params: FindParams<FilterType, AnyProjection<ModelType, ProjectionType>, SortType, OptionsType>,
     records: PartialDeep<ModelType>[],
   ): Promise<PartialDeep<ModelType>[]> {
-    const results = []
     const enrichedParams = this.addOptions(params, this.driverOptions, this.options);
-    for (const record of records) {
-      results.push(await this.afterFind(enrichedParams, record))
-    }
-    return results
+    return await this.afterFind(enrichedParams, records);
   }
 
   async findAll<P extends AnyProjection<ModelType, ProjectionType> = true>(params: FindParams<FilterType, P, SortType, OptionsType> = {}): Promise<ModelProjection<ModelType, P>[]> {
