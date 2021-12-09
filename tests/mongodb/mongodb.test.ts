@@ -1,12 +1,13 @@
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
-import { projection, SortDirection, StaticProjection, computedField, mongoDbAdapters, identityAdapter, projectionDependency } from '@twinlogix/typetta'
+import { projection, SortDirection, computedField, mongoDbAdapters, identityAdapter, projectionDependency } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
+import { PartialObjectDeep } from 'type-fest/source/partial-deep'
 
 let con: MongoClient
 let mongoServer: MongoMemoryServer
@@ -147,26 +148,26 @@ test('find nested foreignRef association', async () => {
 test('safe find', async () => {
   await dao.user.insertOne({ record: { id: 'u1', firstName: 'FirstName', lastName: 'LastName', live: true } })
 
-  //Static projection
+  // Static projection
   const response = await dao.user.findAll({ projection: { firstName: true, live: true } })
   typeAssert<Test<typeof response, { firstName?: string | null; live: boolean; __projection: { firstName: true; live: true } }[]>>()
   expect(response.length).toBe(1)
   expect(response[0].firstName).toBe('FirstName')
   expect(response[0].live).toBe(true)
 
-  //Static projection
+  // Static projection
   const response1 = await dao.user.findOne({ filter: { id: 'u2' }, projection: { live: true } })
   typeAssert<Test<typeof response1, { live: boolean; __projection: { live: true } } | null>>()
   expect(response1).toBe(null)
 
-  //Static projection
+  // Static projection
   const response2 = await dao.user.findOne({ projection: { firstName: true, live: true, c: true } })
   typeAssert<Test<typeof response2, { firstName?: string | null; live: boolean; __projection: { firstName: true; live: true; c: boolean } } | null>>()
   expect(response2).toBeDefined()
   expect(response2!.firstName).toBe('FirstName')
   expect(response2!.live).toBe(true)
 
-  //Dynamic projection
+  // Dynamic projection
   const proj: UserProjection = { firstName: true, live: true }
   const response3 = await dao.user.findOne({ projection: proj })
   typeAssert<Test<typeof response3, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
@@ -174,39 +175,43 @@ test('safe find', async () => {
   expect(response3!.firstName).toBe('FirstName')
   expect(response3!.live).toBe(true)
 
-  //Static projection create before
+  // Static projection create before
   const proj2 = projection<User>().build({ live: true })
   const response7 = await dao.user.findOne({ projection: proj2 })
   typeAssert<Test<typeof response7, { live: boolean; __projection: { live: true } } | null>>()
   expect(response7).toBeDefined()
   expect(response7!.live).toBe(true)
 
-  //Static projection create before (do not use)
-  const proj3: StaticProjection<User> = { live: true }
+  // Static projection create before (do not use)
+  const proj3: PartialDeep<UserProjection> = { live: true }
   const response8 = await dao.user.findOne({ projection: proj3 })
-  //typeAssert<Test<typeof response8, {} | null >>()
+  typeAssert<Test<typeof response8, PartialDeep<User> & { __projection: 'unknown' } | null>>()
   expect(response8).toBeDefined()
 
-  //Whole object
+  // Whole object
   const response4 = await dao.user.findOne({ projection: true })
   typeAssert<Test<typeof response4, (User & { __projection: 'all' }) | null>>()
   expect(response4).toBeDefined()
   expect(response4!.firstName).toBe('FirstName')
   expect(response4!.live).toBe(true)
 
-  //No projection
+  // No projection
   const response5 = await dao.user.findOne({})
   typeAssert<Test<typeof response5, (User & { __projection: 'all' }) | null>>()
   expect(response5).toBeDefined()
   expect(response5!.firstName).toBe('FirstName')
   expect(response5!.live).toBe(true)
 
-  //Info to projection
-  const response6 = await dao.user.findOne({ projection: true })
-  typeAssert<Test<typeof response6, (User & { __projection: 'all' }) | null>>()
-  expect(response6).toBeDefined()
-  expect(response6!.firstName).toBe('FirstName')
-  expect(response6!.live).toBe(true)
+   // Empty static projection
+   const response6 = await dao.user.findOne({ projection: {} })
+   typeAssert<Test<typeof response6, { __projection: 'empty' } | null>>()
+   expect(response6).toBeDefined()
+
+   // All undefined projection (TODO)
+   /*
+   const response9 = await dao.user.findOne({ projection: undefined })
+   typeAssert<Test<typeof response9, (User & { __projection: 'all' }) | null>>()
+   expect(response9).toBeDefined()*/
 })
 
 // ------------------------------------------------------------------------
@@ -702,49 +707,45 @@ test('middleware', async () => {
 })
 
 test('middleware options', async () => {
-
   const dao = new DAOContext<{ testType: string }>({
-    options: { testType: "test1" },
+    options: { testType: 'test1' },
     mongoDB: db,
     overrides: {
       user: {
         middlewares: [
           {
             beforeInsert: async (params) => {
-              expect(params.options?.testType).toBe("test1");
-              expect(params.options?.testType).toBeDefined();
-              return params;
+              expect(params.options?.testType).toBe('test1')
+              expect(params.options?.testType).toBeDefined()
+              return params
             },
           },
         ],
       },
     },
   })
-  await dao.user.insertOne({ record: { live: true } });
-
+  await dao.user.insertOne({ record: { live: true } })
 })
 
 test('middleware options overrides', async () => {
-
   const dao = new DAOContext({
-    options: { testType: "test1" },
+    options: { testType: 'test1' },
     mongoDB: db,
     overrides: {
       user: {
         middlewares: [
           {
             beforeInsert: async (params) => {
-              expect(params.options?.testType).toBe("test2");
-              expect(params.options?.testType).toBeDefined();
-              return params;
+              expect(params.options?.testType).toBe('test2')
+              expect(params.options?.testType).toBeDefined()
+              return params
             },
           },
         ],
       },
     },
   })
-  await dao.user.insertOne({ record: { live: true }, options: { testType: 'test2' } });
-
+  await dao.user.insertOne({ record: { live: true }, options: { testType: 'test2' } })
 })
 
 // ------------------------------------------------------------------------
