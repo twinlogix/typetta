@@ -702,6 +702,7 @@ test('middleware', async () => {
 })
 
 test('middleware options', async () => {
+
   const dao = new DAOContext<{ testType: string }>({
     options: { testType: "test1" },
     mongoDB: db,
@@ -719,8 +720,30 @@ test('middleware options', async () => {
       },
     },
   })
-
   await dao.user.insertOne({ record: { live: true } });
+
+})
+
+test('middleware options overrides', async () => {
+
+  const dao = new DAOContext({
+    options: { testType: "test1" },
+    mongoDB: db,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            beforeInsert: async (params) => {
+              expect(params.options?.testType).toBe("test2");
+              expect(params.options?.testType).toBeDefined();
+              return params;
+            },
+          },
+        ],
+      },
+    },
+  })
+  await dao.user.insertOne({ record: { live: true }, options: { testType: 'test2' } });
 
 })
 

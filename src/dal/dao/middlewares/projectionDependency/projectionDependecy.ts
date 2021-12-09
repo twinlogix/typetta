@@ -6,13 +6,13 @@ export function projectionDependency<
   ModelType,
   P1 extends StaticProjection<ModelType>,
   P2 extends AnyProjection<ModelType, ProjectionType>,
-  ProjectionType extends Projection<ModelType>,
+  ProjectionType,
   IDKey extends Exclude<keyof ModelType, ExcludedFields>,
   ExcludedFields extends keyof ModelType
 >(args: {
   fieldsProjection: P2
   requiredProjection: P1
-}): DAOMiddleware<ModelType, IDKey, any, any, ProjectionType, any, ExcludedFields, any, any, any> {
+}): DAOMiddleware<ModelType, IDKey, any, any, AnyProjection<ModelType, ProjectionType>, any, ExcludedFields, any, any, any> {
   return {
     beforeFind: async (findParams) => {
       if (isProjectionIntersected(findParams.projection ? (findParams.projection as GenericProjection) : true, args.fieldsProjection ? (args.fieldsProjection as GenericProjection) : true)) {

@@ -9,14 +9,14 @@ export function computedField<
   ModelType,
   P1 extends StaticProjection<ModelType>,
   P2 extends AnyProjection<ModelType, ProjectionType>,
-  ProjectionType extends Projection<ModelType>,
+  ProjectionType,
   IDKey extends Exclude<keyof ModelType, ExcludedFields>,
   ExcludedFields extends keyof ModelType
 >(args: {
   fieldsProjection: P2
   requiredProjection: P1
   compute: (record: ModelProjection<ModelType, P1>) => Promise<PartialDeep<ModelType>>
-}): DAOMiddleware<ModelType, IDKey, any, any, ProjectionType, any, ExcludedFields, any, any, any> {
+}): DAOMiddleware<ModelType, IDKey, any, any, AnyProjection<ModelType, ProjectionType>, any, ExcludedFields, any, any, any> {
 
   return {
     beforeFind: projectionDependency<ModelType, P1, P2, ProjectionType, IDKey, ExcludedFields>(args).beforeFind,
