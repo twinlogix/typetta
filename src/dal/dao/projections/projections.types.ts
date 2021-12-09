@@ -45,7 +45,7 @@ export type ModelProjection<ModelType extends object, ProjectionType extends obj
     ? ModelType & { __projection: 'all' }
     : S extends 'specific'
     ? P extends PartialDeep<ProjectionType>
-      ? Expand<StaticModelProjection<ModelType, ProjectionType, P>>
+      ? Expand<MP<ModelType, P>>
       : never
     : S extends 'unknown'
     ? PartialDeep<ModelType> & { __projection: 'unknown' }
@@ -117,3 +117,25 @@ type StaticModelProjectionParam<ModelType, ProjectionType, P extends PartialDeep
       }>
     > & { __projection?: P }
   : never
+
+type MP<ModelType extends object, P extends PartialObjectDeep<any>> = Expand<{
+  [K in keyof P]: P[K] extends true // true: T
+    ? ModelType extends Partial<Record<K, any>>
+      ? ModelType[K]
+      : never
+    : P[K] extends false // false: never
+    ? never
+    : P[K] extends boolean // boolean: T | undefined
+    ? ModelType extends Partial<Record<K, any>>
+      ? ModelType[K] | undefined
+      : never
+    : P[K] extends object // object:
+    ? ModelType extends Record<K, infer A> // not optional field
+      ? MPS<A, P, K>
+      : ModelType extends Partial<Record<K, infer B>> // optional field
+      ? MPS<B, P, K> | undefined
+      : never
+    : never
+} & { __projection: P }>
+
+type MPS<T, P extends object, K extends keyof P> = T extends (infer O)[] ? MPS<O, P, K>[] : T extends object ? MP<T, P[K]> : never
