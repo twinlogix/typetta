@@ -1,6 +1,6 @@
-import { DAOContext } from './dao.mock'
-import { Scalars } from './models.mock'
-import { knexJsAdapters, identityAdapter, computedField } from '@twinlogix/typetta'
+import { DAOContext, UserExcludedFields, UserProjection } from './dao.mock'
+import { Scalars, User } from './models.mock'
+import { knexJsAdapters, identityAdapter, computedField, ModelProjection } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -14,8 +14,6 @@ const config: Knex.Config = {
   useNullAsDefault: true,
 }
 
-beforeAll(async () => { })
-
 beforeEach(async () => {
   knexInstance = knex(config)
   dao = new DAOContext({
@@ -23,16 +21,16 @@ beforeEach(async () => {
       user: {
         middlewares: [
           computedField({
-            fieldsProjection: { averageViewsPerPost: true },
-            requiredProjection: { totalPostsViews: true, posts: {} },
-            compute: async (u) => (
-              { averageViewsPerPost: (u.totalPostsViews || 0) / (u.posts?.length || 1) }),
-          }),
+              fieldsProjection: { averageViewsPerPost: true },
+              requiredProjection: { totalPostsViews: true, posts: {} },
+              compute: async (u) => ({ averageViewsPerPost: (u.totalPostsViews || 0) / (u.posts?.length || 1) }),
+            },
+          ),
           computedField({
             fieldsProjection: { totalPostsViews: true },
             requiredProjection: { posts: { views: true } },
             compute: async (u) => ({
-              totalPostsViews: u.posts?.map((p) => p.views).reduce((p, c) => p + c, 0) || 0,
+              totalPostsViews: u.posts?.map((p) => p.views || 0).reduce((p, c) => p + c, 0) || 0,
             }),
           }),
         ],
@@ -69,8 +67,6 @@ beforeEach(async () => {
   await dao.post.createTable(specificTypeMap, defaultSpecificType)
   await dao.user.createTable(specificTypeMap, defaultSpecificType)
 })
-
-afterEach(async () => { })
 
 test('Demo', async () => {
   const user = await dao.user.insertOne({
@@ -111,6 +107,4 @@ test('Demo', async () => {
       },
     },
   })
-
-  console.log(user, pippo)
 })

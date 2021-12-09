@@ -6,7 +6,7 @@ import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document } from 'mongodb'
 
-export function adaptProjection<ModelType, ProjectionType, ScalarsType>(projection: AnyProjection<ModelType, ProjectionType>, schema: Schema<ScalarsType>): AnyProjection<ModelType, ProjectionType> {
+export function adaptProjection<ProjectionType extends object, ScalarsType>(projection: AnyProjection<ProjectionType>, schema: Schema<ScalarsType>): AnyProjection<ProjectionType> {
   if (projection === true || projection === undefined) {
     return undefined
   }
@@ -26,7 +26,7 @@ export function adaptProjection<ModelType, ProjectionType, ScalarsType>(projecti
       }
     }
     return result
-  }, {} as object) as AnyProjection<ModelType, ProjectionType>
+  }, {} as object) as AnyProjection<ProjectionType>
 }
 
 export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {

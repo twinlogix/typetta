@@ -1,35 +1,36 @@
-import { GenericProjection, MergeGenericProjection, Projection, StaticGenericProjection, StaticProjection } from './projections.types'
+import { GenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
 import _ from 'lodash'
+import { PartialDeep } from 'type-fest'
 
-type SelectProjection<M, P1 extends StaticProjection<M> | Projection<M>, P2 extends StaticProjection<M> | Projection<M>> = P1 extends StaticGenericProjection
-  ? P2 extends StaticGenericProjection
+type SelectProjection<ProjectionType, P1 extends PartialDeep<ProjectionType>, P2 extends PartialDeep<ProjectionType>> = P1 extends GenericProjection
+  ? P2 extends GenericProjection
     ? MergeGenericProjection<P1, P2>
-    : Projection<M>
-  : Projection<M>
+    : PartialDeep<ProjectionType>
+  : PartialDeep<ProjectionType>
 
 export function mergeGenericProjection<P1 extends GenericProjection, P2 extends GenericProjection>(p1: P1, p2: P2): MergeGenericProjection<P1, P2> {
   return mergeProjections(p1, p2)
 }
-export interface ProjectionBuilderInterface<M> {
-  build<P extends StaticProjection<M>>(p: P): P
+export interface ProjectionBuilderInterface<ProjectionType extends object> {
+  build<P extends PartialDeep<ProjectionType>>(p: P): P
 
-  merge<P1 extends StaticProjection<M> | Projection<M>, P2 extends StaticProjection<M> | Projection<M>>(p1: P1, p2: P2): SelectProjection<M, P1, P2>
+  merge<P1 extends PartialDeep<ProjectionType>, P2 extends PartialDeep<ProjectionType>>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2>
 
-  fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): Projection<M>
+  fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): PartialDeep<ProjectionType> | true
 }
 
-export function projection<M>(): ProjectionBuilderInterface<M> {
-  return new (class implements ProjectionBuilderInterface<M> {
-    build<P extends StaticProjection<M>>(p: P): P {
+export function projection<ProjectionType extends object>(): ProjectionBuilderInterface<ProjectionType> {
+  return new (class implements ProjectionBuilderInterface<ProjectionType> {
+    build<P extends PartialDeep<ProjectionType>>(p: P): P {
       return p
     }
 
-    merge<P1 extends StaticProjection<M> | Projection<M>, P2 extends StaticProjection<M> | Projection<M>>(p1: P1, p2: P2): SelectProjection<M, P1, P2> {
-      return mergeProjections(p1 as GenericProjection, p2 as GenericProjection) as SelectProjection<M, P1, P2>
+    merge<P1 extends PartialDeep<ProjectionType>, P2 extends PartialDeep<ProjectionType>>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2> {
+      return mergeProjections(p1 as GenericProjection, p2 as GenericProjection) as SelectProjection<ProjectionType, P1, P2>
     }
 
-    fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): Projection<M> {
+    fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): PartialDeep<ProjectionType> | true {
       return infoToProjection(info, defaults, context ? context : info.fieldNodes[0], type ? type : getNamedType(info.returnType), schema ? schema : info.schema)
     }
   })()
@@ -51,7 +52,7 @@ export function mergeProjections<P1 extends GenericProjection, P2 extends Generi
   return res as MergeGenericProjection<P1, P2>
 }
 
-function infoToProjection<M>(info: GraphQLResolveInfo, defaults: any, context: FieldNode, type: GraphQLNamedType, schema: GraphQLSchema): Projection<M> {
+function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defaults: any, context: FieldNode, type: GraphQLNamedType, schema: GraphQLSchema): PartialDeep<ProjectionType> | true {
   if (context.selectionSet) {
     return context.selectionSet.selections.reduce(
       (proj: any, selection: any) => {
