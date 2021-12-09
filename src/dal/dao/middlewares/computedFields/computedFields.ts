@@ -20,11 +20,14 @@ export function computedField<
 
   return {
     beforeFind: projectionDependency<ModelType, P1, P2, ProjectionType, IDKey, ExcludedFields>(args).beforeFind,
-    afterFind: async (findParams, result) => {
-      if (result && isProjectionIntersected(findParams.projection ? (findParams.projection as GenericProjection) : true, args.fieldsProjection ? (args.fieldsProjection as GenericProjection) : true)) {
-        return deepMerge(result, await args.compute(result as ModelProjection<ModelType, ProjectionType, P1>))
+    afterFind: async (findParams, records) => {
+      const computedRecords = [];
+      for (const record of records) {
+        if (record && isProjectionIntersected(findParams.projection ? (findParams.projection as GenericProjection) : true, args.fieldsProjection ? (args.fieldsProjection as GenericProjection) : true)) {
+          computedRecords.push(deepMerge(record, await args.compute(record as ModelProjection<ModelType, ProjectionType, P1>)))
+        }
       }
-      return result
+      return computedRecords
     },
   }
 
