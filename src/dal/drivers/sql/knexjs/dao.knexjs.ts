@@ -123,7 +123,7 @@ export class AbstractKnexJsDAO<
     const records = await this.qb().insert(record, '*')
     const inserted = records[0]
     if (typeof inserted === 'number') {
-      return (await this._findOne({ filter: { [this.idField]: record[this.idField] } as FilterType })) as Omit<ModelType, ExcludedFields>
+      return (await this._findOne({ filter: { [this.idField]: ((params.record) as any)[this.idField] || inserted } as FilterType })) as Omit<ModelType, ExcludedFields>
     }
     return this.dbToModel(inserted) as Omit<ModelType, ExcludedFields>
   }

@@ -7,10 +7,11 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --detectOpenHandles",
-    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo",
+    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
-    "generate-demo": "graphql-codegen --config tests/demo/codegen.yml"
+    "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",
+    "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml"
   },
   "repository": {
     "type": "git",

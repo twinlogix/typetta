@@ -81,11 +81,15 @@ export abstract class AbstractDAO<
     this.associations = associations
     this.associations.forEach((association) => this.addResolver(association))
     this.idGeneration = idGeneration
-    const generator = this.idGenerator || this.daoContext.idGenerators[idScalar]
-    if (!generator) {
-      throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
+    if (this.idGeneration === 'generator') {
+      const generator = this.idGenerator || this.daoContext.idGenerators[idScalar]
+      if (!generator) {
+        throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
+      }
+      this.middlewares = [generateId({ generator })]
+    } else {
+      this.middlewares = []
     }
-    this.middlewares = [generateId({ generator })]
     this.middlewares = [
       {
         beforeFind: async (params) => ({ ...params, projection: this.elabAssociationProjection(params.projection) }),

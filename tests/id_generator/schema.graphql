@@ -1,0 +1,35 @@
+scalar JSON
+scalar Decimal
+scalar MongoID
+scalar IntAutoInc
+
+type A @mongoEntity {
+  id: MongoID! @id(from: "db") @alias(value: "_id")
+  value: Int!
+}
+
+type B @mongoEntity {
+  id: ID! @id(from: "generator")
+  value: Int!
+}
+
+type C @mongoEntity {
+  id: ID! @id(from: "user")
+  value: Int!
+}
+
+
+type D @sqlEntity {
+  id: IntAutoInc! @id(from: "db")
+  value: Int!
+}
+
+type E @sqlEntity {
+  id: ID! @id(from: "generator")
+  value: Int!
+}
+
+type F @sqlEntity {
+  id: ID! @id(from: "user")
+  value: Int!
+}

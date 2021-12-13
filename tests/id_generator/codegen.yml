@@ -1,0 +1,37 @@
+overwrite: true
+schema: 'tests/id_generator/schema.graphql'
+documents: null
+generates:
+  tests/id_generator/models.mock.ts:
+    plugins:
+      - add:
+          content: 'import BigNumber from "bignumber.js";'
+      - add:
+          content: 'import {Coordinates} from "@twinlogix/tl-commons";'
+      - add:
+          content: 'import {LocalizedString} from "@twinlogix/tl-commons";'
+      - add:
+          content: 'import { ObjectId } from "mongodb"'
+      - 'typescript'
+    config:
+      namingConvention: keep
+      scalars:
+        JSON: any
+        Decimal: BigNumber
+        MongoID: ObjectId
+        IntAutoInc: number
+  tests/id_generator/dao.mock.ts:
+    config:
+      schemaImport: './schema.graphql'
+      tsTypesImport: ./models.mock
+      namingConvention: keep
+      optionsType: '{ test: string }'
+      defaultIdGenerationStrategy: 'generator'
+    plugins:
+      - add:
+          content: 'import BigNumber from "bignumber.js";'
+      - add:
+          content: 'import {Coordinates} from "@twinlogix/tl-commons";'
+      - add:
+          content: 'import {LocalizedString} from "@twinlogix/tl-commons";'
+      - lib/generation/index.js
