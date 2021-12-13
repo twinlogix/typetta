@@ -77,10 +77,10 @@ export type PostUpdate = {
   'views'?: number
 };
 
-type PostDAOAllParams<OptionType> = KnexJsDAOParams<types.Post, 'id', string, true, PostFilter, PostProjection, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
-export type PostDAOParams<OptionType> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<PostDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type PostDAOAllParams<OptionType> = KnexJsDAOParams<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
+export type PostDAOParams<OptionType> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<PostDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Post, 'id', string, true, PostFilter, PostProjection, PostSort, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
+export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: PostDAOParams<OptionType>){
     super({   
@@ -92,7 +92,8 @@ export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<types.
           { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user' }
         ]
       ), 
-      idGenerator: () => uuidv4() 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
     });
   }
   
@@ -184,10 +185,10 @@ export type UserUpdate = {
   'lastName'?: string | null
 };
 
-type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', string, true, UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
+export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
 
-export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', string, true, UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
+export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: UserDAOParams<OptionType>){
     super({   
@@ -199,7 +200,8 @@ export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.
           { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'posts', refFrom: 'authorId', refTo: 'id', dao: 'post' }
         ]
       ), 
-      idGenerator: () => uuidv4() 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
     });
   }
   
@@ -208,11 +210,12 @@ export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.
 export type DAOContextParams<OptionsType> = {
   options?: OptionsType
   overrides?: { 
-    post?: Partial<PostDAOParams<OptionsType>>,
-    user?: Partial<UserDAOParams<OptionsType>>
+    post?: Pick<Partial<PostDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>,
+    user?: Pick<Partial<UserDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>
   },
   knex: Knex,
-  adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>
+  adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
+  idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
 export class DAOContext<OptionType extends object = {}> extends AbstractDAOContext<types.Scalars, OptionType>  {

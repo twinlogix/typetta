@@ -2,10 +2,11 @@ import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
 import { Coordinates } from '@twinlogix/tl-commons'
 import { LocalizedString } from '@twinlogix/tl-commons'
-import { mongoDbAdapters, knexJsAdapters, identityAdapter, SortDirection } from '@twinlogix/typetta'
+import { knexJsAdapters, identityAdapter, SortDirection } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
+import { v4 as uuidv4 } from 'uuid'
 
 let knexInstance: Knex<any, unknown[]>
 let dao: DAOContext
@@ -44,6 +45,7 @@ beforeEach(async () => {
         ID: identityAdapter,
       },
     },
+    idGenerators: { ID: () => uuidv4() }
   })
   const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
     ['Decimal', ['decimal', 'decimal ARRAY']],

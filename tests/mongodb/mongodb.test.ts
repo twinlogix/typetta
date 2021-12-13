@@ -7,7 +7,7 @@ import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
-import { PartialObjectDeep } from 'type-fest/source/partial-deep'
+import { v4 as uuidv4 } from 'uuid'
 
 let con: MongoClient
 let mongoServer: MongoMemoryServer
@@ -32,6 +32,7 @@ beforeAll(async () => {
         },
       },
     },
+    idGenerators: { ID: () => uuidv4() }
   })
 })
 
@@ -638,6 +639,7 @@ test('middleware', async () => {
   let operationCount = 0
   const dao = new DAOContext({
     mongoDB: db,
+    idGenerators: { ID: () => uuidv4() },
     overrides: {
       user: {
         middlewares: [
@@ -710,6 +712,7 @@ test('middleware', async () => {
 
 test('middleware options', async () => {
   const dao = new DAOContext<{ testType: string }>({
+    idGenerators: { ID: () => uuidv4() },
     options: { testType: 'test1' },
     mongoDB: db,
     overrides: {
@@ -731,6 +734,7 @@ test('middleware options', async () => {
 
 test('middleware options overrides', async () => {
   const dao = new DAOContext({
+    idGenerators: { ID: () => uuidv4() },
     options: { testType: 'test1' },
     mongoDB: db,
     overrides: {
@@ -755,6 +759,7 @@ test('middleware options overrides', async () => {
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const customDao = new DAOContext({
+    idGenerators: { ID: () => uuidv4() },
     mongoDB: db,
     adapters: dao.adapters,
     overrides: {
@@ -783,6 +788,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const customDao = new DAOContext({
+    idGenerators: { ID: () => uuidv4() },
     mongoDB: db,
     adapters: dao.adapters,
     overrides: {
@@ -804,6 +810,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const customDao = new DAOContext({
+    idGenerators: { ID: () => uuidv4() },
     mongoDB: db,
     adapters: dao.adapters,
     overrides: {
@@ -831,6 +838,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao = new DAOContext({
+    idGenerators: { ID: () => uuidv4() },
     mongoDB: db,
     overrides: {
       city: {
@@ -856,6 +864,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 
 test('computed fields (one dependency - deep level - one calculated)', async () => {
   const dao = new DAOContext({
+    idGenerators: { ID: () => uuidv4() },
     mongoDB: db,
     overrides: {
       organization: {
@@ -874,6 +883,7 @@ test('computed fields (one dependency - deep level - one calculated)', async () 
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
   const dao = new DAOContext({
+    idGenerators: { ID: () => uuidv4() },
     mongoDB: db,
     overrides: {
       organization: {

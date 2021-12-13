@@ -1,4 +1,4 @@
-import { DAOContext} from './dao.mock'
+import { DAOContext } from './dao.mock'
 import { Scalars, User } from './models.mock'
 import { knexJsAdapters, identityAdapter, computedField } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
@@ -14,18 +14,22 @@ const config: Knex.Config = {
   useNullAsDefault: true,
 }
 
+let idCounter = 0
 beforeEach(async () => {
   knexInstance = knex(config)
   dao = new DAOContext({
     overrides: {
       user: {
+        idGenerator: () => {
+          idCounter = idCounter + 1
+          return 'user_' + idCounter
+        },
         middlewares: [
           computedField({
-              fieldsProjection: { averageViewsPerPost: true },
-              requiredProjection: { totalPostsViews: true, posts: {} },
-              compute: async (u) => ({ averageViewsPerPost: (u.totalPostsViews || 0) / (u.posts?.length || 1) }),
-            },
-          ),
+            fieldsProjection: { averageViewsPerPost: true },
+            requiredProjection: { totalPostsViews: true, posts: {} },
+            compute: async (u) => ({ averageViewsPerPost: (u.totalPostsViews || 0) / (u.posts?.length || 1) }),
+          }),
           computedField({
             fieldsProjection: { totalPostsViews: true },
             requiredProjection: { posts: { views: true } },
@@ -34,6 +38,12 @@ beforeEach(async () => {
             }),
           }),
         ],
+      },
+      post: {
+        idGenerator: () => {
+          idCounter = idCounter + 1
+          return 'post_' + idCounter
+        },
       },
     },
     knex: knexInstance,
@@ -80,8 +90,9 @@ test('Demo', async () => {
       },
     },
   })
+  expect(user.id).toBe('user_1')
   for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
-    await dao.post.insertOne({
+    const post = await dao.post.insertOne({
       record: {
         authorId: i <= 5 ? user.id : 'random',
         createdAt: new Date(),
@@ -89,6 +100,7 @@ test('Demo', async () => {
         views: i,
       },
     })
+    expect(post.id).toBe('post_' + (i + 1).toString())
   }
 
   const pippo = await dao.user.findOne({

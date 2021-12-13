@@ -1,10 +1,15 @@
+import { IdGenerationStrategy } from '..'
 import { QuantityOperators, EqualityOperators, ElementOperators, StringOperators } from '../dal/dao/filters/filters.types'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { SortDirection } from '../dal/dao/sorts/sorts.types'
-import _ from 'lodash'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
+import _ from 'lodash'
 
-export type ConditionalPartialBy<T, K extends keyof T, Condition extends boolean> = Condition extends true ? Omit<T, K> & Partial<Pick<T, K>> : T
+export type ConditionalPartialBy<T, K extends keyof T, IdGeneration extends IdGenerationStrategy> = IdGeneration extends 'user'
+  ? T
+  : IdGeneration extends 'generator'
+  ? Omit<T, K> & Partial<Pick<T, K>>
+  : Omit<T, K>
 
 export type OneKey<K extends string, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
