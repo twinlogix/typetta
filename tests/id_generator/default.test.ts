@@ -1,11 +1,11 @@
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { knexJsAdapters, identityAdapter, computedField, mongoDbAdapters } from '@twinlogix/typetta'
-import BigNumber from 'bignumber.js'
+import { knexJsAdapters, identityAdapter, mongoDbAdapters } from '@twinlogix/typetta'
 import knex, { Knex } from 'knex'
-import { Db, MongoClient, ObjectId } from 'mongodb'
+import { Db, MongoClient } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
-import sha256 from 'sha256'
 import { v4 as uuidv4 } from 'uuid'
 
 const config: Knex.Config = {

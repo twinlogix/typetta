@@ -1,3 +1,5 @@
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
@@ -32,7 +34,7 @@ beforeAll(async () => {
         },
       },
     },
-    idGenerators: { ID: () => uuidv4() }
+    idGenerators: { ID: () => uuidv4() },
   })
 })
 
@@ -186,7 +188,7 @@ test('safe find', async () => {
   // Static projection create before (do not use)
   const proj3: PartialDeep<UserProjection> = { live: true }
   const response8 = await dao.user.findOne({ projection: proj3 })
-  typeAssert<Test<typeof response8, PartialDeep<User> & { __projection: 'unknown' } | null>>()
+  typeAssert<Test<typeof response8, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
   expect(response8).toBeDefined()
 
   // Whole object
@@ -669,11 +671,11 @@ test('middleware', async () => {
               return params
             },
             afterFind: async (params, records) => {
-              return records.map(record => {
+              return records.map((record) => {
                 if (params.filter?.id === 'u1' && record.firstName) {
                   return { ...record, firstName: record.firstName + ' OK' }
                 }
-                return record;
+                return record
               })
             },
             beforeUpdate: async (params) => {
@@ -909,8 +911,6 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 // ------------------------- SECURITY POLICIES ----------------------------
 // ------------------------------------------------------------------------
 
-
-
 afterAll(async () => {
   if (con) {
     await con.close()
@@ -919,5 +919,3 @@ afterAll(async () => {
     await mongoServer.stop()
   }
 })
-
-
