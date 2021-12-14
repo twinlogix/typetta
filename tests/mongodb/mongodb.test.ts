@@ -1,7 +1,7 @@
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
-import { projection, SortDirection, computedField, mongoDbAdapters, identityAdapter, projectionDependency } from '@twinlogix/typetta'
+import { SortDirection, computedField, mongoDbAdapters, identityAdapter, projectionDependency } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'

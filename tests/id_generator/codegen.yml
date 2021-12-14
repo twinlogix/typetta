@@ -28,8 +28,4 @@ generates:
     plugins:
       - add:
           content: 'import BigNumber from "bignumber.js";'
-      - add:
-          content: 'import {Coordinates} from "@twinlogix/tl-commons";'
-      - add:
-          content: 'import {LocalizedString} from "@twinlogix/tl-commons";'
       - lib/generation/index.js
