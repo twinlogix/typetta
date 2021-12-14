@@ -1,6 +1,5 @@
 import BigNumber from "bignumber.js";
-import {Coordinates} from "@twinlogix/tl-commons";
-import {LocalizedString} from "@twinlogix/tl-commons";
+import { Coordinates, LocalizedString } from "@twinlogix/typetta";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };

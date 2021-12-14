@@ -1,5 +1,5 @@
+import { setTraversing } from '../../../utils/utils'
 import { DAOAssociation } from './associations.types'
-import { setTraversing } from '@twinlogix/tl-commons'
 
 export function overrideAssociations(associations1: DAOAssociation[] = [], associations2: DAOAssociation[] = []): DAOAssociation[] {
   return [...associations2, ...associations1.filter((association1) => !associations2.find((association2) => association1.field === association2.field))]

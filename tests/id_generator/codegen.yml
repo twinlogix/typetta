@@ -7,9 +7,7 @@ generates:
       - add:
           content: 'import BigNumber from "bignumber.js";'
       - add:
-          content: 'import {Coordinates} from "@twinlogix/tl-commons";'
-      - add:
-          content: 'import {LocalizedString} from "@twinlogix/tl-commons";'
+          content: 'import { Coordinates, LocalizedString } from "@twinlogix/typetta";'
       - add:
           content: 'import { ObjectId } from "mongodb"'
       - 'typescript'

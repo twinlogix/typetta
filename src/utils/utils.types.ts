@@ -6,8 +6,8 @@ export type Truetizer<P> = P extends true
   ? true
   : P extends object
   ? {
-    [K in keyof P]: P[K] extends object ? Truetizer<P[K]> : never | P[K] | true
-  }
+      [K in keyof P]: P[K] extends object ? Truetizer<P[K]> : never | P[K] | true
+    }
   : never /* | true*/
 
 /**
@@ -30,3 +30,12 @@ export type KeyOfTypeStrict<T extends object, V> = {
 }[keyof T]
 
 export type OmitUndefinedAndNeverKeys<T> = T extends object ? Pick<T, KeyOfType<T, undefined>> : never
+
+export type LocalizedString = {
+  [key: string]: string
+}
+
+export type Coordinates = {
+  latitude: number
+  longitude: number
+}
