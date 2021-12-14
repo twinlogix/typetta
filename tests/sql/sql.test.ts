@@ -1,7 +1,6 @@
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { Coordinates } from '@twinlogix/tl-commons'
-import { LocalizedString } from '@twinlogix/tl-commons'
+import { Coordinates, LocalizedString } from '@twinlogix/typetta'
 import { knexJsAdapters, identityAdapter, SortDirection } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
