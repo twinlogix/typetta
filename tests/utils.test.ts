@@ -1,13 +1,25 @@
+import { UserProjection } from './mongodb/dao.mock'
+import {
+  hasIdFilter,
+  GenericProjection,
+  MergeGenericProjection,
+  ModelProjection,
+  getProjection,
+  isChangesContainedInProjection,
+  isProjectionContained,
+  isProjectionIntersected,
+  mergeProjections,
+  projection,
+} from '@twinlogix/typetta'
 import { ApolloServer } from 'apollo-server'
-const { createTestClient } = require('apollo-server-testing')
 import gql from 'graphql-tag'
-import { User } from './mongodb/models.mock'
-import { hasIdFilter, GenericProjection, MergeGenericProjection, ModelProjection, Projection, getProjection, isChangesContainedInProjection, isProjectionContained, isProjectionIntersected, mergeProjections, projection } from '@twinlogix/typetta'
+
+const { createTestClient } = require('apollo-server-testing')
 
 type Pass = 'pass'
 export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T; expected: U }) : { actual: T; expected: U }
 
-export function typeAssert<T extends Pass>() { }
+export function typeAssert<T extends Pass>() {}
 
 test('infoToProjection test', async () => {
   const typeDefs = gql`
@@ -272,7 +284,7 @@ test('isProjectionContained test', () => {
     }
     j: {}
   }
-  const allowedProjection: Projection<A> = {
+  const allowedProjection = {
     a: true,
     b: {
       c: true,
@@ -285,8 +297,8 @@ test('isProjectionContained test', () => {
       h: true,
       i: true,
     },
-  }
-  const requiredProjection: Projection<A> = {
+  } as const
+  const requiredProjection = {
     a: true,
     b: {
       d: {
@@ -296,7 +308,7 @@ test('isProjectionContained test', () => {
     },
     g: true,
     j: true,
-  }
+  } as const
   const notAllowed = {
     b: {
       d: {
@@ -304,7 +316,7 @@ test('isProjectionContained test', () => {
       },
     },
     g: true,
-  }
+  } as const
   expect(isProjectionContained(allowedProjection, requiredProjection, ['j'])).toStrictEqual([false, notAllowed])
 })
 
@@ -365,18 +377,21 @@ test('mergeProgections test', () => {
 })
 
 test('mergeStaticProjection', () => {
-  const proj: Projection<User> = { firstName: true, live: true }
-  const p1 = projection<User>().merge({ lastName: true }, { live: true })
-  typeAssert<Test<typeof p1, { lastName: true; live: true }>>()
-  const p2 = projection<User>().merge(proj, { live: true })
-  typeAssert<Test<typeof p2, Projection<User>>>()
-  const p3 = projection<User>().merge({ lastName: true }, proj)
-  typeAssert<Test<typeof p3, Projection<User>>>()
-  const p4 = projection<User>().merge(proj, proj)
-  typeAssert<Test<typeof p4, Projection<User>>>()
+  const proj: UserProjection = { firstName: true, live: true }
+  const p1 = projection<UserProjection>().merge({ amount: true }, { live: true })
+  typeAssert<Test<typeof p1, { amount: true; live: true }>>()
+  const p2 = projection<UserProjection>().merge(proj, { live: true })
+  typeAssert<Test<typeof p2, UserProjection>>()
+  const p3 = projection<UserProjection>().merge({ lastName: true }, proj)
+  typeAssert<Test<typeof p3, UserProjection>>()
+  const p4 = projection<UserProjection>().merge(proj, proj)
+  typeAssert<Test<typeof p4, UserProjection>>()
 
   type B = {
     v: number
+  }
+  type BProj = {
+    v?: boolean
   }
   type A = {
     a: undefined | number | null
@@ -388,20 +403,30 @@ test('mergeStaticProjection', () => {
     g: A | A[] | null
     u: never
   }
-  const pa = projection<A>().build({
+  type AProj = {
+    a?: boolean
+    b?: boolean
+    c?: boolean | BProj | AProj
+    d?: boolean | AProj
+    e?: boolean | AProj
+    f?: boolean | AProj
+    g?: boolean | AProj
+    u?: boolean
+  }
+  const pa = {
     b: true,
     c: { b: true, v: true },
     d: { f: { a: true } },
     f: { b: true, f: { a: true } },
-  })
-  const pb = projection<A>().build({
+  } as const
+  const pb = {
     a: true,
     c: { a: true },
     d: { u: true },
     f: { a: true },
     u: true,
-  })
-  const pc = projection<A>().merge(pa, pb)
+  } as const
+  const pc = projection<AProj>().merge(pa, pb)
   typeAssert<
     Test<
       typeof pc,
@@ -423,7 +448,7 @@ test('mergeStaticProjection', () => {
     f: { a: true, b: true, f: { a: true } },
     u: true,
   })
-  type AP = ModelProjection<A, typeof pc>
+  type AP = ModelProjection<A, AProj, typeof pc>
   /*typeAssert<Test<AP, {
         a: undefined | number | null
         b?: number | undefined
@@ -457,12 +482,18 @@ test('selectProjection', () => {
     a: string
     b: boolean
   }
+  type AProj = {
+    a?: boolean
+    b?: boolean
+  }
 
-  const dynamicPorjection: Projection<A> = { b: true }
-  const staticProjection = projection<A>().build({ a: true })
+  const dynamicPorjection: AProj = { b: true }
+  const staticProjection = { a: true } as const
 
-  const m1 = projection<A>().merge(staticProjection, dynamicPorjection)
-  const m2 = projection<A>().merge(dynamicPorjection, staticProjection)
-  typeAssert<Test<typeof m1, Projection<A>>>()
-  typeAssert<Test<typeof m2, Projection<A>>>()
+  const m1 = projection<AProj>().merge(staticProjection, dynamicPorjection)
+  const m2 = projection<AProj>().merge(dynamicPorjection, staticProjection)
+  const m3 = projection<AProj>().merge(staticProjection, staticProjection)
+  typeAssert<Test<typeof m1, AProj>>()
+  typeAssert<Test<typeof m2, AProj>>()
+  typeAssert<Test<typeof m3, { a: true }>>()
 })

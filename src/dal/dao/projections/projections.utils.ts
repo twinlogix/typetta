@@ -1,36 +1,27 @@
 import { GenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
 import _ from 'lodash'
-import { PartialDeep } from 'type-fest'
 
-type SelectProjection<ProjectionType, P1 extends PartialDeep<ProjectionType>, P2 extends PartialDeep<ProjectionType>> = P1 extends GenericProjection
-  ? P2 extends GenericProjection
-    ? MergeGenericProjection<P1, P2>
-    : PartialDeep<ProjectionType>
-  : PartialDeep<ProjectionType>
+type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = 
+ProjectionType extends P1 ? ProjectionType : ProjectionType extends P2 ? ProjectionType : MergeGenericProjection<P1, P2>
+
 
 export function mergeGenericProjection<P1 extends GenericProjection, P2 extends GenericProjection>(p1: P1, p2: P2): MergeGenericProjection<P1, P2> {
   return mergeProjections(p1, p2)
 }
-export interface ProjectionBuilderInterface<ProjectionType extends object> {
-  build<P extends PartialDeep<ProjectionType>>(p: P): P
+export interface ProjectionBuilderInterface<ProjectionType extends GenericProjection> {
+  merge<P1 extends ProjectionType, P2 extends ProjectionType>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2>
 
-  merge<P1 extends PartialDeep<ProjectionType>, P2 extends PartialDeep<ProjectionType>>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2>
-
-  fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): PartialDeep<ProjectionType> | true
+  fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): ProjectionType | true
 }
 
-export function projection<ProjectionType extends object>(): ProjectionBuilderInterface<ProjectionType> {
+export function projection<ProjectionType extends GenericProjection>(): ProjectionBuilderInterface<ProjectionType> {
   return new (class implements ProjectionBuilderInterface<ProjectionType> {
-    build<P extends PartialDeep<ProjectionType>>(p: P): P {
-      return p
-    }
-
-    merge<P1 extends PartialDeep<ProjectionType>, P2 extends PartialDeep<ProjectionType>>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2> {
+    merge<P1 extends ProjectionType, P2 extends ProjectionType>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2> {
       return mergeProjections(p1 as GenericProjection, p2 as GenericProjection) as SelectProjection<ProjectionType, P1, P2>
     }
 
-    fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): PartialDeep<ProjectionType> | true {
+    fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): ProjectionType | true {
       return infoToProjection(info, defaults, context ? context : info.fieldNodes[0], type ? type : getNamedType(info.returnType), schema ? schema : info.schema)
     }
   })()
@@ -52,7 +43,7 @@ export function mergeProjections<P1 extends GenericProjection, P2 extends Generi
   return res as MergeGenericProjection<P1, P2>
 }
 
-function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defaults: any, context: FieldNode, type: GraphQLNamedType, schema: GraphQLSchema): PartialDeep<ProjectionType> | true {
+function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defaults: any, context: FieldNode, type: GraphQLNamedType, schema: GraphQLSchema): ProjectionType | true {
   if (context.selectionSet) {
     return context.selectionSet.selections.reduce(
       (proj: any, selection: any) => {

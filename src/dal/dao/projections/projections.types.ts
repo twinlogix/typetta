@@ -44,7 +44,7 @@ export type ModelProjection<ModelType extends object, ProjectionType extends obj
   ? S extends 'all'
     ? ModelType & { __projection: 'all' }
     : S extends 'specific'
-    ? P extends PartialDeep<ProjectionType>
+    ? P extends ProjectionType
       ? Expand<StaticModelProjection<ModelType, ProjectionType, P>>
       : never
     : S extends 'unknown'
@@ -56,13 +56,13 @@ export type ModelProjection<ModelType extends object, ProjectionType extends obj
  * Given a model M and a StaticProjection P returns the mapepd model to the projection.
  * It should be used as projector in function parameters.
  */
-export type ParamProjection<ModelType extends object, ProjectionType extends object, P extends PartialDeep<ProjectionType>> = Expand<StaticModelProjectionParam<ModelType, ProjectionType, P>>
+export type ParamProjection<ModelType extends object, ProjectionType extends object, P extends ProjectionType> = Expand<StaticModelProjectionParam<ModelType, ProjectionType, P>>
 
 /**
  * Given a model M and a StaticProjection with an explicit type (eg. const p1: {a: true} = ...)
  * returns the mapped model to the projection. This carry the information about the projection at compilation time.
  */
-type StaticModelProjection<ModelType, ProjectionType, P extends PartialDeep<ProjectionType>> = ModelType extends null
+type StaticModelProjection<ModelType, ProjectionType, P extends ProjectionType> = ModelType extends null
   ? null
   : ModelType extends undefined
   ? undefined
@@ -80,7 +80,7 @@ type StaticModelProjection<ModelType, ProjectionType, P extends PartialDeep<Proj
           : P extends Record<K, boolean>
           ? ModelType[K] | undefined
           : Required<Exclude<ProjectionType, boolean>> extends Record<K, infer SubProjectinoType>
-          ? P extends Record<K, PartialDeep<SubProjectinoType>>
+          ? P extends Record<K, SubProjectinoType>
             ? StaticModelProjection<ModelType[K], SubProjectinoType, P[K]>
             : never
           : never
@@ -92,7 +92,7 @@ type StaticModelProjection<ModelType, ProjectionType, P extends PartialDeep<Proj
  * Given a model M and a StaticProjection with an explicit type (eg. const p1: {a: true} = ...)
  * returns the mapped model to the projection. This carry the information about the potentially required projection at compilation time.
  */
-type StaticModelProjectionParam<ModelType, ProjectionType, P extends PartialDeep<ProjectionType>> = ModelType extends null
+type StaticModelProjectionParam<ModelType, ProjectionType, P extends ProjectionType> = ModelType extends null
   ? null
   : ModelType extends undefined
   ? undefined
@@ -110,7 +110,7 @@ type StaticModelProjectionParam<ModelType, ProjectionType, P extends PartialDeep
           : P extends Record<K, boolean>
           ? ModelType[K] | undefined
           : Required<Exclude<ProjectionType, boolean>> extends Record<K, infer SubProjectinoType>
-          ? P extends Record<K, PartialDeep<SubProjectinoType>>
+          ? P extends Record<K, SubProjectinoType>
             ? StaticModelProjection<ModelType[K], SubProjectinoType, P[K]>
             : never
           : never

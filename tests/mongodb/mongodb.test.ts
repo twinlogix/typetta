@@ -177,7 +177,7 @@ test('safe find', async () => {
   expect(response3!.live).toBe(true)
 
   // Static projection create before
-  const proj2 = projection<User>().build({ live: true })
+  const proj2 = { live: true } as const
   const response7 = await dao.user.findOne({ projection: proj2 })
   typeAssert<Test<typeof response7, { live: boolean; __projection: { live: true } } | null>>()
   expect(response7).toBeDefined()

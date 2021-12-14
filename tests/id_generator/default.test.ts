@@ -91,3 +91,12 @@ test('Test sql', async () => {
   expect(er!.value).toBe(2)
   expect(fr!.value).toBe(3)
 })
+
+afterAll(async () => {
+  if (con) {
+    await con.close()
+  }
+  if (mongoServer) {
+    await mongoServer.stop()
+  }
+})
