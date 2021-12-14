@@ -5,10 +5,7 @@ on:
     branches: [master, develop]
   pull_request:
     branches: [master, develop]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -20,7 +17,7 @@ jobs:
       - name: Node verision
         run: node --version && npm --version
       - name: Installing node packages
-        run: npm ci
+        run: npm install -g npm@7 && npm ci
       - name: Building
         run: npm run build
       - name: Test code generation
