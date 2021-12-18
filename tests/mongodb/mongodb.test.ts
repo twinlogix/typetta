@@ -1,3 +1,6 @@
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
+
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
@@ -8,9 +11,6 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
-
-global.TextEncoder = require('util').TextEncoder
-global.TextDecoder = require('util').TextDecoder
 
 let con: MongoClient
 let mongoServer: MongoMemoryServer
