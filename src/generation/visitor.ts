@@ -157,9 +157,11 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
 
     const mongoEntityDirective = this._getDirectiveFromAstNode(node, Directives.MONGO_ENTITY)
     const collection = (mongoEntityDirective && this._getDirectiveArgValue<string>(mongoEntityDirective, 'collection')) || toFirstLower(plainName) + 's'
+    const mongoSource = (mongoEntityDirective && this._getDirectiveArgValue<string>(mongoEntityDirective, 'source')) || 'default'
 
     const sqlEntityDirective = this._getDirectiveFromAstNode(node, Directives.SQL_ENTITY)
     const table = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'table')) || toFirstLower(plainName) + 's'
+    const knexSource = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'source')) || 'default'
 
     const fields = this._buildFields(node.fields!)
 
@@ -167,8 +169,8 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       type: 'type',
       name: plainName,
       prefixedName,
-      mongoEntity: mongoEntityDirective ? { collection } : undefined,
-      sqlEntity: sqlEntityDirective ? { table } : undefined,
+      mongoEntity: mongoEntityDirective ? { collection, source: mongoSource } : undefined,
+      sqlEntity: sqlEntityDirective ? { table, source: knexSource } : undefined,
       fields,
     }
   }

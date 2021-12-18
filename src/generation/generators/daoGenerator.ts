@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
 import { findID, findNode, indentMultiline, isEmbed, isEntity, isForeignRef, isInnerRef, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
@@ -30,8 +31,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   }
 
   public generateExports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
-    const hasMongoDBEntites = [...typesMap.values()].filter((type) => type.mongoEntity).length > 0
-    const hasSQLEntities = [...typesMap.values()].filter((type) => type.sqlEntity).length > 0
+    const mongoSources = _.uniq([...typesMap.values()].flatMap((type) => type.mongoEntity ? [type.mongoEntity.source] : []))
+    const hasMongoDBEntites = mongoSources.length > 0
+    const sqlSources = _.uniq([...typesMap.values()].flatMap((type) => type.sqlEntity ? [type.sqlEntity.source] : []))
+    const hasSQLEntities = sqlSources.length > 0
 
     const contextDAOParamsDeclarations = Array.from(typesMap.values())
       .concat([])
@@ -43,8 +46,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
     const options = `options?: OptionsType`
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
-    const mongoDBParams = hasMongoDBEntites ? ',\nmongoDB: Db' : ''
-    const knexJsParams = hasSQLEntities ? ',\nknex: Knex' : ''
+    const mongoDBParams = hasMongoDBEntites ? `,\nmongoDB: Record<${mongoSources.map(v => `'${v}'`).join(' | ')}, Db>` : ''
+    const knexJsParams = hasSQLEntities ? `,\nknex: Record<${sqlSources.map(v => `'${v}'`).join(' | ')}, Knex>` : ''
     const adaptersParams = ',\nadapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>'
     const idGeneratorParams = ',\nidGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }'
 
@@ -57,17 +60,17 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       })
       .join('\n')
 
-    const mongoDBFields = hasMongoDBEntites ? '\nprivate mongoDB: Db;' : ''
-    const knexJsFields = hasSQLEntities ? '\nprivate knex: Knex;' : ''
+    const mongoDBFields = hasMongoDBEntites ? `\nprivate mongoDB: Record<${mongoSources.map(v => `'${v}'`).join(' | ')}, Db>;` : ''
+    const knexJsFields = hasSQLEntities ? `\nprivate knex: Record<${sqlSources.map(v => `'${v}'`).join(' | ')}, Knex>;` : ''
     const overridesDeclaration = `private overrides: DAOContextParams<OptionType>['overrides'];${mongoDBFields}${knexJsFields}`
 
     const daoGetters = Array.from(typesMap.values())
       .filter((node) => isEntity(node))
       .map((node) => {
         const daoImplementationInit = node.sqlEntity
-          ? `, knex: this.knex, tableName: '${node.sqlEntity?.table}'`
+          ? `, knex: this.knex['${node.sqlEntity!.source}'], tableName: '${node.sqlEntity?.table}'`
           : node.mongoEntity
-          ? `, collection: this.mongoDB.collection('${node.mongoEntity?.collection}')`
+          ? `, collection: this.mongoDB['${node.mongoEntity!.source}'].collection('${node.mongoEntity?.collection}')`
           : ''
         const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, options: this.options, ...this.overrides?.${toFirstLower(node.name)}${daoImplementationInit} });`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}${false ? '.apiV1' : ''};`
@@ -262,7 +265,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const daoAllParams = `type ${node.name}DAOAllParams<OptionType> = ${dbDAOParams}<types.${node.name}, '${idField.name}', '${idField.coreType}', '${
       idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
     }', ${node.name}Filter, ${node.name}Projection, ${node.name}Update, ${node.name}ExcludedFields, ${node.name}Sort, OptionType, types.Scalars>;`
-    const daoParams = `export type ${node.name}DAOParams<OptionType> = Omit<${node.name}DAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<${node.name}DAOAllParams<OptionType>, 'idField' | 'schema'>>;`
+    const daoParams = `export type ${node.name}DAOParams<OptionType> = Omit<${node.name}DAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;`
     return [daoAllParams, daoParams].join('\n')
   }
 

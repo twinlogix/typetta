@@ -46,7 +46,9 @@ beforeEach(async () => {
         },
       },
     },
-    knex: knexInstance,
+    knex: {
+      default: knexInstance,
+    },
     adapters: {
       knexjs: {
         ...knexJsAdapters,

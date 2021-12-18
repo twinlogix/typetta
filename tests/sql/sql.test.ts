@@ -21,7 +21,9 @@ beforeAll(async () => {})
 beforeEach(async () => {
   knexInstance = knex(config)
   dao = new DAOContext({
-    knex: knexInstance,
+    knex: {
+      default: knexInstance,
+    },
     adapters: {
       knexjs: {
         ...knexJsAdapters,
@@ -44,7 +46,7 @@ beforeEach(async () => {
         ID: identityAdapter,
       },
     },
-    idGenerators: { ID: () => uuidv4() }
+    idGenerators: { ID: () => uuidv4() },
   })
   const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
     ['Decimal', ['decimal', 'decimal ARRAY']],

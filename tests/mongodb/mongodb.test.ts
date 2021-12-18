@@ -1,5 +1,3 @@
-global.TextEncoder = require('util').TextEncoder
-global.TextDecoder = require('util').TextDecoder
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
@@ -11,6 +9,9 @@ import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
 
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
+
 let con: MongoClient
 let mongoServer: MongoMemoryServer
 let db: Db
@@ -21,7 +22,9 @@ beforeAll(async () => {
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
   dao = new DAOContext({
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     adapters: {
       mongoDB: {
         ...mongoDbAdapters,
@@ -640,7 +643,9 @@ test('insert and retrieve localized string field', async () => {
 test('middleware', async () => {
   let operationCount = 0
   const dao = new DAOContext({
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     idGenerators: { ID: () => uuidv4() },
     overrides: {
       user: {
@@ -716,7 +721,9 @@ test('middleware options', async () => {
   const dao = new DAOContext<{ testType: string }>({
     idGenerators: { ID: () => uuidv4() },
     options: { testType: 'test1' },
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     overrides: {
       user: {
         middlewares: [
@@ -738,7 +745,9 @@ test('middleware options overrides', async () => {
   const dao = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
     options: { testType: 'test1' },
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     overrides: {
       user: {
         middlewares: [
@@ -762,7 +771,9 @@ test('middleware options overrides', async () => {
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const customDao = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     adapters: dao.adapters,
     overrides: {
       city: {
@@ -791,7 +802,9 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const customDao = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     adapters: dao.adapters,
     overrides: {
       city: {
@@ -813,7 +826,9 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const customDao = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     adapters: dao.adapters,
     overrides: {
       city: {
@@ -841,7 +856,9 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     overrides: {
       city: {
         middlewares: [
@@ -867,7 +884,9 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 test('computed fields (one dependency - deep level - one calculated)', async () => {
   const dao = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     overrides: {
       organization: {
         middlewares: [
@@ -886,7 +905,9 @@ test('computed fields (one dependency - deep level - one calculated)', async () 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
   const dao = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
-    mongoDB: db,
+    mongoDB: {
+      default: db,
+    },
     overrides: {
       organization: {
         middlewares: [

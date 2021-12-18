@@ -3,7 +3,7 @@ scalar Decimal
 scalar MongoID
 scalar IntAutoInc
 
-type A @mongoEntity {
+type A @mongoEntity(source: "a") {
   id: MongoID! @id(from: "db") @alias(value: "_id")
   value: Int!
 }

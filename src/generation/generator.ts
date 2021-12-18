@@ -25,8 +25,8 @@ export type TsTypettaGeneratorNode = {
   type: 'type'
   name: string
   prefixedName: string
-  mongoEntity?: { collection: string }
-  sqlEntity?: { table: string }
+  mongoEntity?: { collection: string; source: string }
+  sqlEntity?: { table: string; source: string }
   fields: TsTypettaGeneratorField[]
 }
 

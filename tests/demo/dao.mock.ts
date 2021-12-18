@@ -76,7 +76,7 @@ export type PostUpdate = {
 };
 
 type PostDAOAllParams<OptionType> = KnexJsDAOParams<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
-export type PostDAOParams<OptionType> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<PostDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type PostDAOParams<OptionType> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
   
@@ -184,7 +184,7 @@ export type UserUpdate = {
 };
 
 type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
@@ -211,7 +211,7 @@ export type DAOContextParams<OptionsType> = {
     post?: Pick<Partial<PostDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>,
     user?: Pick<Partial<UserDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>
   },
-  knex: Knex,
+  knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
@@ -222,17 +222,17 @@ export class DAOContext<OptionType extends object = {}> extends AbstractDAOConte
   private _user: UserDAO<OptionType> | undefined;
   
   private overrides: DAOContextParams<OptionType>['overrides'];
-  private knex: Knex;
+  private knex: Record<'default', Knex>;
   
   get post() {
     if(!this._post) {
-      this._post = new PostDAO({ daoContext: this, options: this.options, ...this.overrides?.post, knex: this.knex, tableName: 'posts' });
+      this._post = new PostDAO({ daoContext: this, options: this.options, ...this.overrides?.post, knex: this.knex['default'], tableName: 'posts' });
     }
     return this._post;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, knex: this.knex, tableName: 'users' });
+      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, knex: this.knex['default'], tableName: 'users' });
     }
     return this._user;
   }

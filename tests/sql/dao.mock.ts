@@ -37,7 +37,7 @@ export type AddressUpdate = {
 };
 
 type AddressDAOAllParams<OptionType> = KnexJsDAOParams<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, OptionType, types.Scalars>;
-export type AddressDAOParams<OptionType> = Omit<AddressDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<AddressDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type AddressDAOParams<OptionType> = Omit<AddressDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class AddressDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, OptionType, types.Scalars> {
   
@@ -109,7 +109,7 @@ export type CityUpdate = {
 };
 
 type CityDAOAllParams<OptionType> = KnexJsDAOParams<types.City, 'id', 'ID', 'generator', CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, OptionType, types.Scalars>;
-export type CityDAOParams<OptionType> = Omit<CityDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<CityDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type CityDAOParams<OptionType> = Omit<CityDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class CityDAO<OptionType extends object> extends AbstractKnexJsDAO<types.City, 'id', 'ID', 'generator', CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, OptionType, types.Scalars> {
   
@@ -179,7 +179,7 @@ export type DeviceUpdate = {
 };
 
 type DeviceDAOAllParams<OptionType> = KnexJsDAOParams<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, OptionType, types.Scalars>;
-export type DeviceDAOParams<OptionType> = Omit<DeviceDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type DeviceDAOParams<OptionType> = Omit<DeviceDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class DeviceDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, OptionType, types.Scalars> {
   
@@ -265,7 +265,7 @@ export type OrganizationUpdate = {
 };
 
 type OrganizationDAOAllParams<OptionType> = KnexJsDAOParams<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, OptionType, types.Scalars>;
-export type OrganizationDAOParams<OptionType> = Omit<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type OrganizationDAOParams<OptionType> = Omit<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class OrganizationDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, OptionType, types.Scalars> {
   
@@ -420,7 +420,7 @@ export type UserUpdate = {
 };
 
 type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
@@ -450,7 +450,7 @@ export type DAOContextParams<OptionsType> = {
     organization?: Pick<Partial<OrganizationDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>,
     user?: Pick<Partial<UserDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>
   },
-  knex: Knex,
+  knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
@@ -464,35 +464,35 @@ export class DAOContext<OptionType extends object = {}> extends AbstractDAOConte
   private _user: UserDAO<OptionType> | undefined;
   
   private overrides: DAOContextParams<OptionType>['overrides'];
-  private knex: Knex;
+  private knex: Record<'default', Knex>;
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, options: this.options, ...this.overrides?.address, knex: this.knex, tableName: 'addresses' });
+      this._address = new AddressDAO({ daoContext: this, options: this.options, ...this.overrides?.address, knex: this.knex['default'], tableName: 'addresses' });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, options: this.options, ...this.overrides?.city, knex: this.knex, tableName: 'citys' });
+      this._city = new CityDAO({ daoContext: this, options: this.options, ...this.overrides?.city, knex: this.knex['default'], tableName: 'citys' });
     }
     return this._city;
   }
   get device() {
     if(!this._device) {
-      this._device = new DeviceDAO({ daoContext: this, options: this.options, ...this.overrides?.device, knex: this.knex, tableName: 'devices' });
+      this._device = new DeviceDAO({ daoContext: this, options: this.options, ...this.overrides?.device, knex: this.knex['default'], tableName: 'devices' });
     }
     return this._device;
   }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, options: this.options, ...this.overrides?.organization, knex: this.knex, tableName: 'organizations' });
+      this._organization = new OrganizationDAO({ daoContext: this, options: this.options, ...this.overrides?.organization, knex: this.knex['default'], tableName: 'organizations' });
     }
     return this._organization;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, knex: this.knex, tableName: 'users' });
+      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, knex: this.knex['default'], tableName: 'users' });
     }
     return this._user;
   }

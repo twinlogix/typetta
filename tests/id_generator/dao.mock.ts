@@ -45,7 +45,7 @@ export type AUpdate = {
 };
 
 type ADAOAllParams<OptionType> = MongoDBDAOParams<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, AUpdate, AExcludedFields, ASort, OptionType, types.Scalars>;
-export type ADAOParams<OptionType> = Omit<ADAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<ADAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type ADAOParams<OptionType> = Omit<ADAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class ADAO<OptionType extends object> extends AbstractMongoDBDAO<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, ASort, AUpdate, AExcludedFields, OptionType, types.Scalars> {
   
@@ -107,7 +107,7 @@ export type BUpdate = {
 };
 
 type BDAOAllParams<OptionType> = MongoDBDAOParams<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BUpdate, BExcludedFields, BSort, OptionType, types.Scalars>;
-export type BDAOParams<OptionType> = Omit<BDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<BDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type BDAOParams<OptionType> = Omit<BDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class BDAO<OptionType extends object> extends AbstractMongoDBDAO<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BSort, BUpdate, BExcludedFields, OptionType, types.Scalars> {
   
@@ -169,7 +169,7 @@ export type CUpdate = {
 };
 
 type CDAOAllParams<OptionType> = MongoDBDAOParams<types.C, 'id', 'ID', 'user', CFilter, CProjection, CUpdate, CExcludedFields, CSort, OptionType, types.Scalars>;
-export type CDAOParams<OptionType> = Omit<CDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<CDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type CDAOParams<OptionType> = Omit<CDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class CDAO<OptionType extends object> extends AbstractMongoDBDAO<types.C, 'id', 'ID', 'user', CFilter, CProjection, CSort, CUpdate, CExcludedFields, OptionType, types.Scalars> {
   
@@ -231,7 +231,7 @@ export type DUpdate = {
 };
 
 type DDAOAllParams<OptionType> = KnexJsDAOParams<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DUpdate, DExcludedFields, DSort, OptionType, types.Scalars>;
-export type DDAOParams<OptionType> = Omit<DDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<DDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type DDAOParams<OptionType> = Omit<DDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class DDAO<OptionType extends object> extends AbstractKnexJsDAO<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DSort, DUpdate, DExcludedFields, OptionType, types.Scalars> {
   
@@ -293,7 +293,7 @@ export type EUpdate = {
 };
 
 type EDAOAllParams<OptionType> = KnexJsDAOParams<types.E, 'id', 'ID', 'generator', EFilter, EProjection, EUpdate, EExcludedFields, ESort, OptionType, types.Scalars>;
-export type EDAOParams<OptionType> = Omit<EDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<EDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type EDAOParams<OptionType> = Omit<EDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class EDAO<OptionType extends object> extends AbstractKnexJsDAO<types.E, 'id', 'ID', 'generator', EFilter, EProjection, ESort, EUpdate, EExcludedFields, OptionType, types.Scalars> {
   
@@ -355,7 +355,7 @@ export type FUpdate = {
 };
 
 type FDAOAllParams<OptionType> = KnexJsDAOParams<types.F, 'id', 'ID', 'user', FFilter, FProjection, FUpdate, FExcludedFields, FSort, OptionType, types.Scalars>;
-export type FDAOParams<OptionType> = Omit<FDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<FDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type FDAOParams<OptionType> = Omit<FDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class FDAO<OptionType extends object> extends AbstractKnexJsDAO<types.F, 'id', 'ID', 'user', FFilter, FProjection, FSort, FUpdate, FExcludedFields, OptionType, types.Scalars> {
   
@@ -386,8 +386,8 @@ export type DAOContextParams<OptionsType> = {
     e?: Pick<Partial<EDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>,
     f?: Pick<Partial<FDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>
   },
-  mongoDB: Db,
-  knex: Knex,
+  mongoDB: Record<'a' | 'default', Db>,
+  knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
@@ -402,42 +402,42 @@ export class DAOContext<OptionType extends object = {}> extends AbstractDAOConte
   private _f: FDAO<OptionType> | undefined;
   
   private overrides: DAOContextParams<OptionType>['overrides'];
-  private mongoDB: Db;
-  private knex: Knex;
+  private mongoDB: Record<'a' | 'default', Db>;
+  private knex: Record<'default', Knex>;
   
   get a() {
     if(!this._a) {
-      this._a = new ADAO({ daoContext: this, options: this.options, ...this.overrides?.a, collection: this.mongoDB.collection('as') });
+      this._a = new ADAO({ daoContext: this, options: this.options, ...this.overrides?.a, collection: this.mongoDB['a'].collection('as') });
     }
     return this._a;
   }
   get b() {
     if(!this._b) {
-      this._b = new BDAO({ daoContext: this, options: this.options, ...this.overrides?.b, collection: this.mongoDB.collection('bs') });
+      this._b = new BDAO({ daoContext: this, options: this.options, ...this.overrides?.b, collection: this.mongoDB['default'].collection('bs') });
     }
     return this._b;
   }
   get c() {
     if(!this._c) {
-      this._c = new CDAO({ daoContext: this, options: this.options, ...this.overrides?.c, collection: this.mongoDB.collection('cs') });
+      this._c = new CDAO({ daoContext: this, options: this.options, ...this.overrides?.c, collection: this.mongoDB['default'].collection('cs') });
     }
     return this._c;
   }
   get d() {
     if(!this._d) {
-      this._d = new DDAO({ daoContext: this, options: this.options, ...this.overrides?.d, knex: this.knex, tableName: 'ds' });
+      this._d = new DDAO({ daoContext: this, options: this.options, ...this.overrides?.d, knex: this.knex['default'], tableName: 'ds' });
     }
     return this._d;
   }
   get e() {
     if(!this._e) {
-      this._e = new EDAO({ daoContext: this, options: this.options, ...this.overrides?.e, knex: this.knex, tableName: 'es' });
+      this._e = new EDAO({ daoContext: this, options: this.options, ...this.overrides?.e, knex: this.knex['default'], tableName: 'es' });
     }
     return this._e;
   }
   get f() {
     if(!this._f) {
-      this._f = new FDAO({ daoContext: this, options: this.options, ...this.overrides?.f, knex: this.knex, tableName: 'fs' });
+      this._f = new FDAO({ daoContext: this, options: this.options, ...this.overrides?.f, knex: this.knex['default'], tableName: 'fs' });
     }
     return this._f;
   }

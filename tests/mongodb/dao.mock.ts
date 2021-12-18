@@ -37,7 +37,7 @@ export type AddressUpdate = {
 };
 
 type AddressDAOAllParams<OptionType> = MongoDBDAOParams<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressProjection, AddressUpdate, AddressExcludedFields, AddressSort, OptionType, types.Scalars>;
-export type AddressDAOParams<OptionType> = Omit<AddressDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<AddressDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type AddressDAOParams<OptionType> = Omit<AddressDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class AddressDAO<OptionType extends object> extends AbstractMongoDBDAO<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressProjection, AddressSort, AddressUpdate, AddressExcludedFields, OptionType, types.Scalars> {
   
@@ -109,7 +109,7 @@ export type CityUpdate = {
 };
 
 type CityDAOAllParams<OptionType> = MongoDBDAOParams<types.City, 'id', 'ID', 'generator', CityFilter, CityProjection, CityUpdate, CityExcludedFields, CitySort, OptionType, types.Scalars>;
-export type CityDAOParams<OptionType> = Omit<CityDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<CityDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type CityDAOParams<OptionType> = Omit<CityDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class CityDAO<OptionType extends object> extends AbstractMongoDBDAO<types.City, 'id', 'ID', 'generator', CityFilter, CityProjection, CitySort, CityUpdate, CityExcludedFields, OptionType, types.Scalars> {
   
@@ -179,7 +179,7 @@ export type DeviceUpdate = {
 };
 
 type DeviceDAOAllParams<OptionType> = MongoDBDAOParams<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceProjection, DeviceUpdate, DeviceExcludedFields, DeviceSort, OptionType, types.Scalars>;
-export type DeviceDAOParams<OptionType> = Omit<DeviceDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<DeviceDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type DeviceDAOParams<OptionType> = Omit<DeviceDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class DeviceDAO<OptionType extends object> extends AbstractMongoDBDAO<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceProjection, DeviceSort, DeviceUpdate, DeviceExcludedFields, OptionType, types.Scalars> {
   
@@ -250,7 +250,7 @@ export type DogUpdate = {
 };
 
 type DogDAOAllParams<OptionType> = MongoDBDAOParams<types.Dog, 'id', 'ID', 'generator', DogFilter, DogProjection, DogUpdate, DogExcludedFields, DogSort, OptionType, types.Scalars>;
-export type DogDAOParams<OptionType> = Omit<DogDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<DogDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type DogDAOParams<OptionType> = Omit<DogDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class DogDAO<OptionType extends object> extends AbstractMongoDBDAO<types.Dog, 'id', 'ID', 'generator', DogFilter, DogProjection, DogSort, DogUpdate, DogExcludedFields, OptionType, types.Scalars> {
   
@@ -336,7 +336,7 @@ export type OrganizationUpdate = {
 };
 
 type OrganizationDAOAllParams<OptionType> = MongoDBDAOParams<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationProjection, OrganizationUpdate, OrganizationExcludedFields, OrganizationSort, OptionType, types.Scalars>;
-export type OrganizationDAOParams<OptionType> = Omit<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type OrganizationDAOParams<OptionType> = Omit<OrganizationDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class OrganizationDAO<OptionType extends object> extends AbstractMongoDBDAO<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationUpdate, OrganizationExcludedFields, OptionType, types.Scalars> {
   
@@ -481,7 +481,7 @@ export type UserUpdate = {
 };
 
 type UserDAOAllParams<OptionType> = MongoDBDAOParams<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'> & Partial<Pick<UserDAOAllParams<OptionType>, 'idField' | 'schema'>>;
+export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
 export class UserDAO<OptionType extends object> extends AbstractMongoDBDAO<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
@@ -513,7 +513,7 @@ export type DAOContextParams<OptionsType> = {
     organization?: Pick<Partial<OrganizationDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>,
     user?: Pick<Partial<UserDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>
   },
-  mongoDB: Db,
+  mongoDB: Record<'default', Db>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
@@ -528,41 +528,41 @@ export class DAOContext<OptionType extends object = {}> extends AbstractDAOConte
   private _user: UserDAO<OptionType> | undefined;
   
   private overrides: DAOContextParams<OptionType>['overrides'];
-  private mongoDB: Db;
+  private mongoDB: Record<'default', Db>;
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, options: this.options, ...this.overrides?.address, collection: this.mongoDB.collection('addresses') });
+      this._address = new AddressDAO({ daoContext: this, options: this.options, ...this.overrides?.address, collection: this.mongoDB['default'].collection('addresses') });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, options: this.options, ...this.overrides?.city, collection: this.mongoDB.collection('citys') });
+      this._city = new CityDAO({ daoContext: this, options: this.options, ...this.overrides?.city, collection: this.mongoDB['default'].collection('citys') });
     }
     return this._city;
   }
   get device() {
     if(!this._device) {
-      this._device = new DeviceDAO({ daoContext: this, options: this.options, ...this.overrides?.device, collection: this.mongoDB.collection('devices') });
+      this._device = new DeviceDAO({ daoContext: this, options: this.options, ...this.overrides?.device, collection: this.mongoDB['default'].collection('devices') });
     }
     return this._device;
   }
   get dog() {
     if(!this._dog) {
-      this._dog = new DogDAO({ daoContext: this, options: this.options, ...this.overrides?.dog, collection: this.mongoDB.collection('dogs') });
+      this._dog = new DogDAO({ daoContext: this, options: this.options, ...this.overrides?.dog, collection: this.mongoDB['default'].collection('dogs') });
     }
     return this._dog;
   }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, options: this.options, ...this.overrides?.organization, collection: this.mongoDB.collection('organizations') });
+      this._organization = new OrganizationDAO({ daoContext: this, options: this.options, ...this.overrides?.organization, collection: this.mongoDB['default'].collection('organizations') });
     }
     return this._organization;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, collection: this.mongoDB.collection('users') });
+      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, collection: this.mongoDB['default'].collection('users') });
     }
     return this._user;
   }
