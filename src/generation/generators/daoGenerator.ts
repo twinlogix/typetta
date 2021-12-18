@@ -31,10 +31,12 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   }
 
   public generateExports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+    const sqlSources = _.uniq([...typesMap.values()].flatMap((type) => type.sqlEntity ? [type.sqlEntity.source] : []))
     const mongoSources = _.uniq([...typesMap.values()].flatMap((type) => type.mongoEntity ? [type.mongoEntity.source] : []))
     const hasMongoDBEntites = mongoSources.length > 0
-    const sqlSources = _.uniq([...typesMap.values()].flatMap((type) => type.sqlEntity ? [type.sqlEntity.source] : []))
     const hasSQLEntities = sqlSources.length > 0
+    const sqlSourcesType = `Record<${sqlSources.map(v => `'${v}'`).join(' | ')}, Knex>`
+    const mongoSourcesType = `Record<${mongoSources.map(v => `'${v}'`).join(' | ')}, Db>`
 
     const contextDAOParamsDeclarations = Array.from(typesMap.values())
       .concat([])
@@ -46,8 +48,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
     const options = `options?: OptionsType`
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
-    const mongoDBParams = hasMongoDBEntites ? `,\nmongoDB: Record<${mongoSources.map(v => `'${v}'`).join(' | ')}, Db>` : ''
-    const knexJsParams = hasSQLEntities ? `,\nknex: Record<${sqlSources.map(v => `'${v}'`).join(' | ')}, Knex>` : ''
+    const mongoDBParams = hasMongoDBEntites ? `,\nmongoDB: ${mongoSourcesType}` : ''
+    const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
     const adaptersParams = ',\nadapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>'
     const idGeneratorParams = ',\nidGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }'
 
@@ -60,8 +62,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       })
       .join('\n')
 
-    const mongoDBFields = hasMongoDBEntites ? `\nprivate mongoDB: Record<${mongoSources.map(v => `'${v}'`).join(' | ')}, Db>;` : ''
-    const knexJsFields = hasSQLEntities ? `\nprivate knex: Record<${sqlSources.map(v => `'${v}'`).join(' | ')}, Knex>;` : ''
+    const mongoDBFields = hasMongoDBEntites ? `\nprivate mongoDB: ${mongoSourcesType};` : ''
+    const knexJsFields = hasSQLEntities ? `\nprivate knex: ${sqlSourcesType};` : ''
     const overridesDeclaration = `private overrides: DAOContextParams<OptionType>['overrides'];${mongoDBFields}${knexJsFields}`
 
     const daoGetters = Array.from(typesMap.values())
