@@ -1,5 +1,4 @@
 import { DefaultModelScalars, IdGenerationStrategy } from '../..'
-import { ConditionalPartialBy } from '../../utils/utils'
 import { AbstractDAO } from '../dao/dao'
 import { AnyProjection, ModelProjection } from '../dao/projections/projections.types'
 
@@ -11,6 +10,7 @@ export class DAOWrapperAPIv1<
   FilterType,
   ProjectionType extends object,
   SortType,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   OptionsType extends object,
@@ -18,9 +18,9 @@ export class DAOWrapperAPIv1<
   ScalarsType extends DefaultModelScalars,
 > {
   private idField: IDKey
-  public apiV2: AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>
+  public apiV2: AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>
   constructor(
-    apiV2: AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>,
+    apiV2: AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>,
     idField: IDKey,
   ) {
     this.apiV2 = apiV2
@@ -65,7 +65,7 @@ export class DAOWrapperAPIv1<
     return this.apiV2.count({ filter, options })
   }
 
-  async insert(record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IdGeneration>, options?: OptionsType & DriverOptionType): Promise<Omit<ModelType, ExcludedFields>> {
+  async insert(record: InsertType, options?: OptionsType & DriverOptionType): Promise<Omit<ModelType, ExcludedFields>> {
     return this.apiV2.insertOne({ record, options })
   }
 
@@ -81,11 +81,11 @@ export class DAOWrapperAPIv1<
     return this.apiV2.updateAll({ filter, changes, options })
   }
 
-  async replace<T extends Pick<ModelType, IDKey>>(record: T, replace: Omit<ModelType, ExcludedFields>, options?: OptionsType & DriverOptionType): Promise<void> {
+  async replace<T extends Pick<ModelType, IDKey>>(record: T, replace: InsertType, options?: OptionsType & DriverOptionType): Promise<void> {
     return this.apiV2.replaceOne({ filter: this.idFilter(record), replace, options })
   }
 
-  async replaceOne(filter: FilterType, replace: Omit<ModelType, ExcludedFields>, options?: OptionsType & DriverOptionType): Promise<void> {
+  async replaceOne(filter: FilterType, replace: InsertType, options?: OptionsType & DriverOptionType): Promise<void> {
     return this.apiV2.replaceOne({ filter, replace, options })
   }
 

@@ -9,13 +9,14 @@ export type MongoDBDAOParams<
   IdGeneration extends IdGenerationStrategy,
   FilterType,
   ProjectionType extends object,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   SortType,
   OptionsType,
   ScalarsType extends DefaultModelScalars,
 > = Omit<
-  DAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, UpdateType, ExcludedFields, SortType, OptionsType, { collection: Collection }, ScalarsType>,
+  DAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, { collection: Collection }, ScalarsType>,
   'driverOptions'
 > & {
   collection: Collection

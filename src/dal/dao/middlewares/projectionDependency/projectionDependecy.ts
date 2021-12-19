@@ -1,4 +1,3 @@
-import { PartialDeep } from 'type-fest'
 import { AnyProjection, GenericProjection } from '../../projections/projections.types'
 import { isProjectionIntersected, mergeProjections } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
@@ -13,7 +12,7 @@ export function projectionDependency<
 >(args: {
   fieldsProjection: P2
   requiredProjection: P1
-}): DAOMiddleware<ModelType, IDKey, any, any, AnyProjection<ProjectionType>, any, ExcludedFields, any, any, any> {
+}): DAOMiddleware<ModelType, IDKey, any, any, AnyProjection<ProjectionType>, any, any, ExcludedFields, any, any, any> {
   return {
     beforeFind: async (findParams) => {
       if (isProjectionIntersected(findParams.projection ? (findParams.projection as GenericProjection) : true, args.fieldsProjection ? (args.fieldsProjection as GenericProjection) : true)) {

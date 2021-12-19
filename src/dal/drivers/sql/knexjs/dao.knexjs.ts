@@ -21,11 +21,12 @@ export class AbstractKnexJsDAO<
   FilterType,
   ProjectionType extends object,
   SortType,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   OptionsType extends object,
   ScalarsType extends DefaultModelScalars,
-> extends AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, UpdateType, ExcludedFields, OptionsType, { knex: Knex }, ScalarsType> {
+> extends AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, { knex: Knex }, ScalarsType> {
   private tableName: string
   private knex: Knex<any, unknown[]>
 
@@ -33,7 +34,7 @@ export class AbstractKnexJsDAO<
     tableName,
     knex,
     ...params
-  }: KnexJsDAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, UpdateType, ExcludedFields, SortType, OptionsType, ScalarsType>) {
+  }: KnexJsDAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, ScalarsType>) {
     super({ ...params, driverOptions: { knex } })
     this.tableName = tableName
     this.knex = knex
@@ -118,12 +119,12 @@ export class AbstractKnexJsDAO<
     return result[0].all as number
   }
 
-  protected async _insertOne(params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>): Promise<Omit<ModelType, ExcludedFields>> {
+  protected async _insertOne(params: InsertParams<InsertType, OptionsType>): Promise<Omit<ModelType, ExcludedFields>> {
     const record = this.modelToDb(params.record as PartialDeep<ModelType>)
     const records = await this.qb().insert(record, '*')
     const inserted = records[0]
     if (typeof inserted === 'number') {
-      return (await this._findOne({ filter: { [this.idField]: ((params.record) as any)[this.idField] || inserted } as FilterType })) as Omit<ModelType, ExcludedFields>
+      return (await this._findOne({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as FilterType })) as Omit<ModelType, ExcludedFields>
     }
     return this.dbToModel(inserted) as Omit<ModelType, ExcludedFields>
   }
@@ -139,7 +140,7 @@ export class AbstractKnexJsDAO<
     await where
   }
 
-  protected _replaceOne(params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>): Promise<void> {
+  protected _replaceOne(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<void> {
     throw new Error(`Operation not supported.`)
   }
 

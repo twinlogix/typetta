@@ -7,11 +7,11 @@ import BigNumber from 'bignumber.js'
 import { isPlainObject } from 'is-plain-object'
 import _ from 'lodash'
 
-export type ConditionalPartialBy<T, K extends keyof T, IdGeneration extends IdGenerationStrategy> = IdGeneration extends 'user'
+/*export type ConditionalPartialBy<T, K extends keyof T, IdGeneration extends IdGenerationStrategy> = IdGeneration extends 'user'
   ? T
   : IdGeneration extends 'generator'
   ? Omit<T, K> & Partial<Pick<T, K>>
-  : Omit<T, K>
+  : Omit<T, K>*/
 
 export type OneKey<K extends string, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never

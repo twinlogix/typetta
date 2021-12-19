@@ -7,6 +7,7 @@ export type DAOMiddleware<
   IdGeneration extends IdGenerationStrategy,
   FilterType,
   ProjectionType,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   SortType,
@@ -23,21 +24,21 @@ export type DAOMiddleware<
     context: MiddlewareContext<ScalarsType, IDKey>,
   ) => Promise<PartialDeep<ModelType>[]>
   beforeInsert?: (
-    params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>,
+    params: InsertParams<InsertType, OptionsType>,
     context: MiddlewareContext<ScalarsType, IDKey>,
-  ) => Promise<InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>>
+  ) => Promise<InsertParams<InsertType, OptionsType>>
   afterInsert?: (
-    params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>,
+    params: InsertParams<InsertType, OptionsType>,
     record: Omit<ModelType, ExcludedFields>,
     context: MiddlewareContext<ScalarsType, IDKey>,
   ) => Promise<Omit<ModelType, ExcludedFields>>
   beforeUpdate?: (params: UpdateParams<FilterType, UpdateType, OptionsType>, context: MiddlewareContext<ScalarsType, IDKey>) => Promise<UpdateParams<FilterType, UpdateType, OptionsType>>
   afterUpdate?: (params: UpdateParams<FilterType, UpdateType, OptionsType>, context: MiddlewareContext<ScalarsType, IDKey>) => Promise<void>
   beforeReplace?: (
-    params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>,
+    params: ReplaceParams<FilterType, InsertType, OptionsType>,
     context: MiddlewareContext<ScalarsType, IDKey>,
-  ) => Promise<ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>>
-  afterReplace?: (params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>, context: MiddlewareContext<ScalarsType, IDKey>) => Promise<void>
+  ) => Promise<ReplaceParams<FilterType, InsertType, OptionsType>>
+  afterReplace?: (params: ReplaceParams<FilterType, InsertType, OptionsType>, context: MiddlewareContext<ScalarsType, IDKey>) => Promise<void>
   beforeDelete?: (params: DeleteParams<FilterType, OptionsType>, context: MiddlewareContext<ScalarsType, IDKey>) => Promise<DeleteParams<FilterType, OptionsType>>
   afterDelete?: (params: DeleteParams<FilterType, OptionsType>, context: MiddlewareContext<ScalarsType, IDKey>) => Promise<void>
 }

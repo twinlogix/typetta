@@ -75,10 +75,19 @@ export type PostUpdate = {
   'views'?: number
 };
 
-type PostDAOAllParams<OptionType> = KnexJsDAOParams<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
+export type PostInsert = {
+  authorId: string,
+  body?: string,
+  createdAt: Date,
+  id?: string,
+  title: string,
+  views: number,
+};
+
+type PostDAOAllParams<OptionType> = KnexJsDAOParams<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostInsert, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
 export type PostDAOParams<OptionType> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
-export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
+export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: PostDAOParams<OptionType>){
     super({   
@@ -183,10 +192,19 @@ export type UserUpdate = {
   'lastName'?: string | null
 };
 
-type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
+export type UserInsert = {
+  createdAt: Date,
+  credentials: types.Credentials,
+  email?: string,
+  firstName?: string,
+  id?: string,
+  lastName?: string,
+};
+
+type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserInsert, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
 export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
-export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
+export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: UserDAOParams<OptionType>){
     super({   

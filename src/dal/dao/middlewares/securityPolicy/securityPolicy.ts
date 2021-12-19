@@ -1,4 +1,3 @@
-import { ConditionalPartialBy } from '../../../../utils/utils'
 import { IdGenerationStrategy } from '../../dao.types'
 import { DAOMiddleware } from '../middlewares.types'
 import { PartialDeep } from 'type-fest'
@@ -10,6 +9,7 @@ export function securityPolicy<
   IdGeneration extends IdGenerationStrategy,
   FilterType,
   ProjectionType extends object,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   OptionsType extends { securityContext: SecurityContext },
@@ -17,9 +17,9 @@ export function securityPolicy<
   secureFilters?: (filter?: FilterType, securityContext?: SecurityContext) => Promise<FilterType | undefined>
   secureProjections?: (filter?: FilterType, projections?: ProjectionType, securityContext?: SecurityContext) => Promise<ProjectionType | undefined>
   secureReturnedRecords?: (records: PartialDeep<ModelType>[], filter?: FilterType, projections?: ProjectionType, securityContext?: SecurityContext) => Promise<PartialDeep<ModelType>[]>
-  secureNewRecord?: <T extends Omit<ModelType, ExcludedFields> | ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IdGeneration>>(record: T, securityContext?: SecurityContext) => Promise<T>
+  secureNewRecord?: <T extends InsertType>(record: T, securityContext?: SecurityContext) => Promise<T>
   secureChanges?: (changes: UpdateType, filter?: FilterType, securityContext?: SecurityContext) => Promise<UpdateType>
-}): DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, UpdateType, ExcludedFields, any, OptionsType, any> {
+}): DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, any, OptionsType, any> {
   return {
     beforeFind: async (params) => {
       return {

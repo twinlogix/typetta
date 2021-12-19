@@ -1,7 +1,7 @@
-import _ from 'lodash'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
 import { findID, findNode, indentMultiline, isEmbed, isEntity, isForeignRef, isInnerRef, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
+import _ from 'lodash'
 
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(): string[] {
@@ -22,21 +22,22 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSort = this._generateDAOSort(node, typesMap)
       const daoUpdate = this._generateDAOUpdate(node, typesMap)
+      const daoInsert = this._generateDAOInsert(node, typesMap)
       const daoParams = this._generateDAOParams(node, typesMap)
       const dao = this._generateDAO(node, typesMap)
-      return [daoExcluded, daoSchema, daoFilter, daoProjection, daoSort, daoUpdate, daoParams, dao].join('\n\n')
+      return [daoExcluded, daoSchema, daoFilter, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
       return ''
     }
   }
 
   public generateExports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
-    const sqlSources = _.uniq([...typesMap.values()].flatMap((type) => type.sqlEntity ? [type.sqlEntity.source] : []))
-    const mongoSources = _.uniq([...typesMap.values()].flatMap((type) => type.mongoEntity ? [type.mongoEntity.source] : []))
+    const sqlSources = _.uniq([...typesMap.values()].flatMap((type) => (type.sqlEntity ? [type.sqlEntity.source] : [])))
+    const mongoSources = _.uniq([...typesMap.values()].flatMap((type) => (type.mongoEntity ? [type.mongoEntity.source] : [])))
     const hasMongoDBEntites = mongoSources.length > 0
     const hasSQLEntities = sqlSources.length > 0
-    const sqlSourcesType = `Record<${sqlSources.map(v => `'${v}'`).join(' | ')}, Knex>`
-    const mongoSourcesType = `Record<${mongoSources.map(v => `'${v}'`).join(' | ')}, Db>`
+    const sqlSourcesType = `Record<${sqlSources.map((v) => `'${v}'`).join(' | ')}, Knex>`
+    const mongoSourcesType = `Record<${mongoSources.map((v) => `'${v}'`).join(' | ')}, Db>`
 
     const contextDAOParamsDeclarations = Array.from(typesMap.values())
       .concat([])
@@ -258,6 +259,34 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   }
 
   // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- INSERT --------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
+  public _generateDAOInsert(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    const daoInsertBody = indentMultiline(this._generateDAOInsertFields(node, typesMap))
+    const daoInsert = `export type ${node.name}Insert = {\n` + daoInsertBody + `\n};`
+    return daoInsert
+  }
+
+  public _generateDAOInsertFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    return node.fields
+      .flatMap((field) => {
+        if ((field.isID && field.idGenerationStrategy === 'db') || field.isExcluded) {
+          return []
+        }
+        const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired)
+        if (typeof field.type === 'string') {
+          return [`${field.name}${required ? '' : '?'}: ${field.type}${field.isList ? '[]' : ''},`]
+        }
+        if ('innerRef' in field.type || 'foreignRef' in field.type) {
+          return []
+        }
+        return [`${field.name}${required ? '' : '?'}: types.${field.type.embed}${field.isList ? '[]' : ''},`]
+      })
+      .join('\n')
+  }
+
+  // ---------------------------------------------------------------------------------------------------------
   // ----------------------------------------------- PARAMS --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
@@ -266,7 +295,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const dbDAOParams = node.sqlEntity ? 'KnexJsDAOParams' : node.mongoEntity ? 'MongoDBDAOParams' : 'DAOParams'
     const daoAllParams = `type ${node.name}DAOAllParams<OptionType> = ${dbDAOParams}<types.${node.name}, '${idField.name}', '${idField.coreType}', '${
       idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
-    }', ${node.name}Filter, ${node.name}Projection, ${node.name}Update, ${node.name}ExcludedFields, ${node.name}Sort, OptionType, types.Scalars>;`
+    }', ${node.name}Filter, ${node.name}Projection, ${node.name}Insert, ${node.name}Update, ${node.name}ExcludedFields, ${node.name}Sort, OptionType, types.Scalars>;`
     const daoParams = `export type ${node.name}DAOParams<OptionType> = Omit<${node.name}DAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;`
     return [daoAllParams, daoParams].join('\n')
   }
@@ -283,7 +312,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     return (
       `export class ${node.name}DAO<OptionType extends object> extends ${daoName}<types.${node.name}, '${idField.name}', '${idField.coreType}', '${
         idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
-      }', ${node.name}Filter, ${node.name}Projection, ${node.name}Sort, ${node.name}Update, ${node.name}ExcludedFields, OptionType, types.Scalars> {\n` +
+      }', ${node.name}Filter, ${node.name}Projection, ${node.name}Sort, ${node.name}Insert, ${node.name}Update, ${node.name}ExcludedFields, OptionType, types.Scalars> {\n` +
       daoBody +
       '\n}'
     )
