@@ -21,7 +21,7 @@ export type KnexJsDAOGenerics<
   'driverContext'
 > & { driverContext: { knex: Knex } }
 
-export type KnexJsDAOParams<T extends KnexJsDAOGenerics> = Omit<DAOParams<T>, 'driverOptions'> & {
+export type KnexJsDAOParams<T extends KnexJsDAOGenerics> = Omit<DAOParams<T>, 'driverContext'> & {
   tableName: string
   knex: Knex<any, unknown[]>
 }

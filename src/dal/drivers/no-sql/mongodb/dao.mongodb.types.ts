@@ -38,6 +38,6 @@ export type MongoDBDAOGenerics<
   'driverContext'
 > & { driverContext: { collection: Collection } }
 
-export type MongoDBDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverOptions'> & {
+export type MongoDBDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverContext'> & {
   collection: Collection
 }
