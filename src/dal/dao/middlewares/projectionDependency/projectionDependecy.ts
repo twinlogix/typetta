@@ -1,24 +1,22 @@
+import { DAOGenerics } from '../../dao.types'
 import { AnyProjection, GenericProjection } from '../../projections/projections.types'
 import { isProjectionIntersected, mergeProjections } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 
 export function projectionDependency<
-  ModelType extends object,
-  P1 extends AnyProjection<ProjectionType>,
-  P2 extends AnyProjection<ProjectionType>,
-  ProjectionType extends object,
-  IDKey extends Exclude<keyof ModelType, ExcludedFields>,
-  ExcludedFields extends keyof ModelType
+  T extends DAOGenerics,
+  P1 extends AnyProjection<T['projectionType']>,
+  P2 extends AnyProjection<T['projectionType']>,
 >(args: {
   fieldsProjection: P2
   requiredProjection: P1
-}): DAOMiddleware<ModelType, IDKey, any, any, AnyProjection<ProjectionType>, any, any, ExcludedFields, any, any, any> {
+}): DAOMiddleware<T> {
   return {
     beforeFind: async (findParams) => {
       if (isProjectionIntersected(findParams.projection ? (findParams.projection as GenericProjection) : true, args.fieldsProjection ? (args.fieldsProjection as GenericProjection) : true)) {
         return {
           ...findParams,
-          projection: mergeProjections((findParams.projection || true) as GenericProjection, args.requiredProjection as GenericProjection) as ProjectionType,
+          projection: mergeProjections((findParams.projection || true) as GenericProjection, args.requiredProjection as GenericProjection) as T['projectionType'],
         }
       }
       return findParams

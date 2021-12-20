@@ -1,10 +1,9 @@
 import { transformObject } from '../../../../generation/utils'
 import { AbstractDAO } from '../../../dao/dao'
-import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, IdGenerationStrategy } from '../../../dao/dao.types'
+import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection } from '../../../dao/projections/projections.types'
-import { DefaultModelScalars } from '../../drivers.types'
-import { KnexJsDAOParams } from './dao.knexjs.types'
+import { KnexJsDAOGenerics, KnexJsDAOParams } from './dao.knexjs.types'
 import { AbstractSort, adaptUpdate, buildSelect, buildSort, buildWhereConditions, embeddedScalars, flatEmbdeddedFields, unflatEmbdeddedFields } from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
@@ -13,28 +12,11 @@ type AbstractFilter = {
   [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators | StringOperators
 }
 
-export class AbstractKnexJsDAO<
-  ModelType extends object,
-  IDKey extends keyof Omit<ModelType, ExcludedFields>,
-  IDScalar extends keyof ScalarsType,
-  IdGeneration extends IdGenerationStrategy,
-  FilterType,
-  ProjectionType extends object,
-  SortType,
-  InsertType extends object,
-  UpdateType,
-  ExcludedFields extends keyof ModelType,
-  OptionsType extends object,
-  ScalarsType extends DefaultModelScalars,
-> extends AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, { knex: Knex }, ScalarsType> {
+export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<T> {
   private tableName: string
   private knex: Knex<any, unknown[]>
 
-  protected constructor({
-    tableName,
-    knex,
-    ...params
-  }: KnexJsDAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, ScalarsType>) {
+  protected constructor({ tableName, knex, ...params }: KnexJsDAOParams<T>) {
     super({ ...params, driverOptions: { knex } })
     this.tableName = tableName
     this.knex = knex
@@ -44,37 +26,37 @@ export class AbstractKnexJsDAO<
     return this.knex(this.tableName)
   }
 
-  private dbsToModels(objects: any[]): PartialDeep<ModelType>[] {
+  private dbsToModels(objects: any[]): PartialDeep<T['modelType']>[] {
     return objects.map((o) => this.dbToModel(o))
   }
 
-  private dbToModel(object: any): PartialDeep<ModelType> {
+  private dbToModel(object: any): PartialDeep<T['modelType']> {
     const unflatted = unflatEmbdeddedFields(this.schema, object)
     return transformObject(this.daoContext.adapters.knexjs, 'dbToModel', unflatted, this.schema)
   }
 
-  private modelToDb(object: PartialDeep<ModelType>): any {
+  private modelToDb(object: PartialDeep<T['modelType']>): any {
     const transformed = transformObject(this.daoContext.adapters.knexjs, 'modelToDB', object, this.schema)
     return flatEmbdeddedFields(this.schema, transformed)
   }
 
-  private buildSelect<P extends AnyProjection<ProjectionType>>(projection?: P, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+  private buildSelect<P extends AnyProjection<T['projectionType']>>(projection?: P, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
     return projection ? buildSelect(qb || this.qb(), projection as GenericProjection, this.schema) : qb || this.qb()
   }
 
-  private buildWhere(filter?: FilterType, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+  private buildWhere(filter?: T['filterType'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
     return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knexjs) : qb || this.qb()
   }
 
-  private buildSort(sorts?: SortType[], qb?: Knex.QueryBuilder<any, any>) {
+  private buildSort(sorts?: T['sortType'][], qb?: Knex.QueryBuilder<any, any>) {
     return buildSort(qb || this.qb(), (sorts || []) as unknown as AbstractSort[], this.schema)
   }
 
-  private adaptUpdate(changes: UpdateType): object {
+  private adaptUpdate(changes: T['updateType']): object {
     return adaptUpdate(changes, this.schema, this.daoContext.adapters.knexjs)
   }
 
-  private async getRecords<P extends AnyProjection<ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
+  private async getRecords<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P>): Promise<PartialDeep<T['modelType']>[]> {
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
     const query = this.buildSort(params.sorts, where)
@@ -82,18 +64,18 @@ export class AbstractKnexJsDAO<
     return this.dbsToModels(records)
   }
 
-  protected async _find<P extends AnyProjection<ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]> {
+  protected async _find<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projectionType']>[]> {
     return this.getRecords(params)
   }
 
-  protected async _findOne<P extends AnyProjection<ProjectionType>>(params: FindOneParams<FilterType, P, OptionsType>): Promise<PartialDeep<ModelType> | null> {
+  protected async _findOne<P extends AnyProjection<T['projectionType']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['modelType']> | null> {
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
     const record = await where.first()
     return record ? this.dbToModel(record) : null
   }
 
-  protected async _findPage<P extends AnyProjection<ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<{ totalCount: number; records: PartialDeep<ModelType>[] }> {
+  protected async _findPage<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['modelType']>[] }> {
     const totalCount = await this._count({ ...params })
     if (totalCount === 0) {
       return { totalCount, records: [] }
@@ -108,53 +90,53 @@ export class AbstractKnexJsDAO<
     return result
   }
 
-  protected async _exists(params: FilterParams<FilterType, OptionsType>): Promise<boolean> {
+  protected async _exists(params: FilterParams<T>): Promise<boolean> {
     return (await this._count(params)) > 0
   }
 
-  protected async _count(params: FilterParams<FilterType, OptionsType>): Promise<number> {
+  protected async _count(params: FilterParams<T>): Promise<number> {
     const count = this.qb().count(this.idField, { as: 'all' })
     const where = this.buildWhere(params.filter, count)
     const result = await where
     return result[0].all as number
   }
 
-  protected async _insertOne(params: InsertParams<InsertType, OptionsType>): Promise<Omit<ModelType, ExcludedFields>> {
-    const record = this.modelToDb(params.record as PartialDeep<ModelType>)
+  protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['modelType'], T['exludedFields']>> {
+    const record = this.modelToDb(params.record as PartialDeep<T['modelType']>)
     const records = await this.qb().insert(record, '*')
     const inserted = records[0]
     if (typeof inserted === 'number') {
-      return (await this._findOne({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as FilterType })) as Omit<ModelType, ExcludedFields>
+      return (await this._findOne({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as T['filterType'] })) as Omit<T['modelType'], T['exludedFields']>
     }
-    return this.dbToModel(inserted) as Omit<ModelType, ExcludedFields>
+    return this.dbToModel(inserted) as Omit<T['modelType'], T['exludedFields']>
   }
 
-  protected _updateOne(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
+  protected _updateOne(params: UpdateParams<T>): Promise<void> {
     throw new Error(`Operation not supported. Use updateAll or apiV1.updateMany specifying the primary key field (${this.idField}) in order to update only one row.`)
   }
 
-  protected async _updateMany(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
+  protected async _updateMany(params: UpdateParams<T>): Promise<void> {
     const updateObject = this.adaptUpdate(params.changes)
     const update = this.qb().update(updateObject)
     const where = this.buildWhere(params.filter, update)
     await where
   }
 
-  protected _replaceOne(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<void> {
+  protected _replaceOne(params: ReplaceParams<T>): Promise<void> {
     throw new Error(`Operation not supported.`)
   }
 
-  protected _deleteOne(params: DeleteParams<FilterType, OptionsType>): Promise<void> {
+  protected _deleteOne(params: DeleteParams<T>): Promise<void> {
     throw new Error(`Operation not supported. Use deleteAll or apiV1.delete specifying the primary key field (${this.idField}) in order to delete only one row.`)
   }
 
-  protected async _deleteMany(params: DeleteParams<FilterType, OptionsType>): Promise<void> {
+  protected async _deleteMany(params: DeleteParams<T>): Promise<void> {
     const deleteQ = this.qb().delete()
     const where = this.buildWhere(params.filter, deleteQ)
     await where
   }
 
-  public async createTable(specificTypeMap: Map<keyof ScalarsType, [string, string]>, defaultSpecificType: [string, string]): Promise<void> {
+  public async createTable(specificTypeMap: Map<keyof T['scalarsType'], [string, string]>, defaultSpecificType: [string, string]): Promise<void> {
     await this.knex.schema.createTable(this.tableName, (table) => {
       Object.entries(this.schema).forEach(([key, schemaField]) => {
         if ('scalar' in schemaField) {

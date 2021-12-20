@@ -1,26 +1,39 @@
-import { IdGenerationStrategy } from '../../dao.types'
+import { DefaultModelScalars } from '../../../drivers/drivers.types'
+import { DAOGenerics, IdGenerationStrategy } from '../../dao.types'
 import { DAOMiddleware } from '../middlewares.types'
 import { PartialDeep } from 'type-fest'
-import { AnyProjection } from '../../projections/projections.types'
 
-export function securityPolicy<
-  SecurityContext,
-  ModelType extends object,
-  IDKey extends keyof Omit<ModelType, ExcludedFields>,
-  IdGeneration extends IdGenerationStrategy,
-  FilterType,
-  ProjectionType,
-  InsertType extends object,
-  UpdateType,
-  ExcludedFields extends keyof ModelType,
-  OptionsType extends { securityContext: SecurityContext },
-  >(args: {
-    secureFilters?: (filter?: FilterType, securityContext?: SecurityContext) => Promise<FilterType | undefined>
-    secureProjections?: (filter?: FilterType, projections?: ProjectionType, securityContext?: SecurityContext) => Promise<ProjectionType | undefined>
-    secureReturnedRecords?: (records: PartialDeep<ModelType>[], filter?: FilterType, projections?: ProjectionType, securityContext?: SecurityContext) => Promise<PartialDeep<ModelType>[]>
-    secureNewRecord?: <T extends InsertType>(record: T, securityContext?: SecurityContext) => Promise<T>
-    secureChanges?: (changes: UpdateType, filter?: FilterType, securityContext?: SecurityContext) => Promise<UpdateType>
-  }): DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, any, OptionsType, any> {
+export type SecurityPolicyDAOGenerics<
+  SecurityContext = any,
+  ModelType extends object = any,
+  IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
+  IDScalar extends keyof ScalarsType = any,
+  IdGeneration extends IdGenerationStrategy = any,
+  FilterType = any,
+  ProjectionType extends object = any,
+  SortType = any,
+  InsertType extends object = any,
+  UpdateType = any,
+  ExcludedFields extends keyof ModelType = any,
+  OptionsType extends { securityContext: SecurityContext } = any,
+  DriverOptionType = any,
+  ScalarsType extends DefaultModelScalars = any,
+> = DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType> & {
+  securityContext: SecurityContext
+}
+
+export function securityPolicy<T extends SecurityPolicyDAOGenerics>(args: {
+  secureFilters?: (filter?: T['filterType'], securityContext?: T['securityContext']) => Promise<T['filterType'] | undefined>
+  secureProjections?: (filter?: T['filterType'], projections?: T['projectionType'], securityContext?: T['securityContext']) => Promise<T['projectionType'] | undefined>
+  secureReturnedRecords?: (
+    records: PartialDeep<T['modelType']>[],
+    filter?: T['filterType'],
+    projections?: T['projectionType'],
+    securityContext?: T['securityContext'],
+  ) => Promise<PartialDeep<T['modelType']>[]>
+  secureNewRecord?: (record: T['insertType'], securityContext?: T['securityContext']) => Promise<T>
+  secureChanges?: (changes: T['updateType'], filter?: T['filterType'], securityContext?: T['securityContext']) => Promise<T['updateType']>
+}): DAOMiddleware<T> {
   return {
     beforeFind: async (params) => {
       return {

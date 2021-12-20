@@ -1,5 +1,5 @@
 import { DefaultModelScalars } from '../..'
-import { deepCopy, getTraversing, reversed, setTraversing } from '../../utils/utils'
+import { deepCopy, deepMerge, getTraversing, reversed, setTraversing } from '../../utils/utils'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { DAOWrapperAPIv1 } from '../legacy/daoWrapperAPIv1'
 import { addAssociationRefToProjection } from './associations/associations'
@@ -17,7 +17,8 @@ import {
   ReferenceChecksResponse,
   ReplaceParams,
   UpdateParams,
-  IdGenerationStrategy,
+  DAOGenerics,
+  ReplaceKey,
 } from './dao.types'
 import { generateId } from './middlewares/generateId.middleware'
 import { DAOMiddleware } from './middlewares/middlewares.types'
@@ -29,62 +30,23 @@ import _ from 'lodash'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 
-export abstract class AbstractDAO<
-  ModelType extends object,
-  IDKey extends keyof Omit<ModelType, ExcludedFields>,
-  IDScalar extends keyof ScalarsType,
-  IdGeneration extends IdGenerationStrategy,
-  FilterType,
-  ProjectionType extends object,
-  SortType,
-  InsertType extends object,
-  UpdateType,
-  ExcludedFields extends keyof ModelType,
-  OptionsType extends object,
-  DriverOptionType,
-  ScalarsType extends DefaultModelScalars,
-> implements DAO<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType>
-{
-  protected idField: IDKey
-  protected idGeneration: IdGeneration
-  protected daoContext: AbstractDAOContext<ScalarsType, OptionsType>
+export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
+  protected idField: T['idKey']
+  protected idGeneration: T['idGeneration']
+  protected daoContext: AbstractDAOContext<T['scalarsType'], T['optionsType']>
   protected associations: DAOAssociation[]
-  protected middlewares: DAOMiddleware<
-    ModelType,
-    IDKey,
-    IdGeneration,
-    FilterType,
-    AnyProjection<ProjectionType>,
-    InsertType,
-    UpdateType,
-    ExcludedFields,
-    SortType,
-    OptionsType & DriverOptionType,
-    ScalarsType
-  >[]
+  protected middlewares: DAOMiddleware<T>[]
   protected pageSize: number
   protected resolvers: { [key: string]: DAOResolver | undefined }
-  protected dataLoaders: Map<string, DataLoader<ModelType[IDKey], ModelType[] | null>>
-  protected options?: OptionsType
-  protected driverOptions: DriverOptionType
-  protected schema: Schema<ScalarsType>
-  protected idGenerator?: () => ScalarsType[IDScalar]
-  public apiV1: DAOWrapperAPIv1<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>
+  protected dataLoaders: Map<string, DataLoader<T['modelType'][T['idKey']], T['modelType'][] | null>>
+  protected options?: T['optionsType']
+  protected driverOptions: T['driverOptionType']
+  protected schema: Schema<T['scalarsType']>
+  protected idGenerator?: () => T['scalarsType'][T['idScalar']]
+  public apiV1: DAOWrapperAPIv1<T>
 
-  protected constructor({
-    idField,
-    idScalar,
-    idGeneration,
-    idGenerator,
-    daoContext,
-    pageSize = 50,
-    associations = [],
-    middlewares = [],
-    schema,
-    options,
-    driverOptions,
-  }: DAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, DriverOptionType, ScalarsType>) {
-    this.dataLoaders = new Map<string, DataLoader<ModelType[IDKey], ModelType[]>>()
+  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, pageSize = 50, associations = [], middlewares = [], schema, options, driverOptions }: DAOParams<T>) {
+    this.dataLoaders = new Map<string, DataLoader<T['modelType'][T['idKey']], T['modelType'][]>>()
     this.idField = idField
     this.idGenerator = idGenerator
     this.daoContext = daoContext
@@ -104,6 +66,13 @@ export abstract class AbstractDAO<
     }
     this.middlewares = [
       {
+        beforeFind: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
+        beforeUpdate: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
+        beforeInsert: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
+        beforeReplace: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
+        beforeDelete: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
+      },
+      {
         beforeFind: async (params) => ({ ...params, projection: this.elabAssociationProjection(params.projection) }),
       },
       ...(this.idGeneration === 'generator' ? this.middlewares : []),
@@ -112,40 +81,22 @@ export abstract class AbstractDAO<
     this.options = options
     this.driverOptions = driverOptions
     this.schema = schema
-    this.apiV1 = new DAOWrapperAPIv1<
-      ModelType,
-      IDKey,
-      IDScalar,
-      IdGeneration,
-      FilterType,
-      ProjectionType,
-      SortType,
-      InsertType,
-      UpdateType,
-      ExcludedFields,
-      OptionsType,
-      DriverOptionType,
-      ScalarsType
-    >(this, idField)
+    this.apiV1 = new DAOWrapperAPIv1<T>(this, idField)
   }
 
   protected async beforeFind(
-    params: FindParams<FilterType, AnyProjection<ProjectionType>, SortType, OptionsType>,
-  ): Promise<FindParams<FilterType, AnyProjection<ProjectionType>, SortType, OptionsType & DriverOptionType>> {
+    params: FindParams<ReplaceKey<T, 'projectionType', AnyProjection<T['projectionType']>>>,
+  ): Promise<FindParams<ReplaceKey<T, 'projectionType', AnyProjection<T['projectionType']>>>> {
     const contextOptions = this.createContextOptions()
-    let enrichedParams = this.addOptions(params, this.driverOptions, this.options)
     for (const middleware of this.middlewares) {
       if (middleware.beforeFind) {
-        enrichedParams = await middleware.beforeFind(enrichedParams, contextOptions)
+        params = await middleware.beforeFind(params, contextOptions)
       }
     }
-    return enrichedParams
+    return params
   }
 
-  protected async afterFind(
-    params: FindParams<FilterType, AnyProjection<ProjectionType>, SortType, OptionsType & DriverOptionType>,
-    records: PartialDeep<ModelType>[],
-  ): Promise<PartialDeep<ModelType>[]> {
+  protected async afterFind(params: FindParams<T, AnyProjection<T['projectionType']>>, records: PartialDeep<T['modelType']>[]): Promise<PartialDeep<T['modelType']>[]> {
     const contextOptions = this.createContextOptions()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterFind) {
@@ -155,51 +106,44 @@ export abstract class AbstractDAO<
     return records
   }
 
-  private async elabRecords(params: FindParams<FilterType, AnyProjection<ProjectionType>, SortType, OptionsType>, records: PartialDeep<ModelType>[]): Promise<PartialDeep<ModelType>[]> {
-    const enrichedParams = this.addOptions(params, this.driverOptions, this.options)
-    return await this.afterFind(enrichedParams, records)
-  }
-
-  async findAll<P extends AnyProjection<ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType> = {}): Promise<ModelProjection<ModelType, ProjectionType, P>[]> {
+  async findAll<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P> = {}): Promise<ModelProjection<T['modelType'], T['projectionType'], P>[]> {
     const newParams = await this.beforeFind(params)
     const records = await this._find(newParams)
     const resolvedRecors = await this.resolveAssociations(records, newParams.projection)
-    return (await this.elabRecords(newParams, resolvedRecors)) as ModelProjection<ModelType, ProjectionType, P>[]
+    return (await this.afterFind(newParams, resolvedRecors)) as ModelProjection<T['modelType'], T['projectionType'], P>[]
   }
 
-  async findOne<P extends AnyProjection<ProjectionType>>(params: FindOneParams<FilterType, P, OptionsType> = {}): Promise<ModelProjection<ModelType, ProjectionType, P> | null> {
+  async findOne<P extends AnyProjection<T['projectionType']>>(params: FindOneParams<T, P> = {}): Promise<ModelProjection<T['modelType'], T['projectionType'], P> | null> {
     const newParams = await this.beforeFind(params)
     const record = await this._findOne(newParams)
     if (record) {
       const resolvedRecors = await this.resolveAssociations([record], newParams.projection)
-      return ((await this.elabRecords(newParams, resolvedRecors)) as ModelProjection<ModelType, ProjectionType, P>[])[0]
+      return ((await this.afterFind(newParams, resolvedRecors)) as ModelProjection<T['modelType'], T['projectionType'], P>[])[0]
     }
     return null
   }
 
-  async findPage<P extends AnyProjection<ProjectionType>>(
-    params: FindParams<FilterType, P, SortType, OptionsType> = {},
-  ): Promise<{ totalCount: number; records: ModelProjection<ModelType, ProjectionType, P>[] }> {
+  async findPage<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P> = {}): Promise<{ totalCount: number; records: ModelProjection<T['modelType'], T['projectionType'], P>[] }> {
     const newParams = await this.beforeFind(params)
     const { totalCount, records } = await this._findPage(newParams)
     const resolvedRecors = await this.resolveAssociations(records, newParams.projection)
     return {
       totalCount,
-      records: (await this.elabRecords(newParams, resolvedRecors)) as ModelProjection<ModelType, ProjectionType, P>[],
+      records: (await this.afterFind(newParams, resolvedRecors)) as ModelProjection<T['modelType'], T['projectionType'], P>[],
     }
   }
 
-  async exists(params: FilterParams<FilterType, OptionsType>): Promise<boolean> {
+  async exists(params: FilterParams<T>): Promise<boolean> {
     const newParams = await this.beforeFind(params)
     return this._exists(newParams)
   }
 
-  async count(params: FilterParams<FilterType, OptionsType> = {}): Promise<number> {
+  async count(params: FilterParams<T> = {}): Promise<number> {
     const newParams = await this.beforeFind(params)
     return this._count(newParams)
   }
 
-  async checkReferences(records: PartialDeep<ModelType> | PartialDeep<ModelType>[]): Promise<ReferenceChecksResponse<ModelType>> {
+  async checkReferences(records: PartialDeep<T['modelType']> | PartialDeep<T['modelType']>[]): Promise<ReferenceChecksResponse<T['modelType']>> {
     const errors = []
     if (records) {
       const inputRecords = records instanceof Array ? records : [records]
@@ -239,12 +183,12 @@ export abstract class AbstractDAO<
   // ---------------------------- ASSOCIATIONS -----------------------------
   // -----------------------------------------------------------------------
   private async load(
-    keys: IDKey[],
-    buildFilter: (keys: IDKey[]) => FilterType,
-    hasKey: (record: ModelType, key: IDKey) => boolean,
-    projection: ProjectionType,
+    keys: T['idKey'][],
+    buildFilter: (keys: T['idKey'][]) => T['filterType'],
+    hasKey: (record: T['modelType'], key: T['idKey']) => boolean,
+    projection: T['projectionType'],
     loaderIdetifier: string = '',
-  ): Promise<(ModelType | null | Error)[]> {
+  ): Promise<(T['modelType'] | null | Error)[]> {
     const dataLoader = this.getDataLoader(buildFilter, hasKey, projection, loaderIdetifier)
     const loadedResults = await dataLoader.loadMany(keys)
     const results = []
@@ -259,19 +203,19 @@ export abstract class AbstractDAO<
   }
 
   private getDataLoader(
-    buildFilter: (keys: any[]) => FilterType,
-    hasKey: (record: ModelType, key: any) => boolean,
-    projection: ProjectionType,
+    buildFilter: (keys: any[]) => T['filterType'],
+    hasKey: (record: T['modelType'], key: any) => boolean,
+    projection: T['projectionType'],
     loaderIdetifier: string,
-  ): DataLoader<any, ModelType[] | null> {
+  ): DataLoader<any, T['modelType'][] | null> {
     const hash = loaderIdetifier + '-' + objectHash(projection || null, { respectType: false, unorderedArrays: true })
     const dataLoader = this.dataLoaders.get(hash)
     if (dataLoader) {
       return dataLoader
     } else {
-      const newDataLoader = new DataLoader<any, ModelType[] | null>(
+      const newDataLoader = new DataLoader<any, T['modelType'][] | null>(
         async (keys) => {
-          const filter = buildFilter(keys as ModelType[IDKey][])
+          const filter = buildFilter(keys as T['modelType'][T['idKey']][])
           const loadedResults: any[] = await this.findAll({ filter, projection })
           const orderedResults = []
           for (const key of keys) {
@@ -288,7 +232,7 @@ export abstract class AbstractDAO<
     }
   }
 
-  private elabAssociationProjection<P extends AnyProjection<ProjectionType>>(projection?: P): P | undefined {
+  private elabAssociationProjection<P extends AnyProjection<T['projectionType']>>(projection?: P): P | undefined {
     if (projection === true || !projection) {
       return projection
     }
@@ -300,7 +244,7 @@ export abstract class AbstractDAO<
     return dbProjections
   }
 
-  private async resolveAssociations(dbObjects: any[], projections?: AnyProjection<ProjectionType>): Promise<PartialDeep<ModelType>[]> {
+  private async resolveAssociations(dbObjects: any[], projections?: AnyProjection<T['projectionType']>): Promise<PartialDeep<T['modelType']>[]> {
     for (const association of this.associations) {
       if (projections) {
         const associationProjection = getProjection(projections as GenericProjection, association.field)
@@ -359,12 +303,12 @@ export abstract class AbstractDAO<
               return this.daoContext.dao(linkedDAO).load(
                 ids,
                 association.buildFilter ||
-                  ((keys: any[]): FilterType => {
+                  ((keys: any[]): T['filterType'] => {
                     // @ts-ignore
                     return { [refTo]: { $in: keys } }
                   }),
                 association.hasKey ||
-                  ((record: ModelType, key: any): boolean => {
+                  ((record: T['modelType'], key: any): boolean => {
                     return (record as any)[refTo] === key
                   }),
                 projections,
@@ -387,12 +331,12 @@ export abstract class AbstractDAO<
               return this.daoContext.dao(linkedDAO).load(
                 ids,
                 association.buildFilter ||
-                  ((keys: any[]): FilterType => {
+                  ((keys: any[]): T['filterType'] => {
                     // @ts-ignore
                     return { [refTo]: { $in: keys } }
                   }),
                 association.hasKey ||
-                  ((record: ModelType, key: any): boolean => {
+                  ((record: T['modelType'], key: any): boolean => {
                     return (record as any)[refTo] === key
                   }),
                 projections,
@@ -417,12 +361,12 @@ export abstract class AbstractDAO<
             return this.daoContext.dao(linkedDAO).load(
               ids,
               association.buildFilter ||
-                ((keys: any[]): FilterType => {
+                ((keys: any[]): T['filterType'] => {
                   // @ts-ignore
                   return { [refFrom]: { $in: keys } }
                 }),
               association.hasKey ||
-                ((record: ModelType, key: any): boolean => {
+                ((record: T['modelType'], key: any): boolean => {
                   return (record as any)[refFrom] === key
                 }),
               projections,
@@ -439,18 +383,17 @@ export abstract class AbstractDAO<
     this.resolvers[association.field] = resolver
   }
 
-  private async beforeInsert(params: InsertParams<InsertType, OptionsType>): Promise<InsertParams<InsertType, OptionsType & DriverOptionType>> {
+  private async beforeInsert(params: InsertParams<T>): Promise<InsertParams<T>> {
     const contextOptions = this.createContextOptions()
-    let enrichedParams = this.addOptions(params, this.driverOptions, this.options)
     for (const middleware of this.middlewares) {
       if (middleware.beforeInsert) {
-        enrichedParams = await middleware.beforeInsert(enrichedParams, contextOptions)
+        params = await middleware.beforeInsert(params, contextOptions)
       }
     }
-    return enrichedParams
+    return params
   }
 
-  private async afterInsert(params: InsertParams<InsertType, OptionsType & DriverOptionType>, result: Omit<ModelType, ExcludedFields>): Promise<Omit<ModelType, ExcludedFields>> {
+  private async afterInsert(params: InsertParams<T>, result: T['insertType']): Promise<T['insertType']> {
     const contextOptions = this.createContextOptions()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterInsert) {
@@ -460,24 +403,23 @@ export abstract class AbstractDAO<
     return result
   }
 
-  async insertOne(params: InsertParams<InsertType, OptionsType>): Promise<Omit<ModelType, ExcludedFields>> {
+  async insertOne(params: InsertParams<T>): Promise<Omit<T['modelType'], T['exludedFields']>> {
     const newParams = await this.beforeInsert(params)
     const result = await this._insertOne(newParams)
     return await this.afterInsert(newParams, result)
   }
 
-  private async beforeUpdate(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<UpdateParams<FilterType, UpdateType, OptionsType & DriverOptionType>> {
+  private async beforeUpdate(params: UpdateParams<T>): Promise<UpdateParams<T>> {
     const contextOptions = this.createContextOptions()
-    let enrichedParams = this.addOptions(params, this.driverOptions, this.options)
     for (const middleware of this.middlewares) {
       if (middleware.beforeUpdate) {
-        enrichedParams = await middleware.beforeUpdate(enrichedParams, contextOptions)
+        params = await middleware.beforeUpdate(params, contextOptions)
       }
     }
-    return enrichedParams
+    return params
   }
 
-  private async afterUpdate(params: UpdateParams<FilterType, UpdateType, OptionsType & DriverOptionType>) {
+  private async afterUpdate(params: UpdateParams<T>) {
     const contextOptions = this.createContextOptions()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterUpdate) {
@@ -486,30 +428,29 @@ export abstract class AbstractDAO<
     }
   }
 
-  async updateOne(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
+  async updateOne(params: UpdateParams<T>): Promise<void> {
     const newParams = await this.beforeUpdate(params)
     await this._updateOne(newParams)
     await this.afterUpdate(newParams)
   }
 
-  async updateAll(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void> {
+  async updateAll(params: UpdateParams<T>): Promise<void> {
     const newParams = await this.beforeUpdate(params)
     await this._updateMany(newParams)
     await this.afterUpdate(newParams)
   }
 
-  private async beforeReplace(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<ReplaceParams<FilterType, InsertType, OptionsType & DriverOptionType>> {
+  private async beforeReplace(params: ReplaceParams<T>): Promise<ReplaceParams<T>> {
     const contextOptions = this.createContextOptions()
-    let enrichedParams = this.addOptions(params, this.driverOptions, this.options)
     for (const middleware of this.middlewares) {
       if (middleware.beforeReplace) {
-        enrichedParams = await middleware.beforeReplace(enrichedParams, contextOptions)
+        params = await middleware.beforeReplace(params, contextOptions)
       }
     }
-    return enrichedParams
+    return params
   }
 
-  private async afterReplace(params: ReplaceParams<FilterType, InsertType, OptionsType & DriverOptionType>): Promise<void> {
+  private async afterReplace(params: ReplaceParams<T>): Promise<void> {
     const contextOptions = this.createContextOptions()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterReplace) {
@@ -518,24 +459,23 @@ export abstract class AbstractDAO<
     }
   }
 
-  async replaceOne(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<void> {
+  async replaceOne(params: ReplaceParams<T>): Promise<void> {
     const newParams = await this.beforeReplace(params)
     await this._replaceOne(newParams)
     await this.afterReplace(newParams)
   }
 
-  private async beforeDelete(params: DeleteParams<FilterType, OptionsType>): Promise<DeleteParams<FilterType, OptionsType & DriverOptionType>> {
+  private async beforeDelete(params: DeleteParams<T>): Promise<DeleteParams<T>> {
     const contextOptions = this.createContextOptions()
-    let enrichedParams = this.addOptions(params, this.driverOptions, this.options)
     for (const middleware of this.middlewares) {
       if (middleware.beforeDelete) {
-        enrichedParams = await middleware.beforeDelete(enrichedParams, contextOptions)
+        params = await middleware.beforeDelete(params, contextOptions)
       }
     }
-    return enrichedParams
+    return params
   }
 
-  private async afterDelete(params: DeleteParams<FilterType, OptionsType & DriverOptionType>): Promise<void> {
+  private async afterDelete(params: DeleteParams<T>): Promise<void> {
     const contextOptions = this.createContextOptions()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterDelete) {
@@ -544,38 +484,34 @@ export abstract class AbstractDAO<
     }
   }
 
-  async deleteOne(params: DeleteParams<FilterType, OptionsType>): Promise<void> {
+  async deleteOne(params: DeleteParams<T>): Promise<void> {
     const newParams = await this.beforeDelete(params)
     await this._deleteOne(newParams)
     await this.afterDelete(newParams)
   }
 
-  async deleteAll(params: DeleteParams<FilterType, OptionsType>): Promise<void> {
+  async deleteAll(params: DeleteParams<T>): Promise<void> {
     const newParams = await this.beforeDelete(params)
     await this._deleteMany(newParams)
     await this.afterDelete(newParams)
   }
 
-  private addOptions<T extends { options?: OptionsType }>(params: T, driverOptions: DriverOptionType, options?: OptionsType): T & { options?: OptionsType & DriverOptionType } {
-    return { ...params, options: { ...options, ...driverOptions, ...params.options } }
-  }
-
-  private createContextOptions(): MiddlewareContext<ScalarsType, IDKey> {
-    return { schema: this.schema, idField: this.idField }
+  private createContextOptions(): MiddlewareContext<T> {
+    return { schema: this.schema, idField: this.idField, driver: this.driverOptions }
   }
 
   // -----------------------------------------------------------------------
   // ------------------------------ ABSTRACTS ------------------------------
   // -----------------------------------------------------------------------
-  protected abstract _find<P extends AnyProjection<ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<PartialDeep<ModelType>[]>
-  protected abstract _findOne<P extends AnyProjection<ProjectionType>>(params: FindOneParams<FilterType, P, OptionsType>): Promise<PartialDeep<ModelType> | null>
-  protected abstract _findPage<P extends AnyProjection<ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<{ totalCount: number; records: PartialDeep<ModelType>[] }>
-  protected abstract _exists(params: FilterParams<FilterType, OptionsType>): Promise<boolean>
-  protected abstract _count(params: FilterParams<FilterType, OptionsType>): Promise<number>
-  protected abstract _insertOne(params: InsertParams<InsertType, OptionsType>): Promise<Omit<ModelType, ExcludedFields>>
-  protected abstract _updateOne(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void>
-  protected abstract _updateMany(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void>
-  protected abstract _replaceOne(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<void>
-  protected abstract _deleteOne(params: DeleteParams<FilterType, OptionsType>): Promise<void>
-  protected abstract _deleteMany(params: DeleteParams<FilterType, OptionsType>): Promise<void>
+  protected abstract _find<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P>): Promise<PartialDeep<T['modelType']>[]>
+  protected abstract _findOne<P extends AnyProjection<T['projectionType']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['modelType']> | null>
+  protected abstract _findPage<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['modelType']>[] }>
+  protected abstract _exists(params: FilterParams<T>): Promise<boolean>
+  protected abstract _count(params: FilterParams<T>): Promise<number>
+  protected abstract _insertOne(params: InsertParams<T>): Promise<Omit<T['modelType'], T['exludedFields']>>
+  protected abstract _updateOne(params: UpdateParams<T>): Promise<void>
+  protected abstract _updateMany(params: UpdateParams<T>): Promise<void>
+  protected abstract _replaceOne(params: ReplaceParams<T>): Promise<void>
+  protected abstract _deleteOne(params: DeleteParams<T>): Promise<void>
+  protected abstract _deleteMany(params: DeleteParams<T>): Promise<void>
 }

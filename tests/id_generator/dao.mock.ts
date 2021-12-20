@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -48,10 +48,10 @@ export type AInsert = {
   value: number,
 };
 
-type ADAOAllParams<OptionType> = MongoDBDAOParams<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, AInsert, AUpdate, AExcludedFields, ASort, OptionType, types.Scalars>;
-export type ADAOParams<OptionType> = Omit<ADAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
+type ADAOGenerics<OptionType extends object> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, ASort, AInsert, AUpdate, AExcludedFields, OptionType, types.Scalars>;
+export type ADAOParams<OptionType extends object> = Omit<MongoDBDAOParams<ADAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class ADAO<OptionType extends object> extends AbstractMongoDBDAO<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, ASort, AInsert, AUpdate, AExcludedFields, OptionType, types.Scalars> {
+export class ADAO<OptionType extends object> extends AbstractMongoDBDAO<ADAOGenerics<OptionType>> {
   
   public constructor(params: ADAOParams<OptionType>){
     super({   
@@ -115,10 +115,10 @@ export type BInsert = {
   value: number,
 };
 
-type BDAOAllParams<OptionType> = MongoDBDAOParams<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BInsert, BUpdate, BExcludedFields, BSort, OptionType, types.Scalars>;
-export type BDAOParams<OptionType> = Omit<BDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
+type BDAOGenerics<OptionType extends object> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BSort, BInsert, BUpdate, BExcludedFields, OptionType, types.Scalars>;
+export type BDAOParams<OptionType extends object> = Omit<MongoDBDAOParams<BDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class BDAO<OptionType extends object> extends AbstractMongoDBDAO<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BSort, BInsert, BUpdate, BExcludedFields, OptionType, types.Scalars> {
+export class BDAO<OptionType extends object> extends AbstractMongoDBDAO<BDAOGenerics<OptionType>> {
   
   public constructor(params: BDAOParams<OptionType>){
     super({   
@@ -182,10 +182,10 @@ export type CInsert = {
   value: number,
 };
 
-type CDAOAllParams<OptionType> = MongoDBDAOParams<types.C, 'id', 'ID', 'user', CFilter, CProjection, CInsert, CUpdate, CExcludedFields, CSort, OptionType, types.Scalars>;
-export type CDAOParams<OptionType> = Omit<CDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
+type CDAOGenerics<OptionType extends object> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CProjection, CSort, CInsert, CUpdate, CExcludedFields, OptionType, types.Scalars>;
+export type CDAOParams<OptionType extends object> = Omit<MongoDBDAOParams<CDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class CDAO<OptionType extends object> extends AbstractMongoDBDAO<types.C, 'id', 'ID', 'user', CFilter, CProjection, CSort, CInsert, CUpdate, CExcludedFields, OptionType, types.Scalars> {
+export class CDAO<OptionType extends object> extends AbstractMongoDBDAO<CDAOGenerics<OptionType>> {
   
   public constructor(params: CDAOParams<OptionType>){
     super({   
@@ -248,10 +248,10 @@ export type DInsert = {
   value: number,
 };
 
-type DDAOAllParams<OptionType> = KnexJsDAOParams<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DInsert, DUpdate, DExcludedFields, DSort, OptionType, types.Scalars>;
-export type DDAOParams<OptionType> = Omit<DDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
+type DDAOGenerics<OptionType extends object> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DSort, DInsert, DUpdate, DExcludedFields, OptionType, types.Scalars>;
+export type DDAOParams<OptionType extends object> = Omit<KnexJsDAOParams<DDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class DDAO<OptionType extends object> extends AbstractKnexJsDAO<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DSort, DInsert, DUpdate, DExcludedFields, OptionType, types.Scalars> {
+export class DDAO<OptionType extends object> extends AbstractKnexJsDAO<DDAOGenerics<OptionType>> {
   
   public constructor(params: DDAOParams<OptionType>){
     super({   
@@ -315,10 +315,10 @@ export type EInsert = {
   value: number,
 };
 
-type EDAOAllParams<OptionType> = KnexJsDAOParams<types.E, 'id', 'ID', 'generator', EFilter, EProjection, EInsert, EUpdate, EExcludedFields, ESort, OptionType, types.Scalars>;
-export type EDAOParams<OptionType> = Omit<EDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
+type EDAOGenerics<OptionType extends object> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, EProjection, ESort, EInsert, EUpdate, EExcludedFields, OptionType, types.Scalars>;
+export type EDAOParams<OptionType extends object> = Omit<KnexJsDAOParams<EDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class EDAO<OptionType extends object> extends AbstractKnexJsDAO<types.E, 'id', 'ID', 'generator', EFilter, EProjection, ESort, EInsert, EUpdate, EExcludedFields, OptionType, types.Scalars> {
+export class EDAO<OptionType extends object> extends AbstractKnexJsDAO<EDAOGenerics<OptionType>> {
   
   public constructor(params: EDAOParams<OptionType>){
     super({   
@@ -382,10 +382,10 @@ export type FInsert = {
   value: number,
 };
 
-type FDAOAllParams<OptionType> = KnexJsDAOParams<types.F, 'id', 'ID', 'user', FFilter, FProjection, FInsert, FUpdate, FExcludedFields, FSort, OptionType, types.Scalars>;
-export type FDAOParams<OptionType> = Omit<FDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
+type FDAOGenerics<OptionType extends object> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FProjection, FSort, FInsert, FUpdate, FExcludedFields, OptionType, types.Scalars>;
+export type FDAOParams<OptionType extends object> = Omit<KnexJsDAOParams<FDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class FDAO<OptionType extends object> extends AbstractKnexJsDAO<types.F, 'id', 'ID', 'user', FFilter, FProjection, FSort, FInsert, FUpdate, FExcludedFields, OptionType, types.Scalars> {
+export class FDAO<OptionType extends object> extends AbstractKnexJsDAO<FDAOGenerics<OptionType>> {
   
   public constructor(params: FDAOParams<OptionType>){
     super({   
@@ -404,7 +404,7 @@ export class FDAO<OptionType extends object> extends AbstractKnexJsDAO<types.F, 
   
 }
 
-export type DAOContextParams<OptionsType> = {
+export type DAOContextParams<OptionsType extends object> = {
   options?: OptionsType
   overrides?: { 
     a?: Pick<Partial<ADAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>,
@@ -420,7 +420,7 @@ export type DAOContextParams<OptionsType> = {
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
-export class DAOContext<OptionType extends object = {}> extends AbstractDAOContext<types.Scalars, OptionType>  {
+export class DAOContext<OptionType extends object> extends AbstractDAOContext<types.Scalars, OptionType>  {
 
   private _a: ADAO<OptionType> | undefined;
   private _b: BDAO<OptionType> | undefined;

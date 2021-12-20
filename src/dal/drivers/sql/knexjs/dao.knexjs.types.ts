@@ -1,24 +1,27 @@
-import { DAOParams, IdGenerationStrategy } from '../../../dao/dao.types'
+import { DAOGenerics, DAOParams, IdGenerationStrategy } from '../../../dao/dao.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { Knex } from 'knex'
 
-export type KnexJsDAOParams<
-  ModelType extends object,
-  IDKey extends keyof Omit<ModelType, ExcludedFields>,
-  IDScalar extends keyof ScalarsType,
-  IdGeneration extends IdGenerationStrategy,
-  FilterType,
-  ProjectionType extends object,
-  InsertType extends object,
-  UpdateType,
-  ExcludedFields extends keyof ModelType,
-  SortType,
-  OptionsType,
-  ScalarsType extends DefaultModelScalars,
+export type KnexJsDAOGenerics<
+  ModelType extends object = any,
+  IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
+  IDScalar extends keyof ScalarsType = any,
+  IdGeneration extends IdGenerationStrategy = any,
+  FilterType = any,
+  ProjectionType extends object = any,
+  SortType = any,
+  InsertType extends object = any,
+  UpdateType = any,
+  ExcludedFields extends keyof ModelType = any,
+  OptionsType extends object = any,
+  DriverOptionType = any,
+  ScalarsType extends DefaultModelScalars = any,
 > = Omit<
-  DAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, { knex: Knex }, ScalarsType>,
-  'driverOptions'
-> & {
+  DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>,
+  'driverOptionType'
+> & { driverOptionType: { knex: Knex } }
+
+export type KnexJsDAOParams<T extends KnexJsDAOGenerics> = Omit<DAOParams<T>, 'driverOptions'> & {
   tableName: string
   knex: Knex<any, unknown[]>
 }

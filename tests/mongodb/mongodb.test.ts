@@ -15,13 +15,13 @@ import { v4 as uuidv4 } from 'uuid'
 let con: MongoClient
 let mongoServer: MongoMemoryServer
 let db: Db
-let dao: DAOContext
+let dao: DAOContext<{}>
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create()
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
-  dao = new DAOContext({
+  dao = new DAOContext<{}>({
     mongoDB: {
       default: db,
     },
@@ -541,34 +541,34 @@ test('update with undefined', async () => {
 // ------------------------------ REPLACE ---------------------------------
 // ------------------------------------------------------------------------
 test('simple replace', async () => {
-  let user: User | null = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  let user: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
   await dao.user.replaceOne({ filter: { id: user.id }, replace: { id: user.id, firstName: 'FirstName 1', live: true } })
-  user = await dao.user.findOne({ filter: { id: user!.id } })
+  const user1 = await dao.user.findOne({ filter: { id: user.id } })
 
-  expect(user).toBeDefined()
-  expect(user?.firstName).toBe('FirstName 1')
+  expect(user1).toBeDefined()
+  expect(user1?.firstName).toBe('FirstName 1')
 })
 
 // ------------------------------------------------------------------------
 // ------------------------------ DELETE ----------------------------------
 // ------------------------------------------------------------------------
 test('simple delete', async () => {
-  let user: User | null = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  let user: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
 
-  user = await dao.user.findOne({ filter: { id: user.id } })
-  expect(user).toBeDefined()
+  const user1 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user1).toBeDefined()
 
-  await dao.user.deleteOne({ filter: { id: user!.id } })
+  await dao.user.deleteOne({ filter: { id: user.id } })
 
-  user = await dao.user.findOne({ filter: { id: user!.id } })
-  expect(user).toBeNull()
+  const user2 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user2).toBeNull()
 })
 
 // ------------------------------------------------------------------------
 // --------------------------- GEOJSON FIELD ------------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve geojson field', async () => {
-  const iuser: User | null = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, localization: { latitude: 1.111, longitude: 2.222 } } })
+  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, localization: { latitude: 1.111, longitude: 2.222 } } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, localization: true } })
   expect(user).toBeDefined()
@@ -580,7 +580,7 @@ test('insert and retrieve geojson field', async () => {
 // --------------------------- DECIMAL FIELD ------------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve decimal field', async () => {
-  const iuser: User | null = await dao.user.insertOne({ record: { id: 'ID1', firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
+  const iuser: User = await dao.user.insertOne({ record: { id: 'ID1', firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
 
   /*const user1 = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amount: true } })
   expect(user1).toBeDefined()
@@ -602,7 +602,7 @@ test('insert and retrieve decimal field 2', async () => {
 })
 
 test('update and retrieve decimal field', async () => {
-  const iuser: User | null = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
+  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amount: true } })
   expect(user).toBeDefined()
@@ -616,7 +616,7 @@ test('update and retrieve decimal field', async () => {
 })
 
 test('insert and retrieve decimal array field', async () => {
-  const iuser: User | null = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amounts: [new BigNumber(1.02), new BigNumber(2.223)] } })
+  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amounts: [new BigNumber(1.02), new BigNumber(2.223)] } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amounts: true } })
   expect(user).toBeDefined()
@@ -629,7 +629,7 @@ test('insert and retrieve decimal array field', async () => {
 // ---------------------- LOCALIZED STRING FIELD --------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve localized string field', async () => {
-  const iuser: User | null = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
+  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, title: true } })
   expect(user).toBeDefined()
@@ -642,7 +642,7 @@ test('insert and retrieve localized string field', async () => {
 // ------------------------------------------------------------------------
 test('middleware', async () => {
   let operationCount = 0
-  const dao = new DAOContext({
+  const dao = new DAOContext<{}>({
     mongoDB: {
       default: db,
     },
@@ -718,9 +718,9 @@ test('middleware', async () => {
 })
 
 test('middleware options', async () => {
-  const dao = new DAOContext<{ testType: string }>({
+  const dao = new DAOContext<{ testType?: string; test2?: string }>({
     idGenerators: { ID: () => uuidv4() },
-    options: { testType: 'test1' },
+    options: { testType: 'test1', test2: 'no' },
     mongoDB: {
       default: db,
     },
@@ -730,6 +730,7 @@ test('middleware options', async () => {
           {
             beforeInsert: async (params) => {
               expect(params.options?.testType).toBe('test1')
+              expect(params.options?.test2).toBe('yes')
               expect(params.options?.testType).toBeDefined()
               return params
             },
@@ -738,7 +739,7 @@ test('middleware options', async () => {
       },
     },
   })
-  await dao.user.insertOne({ record: { live: true } })
+  await dao.user.insertOne({ record: { live: true }, options: {test2: 'yes'} })
 })
 
 test('middleware options overrides', async () => {
@@ -769,7 +770,7 @@ test('middleware options overrides', async () => {
 // ------------------------- COMPUTED FIELDS ------------------------------
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new DAOContext<{}>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -800,7 +801,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 })
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new DAOContext<{}>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -824,7 +825,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 })
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new DAOContext<{}>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -854,7 +855,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 })
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
-  const dao = new DAOContext({
+  const dao = new DAOContext<{}>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -882,7 +883,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 })
 
 test('computed fields (one dependency - deep level - one calculated)', async () => {
-  const dao = new DAOContext({
+  const dao = new DAOContext<{}>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -903,7 +904,7 @@ test('computed fields (one dependency - deep level - one calculated)', async () 
 })
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
-  const dao = new DAOContext({
+  const dao = new DAOContext<{}>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,

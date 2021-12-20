@@ -1,25 +1,12 @@
-import { IdGenerationStrategy } from '../dao.types'
+import { DAOGenerics } from '../dao.types'
 import { DAOMiddleware } from './middlewares.types'
 
-export function generateId<
-  ModelType extends object,
-  IDKey extends keyof Omit<ModelType, ExcludedFields>,
-  IDScalar extends keyof ScalarsType,
-  IdGeneration extends IdGenerationStrategy,
-  FilterType,
-  ProjectionType,
-  InsertType extends object,
-  UpdateType,
-  ExcludedFields extends keyof ModelType,
-  SortType,
-  OptionsType,
-  ScalarsType,
->(args: {
-  generator: () => ScalarsType[IDScalar]
-}): DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, ScalarsType> {
+export function generateId<T extends DAOGenerics>(args: {
+  generator: () => T['scalarsType'][T['idScalar']]
+}): DAOMiddleware<T> {
   return {
     beforeInsert: async (params, context) => {
-      if (!(context.idField in params.record)) {
+      if (!Object.keys(params.record).includes(context.idField)) {
         return { ...params, record: { ...params.record, [context.idField]: args.generator() } }
       }
       return params

@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -84,10 +84,10 @@ export type PostInsert = {
   views: number,
 };
 
-type PostDAOAllParams<OptionType> = KnexJsDAOParams<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostInsert, PostUpdate, PostExcludedFields, PostSort, OptionType, types.Scalars>;
-export type PostDAOParams<OptionType> = Omit<PostDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
+type PostDAOGenerics<OptionType extends object> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, OptionType, types.Scalars>;
+export type PostDAOParams<OptionType extends object> = Omit<KnexJsDAOParams<PostDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, OptionType, types.Scalars> {
+export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<PostDAOGenerics<OptionType>> {
   
   public constructor(params: PostDAOParams<OptionType>){
     super({   
@@ -201,10 +201,10 @@ export type UserInsert = {
   lastName?: string,
 };
 
-type UserDAOAllParams<OptionType> = KnexJsDAOParams<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserInsert, UserUpdate, UserExcludedFields, UserSort, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType> = Omit<UserDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
+type UserDAOGenerics<OptionType extends object> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, OptionType, types.Scalars>;
+export type UserDAOParams<OptionType extends object> = Omit<KnexJsDAOParams<UserDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, OptionType, types.Scalars> {
+export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<UserDAOGenerics<OptionType>> {
   
   public constructor(params: UserDAOParams<OptionType>){
     super({   
@@ -223,7 +223,7 @@ export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<types.
   
 }
 
-export type DAOContextParams<OptionsType> = {
+export type DAOContextParams<OptionsType extends object> = {
   options?: OptionsType
   overrides?: { 
     post?: Pick<Partial<PostDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>,
@@ -234,7 +234,7 @@ export type DAOContextParams<OptionsType> = {
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
-export class DAOContext<OptionType extends object = {}> extends AbstractDAOContext<types.Scalars, OptionType>  {
+export class DAOContext<OptionType extends object> extends AbstractDAOContext<types.Scalars, OptionType>  {
 
   private _post: PostDAO<OptionType> | undefined;
   private _user: UserDAO<OptionType> | undefined;
