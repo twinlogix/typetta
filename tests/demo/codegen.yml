@@ -20,6 +20,7 @@ generates:
         Password: string
   tests/demo/dao.mock.ts:
     config:
+      skipTypename: true
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
       namingConvention: keep

@@ -20,37 +20,31 @@ export type Scalars = {
 };
 
 export type A = {
-  __typename?: 'A';
   id: Scalars['MongoID'];
   value: Scalars['Int'];
 };
 
 export type B = {
-  __typename?: 'B';
   id: Scalars['ID'];
   value: Scalars['Int'];
 };
 
 export type C = {
-  __typename?: 'C';
   id: Scalars['ID'];
   value: Scalars['Int'];
 };
 
 export type D = {
-  __typename?: 'D';
   id: Scalars['IntAutoInc'];
   value: Scalars['Int'];
 };
 
 export type E = {
-  __typename?: 'E';
   id: Scalars['ID'];
   value: Scalars['Int'];
 };
 
 export type F = {
-  __typename?: 'F';
   id: Scalars['ID'];
   value: Scalars['Int'];
 };

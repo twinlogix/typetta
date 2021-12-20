@@ -12,6 +12,7 @@ generates:
           content: 'import { ObjectId } from "mongodb"'
       - 'typescript'
     config:
+      skipTypename: true
       namingConvention: keep
       scalars:
         JSON: any

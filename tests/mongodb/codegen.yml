@@ -23,6 +23,7 @@ generates:
       namingConvention: keep
       optionsType: '{ test: string, securityContext }'
       defaultIdGenerationStrategy: 'generator'
+      skipTypename: true
       scalars:
         Date: Date
         Decimal: BigNumber
