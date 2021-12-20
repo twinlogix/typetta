@@ -91,28 +91,28 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
     const changes = this.buildChanges(params.changes)
     const filter = this.buildFilter(params.filter)
-    await this.collection.updateOne(filter, { $set: changes }, { upsert: false, ignoreUndefined: true } as UpdateOptions)
+    await this.collection.updateOne(filter, { $set: changes }, { ...(params.updateOptions ?? {}), upsert: false, ignoreUndefined: true } as UpdateOptions)
   }
 
   protected async _updateMany(params: UpdateParams<T>): Promise<void> {
     const changes = this.buildChanges(params.changes)
     const filter = this.buildFilter(params.filter)
-    await this.collection.updateMany(filter, changes)
+    await this.collection.updateMany(filter, changes, params.updateOptions ?? {})
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
     const replace = this.modelToDb(params.replace)
     const filter = this.buildFilter(params.filter)
-    await this.collection.replaceOne(filter, replace)
+    await this.collection.replaceOne(filter, replace, params.replaceOptions ?? {})
   }
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
     const filter = this.buildFilter(params.filter)
-    await this.collection.deleteOne(filter)
+    await this.collection.deleteOne(filter, params.deleteOptions ?? {})
   }
 
   protected async _deleteMany(params: DeleteParams<T>): Promise<void> {
     const filter = this.buildFilter(params.filter)
-    await this.collection.deleteMany(filter)
+    await this.collection.deleteMany(filter, params.deleteOptions ?? {})
   }
 }

@@ -52,17 +52,20 @@ export type UpdateParams<T extends DAOGenerics> = {
   filter: T['filter']
   changes: T['update']
   options?: T['options']
+  updateOptions?: T['driverUpdateOptions']
 }
 
 export type ReplaceParams<T extends DAOGenerics> = {
   filter: T['filter']
   replace: T['insert']
   options?: T['options']
+  replaceOptions?: T['driverReplaceOptions']
 }
 
 export type DeleteParams<T extends DAOGenerics> = {
   filter: T['filter']
   options?: T['options']
+  deleteOptions?: T['driverDeleteOptions']
 }
 
 export type DAOParams<T extends DAOGenerics> = {
@@ -114,7 +117,10 @@ export type DAOGenerics<
   ScalarsType extends DefaultModelScalars = any,
   DriverFilterOptions = any,
   DriverFindOptions = any,
-  DriverInsertOptions = any
+  DriverInsertOptions = any,
+  DriverUpdateOptions = any,
+  DriverReplaceOptions = any,
+  DriverDeleteOptions = any
 > = {
   model: ModelType
   idKey: IDKey
@@ -133,4 +139,7 @@ export type DAOGenerics<
   driverFilterOptions: DriverFilterOptions
   driverFindOptions: DriverFindOptions
   driverInsertOptions: DriverInsertOptions
+  driverUpdateOptions: DriverUpdateOptions
+  driverReplaceOptions: DriverReplaceOptions
+  driverDeleteOptions: DriverDeleteOptions
 }
