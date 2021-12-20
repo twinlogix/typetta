@@ -1,5 +1,4 @@
 import { DefaultModelScalars } from '../..'
-import { ConditionalPartialBy } from '../../utils/utils'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { DAOAssociation } from './associations/associations.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
@@ -41,8 +40,8 @@ export type FindParams<FilterType, ProjectionType, SortType, OptionsType> = Find
   sorts?: SortType[]
 }
 
-export type InsertParams<ModelType, IDKey extends keyof Omit<ModelType, ExcludedFields>, ExcludedFields extends keyof ModelType, IdGeneration extends IdGenerationStrategy, OptionsType> = {
-  record: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IdGeneration>
+export type InsertParams<InsertType, OptionsType> = {
+  record: InsertType
   options?: OptionsType
 }
 
@@ -52,9 +51,9 @@ export type UpdateParams<FilterType, UpdateType, OptionsType> = {
   options?: OptionsType
 }
 
-export type ReplaceParams<FilterType, ModelType, ExcludedFields extends keyof ModelType, OptionsType> = {
+export type ReplaceParams<FilterType, InsertType, OptionsType> = {
   filter: FilterType
-  replace: Omit<ModelType, ExcludedFields>
+  replace: InsertType
   options?: OptionsType
 }
 
@@ -70,6 +69,7 @@ export type DAOParams<
   IdGeneration extends IdGenerationStrategy,
   FilterType,
   ProjectionType extends object,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   SortType,
@@ -87,7 +87,7 @@ export type DAOParams<
   driverOptions: DriverOptionsType
   pageSize?: number
   associations?: DAOAssociation[]
-  middlewares?: DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, AnyProjection<ProjectionType>, UpdateType, ExcludedFields, SortType, OptionsType & DriverOptionsType, ScalarsType>[]
+  middlewares?: DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, AnyProjection<ProjectionType>, InsertType, UpdateType, ExcludedFields, SortType, OptionsType & DriverOptionsType, ScalarsType>[]
 }
 
 export type MiddlewareContext<ScalarsType, IDKey> = { schema: Schema<ScalarsType>; idField: IDKey } // TODO: add DAOContext? How?
@@ -101,6 +101,7 @@ export interface DAO<
   FilterType,
   ProjectionType extends object,
   SortType,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   OptionsType,
@@ -113,10 +114,10 @@ export interface DAO<
   exists(params: FilterParams<FilterType, OptionsType>): Promise<boolean>
   count(params?: FilterParams<FilterType, OptionsType>): Promise<number>
   checkReferences(records: PartialDeep<ModelType> | PartialDeep<ModelType>[], options?: OptionsType): Promise<ReferenceChecksResponse<ModelType>>
-  insertOne(params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>): Promise<Omit<ModelType, ExcludedFields>>
+  insertOne(params: InsertParams<InsertType, OptionsType>): Promise<Omit<ModelType, ExcludedFields>>
   updateOne(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void>
   updateAll(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void>
-  replaceOne(params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>): Promise<void>
+  replaceOne(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<void>
   deleteOne(params: DeleteParams<FilterType, OptionsType>): Promise<void>
   deleteAll(params: DeleteParams<FilterType, OptionsType>): Promise<void>
 }

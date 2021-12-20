@@ -44,10 +44,14 @@ export type AUpdate = {
   'value'?: number
 };
 
-type ADAOAllParams<OptionType> = MongoDBDAOParams<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, AUpdate, AExcludedFields, ASort, OptionType, types.Scalars>;
+export type AInsert = {
+  value: number,
+};
+
+type ADAOAllParams<OptionType> = MongoDBDAOParams<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, AInsert, AUpdate, AExcludedFields, ASort, OptionType, types.Scalars>;
 export type ADAOParams<OptionType> = Omit<ADAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
-export class ADAO<OptionType extends object> extends AbstractMongoDBDAO<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, ASort, AUpdate, AExcludedFields, OptionType, types.Scalars> {
+export class ADAO<OptionType extends object> extends AbstractMongoDBDAO<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, ASort, AInsert, AUpdate, AExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: ADAOParams<OptionType>){
     super({   
@@ -106,10 +110,15 @@ export type BUpdate = {
   'value'?: number
 };
 
-type BDAOAllParams<OptionType> = MongoDBDAOParams<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BUpdate, BExcludedFields, BSort, OptionType, types.Scalars>;
+export type BInsert = {
+  id?: string,
+  value: number,
+};
+
+type BDAOAllParams<OptionType> = MongoDBDAOParams<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BInsert, BUpdate, BExcludedFields, BSort, OptionType, types.Scalars>;
 export type BDAOParams<OptionType> = Omit<BDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
-export class BDAO<OptionType extends object> extends AbstractMongoDBDAO<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BSort, BUpdate, BExcludedFields, OptionType, types.Scalars> {
+export class BDAO<OptionType extends object> extends AbstractMongoDBDAO<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BSort, BInsert, BUpdate, BExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: BDAOParams<OptionType>){
     super({   
@@ -168,10 +177,15 @@ export type CUpdate = {
   'value'?: number
 };
 
-type CDAOAllParams<OptionType> = MongoDBDAOParams<types.C, 'id', 'ID', 'user', CFilter, CProjection, CUpdate, CExcludedFields, CSort, OptionType, types.Scalars>;
+export type CInsert = {
+  id: string,
+  value: number,
+};
+
+type CDAOAllParams<OptionType> = MongoDBDAOParams<types.C, 'id', 'ID', 'user', CFilter, CProjection, CInsert, CUpdate, CExcludedFields, CSort, OptionType, types.Scalars>;
 export type CDAOParams<OptionType> = Omit<CDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
-export class CDAO<OptionType extends object> extends AbstractMongoDBDAO<types.C, 'id', 'ID', 'user', CFilter, CProjection, CSort, CUpdate, CExcludedFields, OptionType, types.Scalars> {
+export class CDAO<OptionType extends object> extends AbstractMongoDBDAO<types.C, 'id', 'ID', 'user', CFilter, CProjection, CSort, CInsert, CUpdate, CExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: CDAOParams<OptionType>){
     super({   
@@ -230,10 +244,14 @@ export type DUpdate = {
   'value'?: number
 };
 
-type DDAOAllParams<OptionType> = KnexJsDAOParams<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DUpdate, DExcludedFields, DSort, OptionType, types.Scalars>;
+export type DInsert = {
+  value: number,
+};
+
+type DDAOAllParams<OptionType> = KnexJsDAOParams<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DInsert, DUpdate, DExcludedFields, DSort, OptionType, types.Scalars>;
 export type DDAOParams<OptionType> = Omit<DDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
-export class DDAO<OptionType extends object> extends AbstractKnexJsDAO<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DSort, DUpdate, DExcludedFields, OptionType, types.Scalars> {
+export class DDAO<OptionType extends object> extends AbstractKnexJsDAO<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DSort, DInsert, DUpdate, DExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: DDAOParams<OptionType>){
     super({   
@@ -292,10 +310,15 @@ export type EUpdate = {
   'value'?: number
 };
 
-type EDAOAllParams<OptionType> = KnexJsDAOParams<types.E, 'id', 'ID', 'generator', EFilter, EProjection, EUpdate, EExcludedFields, ESort, OptionType, types.Scalars>;
+export type EInsert = {
+  id?: string,
+  value: number,
+};
+
+type EDAOAllParams<OptionType> = KnexJsDAOParams<types.E, 'id', 'ID', 'generator', EFilter, EProjection, EInsert, EUpdate, EExcludedFields, ESort, OptionType, types.Scalars>;
 export type EDAOParams<OptionType> = Omit<EDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
-export class EDAO<OptionType extends object> extends AbstractKnexJsDAO<types.E, 'id', 'ID', 'generator', EFilter, EProjection, ESort, EUpdate, EExcludedFields, OptionType, types.Scalars> {
+export class EDAO<OptionType extends object> extends AbstractKnexJsDAO<types.E, 'id', 'ID', 'generator', EFilter, EProjection, ESort, EInsert, EUpdate, EExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: EDAOParams<OptionType>){
     super({   
@@ -354,10 +377,15 @@ export type FUpdate = {
   'value'?: number
 };
 
-type FDAOAllParams<OptionType> = KnexJsDAOParams<types.F, 'id', 'ID', 'user', FFilter, FProjection, FUpdate, FExcludedFields, FSort, OptionType, types.Scalars>;
+export type FInsert = {
+  id: string,
+  value: number,
+};
+
+type FDAOAllParams<OptionType> = KnexJsDAOParams<types.F, 'id', 'ID', 'user', FFilter, FProjection, FInsert, FUpdate, FExcludedFields, FSort, OptionType, types.Scalars>;
 export type FDAOParams<OptionType> = Omit<FDAOAllParams<OptionType>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>;
 
-export class FDAO<OptionType extends object> extends AbstractKnexJsDAO<types.F, 'id', 'ID', 'user', FFilter, FProjection, FSort, FUpdate, FExcludedFields, OptionType, types.Scalars> {
+export class FDAO<OptionType extends object> extends AbstractKnexJsDAO<types.F, 'id', 'ID', 'user', FFilter, FProjection, FSort, FInsert, FUpdate, FExcludedFields, OptionType, types.Scalars> {
   
   public constructor(params: FDAOParams<OptionType>){
     super({   

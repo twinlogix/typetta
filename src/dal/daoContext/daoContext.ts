@@ -18,7 +18,7 @@ export abstract class AbstractDAOContext<ScalarsType extends DefaultModelScalars
     this.options = args?.options
   }
 
-  public dao(daoName: string): AbstractDAO<any, any, any, any, any, any, any, any, never, any, any, any> {
+  public dao(daoName: string): AbstractDAO<any, any, any, any, any, any, any, any, any, never, any, any, any> {
     return (this as any)[daoName]
   }
 }

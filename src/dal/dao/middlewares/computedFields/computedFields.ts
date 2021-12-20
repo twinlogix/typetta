@@ -16,7 +16,7 @@ export function computedField<
   fieldsProjection: P2
   requiredProjection: P1
   compute: (record: ModelProjection<ModelType, ProjectionType, P1>) => Promise<PartialDeep<ModelType>>
-}): DAOMiddleware<ModelType, IDKey, any, any, AnyProjection<ProjectionType>, any, ExcludedFields, any, any, any> {
+}): DAOMiddleware<ModelType, IDKey, any, any, AnyProjection<ProjectionType>, any, any, ExcludedFields, any, any, any> {
   return {
     beforeFind: projectionDependency<ModelType, P1, P2, ProjectionType, IDKey, ExcludedFields>(args).beforeFind,
     afterFind: async (findParams, records) => {

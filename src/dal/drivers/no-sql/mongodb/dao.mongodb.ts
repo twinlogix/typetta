@@ -1,5 +1,4 @@
 import { transformObject } from '../../../../generation/utils'
-import { ConditionalPartialBy } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, IdGenerationStrategy } from '../../../dao/dao.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
@@ -18,17 +17,18 @@ export class AbstractMongoDBDAO<
   FilterType,
   ProjectionType extends object,
   SortType,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   OptionsType extends object,
   ScalarsType extends DefaultModelScalars,
-> extends AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, UpdateType, ExcludedFields, OptionsType, { collection: Collection }, ScalarsType> {
+> extends AbstractDAO<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, { collection: Collection }, ScalarsType> {
   protected collection: Collection
 
   protected constructor({
     collection,
     ...params
-  }: MongoDBDAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, UpdateType, ExcludedFields, SortType, OptionsType, ScalarsType>) {
+  }: MongoDBDAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, ScalarsType>) {
     super({ ...params, driverOptions: { collection } })
     this.collection = collection
   }
@@ -41,7 +41,7 @@ export class AbstractMongoDBDAO<
     return transformObject(this.daoContext.adapters.mongoDB, 'dbToModel', object, this.schema)
   }
 
-  private modelToDb(object: ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IdGeneration> | UpdateType): OptionalId<Document> {
+  private modelToDb(object: InsertType | UpdateType): OptionalId<Document> {
     return transformObject(this.daoContext.adapters.mongoDB, 'modelToDB', object, this.schema)
   }
 
@@ -98,7 +98,7 @@ export class AbstractMongoDBDAO<
     return this.collection.countDocuments(filter)
   }
 
-  protected async _insertOne(params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>): Promise<Omit<ModelType, ExcludedFields>> {
+  protected async _insertOne(params: InsertParams<InsertType, OptionsType>): Promise<Omit<ModelType, ExcludedFields>> {
     const record = this.modelToDb(params.record)
     const result = await this.collection.insertOne(record)
     const inserted = await this.collection.findOne(result.insertedId)
@@ -117,7 +117,7 @@ export class AbstractMongoDBDAO<
     await this.collection.updateMany(filter, changes)
   }
 
-  protected async _replaceOne(params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>): Promise<void> {
+  protected async _replaceOne(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<void> {
     const replace = this.modelToDb(params.replace)
     const filter = this.buildFilter(params.filter)
     await this.collection.replaceOne(filter, replace)

@@ -8,12 +8,15 @@ export function generateId<
   IdGeneration extends IdGenerationStrategy,
   FilterType,
   ProjectionType,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   SortType,
   OptionsType,
   ScalarsType,
->(args: { generator: () => ScalarsType[IDScalar] }): DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, UpdateType, ExcludedFields, SortType, OptionsType, ScalarsType> {
+>(args: {
+  generator: () => ScalarsType[IDScalar]
+}): DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, ScalarsType> {
   return {
     beforeInsert: async (params, context) => {
       if (!(context.idField in params.record)) {

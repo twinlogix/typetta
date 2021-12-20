@@ -37,18 +37,31 @@ export abstract class AbstractDAO<
   FilterType,
   ProjectionType extends object,
   SortType,
+  InsertType extends object,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   OptionsType extends object,
   DriverOptionType,
   ScalarsType extends DefaultModelScalars,
-> implements DAO<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, SortType, UpdateType, ExcludedFields, OptionsType>
+> implements DAO<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType>
 {
   protected idField: IDKey
   protected idGeneration: IdGeneration
   protected daoContext: AbstractDAOContext<ScalarsType, OptionsType>
   protected associations: DAOAssociation[]
-  protected middlewares: DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, AnyProjection<ProjectionType>, UpdateType, ExcludedFields, SortType, OptionsType & DriverOptionType, ScalarsType>[]
+  protected middlewares: DAOMiddleware<
+    ModelType,
+    IDKey,
+    IdGeneration,
+    FilterType,
+    AnyProjection<ProjectionType>,
+    InsertType,
+    UpdateType,
+    ExcludedFields,
+    SortType,
+    OptionsType & DriverOptionType,
+    ScalarsType
+  >[]
   protected pageSize: number
   protected resolvers: { [key: string]: DAOResolver | undefined }
   protected dataLoaders: Map<string, DataLoader<ModelType[IDKey], ModelType[] | null>>
@@ -56,7 +69,7 @@ export abstract class AbstractDAO<
   protected driverOptions: DriverOptionType
   protected schema: Schema<ScalarsType>
   protected idGenerator?: () => ScalarsType[IDScalar]
-  public apiV1: DAOWrapperAPIv1<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>
+  public apiV1: DAOWrapperAPIv1<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>
 
   protected constructor({
     idField,
@@ -70,7 +83,7 @@ export abstract class AbstractDAO<
     schema,
     options,
     driverOptions,
-  }: DAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, UpdateType, ExcludedFields, SortType, OptionsType, DriverOptionType, ScalarsType>) {
+  }: DAOParams<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, InsertType, UpdateType, ExcludedFields, SortType, OptionsType, DriverOptionType, ScalarsType>) {
     this.dataLoaders = new Map<string, DataLoader<ModelType[IDKey], ModelType[]>>()
     this.idField = idField
     this.idGenerator = idGenerator
@@ -99,10 +112,21 @@ export abstract class AbstractDAO<
     this.options = options
     this.driverOptions = driverOptions
     this.schema = schema
-    this.apiV1 = new DAOWrapperAPIv1<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>(
-      this,
-      idField,
-    )
+    this.apiV1 = new DAOWrapperAPIv1<
+      ModelType,
+      IDKey,
+      IDScalar,
+      IdGeneration,
+      FilterType,
+      ProjectionType,
+      SortType,
+      InsertType,
+      UpdateType,
+      ExcludedFields,
+      OptionsType,
+      DriverOptionType,
+      ScalarsType
+    >(this, idField)
   }
 
   protected async beforeFind(
@@ -415,9 +439,7 @@ export abstract class AbstractDAO<
     this.resolvers[association.field] = resolver
   }
 
-  private async beforeInsert(
-    params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>,
-  ): Promise<InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType & DriverOptionType>> {
+  private async beforeInsert(params: InsertParams<InsertType, OptionsType>): Promise<InsertParams<InsertType, OptionsType & DriverOptionType>> {
     const contextOptions = this.createContextOptions()
     let enrichedParams = this.addOptions(params, this.driverOptions, this.options)
     for (const middleware of this.middlewares) {
@@ -428,10 +450,7 @@ export abstract class AbstractDAO<
     return enrichedParams
   }
 
-  private async afterInsert(
-    params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType & DriverOptionType>,
-    result: Omit<ModelType, ExcludedFields>,
-  ): Promise<Omit<ModelType, ExcludedFields>> {
+  private async afterInsert(params: InsertParams<InsertType, OptionsType & DriverOptionType>, result: Omit<ModelType, ExcludedFields>): Promise<Omit<ModelType, ExcludedFields>> {
     const contextOptions = this.createContextOptions()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterInsert) {
@@ -441,7 +460,7 @@ export abstract class AbstractDAO<
     return result
   }
 
-  async insertOne(params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>): Promise<Omit<ModelType, ExcludedFields>> {
+  async insertOne(params: InsertParams<InsertType, OptionsType>): Promise<Omit<ModelType, ExcludedFields>> {
     const newParams = await this.beforeInsert(params)
     const result = await this._insertOne(newParams)
     return await this.afterInsert(newParams, result)
@@ -479,9 +498,7 @@ export abstract class AbstractDAO<
     await this.afterUpdate(newParams)
   }
 
-  private async beforeReplace(
-    params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>,
-  ): Promise<ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType & DriverOptionType>> {
+  private async beforeReplace(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<ReplaceParams<FilterType, InsertType, OptionsType & DriverOptionType>> {
     const contextOptions = this.createContextOptions()
     let enrichedParams = this.addOptions(params, this.driverOptions, this.options)
     for (const middleware of this.middlewares) {
@@ -492,7 +509,7 @@ export abstract class AbstractDAO<
     return enrichedParams
   }
 
-  private async afterReplace(params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType & DriverOptionType>): Promise<void> {
+  private async afterReplace(params: ReplaceParams<FilterType, InsertType, OptionsType & DriverOptionType>): Promise<void> {
     const contextOptions = this.createContextOptions()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterReplace) {
@@ -501,7 +518,7 @@ export abstract class AbstractDAO<
     }
   }
 
-  async replaceOne(params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>): Promise<void> {
+  async replaceOne(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<void> {
     const newParams = await this.beforeReplace(params)
     await this._replaceOne(newParams)
     await this.afterReplace(newParams)
@@ -555,10 +572,10 @@ export abstract class AbstractDAO<
   protected abstract _findPage<P extends AnyProjection<ProjectionType>>(params: FindParams<FilterType, P, SortType, OptionsType>): Promise<{ totalCount: number; records: PartialDeep<ModelType>[] }>
   protected abstract _exists(params: FilterParams<FilterType, OptionsType>): Promise<boolean>
   protected abstract _count(params: FilterParams<FilterType, OptionsType>): Promise<number>
-  protected abstract _insertOne(params: InsertParams<ModelType, IDKey, ExcludedFields, IdGeneration, OptionsType>): Promise<Omit<ModelType, ExcludedFields>>
+  protected abstract _insertOne(params: InsertParams<InsertType, OptionsType>): Promise<Omit<ModelType, ExcludedFields>>
   protected abstract _updateOne(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void>
   protected abstract _updateMany(params: UpdateParams<FilterType, UpdateType, OptionsType>): Promise<void>
-  protected abstract _replaceOne(params: ReplaceParams<FilterType, ModelType, ExcludedFields, OptionsType>): Promise<void>
+  protected abstract _replaceOne(params: ReplaceParams<FilterType, InsertType, OptionsType>): Promise<void>
   protected abstract _deleteOne(params: DeleteParams<FilterType, OptionsType>): Promise<void>
   protected abstract _deleteMany(params: DeleteParams<FilterType, OptionsType>): Promise<void>
 }
