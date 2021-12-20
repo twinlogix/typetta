@@ -2,6 +2,7 @@ import { ConditionalPartialBy } from '../../../../utils/utils'
 import { IdGenerationStrategy } from '../../dao.types'
 import { DAOMiddleware } from '../middlewares.types'
 import { PartialDeep } from 'type-fest'
+import { AnyProjection } from '../../projections/projections.types'
 
 export function securityPolicy<
   SecurityContext,
@@ -9,17 +10,17 @@ export function securityPolicy<
   IDKey extends keyof Omit<ModelType, ExcludedFields>,
   IdGeneration extends IdGenerationStrategy,
   FilterType,
-  ProjectionType extends object,
+  ProjectionType,
   UpdateType,
   ExcludedFields extends keyof ModelType,
   OptionsType extends { securityContext: SecurityContext },
->(args: {
-  secureFilters?: (filter?: FilterType, securityContext?: SecurityContext) => Promise<FilterType | undefined>
-  secureProjections?: (filter?: FilterType, projections?: ProjectionType, securityContext?: SecurityContext) => Promise<ProjectionType | undefined>
-  secureReturnedRecords?: (records: PartialDeep<ModelType>[], filter?: FilterType, projections?: ProjectionType, securityContext?: SecurityContext) => Promise<PartialDeep<ModelType>[]>
-  secureNewRecord?: <T extends Omit<ModelType, ExcludedFields> | ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IdGeneration>>(record: T, securityContext?: SecurityContext) => Promise<T>
-  secureChanges?: (changes: UpdateType, filter?: FilterType, securityContext?: SecurityContext) => Promise<UpdateType>
-}): DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, UpdateType, ExcludedFields, any, OptionsType, any> {
+  >(args: {
+    secureFilters?: (filter?: FilterType, securityContext?: SecurityContext) => Promise<FilterType | undefined>
+    secureProjections?: (filter?: FilterType, projections?: ProjectionType, securityContext?: SecurityContext) => Promise<ProjectionType | undefined>
+    secureReturnedRecords?: (records: PartialDeep<ModelType>[], filter?: FilterType, projections?: ProjectionType, securityContext?: SecurityContext) => Promise<PartialDeep<ModelType>[]>
+    secureNewRecord?: <T extends Omit<ModelType, ExcludedFields> | ConditionalPartialBy<Omit<ModelType, ExcludedFields>, IDKey, IdGeneration>>(record: T, securityContext?: SecurityContext) => Promise<T>
+    secureChanges?: (changes: UpdateType, filter?: FilterType, securityContext?: SecurityContext) => Promise<UpdateType>
+  }): DAOMiddleware<ModelType, IDKey, IdGeneration, FilterType, ProjectionType, UpdateType, ExcludedFields, any, OptionsType, any> {
   return {
     beforeFind: async (params) => {
       return {
