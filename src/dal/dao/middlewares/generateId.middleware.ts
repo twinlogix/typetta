@@ -2,7 +2,7 @@ import { DAOGenerics } from '../dao.types'
 import { DAOMiddleware } from './middlewares.types'
 
 export function generateId<T extends DAOGenerics>(args: {
-  generator: () => T['scalarsType'][T['idScalar']]
+  generator: () => T['scalars'][T['idScalar']]
 }): DAOMiddleware<T> {
   return {
     beforeInsert: async (params, context) => {

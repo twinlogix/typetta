@@ -3,9 +3,9 @@ import { PartialDeep } from 'type-fest'
 
 export type DAOMiddleware<T extends DAOGenerics> = {
   beforeFind?: (params: FindParams<T>, context: MiddlewareContext<T>) => Promise<FindParams<T>>
-  afterFind?: (params: FindParams<T>, records: PartialDeep<T['modelType']>[], context: MiddlewareContext<T>) => Promise<PartialDeep<T['modelType']>[]>
+  afterFind?: (params: FindParams<T>, records: PartialDeep<T['model']>[], context: MiddlewareContext<T>) => Promise<PartialDeep<T['model']>[]>
   beforeInsert?: (params: InsertParams<T>, context: MiddlewareContext<T>) => Promise<InsertParams<T>>
-  afterInsert?: (params: InsertParams<T>, record: T['insertType'], context: MiddlewareContext<T>) => Promise<T['insertType']>
+  afterInsert?: (params: InsertParams<T>, record: T['insert'], context: MiddlewareContext<T>) => Promise<T['insert']>
   beforeUpdate?: (params: UpdateParams<T>, context: MiddlewareContext<T>) => Promise<UpdateParams<T>>
   afterUpdate?: (params: UpdateParams<T>, context: MiddlewareContext<T>) => Promise<void>
   beforeReplace?: (params: ReplaceParams<T>, context: MiddlewareContext<T>) => Promise<ReplaceParams<T>>

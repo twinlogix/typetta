@@ -14,10 +14,10 @@ export type MongoDBDAOGenerics<
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   OptionsType extends object = any,
-  DriverOptionType = any,
+  DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
 > = Omit<
-  DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType>,
+  DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverContext, ScalarsType>,
   'driverOptionType'
 > & { driverOptionType: { collection: Collection } }
 

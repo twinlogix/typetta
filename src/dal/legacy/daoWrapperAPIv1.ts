@@ -10,81 +10,81 @@ export class DAOWrapperAPIv1<T extends DAOGenerics> {
     this.idField = idField
   }
 
-  protected idFilter<V extends Pick<T['modelType'], T['idKey']>>(model: V): T['filterType'] {
-    return { [this.idField]: model[this.idField] } as unknown as T['filterType']
+  protected idFilter<V extends Pick<T['model'], T['idKey']>>(model: V): T['filter'] {
+    return { [this.idField]: model[this.idField] } as unknown as T['filter']
   }
 
-  async find<P extends AnyProjection<T['projectionType']>>(
-    filter: T['filterType'],
+  async find<P extends AnyProjection<T['projection']>>(
+    filter: T['filter'],
     projection?: P,
-    sorts?: T['sortType'] | T['sortType'][],
+    sorts?: T['sort'] | T['sort'][],
     start?: number,
     limit?: number,
-    options?: T['optionsType'] & T['driverOptionType'],
-  ): Promise<ModelProjection<T['modelType'], T['projectionType'], P>[]> {
+    options?: T['options'] & T['driverContext'],
+  ): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
     return this.apiV2.findAll({ filter, projection, sorts: sorts ? (Array.isArray(sorts) ? sorts : [sorts]) : [], start, limit, options })
   }
 
-  async findPage<P extends AnyProjection<T['projectionType']>>(
-    filter: T['filterType'],
+  async findPage<P extends AnyProjection<T['projection']>>(
+    filter: T['filter'],
     projection?: P,
-    sorts?: T['sortType'],
+    sorts?: T['sort'],
     start?: number,
     limit?: number,
-    options?: T['optionsType'] & T['driverOptionType'],
-  ): Promise<{ totalCount: number; records: ModelProjection<T['modelType'], T['projectionType'], P>[] }> {
+    options?: T['options'] & T['driverContext'],
+  ): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }> {
     return this.apiV2.findPage({ filter, projection, sorts: sorts ? (Array.isArray(sorts) ? sorts : [sorts]) : [], start, limit, options })
   }
 
-  async findOne<P extends AnyProjection<T['projectionType']>>(
-    filter: T['filterType'],
+  async findOne<P extends AnyProjection<T['projection']>>(
+    filter: T['filter'],
     projection?: P,
-    options?: T['optionsType'] & T['driverOptionType'],
-  ): Promise<ModelProjection<T['modelType'], T['projectionType'], P> | null> {
+    options?: T['options'] & T['driverContext'],
+  ): Promise<ModelProjection<T['model'], T['projection'], P> | null> {
     return this.apiV2.findOne({ filter, projection, options })
   }
 
-  async exists(filter?: T['filterType'], options?: T['optionsType'] & T['driverOptionType']): Promise<boolean> {
+  async exists(filter?: T['filter'], options?: T['options'] & T['driverContext']): Promise<boolean> {
     return this.apiV2.exists({ filter, options })
   }
 
-  async count(filter?: T['filterType'], options?: T['optionsType'] & T['driverOptionType']): Promise<number> {
+  async count(filter?: T['filter'], options?: T['options'] & T['driverContext']): Promise<number> {
     return this.apiV2.count({ filter, options })
   }
 
-  async insert(record: T['insertType'], options?: T['optionsType'] & T['driverOptionType']): Promise<Omit<T['modelType'], T['exludedFields']>> {
+  async insert(record: T['insert'], options?: T['options'] & T['driverContext']): Promise<Omit<T['model'], T['exludedFields']>> {
     return this.apiV2.insertOne({ record, options })
   }
 
-  async update<V extends Pick<T['modelType'], T['idKey']>>(record: V, changes: T['updateType'], options?: T['optionsType'] & T['driverOptionType']): Promise<void> {
+  async update<V extends Pick<T['model'], T['idKey']>>(record: V, changes: T['update'], options?: T['options'] & T['driverContext']): Promise<void> {
     return this.apiV2.updateOne({ filter: this.idFilter(record), changes, options })
   }
 
-  async updateOne(filter: T['filterType'], changes: T['updateType'], options?: T['optionsType'] & T['driverOptionType']): Promise<void> {
+  async updateOne(filter: T['filter'], changes: T['update'], options?: T['options'] & T['driverContext']): Promise<void> {
     return this.apiV2.updateOne({ filter, changes, options })
   }
 
-  async updateMany(filter: T['filterType'], changes: T['updateType'], options?: T['optionsType'] & T['driverOptionType']): Promise<void> {
+  async updateMany(filter: T['filter'], changes: T['update'], options?: T['options'] & T['driverContext']): Promise<void> {
     return this.apiV2.updateAll({ filter, changes, options })
   }
 
-  async replace<V extends Pick<T['modelType'], T['idKey']>>(record: V, replace: T['insertType'], options?: T['optionsType'] & T['driverOptionType']): Promise<void> {
+  async replace<V extends Pick<T['model'], T['idKey']>>(record: V, replace: T['insert'], options?: T['options'] & T['driverContext']): Promise<void> {
     return this.apiV2.replaceOne({ filter: this.idFilter(record), replace, options })
   }
 
-  async replaceOne(filter: T['filterType'], replace: T['insertType'], options?: T['optionsType'] & T['driverOptionType']): Promise<void> {
+  async replaceOne(filter: T['filter'], replace: T['insert'], options?: T['options'] & T['driverContext']): Promise<void> {
     return this.apiV2.replaceOne({ filter, replace, options })
   }
 
-  async delete<V extends Pick<T['modelType'], T['idKey']>>(record: V, options?: T['optionsType'] & T['driverOptionType']): Promise<void> {
+  async delete<V extends Pick<T['model'], T['idKey']>>(record: V, options?: T['options'] & T['driverContext']): Promise<void> {
     return this.apiV2.deleteOne({ filter: this.idFilter(record), options })
   }
 
-  async deleteOne(filter: T['filterType'], options?: T['optionsType'] & T['driverOptionType']): Promise<void> {
+  async deleteOne(filter: T['filter'], options?: T['options'] & T['driverContext']): Promise<void> {
     return this.apiV2.deleteOne({ filter, options })
   }
 
-  async deleteMany(filter: T['filterType'], options?: T['optionsType'] & T['driverOptionType']): Promise<void> {
+  async deleteMany(filter: T['filter'], options?: T['options'] & T['driverContext']): Promise<void> {
     return this.apiV2.deleteAll({ filter, options })
   }
 }

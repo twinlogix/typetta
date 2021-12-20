@@ -27,39 +27,39 @@ export type DAOResolver = {
 }
 
 export type FilterParams<T extends DAOGenerics> = {
-  filter?: T['filterType']
-  options?: T['optionsType']
+  filter?: T['filter']
+  options?: T['options']
 }
 
-export type FindOneParams<T extends DAOGenerics, P = T['projectionType']> = FilterParams<T> & {
+export type FindOneParams<T extends DAOGenerics, P = T['projection']> = FilterParams<T> & {
   projection?: P
 }
-export type FindParams<T extends DAOGenerics, P = T['projectionType']> = FindOneParams<T, P> & {
+export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
   start?: number
   limit?: number
-  sorts?: T['sortType'][]
+  sorts?: T['sort'][]
 }
 
 export type InsertParams<T extends DAOGenerics> = {
-  record: T['insertType']
-  options?: T['optionsType']
+  record: T['insert']
+  options?: T['options']
 }
 
 export type UpdateParams<T extends DAOGenerics> = {
-  filter: T['filterType']
-  changes: T['updateType']
-  options?: T['optionsType'] & T['driverOptionType']
+  filter: T['filter']
+  changes: T['update']
+  options?: T['options'] & T['driverContext']
 }
 
 export type ReplaceParams<T extends DAOGenerics> = {
-  filter: T['filterType']
-  replace: T['insertType']
-  options?: T['optionsType'] & T['driverOptionType']
+  filter: T['filter']
+  replace: T['insert']
+  options?: T['options'] & T['driverContext']
 }
 
 export type DeleteParams<T extends DAOGenerics> = {
-  filter: T['filterType']
-  options?: T['optionsType'] & T['driverOptionType']
+  filter: T['filter']
+  options?: T['options'] & T['driverContext']
 }
 
 export type DAOParams<T extends DAOGenerics> = {
@@ -67,27 +67,27 @@ export type DAOParams<T extends DAOGenerics> = {
   idScalar: T['idScalar']
   idGeneration: T['idGeneration']
   idGenerator?: () => T['idScalar'][T['idScalar']]
-  daoContext: AbstractDAOContext<T['scalarsType'], T['optionsType']>
-  schema: Schema<T['scalarsType']>
-  options?: T['optionsType']
-  driverOptions: T['driverOptionType']
+  daoContext: AbstractDAOContext<T['scalars'], T['options']>
+  schema: Schema<T['scalars']>
+  options?: T['options']
+  driverOptions: T['driverContext']
   pageSize?: number
   associations?: DAOAssociation[]
   middlewares?: DAOMiddleware<T>[]
 }
 
-export type MiddlewareContext<T extends DAOGenerics> = { schema: Schema<T['scalarsType']>; idField: T['idKey']; driver: T['driverOptionType'] } // TODO: add DAOContext? How?
+export type MiddlewareContext<T extends DAOGenerics> = { schema: Schema<T['scalars']>; idField: T['idKey']; driver: T['driverContext'] } // TODO: add DAOContext? How?
 
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 
 export interface DAO<T extends DAOGenerics> {
-  findAll<P extends AnyProjection<T['projectionType']>>(params?: FindParams<T>): Promise<ModelProjection<T['modelType'], T['projectionType'], P>[]>
-  findOne<P extends AnyProjection<T['projectionType']>>(params?: FindOneParams<T>): Promise<ModelProjection<T['modelType'], T['projectionType'], P> | null>
-  findPage<P extends AnyProjection<T['projectionType']>>(params?: FindParams<T>): Promise<{ totalCount: number; records: ModelProjection<T['modelType'], T['projectionType'], P>[] }>
+  findAll<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<ModelProjection<T['model'], T['projection'], P>[]>
+  findOne<P extends AnyProjection<T['projection']>>(params?: FindOneParams<T>): Promise<ModelProjection<T['model'], T['projection'], P> | null>
+  findPage<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
-  checkReferences(records: PartialDeep<T['modelType']> | PartialDeep<T['modelType']>[], options?: T['optionsType']): Promise<ReferenceChecksResponse<T['modelType']>>
-  insertOne(params: InsertParams<T>): Promise<Omit<T['modelType'], T['exludedFields']>>
+  checkReferences(records: PartialDeep<T['model']> | PartialDeep<T['model']>[], options?: T['options']): Promise<ReferenceChecksResponse<T['model']>>
+  insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>
   replaceOne(params: ReplaceParams<T>): Promise<void>
@@ -107,22 +107,22 @@ export type DAOGenerics<
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   OptionsType extends object = any,
-  DriverOptionType = any,
+  DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
 > = {
-  modelType: ModelType
+  model: ModelType
   idKey: IDKey
   idScalar: IDScalar
   idGeneration: IdGeneration
-  filterType: FilterType
-  projectionType: ProjectionType
-  sortType: SortType
-  insertType: InsertType
-  updateType: UpdateType
+  filter: FilterType
+  projection: ProjectionType
+  sort: SortType
+  insert: InsertType
+  update: UpdateType
   exludedFields: ExcludedFields
-  optionsType: OptionsType
-  driverOptionType: DriverOptionType
-  scalarsType: ScalarsType
+  options: OptionsType
+  driverContext: DriverContext
+  scalars: ScalarsType
 }
 
 export type ReplaceKey<O extends object, K extends keyof O, T> = Omit<O, K> & Record<K, T>

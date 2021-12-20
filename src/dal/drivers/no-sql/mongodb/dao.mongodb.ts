@@ -16,35 +16,35 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     this.collection = collection
   }
 
-  private dbsToModels(objects: WithId<Document>[]): PartialDeep<T['modelType']>[] {
+  private dbsToModels(objects: WithId<Document>[]): PartialDeep<T['model']>[] {
     return objects.map((o) => this.dbToModel(o))
   }
 
-  private dbToModel(object: WithId<Document>): PartialDeep<T['modelType']> {
+  private dbToModel(object: WithId<Document>): PartialDeep<T['model']> {
     return transformObject(this.daoContext.adapters.mongoDB, 'dbToModel', object, this.schema)
   }
 
-  private modelToDb(object: T['insertType'] | T['updateType']): OptionalId<Document> {
+  private modelToDb(object: T['insert'] | T['update']): OptionalId<Document> {
     return transformObject(this.daoContext.adapters.mongoDB, 'modelToDB', object, this.schema)
   }
 
-  private buildProjection(projection?: AnyProjection<T['projectionType']>): Document | undefined {
+  private buildProjection(projection?: AnyProjection<T['projection']>): Document | undefined {
     return adaptProjection(projection, this.schema) as Document
   }
 
-  private buildFilter(filter?: T['filterType']): Filter<Document> {
+  private buildFilter(filter?: T['filter']): Filter<Document> {
     return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongoDB) : {}
   }
 
-  private buildSort(sorts?: T['sortType'][]): [string, 1 | -1][] {
+  private buildSort(sorts?: T['sort'][]): [string, 1 | -1][] {
     return sorts ? adaptSorts(sorts, this.schema) : []
   }
 
-  private buildChanges(update: T['updateType']) {
+  private buildChanges(update: T['update']) {
     return adaptUpdate(update, this.schema, this.daoContext.adapters.mongoDB)
   }
 
-  protected async _find<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projectionType']>[]> {
+  protected async _find<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
     if (params.limit === 0) {
       return []
     }
@@ -56,7 +56,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return records
   }
 
-  protected async _findOne<P extends AnyProjection<T['projectionType']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['modelType']> | null> {
+  protected async _findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['model']> | null> {
     const filter = this.buildFilter(params.filter)
     const projection = this.buildProjection(params.projection)
     const result = await this.collection.findOne(filter, { projection } as FindOptions)
@@ -66,7 +66,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return this.dbToModel(result)
   }
 
-  protected async _findPage<P extends AnyProjection<T['projectionType']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['modelType']>[] }> {
+  protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
     const totalCount = await this._count(params)
     const records = await this._find(params)
     return { totalCount, records }
@@ -81,11 +81,11 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return this.collection.countDocuments(filter)
   }
 
-  protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['modelType'], T['exludedFields']>> {
+  protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
     const record = this.modelToDb(params.record)
     const result = await this.collection.insertOne(record)
     const inserted = await this.collection.findOne(result.insertedId)
-    return this.dbToModel(inserted!) as Omit<T['modelType'], T['exludedFields']>
+    return this.dbToModel(inserted!) as Omit<T['model'], T['exludedFields']>
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {

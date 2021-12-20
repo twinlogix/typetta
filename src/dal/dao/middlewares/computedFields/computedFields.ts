@@ -8,12 +8,12 @@ import { DAOGenerics } from '../../dao.types'
 
 export function computedField<
   T extends DAOGenerics,
-  P1 extends AnyProjection<T['projectionType']>,
-  P2 extends AnyProjection<T['projectionType']>
+  P1 extends AnyProjection<T['projection']>,
+  P2 extends AnyProjection<T['projection']>
 >(args: {
   fieldsProjection: P2
   requiredProjection: P1
-  compute: (record: ModelProjection<T['modelType'], T['projectionType'], P1>) => Promise<PartialDeep<T['modelType']>>
+  compute: (record: ModelProjection<T['model'], T['projection'], P1>) => Promise<PartialDeep<T['model']>>
 }): DAOMiddleware<T> {
   return {
     beforeFind: projectionDependency<T, P1, P2>(args).beforeFind,
@@ -24,7 +24,7 @@ export function computedField<
           record &&
           isProjectionIntersected(findParams.projection ? (findParams.projection as GenericProjection) : true, args.fieldsProjection ? (args.fieldsProjection as GenericProjection) : true)
         ) {
-          computedRecords.push(deepMerge(record, await args.compute(record as ModelProjection<T['modelType'], T['projectionType'], P1>)))
+          computedRecords.push(deepMerge(record, await args.compute(record as ModelProjection<T['model'], T['projection'], P1>)))
         }
       }
       return computedRecords

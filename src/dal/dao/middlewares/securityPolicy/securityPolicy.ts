@@ -16,23 +16,23 @@ export type SecurityPolicyDAOGenerics<
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   OptionsType extends { securityContext: SecurityContext } = any,
-  DriverOptionType = any,
+  DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
-> = DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverOptionType, ScalarsType> & {
+> = DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverContext, ScalarsType> & {
   securityContext: SecurityContext
 }
 
 export function securityPolicy<T extends SecurityPolicyDAOGenerics>(args: {
-  secureFilters?: (filter?: T['filterType'], securityContext?: T['securityContext']) => Promise<T['filterType'] | undefined>
-  secureProjections?: (filter?: T['filterType'], projections?: T['projectionType'], securityContext?: T['securityContext']) => Promise<T['projectionType'] | undefined>
+  secureFilters?: (filter?: T['filter'], securityContext?: T['securityContext']) => Promise<T['filter'] | undefined>
+  secureProjections?: (filter?: T['filter'], projections?: T['projection'], securityContext?: T['securityContext']) => Promise<T['projection'] | undefined>
   secureReturnedRecords?: (
-    records: PartialDeep<T['modelType']>[],
-    filter?: T['filterType'],
-    projections?: T['projectionType'],
+    records: PartialDeep<T['model']>[],
+    filter?: T['filter'],
+    projections?: T['projection'],
     securityContext?: T['securityContext'],
-  ) => Promise<PartialDeep<T['modelType']>[]>
-  secureNewRecord?: (record: T['insertType'], securityContext?: T['securityContext']) => Promise<T>
-  secureChanges?: (changes: T['updateType'], filter?: T['filterType'], securityContext?: T['securityContext']) => Promise<T['updateType']>
+  ) => Promise<PartialDeep<T['model']>[]>
+  secureNewRecord?: (record: T['insert'], securityContext?: T['securityContext']) => Promise<T>
+  secureChanges?: (changes: T['update'], filter?: T['filter'], securityContext?: T['securityContext']) => Promise<T['update']>
 }): DAOMiddleware<T> {
   return {
     beforeFind: async (params) => {
