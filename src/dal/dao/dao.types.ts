@@ -29,10 +29,12 @@ export type DAOResolver = {
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
   options?: T['options']
+  findOptions?: T['driverFilterOptions']
 }
 
-export type FindOneParams<T extends DAOGenerics, P = T['projection']> = FilterParams<T> & {
+export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<FilterParams<T>, 'findOptions'> & {
   projection?: P
+  findOptions?: T['driverFindOptions']
 }
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
   start?: number
@@ -43,23 +45,24 @@ export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOnePara
 export type InsertParams<T extends DAOGenerics> = {
   record: T['insert']
   options?: T['options']
+  insertOptions?: T['driverInsertOptions']
 }
 
 export type UpdateParams<T extends DAOGenerics> = {
   filter: T['filter']
   changes: T['update']
-  options?: T['options'] & T['driverContext']
+  options?: T['options']
 }
 
 export type ReplaceParams<T extends DAOGenerics> = {
   filter: T['filter']
   replace: T['insert']
-  options?: T['options'] & T['driverContext']
+  options?: T['options']
 }
 
 export type DeleteParams<T extends DAOGenerics> = {
   filter: T['filter']
-  options?: T['options'] & T['driverContext']
+  options?: T['options']
 }
 
 export type DAOParams<T extends DAOGenerics> = {
@@ -70,7 +73,7 @@ export type DAOParams<T extends DAOGenerics> = {
   daoContext: AbstractDAOContext<T['scalars'], T['options']>
   schema: Schema<T['scalars']>
   options?: T['options']
-  driverOptions: T['driverContext']
+  driverContext: T['driverContext']
   pageSize?: number
   associations?: DAOAssociation[]
   middlewares?: DAOMiddleware<T>[]
@@ -109,6 +112,9 @@ export type DAOGenerics<
   OptionsType extends object = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
+  DriverFilterOptions = any,
+  DriverFindOptions = any,
+  DriverInsertOptions = any
 > = {
   model: ModelType
   idKey: IDKey
@@ -123,6 +129,8 @@ export type DAOGenerics<
   options: OptionsType
   driverContext: DriverContext
   scalars: ScalarsType
-}
 
-export type ReplaceKey<O extends object, K extends keyof O, T> = Omit<O, K> & Record<K, T>
+  driverFilterOptions: DriverFilterOptions
+  driverFindOptions: DriverFindOptions
+  driverInsertOptions: DriverInsertOptions
+}

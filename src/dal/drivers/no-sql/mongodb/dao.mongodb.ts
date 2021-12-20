@@ -12,7 +12,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   protected collection: Collection
 
   protected constructor({ collection, ...params }: MongoDBDAOParams<T>) {
-    super({ ...params, driverOptions: { collection } })
+    super({ ...params, driverContext: { collection } })
     this.collection = collection
   }
 
@@ -51,7 +51,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     const filter = this.buildFilter(params.filter)
     const projection = this.buildProjection(params.projection)
     const sort = this.buildSort(params.sorts)
-    const results = await this.collection.find(filter, { projection, sort, skip: params.start, limit: params.limit || this.pageSize } as FindOptions).toArray()
+    const results = await this.collection.find(filter, { ...(params.findOptions ?? {}), projection, sort, skip: params.start, limit: params.limit || this.pageSize } as FindOptions).toArray()
     const records = this.dbsToModels(results)
     return records
   }
@@ -59,7 +59,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   protected async _findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['model']> | null> {
     const filter = this.buildFilter(params.filter)
     const projection = this.buildProjection(params.projection)
-    const result = await this.collection.findOne(filter, { projection } as FindOptions)
+    const result = await this.collection.findOne(filter, { ...(params.findOptions ?? {}), projection } as FindOptions)
     if (!result) {
       return null
     }
@@ -78,12 +78,12 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected async _count(params: FilterParams<T>): Promise<number> {
     const filter = this.buildFilter(params.filter)
-    return this.collection.countDocuments(filter)
+    return this.collection.countDocuments(filter, params.findOptions ?? {})
   }
 
   protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
     const record = this.modelToDb(params.record)
-    const result = await this.collection.insertOne(record)
+    const result = await this.collection.insertOne(record, params.insertOptions ?? {})
     const inserted = await this.collection.findOne(result.insertedId)
     return this.dbToModel(inserted!) as Omit<T['model'], T['exludedFields']>
   }

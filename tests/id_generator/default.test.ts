@@ -19,7 +19,7 @@ let knexInstance: Knex<any, unknown[]>
 let con: MongoClient
 let mongoServer: MongoMemoryServer
 let db: Db
-let dao: DAOContext
+let dao: DAOContext<{}>
 
 beforeAll(async () => {
   knexInstance = knex(config)

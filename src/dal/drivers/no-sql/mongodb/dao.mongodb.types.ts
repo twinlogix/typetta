@@ -1,6 +1,6 @@
 import { DAOGenerics, DAOParams, IdGenerationStrategy } from '../../../dao/dao.types'
 import { DefaultModelScalars } from '../../drivers.types'
-import { Collection } from 'mongodb'
+import { Collection, CountOptions, FindOptions, InsertOneOptions } from 'mongodb'
 
 export type MongoDBDAOGenerics<
   ModelType extends object = any,
@@ -17,9 +17,26 @@ export type MongoDBDAOGenerics<
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
 > = Omit<
-  DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverContext, ScalarsType>,
-  'driverOptionType'
-> & { driverOptionType: { collection: Collection } }
+  DAOGenerics<
+    ModelType,
+    IDKey,
+    IDScalar,
+    IdGeneration,
+    FilterType,
+    ProjectionType,
+    SortType,
+    InsertType,
+    UpdateType,
+    ExcludedFields,
+    OptionsType,
+    DriverContext,
+    ScalarsType,
+    CountOptions,
+    FindOptions,
+    InsertOneOptions
+  >,
+  'driverContext'
+> & { driverContext: { collection: Collection } }
 
 export type MongoDBDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverOptions'> & {
   collection: Collection

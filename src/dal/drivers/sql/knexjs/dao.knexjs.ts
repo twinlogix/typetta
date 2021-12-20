@@ -17,7 +17,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private knex: Knex<any, unknown[]>
 
   protected constructor({ tableName, knex, ...params }: KnexJsDAOParams<T>) {
-    super({ ...params, driverOptions: { knex } })
+    super({ ...params, driverContext: { knex } })
     this.tableName = tableName
     this.knex = knex
   }

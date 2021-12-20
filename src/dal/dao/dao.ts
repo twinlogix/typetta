@@ -17,7 +17,6 @@ import {
   ReplaceParams,
   UpdateParams,
   DAOGenerics,
-  ReplaceKey,
 } from './dao.types'
 import { generateId } from './middlewares/generateId.middleware'
 import { DAOMiddleware } from './middlewares/middlewares.types'
@@ -39,12 +38,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected resolvers: { [key: string]: DAOResolver | undefined }
   protected dataLoaders: Map<string, DataLoader<T['model'][T['idKey']], T['model'][] | null>>
   protected options?: T['options']
-  protected driverOptions: T['driverContext']
+  protected driverContext: T['driverContext']
   protected schema: Schema<T['scalars']>
   protected idGenerator?: () => T['scalars'][T['idScalar']]
   public apiV1: DAOWrapperAPIv1<T>
 
-  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, pageSize = 50, associations = [], middlewares = [], schema, options, driverOptions }: DAOParams<T>) {
+  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, pageSize = 50, associations = [], middlewares = [], schema, options, driverContext: driverOptions }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['model'][T['idKey']], T['model'][]>>()
     this.idField = idField
     this.idGenerator = idGenerator
@@ -78,14 +77,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       ...middlewares,
     ]
     this.options = options
-    this.driverOptions = driverOptions
+    this.driverContext = driverOptions
     this.schema = schema
     this.apiV1 = new DAOWrapperAPIv1<T>(this, idField)
   }
 
   protected async beforeFind(
-    params: FindParams<ReplaceKey<T, 'projection', AnyProjection<T['projection']>>>,
-  ): Promise<FindParams<ReplaceKey<T, 'projection', AnyProjection<T['projection']>>>> {
+    params: FindParams<T, AnyProjection<T['projection']>>,
+  ): Promise<FindParams<T, AnyProjection<T['projection']>>> {
     const contextOptions = this.createContextOptions()
     for (const middleware of this.middlewares) {
       if (middleware.beforeFind) {
@@ -496,7 +495,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private createContextOptions(): MiddlewareContext<T> {
-    return { schema: this.schema, idField: this.idField, driver: this.driverOptions }
+    return { schema: this.schema, idField: this.idField, driver: this.driverContext }
   }
 
   // -----------------------------------------------------------------------

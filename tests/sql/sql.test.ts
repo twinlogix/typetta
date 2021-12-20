@@ -8,7 +8,7 @@ import sha256 from 'sha256'
 import { v4 as uuidv4 } from 'uuid'
 
 let knexInstance: Knex<any, unknown[]>
-let dao: DAOContext
+let dao: DAOContext<{}>
 
 const config: Knex.Config = {
   client: 'sqlite3',

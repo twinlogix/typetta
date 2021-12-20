@@ -18,8 +18,8 @@ export type KnexJsDAOGenerics<
   ScalarsType extends DefaultModelScalars = any,
 > = Omit<
   DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverContext, ScalarsType>,
-  'driverOptionType'
-> & { driverOptionType: { knex: Knex } }
+  'driverContext'
+> & { driverContext: { knex: Knex } }
 
 export type KnexJsDAOParams<T extends KnexJsDAOGenerics> = Omit<DAOParams<T>, 'driverOptions'> & {
   tableName: string
