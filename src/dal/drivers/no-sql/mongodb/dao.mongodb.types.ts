@@ -13,7 +13,7 @@ export type MongoDBDAOGenerics<
   InsertType extends object = any,
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
-  OptionsType extends object = any,
+  MetadataType = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
 > = Omit<
@@ -28,7 +28,7 @@ export type MongoDBDAOGenerics<
     InsertType,
     UpdateType,
     ExcludedFields,
-    OptionsType,
+    MetadataType,
     DriverContext,
     ScalarsType,
     CountOptions,

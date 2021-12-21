@@ -51,7 +51,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     const filter = this.buildFilter(params.filter)
     const projection = this.buildProjection(params.projection)
     const sort = this.buildSort(params.sorts)
-    const results = await this.collection.find(filter, { ...(params.findOptions ?? {}), projection, sort, skip: params.start, limit: params.limit || this.pageSize } as FindOptions).toArray()
+    const results = await this.collection.find(filter, { ...(params.options ?? {}), projection, sort, skip: params.start, limit: params.limit || this.pageSize } as FindOptions).toArray()
     const records = this.dbsToModels(results)
     return records
   }
@@ -59,7 +59,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   protected async _findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['model']> | null> {
     const filter = this.buildFilter(params.filter)
     const projection = this.buildProjection(params.projection)
-    const result = await this.collection.findOne(filter, { ...(params.findOptions ?? {}), projection } as FindOptions)
+    const result = await this.collection.findOne(filter, { ...(params.options ?? {}), projection } as FindOptions)
     if (!result) {
       return null
     }
@@ -78,12 +78,12 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected async _count(params: FilterParams<T>): Promise<number> {
     const filter = this.buildFilter(params.filter)
-    return this.collection.countDocuments(filter, params.findOptions ?? {})
+    return this.collection.countDocuments(filter, params.options ?? {})
   }
 
   protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
     const record = this.modelToDb(params.record)
-    const result = await this.collection.insertOne(record, params.insertOptions ?? {})
+    const result = await this.collection.insertOne(record, params.options ?? {})
     const inserted = await this.collection.findOne(result.insertedId)
     return this.dbToModel(inserted!) as Omit<T['model'], T['exludedFields']>
   }
@@ -91,28 +91,28 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
     const changes = this.buildChanges(params.changes)
     const filter = this.buildFilter(params.filter)
-    await this.collection.updateOne(filter, { $set: changes }, { ...(params.updateOptions ?? {}), upsert: false, ignoreUndefined: true } as UpdateOptions)
+    await this.collection.updateOne(filter, { $set: changes }, { ...(params.options ?? {}), upsert: false, ignoreUndefined: true } as UpdateOptions)
   }
 
   protected async _updateMany(params: UpdateParams<T>): Promise<void> {
     const changes = this.buildChanges(params.changes)
     const filter = this.buildFilter(params.filter)
-    await this.collection.updateMany(filter, changes, params.updateOptions ?? {})
+    await this.collection.updateMany(filter, changes, params.options ?? {})
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
     const replace = this.modelToDb(params.replace)
     const filter = this.buildFilter(params.filter)
-    await this.collection.replaceOne(filter, replace, params.replaceOptions ?? {})
+    await this.collection.replaceOne(filter, replace, params.options ?? {})
   }
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
     const filter = this.buildFilter(params.filter)
-    await this.collection.deleteOne(filter, params.deleteOptions ?? {})
+    await this.collection.deleteOne(filter, params.options ?? {})
   }
 
   protected async _deleteMany(params: DeleteParams<T>): Promise<void> {
     const filter = this.buildFilter(params.filter)
-    await this.collection.deleteMany(filter, params.deleteOptions ?? {})
+    await this.collection.deleteMany(filter, params.options ?? {})
   }
 }

@@ -38,37 +38,37 @@ export function securityPolicy<T extends SecurityPolicyDAOGenerics>(args: {
     beforeFind: async (params) => {
       return {
         ...params,
-        filter: args.secureFilters ? await args.secureFilters(params.filter, params.options?.securityContext) : params.filter,
-        projection: args.secureProjections ? await args.secureProjections(params.filter, params.projection, params.options?.securityContext) : params.projection,
+        filter: args.secureFilters ? await args.secureFilters(params.filter, params.metadata?.securityContext) : params.filter,
+        projection: args.secureProjections ? await args.secureProjections(params.filter, params.projection, params.metadata?.securityContext) : params.projection,
       }
     },
     afterFind: async (params, records) => {
-      return args.secureReturnedRecords ? await args.secureReturnedRecords(records, params.filter, params.projection, params.options?.securityContext) : records
+      return args.secureReturnedRecords ? await args.secureReturnedRecords(records, params.filter, params.projection, params.metadata?.securityContext) : records
     },
     beforeInsert: async (params) => {
       return {
         ...params,
-        record: args.secureNewRecord ? await args.secureNewRecord(params.record, params.options?.securityContext) : params.record,
+        record: args.secureNewRecord ? await args.secureNewRecord(params.record, params.metadata?.securityContext) : params.record,
       }
     },
     beforeUpdate: async (params) => {
       return {
         ...params,
-        filter: args.secureFilters ? (await args.secureFilters(params.filter, params.options?.securityContext)) || params.filter : params.filter,
-        changes: args.secureChanges ? await args.secureChanges(params.changes, params.filter, params.options?.securityContext) : params.changes,
+        filter: args.secureFilters ? (await args.secureFilters(params.filter, params.metadata?.securityContext)) || params.filter : params.filter,
+        changes: args.secureChanges ? await args.secureChanges(params.changes, params.filter, params.metadata?.securityContext) : params.changes,
       }
     },
     beforeReplace: async (params) => {
       return {
         ...params,
-        filter: args.secureFilters ? (await args.secureFilters(params.filter, params.options?.securityContext)) || params.filter : params.filter,
-        replace: args.secureNewRecord ? await args.secureNewRecord(params.replace, params.options?.securityContext) : params.replace,
+        filter: args.secureFilters ? (await args.secureFilters(params.filter, params.metadata?.securityContext)) || params.filter : params.filter,
+        replace: args.secureNewRecord ? await args.secureNewRecord(params.replace, params.metadata?.securityContext) : params.replace,
       }
     },
     beforeDelete: async (params) => {
       return {
         ...params,
-        filter: args.secureFilters ? (await args.secureFilters(params.filter, params.options?.securityContext)) || params.filter : params.filter,
+        filter: args.secureFilters ? (await args.secureFilters(params.filter, params.metadata?.securityContext)) || params.filter : params.filter,
       }
     },
   }

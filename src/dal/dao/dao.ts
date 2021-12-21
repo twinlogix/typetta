@@ -31,19 +31,31 @@ import { PartialDeep } from 'type-fest'
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idField: T['idKey']
   protected idGeneration: T['idGeneration']
-  protected daoContext: AbstractDAOContext<T['scalars'], T['options']>
+  protected daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
   protected associations: DAOAssociation[]
   protected middlewares: DAOMiddleware<T>[]
   protected pageSize: number
   protected resolvers: { [key: string]: DAOResolver | undefined }
   protected dataLoaders: Map<string, DataLoader<T['model'][T['idKey']], T['model'][] | null>>
-  protected options?: T['options']
+  protected metadata?: T['metadata']
   protected driverContext: T['driverContext']
   protected schema: Schema<T['scalars']>
   protected idGenerator?: () => T['scalars'][T['idScalar']]
   public apiV1: DAOWrapperAPIv1<T>
 
-  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, pageSize = 50, associations = [], middlewares = [], schema, options, driverContext: driverOptions }: DAOParams<T>) {
+  protected constructor({
+    idField,
+    idScalar,
+    idGeneration,
+    idGenerator,
+    daoContext,
+    pageSize = 50,
+    associations = [],
+    middlewares = [],
+    schema,
+    metadata,
+    driverContext: driverOptions,
+  }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['model'][T['idKey']], T['model'][]>>()
     this.idField = idField
     this.idGenerator = idGenerator
@@ -64,11 +76,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     this.middlewares = [
       {
-        beforeFind: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
-        beforeUpdate: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
-        beforeInsert: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
-        beforeReplace: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
-        beforeDelete: async (params) => ({ ...params, options: params.options && this.options ? deepMerge(this.options, params.options) : params.options ? params.options : this.options }),
+        beforeFind: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
+        beforeUpdate: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
+        beforeInsert: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
+        beforeReplace: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
+        beforeDelete: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
       },
       {
         beforeFind: async (params) => ({ ...params, projection: this.elabAssociationProjection(params.projection) }),
@@ -76,29 +88,27 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       ...(this.idGeneration === 'generator' ? this.middlewares : []),
       ...middlewares,
     ]
-    this.options = options
+    this.metadata = metadata
     this.driverContext = driverOptions
     this.schema = schema
     this.apiV1 = new DAOWrapperAPIv1<T>(this, idField)
   }
 
-  protected async beforeFind(
-    params: FindParams<T, AnyProjection<T['projection']>>,
-  ): Promise<FindParams<T, AnyProjection<T['projection']>>> {
-    const contextOptions = this.createContextOptions()
+  protected async beforeFind(params: FindParams<T, AnyProjection<T['projection']>>): Promise<FindParams<T, AnyProjection<T['projection']>>> {
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of this.middlewares) {
       if (middleware.beforeFind) {
-        params = await middleware.beforeFind(params, contextOptions)
+        params = await middleware.beforeFind(params, middlewareContext)
       }
     }
     return params
   }
 
   protected async afterFind(params: FindParams<T, AnyProjection<T['projection']>>, records: PartialDeep<T['model']>[]): Promise<PartialDeep<T['model']>[]> {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterFind) {
-        records = await middleware.afterFind(params, records, contextOptions)
+        records = await middleware.afterFind(params, records, middlewareContext)
       }
     }
     return records
@@ -382,20 +392,20 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private async beforeInsert(params: InsertParams<T>): Promise<InsertParams<T>> {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of this.middlewares) {
       if (middleware.beforeInsert) {
-        params = await middleware.beforeInsert(params, contextOptions)
+        params = await middleware.beforeInsert(params, middlewareContext)
       }
     }
     return params
   }
 
   private async afterInsert(params: InsertParams<T>, result: T['insert']): Promise<T['insert']> {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterInsert) {
-        result = await middleware.afterInsert(params, result, contextOptions)
+        result = await middleware.afterInsert(params, result, middlewareContext)
       }
     }
     return result
@@ -408,20 +418,20 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private async beforeUpdate(params: UpdateParams<T>): Promise<UpdateParams<T>> {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of this.middlewares) {
       if (middleware.beforeUpdate) {
-        params = await middleware.beforeUpdate(params, contextOptions)
+        params = await middleware.beforeUpdate(params, middlewareContext)
       }
     }
     return params
   }
 
   private async afterUpdate(params: UpdateParams<T>) {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterUpdate) {
-        await middleware.afterUpdate(params, contextOptions)
+        await middleware.afterUpdate(params, middlewareContext)
       }
     }
   }
@@ -439,20 +449,20 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private async beforeReplace(params: ReplaceParams<T>): Promise<ReplaceParams<T>> {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of this.middlewares) {
       if (middleware.beforeReplace) {
-        params = await middleware.beforeReplace(params, contextOptions)
+        params = await middleware.beforeReplace(params, middlewareContext)
       }
     }
     return params
   }
 
   private async afterReplace(params: ReplaceParams<T>): Promise<void> {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterReplace) {
-        await middleware.afterReplace(params, contextOptions)
+        await middleware.afterReplace(params, middlewareContext)
       }
     }
   }
@@ -464,20 +474,20 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private async beforeDelete(params: DeleteParams<T>): Promise<DeleteParams<T>> {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of this.middlewares) {
       if (middleware.beforeDelete) {
-        params = await middleware.beforeDelete(params, contextOptions)
+        params = await middleware.beforeDelete(params, middlewareContext)
       }
     }
     return params
   }
 
   private async afterDelete(params: DeleteParams<T>): Promise<void> {
-    const contextOptions = this.createContextOptions()
+    const middlewareContext = this.createMiddlewareContext()
     for (const middleware of reversed(this.middlewares)) {
       if (middleware.afterDelete) {
-        await middleware.afterDelete(params, contextOptions)
+        await middleware.afterDelete(params, middlewareContext)
       }
     }
   }
@@ -494,8 +504,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     await this.afterDelete(newParams)
   }
 
-  private createContextOptions(): MiddlewareContext<T> {
+  private createMiddlewareContext(): MiddlewareContext<T> {
     return { schema: this.schema, idField: this.idField, driver: this.driverContext }
+  }
+
+  private mergeDefaultMetadata(metadata?: T['metadata']): T['metadata'] | undefined {
+    return metadata && this.metadata ? deepMerge(this.metadata, metadata) : metadata ? metadata : this.metadata
   }
 
   // -----------------------------------------------------------------------

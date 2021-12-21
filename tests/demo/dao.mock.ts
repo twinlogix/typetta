@@ -84,12 +84,12 @@ export type PostInsert = {
   views: number,
 };
 
-type PostDAOGenerics<OptionType extends object> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, OptionType, types.Scalars>;
-export type PostDAOParams<OptionType extends object> = Omit<KnexJsDAOParams<PostDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type PostDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, MetadataType, types.Scalars>;
+export type PostDAOParams<MetadataType> = Omit<KnexJsDAOParams<PostDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class PostDAO<OptionType extends object> extends AbstractKnexJsDAO<PostDAOGenerics<OptionType>> {
+export class PostDAO<MetadataType> extends AbstractKnexJsDAO<PostDAOGenerics<MetadataType>> {
   
-  public constructor(params: PostDAOParams<OptionType>){
+  public constructor(params: PostDAOParams<MetadataType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -201,12 +201,12 @@ export type UserInsert = {
   lastName?: string,
 };
 
-type UserDAOGenerics<OptionType extends object> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, OptionType, types.Scalars>;
-export type UserDAOParams<OptionType extends object> = Omit<KnexJsDAOParams<UserDAOGenerics<OptionType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type UserDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, types.Scalars>;
+export type UserDAOParams<MetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<UserDAOGenerics<OptionType>> {
+export class UserDAO<MetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType>> {
   
-  public constructor(params: UserDAOParams<OptionType>){
+  public constructor(params: UserDAOParams<MetadataType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -223,39 +223,39 @@ export class UserDAO<OptionType extends object> extends AbstractKnexJsDAO<UserDA
   
 }
 
-export type DAOContextParams<OptionsType extends object> = {
-  options?: OptionsType
+export type DAOContextParams<MetadataType> = {
+  metadata?: MetadataType
   overrides?: { 
-    post?: Pick<Partial<PostDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>,
-    user?: Pick<Partial<UserDAOParams<OptionsType>>, 'idGenerator' | 'middlewares' | 'options'>
+    post?: Pick<Partial<PostDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
-export class DAOContext<OptionType extends object> extends AbstractDAOContext<types.Scalars, OptionType>  {
+export class DAOContext<MetadataType> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
-  private _post: PostDAO<OptionType> | undefined;
-  private _user: UserDAO<OptionType> | undefined;
+  private _post: PostDAO<MetadataType> | undefined;
+  private _user: UserDAO<MetadataType> | undefined;
   
-  private overrides: DAOContextParams<OptionType>['overrides'];
+  private overrides: DAOContextParams<MetadataType>['overrides'];
   private knex: Record<'default', Knex>;
   
   get post() {
     if(!this._post) {
-      this._post = new PostDAO({ daoContext: this, options: this.options, ...this.overrides?.post, knex: this.knex['default'], tableName: 'posts' });
+      this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, knex: this.knex['default'], tableName: 'posts' });
     }
     return this._post;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, options: this.options, ...this.overrides?.user, knex: this.knex['default'], tableName: 'users' });
+      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, knex: this.knex['default'], tableName: 'users' });
     }
     return this._user;
   }
   
-  constructor(params: DAOContextParams<OptionType>) {
+  constructor(params: DAOContextParams<MetadataType>) {
     super(params)
     this.overrides = params.overrides
     this.knex = params.knex;

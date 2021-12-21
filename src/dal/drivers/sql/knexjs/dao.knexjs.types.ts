@@ -13,11 +13,11 @@ export type KnexJsDAOGenerics<
   InsertType extends object = any,
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
-  OptionsType extends object = any,
+  MetadataType = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
 > = Omit<
-  DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverContext, ScalarsType>,
+  DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, MetadataType, DriverContext, ScalarsType>,
   'driverContext'
 > & { driverContext: { knex: Knex } }
 

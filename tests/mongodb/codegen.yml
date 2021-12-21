@@ -21,7 +21,6 @@ generates:
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
       namingConvention: keep
-      optionsType: '{ test: string, securityContext }'
       defaultIdGenerationStrategy: 'generator'
       skipTypename: true
       scalars:

@@ -15,13 +15,13 @@ import { v4 as uuidv4 } from 'uuid'
 let con: MongoClient
 let mongoServer: MongoMemoryServer
 let db: Db
-let dao: DAOContext<{}>
+let dao: DAOContext<any>
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create()
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
-  dao = new DAOContext<{}>({
+  dao = new DAOContext<any>({
     mongoDB: {
       default: db,
     },
@@ -642,7 +642,7 @@ test('insert and retrieve localized string field', async () => {
 // ------------------------------------------------------------------------
 test('middleware', async () => {
   let operationCount = 0
-  const dao = new DAOContext<{}>({
+  const dao = new DAOContext<any>({
     mongoDB: {
       default: db,
     },
@@ -720,7 +720,7 @@ test('middleware', async () => {
 test('middleware options', async () => {
   const dao = new DAOContext<{ testType?: string; test2?: string }>({
     idGenerators: { ID: () => uuidv4() },
-    options: { testType: 'test1', test2: 'no' },
+    metadata: { testType: 'test1', test2: 'no' },
     mongoDB: {
       default: db,
     },
@@ -729,9 +729,9 @@ test('middleware options', async () => {
         middlewares: [
           {
             beforeInsert: async (params) => {
-              expect(params.options?.testType).toBe('test1')
-              expect(params.options?.test2).toBe('yes')
-              expect(params.options?.testType).toBeDefined()
+              expect(params.metadata?.testType).toBe('test1')
+              expect(params.metadata?.test2).toBe('yes')
+              expect(params.metadata?.testType).toBeDefined()
               return params
             },
           },
@@ -739,13 +739,13 @@ test('middleware options', async () => {
       },
     },
   })
-  await dao.user.insertOne({ record: { live: true }, options: {test2: 'yes'} })
+  await dao.user.insertOne({ record: { live: true }, metadata: {test2: 'yes'} })
 })
 
 test('middleware options overrides', async () => {
   const dao = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
-    options: { testType: 'test1' },
+    metadata: { testType: 'test1' },
     mongoDB: {
       default: db,
     },
@@ -754,8 +754,8 @@ test('middleware options overrides', async () => {
         middlewares: [
           {
             beforeInsert: async (params) => {
-              expect(params.options?.testType).toBe('test2')
-              expect(params.options?.testType).toBeDefined()
+              expect(params.metadata?.testType).toBe('test2')
+              expect(params.metadata?.testType).toBeDefined()
               return params
             },
           },
@@ -763,14 +763,14 @@ test('middleware options overrides', async () => {
       },
     },
   })
-  await dao.user.insertOne({ record: { live: true }, options: { testType: 'test2' } })
+  await dao.user.insertOne({ record: { live: true }, metadata: { testType: 'test2' } })
 })
 
 // ------------------------------------------------------------------------
 // ------------------------- COMPUTED FIELDS ------------------------------
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
-  const customDao = new DAOContext<{}>({
+  const customDao = new DAOContext<any>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -801,7 +801,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 })
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
-  const customDao = new DAOContext<{}>({
+  const customDao = new DAOContext<any>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -825,7 +825,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 })
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
-  const customDao = new DAOContext<{}>({
+  const customDao = new DAOContext<any>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -855,7 +855,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 })
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
-  const dao = new DAOContext<{}>({
+  const dao = new DAOContext<any>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -883,7 +883,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 })
 
 test('computed fields (one dependency - deep level - one calculated)', async () => {
-  const dao = new DAOContext<{}>({
+  const dao = new DAOContext<any>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,
@@ -904,7 +904,7 @@ test('computed fields (one dependency - deep level - one calculated)', async () 
 })
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
-  const dao = new DAOContext<{}>({
+  const dao = new DAOContext<any>({
     idGenerators: { ID: () => uuidv4() },
     mongoDB: {
       default: db,

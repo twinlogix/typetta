@@ -28,13 +28,13 @@ export type DAOResolver = {
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
-  options?: T['options']
-  findOptions?: T['driverFilterOptions']
+  metadata?: T['metadata']
+  options?: T['driverFilterOptions']
 }
 
-export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<FilterParams<T>, 'findOptions'> & {
+export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<FilterParams<T>, 'options'> & {
   projection?: P
-  findOptions?: T['driverFindOptions']
+  options?: T['driverFindOptions']
 }
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
   start?: number
@@ -44,28 +44,28 @@ export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOnePara
 
 export type InsertParams<T extends DAOGenerics> = {
   record: T['insert']
-  options?: T['options']
-  insertOptions?: T['driverInsertOptions']
+  metadata?: T['metadata']
+  options?: T['driverInsertOptions']
 }
 
 export type UpdateParams<T extends DAOGenerics> = {
   filter: T['filter']
   changes: T['update']
-  options?: T['options']
-  updateOptions?: T['driverUpdateOptions']
+  metadata?: T['metadata']
+  options?: T['driverUpdateOptions']
 }
 
 export type ReplaceParams<T extends DAOGenerics> = {
   filter: T['filter']
   replace: T['insert']
-  options?: T['options']
-  replaceOptions?: T['driverReplaceOptions']
+  metadata?: T['metadata']
+  options?: T['driverReplaceOptions']
 }
 
 export type DeleteParams<T extends DAOGenerics> = {
   filter: T['filter']
-  options?: T['options']
-  deleteOptions?: T['driverDeleteOptions']
+  metadata?: T['metadata']
+  options?: T['driverDeleteOptions']
 }
 
 export type DAOParams<T extends DAOGenerics> = {
@@ -73,9 +73,9 @@ export type DAOParams<T extends DAOGenerics> = {
   idScalar: T['idScalar']
   idGeneration: T['idGeneration']
   idGenerator?: () => T['idScalar'][T['idScalar']]
-  daoContext: AbstractDAOContext<T['scalars'], T['options']>
+  daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
-  options?: T['options']
+  metadata?: T['metadata']
   driverContext: T['driverContext']
   pageSize?: number
   associations?: DAOAssociation[]
@@ -92,7 +92,7 @@ export interface DAO<T extends DAOGenerics> {
   findPage<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
-  checkReferences(records: PartialDeep<T['model']> | PartialDeep<T['model']>[], options?: T['options']): Promise<ReferenceChecksResponse<T['model']>>
+  checkReferences(records: PartialDeep<T['model']> | PartialDeep<T['model']>[], metadata?: T['metadata']): Promise<ReferenceChecksResponse<T['model']>>
   insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>
@@ -112,7 +112,7 @@ export type DAOGenerics<
   InsertType extends object = any,
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
-  OptionsType extends object = any,
+  MetadataType = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
   DriverFilterOptions = any,
@@ -132,7 +132,7 @@ export type DAOGenerics<
   insert: InsertType
   update: UpdateType
   exludedFields: ExcludedFields
-  options: OptionsType
+  metadata: MetadataType
   driverContext: DriverContext
   scalars: ScalarsType
 
