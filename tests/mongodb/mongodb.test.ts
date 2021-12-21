@@ -7,19 +7,19 @@ import { User } from './models.mock'
 import { SortDirection, computedField, mongoDbAdapters, identityAdapter, projectionDependency } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import { MongoClient, Db } from 'mongodb'
-import { MongoMemoryServer } from 'mongodb-memory-server'
+import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
 
+let replSet: MongoMemoryReplSet
 let con: MongoClient
-let mongoServer: MongoMemoryServer
 let db: Db
 let dao: DAOContext<any>
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create()
-  con = await MongoClient.connect(mongoServer.getUri(), {})
+  replSet = await MongoMemoryReplSet.create({ replSet: { count: 3 } });
+  con = await MongoClient.connect(replSet.getUri(), {})
   db = con.db('test')
   dao = new DAOContext<any>({
     mongoDB: {
@@ -930,6 +930,48 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 })
 
 // ------------------------------------------------------------------------
+// --------------------------- TRANSACTIONS -------------------------------
+// ------------------------------------------------------------------------
+
+test('Simple transaction', async () => {
+  const session = con.startSession()
+  session.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+  const options = { session }
+  const user1 = await dao.user.insertOne({ record: { id: '123', live: true }, options })
+  const user2 = await dao.user.findOne({ filter: { id: '123' } })
+  const user3 = await dao.user.findOne({ filter: { id: '123' }, options })
+  const res = await session.commitTransaction()
+  const user4 = await dao.user.findOne({ filter: { id: '123' } })
+  expect(res.ok).toBe(1)
+  expect(user1.live).toBe(true)
+  expect(user2).toBe(null)
+  expect(user3?.live).toBe(true)
+  expect(user4?.live).toBe(true)
+})
+
+test('Simple transaction 2', async () => {
+  await dao.user.insertOne({ record: { id: '123', live: true } })
+  const session = con.startSession()
+  session.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+  const options = { session }
+  await dao.user.updateOne({ filter: { id: '123' }, changes: { live: false }, options })
+  await dao.user.deleteOne({ filter: { id: '123' } })
+  try {
+    await session.commitTransaction()
+    expect(1).toBe(0)
+  } catch(error) {
+    console.log(error)
+    expect(error.ok).toBe(0)
+  }
+})
+
+// ------------------------------------------------------------------------
 // ------------------------- SECURITY POLICIES ----------------------------
 // ------------------------------------------------------------------------
 
@@ -937,7 +979,7 @@ afterAll(async () => {
   if (con) {
     await con.close()
   }
-  if (mongoServer) {
-    await mongoServer.stop()
+  if (replSet) {
+    await replSet.stop()
   }
 })

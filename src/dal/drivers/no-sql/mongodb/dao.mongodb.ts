@@ -84,7 +84,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
     const record = this.modelToDb(params.record)
     const result = await this.collection.insertOne(record, params.options ?? {})
-    const inserted = await this.collection.findOne(result.insertedId)
+    const inserted = await this.collection.findOne(result.insertedId, params.options ?? {})
     return this.dbToModel(inserted!) as Omit<T['model'], T['exludedFields']>
   }
 
