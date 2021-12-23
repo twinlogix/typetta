@@ -76,13 +76,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     this.middlewares = [
       {
-        beforeFind: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
-        beforeUpdate: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
-        beforeInsert: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
-        beforeReplace: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
-        beforeDelete: async (params) => ({ ...params, metadata: this.mergeDefaultMetadata(params.metadata) }),
-      },
-      {
         beforeFind: async (params) => ({ ...params, projection: this.elabAssociationProjection(params.projection) }),
       },
       ...(this.idGeneration === 'generator' ? this.middlewares : []),
@@ -505,11 +498,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private createMiddlewareContext(): MiddlewareContext<T> {
-    return { schema: this.schema, idField: this.idField, driver: this.driverContext }
-  }
-
-  private mergeDefaultMetadata(metadata?: T['metadata']): T['metadata'] | undefined {
-    return metadata && this.metadata ? deepMerge(this.metadata, metadata) : metadata ? metadata : this.metadata
+    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata : this.metadata }
   }
 
   // -----------------------------------------------------------------------

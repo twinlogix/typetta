@@ -40,10 +40,10 @@ export type AddressInsert = {
   id?: string,
 };
 
-type AddressDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressProjection, AddressSort, AddressInsert, AddressUpdate, AddressExcludedFields, MetadataType, types.Scalars>;
-export type AddressDAOParams<MetadataType> = Omit<KnexJsDAOParams<AddressDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressProjection, AddressSort, AddressInsert, AddressUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type AddressDAOParams<MetadataType> = Omit<KnexJsDAOParams<AddressDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class AddressDAO<MetadataType> extends AbstractKnexJsDAO<AddressDAOGenerics<MetadataType>> {
+export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: AddressDAOParams<MetadataType>){
     super({   
@@ -118,10 +118,10 @@ export type CityInsert = {
   name: string,
 };
 
-type CityDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityProjection, CitySort, CityInsert, CityUpdate, CityExcludedFields, MetadataType, types.Scalars>;
-export type CityDAOParams<MetadataType> = Omit<KnexJsDAOParams<CityDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type CityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityProjection, CitySort, CityInsert, CityUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type CityDAOParams<MetadataType> = Omit<KnexJsDAOParams<CityDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class CityDAO<MetadataType> extends AbstractKnexJsDAO<CityDAOGenerics<MetadataType>> {
+export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: CityDAOParams<MetadataType>){
     super({   
@@ -194,10 +194,10 @@ export type DeviceInsert = {
   userId?: string,
 };
 
-type DeviceDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceProjection, DeviceSort, DeviceInsert, DeviceUpdate, DeviceExcludedFields, MetadataType, types.Scalars>;
-export type DeviceDAOParams<MetadataType> = Omit<KnexJsDAOParams<DeviceDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceProjection, DeviceSort, DeviceInsert, DeviceUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type DeviceDAOParams<MetadataType> = Omit<KnexJsDAOParams<DeviceDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class DeviceDAO<MetadataType> extends AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType>> {
+export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: DeviceDAOParams<MetadataType>){
     super({   
@@ -287,10 +287,10 @@ export type OrganizationInsert = {
   vatNumber?: string,
 };
 
-type OrganizationDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationInsert, OrganizationUpdate, OrganizationExcludedFields, MetadataType, types.Scalars>;
-export type OrganizationDAOParams<MetadataType> = Omit<KnexJsDAOParams<OrganizationDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationInsert, OrganizationUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type OrganizationDAOParams<MetadataType> = Omit<KnexJsDAOParams<OrganizationDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class OrganizationDAO<MetadataType> extends AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType>> {
+export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: OrganizationDAOParams<MetadataType>){
     super({   
@@ -454,10 +454,10 @@ export type UserInsert = {
   title?: LocalizedString,
 };
 
-type UserDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, types.Scalars>;
-export type UserDAOParams<MetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type UserDAOParams<MetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class UserDAO<MetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType>> {
+export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: UserDAOParams<MetadataType>){
     super({   
@@ -479,24 +479,24 @@ export class UserDAO<MetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<Met
 export type DAOContextParams<MetadataType> = {
   metadata?: MetadataType
   overrides?: { 
-    address?: Pick<Partial<AddressDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    city?: Pick<Partial<CityDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    device?: Pick<Partial<DeviceDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    organization?: Pick<Partial<OrganizationDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    address?: Pick<Partial<AddressDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    city?: Pick<Partial<CityDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    device?: Pick<Partial<DeviceDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    organization?: Pick<Partial<OrganizationDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
-export class DAOContext<MetadataType> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
-  private _address: AddressDAO<MetadataType> | undefined;
-  private _city: CityDAO<MetadataType> | undefined;
-  private _device: DeviceDAO<MetadataType> | undefined;
-  private _organization: OrganizationDAO<MetadataType> | undefined;
-  private _user: UserDAO<MetadataType> | undefined;
+  private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined;
+  private _city: CityDAO<MetadataType, OperationMetadataType> | undefined;
+  private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined;
+  private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined;
+  private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
   private overrides: DAOContextParams<MetadataType>['overrides'];
   private knex: Record<'default', Knex>;

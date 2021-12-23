@@ -84,10 +84,10 @@ export type PostInsert = {
   views: number,
 };
 
-type PostDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, MetadataType, types.Scalars>;
-export type PostDAOParams<MetadataType> = Omit<KnexJsDAOParams<PostDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type PostDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type PostDAOParams<MetadataType> = Omit<KnexJsDAOParams<PostDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class PostDAO<MetadataType> extends AbstractKnexJsDAO<PostDAOGenerics<MetadataType>> {
+export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: PostDAOParams<MetadataType>){
     super({   
@@ -201,10 +201,10 @@ export type UserInsert = {
   lastName?: string,
 };
 
-type UserDAOGenerics<MetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, types.Scalars>;
-export type UserDAOParams<MetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type UserDAOParams<MetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class UserDAO<MetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType>> {
+export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: UserDAOParams<MetadataType>){
     super({   
@@ -226,18 +226,18 @@ export class UserDAO<MetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<Met
 export type DAOContextParams<MetadataType> = {
   metadata?: MetadataType
   overrides?: { 
-    post?: Pick<Partial<PostDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    post?: Pick<Partial<PostDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
-export class DAOContext<MetadataType> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
-  private _post: PostDAO<MetadataType> | undefined;
-  private _user: UserDAO<MetadataType> | undefined;
+  private _post: PostDAO<MetadataType, OperationMetadataType> | undefined;
+  private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
   private overrides: DAOContextParams<MetadataType>['overrides'];
   private knex: Record<'default', Knex>;

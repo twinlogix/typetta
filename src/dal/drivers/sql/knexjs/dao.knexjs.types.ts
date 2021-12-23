@@ -14,6 +14,7 @@ export type KnexJsDAOGenerics<
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   MetadataType = any,
+  OperationMetadataType = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
 > = Omit<
@@ -29,6 +30,7 @@ export type KnexJsDAOGenerics<
     UpdateType,
     ExcludedFields,
     MetadataType,
+    OperationMetadataType,
     DriverContext,
     ScalarsType,
     { trx?: Knex.Transaction },

@@ -14,6 +14,7 @@ export type MongoDBDAOGenerics<
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   MetadataType = any,
+  OperationMetadataType = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
 > = Omit<
@@ -29,6 +30,7 @@ export type MongoDBDAOGenerics<
     UpdateType,
     ExcludedFields,
     MetadataType,
+    OperationMetadataType,
     DriverContext,
     ScalarsType,
     CountOptions,

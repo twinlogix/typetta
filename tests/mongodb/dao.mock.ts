@@ -40,10 +40,10 @@ export type AddressInsert = {
   id?: string,
 };
 
-type AddressDAOGenerics<MetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressProjection, AddressSort, AddressInsert, AddressUpdate, AddressExcludedFields, MetadataType, types.Scalars>;
-export type AddressDAOParams<MetadataType> = Omit<MongoDBDAOParams<AddressDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressProjection, AddressSort, AddressInsert, AddressUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type AddressDAOParams<MetadataType> = Omit<MongoDBDAOParams<AddressDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class AddressDAO<MetadataType> extends AbstractMongoDBDAO<AddressDAOGenerics<MetadataType>> {
+export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: AddressDAOParams<MetadataType>){
     super({   
@@ -118,10 +118,10 @@ export type CityInsert = {
   name: string,
 };
 
-type CityDAOGenerics<MetadataType> = MongoDBDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityProjection, CitySort, CityInsert, CityUpdate, CityExcludedFields, MetadataType, types.Scalars>;
-export type CityDAOParams<MetadataType> = Omit<MongoDBDAOParams<CityDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type CityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityProjection, CitySort, CityInsert, CityUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type CityDAOParams<MetadataType> = Omit<MongoDBDAOParams<CityDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class CityDAO<MetadataType> extends AbstractMongoDBDAO<CityDAOGenerics<MetadataType>> {
+export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: CityDAOParams<MetadataType>){
     super({   
@@ -194,10 +194,10 @@ export type DeviceInsert = {
   userId?: string,
 };
 
-type DeviceDAOGenerics<MetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceProjection, DeviceSort, DeviceInsert, DeviceUpdate, DeviceExcludedFields, MetadataType, types.Scalars>;
-export type DeviceDAOParams<MetadataType> = Omit<MongoDBDAOParams<DeviceDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceProjection, DeviceSort, DeviceInsert, DeviceUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type DeviceDAOParams<MetadataType> = Omit<MongoDBDAOParams<DeviceDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class DeviceDAO<MetadataType> extends AbstractMongoDBDAO<DeviceDAOGenerics<MetadataType>> {
+export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: DeviceDAOParams<MetadataType>){
     super({   
@@ -271,10 +271,10 @@ export type DogInsert = {
   ownerId: string,
 };
 
-type DogDAOGenerics<MetadataType> = MongoDBDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogProjection, DogSort, DogInsert, DogUpdate, DogExcludedFields, MetadataType, types.Scalars>;
-export type DogDAOParams<MetadataType> = Omit<MongoDBDAOParams<DogDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type DogDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogProjection, DogSort, DogInsert, DogUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type DogDAOParams<MetadataType> = Omit<MongoDBDAOParams<DogDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class DogDAO<MetadataType> extends AbstractMongoDBDAO<DogDAOGenerics<MetadataType>> {
+export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: DogDAOParams<MetadataType>){
     super({   
@@ -364,10 +364,10 @@ export type OrganizationInsert = {
   vatNumber?: string,
 };
 
-type OrganizationDAOGenerics<MetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationInsert, OrganizationUpdate, OrganizationExcludedFields, MetadataType, types.Scalars>;
-export type OrganizationDAOParams<MetadataType> = Omit<MongoDBDAOParams<OrganizationDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationProjection, OrganizationSort, OrganizationInsert, OrganizationUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type OrganizationDAOParams<MetadataType> = Omit<MongoDBDAOParams<OrganizationDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class OrganizationDAO<MetadataType> extends AbstractMongoDBDAO<OrganizationDAOGenerics<MetadataType>> {
+export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: OrganizationDAOParams<MetadataType>){
     super({   
@@ -522,10 +522,10 @@ export type UserInsert = {
   usernamePasswordCredentials?: types.UsernamePasswordCredentials,
 };
 
-type UserDAOGenerics<MetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, types.Scalars>;
-export type UserDAOParams<MetadataType> = Omit<MongoDBDAOParams<UserDAOGenerics<MetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type UserDAOParams<MetadataType> = Omit<MongoDBDAOParams<UserDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
-export class UserDAO<MetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType>> {
+export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
   
   public constructor(params: UserDAOParams<MetadataType>){
     super({   
@@ -548,26 +548,26 @@ export class UserDAO<MetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<Me
 export type DAOContextParams<MetadataType> = {
   metadata?: MetadataType
   overrides?: { 
-    address?: Pick<Partial<AddressDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    city?: Pick<Partial<CityDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    device?: Pick<Partial<DeviceDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    dog?: Pick<Partial<DogDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    organization?: Pick<Partial<OrganizationDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    address?: Pick<Partial<AddressDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    city?: Pick<Partial<CityDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    device?: Pick<Partial<DeviceDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    dog?: Pick<Partial<DogDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    organization?: Pick<Partial<OrganizationDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
+    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'middlewares' | 'metadata'>
   },
   mongo: Record<'default', Db>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
-export class DAOContext<MetadataType> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
-  private _address: AddressDAO<MetadataType> | undefined;
-  private _city: CityDAO<MetadataType> | undefined;
-  private _device: DeviceDAO<MetadataType> | undefined;
-  private _dog: DogDAO<MetadataType> | undefined;
-  private _organization: OrganizationDAO<MetadataType> | undefined;
-  private _user: UserDAO<MetadataType> | undefined;
+  private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined;
+  private _city: CityDAO<MetadataType, OperationMetadataType> | undefined;
+  private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined;
+  private _dog: DogDAO<MetadataType, OperationMetadataType> | undefined;
+  private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined;
+  private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
   private overrides: DAOContextParams<MetadataType>['overrides'];
   private mongo: Record<'default', Db>;

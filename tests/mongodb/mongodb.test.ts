@@ -1,6 +1,3 @@
-global.TextEncoder = require('util').TextEncoder
-global.TextDecoder = require('util').TextDecoder
-
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
@@ -12,18 +9,23 @@ import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
 
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
+
 let replSet: MongoMemoryReplSet
 let con: MongoClient
 let db: Db
-let dao: DAOContext<any>
+type DAOContextType = DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
+let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
 
-beforeAll(async () => {
-  replSet = await MongoMemoryReplSet.create({ replSet: { count: 3 } })
-  con = await MongoClient.connect(replSet.getUri(), {})
-  db = con.db('test')
-  dao = new DAOContext<any>({
+function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {
+  return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
     mongo: {
       default: db,
+    },
+    metadata: {
+      conn: con,
+      dao: createDao,
     },
     adapters: {
       mongo: {
@@ -38,7 +40,25 @@ beforeAll(async () => {
       },
     },
     idGenerators: { ID: () => uuidv4() },
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            beforeFind: async (params, context) => {
+              return params
+            },
+          },
+        ],
+      },
+    },
   })
+}
+
+beforeAll(async () => {
+  replSet = await MongoMemoryReplSet.create({ replSet: { count: 3 } })
+  con = await MongoClient.connect(replSet.getUri(), {})
+  db = con.db('test')
+  dao = createDao()
 })
 
 beforeEach(async () => {
@@ -778,10 +798,10 @@ test('middleware options', async () => {
       user: {
         middlewares: [
           {
-            beforeInsert: async (params) => {
-              expect(params.metadata?.testType).toBe('test1')
+            beforeInsert: async (params, context) => {
+              expect(context.metadata?.testType).toBe('test1')
+              expect(context.metadata?.test2).toBe('no')
               expect(params.metadata?.test2).toBe('yes')
-              expect(params.metadata?.testType).toBeDefined()
               return params
             },
           },

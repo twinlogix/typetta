@@ -28,7 +28,7 @@ export type DAOResolver = {
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
-  metadata?: T['metadata']
+  metadata?: T['operationMetadata']
   options?: T['driverFilterOptions']
 }
 
@@ -44,27 +44,27 @@ export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOnePara
 
 export type InsertParams<T extends DAOGenerics> = {
   record: T['insert']
-  metadata?: T['metadata']
+  metadata?: T['operationMetadata']
   options?: T['driverInsertOptions']
 }
 
 export type UpdateParams<T extends DAOGenerics> = {
   filter: T['filter']
   changes: T['update']
-  metadata?: T['metadata']
+  metadata?: T['operationMetadata']
   options?: T['driverUpdateOptions']
 }
 
 export type ReplaceParams<T extends DAOGenerics> = {
   filter: T['filter']
   replace: T['insert']
-  metadata?: T['metadata']
+  metadata?: T['operationMetadata']
   options?: T['driverReplaceOptions']
 }
 
 export type DeleteParams<T extends DAOGenerics> = {
   filter: T['filter']
-  metadata?: T['metadata']
+  metadata?: T['operationMetadata']
   options?: T['driverDeleteOptions']
 }
 
@@ -82,7 +82,12 @@ export type DAOParams<T extends DAOGenerics> = {
   middlewares?: DAOMiddleware<T>[]
 }
 
-export type MiddlewareContext<T extends DAOGenerics> = { schema: Schema<T['scalars']>; idField: T['idKey']; driver: T['driverContext'] } // TODO: add DAOContext? How?
+export type MiddlewareContext<T extends DAOGenerics> = {
+  schema: Schema<T['scalars']>
+  idField: T['idKey']
+  driver: T['driverContext']
+  metadata?: T['metadata']
+}
 
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 
@@ -113,6 +118,7 @@ export type DAOGenerics<
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   MetadataType = any,
+  OperationMetadataType = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
   DriverFilterOptions = any,
@@ -120,7 +126,7 @@ export type DAOGenerics<
   DriverInsertOptions = any,
   DriverUpdateOptions = any,
   DriverReplaceOptions = any,
-  DriverDeleteOptions = any
+  DriverDeleteOptions = any,
 > = {
   model: ModelType
   idKey: IDKey
@@ -133,6 +139,7 @@ export type DAOGenerics<
   update: UpdateType
   exludedFields: ExcludedFields
   metadata: MetadataType
+  operationMetadata: OperationMetadataType
   driverContext: DriverContext
   scalars: ScalarsType
 
