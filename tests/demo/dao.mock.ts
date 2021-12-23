@@ -226,8 +226,8 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 export type DAOContextParams<MetadataType> = {
   metadata?: MetadataType
   overrides?: { 
-    post?: Pick<Partial<PostDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'middlewares' | 'metadata'>
+    post?: Pick<Partial<PostDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,

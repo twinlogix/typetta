@@ -479,11 +479,11 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 export type DAOContextParams<MetadataType> = {
   metadata?: MetadataType
   overrides?: { 
-    address?: Pick<Partial<AddressDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    city?: Pick<Partial<CityDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    device?: Pick<Partial<DeviceDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    organization?: Pick<Partial<OrganizationDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'middlewares' | 'metadata'>
+    address?: Pick<Partial<AddressDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    city?: Pick<Partial<CityDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    device?: Pick<Partial<DeviceDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    organization?: Pick<Partial<OrganizationDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    user?: Pick<Partial<UserDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,

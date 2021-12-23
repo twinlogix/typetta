@@ -407,12 +407,12 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
 export type DAOContextParams<MetadataType> = {
   metadata?: MetadataType
   overrides?: { 
-    a?: Pick<Partial<ADAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    b?: Pick<Partial<BDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    c?: Pick<Partial<CDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    d?: Pick<Partial<DDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    e?: Pick<Partial<EDAOParams<MetadataType>>, 'middlewares' | 'metadata'>,
-    f?: Pick<Partial<FDAOParams<MetadataType>>, 'middlewares' | 'metadata'>
+    a?: Pick<Partial<ADAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    b?: Pick<Partial<BDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    c?: Pick<Partial<CDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    d?: Pick<Partial<DDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    e?: Pick<Partial<EDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    f?: Pick<Partial<FDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   mongo: Record<'a' | 'default', Db>,
   knex: Record<'default', Knex>,

@@ -43,7 +43,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .concat([])
       .filter((node) => isEntity(node))
       .map((node) => {
-        return `${toFirstLower(node.name)}?: Pick<Partial<${node.name}DAOParams<MetadataType>>, 'middlewares' | 'metadata'>`
+        return `${toFirstLower(node.name)}?: Pick<Partial<${node.name}DAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>`
       })
       .join(',\n')
 
