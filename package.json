@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest --detectOpenHandles",
+    "test": "jest --detectOpenHandles --no-cache",
     "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
