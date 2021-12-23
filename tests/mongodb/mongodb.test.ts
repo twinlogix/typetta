@@ -18,7 +18,7 @@ let db: Db
 let dao: DAOContext<any>
 
 beforeAll(async () => {
-  replSet = await MongoMemoryReplSet.create({ replSet: { count: 3 } });
+  replSet = await MongoMemoryReplSet.create({ replSet: { count: 3 } })
   con = await MongoClient.connect(replSet.getUri(), {})
   db = con.db('test')
   dao = new DAOContext<any>({
@@ -646,6 +646,18 @@ test('middleware', async () => {
     mongoDB: {
       default: db,
     },
+    adapters: {
+      mongoDB: {
+        ...mongoDbAdapters,
+        Coordinates: identityAdapter,
+        LocalizedString: identityAdapter,
+        ID: identityAdapter,
+        Password: {
+          dbToModel: (o: unknown) => o as string,
+          modelToDB: (o: string) => sha256(o),
+        },
+      },
+    },
     idGenerators: { ID: () => uuidv4() },
     overrides: {
       user: {
@@ -653,7 +665,6 @@ test('middleware', async () => {
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
           {
             beforeInsert: async (params) => {
-              //expect(params.options?.test).toBe('test') //TODO
               if (params.record.id === 'u1' && params.record.firstName === 'Mario') {
                 throw new Error('is Mario')
               }
@@ -702,7 +713,7 @@ test('middleware', async () => {
               operationCount++
             },
             beforeDelete: async (params) => {
-              if (params.filter?.id === 'u2') {
+              if (params.filter?.id === 'u1') {
                 return { ...params, filter: { id: 'u3' } }
               }
               return params
@@ -715,6 +726,33 @@ test('middleware', async () => {
       },
     },
   })
+
+  try {
+    await dao.user.insertOne({ record: { id: 'u1', firstName: 'Mario', live: true } })
+    fail()
+  } catch (error) {
+    expect((error as Error).message).toBe('is Mario')
+  }
+
+  await dao.user.insertOne({ record: { id: 'u1', firstName: 'Luigi', live: true } })
+  const u = await dao.user.findOne({ filter: { id: 'u1' } })
+  expect(u!.firstName).toBe('LUIGI OK')
+
+  await dao.user.updateOne({ filter: { id: 'u1' }, changes: { firstName: 'Mario' } })
+  const lastName = (await dao.user.findOne({ filter: { id: 'u1' } }))?.lastName
+  expect(lastName).toBe('Bros')
+
+  await dao.user.deleteOne({ filter: { id: 'u1' } })
+  expect(await dao.user.exists({ filter: { id: 'u1' } })).toBe(true)
+
+  await dao.user.insertOne({ record: { id: 'u2', firstName: 'Mario', live: true } })
+  await dao.user.deleteOne({ filter: { id: 'u2' } })
+  expect(await dao.user.exists({ filter: { id: 'u2' } })).toBe(false)
+
+  await dao.user.replaceOne({ filter: { id: 'u1' }, replace: { live: true, id: 'u3' } })
+  expect((await dao.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } }))!.firstName).toBe('Luigi')
+
+  expect(operationCount).toBe(5)
 })
 
 test('middleware options', async () => {
@@ -723,6 +761,18 @@ test('middleware options', async () => {
     metadata: { testType: 'test1', test2: 'no' },
     mongoDB: {
       default: db,
+    },
+    adapters: {
+      mongoDB: {
+        ...mongoDbAdapters,
+        Coordinates: identityAdapter,
+        LocalizedString: identityAdapter,
+        ID: identityAdapter,
+        Password: {
+          dbToModel: (o: unknown) => o as string,
+          modelToDB: (o: string) => sha256(o),
+        },
+      },
     },
     overrides: {
       user: {
@@ -739,7 +789,7 @@ test('middleware options', async () => {
       },
     },
   })
-  await dao.user.insertOne({ record: { live: true }, metadata: {test2: 'yes'} })
+  await dao.user.insertOne({ record: { live: true }, metadata: { test2: 'yes' } })
 })
 
 test('middleware options overrides', async () => {
@@ -965,7 +1015,7 @@ test('Simple transaction 2', async () => {
   try {
     await session.commitTransaction()
     expect(1).toBe(0)
-  } catch(error) {
+  } catch (error) {
     console.log(error)
     expect(error.ok).toBe(0)
   }
