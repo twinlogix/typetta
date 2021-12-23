@@ -11,8 +11,8 @@ export abstract class AbstractDAOContext<ScalarsType extends DefaultModelScalars
 
   public constructor(args?: { adapters?: Partial<DriverDataTypeAdapterMap<ScalarsType>>; metadata?: MetadataType; idGenerators?: { [K in keyof ScalarsType]?: () => ScalarsType[K] } }) {
     this.adapters = {
-      knexjs: args?.adapters?.knexjs || (knexJsAdapters as KnexJSDataTypeAdapterMap<ScalarsType>),
-      mongoDB: args?.adapters?.mongoDB || (mongoDbAdapters as MongoDBDataTypeAdapterMap<ScalarsType>),
+      knex: args?.adapters?.knex || (knexJsAdapters as KnexJSDataTypeAdapterMap<ScalarsType>),
+      mongo: args?.adapters?.mongo || (mongoDbAdapters as MongoDBDataTypeAdapterMap<ScalarsType>),
     }
     this.idGenerators = args?.idGenerators || ({ String: () => uuidv4() } as { [K in keyof ScalarsType]?: () => ScalarsType[K] })
     this.metadata = args?.metadata

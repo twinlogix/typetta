@@ -414,7 +414,7 @@ export type DAOContextParams<MetadataType> = {
     e?: Pick<Partial<EDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     f?: Pick<Partial<FDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
-  mongoDB: Record<'a' | 'default', Db>,
+  mongo: Record<'a' | 'default', Db>,
   knex: Record<'default', Knex>,
   adapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>,
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
@@ -430,42 +430,42 @@ export class DAOContext<MetadataType> extends AbstractDAOContext<types.Scalars, 
   private _f: FDAO<MetadataType> | undefined;
   
   private overrides: DAOContextParams<MetadataType>['overrides'];
-  private mongoDB: Record<'a' | 'default', Db>;
+  private mongo: Record<'a' | 'default', Db>;
   private knex: Record<'default', Knex>;
   
   get a() {
     if(!this._a) {
-      this._a = new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: this.mongoDB['a'].collection('as') });
+      this._a = new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: this.mongo.a.collection('as') });
     }
     return this._a;
   }
   get b() {
     if(!this._b) {
-      this._b = new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: this.mongoDB['default'].collection('bs') });
+      this._b = new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: this.mongo.default.collection('bs') });
     }
     return this._b;
   }
   get c() {
     if(!this._c) {
-      this._c = new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: this.mongoDB['default'].collection('cs') });
+      this._c = new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: this.mongo.default.collection('cs') });
     }
     return this._c;
   }
   get d() {
     if(!this._d) {
-      this._d = new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: this.knex['default'], tableName: 'ds' });
+      this._d = new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: this.knex.default, tableName: 'ds' });
     }
     return this._d;
   }
   get e() {
     if(!this._e) {
-      this._e = new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: this.knex['default'], tableName: 'es' });
+      this._e = new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: this.knex.default, tableName: 'es' });
     }
     return this._e;
   }
   get f() {
     if(!this._f) {
-      this._f = new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: this.knex['default'], tableName: 'fs' });
+      this._f = new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: this.knex.default, tableName: 'fs' });
     }
     return this._f;
   }
@@ -473,7 +473,7 @@ export class DAOContext<MetadataType> extends AbstractDAOContext<types.Scalars, 
   constructor(params: DAOContextParams<MetadataType>) {
     super(params)
     this.overrides = params.overrides
-    this.mongoDB = params.mongoDB
+    this.mongo = params.mongo
     this.knex = params.knex;
   }
 

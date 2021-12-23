@@ -21,8 +21,8 @@ export type DataTypeAdapter<ModelType, DBType> = {
 }
 
 export type DriverDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = {
-  knexjs: KnexJSDataTypeAdapterMap<ModelScalars>
-  mongoDB: MongoDBDataTypeAdapterMap<ModelScalars>
+  knex: KnexJSDataTypeAdapterMap<ModelScalars>
+  mongo: MongoDBDataTypeAdapterMap<ModelScalars>
 }
 
 export const identityAdapter: DataTypeAdapter<any, any> = {

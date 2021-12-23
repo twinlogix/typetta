@@ -25,7 +25,7 @@ beforeEach(async () => {
       default: knexInstance,
     },
     adapters: {
-      knexjs: {
+      knex: {
         ...knexJsAdapters,
         LocalizedString: {
           dbToModel: (o: unknown) => JSON.parse(o as string),
@@ -138,4 +138,14 @@ test('Inner ref', async () => {
   expect(device?.user?.live).toBe(true)
   expect(device?.user?.credentials?.username).toBe('user')
   expect(device?.user?.credentials?.another?.test).toBe(null)
+})
+
+test('Simple transaction', async () => {
+  const trx = await knexInstance.transaction({isolationLevel:'snapshot'})
+  await dao.device.insertOne({ record: { name: 'dev' }, options: { trx } })
+  const dev1 = await dao.device.findOne({ filter: { name: 'dev' }, options: { trx } })
+  expect(dev1!.name).toBe('dev')
+  await trx.rollback()
+  const dev2 = await dao.device.findOne({ filter: { name: 'dev' } })
+  expect(dev2).toBe(null)
 })

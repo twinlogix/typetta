@@ -50,7 +50,7 @@ beforeEach(async () => {
       default: knexInstance,
     },
     adapters: {
-      knexjs: {
+      knex: {
         ...knexJsAdapters,
         ID: identityAdapter,
         Decimal: {

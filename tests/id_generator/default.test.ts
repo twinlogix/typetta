@@ -27,7 +27,7 @@ beforeAll(async () => {
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
   dao = new DAOContext({
-    mongoDB: {
+    mongo: {
       default: db,
       a: db,
     },
@@ -35,13 +35,13 @@ beforeAll(async () => {
       default: knexInstance,
     },
     adapters: {
-      mongoDB: {
+      mongo: {
         ...mongoDbAdapters,
         ID: identityAdapter,
         MongoID: identityAdapter,
         IntAutoInc: identityAdapter,
       },
-      knexjs: {
+      knex: {
         ...knexJsAdapters,
         IntAutoInc: identityAdapter,
         MongoID: identityAdapter,

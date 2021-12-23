@@ -17,7 +17,27 @@ export type KnexJsDAOGenerics<
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
 > = Omit<
-  DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, MetadataType, DriverContext, ScalarsType>,
+  DAOGenerics<
+    ModelType,
+    IDKey,
+    IDScalar,
+    IdGeneration,
+    FilterType,
+    ProjectionType,
+    SortType,
+    InsertType,
+    UpdateType,
+    ExcludedFields,
+    MetadataType,
+    DriverContext,
+    ScalarsType,
+    { trx?: Knex.Transaction },
+    { trx?: Knex.Transaction },
+    { trx?: Knex.Transaction },
+    { trx?: Knex.Transaction },
+    { trx?: Knex.Transaction },
+    { trx?: Knex.Transaction }
+  >,
   'driverContext'
 > & { driverContext: { knex: Knex } }
 

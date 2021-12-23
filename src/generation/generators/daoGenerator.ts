@@ -49,7 +49,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
     const metadata = `metadata?: MetadataType`
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
-    const mongoDBParams = hasMongoDBEntites ? `,\nmongoDB: ${mongoSourcesType}` : ''
+    const mongoDBParams = hasMongoDBEntites ? `,\nmongo: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
     const adaptersParams = ',\nadapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>'
     const idGeneratorParams = ',\nidGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }'
@@ -63,7 +63,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       })
       .join('\n')
 
-    const mongoDBFields = hasMongoDBEntites ? `\nprivate mongoDB: ${mongoSourcesType};` : ''
+    const mongoDBFields = hasMongoDBEntites ? `\nprivate mongo: ${mongoSourcesType};` : ''
     const knexJsFields = hasSQLEntities ? `\nprivate knex: ${sqlSourcesType};` : ''
     const overridesDeclaration = `private overrides: DAOContextParams<MetadataType>['overrides'];${mongoDBFields}${knexJsFields}`
 
@@ -71,9 +71,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .filter((node) => isEntity(node))
       .map((node) => {
         const daoImplementationInit = node.sqlEntity
-          ? `, knex: this.knex['${node.sqlEntity!.source}'], tableName: '${node.sqlEntity?.table}'`
+          ? `, knex: this.knex.${node.sqlEntity!.source}, tableName: '${node.sqlEntity?.table}'`
           : node.mongoEntity
-          ? `, collection: this.mongoDB['${node.mongoEntity!.source}'].collection('${node.mongoEntity?.collection}')`
+          ? `, collection: this.mongo.${node.mongoEntity!.source}.collection('${node.mongoEntity?.collection}')`
           : ''
         const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(node.name)}${daoImplementationInit} });`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}${false ? '.apiV1' : ''};`
@@ -81,7 +81,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       })
       .join('\n')
 
-    const mongoDBConstructor = hasMongoDBEntites ? '\nthis.mongoDB = params.mongoDB' : ''
+    const mongoDBConstructor = hasMongoDBEntites ? '\nthis.mongo = params.mongo' : ''
     const knexJsContsructor = hasSQLEntities ? '\nthis.knex = params.knex;' : ''
     const daoConstructor =
       'constructor(params: DAOContextParams<MetadataType>) {\n' + indentMultiline(`super(params)\nthis.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}`) + '\n}'
