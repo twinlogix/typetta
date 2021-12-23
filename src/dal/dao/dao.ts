@@ -117,11 +117,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P> | null> {
     const newParams = await this.beforeFind(params)
     const record = await this._findOne(newParams)
-    if (record) {
-      const resolvedRecors = await this.resolveAssociations([record], newParams.projection)
-      return ((await this.afterFind(newParams, resolvedRecors)) as ModelProjection<T['model'], T['projection'], P>[])[0]
-    }
-    return null
+    const resolvedRecors = await this.resolveAssociations(record ? [record] : [], newParams.projection)
+    const results = (await this.afterFind(newParams, resolvedRecors)) as ModelProjection<T['model'], T['projection'], P>[]
+    return results.length > 0 ? results[0] : null
   }
 
   async findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P> = {}): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }> {
@@ -498,7 +496,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private createMiddlewareContext(): MiddlewareContext<T> {
-    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata : this.metadata }
+    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata: this.metadata }
   }
 
   // -----------------------------------------------------------------------

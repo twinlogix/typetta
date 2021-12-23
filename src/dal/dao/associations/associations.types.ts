@@ -11,7 +11,7 @@ export enum DAOAssociationReference {
 export type DAOAssociation = {
   type: DAOAssociationType
   reference: DAOAssociationReference
-  field: string // TODO: use recursivekeyof
+  field: string
   refFrom: string
   refTo: string
   dao: string
