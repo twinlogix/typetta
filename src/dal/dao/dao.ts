@@ -65,20 +65,32 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.associations = associations
     this.associations.forEach((association) => this.addResolver(association))
     this.idGeneration = idGeneration
-    if (this.idGeneration === 'generator') {
-      const generator = this.idGenerator || this.daoContext.idGenerators[idScalar]
-      if (!generator) {
-        throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
-      }
-      this.middlewares = [generateId({ generator })]
-    } else {
-      this.middlewares = []
+    const generator = this.idGenerator || this.daoContext.idGenerators[idScalar]
+    if (this.idGeneration === 'generator' && !generator) {
+      throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
     }
     this.middlewares = [
       {
-        beforeFind: async (params) => ({ ...params, projection: this.elabAssociationProjection(params.projection) }),
+        before: async (args, context) => {
+          if (args.operation === 'findAll' || args.operation === 'findOne') {
+            return {
+              continue: true,
+              operation: args.operation,
+              params: {
+                ...args.params,
+                projection: this.elabAssociationProjection(args.params.projection),
+              },
+            }
+          }
+          if (args.operation === 'insertOne' && this.idGeneration === 'generator' && generator && !Object.keys(args.params.record).includes(this.idField)) {
+            return {
+              continue: true,
+              operation: 'insertOne',
+              params: { ...args.params, record: { ...args.params.record, [context.idField]: generator() } },
+            }
+          }
+        },
       },
-      ...(this.idGeneration === 'generator' ? this.middlewares : []),
       ...middlewares,
     ]
     this.metadata = metadata
@@ -89,9 +101,17 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   protected async beforeFind(params: FindParams<T, AnyProjection<T['projection']>>): Promise<FindParams<T, AnyProjection<T['projection']>>> {
     const middlewareContext = this.createMiddlewareContext()
-    for (const middleware of this.middlewares) {
-      if (middleware.beforeFind) {
-        params = await middleware.beforeFind(params, middlewareContext)
+    for (const m of this.middlewares) {
+      if (m.before) {
+        const result = await m.before({ operation: 'findAll', params }, middlewareContext)
+        if (!result) {
+          continue
+        }
+        if(result.continue) {
+          params = result.params
+        } else {
+         // result.result
+        }
       }
     }
     return params
@@ -498,7 +518,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private createMiddlewareContext(): MiddlewareContext<T> {
-    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata : this.metadata }
+    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata: this.metadata }
   }
 
   // -----------------------------------------------------------------------

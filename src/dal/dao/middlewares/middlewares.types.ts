@@ -1,20 +1,7 @@
 import { MiddlewareContext, DeleteParams, FindParams, InsertParams, ReplaceParams, UpdateParams, IdGenerationStrategy, DAOGenerics } from '../dao.types'
 import { PartialDeep } from 'type-fest'
 
-export type DAOMiddleware<T extends DAOGenerics> = {
-  beforeFind?: (params: FindParams<T>, context: MiddlewareContext<T>) => Promise<FindParams<T>>
-  afterFind?: (params: FindParams<T>, records: PartialDeep<T['model']>[], context: MiddlewareContext<T>) => Promise<PartialDeep<T['model']>[]>
-  beforeInsert?: (params: InsertParams<T>, context: MiddlewareContext<T>) => Promise<InsertParams<T>>
-  afterInsert?: (params: InsertParams<T>, record: T['insert'], context: MiddlewareContext<T>) => Promise<T['insert']>
-  beforeUpdate?: (params: UpdateParams<T>, context: MiddlewareContext<T>) => Promise<UpdateParams<T>>
-  afterUpdate?: (params: UpdateParams<T>, context: MiddlewareContext<T>) => Promise<void>
-  beforeReplace?: (params: ReplaceParams<T>, context: MiddlewareContext<T>) => Promise<ReplaceParams<T>>
-  afterReplace?: (params: ReplaceParams<T>, context: MiddlewareContext<T>) => Promise<void>
-  beforeDelete?: (params: DeleteParams<T>, context: MiddlewareContext<T>) => Promise<DeleteParams<T>>
-  afterDelete?: (params: DeleteParams<T>, context: MiddlewareContext<T>) => Promise<void>
-}
-
-type InputParams<T extends DAOGenerics> =
+type InputMiddlewareParams<T extends DAOGenerics> =
   | {
       operation: 'findAll'
       params: FindParams<T>
@@ -51,7 +38,7 @@ type InputParams<T extends DAOGenerics> =
       operation: 'deleteOne'
       params: DeleteParams<T>
     }
-type OuputParams<T extends DAOGenerics> =
+type OuputMiddlewareParams<T extends DAOGenerics> =
   | {
       operation: 'findAll'
       params: FindParams<T>
@@ -91,44 +78,35 @@ type OuputParams<T extends DAOGenerics> =
       operation: 'deleteOne'
       params: DeleteParams<T>
     }
-export type DAOMiddleware2<T extends DAOGenerics> = {
-  before?: (params: InputParams<T>, context: MiddlewareContext<T>) => Promise<(InputParams<T> & ({ continue: true } | ({ continue: false } & OuputParams<T>))) | void>
-  after?: (params: OuputParams<T>, context: MiddlewareContext<T>) => Promise<{ continue: boolean } & OuputParams<T>>
+
+type ASD<G extends DAOGenerics, T extends 'findAll' | 'findOne' | 'insertOne' | 'updateAll' | 'updateOne' | 'replaceAll' | 'replaceOne' | 'deleteAll' | 'deleteOne'> = T extends 'findAll'
+  ?
+      | {
+          operation: 'findAll'
+          params: FindParams<G>
+          continue: true
+        }
+      | {
+          operation: 'findAll'
+          params: FindParams<G>
+          continue: false
+          records: PartialDeep<G['model']>[]
+        }
+  : InputMiddlewareParams<G> & ({ continue: true } | ({ continue: false } & OuputMiddlewareParams<G>))
+
+export type DAOMiddleware<T extends DAOGenerics> = {
+  before?: <G extends InputMiddlewareParams<T>>(args: G, context: MiddlewareContext<T>) => Promise<ASD<T, G['operation']> | void>
+  after?: (args: OuputMiddlewareParams<T>, context: MiddlewareContext<T>) => Promise<{ continue: boolean } & OuputMiddlewareParams<T>>
 }
 
-const asd: DAOMiddleware2<any> = {
-  before: async (params, context) => {
-    if (params.operation === 'findAll') {
+const asd: DAOMiddleware<any> = {
+  before: async (args, cont) => {
+    if (args.operation === 'findAll') {
       return {
         operation: 'findAll',
-        params: params,
-        continue: false,
-        records: [],
-      }
-    }
-    if (params.operation === 'findOne') {
-      return {
-        operation: 'findOne',
-        params: params,
         continue: true,
-      }
-    }
-    if (params.operation === 'deleteOne') {
-      return {
-        ...params,
-        continue: false,
+        params: args.params,
       }
     }
   },
 }
-
-function test<T extends 'a' | 'b'>(t: T): T {
-  if (t === 'a') {
-    // Type '"a"' is not assignable to type 'T'.
-    // '"a"' is assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint '"a" | "b"'.ts(2322)
-    return 'a' 
-  }
-  return t
-}
-
-const v = test('a')
