@@ -16,11 +16,11 @@ export const mongoDbAdapters: MongoDBDataTypeAdapterMap<DefaultModelScalars> = {
   String: identityAdapter,
   Boolean: identityAdapter,
   Int: {
-    dbToModel: (o: Int32) => parseInt(o.toString(), 10), // TODO: improve performance
+    dbToModel: (o: Int32) => o.valueOf(),
     modelToDB: (o: number) => new Int32(o),
   },
   Float: {
-    dbToModel: (o: Double) => parseInt(o.toString(), 10), // TODO: improve performance
+    dbToModel: (o: Double) => o.valueOf(),
     modelToDB: (o: number) => new Double(o),
   },
   Decimal: {
