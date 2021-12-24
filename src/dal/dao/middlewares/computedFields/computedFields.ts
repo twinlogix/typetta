@@ -14,7 +14,7 @@ export function computedField<T extends DAOGenerics, P1 extends AnyProjection<T[
   return {
     before: projectionDependency<T, P1, P2>(options).before,
     after: async (args) => {
-      if (args.operation === 'findAll') {
+      if (args.operation === 'find') {
         const computedRecords = []
         for (const record of args.records) {
           if (
@@ -25,7 +25,7 @@ export function computedField<T extends DAOGenerics, P1 extends AnyProjection<T[
           }
         }
         return {
-          operation: 'findAll',
+          operation: 'find',
           continue: true,
           records: computedRecords,
           params: args.params,

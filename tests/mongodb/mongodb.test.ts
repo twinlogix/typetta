@@ -1,6 +1,3 @@
-global.TextEncoder = require('util').TextEncoder
-global.TextDecoder = require('util').TextDecoder
-
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
@@ -11,6 +8,9 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
+
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
 
 let replSet: MongoMemoryReplSet
 let con: MongoClient
@@ -41,9 +41,7 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
     },
     idGenerators: { ID: () => uuidv4() },
     overrides: {
-      user: {
-        
-      },
+      user: {},
     },
   })
 }
@@ -654,7 +652,7 @@ test('insert and retrieve localized string field', async () => {
 // ------------------------------------------------------------------------
 // --------------------------- MIDDLEWARE ---------------------------------
 // ------------------------------------------------------------------------
-test('middleware', async () => {/*
+test('middleware', async () => {
   let operationCount = 0
   const dao = new DAOContext<any>({
     mongo: {
@@ -678,62 +676,84 @@ test('middleware', async () => {/*
         middlewares: [
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
           {
-            beforeInsert: async (params) => {
-              if (params.record.id === 'u1' && params.record.firstName === 'Mario') {
-                throw new Error('is Mario')
+            before: async (args, context) => {
+              if (args.operation === 'insert') {
+                if (args.params.record.id === 'u1' && args.params.record.firstName === 'Mario') {
+                  throw new Error('is Mario')
+                }
+                if (args.params.record.firstName) {
+                  return {
+                    continue: true,
+                    operation: 'insert',
+                    params: { ...args.params, record: { ...args.params.record, firstName: args.params.record.firstName?.toUpperCase() } },
+                  }
+                }
               }
-              if (params.record.firstName) {
-                return { ...params, record: { ...params.record, firstName: params.record.firstName?.toUpperCase() } }
+
+              if (args.operation === 'find') {
+                if (args.params.projection !== true && args.params.projection?.id) {
+                  expect(args.params.projection.live).toBe(true)
+                  operationCount++
+                }
               }
-              return params
+
+              if (args.operation === 'update') {
+                if (args.params.filter?.id === 'u1') {
+                  return {
+                    continue: true,
+                    operation: args.operation,
+                    params: { ...args.params, changes: { ...args.params.changes, lastName: 'Bros' } },
+                  }
+                }
+              }
+
+              if (args.operation === 'delete') {
+                if (args.params.filter?.id === 'u1') {
+                  return {
+                    continue: true,
+                    operation: args.operation,
+                    params: { ...args.params, filter: { id: 'u3' } },
+                  }
+                }
+              }
+
+              if (args.operation === 'replace') {
+                if (args.params.filter?.id === 'u1') {
+                  return {
+                    continue: true,
+                    operation: args.operation,
+                    params: { ...args.params, replace: { ...args.params.replace, firstName: 'Luigi' } },
+                  }
+                }
+              }
             },
-            afterInsert: async (params, result) => {
-              if (params.record?.id === 'u1' && result.firstName) {
-                return { ...result, firstName: result.firstName + ' OK' }
+            after: async (args, context) => {
+              if (args.operation === 'insert') {
+                if (args.params.record?.id === 'u1' && args.record.firstName) {
+                  return {
+                    continue: true,
+                    operation: 'insert',
+                    params: args.params,
+                    record: { ...args.record, firstName: args.record.firstName + ' OK' },
+                  }
+                }
               }
-              return result
-            },
-            beforeFind: async (params) => {
-              if (params.projection !== true && params.projection?.id) {
-                expect(params.projection.live).toBe(true)
+              if (args.operation === 'find') {
+                return {
+                  continue: true,
+                  operation: 'find',
+                  params: args.params,
+                  records: args.records.map((record) => {
+                    if (args.params.filter?.id === 'u1' && record.firstName) {
+                      return { ...record, firstName: record.firstName + ' OK' }
+                    }
+                    return record
+                  }),
+                }
+              }
+              if (args.operation === 'update' || args.operation === 'delete' || args.operation === 'replace') {
                 operationCount++
               }
-              return params
-            },
-            afterFind: async (params, records) => {
-              return records.map((record) => {
-                if (params.filter?.id === 'u1' && record.firstName) {
-                  return { ...record, firstName: record.firstName + ' OK' }
-                }
-                return record
-              })
-            },
-            beforeUpdate: async (params) => {
-              if (params.filter?.id === 'u1') {
-                return { ...params, changes: { ...params.changes, lastName: 'Bros' } }
-              }
-              return params
-            },
-            afterUpdate: async (params) => {
-              operationCount++
-            },
-            beforeReplace: async (params) => {
-              if (params.filter?.id === 'u1') {
-                return { ...params, replace: { ...params.replace, firstName: 'Luigi' } }
-              }
-              return params
-            },
-            afterReplace: async (params) => {
-              operationCount++
-            },
-            beforeDelete: async (params) => {
-              if (params.filter?.id === 'u1') {
-                return { ...params, filter: { id: 'u3' } }
-              }
-              return params
-            },
-            afterDelete: async (params) => {
-              operationCount++
             },
           },
         ],
@@ -756,7 +776,9 @@ test('middleware', async () => {/*
   const lastName = (await dao.user.findOne({ filter: { id: 'u1' } }))?.lastName
   expect(lastName).toBe('Bros')
 
+  const asd1 = await dao.user.findAll({})
   await dao.user.deleteOne({ filter: { id: 'u1' } })
+  const asd2 = await dao.user.findAll({})
   expect(await dao.user.exists({ filter: { id: 'u1' } })).toBe(true)
 
   await dao.user.insertOne({ record: { id: 'u2', firstName: 'Mario', live: true } })
@@ -764,15 +786,76 @@ test('middleware', async () => {/*
   expect(await dao.user.exists({ filter: { id: 'u2' } })).toBe(false)
 
   await dao.user.replaceOne({ filter: { id: 'u1' }, replace: { live: true, id: 'u3' } })
-  expect((await dao.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } }))!.firstName).toBe('Luigi')
+  const luigi = await dao.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } })
+  expect(luigi!.firstName).toBe('Luigi')
 
-  expect(operationCount).toBe(5)*/
+  expect(operationCount).toBe(5)
+})
+
+test('middleware', async () => {
+  let operationCount = 0
+  const dao = new DAOContext<any>({
+    mongo: {
+      default: db,
+    },
+    adapters: {
+      mongo: {
+        ...mongoDbAdapters,
+        Coordinates: identityAdapter,
+        LocalizedString: identityAdapter,
+        ID: identityAdapter,
+        Password: {
+          dbToModel: (o: unknown) => o as string,
+          modelToDB: (o: string) => sha256(o),
+        },
+      },
+    },
+    idGenerators: { ID: () => uuidv4() },
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            before: async (args, context) => {
+              if(args.operation === 'find') {
+                return {
+                  continue: false,
+                  operation: 'find',
+                  params: args.params,
+                  records: [{id: 'u1', firstName: 'Mario'}]
+                }
+              }
+            },
+            after: async (args, context) => {
+              if(args.operation === 'find') {
+                return {
+                  continue: true,
+                  operation: 'find',
+                  params: args.params,
+                  records: args.records.map(u => ({...u, firstName: "MARIO"}))
+                }
+              }
+            },
+          },
+          {
+            before: async (args, context) => {
+              throw 'Should not be called'
+            },
+            after: async (args, context) => {
+              throw 'Should not be called'
+            },
+          },
+        ],
+      },
+    },
+  })
+  const mario = await dao.user.findOne({})
+  expect(mario?.firstName).toBe("MARIO")
 })
 
 test('middleware options', async () => {
-  const dao = new DAOContext<{ testType?: string; test2?: string }>({
+  const dao = new DAOContext<{ m1?: string; m2?: string }, { m3: string }>({
     idGenerators: { ID: () => uuidv4() },
-    metadata: { testType: 'test1', test2: 'no' },
+    metadata: { m1: 'test1', m2: 'no' },
     mongo: {
       default: db,
     },
@@ -792,40 +875,17 @@ test('middleware options', async () => {
       user: {
         middlewares: [
           {
-            before: async (params, context) => {
-              expect(context.metadata?.testType).toBe('test1')
-              expect(context.metadata?.test2).toBe('no')
-              //expect(params.metadata?.test2).toBe('yes')
+            before: async (args, context) => {
+              expect(context.metadata?.m1).toBe('test1')
+              expect(context.metadata?.m2).toBe('no')
+              expect(args.params.metadata?.m3).toBe('yes')
             },
           },
         ],
       },
     },
   })
-  await dao.user.insertOne({ record: { live: true }, metadata: { test2: 'yes' } })
-})
-
-test('middleware options overrides', async () => {
-  const dao = new DAOContext({
-    idGenerators: { ID: () => uuidv4() },
-    metadata: { testType: 'test1' },
-    mongo: {
-      default: db,
-    },
-    overrides: {
-      user: {
-        middlewares: [
-          {
-            before: async (params) => {
-              /*expect(params.metadata?.testType).toBe('test2')
-              expect(params.metadata?.testType).toBeDefined()*/
-            },
-          },
-        ],
-      },
-    },
-  })
-  await dao.user.insertOne({ record: { live: true }, metadata: { testType: 'test2' } })
+  await dao.user.insertOne({ record: { live: true }, metadata: { m3: 'yes' } })
 })
 
 // ------------------------------------------------------------------------

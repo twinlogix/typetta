@@ -9,11 +9,11 @@ export function projectionDependency<T extends DAOGenerics, P1 extends AnyProjec
 }): DAOMiddleware<T> {
   return {
     before: async (args) => {
-      if (args.operation === 'findAll') {
+      if (args.operation === 'find') {
         if (isProjectionIntersected(args.params.projection ? (args.params.projection as GenericProjection) : true, options.fieldsProjection ? (options.fieldsProjection as GenericProjection) : true)) {
           return {
+            operation: 'find',
             continue: true,
-            operation: 'findAll',
             params: {
               ...args.params,
               projection: mergeProjections((args.params.projection || true) as GenericProjection, options.requiredProjection as GenericProjection) as T['projection'],

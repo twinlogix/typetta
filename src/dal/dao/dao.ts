@@ -71,7 +71,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.middlewares = [
       {
         before: async (args, context) => {
-          if (args.operation === 'findAll') {
+          if (args.operation === 'find') {
             return {
               continue: true,
               operation: args.operation,
@@ -81,7 +81,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               },
             }
           }
-          if (args.operation === 'insertOne' && this.idGeneration === 'generator' && generator && !Object.keys(args.params.record).includes(this.idField)) {
+          if (args.operation === 'insert' && this.idGeneration === 'generator' && generator && !Object.keys(args.params.record).includes(this.idField)) {
             return {
               continue: true,
               operation: args.operation,
@@ -99,26 +99,26 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   async findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'findAll', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     const records = beforeResults.continue ? await this._find(beforeResults.params) : beforeResults.records
     const resolvedRecors = await this.resolveAssociations(records, beforeResults.params.projection)
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'findAll', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
+    const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
     return afterResults.records as ModelProjection<T['model'], T['projection'], P>[]
   }
 
   async findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P> | null> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'findAll', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     const record = beforeResults.continue ? await this._findOne(beforeResults.params) : beforeResults.records.length > 0 ? beforeResults.records[0] : null
     const resolvedRecors = record ? await this.resolveAssociations([record], beforeResults.params.projection) : []
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'findAll', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
+    const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
     return afterResults.records.length > 0 ? afterResults.records[0] : null
   }
 
   async findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P> = {}): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'findAll', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     const { totalCount, records } = beforeResults.continue ? await this._findPage(beforeResults.params) : { records: beforeResults.records, totalCount: beforeResults.totalCount ?? 0 }
     const resolvedRecors = await this.resolveAssociations(records, beforeResults.params.projection)
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'findAll', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex)
+    const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex)
     return {
       totalCount: afterResults.totalCount ?? 0,
       records: afterResults.records as ModelProjection<T['model'], T['projection'], P>[],
@@ -126,12 +126,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   async exists(params: FilterParams<T>): Promise<boolean> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'findAll', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     return this._exists(beforeResults.params)
   }
 
   async count(params: FilterParams<T> = {}): Promise<number> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'findAll', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     return this._count(beforeResults.params)
   }
 
@@ -376,50 +376,50 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insertOne', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params })
     const record = beforeResults.continue ? await this._insertOne(beforeResults.params) : beforeResults.record
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'insertOne', params: beforeResults.params, record }, beforeResults.middlewareIndex)
+    const afterResults = await this.executeAfterMiddlewares({ operation: 'insert', params: beforeResults.params, record }, beforeResults.middlewareIndex)
     return afterResults.record
   }
 
   async updateOne(params: UpdateParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'updateOne', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'update', params })
     if (beforeResults.continue) {
       await this._updateOne(beforeResults.params)
     }
-    await this.executeAfterMiddlewares({ operation: 'updateOne', params: beforeResults.params }, beforeResults.middlewareIndex)
+    await this.executeAfterMiddlewares({ operation: 'update', params: beforeResults.params }, beforeResults.middlewareIndex)
   }
 
   async updateAll(params: UpdateParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'updateAll', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'update', params })
     if (beforeResults.continue) {
       await this._updateMany(beforeResults.params)
     }
-    await this.executeAfterMiddlewares({ operation: 'updateAll', params: beforeResults.params }, beforeResults.middlewareIndex)
+    await this.executeAfterMiddlewares({ operation: 'update', params: beforeResults.params }, beforeResults.middlewareIndex)
   }
 
   async replaceOne(params: ReplaceParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'replaceOne', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'replace', params })
     if (beforeResults.continue) {
       await this._replaceOne(beforeResults.params)
     }
-    await this.executeAfterMiddlewares({ operation: 'replaceOne', params: beforeResults.params }, beforeResults.middlewareIndex)
+    await this.executeAfterMiddlewares({ operation: 'replace', params: beforeResults.params }, beforeResults.middlewareIndex)
   }
 
   async deleteOne(params: DeleteParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'deleteOne', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'delete', params })
     if (beforeResults.continue) {
       await this._deleteOne(beforeResults.params)
     }
-    await this.executeAfterMiddlewares({ operation: 'deleteOne', params: beforeResults.params }, beforeResults.middlewareIndex)
+    await this.executeAfterMiddlewares({ operation: 'delete', params: beforeResults.params }, beforeResults.middlewareIndex)
   }
 
   async deleteAll(params: DeleteParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'deleteAll', params })
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'delete', params })
     if (beforeResults.continue) {
       await this._deleteMany(beforeResults.params)
     }
-    await this.executeAfterMiddlewares({ operation: 'deleteAll', params: beforeResults.params }, beforeResults.middlewareIndex)
+    await this.executeAfterMiddlewares({ operation: 'delete', params: beforeResults.params }, beforeResults.middlewareIndex)
   }
 
   private createMiddlewareContext(): MiddlewareContext<T> {
@@ -437,9 +437,13 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         throw new Error(`Invalid operation. Expecting '${input.operation}' but received '${result.operation}'.`)
       }
       if (result.continue) {
-        input = result as unknown as I
+        const newInput = { ...result, continue: undefined }
+        delete newInput.continue
+        input = newInput as unknown as I
       } else {
-        return { ...result, middlewareIndex: index } as unknown as SelectBeforeMiddlewareOutputType<T, I> & { middlewareIndex?: number }
+        const newResult = { ...result, continue: undefined }
+        delete newResult.continue
+        return { ...newResult, middlewareIndex: index } as unknown as SelectBeforeMiddlewareOutputType<T, I> & { middlewareIndex?: number }
       }
     }
     return { ...input, continue: true } as unknown as SelectBeforeMiddlewareOutputType<T, I> & { middlewareIndex?: number }
@@ -456,9 +460,13 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         throw new Error(`Invalid operation. Expecting '${input.operation}' but received '${result.operation}'.`)
       }
       if (result.continue) {
-        input = result as unknown as I
+        const newInput = { ...result, continue: undefined }
+        delete newInput.continue
+        input = newInput as unknown as I
       } else {
-        return result as unknown as SelectAfterMiddlewareOutputType<T, I>
+        const newResult = { ...result, continue: undefined }
+        delete newResult.continue
+        return newResult as unknown as SelectAfterMiddlewareOutputType<T, I>
       }
     }
     return input as unknown as SelectAfterMiddlewareOutputType<T, I>
