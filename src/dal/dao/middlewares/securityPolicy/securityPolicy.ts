@@ -3,7 +3,7 @@ import { DAOGenerics, IdGenerationStrategy } from '../../dao.types'
 import { DAOMiddleware } from '../middlewares.types'
 import { PartialDeep } from 'type-fest'
 
-export type SecurityPolicyDAOGenerics<
+/*export type SecurityPolicyDAOGenerics<
   SecurityContext = any,
   ModelType extends object = any,
   IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
@@ -72,4 +72,4 @@ export function securityPolicy<T extends SecurityPolicyDAOGenerics>(args: {
       }
     },
   }
-}
+}*/
