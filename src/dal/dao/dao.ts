@@ -1,8 +1,8 @@
 import { deepCopy, deepMerge, getTraversing, reversed, setTraversing } from '../../utils/utils'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { DAOWrapperAPIv1 } from '../legacy/daoWrapperAPIv1'
-import { addAssociationRefToProjection } from './associations/associations'
-import { DAOAssociation, DAOAssociationReference, DAOAssociationType } from './associations/associations.types'
+import { addRelationRefToProjection } from './relations/relations'
+import { DAORelation, DAORelationReference, DAORelationType } from './relations/relations.types'
 import {
   MiddlewareContext,
   DAO,
@@ -31,7 +31,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idField: T['idKey']
   protected idGeneration: T['idGeneration']
   protected daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
-  protected associations: DAOAssociation[]
+  protected relations: DAORelation[]
   protected middlewares: DAOMiddleware<T>[]
   protected pageSize: number
   protected resolvers: { [key: string]: DAOResolver | undefined }
@@ -49,7 +49,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     idGenerator,
     daoContext,
     pageSize = 50,
-    associations = [],
+    relations = [],
     middlewares = [],
     schema,
     metadata,
@@ -61,8 +61,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.daoContext = daoContext
     this.pageSize = pageSize
     this.resolvers = {}
-    this.associations = associations
-    this.associations.forEach((association) => this.addResolver(association))
+    this.relations = relations
+    this.relations.forEach((relation) => this.addResolver(relation))
     this.idGeneration = idGeneration
     const generator = this.idGenerator || this.daoContext.idGenerators[idScalar]
     if (this.idGeneration === 'generator' && !generator) {
@@ -77,7 +77,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               operation: args.operation,
               params: {
                 ...args.params,
-                projection: this.elabAssociationProjection(args.params.projection),
+                projection: this.elabRelationProjection(args.params.projection),
               },
             }
           }
@@ -101,7 +101,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     const records = beforeResults.continue ? await this._find(beforeResults.params) : beforeResults.records
-    const resolvedRecors = await this.resolveAssociations(records, beforeResults.params.projection, beforeResults.params.relations)
+    const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
     const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
     return afterResults.records as ModelProjection<T['model'], T['projection'], P>[]
   }
@@ -109,7 +109,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P> | null> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     const record = beforeResults.continue ? await this._findOne(beforeResults.params) : beforeResults.records.length > 0 ? beforeResults.records[0] : null
-    const resolvedRecors = record ? await this.resolveAssociations([record], beforeResults.params.projection, beforeResults.params.relations) : []
+    const resolvedRecors = record ? await this.resolveRelations([record], beforeResults.params.projection, beforeResults.params.relations) : []
     const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
     return afterResults.records.length > 0 ? afterResults.records[0] : null
   }
@@ -117,7 +117,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P> = {}): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     const { totalCount, records } = beforeResults.continue ? await this._findPage(beforeResults.params) : { records: beforeResults.records, totalCount: beforeResults.totalCount ?? 0 }
-    const resolvedRecors = await this.resolveAssociations(records, beforeResults.params.projection, beforeResults.params.relations)
+    const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
     const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex)
     return {
       totalCount: afterResults.totalCount ?? 0,
@@ -139,26 +139,26 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     const errors = []
     if (records) {
       const inputRecords = records instanceof Array ? records : [records]
-      for (const association of this.associations) {
-        if (association.reference === DAOAssociationReference.INNER) {
-          const associationProjection = {}
-          setTraversing(associationProjection, association.refTo, true)
-          const resolver: DAOResolver = this.resolvers[association.field]!
+      for (const relation of this.relations) {
+        if (relation.reference === DAORelationReference.INNER) {
+          const relationProjection = {}
+          setTraversing(relationProjection, relation.refTo, true)
+          const resolver: DAOResolver = this.resolvers[relation.field]!
 
-          const associationFieldPathSplitted = association.field.split('.')
-          associationFieldPathSplitted.pop()
-          const parentPath = associationFieldPathSplitted.join('.')
+          const relationFieldPathSplitted = relation.field.split('.')
+          relationFieldPathSplitted.pop()
+          const parentPath = relationFieldPathSplitted.join('.')
           const parents = getTraversing(inputRecords, parentPath)
-          const associatedRecords = await resolver.load(parents, associationProjection, undefined)
+          const associatedRecords = await resolver.load(parents, relationProjection, undefined)
 
           for (const inputRecord of inputRecords) {
-            const notFoundRefsFrom = getTraversing(inputRecord, association.refFrom).filter((refFrom) => {
+            const notFoundRefsFrom = getTraversing(inputRecord, relation.refFrom).filter((refFrom) => {
               return !associatedRecords.find(
-                (associatedRecord) => associatedRecord && getTraversing(associatedRecord, association.refTo).length > 0 && refFrom === getTraversing(associatedRecord, association.refTo)[0],
+                (associatedRecord) => associatedRecord && getTraversing(associatedRecord, relation.refTo).length > 0 && refFrom === getTraversing(associatedRecord, relation.refTo)[0],
               )
             })
             if (notFoundRefsFrom.length > 0) {
-              errors.push({ association, record: inputRecord, failedReferences: notFoundRefsFrom })
+              errors.push({ relation, record: inputRecord, failedReferences: notFoundRefsFrom })
             }
           }
         }
@@ -226,50 +226,50 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
   }
 
-  private elabAssociationProjection<P extends AnyProjection<T['projection']>>(projection?: P): P | undefined {
+  private elabRelationProjection<P extends AnyProjection<T['projection']>>(projection?: P): P | undefined {
     if (projection === true || !projection) {
       return projection
     }
-    const dbProjections = deepCopy(projection) // IMPROVE: make addAssociationRefToProjection functional and stop using side effects
-    this.associations
-      .filter((association) => association.reference === DAOAssociationReference.INNER)
-      .forEach((association) => addAssociationRefToProjection(association.field, association.refFrom, dbProjections))
-    this.associations.filter((association) => association.reference === DAOAssociationReference.FOREIGN).forEach((association) => setTraversing(dbProjections, association.refTo, true))
+    const dbProjections = deepCopy(projection) // IMPROVE: make addRelationRefToProjection functional and stop using side effects
+    this.relations
+      .filter((relation) => relation.reference === DAORelationReference.INNER)
+      .forEach((relation) => addRelationRefToProjection(relation.field, relation.refFrom, dbProjections))
+    this.relations.filter((relation) => relation.reference === DAORelationReference.FOREIGN).forEach((relation) => setTraversing(dbProjections, relation.refTo, true))
     return dbProjections
   }
 
-  private async resolveAssociations(dbObjects: any[], projections?: AnyProjection<T['projection']>, relations?: T['relations']): Promise<PartialDeep<T['model']>[]> {
-    for (const association of this.associations) {
+  private async resolveRelations(dbObjects: any[], projections?: AnyProjection<T['projection']>, relations?: T['relations']): Promise<PartialDeep<T['model']>[]> {
+    for (const relation of this.relations) {
       if (projections) {
-        const associationProjection = getProjection(projections as GenericProjection, association.field)
-        const relationsFilter = getTraversing(relations, association.field)
-        if (associationProjection && projections !== true) {
-          if (associationProjection !== true) {
-            if (association.reference === DAOAssociationReference.INNER) {
-              setTraversing(associationProjection, association.refTo, true)
-            } else if (association.reference === DAOAssociationReference.FOREIGN) {
-              setTraversing(associationProjection, association.refFrom, true)
+        const relationProjection = getProjection(projections as GenericProjection, relation.field)
+        const relationsFilter = getTraversing(relations, relation.field)
+        if (relationProjection && projections !== true) {
+          if (relationProjection !== true) {
+            if (relation.reference === DAORelationReference.INNER) {
+              setTraversing(relationProjection, relation.refTo, true)
+            } else if (relation.reference === DAORelationReference.FOREIGN) {
+              setTraversing(relationProjection, relation.refFrom, true)
             }
           }
-          const resolver: DAOResolver = this.resolvers[association.field]!
+          const resolver: DAOResolver = this.resolvers[relation.field]!
 
-          const associationFieldPathSplitted = association.field.split('.')
-          const associationField = associationFieldPathSplitted.pop()
-          if (associationField) {
-            const parentPath = associationFieldPathSplitted.join('.')
+          const relationFieldPathSplitted = relation.field.split('.')
+          const relationField = relationFieldPathSplitted.pop()
+          if (relationField) {
+            const parentPath = relationFieldPathSplitted.join('.')
             const parents = getTraversing(
               dbObjects.filter((dbObject) => dbObject != null),
               parentPath,
             )
-            const associatedRecords = await resolver.load(parents, associationProjection, relationsFilter.length > 0 ? relationsFilter[0] : undefined)
+            const associatedRecords = await resolver.load(parents, relationProjection, relationsFilter.length > 0 ? relationsFilter[0] : undefined)
             parents.forEach((parent) => {
-              if (association.type === DAOAssociationType.ONE_TO_ONE) {
-                parent[associationField] =
+              if (relation.type === DAORelationType.ONE_TO_ONE) {
+                parent[relationField] =
                   associatedRecords.find((value) => {
                     return resolver.match(parent, value)
                   }) || null
-              } else if (association.type === DAOAssociationType.ONE_TO_MANY) {
-                parent[associationField] =
+              } else if (relation.type === DAORelationType.ONE_TO_MANY) {
+                parent[relationField] =
                   associatedRecords.filter((value) => {
                     return resolver.match(parent, value)
                   }) || null
@@ -282,26 +282,26 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return dbObjects
   }
 
-  private addResolver(association: DAOAssociation) {
+  private addResolver(relation: DAORelation) {
     let resolver
 
-    if (association.reference === DAOAssociationReference.INNER) {
-      const refFrom = association.refFrom.split('.').pop()
-      const refTo = association.refTo
-      const linkedDAO = association.dao
+    if (relation.reference === DAORelationReference.INNER) {
+      const refFrom = relation.refFrom.split('.').pop()
+      const refTo = relation.refTo
+      const linkedDAO = relation.dao
       if (refFrom) {
-        if (association.type === DAOAssociationType.ONE_TO_ONE) {
+        if (relation.type === DAORelationType.ONE_TO_ONE) {
           resolver = {
             load: async (parents: any[], projections: any, filter: any) => {
               const ids = parents.map((parent) => parent[refFrom]).filter((value, index, self) => value !== null && value !== undefined && self.indexOf(value) === index)
 
               return this.daoContext.dao(linkedDAO).load(
                 ids,
-                association.buildFilter ||
+                relation.buildFilter ||
                   ((keys: any[]): T['filter'] => {
                     return { [refTo]: { $in: keys } }
                   }),
-                association.hasKey ||
+                relation.hasKey ||
                   ((record: T['model'], key: any): boolean => {
                     return (record as any)[refTo] === key
                   }),
@@ -314,7 +314,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               return source[refFrom] === value[refTo]
             },
           }
-        } else if (association.type === DAOAssociationType.ONE_TO_MANY) {
+        } else if (relation.type === DAORelationType.ONE_TO_MANY) {
           resolver = {
             load: async (parents: any[], projections: any, filter: any) => {
               const ids = parents
@@ -325,11 +325,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
               return this.daoContext.dao(linkedDAO).load(
                 ids,
-                association.buildFilter ||
+                relation.buildFilter ||
                   ((keys: any[]): T['filter'] => {
                     return { [refTo]: { $in: keys } }
                   }),
-                association.hasKey ||
+                relation.hasKey ||
                   ((record: T['model'], key: any): boolean => {
                     return (record as any)[refTo] === key
                   }),
@@ -344,10 +344,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         }
       }
-    } else if (association.reference === DAOAssociationReference.FOREIGN) {
-      const refFrom = association.refFrom
-      const refTo = association.refTo.split('.').pop()
-      const linkedDAO = association.dao
+    } else if (relation.reference === DAORelationReference.FOREIGN) {
+      const refFrom = relation.refFrom
+      const refTo = relation.refTo.split('.').pop()
+      const linkedDAO = relation.dao
       if (refTo) {
         resolver = {
           load: async (parents: any[], projections: any, filter: any) => {
@@ -355,11 +355,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
             return this.daoContext.dao(linkedDAO).load(
               ids,
-              association.buildFilter ||
+              relation.buildFilter ||
                 ((keys: any[]): T['filter'] => {
                   return { [refFrom]: { $in: keys } }
                 }),
-              association.hasKey ||
+              relation.hasKey ||
                 ((record: T['model'], key: any): boolean => {
                   return (record as any)[refFrom] === key
                 }),
@@ -375,7 +375,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         }
       }
     }
-    this.resolvers[association.field] = resolver
+    this.resolvers[relation.field] = resolver
   }
 
   async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {

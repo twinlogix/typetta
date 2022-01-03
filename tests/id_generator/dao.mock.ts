@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -62,7 +62,7 @@ export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ...params, 
       idField: 'id', 
       schema: aSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -133,7 +133,7 @@ export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ...params, 
       idField: 'id', 
       schema: bSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -204,7 +204,7 @@ export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ...params, 
       idField: 'id', 
       schema: cSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -274,7 +274,7 @@ export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ...params, 
       idField: 'id', 
       schema: dSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -345,7 +345,7 @@ export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ...params, 
       idField: 'id', 
       schema: eSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -416,7 +416,7 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ...params, 
       idField: 'id', 
       schema: fSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]

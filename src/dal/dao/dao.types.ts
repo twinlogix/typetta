@@ -1,6 +1,6 @@
 import { DefaultModelScalars } from '../..'
 import { AbstractDAOContext } from '../daoContext/daoContext'
-import { DAOAssociation } from './associations/associations.types'
+import { DAORelation } from './relations/relations.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { Schema } from './schemas/schemas.types'
@@ -16,7 +16,7 @@ export type RequestArgs<Filter, Sort> = {
 export type ReferenceChecksResponse<T> =
   | true
   | {
-      association: DAOAssociation
+      relation: DAORelation
       record: PartialDeep<T>
       failedReferences: any[]
     }[]
@@ -79,7 +79,7 @@ export type DAOParams<T extends DAOGenerics> = {
   metadata?: T['metadata']
   driverContext: T['driverContext']
   pageSize?: number
-  associations?: DAOAssociation[]
+  relations?: DAORelation[]
   middlewares?: DAOMiddleware<T>[]
 }
 

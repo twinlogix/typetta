@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -98,9 +98,9 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       ...params, 
       idField: 'id', 
       schema: postSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
-          { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user' }
+          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user' }
         ]
       ), 
       idGeneration: 'generator', 
@@ -224,9 +224,9 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       ...params, 
       idField: 'id', 
       schema: userSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
-          { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'posts', refFrom: 'authorId', refTo: 'id', dao: 'post' }
+          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'posts', refFrom: 'authorId', refTo: 'id', dao: 'post' }
         ]
       ), 
       idGeneration: 'generator', 

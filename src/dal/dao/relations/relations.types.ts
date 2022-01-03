@@ -1,16 +1,16 @@
-export enum DAOAssociationType {
+export enum DAORelationType {
   ONE_TO_ONE,
   ONE_TO_MANY,
 }
 
-export enum DAOAssociationReference {
+export enum DAORelationReference {
   INNER,
   FOREIGN,
 }
 
-export type DAOAssociation = {
-  type: DAOAssociationType
-  reference: DAOAssociationReference
+export type DAORelation = {
+  type: DAORelationType
+  reference: DAORelationReference
   field: string
   refFrom: string
   refTo: string

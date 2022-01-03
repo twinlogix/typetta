@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -59,9 +59,9 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKne
       ...params, 
       idField: 'id', 
       schema: addressSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
-          { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
+          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
         ]
       ), 
       idGeneration: 'generator', 
@@ -141,7 +141,7 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       ...params, 
       idField: 'id', 
       schema: citySchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -221,9 +221,9 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnex
       ...params, 
       idField: 'id', 
       schema: deviceSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
-          { type: DAOAssociationType.ONE_TO_ONE, reference: DAOAssociationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
+          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
         ]
       ), 
       idGeneration: 'generator', 
@@ -318,9 +318,9 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
       ...params, 
       idField: 'id', 
       schema: organizationSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
-          { type: DAOAssociationType.ONE_TO_MANY, reference: DAOAssociationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
+          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
         ]
       ), 
       idGeneration: 'generator', 
@@ -489,7 +489,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       ...params, 
       idField: 'id', 
       schema: userSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
