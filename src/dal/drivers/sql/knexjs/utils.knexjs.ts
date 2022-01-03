@@ -25,7 +25,7 @@ function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType
   }
 }
 
-// TODO: array fitlering not supported
+
 export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   filter: AbstractFilter,
@@ -36,7 +36,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
     const schemaField = getSchemaFieldTraversing(k, schema)
     if (schemaField) {
       if (schemaField.array) {
-        throw new Error(`Array filtering not supported on sql entity yet. (field: ${k})`)
+        throw new Error(`Array filtering not supported on sql entity. (field: ${k})`)
       }
       const columnName = modelNameToDbName(k, schema)
       if ('scalar' in schemaField) {
@@ -49,7 +49,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             const av = () => adapter.modelToDB(fv) as any
             const avs = () => (fv as any[]).map((fve) => adapter.modelToDB(fve) as any)
             // prettier-ignore
-            switch (fk) { // TODO: text search
+            switch (fk) {
               case '$exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
               case '$eq': builder.where(columnName, av()); break
               case '$gte': builder.where(columnName, '>=', av()); break
@@ -59,7 +59,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case '$ne': builder.not.where(columnName, av()); break
               case '$in': builder.whereIn(columnName, avs()); break
               case '$nin': builder.not.whereIn(columnName, avs()); break
-              default: throw new Error(`${fk} query is not supported on sql entity yet.`)
+              default: throw new Error(`${fk} query is not supported on sql entity.`)
             }
           })
         } else {
@@ -96,7 +96,6 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   return builder
 }
 
-// TODO: array not supported
 export function buildSelect<TRecord, TResult, ScalarsType>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   projection: GenericProjection,
