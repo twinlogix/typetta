@@ -1,7 +1,7 @@
 import { DefaultModelScalars } from '../../../drivers/drivers.types'
 import { DAOGenerics, IdGenerationStrategy } from '../../dao.types'
 import { DAOMiddleware } from '../middlewares.types'
-import { buildMiddleware } from '../utils/utilsMiddleware'
+import { buildMiddleware } from '../utils/builder'
 import { PartialDeep } from 'type-fest'
 
 export type SecurityPolicyDAOGenerics<
