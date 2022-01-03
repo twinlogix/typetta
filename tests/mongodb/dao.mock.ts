@@ -29,6 +29,7 @@ export type AddressRelations = {
     sorts?: CitySort[]
     start?: number
     limit?: number
+    relations?: CityRelations
   }
 }
 
@@ -493,12 +494,14 @@ export type UserRelations = {
     sorts?: DogSort[]
     start?: number
     limit?: number
+    relations?: DogRelations
   }
   friends?: {
     filter?: UserFilter
     sorts?: UserSort[]
     start?: number
     limit?: number
+    relations?: UserRelations
   }
 }
 

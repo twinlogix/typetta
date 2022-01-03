@@ -31,8 +31,16 @@ export type Post = {
   body?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   id: Scalars['ID'];
+  tags?: Maybe<Array<Tag>>;
   title: Scalars['String'];
   views: Scalars['Int'];
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  id: Scalars['ID'];
+  name?: Maybe<Scalars['String']>;
+  postId: Scalars['ID'];
 };
 
 export type User = {

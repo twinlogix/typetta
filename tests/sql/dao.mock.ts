@@ -29,6 +29,7 @@ export type AddressRelations = {
     sorts?: CitySort[]
     start?: number
     limit?: number
+    relations?: CityRelations
   }
 }
 

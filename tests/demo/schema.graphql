@@ -28,4 +28,11 @@ type Post @sqlEntity {
   views: Int!
   authorId: ID!
   author: User @innerRef
+  tags: [Tag!] @foreignRef(refFrom: "postId")
+}
+
+type Tag @sqlEntity {
+  id: ID! @id
+  postId: ID!
+  name: String
 }

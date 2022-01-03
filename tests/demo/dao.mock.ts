@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 //------------------------------------- POST -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type PostExcludedFields = 'author'
+export type PostExcludedFields = 'author' | 'tags'
 
 export const postSchema : Schema<types.Scalars>= {
   'authorId': {
@@ -48,7 +48,13 @@ type PostFilterFields = {
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
 
 export type PostRelations = {
-
+  tags?: {
+    filter?: TagFilter
+    sorts?: TagSort[]
+    start?: number
+    limit?: number
+    relations?: TagRelations
+  }
 }
 
 export type PostProjection = {
@@ -57,6 +63,7 @@ export type PostProjection = {
   body?: boolean,
   createdAt?: boolean,
   id?: boolean,
+  tags?: TagProjection | boolean,
   title?: boolean,
   views?: boolean,
 };
@@ -100,7 +107,87 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       schema: postSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user' }
+          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user' },
+          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'tags', refFrom: 'postId', refTo: 'id', dao: 'tag' }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
+//------------------------------------- TAG --------------------------------------
+//--------------------------------------------------------------------------------
+
+export type TagExcludedFields = never
+
+export const tagSchema : Schema<types.Scalars>= {
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String'
+  },
+  'postId': {
+    scalar: 'ID', 
+    required: true
+  }
+};
+
+type TagFilterFields = {
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'postId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+};
+export type TagFilter = TagFilterFields & LogicalOperators<TagFilterFields>;
+
+export type TagRelations = {
+
+}
+
+export type TagProjection = {
+  id?: boolean,
+  name?: boolean,
+  postId?: boolean,
+};
+
+export type TagSortKeys = 
+  'id'|
+  'name'|
+  'postId';
+export type TagSort = OneKey<TagSortKeys, SortDirection>;
+
+export type TagUpdate = {
+  'id'?: string,
+  'name'?: string | null,
+  'postId'?: string
+};
+
+export type TagInsert = {
+  id?: string,
+  name?: string,
+  postId: string,
+};
+
+type TagDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Tag, 'id', 'ID', 'generator', TagFilter, TagRelations, TagProjection, TagSort, TagInsert, TagUpdate, TagExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type TagDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<TagDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+
+export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<TagDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: TagDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: tagSchema, 
+      relations: overrideRelations(
+        [
+          
         ]
       ), 
       idGeneration: 'generator', 
@@ -166,6 +253,7 @@ export type UserRelations = {
     sorts?: PostSort[]
     start?: number
     limit?: number
+    relations?: PostRelations
   }
 }
 
@@ -240,6 +328,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   metadata?: MetadataType
   overrides?: { 
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    tag?: Pick<Partial<TagDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
@@ -250,6 +339,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
 export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined;
+  private _tag: TagDAO<MetadataType, OperationMetadataType> | undefined;
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];
@@ -260,6 +350,12 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
       this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, knex: this.knex.default, tableName: 'posts' });
     }
     return this._post;
+  }
+  get tag() {
+    if(!this._tag) {
+      this._tag = new TagDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tag, knex: this.knex.default, tableName: 'tags' });
+    }
+    return this._tag;
   }
   get user() {
     if(!this._user) {

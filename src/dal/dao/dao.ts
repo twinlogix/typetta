@@ -210,7 +210,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const newDataLoader = new DataLoader<any, T['model'][] | null>(
         async (keys) => {
           const filter = relations && relations.filter ? { $and: [buildFilter(keys as T['model'][T['idKey']][]), relations.filter] } : buildFilter(keys as T['model'][T['idKey']][])
-          const loadedResults: any[] = await this.findAll({ filter, projection, sorts: relations?.sorts, limit: relations?.limit, start: relations?.start })
+          const loadedResults: any[] = await this.findAll({ filter, projection, sorts: relations?.sorts, limit: relations?.limit, start: relations?.start, relations: relations?.relations })
           const orderedResults = []
           for (const key of keys) {
             orderedResults.push(loadedResults.filter((loadedResult) => hasKey(loadedResult, key)) || null)

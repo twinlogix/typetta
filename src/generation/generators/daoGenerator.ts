@@ -186,7 +186,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const relationsBody = node.fields.flatMap((field) => {
       if (field.isList && typeof field.type !== 'string' && ('innerRef' in field.type || 'foreignRef' in field.type) && !field.isExcluded) {
         const nodeName = 'innerRef' in field.type ? field.type.innerRef : field.type.foreignRef
-        const body = [`filter?: ${nodeName}Filter`, `sorts?: ${nodeName}Sort[]`, 'start?: number', 'limit?: number'].map((v) => `    ${v}`).join('\n')
+        const body = [`filter?: ${nodeName}Filter`, `sorts?: ${nodeName}Sort[]`, 'start?: number', 'limit?: number', `relations?: ${nodeName}Relations`].map((v) => `    ${v}`).join('\n')
         return `  ${field.name}?: {\n${body}\n  }`
       } else {
         return []
