@@ -22,12 +22,13 @@ export type ReferenceChecksResponse<T> =
     }[]
 
 export type DAOResolver = {
-  load: (parents: any[], projections: any) => Promise<any[]>
+  load: (parents: any[], projections: any, filter: any) => Promise<any[]>
   match: (source: any, value: any) => boolean
 }
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
+  relations?: T['relations']
   metadata?: T['operationMetadata']
   options?: T['driverFilterOptions']
 }
@@ -112,6 +113,7 @@ export type DAOGenerics<
   IDScalar extends keyof ScalarsType = any,
   IdGeneration extends IdGenerationStrategy = any,
   FilterType = any,
+  RelationsType = any,
   ProjectionType extends object = any,
   SortType = any,
   InsertType extends object = any,
@@ -133,6 +135,7 @@ export type DAOGenerics<
   idScalar: IDScalar
   idGeneration: IdGeneration
   filter: FilterType
+  relations: RelationsType
   projection: ProjectionType
   sort: SortType
   insert: InsertType

@@ -1,6 +1,6 @@
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { knexJsAdapters, identityAdapter, computedField, loggingMiddleware } from '@twinlogix/typetta'
+import { knexJsAdapters, identityAdapter, computedField, loggingMiddleware, SortDirection } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -120,5 +120,11 @@ test('Demo', async () => {
         },
       },
     },
+    relations: {
+      posts: { filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } }, limit: 2, start: 1, sorts: [{ title: SortDirection.DESC }] },
+    },
   })
+
+  expect((pippo?.posts || [])[0].title).toBe('Title 2')
+  expect((pippo?.posts || [])[1].title).toBe('Title 1')
 })

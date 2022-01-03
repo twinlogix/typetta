@@ -11,6 +11,7 @@ export type SecurityPolicyDAOGenerics<
   IDScalar extends keyof ScalarsType = any,
   IdGeneration extends IdGenerationStrategy = any,
   FilterType = any,
+  RelationsType = any,
   ProjectionType extends object = any,
   SortType = any,
   InsertType extends object = any,
@@ -19,7 +20,22 @@ export type SecurityPolicyDAOGenerics<
   OptionsType extends { securityContext: SecurityContext } = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
-> = DAOGenerics<ModelType, IDKey, IDScalar, IdGeneration, FilterType, ProjectionType, SortType, InsertType, UpdateType, ExcludedFields, OptionsType, DriverContext, ScalarsType> & {
+> = DAOGenerics<
+  ModelType,
+  IDKey,
+  IDScalar,
+  IdGeneration,
+  FilterType,
+  RelationsType,
+  ProjectionType,
+  SortType,
+  InsertType,
+  UpdateType,
+  ExcludedFields,
+  OptionsType,
+  DriverContext,
+  ScalarsType
+> & {
   securityContext: SecurityContext
 }
 
