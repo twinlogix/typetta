@@ -235,7 +235,7 @@ test('findOne self innerRef association', async () => {
 
   await dao.friends.insertOne({record: {from: "u3", to: "u4"}})
 
-  const asd = await dao.user.findAll({
+  const users = await dao.user.findAll({
     projection: {
       firstName: true,
       friends: {
@@ -254,7 +254,8 @@ test('findOne self innerRef association', async () => {
       }
     }
   })
-  console.log(asd)
+  const friend = (users[1].friends || [])[0]
+  expect(friend!.friends!.length).toBe(3)
 })
 
 // TODO: ask @minox86 if this behaviuor is desired

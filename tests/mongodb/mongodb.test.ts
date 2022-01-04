@@ -175,7 +175,7 @@ test('find nested foreignRef association', async () => {
   await dao.city.insertOne({ record: { id: 'city1', name: 'City 1', addressId: 'address1' } })
   await dao.city.insertOne({ record: { id: 'city2', name: 'City 2', addressId: 'address1' } })
 
-  const response = await dao.organization.findAll({ projection: { id: true, address: { id: true, cities: { id: true, addressId: true, name: true } } } })
+  const response = await dao.organization.findAll({ projection: { id: true, address: { id: true, cities: { id: true, name: true } } } })
   expect(response.length).toBe(1)
   expect(response[0].address?.cities?.length).toBe(2)
   expect((response[0].address?.cities)![0].name).toBe('City 1')
