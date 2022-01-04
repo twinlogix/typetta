@@ -167,10 +167,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     buildFilter: (keys: T['idKey'][]) => T['filter'],
     hasKey: (record: T['model'], key: T['idKey']) => boolean,
     projection: T['projection'],
-    filter: T['filter'] | undefined,
+    relations: T['relations'] | undefined,
     loaderIdetifier: string = '',
   ): Promise<(T['model'] | null | Error)[]> {
-    const dataLoader = this.getDataLoader(buildFilter, hasKey, projection, filter, loaderIdetifier)
+    const dataLoader = this.getDataLoader(buildFilter, hasKey, projection, relations, loaderIdetifier)
     const loadedResults = await dataLoader.loadMany(keys)
     const results = []
     for (const loadedResult of loadedResults) {
@@ -317,7 +317,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       if (refFrom) {
         if (relation.type === DAORelationType.ONE_TO_ONE) {
           resolver = {
-            load: async (parents: any[], projections: any, filter: any) => {
+            load: async (parents: any[], projections: any, relations: any) => {
               const ids = parents.map((parent) => parent[refFrom]).filter((value, index, self) => value !== null && value !== undefined && self.indexOf(value) === index)
 
               return this.daoContext.dao(linkedDAO).load(
@@ -331,7 +331,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
                     return (record as any)[refTo] === key
                   }),
                 projections,
-                filter,
+                relations,
                 refTo,
               )
             },
@@ -341,7 +341,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.type === DAORelationType.ONE_TO_MANY) {
           resolver = {
-            load: async (parents: any[], projections: any, filter: any) => {
+            load: async (parents: any[], projections: any, relations: any) => {
               const ids = parents
                 .map((parent) => parent[refFrom])
                 .filter((value) => value !== null && value !== undefined)
@@ -359,7 +359,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
                     return (record as any)[refTo] === key
                   }),
                 projections,
-                filter,
+                relations,
                 refTo,
               )
             },
@@ -375,7 +375,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const linkedDAO = relation.dao
       if (refTo) {
         resolver = {
-          load: async (parents: any[], projections: any, filter: any) => {
+          load: async (parents: any[], projections: any, relations: any) => {
             const ids = parents.map((parent) => parent[refTo]).filter((value, index, self) => value !== null && value !== undefined && self.indexOf(value) === index)
 
             return this.daoContext.dao(linkedDAO).load(
@@ -389,7 +389,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
                   return (record as any)[refFrom] === key
                 }),
               projections,
-              filter,
+              relations,
               refFrom,
             )
           },

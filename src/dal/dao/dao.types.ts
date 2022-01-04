@@ -22,7 +22,7 @@ export type ReferenceChecksResponse<T> =
     }[]
 
 export type DAOResolver = {
-  load: (parents: any[], projections: any, filter: any) => Promise<any[]>
+  load: (parents: any[], projections: any, relations: any) => Promise<any[]>
   match: (source: any, value: any) => boolean
 }
 
