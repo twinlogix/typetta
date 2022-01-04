@@ -1,3 +1,13 @@
+# Cos'è Typetta
+
+Typetta è un ORM open-source scritto interamente in linguaggio TypeScript per l'accesso a tutti i principali database SQL (MySQL, PostgreSQL, Microsoft SQL Server, SQLLite3, CockroachDB, MariaDB, Oracle e Amazon Redshift) e ai database NoSQL MongoDB.
+
+Typetta può essere utilizzato in qualsiasi backend TypeScript (incluse applicazioni serverless e microservizi), ma il nostro consiglio è di utilizzarlo nello sviluppo di backend GraphQL, perchè noi amiamo GraphQL.
+
 # Why Typetta
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+```graphql
+type A {
+  field1: String!
+}
+```
