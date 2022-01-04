@@ -2,7 +2,7 @@ import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALA
 import autoBind from 'auto-bind'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
+import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, RelationEntityRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
 import { toFirstLower } from './utils'
 import { Directives } from './directives'
 import { IdGenerationStrategy } from '..'
@@ -70,7 +70,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     return foundDirective
   }
 
-  private _buildFields(fields: ReadonlyArray<FieldDefinitionNode>): TsTypettaGeneratorField[] {
+  private _buildFields(fields: ReadonlyArray<FieldDefinitionNode>, node: ObjectTypeDefinitionNode): TsTypettaGeneratorField[] {
     const resFields: TsTypettaGeneratorField[] = []
 
     fields.forEach((field) => {
@@ -78,23 +78,28 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       const coreTypeName = this.convertName(coreType, { useTypesPrefix: false })
       const schemaType = this._schema.getType(coreType.name.value)
 
-      let resFieldType
+      let resFieldType: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType
       let innerRefDirective
       let foreignRefDirective
+      let relationEntityRefDirective
       if (isObjectType(schemaType)) {
         innerRefDirective = this._getDirectiveFromAstNode(field, Directives.INNER_REF)
         foreignRefDirective = this._getDirectiveFromAstNode(field, Directives.FOREIGN_REF)
+        relationEntityRefDirective = this._getDirectiveFromAstNode(field, Directives.RELATION_ENTITY_REF)
 
         if (innerRefDirective) {
-          const innerRef = coreTypeName
           const refFrom = this._getDirectiveArgValue<string>(innerRefDirective, 'refFrom')!
           const refTo = this._getDirectiveArgValue<string>(innerRefDirective, 'refTo')!
-          resFieldType = { innerRef, refFrom, refTo }
+          resFieldType = { innerRef: coreTypeName, refFrom, refTo }
         } else if (foreignRefDirective) {
-          const foreignRef = coreTypeName
           const refFrom = this._getDirectiveArgValue<string>(foreignRefDirective, 'refFrom')!
           const refTo = this._getDirectiveArgValue<string>(foreignRefDirective, 'refTo')!
-          resFieldType = { foreignRef, refFrom, refTo }
+          resFieldType = { foreignRef: coreTypeName, refFrom, refTo }
+        } else if (relationEntityRefDirective) {
+          const entity = this._getDirectiveArgValue<string>(relationEntityRefDirective, 'entity')!
+          const refThis = this._getDirectiveArgValue<{ refFrom: string; refTo?: string }>(relationEntityRefDirective, 'refThis')!
+          const refOther = this._getDirectiveArgValue<{ refFrom: string; refTo?: string }>(relationEntityRefDirective, 'refOther')!
+          resFieldType = { entity, refThis, refOther, destRef: coreTypeName, sourceRef: node.name.value }
         } else {
           resFieldType = { embed: coreTypeName }
         }
@@ -132,6 +137,9 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       if (aliasDirective && foreignRefDirective) {
         throw new Error(`@alias and @foreignRef directives of field '${field.name.value}' are incompatible.`)
       }
+      if (aliasDirective && relationEntityRefDirective) {
+        throw new Error(`@alias and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
+      }
 
       resFields.push({
         name: field.name.value,
@@ -163,7 +171,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     const table = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'table')) || toFirstLower(plainName) + 's'
     const knexSource = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'source')) || 'default'
 
-    const fields = this._buildFields(node.fields!)
+    const fields = this._buildFields(node.fields!, node)
 
     return {
       type: 'type',

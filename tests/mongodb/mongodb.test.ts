@@ -226,11 +226,10 @@ test('safe find', async () => {
   typeAssert<Test<typeof response6, { __projection: 'empty' } | null>>()
   expect(response6).toBeDefined()
 
-  // All undefined projection (TODO)
-  /*
-  const response9 = await dao.user.findOne({ projection: undefined })
+  // All undefined projection
+  const response9 = await dao.user.findOne({ })
   typeAssert<Test<typeof response9, (User & { __projection: 'all' }) | null>>()
-  expect(response9).toBeDefined()*/
+  expect(response9).toBeDefined()
 })
 
 // ------------------------------------------------------------------------

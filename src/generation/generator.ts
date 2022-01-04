@@ -2,15 +2,16 @@ import { IdGenerationStrategy } from '..'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
-import { findField, findID, findNode, isForeignRef, isInnerRef } from './utils'
+import { findField, findID, findNode, isForeignRef, isInnerRef, isRelationEntityRef, toFirstLower } from './utils'
 
 export type EmbedFieldType = { embed: string }
 export type InnerRefFieldType = { innerRef: string; refFrom?: string; refTo?: string }
 export type ForeignRefFieldType = { foreignRef: string; refFrom?: string; refTo?: string }
+export type RelationEntityRefFieldType = { sourceRef: string; destRef: string; entity: string; refThis?: { refFrom: string; refTo?: string }; refOther?: { refFrom: string; refTo?: string } }
 
 export type TsTypettaGeneratorField = {
   name: string
-  type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType
+  type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType
   coreType: string
   graphqlType: string
   isRequired: boolean
@@ -128,13 +129,13 @@ export class TsTypettaGenerator {
             if (field.type.refFrom) {
               const refFromField = findField(type, field.type.refFrom, typesMap)
               if (!refFromField) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refFrom ${field.type.refFrom} that cannot be resolved.`)
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refFrom = '${field.type.refFrom}' that cannot be resolved.`)
               }
             }
             if (field.type.refTo) {
               const refToField = findField(refType, field.type.refTo, typesMap)
               if (!refToField) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refTo ${field.type.refTo} that cannot be resolved.`)
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.innerRef} with refTo = '${field.type.refTo}' that cannot be resolved.`)
               }
             }
           } else if (isForeignRef(field.type)) {
@@ -145,13 +146,56 @@ export class TsTypettaGenerator {
             if (field.type.refFrom) {
               const refFromField = findField(refType, field.type.refFrom, typesMap)
               if (!refFromField) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refFrom ${field.type.refFrom} that cannot be resolved.`)
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refFrom = '${field.type.refFrom}' that cannot be resolved.`)
               }
             }
             if (field.type.refTo) {
               const refToField = findField(type, field.type.refTo, typesMap)
               if (!refToField) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refTo ${field.type.refTo} that cannot be resolved.`)
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.foreignRef} with refTo = '${field.type.refTo}' that cannot be resolved.`)
+              }
+            }
+          } else if (isRelationEntityRef(field.type)) {
+            const refType = findNode(field.type.entity, typesMap)
+            const sourceRefType = findNode(field.type.sourceRef, typesMap)!
+            const destRefType = findNode(field.type.destRef, typesMap)!
+            if (!refType) {
+              throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} that cannot be resolved.`)
+            }
+            if (field.type.refThis) {
+              const refFromField = findField(refType, field.type.refThis.refFrom, typesMap)
+              if (!refFromField) {
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} with refThis.refFrom = '${field.type.refThis.refFrom}' that cannot be resolved.`)
+              }
+              if (field.type.refThis.refTo) {
+                const refToField = findField(sourceRefType, field.type.refThis.refTo, typesMap)
+                if (!refToField) {
+                  throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.sourceRef} with refThis.refTo = '${field.type.refThis.refTo}' that cannot be resolved.`)
+                }
+              }
+            } else {
+              const refThisrefFrom = toFirstLower(field.type.sourceRef) + 'Id'
+              const refFromField = findField(refType, refThisrefFrom, typesMap)
+              if (!refFromField) {
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} with refThis.refFrom ${refThisrefFrom} that cannot be resolved.`)
+              }
+            }
+            if (field.type.refOther) {
+              const refFromField = findField(refType, field.type.refOther.refFrom, typesMap)
+              if (!refFromField) {
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} with refOther.refFrom = '${field.type.refOther.refFrom}' that cannot be resolved.`)
+              }
+              if (field.type.refOther.refTo) {
+                const refToField = findField(destRefType, field.type.refOther.refTo, typesMap)
+                if (!refToField) {
+                  throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.destRef} with refOther.refTo = '${field.type.refOther.refTo}' that cannot be resolved.`)
+                }
+              }
+            } else {
+              const refOtherrefFrom = toFirstLower(field.type.destRef) + 'Id'
+              const refFromField = findField(refType, refOtherrefFrom, typesMap)
+              if (!refFromField) {
+                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} with refOther.refFrom ${refOtherrefFrom} that cannot be resolved.`)
               }
             }
           }

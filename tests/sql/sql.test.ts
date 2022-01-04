@@ -57,6 +57,10 @@ beforeEach(async () => {
   const defaultSpecificType: [string, string] = ['string', 'string ARRAY']
   await dao.device.createTable(specificTypeMap, defaultSpecificType)
   await dao.user.createTable(specificTypeMap, defaultSpecificType)
+  await dao.friends.createTable(specificTypeMap, defaultSpecificType)
+  await dao.dog.createTable(specificTypeMap, defaultSpecificType)
+  await dao.city.createTable(specificTypeMap, defaultSpecificType)
+  await dao.organization.createTable(specificTypeMap, defaultSpecificType)
 })
 
 afterEach(async () => {})
@@ -141,11 +145,130 @@ test('Inner ref', async () => {
 })
 
 test('Simple transaction', async () => {
-  const trx = await knexInstance.transaction({isolationLevel:'snapshot'})
+  const trx = await knexInstance.transaction({ isolationLevel: 'snapshot' })
   await dao.device.insertOne({ record: { name: 'dev' }, options: { trx } })
   const dev1 = await dao.device.findOne({ filter: { name: 'dev' }, options: { trx } })
   expect(dev1!.name).toBe('dev')
   await trx.rollback()
   const dev2 = await dao.device.findOne({ filter: { name: 'dev' } })
   expect(dev2).toBe(null)
+})
+
+// ------------------------------------------------------------------------
+// ---------------------------- FIND --------------------------------------
+// ------------------------------------------------------------------------
+test('empty find', async () => {
+  const users = await dao.user.findAll({})
+  expect(users.length).toBe(0)
+
+  const user = await dao.user.findOne({})
+  expect(user).toBeNull()
+})
+
+test('simple findAll', async () => {
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+
+  const users = await dao.user.findAll({})
+  expect(users.length).toBe(1)
+  expect(users[0].firstName).toBe('FirstName')
+  expect(users[0].lastName).toBe('LastName')
+})
+
+test('simple findOne', async () => {
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+
+  const user = await dao.user.findOne({})
+  expect(user).toBeDefined()
+  expect(user!.firstName).toBe('FirstName')
+  expect(user!.lastName).toBe('LastName')
+})
+
+test('findOne innerRef association without projection', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
+
+  const dog = await dao.dog.findOne({})
+  expect(dog!.owner).toBeUndefined()
+})
+
+test('findOne foreignRef association without projection', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
+
+  const users = await dao.user.findAll({})
+  expect(users[0].dogs).toBeUndefined()
+})
+
+test('findOne simple inner association', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
+
+  const dog = await dao.dog.findOne({ projection: { owner: { firstName: true } } })
+  expect(dog!.owner).toBeDefined()
+  expect(dog!.owner!.firstName).toBe('FirstName')
+})
+
+test('findOne simple foreignRef association', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
+  await dao.dog.insertOne({ record: { name: 'Pippo', ownerId: user.id } })
+
+  const foundUser = await dao.user.findOne({ projection: { id: true, dogs: { name: true, ownerId: true } }, relations: { dogs: { filter: { name: 'Charlie' } } } })
+  expect(foundUser!.dogs).toBeDefined()
+  expect(foundUser!.dogs!.length).toBe(1)
+  expect(foundUser!.dogs![0].name).toBe('Charlie')
+})
+
+test('findOne self innerRef association', async () => {
+  const user1 = await dao.user.insertOne({ record: { id: "u1", firstName: 'FirstName1', lastName: 'LastName1', live: true } })
+  const user2 = await dao.user.insertOne({ record: { id: "u2", firstName: 'FirstName2', lastName: 'LastName2', live: true } })
+  const user3 = await dao.user.insertOne({ record: { id: "u3", firstName: 'FirstName3', lastName: 'LastName2', live: true } })
+  const user4 = await dao.user.insertOne({ record: { id: "u4", firstName: 'FirstName4', lastName: 'LastName2', live: true } })
+  const user5 = await dao.user.insertOne({ record: { id: "u5", firstName: 'FirstName5', lastName: 'LastName2', live: true } })
+
+  await dao.friends.insertOne({record: {from: "u1", to: "u2"}})
+  await dao.friends.insertOne({record: {from: "u1", to: "u3"}})
+  await dao.friends.insertOne({record: {from: "u1", to: "u4"}})
+
+  await dao.friends.insertOne({record: {from: "u2", to: "u1"}})
+  await dao.friends.insertOne({record: {from: "u2", to: "u4"}})
+
+  await dao.friends.insertOne({record: {from: "u3", to: "u4"}})
+
+  const asd = await dao.user.findAll({
+    projection: {
+      firstName: true,
+      friends: {
+        firstName: true,
+        friends: {
+          firstName: true
+        }
+      }
+    },
+    relations: {
+      friends: {
+        filter: {
+          live: true
+        },
+        limit: 1
+      }
+    }
+  })
+  console.log(asd)
+})
+
+// TODO: ask @minox86 if this behaviuor is desired
+test('Foreign ref in embedded entity', async () => {
+  await dao.city.insertOne({ record: { addressId: 'a1', name: 'C1', id: 'c1' } })
+  await dao.organization.insertOne({ record: { id: 'o1', name: 'O1', address: { id: 'a1' } } })
+
+  const o1 = await dao.organization.findOne({
+    projection: {
+      name: true,
+      address: {
+        cities: true,
+      },
+    },
+  })
+  expect(o1!.address!.cities!.length).toBe(1)
 })

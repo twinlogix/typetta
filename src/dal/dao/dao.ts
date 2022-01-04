@@ -1,8 +1,6 @@
 import { deepCopy, deepMerge, getTraversing, reversed, setTraversing } from '../../utils/utils'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { DAOWrapperAPIv1 } from '../legacy/daoWrapperAPIv1'
-import { addRelationRefToProjection } from './relations/relations'
-import { DAORelation, DAORelationReference, DAORelationType } from './relations/relations.types'
 import {
   MiddlewareContext,
   DAO,
@@ -21,6 +19,8 @@ import {
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection } from './projections/projections.utils'
+import { addRelationRefToProjection } from './relations/relations'
+import { DAORelation, DAORelationReference, DAORelationType } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
 import _ from 'lodash'
@@ -42,19 +42,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idGenerator?: () => T['scalars'][T['idScalar']]
   public apiV1: DAOWrapperAPIv1<T>
 
-  protected constructor({
-    idField,
-    idScalar,
-    idGeneration,
-    idGenerator,
-    daoContext,
-    pageSize = 50,
-    relations = [],
-    middlewares = [],
-    schema,
-    metadata,
-    driverContext: driverOptions,
-  }: DAOParams<T>) {
+  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext: driverOptions }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['model'][T['idKey']], T['model'][]>>()
     this.idField = idField
     this.idGenerator = idGenerator
@@ -231,10 +219,21 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       return projection
     }
     const dbProjections = deepCopy(projection) // IMPROVE: make addRelationRefToProjection functional and stop using side effects
-    this.relations
-      .filter((relation) => relation.reference === DAORelationReference.INNER)
-      .forEach((relation) => addRelationRefToProjection(relation.field, relation.refFrom, dbProjections))
-    this.relations.filter((relation) => relation.reference === DAORelationReference.FOREIGN).forEach((relation) => setTraversing(dbProjections, relation.refTo, true))
+    this.relations.forEach((relation) => {
+      if (relation.reference === DAORelationReference.INNER) {
+        addRelationRefToProjection(relation.field, relation.refFrom, dbProjections)
+      }
+    })
+    this.relations.forEach((relation) => {
+      if (relation.reference === DAORelationReference.FOREIGN) {
+        setTraversing(dbProjections, relation.refTo, true)
+      }
+    })
+    this.relations.forEach((relation) => {
+      if (relation.reference === DAORelationReference.RELATION) {
+        setTraversing(dbProjections, relation.refThis.refTo, true)
+      }
+    })
     return dbProjections
   }
 
@@ -250,6 +249,32 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             } else if (relation.reference === DAORelationReference.FOREIGN) {
               setTraversing(relationProjection, relation.refFrom, true)
             }
+          }
+          if (relation.reference === DAORelationReference.RELATION) {
+            const rels = await this.daoContext.dao(relation.relationDao).findAll({
+              filter: { [relation.refThis.refFrom]: { $in: dbObjects.map((o) => o[relation.refThis.refTo]) } },
+              projection: { [relation.refThis.refFrom]: true, [relation.refOther.refFrom]: true },
+            })
+            const info = relationsFilter.length > 0 ? relationsFilter[0] : undefined
+            for (const obj of dbObjects) {
+              const results = await this.daoContext.dao(relation.entityDao).findAll({
+                filter: {
+                  $and: [
+                    {
+                      [relation.refOther.refTo]: { $in: rels.filter((r) => (r as any)[relation.refThis.refFrom] === obj[relation.refThis.refTo]).map((r) => (r as any)[relation.refOther.refFrom]) },
+                    },
+                    info?.filter ?? {},
+                  ],
+                },
+                projection: relationProjection,
+                limit: info?.limit,
+                start: info?.start,
+                sorts: info?.sorts,
+                relations: info?.relations,
+              })
+              obj[relation.field] = results
+            }
+            continue
           }
           const resolver: DAOResolver = this.resolvers[relation.field]!
 
