@@ -25,7 +25,6 @@ function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType
   }
 }
 
-
 export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   filter: AbstractFilter,
@@ -75,15 +74,15 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
       }
     } else if (k === '$or') {
       builder.orWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
       })
     } else if (k === '$and') {
       builder.andWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb, f, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb, f, schema, adapters))
       })
     } else if (k === '$nor') {
       builder.not.orWhere((qb) => {
-        ; (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
+        ;(v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
       })
     } else if (k === '$not') {
       builder.whereNot((qb) => {
@@ -177,7 +176,11 @@ export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, 
         const name = concatEmbeddedNames(prefix, subSchemaField.alias || k)
         if ('embedded' in subSchemaField) {
           const [obj, newToDelete] = unflat(name, subSchemaField, value, oldToDelete)
-          return [{ ...(record || {}), [k]: obj }, newToDelete] as [object, string[]]
+          if (newToDelete.length > 0) {
+            return [{ ...(record || {}), [k]: obj }, newToDelete] as [object, string[]]
+          } else {
+            return [record, oldToDelete] as [object | undefined, string[]]
+          }
         } else if (name in value) {
           return [{ ...(record || {}), [k]: value[name] }, [...oldToDelete, name]] as [object, string[]]
         }
