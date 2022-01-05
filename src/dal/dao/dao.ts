@@ -1,17 +1,14 @@
-import { deepCopy, getTraversing, OneKey, reversed, setTraversing } from '../../utils/utils'
+import { deepCopy, getTraversing, reversed, setTraversing } from '../../utils/utils'
 import { AbstractDAOContext } from '../daoContext/daoContext'
-import { DAOWrapperAPIv1 } from '../legacy/daoWrapperAPIv1'
 import {
   MiddlewareContext,
   DAO,
   DAOParams,
-  DAOResolver,
   DeleteParams,
   FilterParams,
   FindOneParams,
   FindParams,
   InsertParams,
-  ReferenceChecksResponse,
   ReplaceParams,
   UpdateParams,
   DAOGenerics,
@@ -23,7 +20,7 @@ import { addRelationRefToProjection } from './relations/relations'
 import { DAORelation, DAORelationReference, DAORelationType } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
-import _, { isArray } from 'lodash'
+import _ from 'lodash'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 
@@ -34,13 +31,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected relations: DAORelation[]
   protected middlewares: DAOMiddleware<T>[]
   protected pageSize: number
-  /*protected resolvers: { [key: string]: DAOResolver | undefined }*/
   protected dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>
   protected metadata?: T['metadata']
   protected driverContext: T['driverContext']
   protected schema: Schema<T['scalars']>
   protected idGenerator?: () => T['scalars'][T['idScalar']]
-  public apiV1: DAOWrapperAPIv1<T>
 
   protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext: driverOptions }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
@@ -48,9 +43,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.idGenerator = idGenerator
     this.daoContext = daoContext
     this.pageSize = pageSize
-    /*this.resolvers = {}*/
     this.relations = relations
-    /*this.relations.forEach((relation) => this.addResolver(relation))*/
     this.idGeneration = idGeneration
     const generator = this.idGenerator || this.daoContext.idGenerators[idScalar]
     if (this.idGeneration === 'generator' && !generator) {
@@ -69,7 +62,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               },
             }
           }
-          if (args.operation === 'insert' && this.idGeneration === 'generator' && generator && !Object.keys(args.params.record).includes(this.idField)) {
+          if (args.operation === 'insert' && this.idGeneration === 'generator' && generator && !Object.keys(args.params.record).includes(context.idField)) {
             return {
               continue: true,
               operation: args.operation,
@@ -83,7 +76,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.metadata = metadata
     this.driverContext = driverOptions
     this.schema = schema
-    this.apiV1 = new DAOWrapperAPIv1<T>(this, idField)
   }
 
   async findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
@@ -121,43 +113,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async count(params: FilterParams<T> = {}): Promise<number> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     return this._count(beforeResults.params)
-  }
-
-  async checkReferences(records: PartialDeep<T['model']> | PartialDeep<T['model']>[]): Promise<ReferenceChecksResponse<T['model']>> {
-    /*const errors = []
-    if (records) {
-      const inputRecords = records instanceof Array ? records : [records]
-      for (const relation of this.relations) {
-        if (relation.reference === DAORelationReference.INNER) {
-          const relationProjection = {}
-          setTraversing(relationProjection, relation.refTo, true)
-          const resolver: DAOResolver = this.resolvers[relation.field]!
-
-          const relationFieldPathSplitted = relation.field.split('.')
-          relationFieldPathSplitted.pop()
-          const parentPath = relationFieldPathSplitted.join('.')
-          const parents = getTraversing(inputRecords, parentPath)
-          const associatedRecords = await resolver.load(parents, relationProjection, undefined)
-
-          for (const inputRecord of inputRecords) {
-            const notFoundRefsFrom = getTraversing(inputRecord, relation.refFrom).filter((refFrom) => {
-              return !associatedRecords.find(
-                (associatedRecord) => associatedRecord && getTraversing(associatedRecord, relation.refTo).length > 0 && refFrom === getTraversing(associatedRecord, relation.refTo)[0],
-              )
-            })
-            if (notFoundRefsFrom.length > 0) {
-              errors.push({ relation, record: inputRecord, failedReferences: notFoundRefsFrom })
-            }
-          }
-        }
-      }
-    }
-    if (errors.length > 0) {
-      return errors
-    } else {
-      return true
-    }*/
-    return true
   }
 
   public async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
@@ -207,10 +162,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     return results as ModelProjection<T['model'], T['projection'], P>[]
   }
-
-  // -----------------------------------------------------------------------
-  // ---------------------------- ASSOCIATIONS -----------------------------
-  // -----------------------------------------------------------------------
 
   private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(projection?: P): P | undefined {
     if (projection === true || !projection) {
@@ -317,7 +268,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return records
   }
 
-  public async loadAllOrFindAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
+  private async loadAllOrFindAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
     params: FindParams<T, P>,
     filterKey: K,
     filterValues: T['filter'][K][],

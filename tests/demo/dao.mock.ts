@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export type PostExcludedFields = 'author' | 'tags'
 
-export const postSchema : Schema<types.Scalars>= {
+export const postSchema: Schema<types.Scalars> = {
   'authorId': {
     scalar: 'ID', 
     required: true
@@ -126,7 +126,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 
 export type TagExcludedFields = never
 
-export const tagSchema : Schema<types.Scalars>= {
+export const tagSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'ID', 
     required: true
@@ -205,7 +205,7 @@ export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
 
 export type UserExcludedFields = 'averageViewsPerPost' | 'posts' | 'totalPostsViews'
 
-export const userSchema : Schema<types.Scalars>= {
+export const userSchema: Schema<types.Scalars> = {
   'createdAt': {
     scalar: 'DateTime', 
     required: true

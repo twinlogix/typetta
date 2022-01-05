@@ -2,9 +2,11 @@ import { GenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
 import _ from 'lodash'
 
-type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = 
-ProjectionType extends P1 ? ProjectionType : ProjectionType extends P2 ? ProjectionType : MergeGenericProjection<P1, P2>
-
+type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
+  ? ProjectionType
+  : ProjectionType extends P2
+  ? ProjectionType
+  : MergeGenericProjection<P1, P2>
 
 export function mergeGenericProjection<P1 extends GenericProjection, P2 extends GenericProjection>(p1: P1, p2: P2): MergeGenericProjection<P1, P2> {
   return mergeProjections(p1, p2)
@@ -87,17 +89,17 @@ function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defaults: an
   }
 }
 
-function fragmentToProjections(info: any, proj: any, selection: any, fragmentRef: string, type: GraphQLType, schema: GraphQLSchema) {
+function fragmentToProjections<ProjectionType>(info: any, proj: any, selection: any, fragmentRef: string, type: GraphQLType, schema: GraphQLSchema) {
   const fragmentKey = fragmentRef[0].toLowerCase() + fragmentRef.slice(1)
   if (proj[fragmentKey] === true) {
     return proj
   } else {
     const fragmentType = getNamedType(schema.getType(fragmentRef)!)
     if (fragmentType === type) {
+      const p = infoToProjection<ProjectionType>(info, proj[fragmentKey], selection, fragmentType, schema)
       return {
         ...proj,
-        // @ts-ignore
-        ...infoToProjection(info, proj[fragmentKey], selection, fragmentType, schema),
+        ...(p === true ? {} : p),
       }
     } else {
       const fragmentProjections: any = infoToProjection(info, proj[fragmentKey], selection, fragmentType, schema)

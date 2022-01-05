@@ -7,32 +7,9 @@ import BigNumber from 'bignumber.js'
 import { isPlainObject } from 'is-plain-object'
 import _ from 'lodash'
 
-/*export type ConditionalPartialBy<T, K extends keyof T, IdGeneration extends IdGenerationStrategy> = IdGeneration extends 'user'
-  ? T
-  : IdGeneration extends 'generator'
-  ? Omit<T, K> & Partial<Pick<T, K>>
-  : Omit<T, K>*/
-
 export type OneKey<K extends string, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
 }[K]
-
-export function flattenSorts<SortInput extends { [key: string]: SortDirection | null | undefined }, SortKey extends string>(
-  sorts?: SortInput[],
-  mappings?: { [key: string]: SortKey },
-): OneKey<SortKey, SortDirection>[] | undefined {
-  return sorts
-    ?.map((sort) =>
-      Object.keys(sort)
-        .filter((key) => sort[key] !== null && sort[key] !== undefined)
-        .map((key) => {
-          // @ts-ignore
-          const resKey: SortKey = mappings && mappings[key] ? mappings[key] : key
-          return { [resKey]: sort[key] } as OneKey<SortKey, SortDirection>
-        }),
-    )
-    .flat()
-}
 
 export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators | StringOperators }>(
   conditions: Filter,

@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export type AExcludedFields = never
 
-export const aSchema : Schema<types.Scalars>= {
+export const aSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'MongoID', 
     required: true, 
@@ -82,7 +82,7 @@ export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 
 export type BExcludedFields = never
 
-export const bSchema : Schema<types.Scalars>= {
+export const bSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'ID', 
     required: true
@@ -153,7 +153,7 @@ export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 
 export type CExcludedFields = never
 
-export const cSchema : Schema<types.Scalars>= {
+export const cSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'ID', 
     required: true
@@ -224,7 +224,7 @@ export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 
 export type DExcludedFields = never
 
-export const dSchema : Schema<types.Scalars>= {
+export const dSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'IntAutoInc', 
     required: true
@@ -294,7 +294,7 @@ export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
 
 export type EExcludedFields = never
 
-export const eSchema : Schema<types.Scalars>= {
+export const eSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'ID', 
     required: true
@@ -365,7 +365,7 @@ export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
 
 export type FExcludedFields = never
 
-export const fSchema : Schema<types.Scalars>= {
+export const fSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'ID', 
     required: true
