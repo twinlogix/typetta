@@ -17,8 +17,8 @@ export type DAORelation =
       refFrom: string
       refTo: string
       dao: string
-      buildFilter?: (keys: readonly any[]) => any
-      hasKey?: (record: any, key: any) => boolean
+      /*buildFilter?: (keys: readonly any[]) => any
+      hasKey?: (record: any, key: any) => boolean*/
     }
   | {
       type: DAORelationType
@@ -28,6 +28,6 @@ export type DAORelation =
       refOther: { refFrom: string; refTo: string }
       relationDao: string
       entityDao: string
-      buildFilter?: (keys: readonly any[]) => any
-      hasKey?: (record: any, key: any) => boolean
+      /*buildFilter?: (keys: readonly any[]) => any
+      hasKey?: (record: any, key: any) => boolean*/
     }

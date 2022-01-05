@@ -34,7 +34,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected relations: DAORelation[]
   protected middlewares: DAOMiddleware<T>[]
   protected pageSize: number
-  protected resolvers: { [key: string]: DAOResolver | undefined }
+  /*protected resolvers: { [key: string]: DAOResolver | undefined }*/
   protected dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>
   protected metadata?: T['metadata']
   protected driverContext: T['driverContext']
@@ -48,9 +48,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.idGenerator = idGenerator
     this.daoContext = daoContext
     this.pageSize = pageSize
-    this.resolvers = {}
+    /*this.resolvers = {}*/
     this.relations = relations
-    this.relations.forEach((relation) => this.addResolver(relation))
+    /*this.relations.forEach((relation) => this.addResolver(relation))*/
     this.idGeneration = idGeneration
     const generator = this.idGenerator || this.daoContext.idGenerators[idScalar]
     if (this.idGeneration === 'generator' && !generator) {
@@ -124,7 +124,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   async checkReferences(records: PartialDeep<T['model']> | PartialDeep<T['model']>[]): Promise<ReferenceChecksResponse<T['model']>> {
-    const errors = []
+    /*const errors = []
     if (records) {
       const inputRecords = records instanceof Array ? records : [records]
       for (const relation of this.relations) {
@@ -156,23 +156,37 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       return errors
     } else {
       return true
-    }
+    }*/
+    return true
   }
 
   public async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
-    params: FindParams<T, P>,
+    params: Omit<FindParams<T, P>, 'start' | 'limit' | 'filter'>,
     filterKey: K,
     filterValues: T['filter'][K][],
+    hasKey?: (record: ModelProjection<T['model'], T['projection'], P>, key: T['filter'][K]) => boolean,
   ): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
-    if (params.start != null || params.limit != null || params.filter != null) {
-      return this.findAll({ ...params, filter: { $and: [{ [filterKey]: { $in: filterValues } }, params.filter ?? {}] } })
-    }
-    const hash = filterKey + "-" + objectHash(params.projection || null, { respectType: false, unorderedArrays: true })
-    if(this.dataLoaders.has(hash)) {
+    const hash =
+      filterKey +
+      '-' +
+      objectHash(params.projection || null, { respectType: false, unorderedArrays: true }) +
+      objectHash(params.sorts || null, { respectType: false, unorderedArrays: true }) +
+      objectHash(params.metadata || null, { respectType: false, unorderedArrays: true }) +
+      objectHash(params.options || null, { respectType: false, unorderedArrays: true })
+    // params.relations?
+
+    const hasKeyF = hasKey ?? ((record, key) => getTraversing(record, filterKey as string).includes(key))
+    if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
         async (keys) => {
-          // add to projection: { [filterKey]: true } (traversing)
-          return await this.findAll({ ...params, filter: { [filterKey]: { $in: keys } } }) as any
+          const dbProjections = deepCopy(params.projection) as P
+          setTraversing(dbProjections, filterKey as string, true)
+          const records = await this.findAll({ ...params, projection: dbProjections, filter: { [filterKey]: { $in: keys } } })
+          const orderedResults = []
+          for (const key of keys) {
+            orderedResults.push(records.filter((loadedResult) => hasKeyF(loadedResult, key)) || null)
+          }
+          return orderedResults
         },
         {
           maxBatchSize: this.pageSize,
@@ -196,58 +210,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   // -----------------------------------------------------------------------
   // ---------------------------- ASSOCIATIONS -----------------------------
   // -----------------------------------------------------------------------
-  private async load(
-    keys: T['idKey'][],
-    buildFilter: (keys: readonly T['model'][T['idKey']][]) => T['filter'],
-    hasKey: (record: T['model'], key: T['model'][T['idKey']]) => boolean,
-    projection: T['projection'],
-    relations: T['relations'] | undefined,
-    loaderIdetifier: string = '',
-  ): Promise<(T['model'] | null | Error)[]> {
-    const dataLoader = this.getDataLoader(buildFilter, hasKey, projection, relations, loaderIdetifier)
-    const loadedResults = await dataLoader.loadMany(keys)
-    const results = []
-    for (const loadedResult of loadedResults) {
-      if (loadedResult instanceof Error) {
-        throw loadedResult
-      } else if (loadedResult !== null) {
-        results.push(...loadedResult)
-      }
-    }
-    return results
-  }
-
-  private getDataLoader(
-    buildFilter: (keys: readonly T['model'][T['idKey']][]) => T['filter'],
-    hasKey: (record: T['model'], key: any) => boolean,
-    projection: T['projection'],
-    relations: any,
-    loaderIdetifier: string,
-  ): DataLoader<any, T['model'][] | null> {
-    const hash = loaderIdetifier + '-' + objectHash(projection || null, { respectType: false, unorderedArrays: true })
-    const dataLoader = this.dataLoaders.get(hash)
-    if (dataLoader) {
-      return dataLoader
-    } else {
-      const newDataLoader = new DataLoader<T['model'][T['idKey']], T['model'][] | null>(
-        async (keys) => {
-          const keysFilter = buildFilter(keys)
-          const filter = relations && relations.filter ? { $and: [keysFilter, relations.filter] } : keysFilter
-          const loadedResults: any[] = await this.findAll({ filter, projection, sorts: relations?.sorts, limit: relations?.limit, start: relations?.start, relations: relations?.relations })
-          const orderedResults = []
-          for (const key of keys) {
-            orderedResults.push(loadedResults.filter((loadedResult) => hasKey(loadedResult, key)) || null)
-          }
-          return orderedResults
-        },
-        {
-          maxBatchSize: this.pageSize,
-        },
-      )
-      this.dataLoaders.set(hash, newDataLoader)
-      return newDataLoader
-    }
-  }
 
   private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(projection?: P): P | undefined {
     if (projection === true || !projection) {
@@ -290,7 +252,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             records.flatMap((r) => getTraversing(r, relation.refThis.refTo)),
           )
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.entityDao).loadAll(
+            const results = await this.daoContext.dao(relation.entityDao).loadAllOrFindAll(
               {
                 filter: relationFilter?.filter,
                 projection: relationProjection,
@@ -310,7 +272,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.reference === DAORelationReference.INNER) {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).loadAll(
+            const results = await this.daoContext.dao(relation.dao).loadAllOrFindAll(
               {
                 filter: relationFilter?.filter,
                 projection: relationProjection,
@@ -330,7 +292,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.reference === DAORelationReference.FOREIGN) {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).loadAll(
+            const results = await this.daoContext.dao(relation.dao).loadAllOrFindAll(
               {
                 filter: relationFilter?.filter,
                 projection: relationProjection,
@@ -354,170 +316,15 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return records
   }
 
-  private async resolveRelations2(dbObjects: any[], projections?: AnyProjection<T['projection']>, relations?: T['relations']): Promise<PartialDeep<T['model']>[]> {
-    for (const relation of this.relations) {
-      if (projections) {
-        const relationProjection = getProjection(projections as GenericProjection, relation.field)
-        const relationsFilter = getTraversing(relations, relation.field)
-        if (relationProjection && projections !== true) {
-          if (relationProjection !== true) {
-            if (relation.reference === DAORelationReference.INNER) {
-              setTraversing(relationProjection, relation.refTo, true)
-            } else if (relation.reference === DAORelationReference.FOREIGN) {
-              setTraversing(relationProjection, relation.refFrom, true)
-            }
-          }
-          if (relation.reference === DAORelationReference.RELATION) {
-            const rels = await this.daoContext.dao(relation.relationDao).findAll({
-              filter: { [relation.refThis.refFrom]: { $in: dbObjects.map((o) => o[relation.refThis.refTo]) } },
-              projection: { [relation.refThis.refFrom]: true, [relation.refOther.refFrom]: true },
-            })
-            const relationFilter = relationsFilter.length > 0 ? relationsFilter[0] : undefined
-            for (const obj of dbObjects) {
-              const results = await this.daoContext.dao(relation.entityDao).findAll({
-                filter: {
-                  $and: [
-                    {
-                      [relation.refOther.refTo]: { $in: rels.filter((r) => (r as any)[relation.refThis.refFrom] === obj[relation.refThis.refTo]).map((r) => (r as any)[relation.refOther.refFrom]) },
-                    },
-                    relationFilter?.filter ?? {},
-                  ],
-                },
-                projection: relationProjection,
-                limit: relationFilter?.limit,
-                start: relationFilter?.start,
-                sorts: relationFilter?.sorts,
-                relations: relationFilter?.relations,
-              })
-              obj[relation.field] = results
-            }
-            continue
-          }
-          const resolver: DAOResolver = this.resolvers[relation.field]!
-
-          const relationFieldPathSplitted = relation.field.split('.')
-          const relationField = relationFieldPathSplitted.pop()
-          if (relationField) {
-            const parentPath = relationFieldPathSplitted.join('.')
-            const parents = getTraversing(
-              dbObjects.filter((dbObject) => dbObject != null),
-              parentPath,
-            )
-            const associatedRecords = await resolver.load(parents, relationProjection, relationsFilter.length > 0 ? relationsFilter[0] : undefined)
-            parents.forEach((parent) => {
-              if (relation.type === DAORelationType.ONE_TO_ONE) {
-                parent[relationField] =
-                  associatedRecords.find((value) => {
-                    return resolver.match(parent, value)
-                  }) || null
-              } else if (relation.type === DAORelationType.ONE_TO_MANY) {
-                parent[relationField] =
-                  associatedRecords.filter((value) => {
-                    return resolver.match(parent, value)
-                  }) || null
-              }
-            })
-          }
-        }
-      }
+  public async loadAllOrFindAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
+    params: FindParams<T, P>,
+    filterKey: K,
+    filterValues: T['filter'][K][],
+  ): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
+    if (params.start != null || params.limit != null || params.filter != null) {
+      return this.findAll({ ...params, filter: { $and: [{ [filterKey]: { $in: filterValues } }, params.filter ?? {}] } })
     }
-    return dbObjects
-  }
-
-  private addResolver(relation: DAORelation) {
-    let resolver
-
-    if (relation.reference === DAORelationReference.INNER) {
-      const refFrom = relation.refFrom.split('.').pop()
-      const refTo = relation.refTo
-      const linkedDAO = relation.dao
-      if (refFrom) {
-        if (relation.type === DAORelationType.ONE_TO_ONE) {
-          resolver = {
-            load: async (parents: any[], projections: any, relations: any) => {
-              const ids = parents.map((parent) => parent[refFrom]).filter((value, index, self) => value !== null && value !== undefined && self.indexOf(value) === index)
-
-              return this.daoContext.dao(linkedDAO).load(
-                ids,
-                relation.buildFilter ||
-                  ((keys: readonly any[]): T['filter'] => {
-                    return { [refTo]: { $in: keys } }
-                  }),
-                relation.hasKey ||
-                  ((record: T['model'], key: any): boolean => {
-                    return (record as any)[refTo] === key
-                  }),
-                projections,
-                relations,
-                refTo,
-              )
-            },
-            match: (source: any, value: any): boolean => {
-              return source[refFrom] === value[refTo]
-            },
-          }
-        } else if (relation.type === DAORelationType.ONE_TO_MANY) {
-          resolver = {
-            load: async (parents: any[], projections: any, relations: any) => {
-              const ids = parents
-                .map((parent) => parent[refFrom])
-                .filter((value) => value !== null && value !== undefined)
-                .reduce((a, c) => [...a, ...c], [])
-                .filter((value: any[], index: number, self: any) => self.indexOf(value) === index)
-
-              return this.daoContext.dao(linkedDAO).load(
-                ids,
-                relation.buildFilter ||
-                  ((keys: readonly any[]): T['filter'] => {
-                    return { [refTo]: { $in: keys } }
-                  }),
-                relation.hasKey ||
-                  ((record: T['model'], key: any): boolean => {
-                    return (record as any)[refTo] === key
-                  }),
-                projections,
-                relations,
-                refTo,
-              )
-            },
-            match: (source: any, value: any): boolean => {
-              return source[refFrom] && source[refFrom].includes(value[refTo])
-            },
-          }
-        }
-      }
-    } else if (relation.reference === DAORelationReference.FOREIGN) {
-      const refFrom = relation.refFrom
-      const refTo = relation.refTo.split('.').pop()
-      const linkedDAO = relation.dao
-      if (refTo) {
-        resolver = {
-          load: async (parents: any[], projections: any, relations: any) => {
-            const ids = parents.map((parent) => parent[refTo]).filter((value, index, self) => value !== null && value !== undefined && self.indexOf(value) === index)
-
-            return this.daoContext.dao(linkedDAO).load(
-              ids,
-              relation.buildFilter ||
-                ((keys: readonly any[]): T['filter'] => {
-                  return { [refFrom]: { $in: keys } }
-                }),
-              relation.hasKey ||
-                ((record: T['model'], key: any): boolean => {
-                  return (record as any)[refFrom] === key
-                }),
-              projections,
-              relations,
-              refFrom,
-            )
-          },
-          match: (source: any, value: any): boolean => {
-            const tmp = getTraversing(value, refFrom)
-            return tmp.includes(source[refTo])
-          },
-        }
-      }
-    }
-    this.resolvers[relation.field] = resolver
+    return await this.loadAll(params, filterKey, filterValues)
   }
 
   async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
