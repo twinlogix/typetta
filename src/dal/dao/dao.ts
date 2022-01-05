@@ -165,6 +165,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     filterKey: K,
     filterValues: T['filter'][K][],
     hasKey?: (record: ModelProjection<T['model'], T['projection'], P>, key: T['filter'][K]) => boolean,
+    buildFilter?: (filterKey: K, filterValues: readonly T['filter'][K][]) => T['filter'],
   ): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
     const hash =
       filterKey +
@@ -172,16 +173,16 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       objectHash(params.projection || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.sorts || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.metadata || null, { respectType: false, unorderedArrays: true }) +
-      objectHash(params.options || null, { respectType: false, unorderedArrays: true })
-    // params.relations?
-
+      objectHash(params.options || null, { respectType: false, unorderedArrays: true }) +
+      objectHash(params.relations || null, { respectType: false, unorderedArrays: true })
     const hasKeyF = hasKey ?? ((record, key) => getTraversing(record, filterKey as string).includes(key))
+    const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { $in: values } }))
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
         async (keys) => {
           const dbProjections = deepCopy(params.projection) as P
           setTraversing(dbProjections, filterKey as string, true)
-          const records = await this.findAll({ ...params, projection: dbProjections, filter: { [filterKey]: { $in: keys } } })
+          const records = await this.findAll({ ...params, projection: dbProjections, filter: buildFilterF(filterKey, keys) })
           const orderedResults = []
           for (const key of keys) {
             orderedResults.push(records.filter((loadedResult) => hasKeyF(loadedResult, key)) || null)
