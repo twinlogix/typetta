@@ -6,7 +6,7 @@ import _ from 'lodash'
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(): string[] {
     return [
-      "import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';",
+      "import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';",
       `import * as types from '${this._config.tsTypesImport}';`,
       "import { Db } from 'mongodb';",
       "import { Knex } from 'knex';",
@@ -19,13 +19,14 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       const daoExcluded = this._generateDAOExludedFields(node)
       const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
+      const daoRelations = this._generateDAORelations(node, typesMap, customScalarsMap)
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSort = this._generateDAOSort(node, typesMap)
       const daoUpdate = this._generateDAOUpdate(node, typesMap)
       const daoInsert = this._generateDAOInsert(node, typesMap)
       const daoParams = this._generateDAOParams(node, typesMap)
       const dao = this._generateDAO(node, typesMap)
-      return [daoExcluded, daoSchema, daoFilter, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
+      return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
       return ''
     }
@@ -54,7 +55,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const adaptersParams = ',\nadapters?: Partial<DriverDataTypeAdapterMap<types.Scalars>>'
     const idGeneratorParams = ',\nidGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }'
 
-    const daoContextParamsExport = `export type DAOContextParams<MetadataType, OperationMetadataType> = {\n${indentMultiline(`${metadata}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${idGeneratorParams}`)}\n};`
+    const daoContextParamsExport = `export type DAOContextParams<MetadataType, OperationMetadataType> = {\n${indentMultiline(
+      `${metadata}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${idGeneratorParams}`,
+    )}\n};`
 
     const daoDeclarations = Array.from(typesMap.values())
       .filter((node) => isEntity(node))
@@ -84,11 +87,14 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const mongoDBConstructor = hasMongoDBEntites ? '\nthis.mongo = params.mongo' : ''
     const knexJsContsructor = hasSQLEntities ? '\nthis.knex = params.knex;' : ''
     const daoConstructor =
-      'constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {\n' + indentMultiline(`super(params)\nthis.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}`) + '\n}'
+      'constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {\n' +
+      indentMultiline(`super(params)\nthis.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}`) +
+      '\n}'
 
     const declarations = [daoDeclarations, overridesDeclaration, daoGetters, daoConstructor].join('\n\n')
 
-    const daoExport = 'export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {\n\n' + indentMultiline(declarations) + '\n\n}'
+    const daoExport =
+      'export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {\n\n' + indentMultiline(declarations) + '\n\n}'
 
     return [[daoContextParamsExport, daoExport].join('\n\n')]
   }
@@ -170,6 +176,23 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         return []
       })
       .reduce((a, c) => [...a, ...c], [])
+  }
+
+  // ---------------------------------------------------------------------------------------------------------
+  // --------------------------------------------- RELATIONS -------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
+  public _generateDAORelations(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>, path: string = ''): string[] {
+    const relationsBody = node.fields.flatMap((field) => {
+      if (field.isList && typeof field.type !== 'string' && ('innerRef' in field.type || 'foreignRef' in field.type) && !field.isExcluded) {
+        const nodeName = 'innerRef' in field.type ? field.type.innerRef : field.type.foreignRef
+        const body = [`filter?: ${nodeName}Filter`, `sorts?: ${nodeName}Sort[]`, 'start?: number', 'limit?: number', `relations?: ${nodeName}Relations`].map((v) => `    ${v}`).join('\n')
+        return `  ${field.name}?: {\n${body}\n  }`
+      } else {
+        return []
+      }
+    })
+    return [`export type ${node.name}Relations = {\n` + relationsBody.join('\n') + `\n}`]
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -296,7 +319,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const dbDAOParams = node.sqlEntity ? 'KnexJsDAOParams' : node.mongoEntity ? 'MongoDBDAOParams' : 'DAOParams'
     const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${idField.coreType}', '${
       idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
-    }', ${node.name}Filter, ${node.name}Projection, ${node.name}Sort, ${node.name}Insert, ${node.name}Update, ${node.name}ExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;`
+    }', ${node.name}Filter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}Insert, ${node.name}Update, ${
+      node.name
+    }ExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>`
     return [daoGenerics, daoParams].join('\n')
   }
@@ -314,31 +339,31 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
   private _generateConstructorMethod(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const idField = findID(node)!
-    const generatedAssociations = `[\n${indentMultiline(this._generateAssociations(node, typesMap).join(',\n'))}\n]`
-    const associations = `associations: overrideAssociations(\n${indentMultiline(`${generatedAssociations}`)}\n)`
+    const generatedRelations = `[\n${indentMultiline(this._generateRelations(node, typesMap).join(',\n'))}\n]`
+    const relations = `relations: overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
     const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'}'`
     const idScalar = `idScalar: '${idField.coreType}'`
     const constructorBody = `super({ ${indentMultiline(
-      `\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema, \n${associations}, \n${idGenerator}, \n${idScalar}`,
+      `\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema, \n${relations}, \n${idGenerator}, \n${idScalar}`,
     )} \n});`
     return `public constructor(params: ${node.name}DAOParams<MetadataType, OperationMetadataType>){\n` + indentMultiline(constructorBody) + '\n}'
   }
 
-  private _generateAssociations(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
+  private _generateRelations(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
     return node.fields
       .map((field) => {
-        return this._generateAssociation(field, node, typesMap, path)
+        return this._generateRelation(field, node, typesMap, path)
       })
       .reduce((a, c) => [...a, ...c], [])
   }
 
-  private _generateAssociation(field: TsTypettaGeneratorField, node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
+  private _generateRelation(field: TsTypettaGeneratorField, node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
     if (typeof field.type !== 'string') {
       if (isInnerRef(field.type)) {
         const linkedType = findNode(field.type.innerRef, typesMap)!
         const linkedTypeIdField = findID(linkedType)!
-        const type = field.isList ? 'DAOAssociationType.ONE_TO_MANY' : 'DAOAssociationType.ONE_TO_ONE'
-        const reference = 'DAOAssociationReference.INNER'
+        const type = field.isList ? 'DAORelationType.ONE_TO_MANY' : 'DAORelationType.ONE_TO_ONE'
+        const reference = 'DAORelationReference.INNER'
         const refField = path + field.name
         const refFrom = field.type.refFrom ? field.type.refFrom : path + field.name + 'Id'
         const refTo = field.type.refTo ? field.type.refTo : linkedTypeIdField.name
@@ -346,8 +371,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         return [`{ type: ${type}, reference: ${reference}, field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}' }`]
       } else if (isForeignRef(field.type)) {
         const idField = findID(node)!
-        const type = field.isList ? 'DAOAssociationType.ONE_TO_MANY' : 'DAOAssociationType.ONE_TO_ONE'
-        const reference = 'DAOAssociationReference.FOREIGN'
+        const type = field.isList ? 'DAORelationType.ONE_TO_MANY' : 'DAORelationType.ONE_TO_ONE'
+        const reference = 'DAORelationReference.FOREIGN'
         const refField = path + field.name
         const refFrom = field.type.refFrom
         const refTo = path + (field.type.refTo ? field.type.refTo : idField.name)
@@ -355,7 +380,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         return [`{ type: ${type}, reference: ${reference}, field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}' }`]
       } else if (isEmbed(field.type)) {
         const embeddedType = findNode(field.type.embed, typesMap)!
-        return this._generateAssociations(embeddedType, typesMap, path + field.name + '.')
+        return this._generateRelations(embeddedType, typesMap, path + field.name + '.')
       }
     }
     return []

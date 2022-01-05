@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAOAssociationType, DAOAssociationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideAssociations } from '@twinlogix/typetta';
+import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -29,6 +29,10 @@ type AFilterFields = {
 };
 export type AFilter = AFilterFields & LogicalOperators<AFilterFields>;
 
+export type ARelations = {
+
+}
+
 export type AProjection = {
   id?: boolean,
   value?: boolean,
@@ -48,7 +52,7 @@ export type AInsert = {
   value: number,
 };
 
-type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, ASort, AInsert, AUpdate, AExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, ARelations, AProjection, ASort, AInsert, AUpdate, AExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type ADAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<ADAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
@@ -58,7 +62,7 @@ export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ...params, 
       idField: 'id', 
       schema: aSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -95,6 +99,10 @@ type BFilterFields = {
 };
 export type BFilter = BFilterFields & LogicalOperators<BFilterFields>;
 
+export type BRelations = {
+
+}
+
 export type BProjection = {
   id?: boolean,
   value?: boolean,
@@ -115,7 +123,7 @@ export type BInsert = {
   value: number,
 };
 
-type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BSort, BInsert, BUpdate, BExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BRelations, BProjection, BSort, BInsert, BUpdate, BExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type BDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -125,7 +133,7 @@ export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ...params, 
       idField: 'id', 
       schema: bSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -162,6 +170,10 @@ type CFilterFields = {
 };
 export type CFilter = CFilterFields & LogicalOperators<CFilterFields>;
 
+export type CRelations = {
+
+}
+
 export type CProjection = {
   id?: boolean,
   value?: boolean,
@@ -182,7 +194,7 @@ export type CInsert = {
   value: number,
 };
 
-type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CProjection, CSort, CInsert, CUpdate, CExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CRelations, CProjection, CSort, CInsert, CUpdate, CExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type CDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<CDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -192,7 +204,7 @@ export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ...params, 
       idField: 'id', 
       schema: cSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -229,6 +241,10 @@ type DFilterFields = {
 };
 export type DFilter = DFilterFields & LogicalOperators<DFilterFields>;
 
+export type DRelations = {
+
+}
+
 export type DProjection = {
   id?: boolean,
   value?: boolean,
@@ -248,7 +264,7 @@ export type DInsert = {
   value: number,
 };
 
-type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DSort, DInsert, DUpdate, DExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DRelations, DProjection, DSort, DInsert, DUpdate, DExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type DDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -258,7 +274,7 @@ export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ...params, 
       idField: 'id', 
       schema: dSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -295,6 +311,10 @@ type EFilterFields = {
 };
 export type EFilter = EFilterFields & LogicalOperators<EFilterFields>;
 
+export type ERelations = {
+
+}
+
 export type EProjection = {
   id?: boolean,
   value?: boolean,
@@ -315,7 +335,7 @@ export type EInsert = {
   value: number,
 };
 
-type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, EProjection, ESort, EInsert, EUpdate, EExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, ERelations, EProjection, ESort, EInsert, EUpdate, EExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type EDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -325,7 +345,7 @@ export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ...params, 
       idField: 'id', 
       schema: eSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]
@@ -362,6 +382,10 @@ type FFilterFields = {
 };
 export type FFilter = FFilterFields & LogicalOperators<FFilterFields>;
 
+export type FRelations = {
+
+}
+
 export type FProjection = {
   id?: boolean,
   value?: boolean,
@@ -382,7 +406,7 @@ export type FInsert = {
   value: number,
 };
 
-type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FProjection, FSort, FInsert, FUpdate, FExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FRelations, FProjection, FSort, FInsert, FUpdate, FExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type FDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -392,7 +416,7 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ...params, 
       idField: 'id', 
       schema: fSchema, 
-      associations: overrideAssociations(
+      relations: overrideRelations(
         [
           
         ]

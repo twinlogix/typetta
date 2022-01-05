@@ -120,8 +120,9 @@ test('findOne simple inner association', async () => {
 test('findOne simple foreignRef association', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
+  await dao.dog.insertOne({ record: { name: 'Pippo', ownerId: user.id } })
 
-  const foundUser = await dao.user.findOne({ projection: { id: true, dogs: { name: true, ownerId: true } } })
+  const foundUser = await dao.user.findOne({ projection: { id: true, dogs: { name: true, ownerId: true } }, relations: { dogs: { filter: { name: 'Charlie' } } } })
   expect(foundUser!.dogs).toBeDefined()
   expect(foundUser!.dogs!.length).toBe(1)
   expect(foundUser!.dogs![0].name).toBe('Charlie')
