@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 export type AddressExcludedFields = 'cities'
 
-export const addressSchema : Schema<types.Scalars>= {
+export const addressSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'ID', 
     required: true
@@ -80,7 +80,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
 
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
 
-export const citySchema : Schema<types.Scalars>= {
+export const citySchema: Schema<types.Scalars> = {
   'addressId': {
     scalar: 'String', 
     required: true
@@ -162,7 +162,7 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 
 export type DeviceExcludedFields = 'user'
 
-export const deviceSchema : Schema<types.Scalars>= {
+export const deviceSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'ID', 
     required: true
@@ -242,7 +242,7 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMong
 
 export type DogExcludedFields = 'owner'
 
-export const dogSchema : Schema<types.Scalars>= {
+export const dogSchema: Schema<types.Scalars> = {
   'id': {
     scalar: 'ID', 
     required: true
@@ -323,7 +323,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
 
 export type OrganizationExcludedFields = 'computedName'
 
-export const organizationSchema : Schema<types.Scalars>= {
+export const organizationSchema: Schema<types.Scalars> = {
   'address': {
     embedded: {
       'id': {
@@ -420,7 +420,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
 
 export type UserExcludedFields = 'dogs' | 'friends'
 
-export const userSchema : Schema<types.Scalars>= {
+export const userSchema: Schema<types.Scalars> = {
   'amount': {
     scalar: 'Decimal'
   },

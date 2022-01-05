@@ -1,5 +1,5 @@
 # Relations
-In questo capitolo vengono descritte i tre tipi di relazioni che è possibile definire nello schema GraphQL.
+In questo capitolo vengono descritti i tre tipi di relazioni che è possibile definire nello schema GraphQL.
 
 ## Inner relations
 
