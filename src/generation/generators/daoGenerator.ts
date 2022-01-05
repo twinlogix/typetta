@@ -6,7 +6,7 @@ import _ from 'lodash'
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(): string[] {
     return [
-      "import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';",
+      "import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';",
       `import * as types from '${this._config.tsTypesImport}';`,
       "import { Db } from 'mongodb';",
       "import { Knex } from 'knex';",
@@ -41,7 +41,6 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const mongoSourcesType = `Record<${mongoSources.map((v) => `'${v}'`).join(' | ')}, Db>`
 
     const contextDAOParamsDeclarations = Array.from(typesMap.values())
-      .concat([])
       .filter((node) => isEntity(node))
       .map((node) => {
         return `${toFirstLower(node.name)}?: Pick<Partial<${node.name}DAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>`
@@ -49,6 +48,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .join(',\n')
 
     const metadata = `metadata?: MetadataType`
+    const middlewares = `\nmiddlewares?: DAOContextMiddleware<MetadataType, OperationMetadataType>[]`
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
     const mongoDBParams = hasMongoDBEntites ? `,\nmongo: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
@@ -56,7 +56,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const idGeneratorParams = ',\nidGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }'
 
     const daoContextParamsExport = `export type DAOContextParams<MetadataType, OperationMetadataType> = {\n${indentMultiline(
-      `${metadata}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${idGeneratorParams}`,
+      `${metadata}${middlewares}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${idGeneratorParams}`,
     )}\n};`
 
     const daoDeclarations = Array.from(typesMap.values())
@@ -69,6 +69,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const mongoDBFields = hasMongoDBEntites ? `\nprivate mongo: ${mongoSourcesType};` : ''
     const knexJsFields = hasSQLEntities ? `\nprivate knex: ${sqlSourcesType};` : ''
     const overridesDeclaration = `private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];${mongoDBFields}${knexJsFields}`
+    const middlewareDeclaration = 'private middlewares: DAOContextMiddleware<MetadataType, OperationMetadataType>[]'
 
     const daoGetters = Array.from(typesMap.values())
       .filter((node) => isEntity(node))
@@ -78,7 +79,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
           : node.mongoEntity
           ? `, collection: this.mongo.${node.mongoEntity!.source}.collection('${node.mongoEntity?.collection}')`
           : ''
-        const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(node.name)}${daoImplementationInit} });`
+        const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...this.middlewares as DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
+        const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(node.name)}${daoImplementationInit}${daoMiddlewareInit} });`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}${false ? '.apiV1' : ''};`
         return `get ${toFirstLower(node.name)}() {\n${indentMultiline(daoGet)}\n}`
       })
@@ -88,15 +90,16 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const knexJsContsructor = hasSQLEntities ? '\nthis.knex = params.knex;' : ''
     const daoConstructor =
       'constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {\n' +
-      indentMultiline(`super(params)\nthis.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}`) +
+      indentMultiline(`super(params)\nthis.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares || []`) +
       '\n}'
 
-    const declarations = [daoDeclarations, overridesDeclaration, daoGetters, daoConstructor].join('\n\n')
+    const declarations = [daoDeclarations, overridesDeclaration, middlewareDeclaration, daoGetters, daoConstructor].join('\n\n')
 
     const daoExport =
       'export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {\n\n' + indentMultiline(declarations) + '\n\n}'
 
-    return [[daoContextParamsExport, daoExport].join('\n\n')]
+    const daoContextMiddleware = `type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<${Array.from(typesMap.values()).filter((node) => isEntity(node)).map(n => `${n.name}DAOGenerics<MetadataType, OperationMetadataType>`).join(' | ')}>`
+    return [[daoContextParamsExport, daoContextMiddleware, daoExport].join('\n\n')]
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -118,7 +121,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
   public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'))
-    const daoSchema = `export const ${toFirstLower(node.name)}Schema : Schema<types.Scalars>= {\n` + daoSchemaBody + `\n};`
+    const daoSchema = `export const ${toFirstLower(node.name)}Schema: Schema<types.Scalars> = {\n` + daoSchemaBody + `\n};`
     return daoSchema
   }
 

@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';
+import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -430,6 +430,7 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
 
 export type DAOContextParams<MetadataType, OperationMetadataType> = {
   metadata?: MetadataType
+  middlewares?: DAOContextMiddleware<MetadataType, OperationMetadataType>[]
   overrides?: { 
     a?: Pick<Partial<ADAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     b?: Pick<Partial<BDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
@@ -444,6 +445,8 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
+type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType> | BDAOGenerics<MetadataType, OperationMetadataType> | CDAOGenerics<MetadataType, OperationMetadataType> | DDAOGenerics<MetadataType, OperationMetadataType> | EDAOGenerics<MetadataType, OperationMetadataType> | FDAOGenerics<MetadataType, OperationMetadataType>>
+
 export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _a: ADAO<MetadataType, OperationMetadataType> | undefined;
@@ -457,39 +460,41 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
   private mongo: Record<'a' | 'default', Db>;
   private knex: Record<'default', Knex>;
   
+  private middlewares: DAOContextMiddleware<MetadataType, OperationMetadataType>[]
+  
   get a() {
     if(!this._a) {
-      this._a = new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: this.mongo.a.collection('as') });
+      this._a = new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: this.mongo.a.collection('as'), middlewares: [...(this.overrides?.a?.middlewares || []), ...this.middlewares as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]] });
     }
     return this._a;
   }
   get b() {
     if(!this._b) {
-      this._b = new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: this.mongo.default.collection('bs') });
+      this._b = new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: this.mongo.default.collection('bs'), middlewares: [...(this.overrides?.b?.middlewares || []), ...this.middlewares as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]] });
     }
     return this._b;
   }
   get c() {
     if(!this._c) {
-      this._c = new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: this.mongo.default.collection('cs') });
+      this._c = new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: this.mongo.default.collection('cs'), middlewares: [...(this.overrides?.c?.middlewares || []), ...this.middlewares as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]] });
     }
     return this._c;
   }
   get d() {
     if(!this._d) {
-      this._d = new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: this.knex.default, tableName: 'ds' });
+      this._d = new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: this.knex.default, tableName: 'ds', middlewares: [...(this.overrides?.d?.middlewares || []), ...this.middlewares as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]] });
     }
     return this._d;
   }
   get e() {
     if(!this._e) {
-      this._e = new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: this.knex.default, tableName: 'es' });
+      this._e = new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: this.knex.default, tableName: 'es', middlewares: [...(this.overrides?.e?.middlewares || []), ...this.middlewares as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]] });
     }
     return this._e;
   }
   get f() {
     if(!this._f) {
-      this._f = new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: this.knex.default, tableName: 'fs' });
+      this._f = new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: this.knex.default, tableName: 'fs', middlewares: [...(this.overrides?.f?.middlewares || []), ...this.middlewares as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]] });
     }
     return this._f;
   }
@@ -499,6 +504,7 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     this.overrides = params.overrides
     this.mongo = params.mongo
     this.knex = params.knex;
+    this.middlewares = params.middlewares || []
   }
 
 }

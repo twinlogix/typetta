@@ -3,7 +3,7 @@ global.TextDecoder = require('util').TextDecoder
 
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { knexJsAdapters, identityAdapter, mongoDbAdapters } from '@twinlogix/typetta'
+import { knexJsAdapters, identityAdapter, mongoDbAdapters, computedField } from '@twinlogix/typetta'
 import knex, { Knex } from 'knex'
 import { Db, MongoClient } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
@@ -34,6 +34,15 @@ beforeAll(async () => {
     knex: {
       default: knexInstance,
     },
+    middlewares: [
+      computedField({
+        fieldsProjection: { value: true },
+        requiredProjection: { value: true },
+        compute: async (r) => {
+          return { value: r.value * 10 }
+        },
+      }),
+    ],
     adapters: {
       mongo: {
         ...mongoDbAdapters,
@@ -73,9 +82,9 @@ test('Test mongo', async () => {
   const c = await dao.c.insertOne({ record: { value: 3, id: 'asd' } }) // id required
   const cr = await dao.c.findOne({ filter: { id: c.id } })
 
-  expect(ar!.value).toBe(1)
-  expect(br!.value).toBe(2)
-  expect(cr!.value).toBe(3)
+  expect(ar!.value).toBe(10)
+  expect(br!.value).toBe(20)
+  expect(cr!.value).toBe(30)
 })
 
 test('Test sql', async () => {
@@ -91,11 +100,11 @@ test('Test sql', async () => {
   const d2 = await dao.d.insertOne({ record: { value: 11 } }) // id generated from db
   const d2r = await dao.d.findOne({ filter: { id: d2.id } })
 
-  expect(dr!.value).toBe(1)
-  expect(d2r!.value).toBe(11)
+  expect(dr!.value).toBe(10)
+  expect(d2r!.value).toBe(110)
   expect(d2r!.id).toBe(2)
-  expect(er!.value).toBe(2)
-  expect(fr!.value).toBe(3)
+  expect(er!.value).toBe(20)
+  expect(fr!.value).toBe(30)
 })
 
 afterAll(async () => {
