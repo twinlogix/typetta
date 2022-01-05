@@ -1,6 +1,6 @@
 import { DAOContext } from './dao.mock'
-import { Scalars, User } from './models.mock'
-import { knexJsAdapters, identityAdapter, computedField } from '@twinlogix/typetta'
+import { Scalars } from './models.mock'
+import { knexJsAdapters, identityAdapter, computedField, loggingMiddleware, SortDirection } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -45,6 +45,11 @@ beforeEach(async () => {
           return 'post_' + idCounter
         },
       },
+      tag: {
+        idGenerator: () => {
+          return 'tag_' + idCounter
+        },
+      },
     },
     knex: {
       default: knexInstance,
@@ -79,6 +84,7 @@ beforeEach(async () => {
   const defaultSpecificType: [string, string] = ['string', 'string ARRAY']
   await dao.post.createTable(specificTypeMap, defaultSpecificType)
   await dao.user.createTable(specificTypeMap, defaultSpecificType)
+  await dao.tag.createTable(specificTypeMap, defaultSpecificType)
 })
 
 test('Demo', async () => {
@@ -92,6 +98,7 @@ test('Demo', async () => {
       },
     },
   })
+
   expect(user.id).toBe('user_1')
   for (const i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
     const post = await dao.post.insertOne({
@@ -103,6 +110,8 @@ test('Demo', async () => {
       },
     })
     expect(post.id).toBe('post_' + (i + 1).toString())
+    await dao.tag.insertOne({ record: { postId: post.id, name: 'Sport' } })
+    await dao.tag.insertOne({ record: { postId: post.id, name: 'Fitness' } })
   }
 
   const pippo = await dao.user.findOne({
@@ -118,7 +127,26 @@ test('Demo', async () => {
         author: {
           firstName: true,
         },
+        tagsId: true,
+        tags: true,
+      },
+    },
+    relations: {
+      posts: {
+        filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
+        limit: 2,
+        start: 1,
+        sorts: [{ title: SortDirection.DESC }],
+        relations: {
+          tags: {
+            filter: { name: 'Sport' },
+          },
+        },
       },
     },
   })
+
+  expect((pippo?.posts || [])[0].title).toBe('Title 2')
+  expect((pippo?.posts || [])[0].tags?.length).toBe(1)
+  expect((pippo?.posts || [])[1].title).toBe('Title 1')
 })

@@ -52,4 +52,23 @@ type User @sqlEntity {
   title: LocalizedString @alias(value: "t")
   amounts: [Decimal!] @alias(value: "values")
   amount: Decimal @alias(value: "value")
+  dogs: [Dog!] @foreignRef(refFrom: "ownerId")
+
+  bestFriendId: ID
+  bestFriend: User @innerRef
+
+  friends: [User] @relationEntityRef(entity: "Friends", refThis: { refFrom: "from" }, refOther: { refFrom: "to" })
+}
+
+type Friends @sqlEntity {
+  id: ID! @id
+  from: ID!
+  to: ID!
+}
+
+type Dog @sqlEntity {
+  id: ID! @id
+  name: String!
+  ownerId: ID!
+  owner: User @innerRef
 }

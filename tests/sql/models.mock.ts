@@ -47,6 +47,21 @@ export type Device = {
   userId?: Maybe<Scalars['ID']>;
 };
 
+export type Dog = {
+  __typename?: 'Dog';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  owner?: Maybe<User>;
+  ownerId: Scalars['ID'];
+};
+
+export type Friends = {
+  __typename?: 'Friends';
+  from: Scalars['ID'];
+  id: Scalars['ID'];
+  to: Scalars['ID'];
+};
+
 export type Organization = {
   __typename?: 'Organization';
   address?: Maybe<Address>;
@@ -60,8 +75,12 @@ export type User = {
   __typename?: 'User';
   amount?: Maybe<Scalars['Decimal']>;
   amounts?: Maybe<Array<Scalars['Decimal']>>;
+  bestFriend?: Maybe<User>;
+  bestFriendId?: Maybe<Scalars['ID']>;
   credentials?: Maybe<UsernamePasswordCredentials>;
+  dogs?: Maybe<Array<Dog>>;
   firstName?: Maybe<Scalars['String']>;
+  friends?: Maybe<Array<Maybe<User>>>;
   id: Scalars['ID'];
   lastName?: Maybe<Scalars['String']>;
   live: Scalars['Boolean'];

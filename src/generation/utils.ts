@@ -1,6 +1,6 @@
 import { Schema } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapterMap } from '../dal/drivers/drivers.types'
-import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
+import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, RelationEntityRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
 
 export function toFirstLower(typeName: string) {
   return typeName.charAt(0).toLowerCase() + typeName.slice(1)
@@ -29,16 +29,20 @@ export function findField(node: TsTypettaGeneratorNode, fieldPath: string, types
   }
 }
 
-export function isEmbed(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is EmbedFieldType {
+export function isEmbed(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType): type is EmbedFieldType {
   return (type as EmbedFieldType).embed !== undefined
 }
 
-export function isInnerRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is InnerRefFieldType {
+export function isInnerRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType): type is InnerRefFieldType {
   return (type as InnerRefFieldType).innerRef !== undefined
 }
 
-export function isForeignRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType): type is ForeignRefFieldType {
+export function isForeignRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType): type is ForeignRefFieldType {
   return (type as ForeignRefFieldType).foreignRef !== undefined
+}
+
+export function isRelationEntityRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType): type is RelationEntityRefFieldType {
+  return (type as RelationEntityRefFieldType).entity !== undefined
 }
 
 export function isEntity(node: TsTypettaGeneratorNode): boolean {

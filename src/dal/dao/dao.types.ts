@@ -1,6 +1,6 @@
 import { DefaultModelScalars } from '../..'
 import { AbstractDAOContext } from '../daoContext/daoContext'
-import { DAOAssociation } from './associations/associations.types'
+import { DAORelation } from './relations/relations.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { Schema } from './schemas/schemas.types'
@@ -16,18 +16,19 @@ export type RequestArgs<Filter, Sort> = {
 export type ReferenceChecksResponse<T> =
   | true
   | {
-      association: DAOAssociation
+      relation: DAORelation
       record: PartialDeep<T>
       failedReferences: any[]
     }[]
 
 export type DAOResolver = {
-  load: (parents: any[], projections: any) => Promise<any[]>
+  load: (parents: any[], projections: any, relations: any) => Promise<any[]>
   match: (source: any, value: any) => boolean
 }
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
+  relations?: T['relations']
   metadata?: T['operationMetadata']
   options?: T['driverFilterOptions']
 }
@@ -78,7 +79,7 @@ export type DAOParams<T extends DAOGenerics> = {
   metadata?: T['metadata']
   driverContext: T['driverContext']
   pageSize?: number
-  associations?: DAOAssociation[]
+  relations?: DAORelation[]
   middlewares?: DAOMiddleware<T>[]
 }
 
@@ -112,6 +113,7 @@ export type DAOGenerics<
   IDScalar extends keyof ScalarsType = any,
   IdGeneration extends IdGenerationStrategy = any,
   FilterType = any,
+  RelationsType = any,
   ProjectionType extends object = any,
   SortType = any,
   InsertType extends object = any,
@@ -133,6 +135,7 @@ export type DAOGenerics<
   idScalar: IDScalar
   idGeneration: IdGeneration
   filter: FilterType
+  relations: RelationsType
   projection: ProjectionType
   sort: SortType
   insert: InsertType
