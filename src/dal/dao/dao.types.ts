@@ -98,7 +98,6 @@ export interface DAO<T extends DAOGenerics> {
   findPage<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
-  checkReferences(records: PartialDeep<T['model']> | PartialDeep<T['model']>[], metadata?: T['metadata']): Promise<ReferenceChecksResponse<T['model']>>
   insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>

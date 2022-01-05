@@ -1,7 +1,6 @@
 import { MiddlewareContext, DeleteParams, FindParams, InsertParams, ReplaceParams, UpdateParams, IdGenerationStrategy, DAOGenerics } from '../dao.types'
 import { PartialDeep } from 'type-fest'
 
-// TODO: add specific operation info? ex: operation: 'find', specification: 'one' | 'all'
 export type Continue<T extends boolean> = { continue: T }
 export type FindMiddlewareInput<T extends DAOGenerics> = { operation: 'find'; params: FindParams<T> }
 export type InsertMiddlewareInput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T> }
