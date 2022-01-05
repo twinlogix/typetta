@@ -27,41 +27,16 @@
           {% endif %}
         </div>
         <div class="menu">
-          <h3>Overview</h3>
+          {% for menu in site.data.menu.main %}
+          <h3>{{ menu.title }}</h3>
           <ul>
-            {% for item in site.menus.overview %}
-            <li class="menu-item-{{ loop.index }}">
-              <a href="{{ item.url }}" title="Go to {{ item.title }}">{{ item.title }}</a>
-            </li>
+            {% for item in menu.children %}
+              <li class="menu-item-{{ loop.index }}">
+                <a href="{{ item.url }}" title="Go to {{ item.title }}">{{ item.title }}</a>
+              </li>
             {% endfor %}
           </ul>
-          
-          <h3>Entità</h3>
-          <ul>
-            {% for item in site.menus.entities %}
-            <li class="menu-item-{{ loop.index }}">
-              <a href="{{ item.url }}" title="Go to {{ item.title }}">{{ item.title }}</a>
-            </li>
-            {% endfor %}
-          </ul>
-          
-          <h3>Relazioni</h3>
-          <ul>
-            {% for item in site.menus.relations %}
-            <li class="menu-item-{{ loop.index }}">
-              <a href="{{ item.url }}" title="Go to {{ item.title }}">{{ item.title }}</a>
-            </li>
-            {% endfor %}
-          </ul>
-          
-          <h3>Utilizzo Avanzato</h3>
-          <ul>
-            {% for item in site.menus.advanced %}
-            <li class="menu-item-{{ loop.index }}">
-              <a href="{{ item.url }}" title="Go to {{ item.title }}">{{ item.title }}</a>
-            </li>
-            {% endfor %}
-          </ul>
+          {% endfor %}
         </div>
 
         <div class="header-footer">

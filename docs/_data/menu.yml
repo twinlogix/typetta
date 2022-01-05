@@ -1,0 +1,17 @@
+main:
+  - overview:
+    title: Overview
+    children:
+      - url: /
+        title: Cos'è Typetta?
+      - url: /chapters/gettingStarted
+        title: Getting Started
+  - entites:
+    title: Entità
+  - entites:
+    title: Relazioni
+    children:
+      - url: /chapters/basicRelations
+        title: Cosa sono le Relazioni?
+  - entites:
+    title: Utilizzo Avanzato
