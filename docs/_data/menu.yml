@@ -2,16 +2,16 @@ main:
   - overview:
     title: Overview
     children:
-      - url: /
+      - url: ./
         title: Cos'è Typetta?
-      - url: /typetta/chapters/gettingStarted
+      - url: ./chapters/gettingStarted
         title: Getting Started
   - entites:
     title: Entità
   - entites:
     title: Relazioni
     children:
-      - url: /typetta/chapters/basicRelations
+      - url: ./chapters/basicRelations
         title: Cosa sono le Relazioni?
   - entites:
     title: Utilizzo Avanzato
