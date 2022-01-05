@@ -1,5 +1,5 @@
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
-import { findID, findNode, indentMultiline, isEmbed, isEntity, isForeignRef, isInnerRef, toFirstLower } from '../utils'
+import { findID, findNode, indentMultiline, isEmbed, isEntity, isForeignRef, isInnerRef, isRelationEntityRef, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
 import _ from 'lodash'
 
@@ -19,7 +19,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       const daoExcluded = this._generateDAOExludedFields(node)
       const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
-      const daoRelations = this._generateDAORelations(node, typesMap, customScalarsMap)
+      const daoRelations = this._generateDAORelations(node)
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSort = this._generateDAOSort(node, typesMap)
       const daoUpdate = this._generateDAOUpdate(node, typesMap)
@@ -182,10 +182,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   // --------------------------------------------- RELATIONS -------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAORelations(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>, path: string = ''): string[] {
+  public _generateDAORelations(node: TsTypettaGeneratorNode): string[] {
     const relationsBody = node.fields.flatMap((field) => {
-      if (field.isList && typeof field.type !== 'string' && ('innerRef' in field.type || 'foreignRef' in field.type) && !field.isExcluded) {
-        const nodeName = 'innerRef' in field.type ? field.type.innerRef : field.type.foreignRef
+      if (field.isList && (isInnerRef(field.type) || isForeignRef(field.type) || isRelationEntityRef(field.type)) && !field.isExcluded) {
+        const nodeName = isInnerRef(field.type) ? field.type.innerRef : isForeignRef(field.type) ? field.type.foreignRef : field.type.destRef
         const body = [`filter?: ${nodeName}Filter`, `sorts?: ${nodeName}Sort[]`, 'start?: number', 'limit?: number', `relations?: ${nodeName}Relations`].map((v) => `    ${v}`).join('\n')
         return `  ${field.name}?: {\n${body}\n  }`
       } else {
@@ -215,6 +215,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
           return `${field.name}?: ${linkedType.name}Projection | boolean,`
         } else if (isForeignRef(field.type)) {
           const linkedType = findNode(field.type.foreignRef, typesMap)!
+          return `${field.name}?: ${linkedType.name}Projection | boolean,`
+        } else if (isRelationEntityRef(field.type)) {
+          const linkedType = findNode(field.type.destRef, typesMap)!
           return `${field.name}?: ${linkedType.name}Projection | boolean,`
         } else if (isEmbed(field.type)) {
           const embeddedType = findNode(field.type.embed, typesMap)!
@@ -301,10 +304,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         if (typeof field.type === 'string') {
           return [`${field.name}${required ? '' : '?'}: ${field.type}${field.isList ? '[]' : ''},`]
         }
-        if ('innerRef' in field.type || 'foreignRef' in field.type) {
-          return []
+        if (isEmbed(field.type)) {
+          return [`${field.name}${required ? '' : '?'}: types.${field.type.embed}${field.isList ? '[]' : ''},`]
         }
-        return [`${field.name}${required ? '' : '?'}: types.${field.type.embed}${field.isList ? '[]' : ''},`]
+        return []
       })
       .join('\n')
   }
@@ -378,6 +381,18 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         const refTo = path + (field.type.refTo ? field.type.refTo : idField.name)
         const dao = toFirstLower(field.type.foreignRef)
         return [`{ type: ${type}, reference: ${reference}, field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}' }`]
+      } else if (isRelationEntityRef(field.type)) {
+        const idField = findID(node)!
+        const type = field.isList ? 'DAORelationType.ONE_TO_MANY' : 'DAORelationType.ONE_TO_ONE'
+        const reference = 'DAORelationReference.RELATION'
+        const refField = path + field.name
+        const refThisRefFrom = field.type.refThis?.refFrom ?? toFirstLower(field.type.sourceRef) + 'Id'
+        const refThisRefTo = field.type.refThis?.refTo ?? idField.name
+        const refOtherRefFrom = field.type.refOther?.refFrom ?? toFirstLower(field.type.destRef) + 'Id'
+        const refOtherRefTo = field.type.refOther?.refTo ?? idField.name
+        const relationDao = toFirstLower(field.type.entity)
+        const entityDao = toFirstLower(field.type.destRef)
+        return [`{ type: ${type}, reference: ${reference}, field: '${refField}', relationDao: '${relationDao}', entityDao: '${entityDao}', refThis: { refFrom: '${refThisRefFrom}', refTo: '${refThisRefTo}' }, refOther: { refFrom: '${refOtherRefFrom}', refTo: '${refOtherRefTo}' } }`]
       } else if (isEmbed(field.type)) {
         const embeddedType = findNode(field.type.embed, typesMap)!
         return this._generateRelations(embeddedType, typesMap, path + field.name + '.')

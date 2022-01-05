@@ -128,6 +128,27 @@ test('findOne simple foreignRef association', async () => {
   expect(foundUser!.dogs![0].name).toBe('Charlie')
 })
 
+test('findOne simple foreignRef association 2', async () => {
+  const user1 = await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName1', live: true } })
+  const user2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName2', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Dog 1', ownerId: user1.id } })
+  await dao.dog.insertOne({ record: { name: 'Dog 2', ownerId: user1.id } })
+  await dao.dog.insertOne({ record: { name: 'Dog 3', ownerId: user1.id } })
+  await dao.dog.insertOne({ record: { name: 'Dog 4', ownerId: user2.id } })
+
+  const users = await dao.user.findAll({
+    projection: { dogs: { name: true } },
+    relations: {
+      dogs: {
+        limit: 1,
+      },
+    },
+  })
+
+  expect(users[0].dogs!.length).toBe(1)
+  expect(users[1].dogs!.length).toBe(1)
+})
+
 test('findOne self innerRef association', async () => {
   const user1 = await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName1', live: true } })
   const user2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName2', friendsId: [user1.id], live: true } })
@@ -154,7 +175,7 @@ test('find nested foreignRef association', async () => {
   await dao.city.insertOne({ record: { id: 'city1', name: 'City 1', addressId: 'address1' } })
   await dao.city.insertOne({ record: { id: 'city2', name: 'City 2', addressId: 'address1' } })
 
-  const response = await dao.organization.findAll({ projection: { id: true, address: { id: true, cities: { id: true, addressId: true, name: true } } } })
+  const response = await dao.organization.findAll({ projection: { id: true, address: { id: true, cities: { id: true, name: true } } } })
   expect(response.length).toBe(1)
   expect(response[0].address?.cities?.length).toBe(2)
   expect((response[0].address?.cities)![0].name).toBe('City 1')
@@ -226,11 +247,10 @@ test('safe find', async () => {
   typeAssert<Test<typeof response6, { __projection: 'empty' } | null>>()
   expect(response6).toBeDefined()
 
-  // All undefined projection (TODO)
-  /*
-  const response9 = await dao.user.findOne({ projection: undefined })
+  // All undefined projection
+  const response9 = await dao.user.findOne({})
   typeAssert<Test<typeof response9, (User & { __projection: 'all' }) | null>>()
-  expect(response9).toBeDefined()*/
+  expect(response9).toBeDefined()
 })
 
 // ------------------------------------------------------------------------

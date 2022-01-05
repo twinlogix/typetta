@@ -237,6 +237,167 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnex
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------- DOG --------------------------------------
+//--------------------------------------------------------------------------------
+
+export type DogExcludedFields = 'owner'
+
+export const dogSchema : Schema<types.Scalars>= {
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  },
+  'ownerId': {
+    scalar: 'ID', 
+    required: true
+  }
+};
+
+type DogFilterFields = {
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+};
+export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
+
+export type DogRelations = {
+
+}
+
+export type DogProjection = {
+  id?: boolean,
+  name?: boolean,
+  owner?: UserProjection | boolean,
+  ownerId?: boolean,
+};
+
+export type DogSortKeys = 
+  'id'|
+  'name'|
+  'ownerId';
+export type DogSort = OneKey<DogSortKeys, SortDirection>;
+
+export type DogUpdate = {
+  'id'?: string,
+  'name'?: string,
+  'ownerId'?: string
+};
+
+export type DogInsert = {
+  id?: string,
+  name: string,
+  ownerId: string,
+};
+
+type DogDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRelations, DogProjection, DogSort, DogInsert, DogUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+
+export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: DogDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: dogSchema, 
+      relations: overrideRelations(
+        [
+          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user' }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
+//----------------------------------- FRIENDS ------------------------------------
+//--------------------------------------------------------------------------------
+
+export type FriendsExcludedFields = never
+
+export const friendsSchema : Schema<types.Scalars>= {
+  'from': {
+    scalar: 'ID', 
+    required: true
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'to': {
+    scalar: 'ID', 
+    required: true
+  }
+};
+
+type FriendsFilterFields = {
+  'from'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'to'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+};
+export type FriendsFilter = FriendsFilterFields & LogicalOperators<FriendsFilterFields>;
+
+export type FriendsRelations = {
+
+}
+
+export type FriendsProjection = {
+  from?: boolean,
+  id?: boolean,
+  to?: boolean,
+};
+
+export type FriendsSortKeys = 
+  'from'|
+  'id'|
+  'to';
+export type FriendsSort = OneKey<FriendsSortKeys, SortDirection>;
+
+export type FriendsUpdate = {
+  'from'?: string,
+  'id'?: string,
+  'to'?: string
+};
+
+export type FriendsInsert = {
+  from: string,
+  id?: string,
+  to: string,
+};
+
+type FriendsDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Friends, 'id', 'ID', 'generator', FriendsFilter, FriendsRelations, FriendsProjection, FriendsSort, FriendsInsert, FriendsUpdate, FriendsExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type FriendsDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FriendsDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+
+export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: FriendsDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: friendsSchema, 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //--------------------------------- ORGANIZATION ---------------------------------
 //--------------------------------------------------------------------------------
 
@@ -337,7 +498,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type UserExcludedFields = never
+export type UserExcludedFields = 'bestFriend' | 'dogs'
 
 export const userSchema : Schema<types.Scalars>= {
   'amount': {
@@ -348,6 +509,9 @@ export const userSchema : Schema<types.Scalars>= {
     scalar: 'Decimal', 
     array: true, 
     alias: 'values'
+  },
+  'bestFriendId': {
+    scalar: 'ID'
   },
   'credentials': {
     embedded: {
@@ -404,6 +568,7 @@ export const userSchema : Schema<types.Scalars>= {
 type UserFilterFields = {
   'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
   'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | ArrayOperators<BigNumber[]>,
+  'bestFriendId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'credentials.another.test'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
@@ -417,12 +582,27 @@ type UserFilterFields = {
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 
 export type UserRelations = {
-
+  dogs?: {
+    filter?: DogFilter
+    sorts?: DogSort[]
+    start?: number
+    limit?: number
+    relations?: DogRelations
+  }
+  friends?: {
+    filter?: UserFilter
+    sorts?: UserSort[]
+    start?: number
+    limit?: number
+    relations?: UserRelations
+  }
 }
 
 export type UserProjection = {
   amount?: boolean,
   amounts?: boolean,
+  bestFriend?: UserProjection | boolean,
+  bestFriendId?: boolean,
   credentials?: {
     another?: {
       test?: boolean,
@@ -430,7 +610,9 @@ export type UserProjection = {
     password?: boolean,
     username?: boolean,
   } | boolean,
+  dogs?: DogProjection | boolean,
   firstName?: boolean,
+  friends?: UserProjection | boolean,
   id?: boolean,
   lastName?: boolean,
   live?: boolean,
@@ -441,6 +623,7 @@ export type UserProjection = {
 export type UserSortKeys = 
   'amount'|
   'amounts'|
+  'bestFriendId'|
   'credentials.another.test'|
   'credentials.password'|
   'credentials.username'|
@@ -455,6 +638,7 @@ export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserUpdate = {
   'amount'?: BigNumber | null,
   'amounts'?: Array<BigNumber> | null,
+  'bestFriendId'?: string | null,
   'credentials'?: types.UsernamePasswordCredentials | null,
   'credentials.another'?: types.Another | null,
   'credentials.another.test'?: string | null,
@@ -471,6 +655,7 @@ export type UserUpdate = {
 export type UserInsert = {
   amount?: BigNumber,
   amounts?: BigNumber[],
+  bestFriendId?: string,
   credentials?: types.UsernamePasswordCredentials,
   firstName?: string,
   id?: string,
@@ -492,7 +677,9 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       schema: userSchema, 
       relations: overrideRelations(
         [
-          
+          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'bestFriend', refFrom: 'bestFriendId', refTo: 'id', dao: 'user' },
+          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog' },
+          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.RELATION, field: 'friends', relationDao: 'friends', entityDao: 'user', refThis: { refFrom: 'from', refTo: 'id' }, refOther: { refFrom: 'to', refTo: 'id' } }
         ]
       ), 
       idGeneration: 'generator', 
@@ -508,6 +695,8 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     city?: Pick<Partial<CityDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    dog?: Pick<Partial<DogDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    friends?: Pick<Partial<FriendsDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
@@ -521,6 +710,8 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined;
   private _city: CityDAO<MetadataType, OperationMetadataType> | undefined;
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined;
+  private _dog: DogDAO<MetadataType, OperationMetadataType> | undefined;
+  private _friends: FriendsDAO<MetadataType, OperationMetadataType> | undefined;
   private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined;
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
@@ -544,6 +735,18 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
       this._device = new DeviceDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.device, knex: this.knex.default, tableName: 'devices' });
     }
     return this._device;
+  }
+  get dog() {
+    if(!this._dog) {
+      this._dog = new DogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, knex: this.knex.default, tableName: 'dogs' });
+    }
+    return this._dog;
+  }
+  get friends() {
+    if(!this._friends) {
+      this._friends = new FriendsDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.friends, knex: this.knex.default, tableName: 'friendss' });
+    }
+    return this._friends;
   }
   get organization() {
     if(!this._organization) {
