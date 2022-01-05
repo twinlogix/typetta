@@ -90,12 +90,6 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return { totalCount, records }
   }
 
-  public async execQuery(build: (qb: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>): Promise<unknown> {
-    const query = build(this.qb())
-    const result = await query
-    return result
-  }
-
   protected async _exists(params: FilterParams<T>): Promise<boolean> {
     return (await this._count(params)) > 0
   }
