@@ -4,14 +4,14 @@ main:
     children:
       - url: /
         title: Cos'è Typetta?
-      - url: /chapters/gettingStarted
+      - url: /typetta/chapters/gettingStarted
         title: Getting Started
   - entites:
     title: Entità
   - entites:
     title: Relazioni
     children:
-      - url: /chapters/basicRelations
+      - url: /typetta/chapters/basicRelations
         title: Cosa sono le Relazioni?
   - entites:
     title: Utilizzo Avanzato
