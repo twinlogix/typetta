@@ -49,11 +49,11 @@ export type AInsert = {
 };
 
 type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, AProjection, ASort, AInsert, AUpdate, AExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
-export type ADAOParams<MetadataType> = Omit<MongoDBDAOParams<ADAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+export type ADAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<ADAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
   
-  public constructor(params: ADAOParams<MetadataType>){
+  public constructor(params: ADAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -116,11 +116,11 @@ export type BInsert = {
 };
 
 type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BProjection, BSort, BInsert, BUpdate, BExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
-export type BDAOParams<MetadataType> = Omit<MongoDBDAOParams<BDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+export type BDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
   
-  public constructor(params: BDAOParams<MetadataType>){
+  public constructor(params: BDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -183,11 +183,11 @@ export type CInsert = {
 };
 
 type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CProjection, CSort, CInsert, CUpdate, CExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
-export type CDAOParams<MetadataType> = Omit<MongoDBDAOParams<CDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+export type CDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<CDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
   
-  public constructor(params: CDAOParams<MetadataType>){
+  public constructor(params: CDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -249,11 +249,11 @@ export type DInsert = {
 };
 
 type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DProjection, DSort, DInsert, DUpdate, DExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
-export type DDAOParams<MetadataType> = Omit<KnexJsDAOParams<DDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+export type DDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
   
-  public constructor(params: DDAOParams<MetadataType>){
+  public constructor(params: DDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -316,11 +316,11 @@ export type EInsert = {
 };
 
 type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, EProjection, ESort, EInsert, EUpdate, EExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
-export type EDAOParams<MetadataType> = Omit<KnexJsDAOParams<EDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+export type EDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
   
-  public constructor(params: EDAOParams<MetadataType>){
+  public constructor(params: EDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -383,11 +383,11 @@ export type FInsert = {
 };
 
 type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FProjection, FSort, FInsert, FUpdate, FExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
-export type FDAOParams<MetadataType> = Omit<KnexJsDAOParams<FDAOGenerics<MetadataType, any>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+export type FDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
 
 export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {
   
-  public constructor(params: FDAOParams<MetadataType>){
+  public constructor(params: FDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
       idField: 'id', 
@@ -404,15 +404,15 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
   
 }
 
-export type DAOContextParams<MetadataType> = {
+export type DAOContextParams<MetadataType, OperationMetadataType> = {
   metadata?: MetadataType
   overrides?: { 
-    a?: Pick<Partial<ADAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    b?: Pick<Partial<BDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    c?: Pick<Partial<CDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    d?: Pick<Partial<DDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    e?: Pick<Partial<EDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    f?: Pick<Partial<FDAOParams<MetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    a?: Pick<Partial<ADAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    b?: Pick<Partial<BDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    c?: Pick<Partial<CDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    d?: Pick<Partial<DDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    e?: Pick<Partial<EDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    f?: Pick<Partial<FDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   mongo: Record<'a' | 'default', Db>,
   knex: Record<'default', Knex>,
@@ -429,7 +429,7 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
   private _e: EDAO<MetadataType, OperationMetadataType> | undefined;
   private _f: FDAO<MetadataType, OperationMetadataType> | undefined;
   
-  private overrides: DAOContextParams<MetadataType>['overrides'];
+  private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];
   private mongo: Record<'a' | 'default', Db>;
   private knex: Record<'default', Knex>;
   
@@ -470,7 +470,7 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     return this._f;
   }
   
-  constructor(params: DAOContextParams<MetadataType>) {
+  constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {
     super(params)
     this.overrides = params.overrides
     this.mongo = params.mongo

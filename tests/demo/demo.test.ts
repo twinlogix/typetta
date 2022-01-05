@@ -1,6 +1,6 @@
 import { DAOContext } from './dao.mock'
-import { Scalars, User } from './models.mock'
-import { knexJsAdapters, identityAdapter, computedField } from '@twinlogix/typetta'
+import { Scalars } from './models.mock'
+import { knexJsAdapters, identityAdapter, computedField, loggingMiddleware } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
