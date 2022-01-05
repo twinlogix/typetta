@@ -39,3 +39,5 @@ export type Coordinates = {
   latitude: number
   longitude: number
 }
+
+export type TypeTraversal<T, Path extends string> = Path extends keyof T ? T[Path] : Path extends `${infer R}.${infer F}` ? (R extends keyof T ? TypeTraversal<T[R], F> : never) : never

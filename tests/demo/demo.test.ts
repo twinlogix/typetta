@@ -1,5 +1,5 @@
-import { DAOContext } from './dao.mock'
-import { Scalars } from './models.mock'
+import { DAOContext, UserExcludedFields } from './dao.mock'
+import { Scalars, User } from './models.mock'
 import { knexJsAdapters, identityAdapter, computedField, loggingMiddleware, SortDirection } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
@@ -145,6 +145,20 @@ test('Demo', async () => {
       },
     },
   })
+
+  const aggregation = await dao.user.aggregate({
+    by: {
+      'credentials.password': true,
+      createdAt: true,
+    },
+    filter: { createdAt: { $gte: new Date() } },
+    aggregations: { pippo: { field: 'email', operator: 'count' }, pluto: { field: 'id', operator: 'sum' } },
+    having: { pippo: { $gte: 20 } },
+    start: 1,
+    limit: 5,
+  })
+
+  console.log(aggregation)
 
   expect((pippo?.posts || [])[0].title).toBe('Title 2')
   expect((pippo?.posts || [])[0].tags?.length).toBe(1)

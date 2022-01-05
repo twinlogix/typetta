@@ -1,6 +1,6 @@
 import { deepCopy, getTraversing, reversed, setTraversing } from '../../utils/utils'
 import { AbstractDAOContext } from '../daoContext/daoContext'
-import { MiddlewareContext, DAO, DAOParams, DeleteParams, FilterParams, FindOneParams, FindParams, InsertParams, ReplaceParams, UpdateParams, DAOGenerics } from './dao.types'
+import { MiddlewareContext, DAO, DAOParams, DeleteParams, FilterParams, FindOneParams, FindParams, InsertParams, ReplaceParams, UpdateParams, DAOGenerics, AggregateParams, AggregationResults } from './dao.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection } from './projections/projections.utils'
@@ -101,6 +101,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async count(params: FilterParams<T> = {}): Promise<number> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
     return this._count(beforeResults.params)
+  }
+
+  async aggregate<A extends AggregateParams<T>>(params: A): Promise<AggregationResults<T, A>> {
+    // @ts-ignore
+    return 1
   }
 
   public async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
