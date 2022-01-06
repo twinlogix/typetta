@@ -9,10 +9,10 @@ main:
   - data-model:
     title: Modello Applicativo
     children:
-      - url: /chapters/data-model/entities
-        title: Entità
       - url: /chapters/data-model/scalars
         title: Scalari
+      - url: /chapters/data-model/entities
+        title: Entità
       - url: /chapters/data-model/relations
         title: Relazioni
   - client:
