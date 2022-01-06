@@ -1,13 +1,11 @@
 import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../../drivers.types'
-import BigNumber from 'bignumber.js'
-import { Decimal128, Double, Int32 } from 'bson'
+import { Double, Int32 } from 'bson'
 
 export type DefaultMongoDBScalars = {
   String: string
   Boolean: boolean
   Int: Int32
   Float: Double
-  Decimal: Decimal128
 }
 
 export type MongoDBDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = DataTypeAdapterMap<ModelScalars, DefaultMongoDBScalars>
@@ -23,9 +21,4 @@ export const mongoDbAdapters: MongoDBDataTypeAdapterMap<DefaultModelScalars> = {
     dbToModel: (o: Double) => o.valueOf(),
     modelToDB: (o: number) => new Double(o),
   },
-  Decimal: {
-    dbToModel: (o: Decimal128) => new BigNumber(o.toString()),
-    modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
-  },
-  JSON: identityAdapter,
 }

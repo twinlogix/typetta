@@ -16,7 +16,7 @@ const config: Knex.Config = {
   useNullAsDefault: true,
 }
 
-beforeAll(async () => {})
+beforeAll(async () => { })
 
 beforeEach(async () => {
   knexInstance = knex(config)
@@ -38,6 +38,10 @@ beforeEach(async () => {
         Decimal: {
           dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
           modelToDB: (o: BigNumber) => o,
+        },
+        JSON: {
+          dbToModel: (o: unknown) => JSON.parse(o as string),
+          modelToDB: (o: any) => JSON.stringify(o),
         },
         Password: {
           dbToModel: (o: unknown) => o as string,
@@ -63,7 +67,7 @@ beforeEach(async () => {
   await dao.organization.createTable(specificTypeMap, defaultSpecificType)
 })
 
-afterEach(async () => {})
+afterEach(async () => { })
 
 test('Insert and retrieve', async () => {
   await dao.user.insertOne({
@@ -226,14 +230,14 @@ test('findOne self innerRef association', async () => {
   const user4 = await dao.user.insertOne({ record: { id: "u4", firstName: 'FirstName4', lastName: 'LastName2', live: true } })
   const user5 = await dao.user.insertOne({ record: { id: "u5", firstName: 'FirstName5', lastName: 'LastName2', live: true } })
 
-  await dao.friends.insertOne({record: {from: "u1", to: "u2"}})
-  await dao.friends.insertOne({record: {from: "u1", to: "u3"}})
-  await dao.friends.insertOne({record: {from: "u1", to: "u4"}})
+  await dao.friends.insertOne({ record: { from: "u1", to: "u2" } })
+  await dao.friends.insertOne({ record: { from: "u1", to: "u3" } })
+  await dao.friends.insertOne({ record: { from: "u1", to: "u4" } })
 
-  await dao.friends.insertOne({record: {from: "u2", to: "u1"}})
-  await dao.friends.insertOne({record: {from: "u2", to: "u4"}})
+  await dao.friends.insertOne({ record: { from: "u2", to: "u1" } })
+  await dao.friends.insertOne({ record: { from: "u2", to: "u4" } })
 
-  await dao.friends.insertOne({record: {from: "u3", to: "u4"}})
+  await dao.friends.insertOne({ record: { from: "u3", to: "u4" } })
 
   const users = await dao.user.findAll({
     projection: {

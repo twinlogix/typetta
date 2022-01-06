@@ -6,7 +6,7 @@ import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { User } from './models.mock'
 import { SortDirection, computedField, mongoDbAdapters, identityAdapter, projectionDependency, buildMiddleware } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
-import { MongoClient, Db } from 'mongodb'
+import { MongoClient, Db, Decimal128 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
@@ -37,6 +37,11 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
           dbToModel: (o: unknown) => o as string,
           modelToDB: (o: string) => sha256(o),
         },
+        Decimal: {
+          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
+          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
+        },
+        JSON: identityAdapter,
       },
     },
     idGenerators: { ID: () => uuidv4() },
@@ -689,6 +694,11 @@ test('middleware 1', async () => {
           dbToModel: (o: unknown) => o as string,
           modelToDB: (o: string) => sha256(o),
         },
+        Decimal: {
+          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
+          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
+        },
+        JSON: identityAdapter,
       },
     },
     idGenerators: { ID: () => uuidv4() },
@@ -828,6 +838,11 @@ test('middleware 2', async () => {
           dbToModel: (o: unknown) => o as string,
           modelToDB: (o: string) => sha256(o),
         },
+        Decimal: {
+          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
+          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
+        },
+        JSON: identityAdapter,
       },
     },
     idGenerators: { ID: () => uuidv4() },
@@ -883,6 +898,11 @@ test('middleware options', async () => {
           dbToModel: (o: unknown) => o as string,
           modelToDB: (o: string) => sha256(o),
         },
+        Decimal: {
+          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
+          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
+        },
+        JSON: identityAdapter,
       },
     },
     overrides: {

@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "0.5.4-beta.13",
+  "version": "0.5.4-beta.15",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

@@ -7,8 +7,6 @@ export type DefaultModelScalars = {
   Boolean: boolean
   Int: number
   Float: number
-  Decimal: BigNumber
-  JSON: any
 }
 
 export type DataTypeAdapterMap<ModelScalars extends object, DBScalars extends object> = {

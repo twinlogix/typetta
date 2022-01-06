@@ -11,7 +11,7 @@ In questo capitolo vengono descritte i tre tipi di relazioni che è possibile de
 
 ## Inner relations
 
-```graphql
+```typescript
 type User @mongoEntity {
   id: ID! @id
   name: String!
