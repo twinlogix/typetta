@@ -37,7 +37,7 @@ Di seguito le principali funzionalità che contraddistinguono Typetta:
 - Campi calcolati.
 - Possibilità di creare query completamente customizzate.
 - Implementazione security policies di accesso al dato.
-- Supporto embedded documents su MongoDB.
+- Supporto embedded documents sia su MongoDB che su SQL.
 - Generazione di codice automatica.
 - Integrazione semplice con backend GraphQL.
 - Transazioni.
@@ -55,4 +55,4 @@ Perchè usare Typetta rispetto ad altri ORM? Di seguito alcune caratteristiche p
   
 - Ha un sistema di **typing** molto rigoroso che sfrutta al 100% le potenzialità del linguaggio TypeScript per fornire tipi di ritorno dinamici sulla base delle proiezioni di dato richieste.
 
-- Prevede la definizione di un modello applicativo in linguaggio standard **GraphQL**, il che lo rende particolarmente utile nello sviluppo di backend GraphQL.
+- Prevede la definizione di un modello applicativo in linguaggio standard **GraphQL**, il che apre alla possibilità di utilizzare un ampio ecosistema di strumenti e framework di terze parti sviluppati su questo standard.

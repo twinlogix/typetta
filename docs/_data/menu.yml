@@ -6,12 +6,55 @@ main:
         title: Cos'è Typetta?
       - url: /chapters/overview/getting-started
         title: Getting Started
-  - entites:
-    title: Entità
-  - entites:
-    title: Relazioni
+  - data-model:
+    title: Modello Applicativo
     children:
-      - url: /chapters/relations/basic-relations
-        title: Cosa sono le Relazioni?
-  - entites:
+      - url: /chapters/data-model/entities
+        title: Entità
+      - url: /chapters/data-model/scalars
+        title: Scalari
+      - url: /chapters/data-model/relations
+        title: Relazioni
+  - client:
+    title: Database Client
+    children:
+      - url: /chapters/client/read-write
+        title: Lettura e Scrittura
+      - url: /chapters/client/projections
+        title: Proiezioni
+      - url: /chapters/client/filters
+        title: Filtri
+      - url: /chapters/client/sorting
+        title: Ordinamento
+      - url: /chapters/client/relations
+        title: Relazioni
+      - url: /chapters/client/pagination
+        title: Paginazione
+      - url: /chapters/client/aggregation
+        title: Aggregazioni
+      - url: /chapters/client/raw-databse-access
+        title: Accesso diretto al DB
+      - url: /chapters/advanced/transactions
+        title: Transazioni
+  - database-drivers:
+    title: Connettori ai Database
+    children:
+      - url: /chapters/database-drivers/mongodb
+        title: MongoDB
+      - url: /chapters/database-drivers/sql
+        title: SQL
+  - advanced:
     title: Utilizzo Avanzato
+    children:
+      - url: /chapters/database-drivers/typing
+        title: Type Safety
+      - url: /chapters/advanced/mocking
+        title: Mocking
+      - url: /chapters/advanced/logging
+        title: Logging
+      - url: /chapters/advanced/middlewares
+        title: Middleware
+      - url: /chapters/data-model/computed-fields
+        title: Campi calcolati
+      - url: /chapters/advanced/security-policies
+        title: Sicurezza

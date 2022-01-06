@@ -44,7 +44,7 @@ MyProject
 
 All'interno del file *schema.graphql* andrà inserito il modello applicativo in linguaggio GraphQL. Per una guida completa della sintassi GraphQL fare riferimento al sito ufficiale [graphql.org](https://graphql.org/learn/){:target="_blank"}.
 
-Typetta utilizza alcune direttive customizzate per aumentare l'espressività del modello e permettere allo sviluppatore di specificare dettagli utili alla connessione alla sorgente dati. Fare riferimento alla sezione [Cos'è un'entità?](../entities/basic-entities) per una guida completa.
+Typetta utilizza alcune direttive customizzate per aumentare l'espressività del modello e permettere allo sviluppatore di specificare dettagli utili alla connessione alla sorgente dati. Fare riferimento alla sezione [Cos'è un'entità?](../data-model/entities) per una guida completa.
 
 Di seguito la semplice definizone di un Utente con nome e cognome:
 ```typescript
