@@ -1,8 +1,8 @@
-import { DefaultModelScalars } from '../..'
+import { DefaultModelScalars, Expand, LogicalOperators, TypeTraversal } from '../..'
 import { AbstractDAOContext } from '../daoContext/daoContext'
-import { DAORelation } from './relations/relations.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
+import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { PartialDeep } from 'type-fest'
 
@@ -69,6 +69,25 @@ export type DeleteParams<T extends DAOGenerics> = {
   options?: T['driverDeleteOptions']
 }
 
+export type AggregateOperation = 'sum' | 'count' | 'avg' | 'min' | 'max'
+
+export type AggregateParams<T extends DAOGenerics> = {
+  by?: { [K in keyof Omit<T['filter'], keyof LogicalOperators<any>>]: true }
+  filter?: T['filter']
+  aggregations: {
+    [key: string]: { field: keyof Omit<T['filter'], keyof LogicalOperators<any>>; operator: AggregateOperation }
+  }
+  having?: {} // TODO
+  start?: number
+  limit?: number
+  metadata?: T['operationMetadata']
+  options?: T['driverFilterOptions']
+}
+
+export type AggregationResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
+  { [K in keyof A['by']]: K extends string ? TypeTraversal<T['model'], K> : K extends keyof T['model'] ? T['model'][K] : never } & Record<keyof A['aggregations'], number>
+>
+
 export type DAOParams<T extends DAOGenerics> = {
   idField: T['idKey']
   idScalar: T['idScalar']
@@ -104,6 +123,8 @@ export interface DAO<T extends DAOGenerics> {
   replaceOne(params: ReplaceParams<T>): Promise<void>
   deleteOne(params: DeleteParams<T>): Promise<void>
   deleteAll(params: DeleteParams<T>): Promise<void>
+
+  aggregate<A extends AggregateParams<T>>(params: A): Promise<AggregationResults<T, A>>
 }
 
 export type DAOGenerics<

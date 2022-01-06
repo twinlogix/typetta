@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, DriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations } from '@twinlogix/typetta';
 import * as types from './models.mock';
-import { Db } from 'mongodb';
+import { Collection, Db } from 'mongodb';
 import { Knex } from 'knex';
 import { v4 as uuidv4 } from 'uuid'
 
@@ -374,6 +374,10 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     this.overrides = params.overrides
     this.knex = params.knex;
     this.middlewares = params.middlewares || []
+  }
+  
+  public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex> }, entities: { post: Knex.QueryBuilder<any, unknown[]>; tag: Knex.QueryBuilder<any, unknown[]>; user: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
+    return run({ knex: this.knex }, { post: this.knex.default.table('posts'), tag: this.knex.default.table('tags'), user: this.knex.default.table('users') })
   }
 
 }

@@ -1,18 +1,6 @@
 import { deepCopy, getTraversing, reversed, setTraversing } from '../../utils/utils'
 import { AbstractDAOContext } from '../daoContext/daoContext'
-import {
-  MiddlewareContext,
-  DAO,
-  DAOParams,
-  DeleteParams,
-  FilterParams,
-  FindOneParams,
-  FindParams,
-  InsertParams,
-  ReplaceParams,
-  UpdateParams,
-  DAOGenerics,
-} from './dao.types'
+import { MiddlewareContext, DAO, DAOParams, DeleteParams, FilterParams, FindOneParams, FindParams, InsertParams, ReplaceParams, UpdateParams, DAOGenerics, AggregateParams, AggregationResults } from './dao.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection } from './projections/projections.utils'
@@ -115,6 +103,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return this._count(beforeResults.params)
   }
 
+  async aggregate<A extends AggregateParams<T>>(params: A): Promise<AggregationResults<T, A>> {
+    // @ts-ignore
+    return 1
+  }
+
   public async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
     params: Omit<FindParams<T, P>, 'start' | 'limit' | 'filter'>,
     filterKey: K,
@@ -135,14 +128,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
         async (keys) => {
-          const dbProjections = deepCopy(params.projection) as P
-          setTraversing(dbProjections, filterKey as string, true)
-          const records = await this.findAll({ ...params, projection: dbProjections, filter: buildFilterF(filterKey, keys) })
-          const orderedResults = []
-          for (const key of keys) {
-            orderedResults.push(records.filter((loadedResult) => hasKeyF(loadedResult, key)) || null)
-          }
-          return orderedResults
+          const proj = deepCopy(params.projection) as P
+          setTraversing(proj, filterKey as string, true)
+          const records = await this.findAll({ ...params, projection: proj, filter: buildFilterF(filterKey, keys) })
+          return keys.map((key) => records.filter((r) => hasKeyF(r, key)))
         },
         {
           maxBatchSize: this.pageSize,
@@ -151,16 +140,13 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       this.dataLoaders.set(hash, newDataLoader)
     }
     const dataLoader = this.dataLoaders.get(hash)!
-    const loadedResults = await dataLoader.loadMany(filterValues)
-    const results = []
-    for (const loadedResult of loadedResults) {
-      if (loadedResult instanceof Error) {
-        throw loadedResult
-      } else if (loadedResult !== null) {
-        results.push(...loadedResult)
+    const results = await dataLoader.loadMany(filterValues)
+    return results.flatMap((r) => {
+      if (r instanceof Error) {
+        throw r
       }
-    }
-    return results as ModelProjection<T['model'], T['projection'], P>[]
+      return r
+    }) as ModelProjection<T['model'], T['projection'], P>[]
   }
 
   private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(projection?: P): P | undefined {
@@ -195,6 +181,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const relationsFilter = getTraversing(relations, relation.field)
       const relationFilter = relationsFilter.length > 0 ? relationsFilter[0] : undefined
       if (relationProjection) {
+        const params = {
+          filter: relationFilter?.filter,
+          projection: relationProjection,
+          limit: relationFilter?.limit,
+          start: relationFilter?.start,
+          sorts: relationFilter?.sorts,
+          relations: relationFilter?.relations,
+        }
         if (relation.reference === DAORelationReference.RELATION) {
           const rels = await this.daoContext.dao(relation.relationDao).loadAll(
             {
@@ -205,14 +199,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           )
           for (const record of records) {
             const results = await this.daoContext.dao(relation.entityDao).loadAllOrFindAll(
-              {
-                filter: relationFilter?.filter,
-                projection: relationProjection,
-                limit: relationFilter?.limit,
-                start: relationFilter?.start,
-                sorts: relationFilter?.sorts,
-                relations: relationFilter?.relations,
-              },
+              params,
               relation.refOther.refTo,
               rels.filter((r) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0]).flatMap((r) => getTraversing(r, relation.refOther.refFrom)),
             )
@@ -224,18 +211,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.reference === DAORelationReference.INNER) {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).loadAllOrFindAll(
-              {
-                filter: relationFilter?.filter,
-                projection: relationProjection,
-                limit: relationFilter?.limit,
-                start: relationFilter?.start,
-                sorts: relationFilter?.sorts,
-                relations: relationFilter?.relations,
-              },
-              relation.refTo,
-              getTraversing(record, relation.refFrom),
-            )
+            const results = await this.daoContext.dao(relation.dao).loadAllOrFindAll(params, relation.refTo, getTraversing(record, relation.refFrom))
             if (relation.type === DAORelationType.ONE_TO_MANY) {
               setTraversing(record, relation.field, results)
             } else {
@@ -244,18 +220,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.reference === DAORelationReference.FOREIGN) {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).loadAllOrFindAll(
-              {
-                filter: relationFilter?.filter,
-                projection: relationProjection,
-                limit: relationFilter?.limit,
-                start: relationFilter?.start,
-                sorts: relationFilter?.sorts,
-                relations: relationFilter?.relations,
-              },
-              relation.refFrom,
-              getTraversing(record, relation.refTo),
-            )
+            const results = await this.daoContext.dao(relation.dao).loadAllOrFindAll(params, relation.refFrom, getTraversing(record, relation.refTo))
             if (relation.type === DAORelationType.ONE_TO_MANY) {
               setTraversing(record, relation.field, results)
             } else {
