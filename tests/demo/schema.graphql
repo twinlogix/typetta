@@ -26,6 +26,7 @@ type Post @sqlEntity {
   title: String!
   body: String
   views: Int!
+  clicks: Int
   authorId: ID! @alias(value: "aId")
   author: User @innerRef
   metadata: PostMetadata

@@ -69,10 +69,10 @@ export type DeleteParams<T extends DAOGenerics> = {
   options?: T['driverDeleteOptions']
 }
 
-export type AggregateOperation = 'sum' | 'count' | 'avg' | 'min' | 'max'
-
 export type AggregationFields<T extends DAOGenerics> = {
-  [key: string]: { field: keyof Omit<T['filter'], keyof LogicalOperators<any>>; operator: AggregateOperation }
+  [key: string]:
+    | { field: keyof Omit<T['filter'], keyof LogicalOperators<any>>; operation: 'sum' | 'avg' | 'min' | 'max' }
+    | { field?: keyof Omit<T['filter'], keyof LogicalOperators<any>>; operation: 'count' }
 }
 
 export type AggregateParams<T extends DAOGenerics> = {
@@ -90,11 +90,13 @@ export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregatePa
   sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
 }
 
-type AggregateResult<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
-  { [K in keyof A['by']]: K extends string ? TypeTraversal<T['model'], K> : K extends keyof T['model'] ? T['model'][K] : never } & Record<keyof A['aggregations'], number>
+export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
+  keyof A['by'] extends never
+    ? Record<keyof A['aggregations'], number | null>
+    : ({ [K in keyof A['by']]: K extends string ? TypeTraversal<T['model'], K> : K extends keyof T['model'] ? T['model'][K] : never } & {
+        [K in keyof A['aggregations']]: A['aggregations'][K]['operation'] extends 'count' ? number : number | null
+      })[]
 >
-
-export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = keyof A['by'] extends never ? AggregateResult<T, A> : AggregateResult<T, A>[]
 
 export type DAOParams<T extends DAOGenerics> = {
   idField: T['idKey']

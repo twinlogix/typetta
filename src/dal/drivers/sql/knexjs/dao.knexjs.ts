@@ -120,9 +120,12 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
      * WHERE 1 = 0
      * GROUP BY dummy.x;
      */
+    if (params.by && Object.keys(params.by).length === 0) {
+      throw new Error("'by' params must contains at least one key.")
+    }
     const byColumns = Object.keys(params.by || {}).map((v) => modelNameToDbName(v, this.schema))
     const aggregations = Object.entries(params.aggregations).map(([k, v]) => {
-      return this.knex.raw(`${v.operator.toUpperCase()}(${modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
+      return this.knex.raw(`${v.operation.toUpperCase()}(${v.field == null ? '*' : modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
     })
     const where = this.buildWhere(params.filter)
     const sort = this.buildSort(args?.sorts, where)
@@ -144,6 +147,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     if (params.by) {
       return results as AggregateResults<T, A>
     } else {
+      if (results.length === 0) {
+        return Object.keys(params.aggregations).reduce((p, k) => {
+          return {
+            ...p,
+            [k]: null,
+          }
+        }, {}) as AggregateResults<T, A>
+      }
       return results[0] as AggregateResults<T, A>
     }
   }
