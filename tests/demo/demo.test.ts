@@ -62,6 +62,10 @@ beforeEach(async () => {
           dbToModel: (o: unknown) => new BigNumber(o as number),
           modelToDB: (o: BigNumber) => o,
         },
+        JSON: {
+          dbToModel: (o: unknown) => JSON.parse(o as string),
+          modelToDB: (o: any) => JSON.stringify(o),
+        },
         Password: {
           dbToModel: (o: unknown) => o as string,
           modelToDB: (o: string) => sha256(o),

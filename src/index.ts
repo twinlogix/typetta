@@ -1,6 +1,6 @@
 export * from './utils/utils.types'
 export * from './utils/utils'
-export * from './generation/generator'
+export * from './generation/index'
 export * from './dal/daoContext/daoContext'
 export * from './dal/drivers/drivers.types'
 export * from './dal/dao/dao.types'

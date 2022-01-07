@@ -5,9 +5,10 @@ import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
 import { knexJsAdapters, identityAdapter, mongoDbAdapters, computedField } from '@twinlogix/typetta'
 import knex, { Knex } from 'knex'
-import { Db, MongoClient } from 'mongodb'
+import { Db, Decimal128, MongoClient } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
+import BigNumber from 'bignumber.js'
 
 const config: Knex.Config = {
   client: 'sqlite3',
@@ -49,12 +50,25 @@ beforeAll(async () => {
         ID: identityAdapter,
         MongoID: identityAdapter,
         IntAutoInc: identityAdapter,
+        Decimal: {
+          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
+          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
+        },
+        JSON: identityAdapter,
       },
       knex: {
         ...knexJsAdapters,
         IntAutoInc: identityAdapter,
         MongoID: identityAdapter,
         ID: identityAdapter,
+        Decimal: {
+          dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
+          modelToDB: (o: BigNumber) => o,
+        },
+        JSON: {
+          dbToModel: (o: unknown) => JSON.parse(o as string),
+          modelToDB: (o: any) => JSON.stringify(o),
+        },
       },
     },
     idGenerators: { ID: () => uuidv4() },
