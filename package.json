@@ -60,7 +60,7 @@
     "graphql-tag": "2.11.0",
     "is-plain-object": "^5.0.0",
     "iso-639-1": "2.1.8",
-    "knex": "0.95.14",
+    "knex": "0.95.15",
     "lodash": "4.17.21",
     "mongodb": "4.2.0",
     "object-hash": "^2.1.1",

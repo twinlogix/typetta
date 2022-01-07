@@ -14,7 +14,8 @@ export type PostExcludedFields = 'author' | 'tags'
 export const postSchema: Schema<types.Scalars> = {
   'authorId': {
     scalar: 'ID', 
-    required: true
+    required: true, 
+    alias: 'aId'
   },
   'body': {
     scalar: 'String'

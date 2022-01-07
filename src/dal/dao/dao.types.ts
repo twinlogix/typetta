@@ -1,10 +1,9 @@
-import { DefaultModelScalars, EqualityOperators, Expand, LogicalOperators, OneKey, QuantityOperators, TypeTraversal } from '../..'
+import { DefaultModelScalars, EqualityOperators, Expand, LogicalOperators, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
-import { Sort, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
 
 export type RequestArgs<Filter, Sort> = {
@@ -86,10 +85,8 @@ export type AggregateParams<T extends DAOGenerics> = {
   options?: T['driverFilterOptions']
 }
 
-type FilterOrLogicalOperation<T> = T | LogicalOperators<T>
-
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
-  having?: FilterOrLogicalOperation<{ [K in keyof A['aggregations']]?: EqualityOperators<number> | QuantityOperators<number> }>
+  having?: { [K in keyof A['aggregations']]?: EqualityOperators<number> | QuantityOperators<number> | number }
   sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
 }
 
@@ -126,7 +123,7 @@ export interface DAO<T extends DAOGenerics> {
   findPage<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
-  aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
+  aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>[]>
   insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>

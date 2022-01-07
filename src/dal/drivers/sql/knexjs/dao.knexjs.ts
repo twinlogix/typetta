@@ -4,7 +4,18 @@ import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, Re
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection } from '../../../dao/projections/projections.types'
 import { KnexJsDAOGenerics, KnexJsDAOParams } from './dao.knexjs.types'
-import { AbstractSort, adaptUpdate, buildSelect, buildSort, buildWhereConditions, embeddedScalars, flatEmbdeddedFields, unflatEmbdeddedFields } from './utils.knexjs'
+import {
+  AbstractSort,
+  adaptUpdate,
+  buildHavingConditions,
+  buildSelect,
+  buildSort,
+  buildWhereConditions,
+  embeddedScalars,
+  flatEmbdeddedFields,
+  modelNameToDbName,
+  unflatEmbdeddedFields,
+} from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
 
@@ -101,8 +112,28 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return result[0].all as number
   }
 
-  protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
-    throw new Error("Not implemented.")
+  protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>[]> {
+    const byColumns = Object.keys(params.by || {}).map((v) => modelNameToDbName(v, this.schema))
+    const aggregations = Object.entries(params.aggregations).map(([k, v]) => {
+      return this.knex.raw(`${v.operator.toUpperCase()}(${modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
+    })
+    const where = this.buildWhere(params.filter)
+    const sort = this.buildSort(args?.sorts, where)
+    const query = sort.select([...byColumns, ...aggregations]).groupBy(byColumns)
+    const having = args?.having ? buildHavingConditions(query, args.having) : query
+    const transactingQuery = await this.buildTransaction(params.options, having)
+      .limit(params.limit || this.pageSize)
+      .offset(params.start || 0)
+    const results = await transactingQuery
+    Object.keys(params.by || {}).forEach((v) => {
+      const name = modelNameToDbName(v, this.schema)
+      for (const result of results) {
+        const value = result[name]
+        delete result[name]
+        result[v] = value
+      }
+    })
+    return results as AggregateResults<T, A>[]
   }
 
   protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {

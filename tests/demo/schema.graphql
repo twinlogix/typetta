@@ -26,7 +26,7 @@ type Post @sqlEntity {
   title: String!
   body: String
   views: Int!
-  authorId: ID!
+  authorId: ID! @alias(value: "aId")
   author: User @innerRef
   tags: [Tag!] @foreignRef(refFrom: "postId")
 }

@@ -1,3 +1,4 @@
+import { AggregateParams, AggregatePostProcessing } from '../../../..'
 import { getSchemaFieldTraversing, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
@@ -13,7 +14,7 @@ export type AbstractFilter = {
 
 export type AbstractSort = { [key: string]: SortDirection }
 
-function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {
+export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {
   const c = name.split('.')
   const k = c.shift()!
   const schemaField = schema[k]
@@ -90,6 +91,35 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
       })
     } else {
       // throw new Error(`${k} is not a scalar in the schema. (Filtering on embedded types is not supported.)`)
+    }
+  })
+  return builder
+}
+
+export function buildHavingConditions<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, having: AggregatePostProcessing<any, any>['having']): Knex.QueryBuilder<TRecord, TResult> {
+  Object.entries(having!).forEach(([k, v]) => {
+    if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
+      Object.entries(v).forEach(([fk, fv]) => {
+        // prettier-ignore
+        switch (fk) {
+          case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
+          case '$eq': builder.having(k, '=', fv as number); break
+          case '$gte': builder.having(k, '>=', fv as number); break
+          case '$gt': builder.having(k, '>', fv as number); break
+          case '$lte': builder.having(k, '<=', fv as number); break
+          case '$lt': builder.having(k, '<', fv as number); break
+          case '$ne': builder.not.having(k, '=', fv as number); break
+          case '$in': builder.havingIn(k, fv as number[]); break
+          case '$nin': builder.havingNotIn(k, fv as number[]); break
+          default: throw new Error(`${fk} query is not supported on sql entity.`)
+        }
+      })
+    } else {
+      if (v === null) {
+        // builder.havingNull(columnName)
+      } else if (v !== undefined) {
+        builder.having(k, '=', v as number)
+      }
     }
   })
   return builder
