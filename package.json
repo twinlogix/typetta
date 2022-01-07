@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "0.5.4-beta.13",
+  "version": "0.0.1-beta1",
   "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -22,9 +22,6 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/twinlogix/typetta/issues"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
   },
   "devDependencies": {
     "@graphql-codegen/add": "3.1.0",

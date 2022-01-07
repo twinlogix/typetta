@@ -58,3 +58,18 @@ type Dog @mongoEntity {
   ownerId: ID!
   owner: User @innerRef
 }
+
+type Post @mongoEntity {
+  id: ID! @id
+  title: String!
+  body: String
+  views: Int!
+  authorId: ID! @alias(value: "aId")
+  author: User @innerRef
+  metadata: PostMetadata
+}
+
+type PostMetadata {
+  region: String!
+  visible: Boolean!
+}

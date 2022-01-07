@@ -190,4 +190,11 @@ test('Aggregate test', async () => {
   )
   expect(aggregation2.avgAuthorViews).toBe(49.5)
   expect(aggregation2.avgAuthorViews).toBe(aggregation2.totalAuthorViews / aggregation2.count)
+
+  const aggregation3 = await dao.post.aggregate(
+    {
+      aggregations: { max: { field: 'views', operator: 'max' }, min: { field: 'views', operator: 'min' } },
+    }
+  )
+  console.log(aggregation3)
 })

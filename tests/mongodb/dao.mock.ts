@@ -415,6 +415,129 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------- POST -------------------------------------
+//--------------------------------------------------------------------------------
+
+export type PostExcludedFields = 'author'
+
+export const postSchema: Schema<types.Scalars> = {
+  'authorId': {
+    scalar: 'ID', 
+    required: true, 
+    alias: 'aId'
+  },
+  'body': {
+    scalar: 'String'
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'metadata': {
+    embedded: {
+      'region': {
+        scalar: 'String', 
+        required: true
+      },
+      'visible': {
+        scalar: 'Boolean', 
+        required: true
+      }
+    }
+  },
+  'title': {
+    scalar: 'String', 
+    required: true
+  },
+  'views': {
+    scalar: 'Int', 
+    required: true
+  }
+};
+
+type PostFilterFields = {
+  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
+  'title'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'views'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+};
+export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
+
+export type PostRelations = {
+
+}
+
+export type PostProjection = {
+  author?: UserProjection | boolean,
+  authorId?: boolean,
+  body?: boolean,
+  id?: boolean,
+  metadata?: {
+    region?: boolean,
+    visible?: boolean,
+  } | boolean,
+  title?: boolean,
+  views?: boolean,
+};
+
+export type PostSortKeys = 
+  'authorId'|
+  'body'|
+  'id'|
+  'metadata.region'|
+  'metadata.visible'|
+  'title'|
+  'views';
+export type PostSort = OneKey<PostSortKeys, SortDirection>;
+
+export type PostUpdate = {
+  'authorId'?: string,
+  'body'?: string | null,
+  'id'?: string,
+  'metadata'?: types.PostMetadata | null,
+  'metadata.region'?: string,
+  'metadata.visible'?: boolean,
+  'title'?: string,
+  'views'?: number
+};
+
+export type PostInsert = {
+  authorId: string,
+  body?: string,
+  id?: string,
+  metadata?: types.PostMetadata,
+  title: string,
+  views: number,
+};
+
+type PostDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRelations, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idGeneration' | 'idScalar'>
+
+export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: PostDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: postSchema, 
+      relations: overrideRelations(
+        [
+          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user' }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
@@ -597,6 +720,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     dog?: Pick<Partial<DogDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   mongo: Record<'default', Db>,
@@ -604,7 +728,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   idGenerators?: { [K in keyof types.Scalars]?: () => types.Scalars[K] }
 };
 
-type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | PostDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
 
 export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
@@ -613,6 +737,7 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined;
   private _dog: DogDAO<MetadataType, OperationMetadataType> | undefined;
   private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined;
+  private _post: PostDAO<MetadataType, OperationMetadataType> | undefined;
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];
@@ -650,6 +775,12 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     }
     return this._organization;
   }
+  get post() {
+    if(!this._post) {
+      this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, collection: this.mongo.default.collection('posts'), middlewares: [...(this.overrides?.post?.middlewares || []), ...this.middlewares as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]] });
+    }
+    return this._post;
+  }
   get user() {
     if(!this._user) {
       this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongo.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...this.middlewares as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]] });
@@ -664,8 +795,8 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     this.middlewares = params.middlewares || []
   }
   
-  public async execQuery<T>(run: (dbs: { mongo: Record<'default', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; organization: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongo: this.mongo }, { address: this.mongo.default.collection('addresses'), city: this.mongo.default.collection('citys'), device: this.mongo.default.collection('devices'), dog: this.mongo.default.collection('dogs'), organization: this.mongo.default.collection('organizations'), user: this.mongo.default.collection('users') })
+  public async execQuery<T>(run: (dbs: { mongo: Record<'default', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; organization: Collection<Document>; post: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
+    return run({ mongo: this.mongo }, { address: this.mongo.default.collection('addresses'), city: this.mongo.default.collection('citys'), device: this.mongo.default.collection('devices'), dog: this.mongo.default.collection('dogs'), organization: this.mongo.default.collection('organizations'), post: this.mongo.default.collection('posts'), user: this.mongo.default.collection('users') })
   }
 
 }

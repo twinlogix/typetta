@@ -59,6 +59,23 @@ export type Organization = {
   vatNumber?: Maybe<Scalars['String']>;
 };
 
+export type Post = {
+  __typename?: 'Post';
+  author?: Maybe<User>;
+  authorId: Scalars['ID'];
+  body?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  metadata?: Maybe<PostMetadata>;
+  title: Scalars['String'];
+  views: Scalars['Int'];
+};
+
+export type PostMetadata = {
+  __typename?: 'PostMetadata';
+  region: Scalars['String'];
+  visible: Scalars['Boolean'];
+};
+
 export type User = {
   __typename?: 'User';
   amount?: Maybe<Scalars['Decimal']>;

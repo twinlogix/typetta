@@ -1106,6 +1106,46 @@ test('Simple transaction 2', async () => {
   }
 })
 
+test('Aggregate test', async () => {
+  for (let i = 0; i < 100; i++) {
+    await dao.post.insertOne({
+      record: {
+        authorId: `user_${Math.floor(i / 10)}`,
+        title: 'Title ' + i,
+        views: i,
+        metadata: {
+          region: i % 2 === 0 ? 'it' : 'en',
+          visible: i % 2 === 0 || i === 99,
+        },
+      },
+    })
+  }
+
+  const aggregation1 = await dao.post.aggregate(
+    {
+      by: {
+        authorId: true,
+        'metadata.region': true,
+      },
+      aggregations: { count: { field: 'authorId', operator: 'count' }, totalAuthorViews: { field: 'views', operator: 'sum' } },
+      filter: { 'metadata.visible': true, views: { $gt: 0 } },
+    },
+    { sorts: [{ totalAuthorViews: SortDirection.ASC }], having: { totalAuthorViews: { $lt: 150 } } },
+  )
+  expect(aggregation1.length).toBe(4)
+  expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
+  expect(aggregation1[1]).toEqual({count: 5, totalAuthorViews: 70, authorId: 'user_1', 'metadata.region': 'it'})
+  expect(aggregation1[2]).toEqual({count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en'})
+  expect(aggregation1[3]).toEqual({count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it'})
+  const aggregation2 = await dao.post.aggregate(
+    {
+      aggregations: { count: { field: 'views', operator: 'count' }, totalAuthorViews: { field: 'views', operator: 'sum' } , avgAuthorViews: { field: 'views', operator: 'avg' } },
+    }
+  )
+  expect(aggregation2.avgAuthorViews).toBe(49.5)
+  expect(aggregation2.avgAuthorViews).toBe(aggregation2.totalAuthorViews / aggregation2.count)
+})
+
 // ------------------------------------------------------------------------
 // ------------------------- SECURITY POLICIES ----------------------------
 // ------------------------------------------------------------------------
