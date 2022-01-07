@@ -100,8 +100,15 @@ type User @mongoEntity {
 Tale direttiva riceve anche un parametro opzionale `from` che può assumere i seguenti valori:
 - `db`: quando l'id viene autogenerato dal DB, sia esso un intero autoincrementale SQL o una stringa univoca come in MongoDB.
 
+```typescript
+scalar MongoID
+type User @mongoEntity(source: "a") {
+  id: MongoID! @id(from: "db") @alias(value: "_id")
+  name: String!
+}
+```
+
 - `user`: quando l'id viene generato manualmente dall'utilizzatore di Typetta, sarà quindi un campo obbligatorio di ogni operazione di insert.
-  
 - `generator`: quando l'id viene autogenrato da Typetta con una logica configurabile a livello di DAOContext. Si può creare un generatore di ID per ogni scalare che verrà quindi invocato per tutti i campi dello specifico scalare annotati con la direttiva `@id`. Un esempio di utilizzo è il caso in cui tutti gli ID debbano essere gestiti come UUID creati a livello applicativo. Per ottenere questo si può quindi configurare il DAOContext come segue:
 
 ```typescript
