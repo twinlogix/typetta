@@ -1,13 +1,80 @@
----
-title: Cosa sono le Relazioni?
-menus:
-  relations:
-    weight: 1
----
+# Relazioni
 
-# Relations
+Una relazione è una connessione tra due entità del modello applicativo. Tale connessione permette l'accesso di una o più entità collegate in entrambe le direzioni, per rendere la consultazione del dato più veloce ed agevole.
 
-In questo capitolo vengono descritte i tre tipi di relazioni che è possibile definire nello schema GraphQL.
+In Typetta le relazioni tra entità sono definite tramite l'aggiunta di **riferimenti** tra un'entità ed un altra.
+
+## Riferimento tra Entità
+
+In Typetta una relazione è definita dichiarando su ogni entità connessa il riferimento alla controparte. E' possibile, se lo si vuole, creare anche delle connessioni mono direzionali da un'entità ad un'altra senza avere la connesione inversa.
+
+Per definire un riferimento ad un'altra entità, Typetta mette a disposizione tre diverse direttive:
+- [@innerRef](#innerref)
+- [@foreignRef](#innerref)
+- [@relationEntityRef](#relationEntityRef)
+
+### InnerRef
+
+Un `@innerRef` è un riferimento tra un campo dell'entità sorgente e l'id dell'entità destinazione. Prendiamo come esempio il seguente modello:
+
+```typescript
+type User @mongoEntity {
+  id: ID! @id
+  firstName: String
+  lastName: String
+  postsId: [ID!]
+  posts: [Post!] @innerRef
+}
+
+type Post @mongoEntity {
+  id: ID! @id
+  content: String!
+}
+```
+
+In questo caso il campo `posts` dell'entità `User` è un campo virtuale che non viene valorizzato direttamente sulla collection dell'entità Utente, ma viene popolato successivamente caricando i post referenziati dal campo adiacente `postsId`.
+
+Si chiama `@innerRef` perchè il riferimento alle entità collegate è all'interno dell'entità sorgente. Per convenzione, tale riferimento (nell'esempio il campo `postsId`) deve avere lo stesso identico nome del campo relazione con il suffisso `Id`. Sempre per convenzione, il campo dell'entità connessa che viene messo in relazione è il campo annotato come `@id`. 
+
+Entrambe queste configurazioni possono comunque essere esplicitate e modificate, si veda il più complesso esempio di seguito:
+```typescript
+type User @mongoEntity {
+  id: ID! @id
+  firstName: String
+  lastName: String
+  postsAnotherId: [ID!]
+  posts: [Post!] @innerRef(refFrom: "postsAnotherId", refTo: "anotherId")
+}
+
+type Post @mongoEntity {
+  id: ID! @id
+  anotherId: ID!
+  content: String!
+}
+```
+
+
+Typetta supporta tutte e tre le tipiche cardinalità di relazione:
+## Relazioni 1-1
+
+Le relazioni uno-a-uno (1-1) sono relazioni in cui al massimo un recordo è collegato ad entrambi i lati della relazione. Nell'esempio di seguito abbiamo una relazione tra `Utente` e `Profilo` in cui un utente ha uno ed un solo profilo ed un profilo è di uno ed un solo utente:
+
+```typescript
+type User @mongoEntity {
+  id: ID! @id
+  profile: UserProfile @foreignRef(refFrom: "userId")
+}
+
+type UserProfile @mongoEntity {
+  id: ID! @id
+  userId: ID
+  user: User @innerRef
+  firstName: String
+  lastName: String
+}
+```
+
+
 
 ## Inner relations
 

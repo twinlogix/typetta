@@ -32,7 +32,11 @@
           <ul>
             {% for item in menu.children %}
               <li class="menu-item-{{ loop.index }}">
+                {% if item.todo %}
+                {{ item.title }} [todo]
+                {% else %}
                 <a href="{{ site.baseurl}}{{ item.url }}" title="Go to {{ item.title }}">{{ item.title }}</a>
+                {% endif %}
               </li>
             {% endfor %}
           </ul>

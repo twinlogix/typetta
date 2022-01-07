@@ -1,7 +1,6 @@
 {
   "name": "@twinlogix/typetta",
   "version": "0.5.4-beta.15",
-  "description": "",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -17,9 +16,15 @@
     "type": "git",
     "url": "git+https://github.com/twinlogix/typetta.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
+  "maintainers": [
+    "Mattia Minotti <mattia@twinlogix.com>",
+    "Edoardo barbieri <edoardo@twinlogix.com>"
+  ],
+  "engines": {
+    "node": ">=12.6",
+    "pnpm": ">=6.14.1"
+  },
   "bugs": {
     "url": "https://github.com/twinlogix/typetta/issues"
   },
