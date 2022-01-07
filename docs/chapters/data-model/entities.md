@@ -157,7 +157,7 @@ type User @mongoEntity {
 }
 ```
 
-Typetta offre il più avanzato supporto possibile alle entità embedded su MongoDB, che vengono trasformate in embedded documents, dando quindi la possibilità di selezionare, filtrare e ordinare i campi delle entità embedded. Sui database SQL queste entità vengono invece trasformate in tipi di dato JSON ed hanno quindi un supporto più limitato.
+Typetta offre il più avanzato supporto possibile alle entità embedded su MongoDB, che vengono trasformate in embedded documents, dando quindi la possibilità di selezionare, filtrare e ordinare i campi delle entità embedded. Sui database SQL queste entità vengono invece appiattite su molteplici colonne, offerndo anche in questo caso la possibilità di selezionare, filtrare e ordinare i campi delle entità embedded.
 
 ## Alias
 
