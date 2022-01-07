@@ -185,6 +185,6 @@ type User @mongoEntity {
   id: ID! @id
   firstName: String
   lastName: String
-  excludedField: String @excluded
+  excludedField: String @exclude
 }
 ```
