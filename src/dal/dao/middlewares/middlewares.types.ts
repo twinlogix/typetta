@@ -1,23 +1,56 @@
-import { MiddlewareContext, DeleteParams, FindParams, InsertParams, ReplaceParams, UpdateParams, IdGenerationStrategy, DAOGenerics } from '../dao.types'
+import {
+  MiddlewareContext,
+  DeleteParams,
+  FindParams,
+  InsertParams,
+  ReplaceParams,
+  UpdateParams,
+  IdGenerationStrategy,
+  DAOGenerics,
+  AggregateParams,
+  AggregateResults,
+  AggregatePostProcessing,
+} from '../dao.types'
 import { PartialDeep } from 'type-fest'
 
 export type Continue<T extends boolean> = { continue: T }
 export type FindMiddlewareInput<T extends DAOGenerics> = { operation: 'find'; params: FindParams<T> }
+export type AggregateMiddlewareInput<T extends DAOGenerics> = { operation: 'aggregate'; params: AggregateParams<T>; args?: AggregatePostProcessing<T, AggregateParams<T>> }
 export type InsertMiddlewareInput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T> }
 export type UpdateMiddlewareInput<T extends DAOGenerics> = { operation: 'update'; params: UpdateParams<T> }
 export type ReplaceMiddlewareInput<T extends DAOGenerics> = { operation: 'replace'; params: ReplaceParams<T> }
 export type DeleteMiddlewareInput<T extends DAOGenerics> = { operation: 'delete'; params: DeleteParams<T> }
-export type MiddlewareInput<T extends DAOGenerics> = FindMiddlewareInput<T> | InsertMiddlewareInput<T> | UpdateMiddlewareInput<T> | ReplaceMiddlewareInput<T> | DeleteMiddlewareInput<T>
+export type MiddlewareInput<T extends DAOGenerics> =
+  | FindMiddlewareInput<T>
+  | AggregateMiddlewareInput<T>
+  | InsertMiddlewareInput<T>
+  | UpdateMiddlewareInput<T>
+  | ReplaceMiddlewareInput<T>
+  | DeleteMiddlewareInput<T>
 
 export type FindMiddlewareOutput<T extends DAOGenerics> = { operation: 'find'; params: FindParams<T>; records: PartialDeep<T['model']>[]; totalCount?: number }
+export type AggregateMiddlewareOutput<T extends DAOGenerics> = {
+  operation: 'aggregate'
+  params: AggregateParams<T>
+  args?: AggregatePostProcessing<T, AggregateParams<T>>
+  result: AggregateResults<T, AggregateParams<T>>
+}
 export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; record: T['insert'] }
 export type UpdateMiddlewareOutput<T extends DAOGenerics> = { operation: 'update'; params: UpdateParams<T> }
 export type ReplaceMiddlewareOutput<T extends DAOGenerics> = { operation: 'replace'; params: ReplaceParams<T> }
 export type DeleteMiddlewareOutput<T extends DAOGenerics> = { operation: 'delete'; params: DeleteParams<T> }
-export type MiddlewareOutput<T extends DAOGenerics> = FindMiddlewareOutput<T> | InsertMiddlewareOutput<T> | UpdateMiddlewareOutput<T> | ReplaceMiddlewareOutput<T> | DeleteMiddlewareOutput<T>
+export type MiddlewareOutput<T extends DAOGenerics> =
+  | FindMiddlewareOutput<T>
+  | AggregateMiddlewareOutput<T>
+  | InsertMiddlewareOutput<T>
+  | UpdateMiddlewareOutput<T>
+  | ReplaceMiddlewareOutput<T>
+  | DeleteMiddlewareOutput<T>
 
 export type SelectBeforeMiddlewareOutputType<T extends DAOGenerics, I extends MiddlewareInput<T>> = I['operation'] extends 'find'
   ? (FindMiddlewareInput<T> & Continue<true>) | (FindMiddlewareOutput<T> & Continue<false>)
+  : I['operation'] extends 'aggregate'
+  ? (AggregateMiddlewareInput<T> & Continue<true>) | (AggregateMiddlewareOutput<T> & Continue<false>)
   : I['operation'] extends 'insert'
   ? (InsertMiddlewareInput<T> & Continue<true>) | (InsertMiddlewareOutput<T> & Continue<false>)
   : I['operation'] extends 'update'
@@ -30,6 +63,8 @@ export type SelectBeforeMiddlewareOutputType<T extends DAOGenerics, I extends Mi
 
 export type SelectAfterMiddlewareOutputType<T extends DAOGenerics, I extends MiddlewareInput<T>> = I['operation'] extends 'find'
   ? FindMiddlewareOutput<T> & Continue<boolean>
+  : I['operation'] extends 'aggregate'
+  ? AggregateMiddlewareOutput<T> & Continue<boolean>
   : I['operation'] extends 'insert'
   ? InsertMiddlewareOutput<T> & Continue<boolean>
   : I['operation'] extends 'update'

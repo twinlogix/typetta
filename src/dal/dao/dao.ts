@@ -1,6 +1,22 @@
 import { deepCopy, getTraversing, reversed, setTraversing } from '../../utils/utils'
 import { AbstractDAOContext } from '../daoContext/daoContext'
-import { MiddlewareContext, DAO, DAOParams, DeleteParams, FilterParams, FindOneParams, FindParams, InsertParams, ReplaceParams, UpdateParams, DAOGenerics, AggregateParams, AggregationResults } from './dao.types'
+import {
+  MiddlewareContext,
+  DAO,
+  DAOParams,
+  DeleteParams,
+  FilterParams,
+  FindOneParams,
+  FindParams,
+  InsertParams,
+  ReplaceParams,
+  UpdateParams,
+  DAOGenerics,
+  AggregateParams,
+  AggregateResults,
+  AggregationFields,
+  AggregatePostProcessing,
+} from './dao.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection } from './projections/projections.utils'
@@ -103,9 +119,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return this._count(beforeResults.params)
   }
 
-  async aggregate<A extends AggregateParams<T>>(params: A): Promise<AggregationResults<T, A>> {
-    // @ts-ignore
-    return 1
+  async aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
+    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'aggregate', params, args })
+    const result = beforeResults.continue ? await this._aggregate(params, args) : beforeResults.result
+    const afterResults = await this.executeAfterMiddlewares({ operation: 'aggregate', params: beforeResults.params, args: beforeResults.args, result }, beforeResults.middlewareIndex)
+    return afterResults.result as AggregateResults<T, A>
   }
 
   public async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
@@ -349,6 +367,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }>
   protected abstract _exists(params: FilterParams<T>): Promise<boolean>
   protected abstract _count(params: FilterParams<T>): Promise<number>
+  protected abstract _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
   protected abstract _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   protected abstract _updateOne(params: UpdateParams<T>): Promise<void>
   protected abstract _updateMany(params: UpdateParams<T>): Promise<void>

@@ -1,9 +1,10 @@
-import { DefaultModelScalars, Expand, LogicalOperators, TypeTraversal } from '../..'
+import { DefaultModelScalars, EqualityOperators, Expand, LogicalOperators, OneKey, QuantityOperators, TypeTraversal } from '../..'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
+import { Sort, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
 
 export type RequestArgs<Filter, Sort> = {
@@ -71,20 +72,28 @@ export type DeleteParams<T extends DAOGenerics> = {
 
 export type AggregateOperation = 'sum' | 'count' | 'avg' | 'min' | 'max'
 
+export type AggregationFields<T extends DAOGenerics> = {
+  [key: string]: { field: keyof Omit<T['filter'], keyof LogicalOperators<any>>; operator: AggregateOperation }
+}
+
 export type AggregateParams<T extends DAOGenerics> = {
   by?: { [K in keyof Omit<T['filter'], keyof LogicalOperators<any>>]: true }
   filter?: T['filter']
-  aggregations: {
-    [key: string]: { field: keyof Omit<T['filter'], keyof LogicalOperators<any>>; operator: AggregateOperation }
-  }
-  having?: {} // TODO
+  aggregations: AggregationFields<T>
   start?: number
   limit?: number
   metadata?: T['operationMetadata']
   options?: T['driverFilterOptions']
 }
 
-export type AggregationResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
+type FilterOrLogicalOperation<T> = T | LogicalOperators<T>
+
+export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
+  having?: FilterOrLogicalOperation<{ [K in keyof A['aggregations']]?: EqualityOperators<number> | QuantityOperators<number> }>
+  sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
+}
+
+export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
   { [K in keyof A['by']]: K extends string ? TypeTraversal<T['model'], K> : K extends keyof T['model'] ? T['model'][K] : never } & Record<keyof A['aggregations'], number>
 >
 
@@ -117,14 +126,13 @@ export interface DAO<T extends DAOGenerics> {
   findPage<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
+  aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
   insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>
   replaceOne(params: ReplaceParams<T>): Promise<void>
   deleteOne(params: DeleteParams<T>): Promise<void>
   deleteAll(params: DeleteParams<T>): Promise<void>
-
-  aggregate<A extends AggregateParams<T>>(params: A): Promise<AggregationResults<T, A>>
 }
 
 export type DAOGenerics<
