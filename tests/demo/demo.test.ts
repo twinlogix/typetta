@@ -199,8 +199,9 @@ test('Aggregate test', async () => {
   expect(aggregation3.max).toBe(99)
   expect(aggregation3.min).toBe(0)
 
-  const aggregation4 = await dao.user.aggregate({ aggregations: { max: { operation: 'max', field: 'id' } } })
+  const aggregation4 = await dao.user.aggregate({ aggregations: { max: { operation: 'max', field: 'email' }, count: { operation: 'count' } } })
   expect(aggregation4.max).toBe(null)
+  expect(aggregation4.count).toBe(0)
 
   const aggregation5 = await dao.post.aggregate({
     by: { authorId: true },

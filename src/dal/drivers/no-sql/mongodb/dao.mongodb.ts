@@ -158,7 +158,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
         return Object.keys(params.aggregations).reduce((p, k) => {
           return {
             ...p,
-            [k]: null,
+            [k]: params.aggregations[k].operation === 'count' ? 0 : null,
           }
         }, {}) as AggregateResults<T, A>
       }

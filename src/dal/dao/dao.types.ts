@@ -92,7 +92,9 @@ export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregatePa
 
 export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
   keyof A['by'] extends never
-    ? Record<keyof A['aggregations'], number | null>
+    ? {
+        [K in keyof A['aggregations']]: A['aggregations'][K]['operation'] extends 'count' ? number : number | null
+      }
     : ({ [K in keyof A['by']]: K extends string ? TypeTraversal<T['model'], K> : K extends keyof T['model'] ? T['model'][K] : never } & {
         [K in keyof A['aggregations']]: A['aggregations'][K]['operation'] extends 'count' ? number : number | null
       })[]

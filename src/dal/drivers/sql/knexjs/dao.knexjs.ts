@@ -151,7 +151,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         return Object.keys(params.aggregations).reduce((p, k) => {
           return {
             ...p,
-            [k]: null,
+            [k]: params.aggregations[k].operation === 'count' ? 0 : null,
           }
         }, {}) as AggregateResults<T, A>
       }
