@@ -113,6 +113,13 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
+    /**
+     * In case by is omitted: maybe is safer this approach
+     * SELECT count(*)
+     * FROM film, (SELECT 1 x) dummy
+     * WHERE 1 = 0
+     * GROUP BY dummy.x;
+     */
     const byColumns = Object.keys(params.by || {}).map((v) => modelNameToDbName(v, this.schema))
     const aggregations = Object.entries(params.aggregations).map(([k, v]) => {
       return this.knex.raw(`${v.operator.toUpperCase()}(${modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
