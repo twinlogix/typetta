@@ -177,28 +177,47 @@ test('Aggregate test', async () => {
         authorId: true,
         'metadata.region': true,
       },
-      aggregations: { count: { field: 'authorId', operator: 'count' }, totalAuthorViews: { field: 'views', operator: 'sum' } },
+      aggregations: { count: { field: 'authorId', operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
     },
     { sorts: [{ totalAuthorViews: SortDirection.ASC }], having: { totalAuthorViews: { $lt: 150 } } },
   )
   expect(aggregation1.length).toBe(4)
   expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
-  expect(aggregation1[1]).toEqual({count: 5, totalAuthorViews: 70, authorId: 'user_1', 'metadata.region': 'it'})
-  expect(aggregation1[2]).toEqual({count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en'})
-  expect(aggregation1[3]).toEqual({count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it'})
-  const aggregation2 = await dao.post.aggregate(
-    {
-      aggregations: { count: { field: 'views', operator: 'count' }, totalAuthorViews: { field: 'views', operator: 'sum' } , avgAuthorViews: { field: 'views', operator: 'avg' } },
-    }
-  )
-  expect(aggregation2.avgAuthorViews).toBe(49.5)
-  expect(aggregation2.avgAuthorViews).toBe(aggregation2.totalAuthorViews / aggregation2.count)
+  expect(aggregation1[1]).toEqual({ count: 5, totalAuthorViews: 70, authorId: 'user_1', 'metadata.region': 'it' })
+  expect(aggregation1[2]).toEqual({ count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en' })
+  expect(aggregation1[3]).toEqual({ count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it' })
+  const aggregation2 = await dao.post.aggregate({
+    aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' }, avgAuthorViews: { field: 'views', operation: 'avg' } },
+  })
+  expect(aggregation2.avgAuthorViews!).toBe(49.5)
+  expect(aggregation2.avgAuthorViews!).toBe(aggregation2.totalAuthorViews! / aggregation2.count!)
 
-  const aggregation3 = await dao.post.aggregate(
-    {
-      aggregations: { max: { field: 'views', operator: 'max' }, min: { field: 'views', operator: 'min' } },
-    }
-  )
-  console.log(aggregation3)
+  const aggregation3 = await dao.post.aggregate({
+    aggregations: { max: { field: 'views', operation: 'max' }, min: { field: 'views', operation: 'min' } },
+  })
+  expect(aggregation3.max).toBe(99)
+  expect(aggregation3.min).toBe(0)
+
+  const aggregation4 = await dao.user.aggregate({ aggregations: { max: { operation: 'max', field: 'email' }, count: { operation: 'count' } } })
+  expect(aggregation4.max).toBe(null)
+  expect(aggregation4.count).toBe(0)
+
+  const aggregation5 = await dao.post.aggregate({
+    by: { authorId: true },
+    aggregations: {
+      max: { operation: 'max', field: 'clicks' },
+      avg: { operation: 'avg', field: 'clicks' },
+      sum: { operation: 'sum', field: 'clicks' },
+      count: { operation: 'count', field: 'clicks' },
+      count2: { operation: 'count', field: 'views' },
+      count3: { operation: 'count' },
+    },
+  })
+  expect(aggregation5[0].max).toBe(null)
+  expect(aggregation5[0].avg).toBe(null)
+  expect(aggregation5[0].sum).toBe(null)
+  expect(aggregation5[0].count).toBe(0)
+  expect(aggregation5[0].count2).toBe(10)
+  expect(aggregation5[0].count3).toBe(10)
 })

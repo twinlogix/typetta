@@ -4,8 +4,8 @@ import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, Re
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
-import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate } from './utils.mongodb'
-import { Collection, Document, WithId, Filter, UpdateOptions, FindOptions, OptionalId } from 'mongodb'
+import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
+import { Collection, Document, WithId, Filter, UpdateOptions, FindOptions, OptionalId, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
@@ -82,8 +82,88 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
-    this.collection.aggregate()
-    throw new Error('Not implemented.')
+    if (params.by && Object.keys(params.by).length === 0) {
+      throw new Error("'by' params must contains at least one key.")
+    }
+    const groupKeys: { [key: string]: string } = {}
+    const byKeys = Object.keys(params.by || {})
+    const groupId = params.by
+      ? byKeys.reduce<object>((p, k) => {
+          const mappedName = k.split('.').join('_')
+          if (mappedName !== k) {
+            groupKeys[k] = mappedName
+          }
+          return { ...p, [mappedName]: `$${modelNameToDbName(k, this.schema)}` }
+        }, {})
+      : {}
+    const aggregation = Object.entries(params.aggregations).reduce<object>((p, [k, v]) => {
+      if (v.operation === 'count' && v.field) {
+        throw new Error('field value is not supported with aggregate count operation (MongoDB)')
+      }
+      return { ...p, [k]: v.operation === 'count' ? { [`$${v.operation}`]: {} } : { [`$${v.operation}`]: `$${modelNameToDbName(v.field as string, this.schema)}` } }
+    }, {})
+
+    const sorts = args?.sorts
+      ? [
+          {
+            // @ts-ignore
+            $sort: args.sorts.reduce<object>((p, s) => {
+              const [k, v] = Object.entries(s)[0]
+              return {
+                ...p,
+                [byKeys.includes(k) ? `_id.${k}` : k]: (v as SortDirection).valueOf(),
+              }
+            }, {}),
+          },
+        ]
+      : []
+    const filter = params.filter ? [{ $match: this.buildFilter(params.filter) }] : []
+    const having = args?.having ? [{ $match: args.having }] : []
+    const results = await this.collection
+      .aggregate(
+        [
+          ...filter,
+          {
+            $group: {
+              _id: groupId,
+              ...aggregation,
+            },
+          },
+          ...having,
+          ...sorts,
+        ],
+        params.options ?? {},
+      )
+      .toArray()
+
+    const mappedResults = results.map((r) => {
+      const rId = r._id
+      for (const [k, v] of Object.entries(groupKeys)) {
+        if (rId[v]) {
+          rId[k] = rId[v]
+          delete rId[v]
+        }
+      }
+      delete r._id
+      return {
+        ...rId,
+        ...r,
+      }
+    })
+
+    if (params.by) {
+      return mappedResults as AggregateResults<T, A>
+    } else {
+      if (mappedResults.length === 0) {
+        return Object.keys(params.aggregations).reduce((p, k) => {
+          return {
+            ...p,
+            [k]: params.aggregations[k].operation === 'count' ? 0 : null,
+          }
+        }, {}) as AggregateResults<T, A>
+      }
+      return mappedResults[0] as AggregateResults<T, A>
+    }
   }
 
   protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {

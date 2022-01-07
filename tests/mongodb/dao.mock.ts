@@ -3,7 +3,6 @@ import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, Loca
 import * as types from './models.mock';
 import { Collection, Db } from 'mongodb';
 import { Knex } from 'knex';
-import { v4 as uuidv4 } from 'uuid'
 
 //--------------------------------------------------------------------------------
 //----------------------------------- ADDRESS ------------------------------------
@@ -429,6 +428,9 @@ export const postSchema: Schema<types.Scalars> = {
   'body': {
     scalar: 'String'
   },
+  'clicks': {
+    scalar: 'Int'
+  },
   'id': {
     scalar: 'ID', 
     required: true
@@ -458,6 +460,7 @@ export const postSchema: Schema<types.Scalars> = {
 type PostFilterFields = {
   'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'clicks'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>,
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
@@ -474,6 +477,7 @@ export type PostProjection = {
   author?: UserProjection | boolean,
   authorId?: boolean,
   body?: boolean,
+  clicks?: boolean,
   id?: boolean,
   metadata?: {
     region?: boolean,
@@ -486,6 +490,7 @@ export type PostProjection = {
 export type PostSortKeys = 
   'authorId'|
   'body'|
+  'clicks'|
   'id'|
   'metadata.region'|
   'metadata.visible'|
@@ -496,6 +501,7 @@ export type PostSort = OneKey<PostSortKeys, SortDirection>;
 export type PostUpdate = {
   'authorId'?: string,
   'body'?: string | null,
+  'clicks'?: number | null,
   'id'?: string,
   'metadata'?: types.PostMetadata | null,
   'metadata.region'?: string,
@@ -507,6 +513,7 @@ export type PostUpdate = {
 export type PostInsert = {
   authorId: string,
   body?: string,
+  clicks?: number,
   id?: string,
   metadata?: types.PostMetadata,
   title: string,
