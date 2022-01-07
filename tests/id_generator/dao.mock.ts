@@ -3,7 +3,6 @@ import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, Loca
 import * as types from './models.mock';
 import { Collection, Db } from 'mongodb';
 import { Knex } from 'knex';
-import { v4 as uuidv4 } from 'uuid'
 
 //--------------------------------------------------------------------------------
 //-------------------------------------- A ---------------------------------------

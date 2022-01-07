@@ -64,6 +64,7 @@ export type Post = {
   author?: Maybe<User>;
   authorId: Scalars['ID'];
   body?: Maybe<Scalars['String']>;
+  clicks?: Maybe<Scalars['Int']>;
   id: Scalars['ID'];
   metadata?: Maybe<PostMetadata>;
   title: Scalars['String'];

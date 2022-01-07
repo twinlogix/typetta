@@ -100,8 +100,14 @@ type User @mongoEntity {
 Tale direttiva riceve anche un parametro opzionale `from` che può assumere i seguenti valori:
 - `db`: quando l'id viene autogenerato dal DB, sia esso un intero autoincrementale SQL o una stringa univoca come in MongoDB.
 
+```typescript
+type User @mongoEntity {
+  id: String! @id(from: "db") @alias(value: "_id")
+  name: String!
+}
+```
+
 - `user`: quando l'id viene generato manualmente dall'utilizzatore di Typetta, sarà quindi un campo obbligatorio di ogni operazione di insert.
-  
 - `generator`: quando l'id viene autogenrato da Typetta con una logica configurabile a livello di DAOContext. Si può creare un generatore di ID per ogni scalare che verrà quindi invocato per tutti i campi dello specifico scalare annotati con la direttiva `@id`. Un esempio di utilizzo è il caso in cui tutti gli ID debbano essere gestiti come UUID creati a livello applicativo. Per ottenere questo si può quindi configurare il DAOContext come segue:
 
 ```typescript
@@ -157,7 +163,7 @@ type User @mongoEntity {
 }
 ```
 
-Typetta offre il più avanzato supporto possibile alle entità embedded su MongoDB, che vengono trasformate in embedded documents, dando quindi la possibilità di selezionare, filtrare e ordinare i campi delle entità embedded. Sui database SQL queste entità vengono invece trasformate in tipi di dato JSON ed hanno quindi un supporto più limitato.
+Typetta offre il più avanzato supporto possibile alle entità embedded su MongoDB, che vengono trasformate in embedded documents, dando quindi la possibilità di selezionare, filtrare e ordinare i campi delle entità embedded. Sui database SQL queste entità vengono invece appiattite su molteplici colonne, offerndo anche in questo caso la possibilità di selezionare, filtrare e ordinare i campi delle entità embedded.
 
 ## Alias
 
@@ -185,6 +191,6 @@ type User @mongoEntity {
   id: ID! @id
   firstName: String
   lastName: String
-  excludedField: String @excluded
+  excludedField: String @exclude
 }
 ```
