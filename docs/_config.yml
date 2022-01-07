@@ -3,7 +3,7 @@ plugins:
   - jekyll-remote-theme
 theme: jekyll-theme-minimal
 title: Typetta
-description: Node.js ORM for typing lovers.
+description: Node.js ORM written in TypeScript for typing lovers.
 logo: /assets/img/logo.png
 show_downloads: true
 google_analytics:
