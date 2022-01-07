@@ -1,7 +1,13 @@
 <div align="center">
+  <br>
+  <br>
+  <br>
+  <br>
   <a href="https://twinlogix.github.io/typetta/">
     <img src="https://github.com/twinlogix/typetta/blob/master/docs/assets/img/logo.png" width="316" height="50">
   </a>
+  <br>
+  <br>
   <br>
   <br>
 </div>
@@ -12,7 +18,7 @@ Typetta può essere utilizzato in qualsiasi backend TypeScript (incluse applicaz
 
 # Come funziona?
 
-Puoi trovare tutte le informazioni utili, le guide e i tutorial su come utilizzare al meglio Typetta sulla [documentazione ufficiale]{https://twinlogix.github.io/typetta/}.
+Puoi trovare tutte le informazioni utili, le guide e i tutorial su come utilizzare al meglio Typetta sulla [documentazione ufficiale](https://twinlogix.github.io/typetta/).
 
 # Principali Funzionalità
 
