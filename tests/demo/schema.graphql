@@ -28,6 +28,7 @@ type Post @sqlEntity {
   views: Int!
   authorId: ID! @alias(value: "aId")
   author: User @innerRef
+  metadata: PostMetadata
   tags: [Tag!] @foreignRef(refFrom: "postId")
 }
 
@@ -35,4 +36,9 @@ type Tag @sqlEntity {
   id: ID! @id
   postId: ID!
   name: String
+}
+
+type PostMetadata {
+  region: String!
+  visible: Boolean!
 }

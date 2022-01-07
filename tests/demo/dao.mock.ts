@@ -28,6 +28,18 @@ export const postSchema: Schema<types.Scalars> = {
     scalar: 'ID', 
     required: true
   },
+  'metadata': {
+    embedded: {
+      'region': {
+        scalar: 'String', 
+        required: true
+      },
+      'visible': {
+        scalar: 'Boolean', 
+        required: true
+      }
+    }
+  },
   'title': {
     scalar: 'String', 
     required: true
@@ -43,6 +55,8 @@ type PostFilterFields = {
   'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | QuantityOperators<Date>,
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
   'title'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'views'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
 };
@@ -64,6 +78,10 @@ export type PostProjection = {
   body?: boolean,
   createdAt?: boolean,
   id?: boolean,
+  metadata?: {
+    region?: boolean,
+    visible?: boolean,
+  } | boolean,
   tags?: TagProjection | boolean,
   title?: boolean,
   views?: boolean,
@@ -74,6 +92,8 @@ export type PostSortKeys =
   'body'|
   'createdAt'|
   'id'|
+  'metadata.region'|
+  'metadata.visible'|
   'title'|
   'views';
 export type PostSort = OneKey<PostSortKeys, SortDirection>;
@@ -83,6 +103,9 @@ export type PostUpdate = {
   'body'?: string | null,
   'createdAt'?: Date,
   'id'?: string,
+  'metadata'?: types.PostMetadata | null,
+  'metadata.region'?: string,
+  'metadata.visible'?: boolean,
   'title'?: string,
   'views'?: number
 };
@@ -92,6 +115,7 @@ export type PostInsert = {
   body?: string,
   createdAt: Date,
   id?: string,
+  metadata?: types.PostMetadata,
   title: string,
   views: number,
 };
