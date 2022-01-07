@@ -101,9 +101,8 @@ Tale direttiva riceve anche un parametro opzionale `from` che può assumere i se
 - `db`: quando l'id viene autogenerato dal DB, sia esso un intero autoincrementale SQL o una stringa univoca come in MongoDB.
 
 ```typescript
-scalar MongoID
-type User @mongoEntity(source: "a") {
-  id: MongoID! @id(from: "db") @alias(value: "_id")
+type User @mongoEntity {
+  id: String! @id(from: "db") @alias(value: "_id")
   name: String!
 }
 ```
