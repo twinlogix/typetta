@@ -112,15 +112,16 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return result[0].all as number
   }
 
-  protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>[]> {
+  protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
     const byColumns = Object.keys(params.by || {}).map((v) => modelNameToDbName(v, this.schema))
     const aggregations = Object.entries(params.aggregations).map(([k, v]) => {
       return this.knex.raw(`${v.operator.toUpperCase()}(${modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
     })
     const where = this.buildWhere(params.filter)
     const sort = this.buildSort(args?.sorts, where)
-    const query = sort.select([...byColumns, ...aggregations]).groupBy(byColumns)
-    const having = args?.having ? buildHavingConditions(query, args.having) : query
+    const select = sort.select([...byColumns, ...aggregations])
+    const groupBy = byColumns.length > 0 ? select.groupBy(byColumns) : select.groupByRaw('(SELECT 1)')
+    const having = args?.having ? buildHavingConditions(groupBy, args.having) : groupBy
     const transactingQuery = await this.buildTransaction(params.options, having)
       .limit(params.limit || this.pageSize)
       .offset(params.start || 0)
@@ -133,7 +134,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         result[v] = value
       }
     })
-    return results as AggregateResults<T, A>[]
+    if (params.by) {
+      return results as AggregateResults<T, A>
+    } else {
+      return results[0] as AggregateResults<T, A>
+    }
   }
 
   protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {

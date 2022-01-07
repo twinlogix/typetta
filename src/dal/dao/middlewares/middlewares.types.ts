@@ -33,7 +33,7 @@ export type AggregateMiddlewareOutput<T extends DAOGenerics> = {
   operation: 'aggregate'
   params: AggregateParams<T>
   args?: AggregatePostProcessing<T, AggregateParams<T>>
-  results: AggregateResults<T, AggregateParams<T>>[]
+  result: AggregateResults<T, AggregateParams<T>>
 }
 export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; record: T['insert'] }
 export type UpdateMiddlewareOutput<T extends DAOGenerics> = { operation: 'update'; params: UpdateParams<T> }

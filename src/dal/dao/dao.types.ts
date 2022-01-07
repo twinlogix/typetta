@@ -90,9 +90,11 @@ export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregatePa
   sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
 }
 
-export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
+type AggregateResult<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
   { [K in keyof A['by']]: K extends string ? TypeTraversal<T['model'], K> : K extends keyof T['model'] ? T['model'][K] : never } & Record<keyof A['aggregations'], number>
 >
+
+export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = keyof A['by'] extends never ? AggregateResult<T, A> : AggregateResult<T, A>[]
 
 export type DAOParams<T extends DAOGenerics> = {
   idField: T['idKey']
@@ -123,7 +125,7 @@ export interface DAO<T extends DAOGenerics> {
   findPage<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
-  aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>[]>
+  aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
   insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>

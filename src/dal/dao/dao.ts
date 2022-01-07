@@ -119,11 +119,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return this._count(beforeResults.params)
   }
 
-  async aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>[]> {
+  async aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'aggregate', params, args })
-    const results = beforeResults.continue ? await this._aggregate(params, args) : beforeResults.results
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'aggregate', params: beforeResults.params, args: beforeResults.args, results }, beforeResults.middlewareIndex)
-    return afterResults.results as AggregateResults<T, A>[]
+    const result = beforeResults.continue ? await this._aggregate(params, args) : beforeResults.result
+    const afterResults = await this.executeAfterMiddlewares(
+      { operation: 'aggregate', params: beforeResults.params, args: beforeResults.args, result: result as AggregateResults<T, AggregateParams<T>> },
+      beforeResults.middlewareIndex,
+    )
+    return afterResults.result as AggregateResults<T, A>
   }
 
   public async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
@@ -367,7 +370,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }>
   protected abstract _exists(params: FilterParams<T>): Promise<boolean>
   protected abstract _count(params: FilterParams<T>): Promise<number>
-  protected abstract _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>[]>
+  protected abstract _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
   protected abstract _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   protected abstract _updateOne(params: UpdateParams<T>): Promise<void>
   protected abstract _updateMany(params: UpdateParams<T>): Promise<void>
