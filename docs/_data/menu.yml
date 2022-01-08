@@ -22,11 +22,11 @@ main:
         title: Il Contesto
       - url: /chapters/client/read-write
         title: Lettura e Scrittura
-      - url: /chapters/client/projections
-        title: Proiezioni
-        todo: true
       - url: /chapters/client/filters
         title: Filtri
+        todo: true
+      - url: /chapters/client/projections
+        title: Proiezioni
         todo: true
       - url: /chapters/client/sorting
         title: Ordinamento
@@ -41,7 +41,7 @@ main:
         title: Aggregazioni
         todo: true
       - url: /chapters/client/raw-databse-access
-        title: Accesso diretto al DB
+        title: Accesso diretto al database
         todo: true
       - url: /chapters/advanced/transactions
         title: Transazioni
@@ -69,11 +69,8 @@ main:
       - url: /chapters/database-drivers/data-mapper
         title: Data Mapper Pattern
         todo: true
-      - url: /chapters/advanced/mocking
-        title: Mocking
-        todo: true
-      - url: /chapters/advanced/logging
-        title: Logging
+      - url: /chapters/advanced/n-1-problem
+        title: N+1 Problem
         todo: true
       - url: /chapters/advanced/middlewares
         title: Middleware
@@ -83,4 +80,10 @@ main:
         todo: true
       - url: /chapters/advanced/security-policies
         title: Sicurezza
+        todo: true
+      - url: /chapters/advanced/mocking
+        title: Mocking
+        todo: true
+      - url: /chapters/advanced/logging
+        title: Logging
         todo: true
