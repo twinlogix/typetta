@@ -37,7 +37,7 @@ scalar DateTime
 
 Ogni volta che si definisce un nuovo scalare occorre configurare il sistema affinchè sappia come esso deve essere rappresentato nel tipo di dato TypeScript e come deve essere serializzato e deserializzato su ogni driver (SQL, MongoDB ed eventuali altri aggiuntivi). 
 
-Il meccanismo di estensibilità dato dagli scalari aggiuntivi è molto potente perchè permette di aumentare l'espressività del modello applicativo e di creare regole di validazione del dato che vengono applicate da Typetta prima di storicizzare na dato su database.
+Il meccanismo di estensibilità dato dagli scalari aggiuntivi è molto potente perchè permette di aumentare l'espressività del modello applicativo e di creare regole di validazione del dato che vengono applicate da Typetta prima di storicizzare il dato su database.
 
 ### Mapping TypeScript
 
@@ -55,7 +55,7 @@ generates:
         DateTime: Date
   [...]
 ```
-La chiave di sinistra corrisponde al nome dello scalare aggiuntivo definito nello schema GraphQL, mentre la chiave di sinistra è il tipo di dato TypeScript corrispondente.
+La chiave di sinistra corrisponde al nome dello scalare aggiuntivo definito nello schema GraphQL, mentre il valore di destra è il tipo di dato TypeScript corrispondente.
 
 E' possibile creare anche scalari aggiuntivi che non abbiano una controparte in un tipo primitivo TypeScript, bensì un tipo o una classe proprietaria o di una libreria di terze parti. Per fare questo occorre aggiungere un ulteriore plugin di generazione che permette di inserire una riga di import all'inizio del file contenente le entità del modello applicativo. Di seguito un esempio di uno scalare Decimal mappato sul tipo di dato BigNumber della libreria [bignumber.js](https://mikemcl.github.io/bignumber.js/){:target="_blank"}:
 
