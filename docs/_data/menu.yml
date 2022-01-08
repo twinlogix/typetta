@@ -18,9 +18,10 @@ main:
   - client:
     title: Database Client
     children:
+      - url: /chapters/client/dao-context
+        title: Il Contesto
       - url: /chapters/client/read-write
         title: Lettura e Scrittura
-        todo: true
       - url: /chapters/client/projections
         title: Proiezioni
         todo: true
@@ -54,11 +55,19 @@ main:
       - url: /chapters/database-drivers/sql
         title: SQL
         todo: true
+  - reference:
+    title: Reference
+    children:
+      - url: /typedoc/index.html
+        title: TypeDoc Reference
   - advanced:
     title: Utilizzo Avanzato
     children:
       - url: /chapters/database-drivers/typing
         title: Type Safety
+        todo: true
+      - url: /chapters/database-drivers/data-mapper
+        title: Data Mapper Pattern
         todo: true
       - url: /chapters/advanced/mocking
         title: Mocking

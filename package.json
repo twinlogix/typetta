@@ -10,7 +10,8 @@
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",
-    "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml"
+    "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
+    "typedoc": "typedoc --githubPages false --out docs/typedoc src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -49,6 +50,7 @@
     "sqlite3": "^5.0.2",
     "ts-jest": "26.4.4",
     "tslint": "6.1.3",
+    "typedoc": "^0.22.10",
     "typescript": "4.3.4"
   },
   "dependencies": {

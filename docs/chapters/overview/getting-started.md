@@ -168,7 +168,7 @@ const daoContext = new DAOContext({
   }
 });
 
-const firstFunction = async () => {
+const main = async () => {
 
   const user1 = await daoContext.user.insertOne({
     record: {
@@ -188,5 +188,5 @@ const firstFunction = async () => {
   users.forEach(user => console.log(`${user.firstName} ${user.lastName}`));
 
 };
-firstFunction();
+main();
 ```
