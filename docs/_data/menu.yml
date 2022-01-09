@@ -24,7 +24,6 @@ main:
         title: Lettura e Scrittura
       - url: /chapters/client/filters
         title: Filtri
-        todo: true
       - url: /chapters/client/projections
         title: Proiezioni
         todo: true
