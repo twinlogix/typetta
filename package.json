@@ -11,7 +11,7 @@
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",
     "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
-    "typedoc": "typedoc --githubPages false --out docs/typedoc src/index.ts"
+    "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts"
   },
   "repository": {
     "type": "git",
