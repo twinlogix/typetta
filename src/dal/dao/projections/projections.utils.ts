@@ -45,7 +45,7 @@ export function mergeProjections<P1 extends GenericProjection, P2 extends Generi
   return res as MergeGenericProjection<P1, P2>
 }
 
-function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defaults: any, context: FieldNode, type: GraphQLNamedType, schema: GraphQLSchema): ProjectionType | true {
+export function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defaults: any, context: FieldNode, type: GraphQLNamedType, schema: GraphQLSchema): ProjectionType | true {
   if (context.selectionSet) {
     return context.selectionSet.selections.reduce(
       (proj: any, selection: any) => {

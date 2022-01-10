@@ -11,6 +11,7 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
+import { GraphQLResolveInfo } from 'graphql'
 
 let replSet: MongoMemoryReplSet
 let con: MongoClient
@@ -253,9 +254,14 @@ test('safe find', async () => {
   expect(response6).toBeDefined()
 
   // All undefined projection
-  const response9 = await dao.user.findOne({})
+  const response9 = await dao.user.findOne()
   typeAssert<Test<typeof response9, (User & { __projection: 'all' }) | null>>()
   expect(response9).toBeDefined()
+
+  // Info to projection
+  const response10 = await dao.user.findOne({ projection: {} as GraphQLResolveInfo })
+  typeAssert<Test<typeof response10, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
+  //expect(response10).toBeDefined()
 })
 
 // ------------------------------------------------------------------------
