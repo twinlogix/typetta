@@ -108,16 +108,39 @@ type User @mongoEntity {
 ```
 
 - `user`: quando l'id viene generato manualmente dall'utilizzatore di Typetta, sarà quindi un campo obbligatorio di ogni operazione di insert.
-- `generator`: quando l'id viene autogenrato da Typetta con una logica configurabile a livello di DAOContext o di singolo DAO. Si può creare un generatore di ID per ogni scalare che verrà quindi invocato per tutti i campi dello specifico scalare annotati con la direttiva `@id`. Un esempio di utilizzo è il caso in cui tutti gli ID debbano essere gestiti come UUID creati a livello applicativo. Per ottenere questo si può quindi configurare il DAOContext come segue:
+
+- `generator`: quando l'id viene autogenerato da Typetta con una logica configurabile a livello di DAOContext o di singolo DAO. Si può creare un generatore di ID per ogni scalare che verrà quindi invocato per tutti i campi dello specifico scalare annotati con la direttiva `@id`. Un esempio di utilizzo è il caso in cui tutti gli ID debbano essere gestiti come UUID creati a livello applicativo. Per ottenere questo si può quindi configurare il DAOContext come segue:
 
 ```typescript
 import { v4 as uuidv4 } from 'uuid'
 
 const daoContext = new DAOContext({
-  idGenerators: { ID: () => uuidv4() },
+  scalars: {
+    ID: {
+      generator: () => uuidv4()
+    }
+  }
+});
+```
+
+Se si vuole un comportamento diverso per un singolo DAO, si può creare un override come il seguente:
+
+```typescript
+import { v4 as uuidv4 } from 'uuid'
+
+const daoContext = new DAOContext({
+  scalars: {
+    ID: {
+      generator: () => uuidv4()
+    }
+  }
   overrides: {
     user: {
-      idGenerator: () => 'user_' + uuidv4()
+      scalars: {
+        ID: {
+          generator: () => 'user_' + uuidv4()
+        }
+      }
     }
   }
 });

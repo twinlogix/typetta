@@ -73,75 +73,76 @@ generates:
   [...]
 ```
 
-### DataType Adapter
+### Scalar Adapter
 
-La seconda specifica necessaria per l'utilizzo di uno scalare aggiuntivo è la definizione dei cosiddetti DataType Adapters.
+La seconda specifica necessaria per l'utilizzo di uno scalare aggiuntivo è la definizione del suo cosiddetto *adapter*.
 
-Un DataType Adapter è un oggetto che contiene due funzioni: una per serializzare lo scalare su uno specifico database e una per deserializzare il valore presente sul database nel tipo di dato TypeScript corrispondente. I DataType Adapters vanno configurati a livello di DAOContext e sono condivisi da tutti i DAO.
+Uno ``Scalar Adapter`` è un oggetto che contiene le specifiche di come il sistema deve comportarsi con lo specifico scalare in merito a:
+- Serializzazione sul database.
+- Deserializzazione dal database.
+- Validazione.
+- Autogenerazione.
 
-Di seguito un esempio di DataType Adapter per lo scalare Decimal già descritto precedentemente. Il tipo di dato TypeScript su cui è mappato questo scalare è BigNumber, mentre il tipo di dato su cui deve essere serializzato su MongoDB è il Decimal128.
+Gli Scalar adapters vanno configurati a livello di DAOContext e sono condivisi da tutti i DAO.
+
+Di seguito un esempio di Scalar Adapter per lo scalare Decimal già descritto precedentemente. Il tipo di dato TypeScript su cui è mappato questo scalare è BigNumber, il tipo di dato su cui deve essere serializzato su MongoDB è il Decimal128:, mentre su SQL utilizzeremo le stringhe.
 
 ```typescript
-const decimalDataTypeAdapter : DataTypeAdapter<BigNumber, Decimal128> = {
+const decimalAdapter = {
   dbToModel: (o: Decimal128) => new BigNumber(o.toString()),
   modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
 };
 ```
 
-In maniera ancora più concisa è possibile settare il DataType Adapter direttamente nel costruttore del DAOContext, come mostrato di seguito:
+Nel caso si stiano utilizzando sorgenti dati di tipo diverso, sia MongoDB che SQL, è possibile specificare due adapter diversi come nel seguente esempio in cui per SQL il tipo di dato Decimal viene storicizzato in un campo stringa:
+
+```typescript
+const decimalAdapter = {
+  mongo: {
+    dbToModel: (o: Decimal128) => new BigNumber(o.toString()),
+    modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
+  },
+  knexjs: {
+    dbToModel: (o: String) => new BigNumber(o),
+    modelToDB: (o: BigNumber) => o.toString(),
+  }
+};
+```
+La configurazione del DAOContext con lo scalar adapter di cui sopra risulta quindi la seguente:
 
 ```typescript
 const daoContext = new DAOContext({
-  adapters: {
-    mongo: {
-      Decimal: {
-        dbToModel: (o: Decimal128) => new BigNumber(o.toString()),
-        modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
-      }
-    }
+  scalars: {
+    Decimal: decimalAdapter
   }
 });
 ```
 
 ### Validazione
 
-Il meccanismo degli scalari aggiuntivi può essere utilizzato anche per definire dei tipi di dato complessi e le loro regole di validazione. Le funzioni di trasformazione `dbToModel` e `modelToDB` vengono infatti invocate ogni qualvolta un dato deve essere serializzato o deserializzato sullo specifico database, quindi si può inserire in esse ogni logica di validazione.
+Ogni `Scalar Adapter` permette la specifica di regole di validazione che vengono applicate sia alla lettura che alla scrittura dello scalare su ogni sorgente dati.
 
-Ipotizziamo per esempio di voler creare uno scalare custom che rappresenti solamente numeri interi positivi:
+Ipotizziamo per esempio di voler creare uno scalare aggiuntivo che rappresenti solamente numeri interi positivi:
 
 ```typescript
 scalar IntPositive
 ```
 
-si potrebbe difinire un semplice validatore ed il relativo DataType Adapter come segue:
+E' possibile difinire un semplice validatore ed il relativo `Scalar Adapter` come segue:
 
 ```typescript
-const validateIntPositive = (value: number) : boolean => {
-  return Number.isInteger(value) && value > 0;
-}
-
 const daoContext = new DAOContext({
-  adapters: {
-    mongo: {
-      IntPositive: {
-        dbToModel: (dbValue: Int32) => {
-          const modelValue = dbValue.valueOf();
-          if(validateIntPositive(modelValue)){
-            return modelValue;
-          } else {
-            throw new Error('IntPositive must be a valid positive integer number.');
-          }
-        },
-        modelToDB: (modelValue: number) => {
-          if(validateIntPositive(modelValue)){
-            return new Int32(modelValue);
-          } else {
-            throw new Error('IntPositive must be a valid positive integer number.');
-          }
+  scalars: {
+    IntPositive: {
+      validate: (data: number) : Error | true => {
+        if(Number.isInteger(value) && value > 0){
+          return true;
+        } else {
+          return new Error('IntPositive must be a valid positive integer number.');
         }
       }
     }
-  },
+  }
 });
 ```
 
