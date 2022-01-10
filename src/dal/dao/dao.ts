@@ -51,8 +51,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.pageSize = pageSize
     this.relations = relations
     this.idGeneration = idGeneration
-    const generator = this.idGenerator || this.daoContext.idGenerators[idScalar]
-    if (this.idGeneration === 'generator' && !generator) {
+    if (this.idGeneration === 'generator' && !this.idGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
     }
     this.middlewares = [
@@ -68,11 +67,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               },
             }
           }
-          if (args.operation === 'insert' && this.idGeneration === 'generator' && generator && !Object.keys(args.params.record).includes(context.idField)) {
+          if (args.operation === 'insert' && this.idGeneration === 'generator' && this.idGenerator && !Object.keys(args.params.record).includes(context.idField)) {
             return {
               continue: true,
               operation: args.operation,
-              params: { ...args.params, record: { ...args.params.record, [context.idField]: generator() } },
+              params: { ...args.params, record: { ...args.params.record, [context.idField]: this.idGenerator() } },
             }
           }
         },

@@ -11,8 +11,8 @@ import { PartialDeep } from 'type-fest'
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
   protected collection: Collection
 
-  protected constructor({ collection, ...params }: MongoDBDAOParams<T>) {
-    super({ ...params, driverContext: { collection } })
+  protected constructor({ collection, idGenerator, ...params }: MongoDBDAOParams<T>) {
+    super({ ...params, driverContext: { collection }, idGenerator: idGenerator ?? params.daoContext.scalars.mongo[params.idScalar].generate })
     this.collection = collection
   }
 
@@ -21,11 +21,11 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private dbToModel(object: WithId<Document>): PartialDeep<T['model']> {
-    return transformObject(this.daoContext.adapters.mongo, 'dbToModel', object, this.schema)
+    return transformObject(this.daoContext.scalars.mongo, 'dbToModel', object, this.schema)
   }
 
   private modelToDb(object: T['insert'] | T['update']): OptionalId<Document> {
-    return transformObject(this.daoContext.adapters.mongo, 'modelToDB', object, this.schema)
+    return transformObject(this.daoContext.scalars.mongo, 'modelToDB', object, this.schema)
   }
 
   private buildProjection(projection?: AnyProjection<T['projection']>): Document | undefined {
@@ -33,7 +33,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildFilter(filter?: T['filter']): Filter<Document> {
-    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongo) : {}
+    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.scalars.mongo) : {}
   }
 
   private buildSort(sorts?: T['sort'][]): [string, 1 | -1][] {
@@ -41,7 +41,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildChanges(update: T['update']) {
-    return adaptUpdate(update, this.schema, this.daoContext.adapters.mongo)
+    return adaptUpdate(update, this.schema, this.daoContext.scalars.mongo)
   }
 
   protected async _find<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {

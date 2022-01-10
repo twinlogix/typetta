@@ -1,6 +1,6 @@
 import { DAOContext, UserExcludedFields } from './dao.mock'
 import { Scalars, User } from './models.mock'
-import { knexJsAdapters, identityAdapter, computedField, loggingMiddleware, SortDirection } from '@twinlogix/typetta'
+import { identityAdapter, computedField, loggingMiddleware, SortDirection } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -54,26 +54,23 @@ beforeEach(async () => {
     knex: {
       default: knexInstance,
     },
-    adapters: {
-      knex: {
-        ...knexJsAdapters,
-        ID: identityAdapter,
-        Decimal: {
-          dbToModel: (o: unknown) => new BigNumber(o as number),
-          modelToDB: (o: BigNumber) => o,
-        },
-        JSON: {
-          dbToModel: (o: unknown) => JSON.parse(o as string),
-          modelToDB: (o: any) => JSON.stringify(o),
-        },
-        Password: {
-          dbToModel: (o: unknown) => o as string,
-          modelToDB: (o: string) => sha256(o),
-        },
-        DateTime: {
-          dbToModel: (o: unknown) => new Date(o as number),
-          modelToDB: (o: Date) => o.getTime(),
-        },
+    scalars: {
+      ID: identityAdapter,
+      Decimal: {
+        dbToModel: (o: unknown) => new BigNumber(o as number),
+        modelToDB: (o: BigNumber) => o,
+      },
+      JSON: {
+        dbToModel: (o: unknown) => JSON.parse(o as string),
+        modelToDB: (o: any) => JSON.stringify(o),
+      },
+      Password: {
+        dbToModel: (o: unknown) => o as string,
+        modelToDB: (o: string) => sha256(o),
+      },
+      DateTime: {
+        dbToModel: (o: unknown) => new Date(o as number),
+        modelToDB: (o: Date) => o.getTime(),
       },
     },
   })

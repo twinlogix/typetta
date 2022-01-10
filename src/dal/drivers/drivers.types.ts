@@ -1,7 +1,3 @@
-import { MongoDBDataTypeAdapterMap } from './no-sql/mongodb/adapters.mongodb'
-import { KnexJSDataTypeAdapterMap } from './sql/knexjs/adapters.knexjs'
-import BigNumber from 'bignumber.js'
-
 export type DefaultModelScalars = {
   String: string
   Boolean: boolean
@@ -16,11 +12,8 @@ export type DataTypeAdapterMap<ModelScalars extends object, DBScalars extends ob
 export type DataTypeAdapter<ModelType, DBType> = {
   modelToDB: (data: ModelType) => DBType
   dbToModel: (data: DBType) => ModelType
-}
-
-export type DriverDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = {
-  knex: KnexJSDataTypeAdapterMap<ModelScalars>
-  mongo: MongoDBDataTypeAdapterMap<ModelScalars>
+  validate?: (data: ModelType) => boolean
+  generate?: () => ModelType
 }
 
 export const identityAdapter: DataTypeAdapter<any, any> = {

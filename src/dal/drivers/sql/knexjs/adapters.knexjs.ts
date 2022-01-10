@@ -1,4 +1,4 @@
-import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../../drivers.types'
+import { DataTypeAdapter, DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../../drivers.types'
 
 export type DefaultKnexJsScalars = {
   String: string

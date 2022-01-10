@@ -3,21 +3,38 @@ global.TextDecoder = require('util').TextDecoder
 
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
-import { User } from './models.mock'
-import { SortDirection, computedField, mongoDbAdapters, identityAdapter, projectionDependency, buildMiddleware } from '@twinlogix/typetta'
+import { Scalars, User } from './models.mock'
+import { SortDirection, computedField, mongoDbAdapters, identityAdapter, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
+import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
-import { GraphQLResolveInfo } from 'graphql'
 
 let replSet: MongoMemoryReplSet
 let con: MongoClient
 let db: Db
 type DAOContextType = DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
 let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
+const scalars: UserInputDriverDataTypeAdapterMap<Scalars> = {
+  Coordinates: identityAdapter,
+  LocalizedString: identityAdapter,
+  ID: {
+    ...identityAdapter,
+    generate: () => uuidv4()
+  },
+  Password: {
+    dbToModel: (o: unknown) => o as string,
+    modelToDB: (o: string) => sha256(o),
+  },
+  Decimal: {
+    dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
+    modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
+  },
+  JSON: identityAdapter,
+}
 
 function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {
   return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
@@ -28,24 +45,7 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
       conn: con,
       dao: createDao,
     },
-    adapters: {
-      mongo: {
-        ...mongoDbAdapters,
-        Coordinates: identityAdapter,
-        LocalizedString: identityAdapter,
-        ID: identityAdapter,
-        Password: {
-          dbToModel: (o: unknown) => o as string,
-          modelToDB: (o: string) => sha256(o),
-        },
-        Decimal: {
-          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
-          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
-        },
-        JSON: identityAdapter,
-      },
-    },
-    idGenerators: { ID: () => uuidv4() },
+    scalars,
     overrides: {
       user: {},
     },
@@ -690,24 +690,7 @@ test('middleware 1', async () => {
     mongo: {
       default: db,
     },
-    adapters: {
-      mongo: {
-        ...mongoDbAdapters,
-        Coordinates: identityAdapter,
-        LocalizedString: identityAdapter,
-        ID: identityAdapter,
-        Password: {
-          dbToModel: (o: unknown) => o as string,
-          modelToDB: (o: string) => sha256(o),
-        },
-        Decimal: {
-          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
-          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
-        },
-        JSON: identityAdapter,
-      },
-    },
-    idGenerators: { ID: () => uuidv4() },
+    scalars,
     overrides: {
       user: {
         middlewares: [
@@ -834,24 +817,7 @@ test('middleware 2', async () => {
     mongo: {
       default: db,
     },
-    adapters: {
-      mongo: {
-        ...mongoDbAdapters,
-        Coordinates: identityAdapter,
-        LocalizedString: identityAdapter,
-        ID: identityAdapter,
-        Password: {
-          dbToModel: (o: unknown) => o as string,
-          modelToDB: (o: string) => sha256(o),
-        },
-        Decimal: {
-          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
-          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
-        },
-        JSON: identityAdapter,
-      },
-    },
-    idGenerators: { ID: () => uuidv4() },
+    scalars,
     overrides: {
       user: {
         middlewares: [
@@ -889,28 +855,11 @@ test('middleware 2', async () => {
 
 test('middleware options', async () => {
   const dao2 = new DAOContext<{ m1?: string; m2?: string }, { m3: string }>({
-    idGenerators: { ID: () => uuidv4() },
     metadata: { m1: 'test1', m2: 'no' },
     mongo: {
       default: db,
     },
-    adapters: {
-      mongo: {
-        ...mongoDbAdapters,
-        Coordinates: identityAdapter,
-        LocalizedString: identityAdapter,
-        ID: identityAdapter,
-        Password: {
-          dbToModel: (o: unknown) => o as string,
-          modelToDB: (o: string) => sha256(o),
-        },
-        Decimal: {
-          dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
-          modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
-        },
-        JSON: identityAdapter,
-      },
-    },
+    scalars,
     overrides: {
       user: {
         middlewares: [
@@ -933,11 +882,10 @@ test('middleware options', async () => {
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
-    idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
     },
-    adapters: dao.adapters,
+    scalars,
     overrides: {
       city: {
         middlewares: [
@@ -964,11 +912,10 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
-    idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
     },
-    adapters: dao.adapters,
+    scalars,
     overrides: {
       city: {
         middlewares: [
@@ -988,11 +935,10 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const customDao = new DAOContext<any>({
-    idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
     },
-    adapters: dao.adapters,
+    scalars,
     overrides: {
       city: {
         middlewares: [
@@ -1018,10 +964,10 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao2 = new DAOContext<any>({
-    idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
     },
+    scalars,
     overrides: {
       city: {
         middlewares: [

@@ -114,7 +114,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       }
 
       const idDirective = this._getDirectiveFromAstNode(field, Directives.ID)
-      const idGenerationStrategy = idDirective ? this._getDirectiveArgValue<IdGenerationStrategy>(idDirective, 'from') : undefined
+      const idGenerationStrategy = idDirective ? this._getDirectiveArgValue<IdGenerationStrategy>(idDirective, 'from') ?? 'generator' : undefined
       if(idGenerationStrategy && idGenerationStrategy !== 'db' && idGenerationStrategy !== 'generator' && idGenerationStrategy !== 'user') {
         throw new Error('@id(from: "db" | "generator" | "user") from must be either "db", "generator" or "user"')
       }
