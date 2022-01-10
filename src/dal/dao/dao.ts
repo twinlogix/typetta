@@ -367,10 +367,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private infoToProjection<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P>): FindParams<T, P> {
-    if(params.projection && typeof params.projection === 'object' && typeof params.projection.fieldName === 'string') {
+    if (params.projection && typeof params.projection === 'object' && (typeof params.projection.path === 'object' || typeof params.projection.schema === 'object')) {
       return {
         ...params,
-        projection: projection().fromInfo(params.projection as GraphQLResolveInfo) as P
+        projection: projection().fromInfo(params.projection as GraphQLResolveInfo) as P,
       }
     }
     return params
