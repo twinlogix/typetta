@@ -208,7 +208,7 @@ Come detto in precedenza, un corretto utilizzo delle proiezioni è importante si
 ### Proiezioni e GraphQL
 La filosofia GraphQL, da cui Typetta è fortemente ispirato, prevede che ogni richiesta definisca esplicitamene ed esattamente i campi necessari. Questo permette di eseguire il numero minimo di query necessarie al recupero del dato che è sempre caricato in maniera *eager*.
 
-Per agevolare l'integrazione di Typetta proprio con i back-end GraphQL, abbiamo creato alcune funzioni di utilità in grado di trasformare semplicemente l'AST di una richiesta GraphQL in una proiezione di Typetta.
+Per agevolare l'integrazione di Typetta proprio con i back-end GraphQL, ogni API di recupero dei dati può ricevere al posto di una proiezione un oggetto GraphQLResolveInfo che contiene l'AST di una richiesta GraphQL ed quindi il sistema a trasformare questa informazione nella giusta proiezione.
 
 Di seguito un esempio di un resolver GraphQL implementato utilizzando un DAO Context:
 
@@ -219,13 +219,11 @@ Query: {
         filter: { 
           id: ctx.user.id 
         },
-        projection: projection<User>().fromInfo(info),
+        projection: info,
       })
     }
   }
 }
 ```
-
-Nell'esempio l'helper `projection()` fornisce un metodo `fromInfo` che permette di trasformare l'oggetto standard `GraphQLResolveInfo` in una proiezione dell'entità di modello `User`.
 
 ### Typing
