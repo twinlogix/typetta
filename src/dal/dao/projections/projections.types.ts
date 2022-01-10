@@ -1,4 +1,5 @@
 import { Expand, OmitUndefinedAndNeverKeys } from '../../../utils/utils.types'
+import { GraphQLResolveInfo } from 'graphql'
 import { PartialDeep, Primitive } from 'type-fest'
 import { PartialObjectDeep } from 'type-fest/source/partial-deep'
 
@@ -25,7 +26,7 @@ export type MergeGenericProjection<T1 extends GenericProjection, T2 extends Gene
       [K in keyof T1 | keyof T2]: T1 extends Record<K, any> ? (T2 extends Record<K, any> ? MergeGenericProjection<T1[K], T2[K]> : T1[K]) : T2 extends Record<K, any> ? T2[K] : never
     }>
 
-type Selector<ProjectionType extends object, P extends AnyProjection<ProjectionType>> = {} extends Required<P>
+type Selector<ProjectionType extends object, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = {} extends Required<P>
   ? 'empty'
   : [true] extends [P]
   ? 'all'
@@ -33,14 +34,17 @@ type Selector<ProjectionType extends object, P extends AnyProjection<ProjectionT
   ? 'all'
   : [ProjectionType] extends [P]
   ? 'unknown'
+  : P extends GraphQLResolveInfo
+  ? 'unknown'
   : 'specific'
 
+type ASD = GraphQLResolveInfo extends GraphQLResolveInfo ? true : false
 /**
  * Given a model M and a projection P returns the mapepd model to the projection.
  * If a StaticProjection was given the projection information is carried at compilation time by this type.
  * It is used as return type in all the finds operations.
  */
-export type ModelProjection<ModelType extends object, ProjectionType extends object, P extends AnyProjection<ProjectionType>> = Selector<ProjectionType, P> extends infer S
+export type ModelProjection<ModelType extends object, ProjectionType extends object, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = Selector<ProjectionType, P> extends infer S
   ? S extends 'all'
     ? ModelType & { __projection: 'all' }
     : S extends 'specific'
@@ -118,24 +122,26 @@ type StaticModelProjectionParam<ModelType, ProjectionType, P extends ProjectionT
     > & { __projection?: P }
   : never
 
-type MP<ModelType extends object, P extends PartialObjectDeep<any>> = Expand<{
-  [K in keyof P]: P[K] extends true // true: T
-    ? ModelType extends Partial<Record<K, any>>
-      ? ModelType[K]
+type MP<ModelType extends object, P extends PartialObjectDeep<any>> = Expand<
+  {
+    [K in keyof P]: P[K] extends true // true: T
+      ? ModelType extends Partial<Record<K, any>>
+        ? ModelType[K]
+        : never
+      : P[K] extends false // false: never
+      ? never
+      : P[K] extends boolean // boolean: T | undefined
+      ? ModelType extends Partial<Record<K, any>>
+        ? ModelType[K] | undefined
+        : never
+      : P[K] extends object // object:
+      ? ModelType extends Record<K, infer A> // not optional field
+        ? MPS<A, P, K>
+        : ModelType extends Partial<Record<K, infer B>> // optional field
+        ? MPS<B, P, K> | undefined
+        : never
       : never
-    : P[K] extends false // false: never
-    ? never
-    : P[K] extends boolean // boolean: T | undefined
-    ? ModelType extends Partial<Record<K, any>>
-      ? ModelType[K] | undefined
-      : never
-    : P[K] extends object // object:
-    ? ModelType extends Record<K, infer A> // not optional field
-      ? MPS<A, P, K>
-      : ModelType extends Partial<Record<K, infer B>> // optional field
-      ? MPS<B, P, K> | undefined
-      : never
-    : never
-} & { __projection: P }>
+  } & { __projection: P }
+>
 
 type MPS<T, P extends object, K extends keyof P> = T extends (infer O)[] ? MPS<O, P, K>[] : T extends object ? MP<T, P[K]> : never

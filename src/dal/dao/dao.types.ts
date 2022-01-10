@@ -5,6 +5,7 @@ import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { PartialDeep } from 'type-fest'
+import { GraphQLResolveInfo } from 'graphql'
 
 export type RequestArgs<Filter, Sort> = {
   start?: number
@@ -124,9 +125,9 @@ export type MiddlewareContext<T extends DAOGenerics> = {
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 
 export interface DAO<T extends DAOGenerics> {
-  findAll<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<ModelProjection<T['model'], T['projection'], P>[]>
-  findOne<P extends AnyProjection<T['projection']>>(params?: FindOneParams<T>): Promise<ModelProjection<T['model'], T['projection'], P> | null>
-  findPage<P extends AnyProjection<T['projection']>>(params?: FindParams<T>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
+  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P >): Promise<ModelProjection<T['model'], T['projection'], P>[]>
+  findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<ModelProjection<T['model'], T['projection'], P> | null>
+  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
   aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
