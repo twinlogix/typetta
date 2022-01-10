@@ -7,8 +7,8 @@ Per **proiezione** si intende il sottoinsieme dei campi di un'entità di modello
   - [Proiezioni esplicite](#proiezioni-esplicite)
   - [Proiezioni e relazioni](#proiezioni-e-relazioni)
   - [L'importanza delle proiezioni](#limportanza-delle-proiezioni)
-  - [Proiezioni e GraphQL](#proiezioni-e-graphql)
-  - [Typing](#typing)
+    - [Proiezioni e GraphQL](#proiezioni-e-graphql)
+    - [Typing](#typing)
 
 ## Proiezioni di default
 
@@ -124,7 +124,7 @@ Ritornerà il seguente risultato:
 }
 ```
 
-Sebbene sia buona norma specificare sempre l'elenco completo dei campi necessari, sia per questioni di efficienza che di correttezza, per le entità embedded è possibile selezionare l'intera entità in una proiezione con la seguente sintassi:
+Sebbene sia buona norma specificare sempre l'elenco completo dei campi necessari, sia per questioni di efficienza che di correttezza, per le entità embedded è possibile selezionare anche l'intera entità in una proiezione con la seguente sintassi:
 
 ```typescript
 const users = daoContext.user.findOne({ 
@@ -139,7 +139,7 @@ const users = daoContext.user.findOne({
 });
 ```
 
-In questo caso il risltato sarà:
+In questo caso il risultato sarà:
 
 ```typescript
 {
@@ -157,11 +157,75 @@ In questo caso il risltato sarà:
 
 ## Proiezioni e relazioni
 
+Tramite la specifica di una proiezione esplicita l'utente può decidere di selezionare le relazioni che intende caricare. Dal punto di vista delle proiezioni, le relazioni sono gestite esattamente come le entità embedded.
 
+Dato il modello applicativo precedente, è quindi possibile selezionare un utente con i suoi post:
+
+```typescript
+const users = daoContext.user.findOne({ 
+  filter: { 
+    id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
+  },
+  projection: {
+    firstName: true,
+    lastName: true,
+    posts: {
+      id: true, 
+      content: true
+    }
+  }
+});
+```
+
+Il sistema supporta la possibilità di richiedere campi con una profondità a piacere, è quindi possibile caricare per esempio un utente, i suoi post e per ogni post nuovamente l'utente:
+
+```typescript
+const users = daoContext.user.findOne({ 
+  filter: { 
+    id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
+  },
+  projection: {
+    firstName: true,
+    lastName: true,
+    posts: {
+      id: true, 
+      user: {
+        firstName: true,
+        lastName: true
+      },
+      content: true
+    }
+  }
+});
+```
+
+Ovviamente richiedere una relazine ha un effetto molto diverso sull'interazione con il database sottostante, infatti il sistema dovrà sostenere tutte le query necessarie al caricamento dei dati, su tutte le tabelle/collection interessate. Typetta si occupa comunque di rendere questa complessità completamente trasparente all'utente.
 
 ## L'importanza delle proiezioni
 
+Come detto in precedenza, un corretto utilizzo delle proiezioni è importante sia per efficientare l'accesso al dato, sia per una corretta gestione dei tipi di ritorno.
 
-## Proiezioni e GraphQL
+### Proiezioni e GraphQL
+La filosofia GraphQL, da cui Typetta è fortemente ispirato, prevede che ogni richiesta definisca esplicitamene ed esattamente i campi necessari. Questo permette di eseguire il numero minimo di query necessarie al recupero del dato che è sempre caricato in maniera *eager*.
 
-## Typing
+Per agevolare l'integrazione di Typetta proprio con i back-end GraphQL, abbiamo creato alcune funzioni di utilità in grado di trasformare semplicemente l'AST di una richiesta GraphQL in una proiezione di Typetta.
+
+Di seguito un esempio di un resolver GraphQL implementato utilizzando un DAO Context:
+
+```typescript
+Query: {
+  user: async (parent: never, args: never, ctx: GraphQLContext, info: GraphQLResolveInfo) => {
+      return await ctx.daoContext.user.findOne({
+        filter: { 
+          id: ctx.user.id 
+        },
+        projection: projection<User>().fromInfo(info),
+      })
+    }
+  }
+}
+```
+
+Nell'esempio l'helper `projection()` fornisce un metodo `fromInfo` che permette di trasformare l'oggetto standard `GraphQLResolveInfo` in una proiezione dell'entità di modello `User`.
+
+### Typing
