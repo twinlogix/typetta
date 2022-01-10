@@ -38,7 +38,6 @@ type Selector<ProjectionType extends object, P extends AnyProjection<ProjectionT
   ? 'unknown'
   : 'specific'
 
-type ASD = GraphQLResolveInfo extends GraphQLResolveInfo ? true : false
 /**
  * Given a model M and a projection P returns the mapepd model to the projection.
  * If a StaticProjection was given the projection information is carried at compilation time by this type.
