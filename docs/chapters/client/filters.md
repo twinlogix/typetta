@@ -29,7 +29,7 @@ Typetta permette di filtrare i record per ognuno dei campi del modello e support
 La seguende operazione `findAll` ha un filtro che permette di trovare tutti gli utenti che:
 - Hanno come nome `Mattia`
 - Abitano a `Rome` o `Milan`
-- Sono nati in na data che non comprende tutto l'anno `2020`
+- Sono nati in una data che non comprende tutto l'anno `2020`
 
 
 ```typescript
@@ -37,7 +37,7 @@ await daoContext.user.findAll({
   filter: {
     firstName: "Mattia",
     "address.city": { $in: [ "Milan", "Rome" ]},
-    "birthDate": { 
+    birthDate: { 
       $or: { 
         $lt: new Date("2020-01-01T00:00:00"), 
         $gte: new Date("2021-01-01T00:00:00") 
