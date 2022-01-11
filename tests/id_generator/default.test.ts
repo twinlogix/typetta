@@ -1,3 +1,6 @@
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
+
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
 import { identityAdapter, computedField } from '@twinlogix/typetta'
@@ -6,9 +9,6 @@ import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
-
-global.TextEncoder = require('util').TextEncoder
-global.TextDecoder = require('util').TextDecoder
 
 const config: Knex.Config = {
   client: 'sqlite3',
