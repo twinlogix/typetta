@@ -25,14 +25,38 @@ export type ElementOperators = {
   $exists?: boolean
 }
 
-export type StringOperators = {
-  $text?: {
-    $search: string
-    $language?: string
-    $caseSensitive?: boolean
-    $diacriticSensitive?: boolean
-  }
-}
+export type MongoDBStringOperators =
+  | {
+      $text?: {
+        $search: string
+        $language?: string
+        $caseSensitive?: boolean
+        $diacriticSensitive?: boolean
+      }
+    }
+  | {
+      $contains: string
+      $caseSensitive?: boolean
+    }
+  | {
+      $startsWith: string
+      $caseSensitive?: boolean
+    }
+  | {
+      $endsWith: string
+      $caseSensitive?: boolean
+    }
+
+export type KnexJSStringOperators =
+  | {
+      $contains: string
+    }
+  | {
+      $startsWith: string
+    }
+  | {
+      $endsWith: string
+    }
 
 export type GeospathialOperators = {
   // $geoIntersect

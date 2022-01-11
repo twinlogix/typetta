@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
+import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, MongoDBStringOperators, KnexJSStringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Collection, Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -53,14 +53,14 @@ export const postSchema: Schema<types.Scalars> = {
 };
 
 type PostFilterFields = {
-  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'body'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
   'clicks'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>,
   'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | QuantityOperators<Date>,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
   'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
-  'title'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'title'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
   'views'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
 };
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
@@ -173,9 +173,9 @@ export const tagSchema: Schema<types.Scalars> = {
 };
 
 type TagFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'postId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'postId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
 };
 export type TagFilter = TagFilterFields & LogicalOperators<TagFilterFields>;
 
@@ -270,12 +270,12 @@ export const userSchema: Schema<types.Scalars> = {
 
 type UserFilterFields = {
   'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | QuantityOperators<Date>,
-  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'email'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'email'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 
@@ -365,7 +365,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
-  scalars: UserInputDriverDataTypeAdapterMap<types.Scalars>
+  scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars>
 };
 
 type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType> | TagDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>

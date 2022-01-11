@@ -1,7 +1,7 @@
 import { transformObject } from '../../../../generation/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
-import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators } from '../../../dao/filters/filters.types'
+import { EqualityOperators, QuantityOperators, ElementOperators, KnexJSStringOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection } from '../../../dao/projections/projections.types'
 import { KnexJsDAOGenerics, KnexJsDAOParams } from './dao.knexjs.types'
 import {
@@ -20,7 +20,7 @@ import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
 
 type AbstractFilter = {
-  [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators | StringOperators
+  [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators | KnexJSStringOperators
 }
 
 export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<T> {

@@ -1212,6 +1212,38 @@ test('Aggregate test', async () => {
   expect(aggregation5[0].count).toBe(10)
 })
 
+test('Text filter test', async () => {
+  await dao.organization.insertOne({ record: { name: 'Microsoft' } })
+  await dao.organization.insertOne({ record: { name: 'Macrosoft' } })
+  await dao.organization.insertOne({ record: { name: 'Macdonalds' } })
+  await dao.organization.insertOne({ record: { name: 'Micdonalds' } })
+  await dao.organization.insertOne({ record: { name: 'Lolft' } })
+
+  const found1 = (await dao.organization.findAll({ filter: { name: { $contains: 'soft' } } })).map(o => o.name)
+  const found2 = (await dao.organization.findAll({ filter: { name: { $contains: 'Soft' } } })).map(o => o.name)
+  const found3 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'Mic' } } })).map(o => o.name)
+  const found4 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'mic' } } })).map(o => o.name)
+  const found5 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'ft' } } })).map(o => o.name)
+  const found6 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'Ft' } } })).map(o => o.name)
+
+  //need index
+  //const found7 = (await dao.organization.findAll({ filter: { name: { $text: {$search: "dona"  } } } })).map(o => o.name)
+
+  expect(found1.length).toBe(2)
+  expect(found1.includes("Microsoft")).toBe(true)
+  expect(found1.includes("Macrosoft")).toBe(true)
+  expect(found2.length).toBe(0)
+  expect(found3.length).toBe(2)
+  expect(found3.includes("Microsoft")).toBe(true)
+  expect(found3.includes("Micdonalds")).toBe(true)
+  expect(found4.length).toBe(0)
+  expect(found5.length).toBe(3)
+  expect(found5.includes("Microsoft")).toBe(true)
+  expect(found5.includes("Macrosoft")).toBe(true)
+  expect(found5.includes("Lolft")).toBe(true)
+  expect(found6.length).toBe(0)
+})
+
 // ------------------------------------------------------------------------
 // ------------------------- SECURITY POLICIES ----------------------------
 // ------------------------------------------------------------------------

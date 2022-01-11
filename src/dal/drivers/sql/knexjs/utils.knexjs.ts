@@ -1,6 +1,6 @@
 import { AggregatePostProcessing } from '../../../..'
 import { getSchemaFieldTraversing, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
-import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
+import { EqualityOperators, QuantityOperators, ElementOperators, KnexJSStringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
@@ -9,7 +9,7 @@ import { KnexJSDataTypeAdapterMap } from './adapters.knexjs'
 import { Knex } from 'knex'
 
 export type AbstractFilter = {
-  [key: string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators
+  [key: string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | KnexJSStringOperators
 } & LogicalOperators<unknown>
 
 export type AbstractSort = { [key: string]: SortDirection }
@@ -59,6 +59,9 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case '$ne': builder.not.where(columnName, av()); break
               case '$in': builder.whereIn(columnName, avs()); break
               case '$nin': builder.not.whereIn(columnName, avs()); break
+              case '$contains': builder.where(columnName, 'like', `%${fv}%`); break
+              case '$startsWith': builder.where(columnName, 'like', `${fv}%`); break
+              case '$endsWith': builder.where(columnName, 'like', `%${fv}`); break
               default: throw new Error(`${fk} query is not supported on sql entity.`)
             }
           })

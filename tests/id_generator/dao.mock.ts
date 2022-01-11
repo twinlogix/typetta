@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
+import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, MongoDBStringOperators, KnexJSStringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Collection, Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -93,7 +93,7 @@ export const bSchema: Schema<types.Scalars> = {
 };
 
 type BFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
   'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
 };
 export type BFilter = BFilterFields & LogicalOperators<BFilterFields>;
@@ -164,7 +164,7 @@ export const cSchema: Schema<types.Scalars> = {
 };
 
 type CFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
   'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
 };
 export type CFilter = CFilterFields & LogicalOperators<CFilterFields>;
@@ -305,7 +305,7 @@ export const eSchema: Schema<types.Scalars> = {
 };
 
 type EFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
   'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
 };
 export type EFilter = EFilterFields & LogicalOperators<EFilterFields>;
@@ -376,7 +376,7 @@ export const fSchema: Schema<types.Scalars> = {
 };
 
 type FFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
   'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
 };
 export type FFilter = FFilterFields & LogicalOperators<FFilterFields>;
@@ -440,7 +440,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   },
   mongo: Record<'a' | 'default', Db>,
   knex: Record<'default', Knex>,
-  scalars: UserInputDriverDataTypeAdapterMap<types.Scalars>
+  scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars>
 };
 
 type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType> | BDAOGenerics<MetadataType, OperationMetadataType> | CDAOGenerics<MetadataType, OperationMetadataType> | DDAOGenerics<MetadataType, OperationMetadataType> | EDAOGenerics<MetadataType, OperationMetadataType> | FDAOGenerics<MetadataType, OperationMetadataType>>

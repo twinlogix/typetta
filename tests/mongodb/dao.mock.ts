@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
+import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, MongoDBStringOperators, KnexJSStringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Collection, Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -18,7 +18,7 @@ export const addressSchema: Schema<types.Scalars> = {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
 
@@ -95,9 +95,9 @@ export const citySchema: Schema<types.Scalars> = {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 
@@ -176,9 +176,9 @@ export const deviceSchema: Schema<types.Scalars> = {
 };
 
 type DeviceFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'userId'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
 };
 export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
 
@@ -257,9 +257,9 @@ export const dogSchema: Schema<types.Scalars> = {
 };
 
 type DogFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
 };
 export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
 
@@ -345,10 +345,10 @@ export const organizationSchema: Schema<types.Scalars> = {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 
@@ -458,13 +458,13 @@ export const postSchema: Schema<types.Scalars> = {
 };
 
 type PostFilterFields = {
-  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'body'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
   'clicks'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
   'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
-  'title'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'title'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
   'views'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
 };
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
@@ -606,15 +606,15 @@ export const userSchema: Schema<types.Scalars> = {
 type UserFilterFields = {
   'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
   'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | ArrayOperators<BigNumber[]>,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | StringOperators | ArrayOperators<string[]>,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | MongoDBStringOperators | ArrayOperators<string[]>,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
+  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
   'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
   'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators | GeospathialOperators,
   'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators,
   'usernamePasswordCredentials.password'?: any | null | EqualityOperators<any> | ElementOperators,
-  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 
@@ -731,7 +731,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   mongo: Record<'default', Db>,
-  scalars: UserInputDriverDataTypeAdapterMap<types.Scalars>
+  scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars>
 };
 
 type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | PostDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>

@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
+import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, MongoDBStringOperators, KnexJSStringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
 import { Collection, Db } from 'mongodb';
 import { Knex } from 'knex';
@@ -18,7 +18,7 @@ export const addressSchema: Schema<types.Scalars> = {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
 
@@ -95,9 +95,9 @@ export const citySchema: Schema<types.Scalars> = {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 
@@ -176,9 +176,9 @@ export const deviceSchema: Schema<types.Scalars> = {
 };
 
 type DeviceFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'userId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
 };
 export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
 
@@ -257,9 +257,9 @@ export const dogSchema: Schema<types.Scalars> = {
 };
 
 type DogFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
 };
 export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
 
@@ -338,9 +338,9 @@ export const friendsSchema: Schema<types.Scalars> = {
 };
 
 type FriendsFilterFields = {
-  'from'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'to'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'from'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'to'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
 };
 export type FriendsFilter = FriendsFilterFields & LogicalOperators<FriendsFilterFields>;
 
@@ -425,10 +425,10 @@ export const organizationSchema: Schema<types.Scalars> = {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 
@@ -567,13 +567,13 @@ export const userSchema: Schema<types.Scalars> = {
 type UserFilterFields = {
   'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
   'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | ArrayOperators<BigNumber[]>,
-  'bestFriendId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'credentials.another.test'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'bestFriendId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'credentials.another.test'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
+  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
   'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
   'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators,
   'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators
@@ -701,7 +701,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
-  scalars: UserInputDriverDataTypeAdapterMap<types.Scalars>
+  scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars>
 };
 
 type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | FriendsDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
