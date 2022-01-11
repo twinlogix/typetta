@@ -16,7 +16,7 @@ export type TsTypettaGeneratorField = {
   graphqlType: string
   isRequired: boolean
   isID: boolean
-  idGenerationStrategy?: IdGenerationStrategy | null
+  idGenerationStrategy?: IdGenerationStrategy
   isList: boolean
   isExcluded: boolean
   alias?: string

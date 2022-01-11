@@ -1,7 +1,5 @@
-import { IdGenerationStrategy } from '..'
 import { QuantityOperators, EqualityOperators, ElementOperators, StringOperators } from '../dal/dao/filters/filters.types'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
-import { SortDirection } from '../dal/dao/sorts/sorts.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import BigNumber from 'bignumber.js'
 import { isPlainObject } from 'is-plain-object'
@@ -52,6 +50,21 @@ export function modelValueToDbValue<ScalarsType>(
   schemaField: SchemaField<ScalarsType>,
   adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
 ): unknown {
+  if (adapter.validate) {
+    if (schemaField.array) {
+      for (const v of value as ScalarsType[keyof ScalarsType][]) {
+        const validation = adapter.validate(v)
+        if (validation !== true) {
+          throw validation
+        }
+      }
+    } else {
+      const validation = adapter.validate(value as ScalarsType[keyof ScalarsType])
+      if (validation !== true) {
+        throw validation
+      }
+    }
+  }
   return schemaField.array ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
 }
 

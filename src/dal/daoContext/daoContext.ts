@@ -1,20 +1,20 @@
+import { DriverDataTypeAdapterMap } from '../../dal/drivers/drivers.adapters'
 import { AbstractDAO } from '../dao/dao'
-import { DefaultModelScalars, DriverDataTypeAdapterMap } from '../drivers/drivers.types'
-import { mongoDbAdapters, MongoDBDataTypeAdapterMap } from '../drivers/no-sql/mongodb/adapters.mongodb'
-import { knexJsAdapters, KnexJSDataTypeAdapterMap } from '../drivers/sql/knexjs/adapters.knexjs'
-import { v4 as uuidv4 } from 'uuid'
+import { DefaultModelScalars } from '../drivers/drivers.types'
+import { mongoDbAdapters } from '../drivers/no-sql/mongodb/adapters.mongodb'
+import { knexJsAdapters } from '../drivers/sql/knexjs/adapters.knexjs'
 
 export abstract class AbstractDAOContext<ScalarsType extends DefaultModelScalars = DefaultModelScalars, MetadataType = any> {
-  public idGenerators: { [K in keyof ScalarsType]?: () => ScalarsType[K] }
   public adapters: DriverDataTypeAdapterMap<ScalarsType>
   public metadata?: MetadataType
 
-  public constructor(args?: { adapters?: Partial<DriverDataTypeAdapterMap<ScalarsType>>; metadata?: MetadataType; idGenerators?: { [K in keyof ScalarsType]?: () => ScalarsType[K] } }) {
-    this.adapters = {
-      knex: args?.adapters?.knex || (knexJsAdapters as KnexJSDataTypeAdapterMap<ScalarsType>),
-      mongo: args?.adapters?.mongo || (mongoDbAdapters as MongoDBDataTypeAdapterMap<ScalarsType>),
-    }
-    this.idGenerators = args?.idGenerators || ({ String: () => uuidv4() } as { [K in keyof ScalarsType]?: () => ScalarsType[K] })
+  public constructor(args?: { scalars?: DriverDataTypeAdapterMap<ScalarsType>; metadata?: MetadataType; idGenerators?: { [K in keyof ScalarsType]?: () => ScalarsType[K] } }) {
+    this.adapters = args?.scalars
+      ? args.scalars
+      : ({
+          knex: knexJsAdapters,
+          mongo: mongoDbAdapters,
+        } as DriverDataTypeAdapterMap<ScalarsType>)
     this.metadata = args?.metadata
   }
 

@@ -1,5 +1,5 @@
 import { Schema } from '../dal/dao/schemas/schemas.types'
-import { DataTypeAdapterMap } from '../dal/drivers/drivers.types'
+import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../dal/drivers/drivers.types'
 import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, RelationEntityRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
 
 export function toFirstLower(typeName: string) {
@@ -64,7 +64,7 @@ export function indentMultiline(str: string, count = 1): string {
  * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
  * @returns a new transformed object
  */
-export function transformObject<From extends { [key: string]: any }, To, ModelScalars extends object, DBScalars extends object>(
+export function transformObject<From extends { [key: string]: any }, To, ModelScalars extends DefaultModelScalars, DBScalars extends object>(
   adapters: DataTypeAdapterMap<ModelScalars, DBScalars>,
   direction: 'dbToModel' | 'modelToDB',
   object: From,
@@ -82,11 +82,21 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
         result[destName] = value
       } else {
         if ('scalar' in schemaField) {
-          const adapter = adapters[schemaField.scalar]
+          const adapter = adapters[schemaField.scalar] ?? identityAdapter
+          const mapper =
+            direction === 'modelToDB' && adapter.validate
+              ? (data: ModelScalars[keyof ModelScalars]) => {
+                  const validation = adapter.validate!(data)
+                  if (validation === true) {
+                    return adapter.modelToDB(data)
+                  }
+                  throw validation
+                }
+              : adapter[direction]
           if (Array.isArray(value) && schemaField.array) {
-            result[destName] = adapter ? value.map((v) => adapter[direction](v)) : value
+            result[destName] = adapter ? value.map((v) => mapper(v)) : value
           } else {
-            result[destName] = adapter ? adapter[direction](value) : value
+            result[destName] = adapter ? mapper(value) : value
           }
         } else {
           if (Array.isArray(value) && schemaField.array) {

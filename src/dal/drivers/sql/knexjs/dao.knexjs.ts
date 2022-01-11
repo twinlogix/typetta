@@ -27,8 +27,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private tableName: string
   private knex: Knex<any, unknown[]>
 
-  protected constructor({ tableName, knex, ...params }: KnexJsDAOParams<T>) {
-    super({ ...params, driverContext: { knex } })
+  protected constructor({ tableName, knex, idGenerator, ...params }: KnexJsDAOParams<T>) {
+    super({ ...params, driverContext: { knex }, idGenerator: idGenerator ?? params.daoContext.adapters.knex[params.idScalar]?.generate })
     this.tableName = tableName
     this.knex = knex
   }
@@ -68,7 +68,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private adaptUpdate(changes: T['update']): object {
-    return adaptUpdate(changes, this.schema, this.daoContext.adapters.knex)
+    return adaptUpdate({ update: changes, schema: this.schema, adapters: this.daoContext.adapters.knex })
   }
 
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {

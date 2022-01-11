@@ -3,12 +3,12 @@ global.TextDecoder = require('util').TextDecoder
 
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { knexJsAdapters, identityAdapter, mongoDbAdapters, computedField } from '@twinlogix/typetta'
+import { identityAdapter, computedField } from '@twinlogix/typetta'
+import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
-import BigNumber from 'bignumber.js'
 
 const config: Knex.Config = {
   client: 'sqlite3',
@@ -27,6 +27,7 @@ beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create()
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
+
   dao = new DAOContext({
     mongo: {
       default: db,
@@ -44,34 +45,42 @@ beforeAll(async () => {
         },
       }),
     ],
-    adapters: {
-      mongo: {
-        ...mongoDbAdapters,
-        ID: identityAdapter,
-        MongoID: identityAdapter,
-        IntAutoInc: identityAdapter,
-        Decimal: {
+    scalars: {
+      Decimal: {
+        mongo: {
           dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
           modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
         },
-        JSON: identityAdapter,
-      },
-      knex: {
-        ...knexJsAdapters,
-        IntAutoInc: identityAdapter,
-        MongoID: identityAdapter,
-        ID: identityAdapter,
-        Decimal: {
+        knex: {
           dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
           modelToDB: (o: BigNumber) => o,
         },
-        JSON: {
+      },
+      ID: {
+        ...identityAdapter,
+        generate: () => {
+          return uuidv4()
+        },
+      },
+      IntAutoInc: identityAdapter,
+      JSON: {
+        knex: {
           dbToModel: (o: unknown) => JSON.parse(o as string),
           modelToDB: (o: any) => JSON.stringify(o),
         },
+        mongo: identityAdapter,
+      },
+      MongoID: {
+        mongo: identityAdapter,
       },
     },
-    idGenerators: { ID: () => uuidv4() },
+    overrides: {
+      b: {
+        idGenerator: () => {
+          return 'entity_b' + uuidv4()
+        },
+      },
+    },
   })
   const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
     ['Decimal', ['decimal', 'decimal ARRAY']],
@@ -96,6 +105,7 @@ test('Test mongo', async () => {
   const c = await dao.c.insertOne({ record: { value: 3, id: 'asd' } }) // id required
   const cr = await dao.c.findOne({ filter: { id: c.id } })
 
+  expect(b.id.startsWith('entity_b')).toBe(true)
   expect(ar!.value).toBe(10)
   expect(br!.value).toBe(20)
   expect(cr!.value).toBe(30)

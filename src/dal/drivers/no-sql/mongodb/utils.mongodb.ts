@@ -8,7 +8,7 @@ import {
 } from '../../../../utils/utils'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
-import { DefaultModelScalars } from '../../drivers.types'
+import { DefaultModelScalars, identityAdapter } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document } from 'mongodb'
@@ -116,7 +116,7 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
-      const adapter = adapters[schemaField.scalar]
+      const adapter = adapters[schemaField.scalar] ?? identityAdapter
       return { [columnName]: modelValueToDbValue(v, schemaField, adapter), ...p }
     } else if (schemaField) {
       return { [columnName]: adaptUpdate(v, schemaField.embedded, adapters), ...p }

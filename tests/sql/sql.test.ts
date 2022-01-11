@@ -16,7 +16,7 @@ const config: Knex.Config = {
   useNullAsDefault: true,
 }
 
-beforeAll(async () => { })
+beforeAll(async () => {})
 
 beforeEach(async () => {
   knexInstance = knex(config)
@@ -24,33 +24,32 @@ beforeEach(async () => {
     knex: {
       default: knexInstance,
     },
-    adapters: {
-      knex: {
-        ...knexJsAdapters,
-        LocalizedString: {
-          dbToModel: (o: unknown) => JSON.parse(o as string),
-          modelToDB: (o: LocalizedString) => JSON.stringify(o),
-        },
-        Coordinates: {
-          dbToModel: (o: unknown) => JSON.parse(o as string),
-          modelToDB: (o: Coordinates) => JSON.stringify(o),
-        },
-        Decimal: {
-          dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
-          modelToDB: (o: BigNumber) => o,
-        },
-        JSON: {
-          dbToModel: (o: unknown) => JSON.parse(o as string),
-          modelToDB: (o: any) => JSON.stringify(o),
-        },
-        Password: {
-          dbToModel: (o: unknown) => o as string,
-          modelToDB: (o: string) => sha256(o),
-        },
-        ID: identityAdapter,
+    scalars: {
+      LocalizedString: {
+        dbToModel: (o: unknown) => JSON.parse(o as string),
+        modelToDB: (o: LocalizedString) => JSON.stringify(o),
+      },
+      Coordinates: {
+        dbToModel: (o: unknown) => JSON.parse(o as string),
+        modelToDB: (o: Coordinates) => JSON.stringify(o),
+      },
+      Decimal: {
+        dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
+        modelToDB: (o: BigNumber) => o,
+      },
+      JSON: {
+        dbToModel: (o: unknown) => JSON.parse(o as string),
+        modelToDB: (o: any) => JSON.stringify(o),
+      },
+      Password: {
+        dbToModel: (o: unknown) => o as string,
+        modelToDB: (o: string) => sha256(o),
+      },
+      ID: {
+        ...identityAdapter,
+        generate: () => uuidv4()
       },
     },
-    idGenerators: { ID: () => uuidv4() },
   })
   const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
     ['Decimal', ['decimal', 'decimal ARRAY']],
@@ -67,7 +66,7 @@ beforeEach(async () => {
   await dao.organization.createTable(specificTypeMap, defaultSpecificType)
 })
 
-afterEach(async () => { })
+afterEach(async () => {})
 
 test('Insert and retrieve', async () => {
   await dao.user.insertOne({
@@ -224,20 +223,20 @@ test('findOne simple foreignRef association', async () => {
 })
 
 test('findOne self innerRef association', async () => {
-  const user1 = await dao.user.insertOne({ record: { id: "u1", firstName: 'FirstName1', lastName: 'LastName1', live: true } })
-  const user2 = await dao.user.insertOne({ record: { id: "u2", firstName: 'FirstName2', lastName: 'LastName2', live: true } })
-  const user3 = await dao.user.insertOne({ record: { id: "u3", firstName: 'FirstName3', lastName: 'LastName2', live: true } })
-  const user4 = await dao.user.insertOne({ record: { id: "u4", firstName: 'FirstName4', lastName: 'LastName2', live: true } })
-  const user5 = await dao.user.insertOne({ record: { id: "u5", firstName: 'FirstName5', lastName: 'LastName2', live: true } })
+  const user1 = await dao.user.insertOne({ record: { id: 'u1', firstName: 'FirstName1', lastName: 'LastName1', live: true } })
+  const user2 = await dao.user.insertOne({ record: { id: 'u2', firstName: 'FirstName2', lastName: 'LastName2', live: true } })
+  const user3 = await dao.user.insertOne({ record: { id: 'u3', firstName: 'FirstName3', lastName: 'LastName2', live: true } })
+  const user4 = await dao.user.insertOne({ record: { id: 'u4', firstName: 'FirstName4', lastName: 'LastName2', live: true } })
+  const user5 = await dao.user.insertOne({ record: { id: 'u5', firstName: 'FirstName5', lastName: 'LastName2', live: true } })
 
-  await dao.friends.insertOne({ record: { from: "u1", to: "u2" } })
-  await dao.friends.insertOne({ record: { from: "u1", to: "u3" } })
-  await dao.friends.insertOne({ record: { from: "u1", to: "u4" } })
+  await dao.friends.insertOne({ record: { from: 'u1', to: 'u2' } })
+  await dao.friends.insertOne({ record: { from: 'u1', to: 'u3' } })
+  await dao.friends.insertOne({ record: { from: 'u1', to: 'u4' } })
 
-  await dao.friends.insertOne({ record: { from: "u2", to: "u1" } })
-  await dao.friends.insertOne({ record: { from: "u2", to: "u4" } })
+  await dao.friends.insertOne({ record: { from: 'u2', to: 'u1' } })
+  await dao.friends.insertOne({ record: { from: 'u2', to: 'u4' } })
 
-  await dao.friends.insertOne({ record: { from: "u3", to: "u4" } })
+  await dao.friends.insertOne({ record: { from: 'u3', to: 'u4' } })
 
   const users = await dao.user.findAll({
     projection: {
@@ -245,18 +244,18 @@ test('findOne self innerRef association', async () => {
       friends: {
         firstName: true,
         friends: {
-          firstName: true
-        }
-      }
+          firstName: true,
+        },
+      },
     },
     relations: {
       friends: {
         filter: {
-          live: true
+          live: true,
         },
-        limit: 1
-      }
-    }
+        limit: 1,
+      },
+    },
   })
   const friend = (users[1].friends || [])[0]
   expect(friend!.friends!.length).toBe(3)
