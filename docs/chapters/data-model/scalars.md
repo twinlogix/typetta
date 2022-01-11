@@ -78,14 +78,14 @@ generates:
 La seconda specifica necessaria per l'utilizzo di uno scalare aggiuntivo è la definizione del suo cosiddetto *adapter*.
 
 Uno ``Scalar Adapter`` è un oggetto che contiene le specifiche di come il sistema deve comportarsi con lo specifico scalare in merito a:
-- Serializzazione sul database.
-- Deserializzazione dal database.
-- Validazione.
-- Autogenerazione.
+- Serializzazione sul database
+- Deserializzazione dal database
+- Validazione
+- Autogenerazione
 
 Gli Scalar adapters vanno configurati a livello di DAOContext e sono condivisi da tutti i DAO.
 
-Di seguito un esempio di Scalar Adapter per lo scalare Decimal già descritto precedentemente. Il tipo di dato TypeScript su cui è mappato questo scalare è BigNumber, il tipo di dato su cui deve essere serializzato su MongoDB è il Decimal128:, mentre su SQL utilizzeremo le stringhe.
+Di seguito un esempio di Scalar Adapter per lo scalare Decimal già descritto precedentemente. Il tipo di dato TypeScript su cui è mappato questo scalare è BigNumber, mentre il tipo di dato su cui deve essere serializzato su MongoDB è il Decimal128.
 
 ```typescript
 const decimalAdapter = {
@@ -94,7 +94,7 @@ const decimalAdapter = {
 };
 ```
 
-Nel caso si stiano utilizzando sorgenti dati di tipo diverso, sia MongoDB che SQL, è possibile specificare due adapter diversi come nel seguente esempio in cui per SQL il tipo di dato Decimal viene storicizzato in un campo stringa:
+Nel caso si stiano utilizzando sorgenti dati di tipo diverso, sia MongoDB che SQL, è possibile specificare due adapter diversi come nel seguente esempio in cui per SQL il tipo di dato Decimal viene storicizzato in un campo di tipo stringa:
 
 ```typescript
 const decimalAdapter = {

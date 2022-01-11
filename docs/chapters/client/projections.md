@@ -208,7 +208,7 @@ Come detto in precedenza, un corretto utilizzo delle proiezioni è importante si
 ### Proiezioni e GraphQL
 La filosofia GraphQL, da cui Typetta è fortemente ispirato, prevede che ogni richiesta definisca esplicitamene ed esattamente i campi necessari. Questo permette di eseguire il numero minimo di query necessarie al recupero del dato che è sempre caricato in maniera *eager*.
 
-Per agevolare l'integrazione di Typetta proprio con i back-end GraphQL, ogni API di recupero dei dati può ricevere al posto di una proiezione un oggetto GraphQLResolveInfo che contiene l'AST di una richiesta GraphQL ed quindi il sistema a trasformare questa informazione nella giusta proiezione.
+Per agevolare l'integrazione di Typetta proprio con i back-end GraphQL, ogni API di recupero dei dati può ricevere al posto di una proiezione esplicita un oggetto ``GraphQLResolveInfo`` che contiene l'AST di una richiesta GraphQL. E' quindi il sistema a trasformare in maniera automatica l'input dell'utente in una proiezione di Typetta.
 
 Di seguito un esempio di un resolver GraphQL implementato utilizzando un DAO Context:
 
@@ -227,3 +227,41 @@ Query: {
 ```
 
 ### Typing
+Nella maggior parte dei linguaggi di programmazione, l'accesso al dato tramite DAO prevede la creazione di oggetti chiamati DTO (data transfer object), ossia oggetti che definiscono quale porzione o composizione del dato storicizzato viene ritornato da un'API. La definizione dei DTO è un processo costoso sia in termini di sviluppo che di manutenzione.
+
+Il linguaggio TypeScript, grazie al suo evoluto concetto di *tipo* e alla sua possibilità di manipolazione, ci offre l'opportunità di superare il design pattern DTO ed offrire allo sviluppatore uno strumento in grado di conciliare produttività e type-safety.
+
+Nello specifico, ogni API di Typetta ritorna un tipo di dato che dipende dalla proiezione passata in input, sia in termini di insieme di campi che di loro opzionalità.
+
+Prendendo come esempio il modello applicativo di cui sopra, con la seguente chiamata ad API:
+
+```typescript
+const user = await ctx.daoContext.user.findOne({
+  filter: { 
+    id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
+  },
+  projection: {
+    firstName: true,
+    lastName: true,
+    posts: {
+      id: true, 
+      content: true
+    }
+  }
+})
+```
+
+La costante `user` avrà come tipo: 
+
+```typescript
+type GeneratedUserType = {
+  firstName?: string,
+  lastName?: string,
+  posts?: {
+    id: string, 
+    content: string
+  }[]
+} | null
+```
+
+Questo significa che a livello di compilatore (e di controlli/suggerimenti dell'IDE) sarà possibile accedere, per esempio, ai campi `firstName` e `lastName` del risultato, ma non al campo `address`, il tutto senza la necessità di definire esplicitamente un DTO e tenerlo allineato al modello applicativo.
