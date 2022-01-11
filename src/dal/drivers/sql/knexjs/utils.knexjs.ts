@@ -59,9 +59,16 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case '$ne': builder.not.where(columnName, av()); break
               case '$in': builder.whereIn(columnName, avs()); break
               case '$nin': builder.not.whereIn(columnName, avs()); break
-              case '$contains': builder.where(columnName, 'like', `%${fv}%`); break
-              case '$startsWith': builder.where(columnName, 'like', `${fv}%`); break
-              case '$endsWith': builder.where(columnName, 'like', `%${fv}`); break
+              case '$text':
+                const so = fv as Exclude<KnexJSStringOperators['$text'], undefined>
+                if ('$contains' in so) {
+                  builder.where(columnName, 'like', `%${so.$contains}%`)
+                } else if('$startsWith' in so) {
+                  builder.where(columnName, 'like', `${so.$startsWith}%`)
+                } else if('$endsWith' in so) {
+                  builder.where(columnName, 'like', `%${so.$endsWith}`)
+                }
+                break
               default: throw new Error(`${fk} query is not supported on sql entity.`)
             }
           })

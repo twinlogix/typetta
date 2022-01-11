@@ -1219,15 +1219,17 @@ test('Text filter test', async () => {
   await dao.organization.insertOne({ record: { name: 'Micdonalds' } })
   await dao.organization.insertOne({ record: { name: 'Lolft' } })
 
-  const found1 = (await dao.organization.findAll({ filter: { name: { $contains: 'soft' } } })).map(o => o.name)
-  const found2 = (await dao.organization.findAll({ filter: { name: { $contains: 'Soft' } } })).map(o => o.name)
-  const found3 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'Mic' } } })).map(o => o.name)
-  const found4 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'mic' } } })).map(o => o.name)
-  const found5 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'ft' } } })).map(o => o.name)
-  const found6 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'Ft' } } })).map(o => o.name)
+  const found1 = (await dao.organization.findAll({ filter: { name: { $text: { $contains: 'soft' } } } })).map(o => o.name)
+  const found2 = (await dao.organization.findAll({ filter: { name: { $text: { $contains: 'Soft' } } } })).map(o => o.name)
+  const found3 = (await dao.organization.findAll({ filter: { name: { $text: { $startsWith: 'Mic' } } } })).map(o => o.name)
+  const found4 = (await dao.organization.findAll({ filter: { name: { $text: { $startsWith: 'mic' } } } })).map(o => o.name)
+  const found5 = (await dao.organization.findAll({ filter: { name: { $text: { $endsWith: 'ft' } } } })).map(o => o.name)
+  const found6 = (await dao.organization.findAll({ filter: { name: { $text: { $endsWith: 'Ft' } } } })).map(o => o.name)
+  const found7 = (await dao.organization.findAll({ filter: { name: { $text: { $startsWith: 'mic', $options: 'i' } } } })).map(o => o.name)
+  const found8 = (await dao.organization.findAll({ filter: { name: { $text: { $regex: /c.o/ } } } })).map(o => o.name)
 
   //need index
-  //const found7 = (await dao.organization.findAll({ filter: { name: { $text: {$search: "dona"  } } } })).map(o => o.name)
+  //const found9 = (await dao.organization.findAll({ filter: { name: { $text: {$search: "dona"  } } } })).map(o => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes("Microsoft")).toBe(true)
@@ -1242,6 +1244,14 @@ test('Text filter test', async () => {
   expect(found5.includes("Macrosoft")).toBe(true)
   expect(found5.includes("Lolft")).toBe(true)
   expect(found6.length).toBe(0)
+  expect(found7.length).toBe(2)
+  expect(found7.includes("Microsoft")).toBe(true)
+  expect(found7.includes("Micdonalds")).toBe(true)
+  expect(found8.length).toBe(4)
+  expect(found8.includes("Microsoft")).toBe(true)
+  expect(found8.includes("Micdonalds")).toBe(true)
+  expect(found8.includes("Macrosoft")).toBe(true)
+  expect(found8.includes("Macdonalds")).toBe(true)
 })
 
 // ------------------------------------------------------------------------

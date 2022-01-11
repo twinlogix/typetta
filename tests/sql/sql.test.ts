@@ -284,9 +284,9 @@ test('Text filter test', async () => {
   await dao.organization.insertOne({ record: { name: 'Micdonalds' } })
   await dao.organization.insertOne({ record: { name: 'Lolft' } })
 
-  const found1 = (await dao.organization.findAll({ filter: { name: { $contains: 'soft' } } })).map((o) => o.name)
-  const found3 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'Mic' } } })).map((o) => o.name)
-  const found5 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'ft' } } })).map((o) => o.name)
+  const found1 = (await dao.organization.findAll({ filter: { name: { $text: { $contains: 'soft' } } } })).map((o) => o.name)
+  const found3 = (await dao.organization.findAll({ filter: { name: { $text: { $startsWith: 'Mic' } } } })).map((o) => o.name)
+  const found5 = (await dao.organization.findAll({ filter: { name: { $text: { $endsWith: 'ft' } } } })).map((o) => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes('Microsoft')).toBe(true)
