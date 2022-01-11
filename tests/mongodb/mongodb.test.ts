@@ -4,7 +4,7 @@ global.TextDecoder = require('util').TextDecoder
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
-import { SortDirection, computedField, mongoDbAdapters, identityAdapter, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '@twinlogix/typetta'
+import { SortDirection, computedField, identityAdapter, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128 } from 'mongodb'
@@ -23,11 +23,17 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars> = {
   LocalizedString: identityAdapter,
   ID: {
     ...identityAdapter,
-    generate: () => uuidv4()
+    generate: () => uuidv4(),
   },
   Password: {
     dbToModel: (o: unknown) => o as string,
     modelToDB: (o: string) => sha256(o),
+    validate: (o: string) => {
+      if (o.length < 3) {
+        return new Error('Password must be 3 character or more.')
+      }
+      return true
+    },
   },
   Decimal: {
     dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
@@ -521,6 +527,71 @@ test('insert generic test 1', async () => {
   expect(all[0].amounts![1].toNumber()).toBe(12.11)
   expect(all[0].usernamePasswordCredentials?.username).toBe('user')
   expect(all[0].usernamePasswordCredentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
+})
+
+test('insert validation fails', async () => {
+  try {
+    await dao.user.insertOne({
+      record: {
+        live: true,
+        usernamePasswordCredentials: {
+          username: 'user',
+          password: 'p',
+        },
+      },
+    })
+    fail()
+  } catch (error) {
+    expect(error.message).toBe('Password must be 3 character or more.')
+  }
+})
+
+test('update validation fails', async () => {
+  await dao.user.insertOne({
+    record: {
+      live: true,
+      usernamePasswordCredentials: {
+        username: 'user',
+        password: 'password',
+      },
+    },
+  })
+  try {
+    await dao.user.updateAll({
+      filter: {},
+      changes: { 'usernamePasswordCredentials.password': 'p' },
+    })
+    fail()
+  } catch (error) {
+    expect(error.message).toBe('Password must be 3 character or more.')
+  }
+})
+
+test('replace validation fails', async () => {
+  await dao.user.insertOne({
+    record: {
+      live: true,
+      usernamePasswordCredentials: {
+        username: 'user',
+        password: 'password',
+      },
+    },
+  })
+  try {
+    await dao.user.replaceOne({
+      filter: {},
+      replace: {
+        live: true,
+        usernamePasswordCredentials: {
+          username: 'user',
+          password: 'p',
+        },
+      },
+    })
+    fail()
+  } catch (error) {
+    expect(error.message).toBe('Password must be 3 character or more.')
+  }
 })
 
 // ------------------------------------------------------------------------

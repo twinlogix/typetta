@@ -77,9 +77,9 @@ beforeAll(async () => {
     overrides: {
       b: {
         idGenerator: () => {
-          return 'entity_b' + uuidv4() 
-        }
-      }
+          return 'entity_b' + uuidv4()
+        },
+      },
     },
   })
   const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([

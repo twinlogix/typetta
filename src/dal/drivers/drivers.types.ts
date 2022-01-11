@@ -12,7 +12,7 @@ export type DataTypeAdapterMap<ModelScalars extends object, DBScalars extends ob
 export type DataTypeAdapter<ModelType, DBType> = {
   modelToDB: (data: ModelType) => DBType
   dbToModel: (data: DBType) => ModelType
-  validate?: (data: ModelType) => boolean
+  validate?: (data: ModelType) => Error | true
   generate?: () => ModelType
 }
 

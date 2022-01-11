@@ -5,11 +5,11 @@ import { mongoDbAdapters } from '../drivers/no-sql/mongodb/adapters.mongodb'
 import { knexJsAdapters } from '../drivers/sql/knexjs/adapters.knexjs'
 
 export abstract class AbstractDAOContext<ScalarsType extends DefaultModelScalars = DefaultModelScalars, MetadataType = any> {
-  public scalars: DriverDataTypeAdapterMap<ScalarsType>
+  public adapters: DriverDataTypeAdapterMap<ScalarsType>
   public metadata?: MetadataType
 
   public constructor(args?: { scalars?: DriverDataTypeAdapterMap<ScalarsType>; metadata?: MetadataType; idGenerators?: { [K in keyof ScalarsType]?: () => ScalarsType[K] } }) {
-    this.scalars = args?.scalars
+    this.adapters = args?.scalars
       ? args.scalars
       : ({
           knex: knexJsAdapters,

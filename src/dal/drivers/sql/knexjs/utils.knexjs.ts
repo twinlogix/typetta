@@ -1,10 +1,10 @@
-import { AggregateParams, AggregatePostProcessing } from '../../../..'
+import { AggregatePostProcessing } from '../../../..'
 import { getSchemaFieldTraversing, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
-import { DefaultModelScalars } from '../../drivers.types'
+import { DefaultModelScalars, identityAdapter } from '../../drivers.types'
 import { KnexJSDataTypeAdapterMap } from './adapters.knexjs'
 import { Knex } from 'knex'
 
@@ -67,6 +67,9 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             builder.whereNull(columnName)
           } else if (v !== undefined) {
             const adapter = adapters[schemaField.scalar]
+            if (!adapter) {
+              throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
+            }
             builder.where(columnName, adapter.modelToDB(v as any) as any)
           }
         }
@@ -248,15 +251,23 @@ export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<Scal
   })
 }
 
-export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: KnexJSDataTypeAdapterMap<ScalarsType>): object {
+export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>({
+  update,
+  schema,
+  adapters,
+}: {
+  update: UpdateType
+  schema: Schema<ScalarsType>
+  adapters: KnexJSDataTypeAdapterMap<ScalarsType>
+}): object {
   return Object.entries(update).reduce((p, [k, v]) => {
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
-      const adapter = adapters[schemaField.scalar]
+      const adapter = adapters[schemaField.scalar] ?? identityAdapter
       return { [columnName]: modelValueToDbValue(v, schemaField, adapter), ...p }
     } else if (schemaField) {
-      const adapted = adaptUpdate(v, schemaField.embedded, adapters)
+      const adapted = adaptUpdate({ update: v, schema: schemaField.embedded, adapters })
       return Object.entries(adapted).reduce((sp, [sk, sv]) => {
         return { [concatEmbeddedNames(columnName, sk)]: sv, ...sp }
       }, p)
