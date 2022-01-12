@@ -2,7 +2,6 @@
 
 Per **proiezione** si intende il sottoinsieme dei campi di un'entità di modello che vengono richiesti in una query, siano essi dell'entità principale, si una entità embedded o di una entità collegata. Typetta sfrutta il meccanismo delle proiezioni per garantise un accesso al dato **efficiente** e **type-safe**.
 
-- [Proiezioni](#proiezioni)
   - [Proiezioni di default](#proiezioni-di-default)
   - [Proiezioni esplicite](#proiezioni-esplicite)
   - [Proiezioni e relazioni](#proiezioni-e-relazioni)
