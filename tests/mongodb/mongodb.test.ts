@@ -4,7 +4,7 @@ global.TextDecoder = require('util').TextDecoder
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
-import { SortDirection, computedField, identityAdapter, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '@twinlogix/typetta'
+import { computedField, identityAdapter, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128 } from 'mongodb'
@@ -412,17 +412,17 @@ test('find with simple sorts', async () => {
     await dao.user.insertOne({ record: { firstName: '' + i, lastName: '' + (9 - i), live: true } })
   }
 
-  response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.DESC }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'desc' }] })
   expect(response[0].firstName).toBe('9')
   expect(response[1].firstName).toBe('8')
 
-  response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.DESC }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'desc' }] })
   expect(response[0].firstName).toBe('9')
 
-  response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.DESC }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'desc' }] })
   expect(response[0].firstName).toBe('9')
 
-  response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.ASC }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'asc' }] })
   expect(response[0].firstName).toBe('0')
   expect(response[1].firstName).toBe('1')
 })
@@ -434,7 +434,7 @@ test('find with multiple sorts', async () => {
     await dao.user.insertOne({ record: { firstName: '1', lastName: '' + (9 - i), live: true } })
   }
 
-  response = await dao.user.findAll({ sorts: [{ firstName: SortDirection.DESC }, { lastName: SortDirection.DESC }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'desc' }, { lastName: 'desc' }] })
   expect(response[0].lastName).toBe('9')
   expect(response[1].lastName).toBe('8')
 })
@@ -789,7 +789,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'update') {
-                if (args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -799,7 +799,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'delete') {
-                if (args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -809,7 +809,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'replace') {
-                if (args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -835,7 +835,7 @@ test('middleware 1', async () => {
                   operation: 'find',
                   params: args.params,
                   records: args.records.map((record) => {
-                    if (args.params.filter?.id === 'u1' && record.firstName) {
+                    if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1' && record.firstName) {
                       return { ...record, firstName: record.firstName + ' OK' }
                     }
                     return record
@@ -1173,7 +1173,7 @@ test('Aggregate test', async () => {
       aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
     },
-    { sorts: [{ authorId: SortDirection.DESC }, { totalAuthorViews: SortDirection.DESC }], having: { totalAuthorViews: { $lt: 150 } } },
+    { sorts: [{ authorId: 'desc' }, { totalAuthorViews: 'desc' }], having: { totalAuthorViews: { $lt: 150 } } },
   )
   expect(aggregation1.length).toBe(4)
   expect(aggregation1[0]).toEqual({ count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en' })
@@ -1219,39 +1219,32 @@ test('Text filter test', async () => {
   await dao.organization.insertOne({ record: { name: 'Micdonalds' } })
   await dao.organization.insertOne({ record: { name: 'Lolft' } })
 
-  const found1 = (await dao.organization.findAll({ filter: { name: { $text: { $contains: 'soft' } } } })).map(o => o.name)
-  const found2 = (await dao.organization.findAll({ filter: { name: { $text: { $contains: 'Soft' } } } })).map(o => o.name)
-  const found3 = (await dao.organization.findAll({ filter: { name: { $text: { $startsWith: 'Mic' } } } })).map(o => o.name)
-  const found4 = (await dao.organization.findAll({ filter: { name: { $text: { $startsWith: 'mic' } } } })).map(o => o.name)
-  const found5 = (await dao.organization.findAll({ filter: { name: { $text: { $endsWith: 'ft' } } } })).map(o => o.name)
-  const found6 = (await dao.organization.findAll({ filter: { name: { $text: { $endsWith: 'Ft' } } } })).map(o => o.name)
-  const found7 = (await dao.organization.findAll({ filter: { name: { $text: { $startsWith: 'mic', $options: 'i' } } } })).map(o => o.name)
-  const found8 = (await dao.organization.findAll({ filter: { name: { $text: { $regex: /c.o/ } } } })).map(o => o.name)
+  const found1 = (await dao.organization.findAll({ filter: { name: { $contains: 'soft' } } })).map((o) => o.name)
+  const found2 = (await dao.organization.findAll({ filter: { name: { $contains: 'Soft' } } })).map((o) => o.name)
+  const found3 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'Mic' } } })).map((o) => o.name)
+  const found4 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'mic' } } })).map((o) => o.name)
+  const found5 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'ft' } } })).map((o) => o.name)
+  const found6 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'Ft' } } })).map((o) => o.name)
 
-  //need index
-  //const found9 = (await dao.organization.findAll({ filter: { name: { $text: {$search: "dona"  } } } })).map(o => o.name)
+  await dao.execQuery(async (dbs, entities) => {
+    await entities.organization.createIndex({ 'name': 'text' }, { name: 'nameIndex' })
+  })
+  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } })})).map(o => o.name)
 
   expect(found1.length).toBe(2)
-  expect(found1.includes("Microsoft")).toBe(true)
-  expect(found1.includes("Macrosoft")).toBe(true)
+  expect(found1.includes('Microsoft')).toBe(true)
+  expect(found1.includes('Macrosoft')).toBe(true)
   expect(found2.length).toBe(0)
   expect(found3.length).toBe(2)
-  expect(found3.includes("Microsoft")).toBe(true)
-  expect(found3.includes("Micdonalds")).toBe(true)
+  expect(found3.includes('Microsoft')).toBe(true)
+  expect(found3.includes('Micdonalds')).toBe(true)
   expect(found4.length).toBe(0)
   expect(found5.length).toBe(3)
-  expect(found5.includes("Microsoft")).toBe(true)
-  expect(found5.includes("Macrosoft")).toBe(true)
-  expect(found5.includes("Lolft")).toBe(true)
+  expect(found5.includes('Microsoft')).toBe(true)
+  expect(found5.includes('Macrosoft')).toBe(true)
+  expect(found5.includes('Lolft')).toBe(true)
   expect(found6.length).toBe(0)
-  expect(found7.length).toBe(2)
-  expect(found7.includes("Microsoft")).toBe(true)
-  expect(found7.includes("Micdonalds")).toBe(true)
-  expect(found8.length).toBe(4)
-  expect(found8.includes("Microsoft")).toBe(true)
-  expect(found8.includes("Micdonalds")).toBe(true)
-  expect(found8.includes("Macrosoft")).toBe(true)
-  expect(found8.includes("Macdonalds")).toBe(true)
+  expect(found10.length).toBe(1)
 })
 
 // ------------------------------------------------------------------------

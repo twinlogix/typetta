@@ -28,7 +28,6 @@ import { GraphQLResolveInfo } from 'graphql'
 import _ from 'lodash'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
-import { PartialObjectDeep } from 'type-fest/source/partial-deep'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idField: T['idKey']

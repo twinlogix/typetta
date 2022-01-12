@@ -1,6 +1,6 @@
-import { DAOContext, UserExcludedFields } from './dao.mock'
-import { Scalars, User } from './models.mock'
-import { identityAdapter, computedField, loggingMiddleware, SortDirection } from '@twinlogix/typetta'
+import { DAOContext } from './dao.mock'
+import { Scalars } from './models.mock'
+import { identityAdapter, computedField } from '@twinlogix/typetta'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -137,7 +137,7 @@ test('Demo', async () => {
         filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
         limit: 2,
         start: 1,
-        sorts: [{ title: SortDirection.DESC }],
+        sorts: [{ title: 'desc' }],
         relations: {
           tags: {
             filter: { name: 'Sport' },
@@ -177,7 +177,7 @@ test('Aggregate test', async () => {
       aggregations: { count: { field: 'authorId', operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
     },
-    { sorts: [{ totalAuthorViews: SortDirection.ASC }], having: { totalAuthorViews: { $lt: 150 } } },
+    { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { $lt: 150 } } },
   )
   expect(aggregation1.length).toBe(4)
   expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })

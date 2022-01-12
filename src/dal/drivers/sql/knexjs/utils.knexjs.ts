@@ -1,6 +1,6 @@
 import { AggregatePostProcessing } from '../../../..'
 import { getSchemaFieldTraversing, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
-import { EqualityOperators, QuantityOperators, ElementOperators, KnexJSStringOperators, LogicalOperators } from '../../../dao/filters/filters.types'
+import { EqualityOperators, QuantityOperators, ElementOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
 import { SortDirection } from '../../../dao/sorts/sorts.types'
@@ -9,7 +9,7 @@ import { KnexJSDataTypeAdapterMap } from './adapters.knexjs'
 import { Knex } from 'knex'
 
 export type AbstractFilter = {
-  [key: string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | KnexJSStringOperators
+  [key: string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators
 } & LogicalOperators<unknown>
 
 export type AbstractSort = { [key: string]: SortDirection }
@@ -59,16 +59,9 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case '$ne': builder.not.where(columnName, av()); break
               case '$in': builder.whereIn(columnName, avs()); break
               case '$nin': builder.not.whereIn(columnName, avs()); break
-              case '$text':
-                const so = fv as Exclude<KnexJSStringOperators['$text'], undefined>
-                if ('$contains' in so) {
-                  builder.where(columnName, 'like', `%${so.$contains}%`)
-                } else if('$startsWith' in so) {
-                  builder.where(columnName, 'like', `${so.$startsWith}%`)
-                } else if('$endsWith' in so) {
-                  builder.where(columnName, 'like', `%${so.$endsWith}`)
-                }
-                break
+              case '$contains': builder.where(columnName, 'like', `%${fv}%`); break
+              case '$startsWith': builder.where(columnName, 'like', `${fv}%`); break
+              case '$endsWith': builder.where(columnName, 'like', `%${fv}`); break
               default: throw new Error(`${fk} query is not supported on sql entity.`)
             }
           })
@@ -181,7 +174,7 @@ export function buildSelect<TRecord, TResult, ScalarsType>(
 export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuilder<TRecord, TResult>, sorts: AbstractSort[], schema: Schema<ScalarsType>): Knex.QueryBuilder<TRecord, TResult> {
   sorts.forEach((s) => {
     const [sortKey, sortDirection] = Object.entries(s)[0]
-    builder.orderBy(modelNameToDbName(sortKey, schema), sortDirection === SortDirection.ASC ? 'asc' : 'desc')
+    builder.orderBy(modelNameToDbName(sortKey, schema), sortDirection)
   })
   return builder
 }

@@ -33,10 +33,13 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildFilter(filter?: T['filter']): Filter<Document> {
+    if(typeof filter === 'function') {
+      return filter()
+    }
     return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongo) : {}
   }
 
-  private buildSort(sorts?: T['sort'][]): [string, 1 | -1][] {
+  private buildSort(sorts?: T['sort'][]): [string, SortDirection][] {
     return sorts ? adaptSorts(sorts, this.schema) : []
   }
 
@@ -111,7 +114,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
               const [k, v] = Object.entries(s)[0]
               return {
                 ...p,
-                [byKeys.includes(k) ? `_id.${k}` : k]: (v as SortDirection).valueOf(),
+                [byKeys.includes(k) ? `_id.${k}` : k]: (v as SortDirection) === 'asc' ? 1 : -1,
               }
             }, {}),
           },

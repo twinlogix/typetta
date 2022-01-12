@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
-import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, MongoDBStringOperators, KnexJSStringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
+import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
-import { Collection, Db } from 'mongodb';
+import { Collection, Db, Filter } from 'mongodb';
 import { Knex } from 'knex';
 
 //--------------------------------------------------------------------------------
@@ -18,9 +18,9 @@ export const addressSchema: Schema<types.Scalars> = {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
+export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type AddressRelations = {
   cities?: {
@@ -95,11 +95,11 @@ export const citySchema: Schema<types.Scalars> = {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
+  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
+export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type CityRelations = {
 
@@ -176,11 +176,11 @@ export const deviceSchema: Schema<types.Scalars> = {
 };
 
 type DeviceFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'userId'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
+export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type DeviceRelations = {
 
@@ -257,11 +257,11 @@ export const dogSchema: Schema<types.Scalars> = {
 };
 
 type DogFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
+export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type DogRelations = {
 
@@ -345,12 +345,12 @@ export const organizationSchema: Schema<types.Scalars> = {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
+  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
+export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type OrganizationRelations = {
 
@@ -458,16 +458,16 @@ export const postSchema: Schema<types.Scalars> = {
 };
 
 type PostFilterFields = {
-  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'body'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'clicks'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
-  'title'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'views'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'clicks'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
+  'title'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'views'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
-export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
+export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type PostRelations = {
 
@@ -604,19 +604,19 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
-  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | ArrayOperators<BigNumber[]>,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | MongoDBStringOperators | ArrayOperators<string[]>,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
-  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators | GeospathialOperators,
-  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators,
-  'usernamePasswordCredentials.password'?: any | null | EqualityOperators<any> | ElementOperators,
-  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators
+  'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators | StringOperators,
+  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | StringOperators | ArrayOperators<BigNumber[]>,
+  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | StringOperators | ArrayOperators<string[]>,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
+  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators | StringOperators | GeospathialOperators,
+  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators | StringOperators,
+  'usernamePasswordCredentials.password'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
+  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
+export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type UserRelations = {
   dogs?: {

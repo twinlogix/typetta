@@ -1,7 +1,7 @@
 import { transformObject } from '../../../../generation/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
-import { EqualityOperators, QuantityOperators, ElementOperators, KnexJSStringOperators } from '../../../dao/filters/filters.types'
+import { EqualityOperators, QuantityOperators, ElementOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection } from '../../../dao/projections/projections.types'
 import { KnexJsDAOGenerics, KnexJsDAOParams } from './dao.knexjs.types'
 import {
@@ -20,7 +20,7 @@ import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
 
 type AbstractFilter = {
-  [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators | KnexJSStringOperators
+  [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators
 }
 
 export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<T> {
@@ -56,10 +56,13 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+    if(typeof filter === 'function') {
+      return filter(qb || this.qb())
+    }
     return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knex) : qb || this.qb()
   }
 
-  private buildSort(sorts?: T['sort'][], qb?: Knex.QueryBuilder<any, any>) {
+  private buildSort(sorts?: T['sort'][], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
     return buildSort(qb || this.qb(), (sorts || []) as unknown as AbstractSort[], this.schema)
   }
 
@@ -75,6 +78,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
     const query = this.buildSort(params.sorts, where)
+    const asd = query.toQuery().toString()
     const records = await this.buildTransaction(params.options, query)
       .limit(params.limit || this.pageSize)
       .offset(params.start || 0)

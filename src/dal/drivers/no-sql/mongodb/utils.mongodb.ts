@@ -6,13 +6,12 @@ import {
   MONGODB_QUERY_PREFIXS,
   MONGODB_SINGLE_VALUE_QUERY_PREFIXS,
 } from '../../../../utils/utils'
-import { MongoDBStringOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
 import { DefaultModelScalars, identityAdapter } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
-import { Filter, Document } from 'mongodb'
+import { Filter, Document, SortDirection } from 'mongodb'
 
 export function adaptProjection<ProjectionType extends object, ScalarsType>(projection: AnyProjection<ProjectionType>, schema: Schema<ScalarsType>): AnyProjection<ProjectionType> {
   if (projection === true || projection === undefined) {
@@ -95,20 +94,14 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
           return { [fk]: (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter)), ...p }
         }
-        if (fk === '$text') {
-          const so = fv as Exclude<MongoDBStringOperators['$text'], undefined>
-          if ('$contains' in so) {
-            return { $regex: so.$contains, ...(so.$options ? { $options: so.$options } : {}), ...p }
-          }
-          if ('$startsWith' in so) {
-            return { $regex: new RegExp(`^${so.$startsWith}`), ...(so.$options ? { $options: so.$options } : {}), ...p }
-          }
-          if ('$endsWith' in so) {
-            return { $regex: new RegExp(`${so.$endsWith}$`), ...(so.$options ? { $options: so.$options } : {}), ...p }
-          }
-          if ('$regex' in so) {
-            return { $regex: so.$regex, ...(so.$options ? { $options: so.$options } : {}), ...p }
-          }
+        if (fk === '$contains') {
+          return { $regex: fv, ...p }
+        }
+        if (fk === '$startsWith') {
+          return { $regex: new RegExp(`^${fv}`), ...p }
+        }
+        if (fk === '$endsWith') {
+          return { $regex: new RegExp(`${fv}$`), ...p }
         }
         return { [fk]: fv, ...p }
       }, {})
@@ -142,10 +135,13 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
   }, {})
 }
 
-export function adaptSorts<SortType, ScalarsType>(sorts: SortType[], schema: Schema<ScalarsType>): [string, 1 | -1][] {
+export function adaptSorts<SortType, ScalarsType>(sorts: SortType[], schema: Schema<ScalarsType>): [string, SortDirection][] {
   return sorts.flatMap((s) => {
     return Object.entries(s).map(([k, v]) => {
-      return [modelNameToDbName(k, schema), v.valueOf()] as [string, 1 | -1]
+      if(k === '$textScore') {
+        return ['score', { $meta: "textScore" }] as [string, SortDirection]
+      }
+      return [modelNameToDbName(k, schema), v] as [string, SortDirection]
     })
   })
 }

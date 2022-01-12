@@ -72,12 +72,12 @@ export type DeleteParams<T extends DAOGenerics> = {
 
 export type AggregationFields<T extends DAOGenerics> = {
   [key: string]:
-    | { field: keyof Omit<T['filter'], keyof LogicalOperators<any>>; operation: 'sum' | 'avg' | 'min' | 'max' }
-    | { field?: keyof Omit<T['filter'], keyof LogicalOperators<any>>; operation: 'count' }
+    | { field: keyof T['sort']; operation: 'sum' | 'avg' | 'min' | 'max' }
+    | { field?: keyof T['sort']; operation: 'count' }
 }
 
 export type AggregateParams<T extends DAOGenerics> = {
-  by?: { [K in keyof Omit<T['filter'], keyof LogicalOperators<any>>]: true }
+  by?: { [K in keyof T['sort']]: true }
   filter?: T['filter']
   aggregations: AggregationFields<T>
   start?: number
@@ -125,7 +125,7 @@ export type MiddlewareContext<T extends DAOGenerics> = {
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 
 export interface DAO<T extends DAOGenerics> {
-  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P >): Promise<ModelProjection<T['model'], T['projection'], P>[]>
+  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<ModelProjection<T['model'], T['projection'], P>[]>
   findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<ModelProjection<T['model'], T['projection'], P> | null>
   findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>

@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
-import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, MongoDBStringOperators, KnexJSStringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
+import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
-import { Collection, Db } from 'mongodb';
+import { Collection, Db, Filter } from 'mongodb';
 import { Knex } from 'knex';
 
 //--------------------------------------------------------------------------------
@@ -23,10 +23,10 @@ export const aSchema: Schema<types.Scalars> = {
 };
 
 type AFilterFields = {
-  'id'?: any | null | EqualityOperators<any> | ElementOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+  'id'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
+  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
-export type AFilter = AFilterFields & LogicalOperators<AFilterFields>;
+export type AFilter = AFilterFields & LogicalOperators<AFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type ARelations = {
 
@@ -93,10 +93,10 @@ export const bSchema: Schema<types.Scalars> = {
 };
 
 type BFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
-export type BFilter = BFilterFields & LogicalOperators<BFilterFields>;
+export type BFilter = BFilterFields & LogicalOperators<BFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type BRelations = {
 
@@ -164,10 +164,10 @@ export const cSchema: Schema<types.Scalars> = {
 };
 
 type CFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | MongoDBStringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
-export type CFilter = CFilterFields & LogicalOperators<CFilterFields>;
+export type CFilter = CFilterFields & LogicalOperators<CFilterFields> | (() => Filter<{ [key: string]: any }>);
 
 export type CRelations = {
 
@@ -235,10 +235,10 @@ export const dSchema: Schema<types.Scalars> = {
 };
 
 type DFilterFields = {
-  'id'?: any | null | EqualityOperators<any> | ElementOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+  'id'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
+  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
-export type DFilter = DFilterFields & LogicalOperators<DFilterFields>;
+export type DFilter = DFilterFields & LogicalOperators<DFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type DRelations = {
 
@@ -305,10 +305,10 @@ export const eSchema: Schema<types.Scalars> = {
 };
 
 type EFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
-export type EFilter = EFilterFields & LogicalOperators<EFilterFields>;
+export type EFilter = EFilterFields & LogicalOperators<EFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type ERelations = {
 
@@ -376,10 +376,10 @@ export const fSchema: Schema<types.Scalars> = {
 };
 
 type FFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
-export type FFilter = FFilterFields & LogicalOperators<FFilterFields>;
+export type FFilter = FFilterFields & LogicalOperators<FFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type FRelations = {
 

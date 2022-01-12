@@ -1,4 +1,3 @@
-export enum SortDirection {
-  ASC = 1,
-  DESC = -1,
-}
+export type SortDirection = 'asc' | 'desc'
+
+export type SortSearchScore = { $meta: "textScore" }

@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
-import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, MongoDBStringOperators, KnexJSStringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
+import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
-import { Collection, Db } from 'mongodb';
+import { Collection, Db, Filter } from 'mongodb';
 import { Knex } from 'knex';
 
 //--------------------------------------------------------------------------------
@@ -18,9 +18,9 @@ export const addressSchema: Schema<types.Scalars> = {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
+export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type AddressRelations = {
   cities?: {
@@ -95,11 +95,11 @@ export const citySchema: Schema<types.Scalars> = {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
+  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
+export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type CityRelations = {
 
@@ -176,11 +176,11 @@ export const deviceSchema: Schema<types.Scalars> = {
 };
 
 type DeviceFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'userId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
+export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type DeviceRelations = {
 
@@ -257,11 +257,11 @@ export const dogSchema: Schema<types.Scalars> = {
 };
 
 type DogFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
+export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type DogRelations = {
 
@@ -338,11 +338,11 @@ export const friendsSchema: Schema<types.Scalars> = {
 };
 
 type FriendsFilterFields = {
-  'from'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'to'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
+  'from'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'to'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type FriendsFilter = FriendsFilterFields & LogicalOperators<FriendsFilterFields>;
+export type FriendsFilter = FriendsFilterFields & LogicalOperators<FriendsFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type FriendsRelations = {
 
@@ -425,12 +425,12 @@ export const organizationSchema: Schema<types.Scalars> = {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators
+  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
+export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type OrganizationRelations = {
 
@@ -565,20 +565,20 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators,
-  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | ArrayOperators<BigNumber[]>,
-  'bestFriendId'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'credentials.another.test'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | KnexJSStringOperators,
-  'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
-  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators,
-  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators
+  'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators | StringOperators,
+  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | StringOperators | ArrayOperators<BigNumber[]>,
+  'bestFriendId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'credentials.another.test'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
+  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators | StringOperators,
+  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators | StringOperators
 };
-export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
+export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
 
 export type UserRelations = {
   dogs?: {
