@@ -89,7 +89,7 @@ Per agevolare il processo di generazione può essere utile aggiungere uno specif
 ```json
 {
   "scripts": {
-    "generate": "graphql-codegn"
+    "generate": "graphql-codegen"
   }
 }
 ```
@@ -106,14 +106,17 @@ Data la configurazione d'esempio di cui sopra, il comando di generazione produrr
 
 Di seguito si mostra un utilizzo minimale di Typetta per la scrittura e lettura di un'entità su un database MongoDB (del tutto simile l'utilizzo per database SQL). 
 
-Come prima cosa occorre creare client e database MongoDB utilizzano il driver ufficiale:
+Come prima cosa occorre creare connessione e database MongoDB utilizzano il driver ufficiale:
 
 ```typescript
 import { MongoClient } from 'mongodb';
 import { DAOContext } from './dao';
 
-const mongoClient = new MongoClient(process.env.MONGODB_URL!);
-const mongoDb = mongoClient.db(process.env.MONGODB_DATABASE_NAME);
+const main = async () => {
+  const mongoConnection = await MongoClient.connect(process.env.MONGODB_URL!);
+  const mongoDb = mongoConnection.db(process.env.MONGODB_DATABASE_NAME);
+};
+main();
 ```
 
 Dopodiché possiamo già istanziare un DAOContext, prima classe generata da Typetta che rappresenta il repository centrale di tutte le entità del modello applicativo.
@@ -159,16 +162,17 @@ Di seguito il codice sorgente completo di questo primo esempio di utilizzo di Ty
 import { MongoClient } from 'mongodb';
 import { DAOContext } from './dao';
 
-const mongoClient = new MongoClient(process.env.MONGODB_URL!);
-const mongoDb = mongoClient.db(process.env.MONGODB_DATABASE_NAME);
-
-const daoContext = new DAOContext({
-  mongo: {
-    default: mongoDb
-  }
-});
 
 const main = async () => {
+
+  const mongoConnection = await MongoClient.connect(process.env.MONGODB_URL!);
+  const mongoDb = mongoConnection.db(process.env.MONGODB_DATABASE_NAME);
+
+  const daoContext = new DAOContext({
+    mongo: {
+      default: mongoDb
+    }
+  });
 
   const user1 = await daoContext.user.insertOne({
     record: {

@@ -99,3 +99,14 @@ section {
     width: 100%;
   }
 }
+
+div.alert {
+  width: calc(100% - 40px);
+  background-color: #fce4e7;
+  border: 2px solid #bf1c31;
+  color: #000;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  margin-bottom: 25px;
+}
