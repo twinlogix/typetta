@@ -8,33 +8,12 @@
       "style",
       "test",
       "build",
-      "ops",
-      "docs",
-      "merge"
+      "ci",
+      "chore",
+      "docs"
     ],
     "commitScopes": [],
     "releaseTagGlobPattern":  "v[0-9]*.[0-9]*.[0-9]*",
     "issueRegexPattern": "(^|\\s)#\\d+(\\s|$)"
-  },
-  "changelog" : {
-    "commitTypes": [
-      "feat",
-      "fix",
-      "perf",
-      "merge",
-      "?"
-    ],
-    "commitScopes": [],
-    "commitIgnoreRegexPattern": "^WIP ",
-    "headlines": {
-      "feat": "Features",
-      "fix": "Bug Fixes",
-      "perf": "Performance Improvements",
-      "merge": "Merged Branches",
-      "breakingChange": "BREAKING CHANGES"
-    },
-    "commitUrl": "https://github.com/twinlogix/typetta/commit/%commit%",
-    "commitRangeUrl": "https://github.com/twinlogix/typetta/compare/%from%...%to%?diff=split",
-    "issueUrl": "https://github.com/twinlogix/typetta/issues/%issue%"
   }
 }
