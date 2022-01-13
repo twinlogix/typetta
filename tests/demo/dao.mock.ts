@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
-import { Collection, Db } from 'mongodb';
+import { Collection, Db, Filter, Sort } from 'mongodb';
 import { Knex } from 'knex';
 
 //--------------------------------------------------------------------------------
@@ -55,20 +55,21 @@ export const postSchema: Schema<types.Scalars> = {
 type PostFilterFields = {
   'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'clicks'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>,
-  'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | QuantityOperators<Date>,
+  'clicks'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>,
+  'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | StringOperators | QuantityOperators<Date>,
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators,
+  'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
   'title'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'views'?: number | null | EqualityOperators<number> | ElementOperators | QuantityOperators<number>
+  'views'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
+export type PostRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type PostRelations = {
   tags?: {
     filter?: TagFilter
-    sorts?: TagSort[]
+    sorts?: TagSort[] | TagRawSort
     start?: number
     limit?: number
     relations?: TagRelations
@@ -102,6 +103,7 @@ export type PostSortKeys =
   'title'|
   'views';
 export type PostSort = OneKey<PostSortKeys, SortDirection>;
+export type PostRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type PostUpdate = {
   'authorId'?: string,
@@ -127,7 +129,7 @@ export type PostInsert = {
   views: number,
 };
 
-type PostDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRelations, PostProjection, PostSort, PostInsert, PostUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type PostDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -178,6 +180,7 @@ type TagFilterFields = {
   'postId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type TagFilter = TagFilterFields & LogicalOperators<TagFilterFields>;
+export type TagRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type TagRelations = {
 
@@ -194,6 +197,7 @@ export type TagSortKeys =
   'name'|
   'postId';
 export type TagSort = OneKey<TagSortKeys, SortDirection>;
+export type TagRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type TagUpdate = {
   'id'?: string,
@@ -207,7 +211,7 @@ export type TagInsert = {
   postId: string,
 };
 
-type TagDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Tag, 'id', 'ID', 'generator', TagFilter, TagRelations, TagProjection, TagSort, TagInsert, TagUpdate, TagExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type TagDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Tag, 'id', 'ID', 'generator', TagFilter, TagRawFilter, TagRelations, TagProjection, TagSort, TagRawSort, TagInsert, TagUpdate, TagExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type TagDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<TagDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<TagDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -269,7 +273,7 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | QuantityOperators<Date>,
+  'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | StringOperators | QuantityOperators<Date>,
   'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'email'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
@@ -278,11 +282,12 @@ type UserFilterFields = {
   'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
+export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserRelations = {
   posts?: {
     filter?: PostFilter
-    sorts?: PostSort[]
+    sorts?: PostSort[] | PostRawSort
     start?: number
     limit?: number
     relations?: PostRelations
@@ -313,6 +318,7 @@ export type UserSortKeys =
   'id'|
   'lastName';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
+export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserUpdate = {
   'createdAt'?: Date,
@@ -334,7 +340,7 @@ export type UserInsert = {
   lastName?: string,
 };
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRelations, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -365,7 +371,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
   knex: Record<'default', Knex>,
-  scalars: UserInputDriverDataTypeAdapterMap<types.Scalars>
+  scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars>
 };
 
 type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType> | TagDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>

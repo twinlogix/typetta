@@ -1,7 +1,7 @@
 import { transformObject } from '../../../../generation/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
-import { EqualityOperators, QuantityOperators, ElementOperators, StringOperators } from '../../../dao/filters/filters.types'
+import { EqualityOperators, QuantityOperators, ElementOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection } from '../../../dao/projections/projections.types'
 import { KnexJsDAOGenerics, KnexJsDAOParams } from './dao.knexjs.types'
 import {
@@ -20,7 +20,7 @@ import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
 
 type AbstractFilter = {
-  [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators | StringOperators
+  [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators
 }
 
 export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<T> {
@@ -56,11 +56,17 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+    if(typeof filter === 'function') {
+      return filter(qb || this.qb())
+    }
     return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knex) : qb || this.qb()
   }
 
-  private buildSort(sorts?: T['sort'][], qb?: Knex.QueryBuilder<any, any>) {
-    return buildSort(qb || this.qb(), (sorts || []) as unknown as AbstractSort[], this.schema)
+  private buildSort(sort?: T['sort'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+    if(typeof sort === 'function') {
+      return sort(qb || this.qb())
+    }
+    return buildSort(qb || this.qb(), (sort || []) as unknown as AbstractSort[], this.schema)
   }
 
   private buildTransaction(options?: Pick<T['driverFilterOptions'], 'trx'>, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
@@ -128,7 +134,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
       return this.knex.raw(`${v.operation.toUpperCase()}(${v.field == null ? '*' : modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
     })
     const where = this.buildWhere(params.filter)
-    const sort = this.buildSort(args?.sorts, where)
+    const sort = this.buildSort(args?.sort, where)
     const select = sort.select([...byColumns, ...aggregations])
     const groupBy = byColumns.length > 0 ? select.groupBy(byColumns) : select.groupByRaw('(SELECT 1)')
     const having = args?.having ? buildHavingConditions(groupBy, args.having) : groupBy

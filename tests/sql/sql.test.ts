@@ -47,7 +47,7 @@ beforeEach(async () => {
       },
       ID: {
         ...identityAdapter,
-        generate: () => uuidv4()
+        generate: () => uuidv4(),
       },
     },
   })
@@ -97,7 +97,7 @@ test('Insert and retrieve', async () => {
   const all = await dao.user.findAll({
     filter: { 'credentials.password': 'password' },
     projection: true,
-    sorts: [{ 'credentials.username': SortDirection.ASC }],
+    sorts: [{ 'credentials.username': 'asc' }],
   })
   expect(all.length).toBe(2)
   expect(all[0].live).toBe(true)
@@ -172,6 +172,15 @@ test('simple findAll', async () => {
   await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
 
   const users = await dao.user.findAll({})
+  expect(users.length).toBe(1)
+  expect(users[0].firstName).toBe('FirstName')
+  expect(users[0].lastName).toBe('LastName')
+})
+
+test('simple findAll with custom where', async () => {
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'asd', lastName: 'asd', live: true } })
+  const users = await dao.user.findAll({ filter: (qb) => qb.where('name', 'like', '%st%') })
   expect(users.length).toBe(1)
   expect(users[0].firstName).toBe('FirstName')
   expect(users[0].lastName).toBe('LastName')
@@ -275,4 +284,27 @@ test('Foreign ref in embedded entity', async () => {
     },
   })
   expect(o1!.address!.cities!.length).toBe(1)
+})
+
+test('Text filter test', async () => {
+  await dao.organization.insertOne({ record: { name: 'Microsoft' } })
+  await dao.organization.insertOne({ record: { name: 'Macrosoft' } })
+  await dao.organization.insertOne({ record: { name: 'Macdonalds' } })
+  await dao.organization.insertOne({ record: { name: 'Micdonalds' } })
+  await dao.organization.insertOne({ record: { name: 'Lolft' } })
+
+  const found1 = (await dao.organization.findAll({ filter: { name: { $contains: 'soft' } } })).map((o) => o.name)
+  const found3 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'Mic' } } })).map((o) => o.name)
+  const found5 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'ft' } } })).map((o) => o.name)
+
+  expect(found1.length).toBe(2)
+  expect(found1.includes('Microsoft')).toBe(true)
+  expect(found1.includes('Macrosoft')).toBe(true)
+  expect(found3.length).toBe(2)
+  expect(found3.includes('Microsoft')).toBe(true)
+  expect(found3.includes('Micdonalds')).toBe(true)
+  expect(found5.length).toBe(3)
+  expect(found5.includes('Microsoft')).toBe(true)
+  expect(found5.includes('Macrosoft')).toBe(true)
+  expect(found5.includes('Lolft')).toBe(true)
 })
