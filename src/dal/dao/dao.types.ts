@@ -41,7 +41,7 @@ export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<Fil
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
   start?: number
   limit?: number
-  sort?: T['sort']
+  sorts?: T['sort']
 }
 
 export type InsertParams<T extends DAOGenerics> = {

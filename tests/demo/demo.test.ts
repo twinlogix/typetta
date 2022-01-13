@@ -137,7 +137,7 @@ test('Demo', async () => {
         filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
         limit: 2,
         start: 1,
-        sort: (qb) => (qb.orderBy('title', 'desc')),
+        sorts: (qb) => (qb.orderBy('title', 'desc')),
         relations: {
           tags: {
             filter: { name: 'Sport' },

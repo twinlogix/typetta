@@ -69,7 +69,7 @@ export type PostRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 export type PostRelations = {
   tags?: {
     filter?: TagFilter
-    sort?: TagSort[] | TagRawSort
+    sorts?: TagSort[] | TagRawSort
     start?: number
     limit?: number
     relations?: TagRelations
@@ -287,7 +287,7 @@ export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 export type UserRelations = {
   posts?: {
     filter?: PostFilter
-    sort?: PostSort[] | PostRawSort
+    sorts?: PostSort[] | PostRawSort
     start?: number
     limit?: number
     relations?: PostRelations

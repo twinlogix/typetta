@@ -412,17 +412,17 @@ test('find with simple sorts', async () => {
     await dao.user.insertOne({ record: { firstName: '' + i, lastName: '' + (9 - i), live: true } })
   }
 
-  response = await dao.user.findAll({ sort: [{ firstName: 'desc' }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'desc' }] })
   expect(response[0].firstName).toBe('9')
   expect(response[1].firstName).toBe('8')
 
-  response = await dao.user.findAll({ sort: [{ firstName: 'desc' }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'desc' }] })
   expect(response[0].firstName).toBe('9')
 
-  response = await dao.user.findAll({ sort: [{ firstName: 'desc' }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'desc' }] })
   expect(response[0].firstName).toBe('9')
 
-  response = await dao.user.findAll({ sort: [{ firstName: 'asc' }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'asc' }] })
   expect(response[0].firstName).toBe('0')
   expect(response[1].firstName).toBe('1')
 })
@@ -434,7 +434,7 @@ test('find with multiple sorts', async () => {
     await dao.user.insertOne({ record: { firstName: '1', lastName: '' + (9 - i), live: true } })
   }
 
-  response = await dao.user.findAll({ sort: [{ firstName: 'desc' }, { lastName: 'desc' }] })
+  response = await dao.user.findAll({ sorts: [{ firstName: 'desc' }, { lastName: 'desc' }] })
   expect(response[0].lastName).toBe('9')
   expect(response[1].lastName).toBe('8')
 })
@@ -1229,7 +1229,7 @@ test('Text filter test', async () => {
   await dao.execQuery(async (dbs, entities) => {
     await entities.organization.createIndex({ 'name': 'text' }, { name: 'nameIndex' })
   })
-  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sort: () => ([['score', { $meta: "textScore" }]])})).map(o => o.name)
+  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => ([['score', { $meta: "textScore" }]])})).map(o => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes('Microsoft')).toBe(true)
