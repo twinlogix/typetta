@@ -10,7 +10,7 @@ import {
   isProjectionIntersected,
   mergeProjections,
   projection,
-} from '@twinlogix/typetta'
+} from '../src'
 import { ApolloServer } from 'apollo-server'
 import gql from 'graphql-tag'
 
@@ -19,7 +19,7 @@ const { createTestClient } = require('apollo-server-testing')
 type Pass = 'pass'
 export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T; expected: U }) : { actual: T; expected: U }
 
-export function typeAssert<T extends Pass>() {}
+export function typeAssert<T extends Pass>() { }
 
 test('infoToProjection test', async () => {
   const typeDefs = gql`

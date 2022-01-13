@@ -12,18 +12,18 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const hasMongoDBEntites = mongoSources.length > 0
 
     const knexImports = [
-      "import { KnexJsDAOGenerics, KnexJSDataTypeAdapterMap, KnexJsDAOParams, AbstractKnexJsDAO } from '@twinlogix/typetta';",
+      `import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
       "import { Knex } from 'knex';",
     ];
 
     const mongodbImports = [
-      "import { MongoDBDAOGenerics, MongoDBDataTypeAdapterMap, MongoDBDAOParams, AbstractMongoDBDAO } from '@twinlogix/typetta';",
+      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
       "import { Collection, Db, Filter, Sort } from 'mongodb';",
     ];
 
     const commonImports = [
-      "import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';",
-      `import * as types from '${this._config.tsTypesImport}';`
+      `import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
+      `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}';`
     ]
 
     return [
