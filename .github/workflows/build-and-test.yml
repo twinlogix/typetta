@@ -16,7 +16,7 @@ jobs:
           node-version: '16'
       - name: Update npm
         run: npm install -g npm@7
-      - name: Node verision
+      - name: Node version
         run: node --version && npm --version
       - name: Installing node packages
         run: npm ci
