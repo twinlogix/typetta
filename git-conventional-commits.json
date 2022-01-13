@@ -10,7 +10,8 @@
       "build",
       "ci",
       "chore",
-      "docs"
+      "docs",
+      "merge"
     ],
     "commitScopes": [],
     "releaseTagGlobPattern":  "v[0-9]*.[0-9]*.[0-9]*",
