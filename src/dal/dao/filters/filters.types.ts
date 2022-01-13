@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 export type LogicalOperators<FilterType> = {
   $and?: LogicalOperators<FilterType>[] | FilterType[]
   $not?: LogicalOperators<FilterType> | FilterType
