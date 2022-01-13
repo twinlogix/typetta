@@ -19,7 +19,7 @@ export function hasFieldFilter<
   FieldType,
   FieldName extends string,
   Filter extends { [P in FieldName]?: FieldType | null | QuantityOperators<FieldType> | EqualityOperators<FieldType> | ElementOperators | StringOperators },
-  >(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
+>(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
   return (
     (id &&
       conditions[fieldName] &&
@@ -88,7 +88,7 @@ export function setTraversing(object: any, path: string, value: any) {
         object[pathSplitted[0]] = {}
       }
       if (Array.isArray(object[pathSplitted[0]])) {
-        ; (object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
+        ;(object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
       } else {
         setTraversing(object[pathSplitted[0]], pathSplitted.slice(1).join('.'), value)
       }
@@ -132,9 +132,9 @@ export function deepCopy(obj: any): any {
   }
   if (obj instanceof Array) {
     const cp = [] as any[]
-      ; (obj as any[]).forEach((v) => {
-        cp.push(v)
-      })
+    ;(obj as any[]).forEach((v) => {
+      cp.push(v)
+    })
     return cp.map((n: any) => deepCopy(n)) as any
   }
   if (isPlainObject(obj)) {

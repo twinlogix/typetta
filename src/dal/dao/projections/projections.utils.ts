@@ -1,6 +1,5 @@
 import { GenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
-import { array } from 'yargs'
 
 type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
   ? ProjectionType
@@ -246,8 +245,8 @@ function head(array: string[]): string | undefined {
 
 function tail(array: string[]): string[] {
   if (array.length > 0) {
-    const [head, ...tail] = array;
-    return tail;
+    const [_, ...t] = array;
+    return t;
   } else {
     return [];
   }

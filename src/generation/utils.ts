@@ -86,12 +86,12 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
           const mapper =
             direction === 'modelToDB' && adapter.validate
               ? (data: ModelScalars[keyof ModelScalars]) => {
-                const validation = adapter.validate!(data)
-                if (validation === true) {
-                  return adapter.modelToDB(data)
+                  const validation = adapter.validate!(data)
+                  if (validation === true) {
+                    return adapter.modelToDB(data)
+                  }
+                  throw validation
                 }
-                throw validation
-              }
               : adapter[direction]
           if (Array.isArray(value) && schemaField.array) {
             result[destName] = adapter ? value.map((v) => mapper(v)) : value

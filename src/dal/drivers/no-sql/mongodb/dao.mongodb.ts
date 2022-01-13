@@ -89,12 +89,12 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     const byKeys = Object.keys(params.by || {})
     const groupId = params.by
       ? byKeys.reduce<object>((p, k) => {
-        const mappedName = k.split('.').join('_')
-        if (mappedName !== k) {
-          groupKeys[k] = mappedName
-        }
-        return { ...p, [mappedName]: `$${modelNameToDbName(k, this.schema)}` }
-      }, {})
+          const mappedName = k.split('.').join('_')
+          if (mappedName !== k) {
+            groupKeys[k] = mappedName
+          }
+          return { ...p, [mappedName]: `$${modelNameToDbName(k, this.schema)}` }
+        }, {})
       : {}
     const aggregation = Object.entries(params.aggregations).reduce<object>((p, [k, v]) => {
       if (v.operation === 'count' && v.field) {
@@ -105,17 +105,17 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
     const sorts = args?.sorts
       ? [
-        {
-          // @ts-ignore
-          $sort: args.sorts.reduce<object>((p, s) => {
-            const [k, v] = Object.entries(s)[0]
-            return {
-              ...p,
-              [byKeys.includes(k) ? `_id.${k}` : k]: (v as SortDirection).valueOf(),
-            }
-          }, {}),
-        },
-      ]
+          {
+            // @ts-ignore
+            $sort: args.sorts.reduce<object>((p, s) => {
+              const [k, v] = Object.entries(s)[0]
+              return {
+                ...p,
+                [byKeys.includes(k) ? `_id.${k}` : k]: (v as SortDirection).valueOf(),
+              }
+            }, {}),
+          },
+        ]
       : []
     const filter = params.filter ? [{ $match: this.buildFilter(params.filter) }] : []
     const having = args?.having ? [{ $match: args.having }] : []
