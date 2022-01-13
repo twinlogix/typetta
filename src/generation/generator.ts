@@ -4,6 +4,7 @@ import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
 import { findField, findID, findNode, isForeignRef, isInnerRef, isRelationEntityRef, toFirstLower } from './utils'
 
+// TODO: add ScalarFieldType and remove string from TsTypettaGeneratorField.type
 export type EmbedFieldType = { embed: string }
 export type InnerRefFieldType = { innerRef: string; refFrom?: string; refTo?: string }
 export type ForeignRefFieldType = { foreignRef: string; refFrom?: string; refTo?: string }
@@ -54,6 +55,7 @@ export class TsTypettaGenerator {
     this.checkEntities(typesMap)
     this.checkIds(typesMap)
     this.checkReferences(typesMap)
+    this.checkArrayInSqlEntities(typesMap)
 
     const imports = this._generators
       .map((generator) => {
@@ -99,7 +101,7 @@ export class TsTypettaGenerator {
     Array.from(typesMap.values())
       .filter((type) => type.mongoEntity && type.sqlEntity)
       .forEach((type) => {
-        throw new Error(`Type ${type.name} is a @mongoEntity and a @sqlEntity ath the same time. A type can be only on one database at a time.`)
+        throw new Error(`Type ${type.name} is a @mongoEntity and a @sqlEntity at the same time. A type can be only on one database at a time.`)
       })
   }
 
@@ -111,6 +113,20 @@ export class TsTypettaGenerator {
         if (!id) {
           throw new Error(`Type ${type.name} requires an @id field being a @mongoEntity.`)
         }
+      })
+  }
+
+  private checkArrayInSqlEntities(typesMap: Map<string, TsTypettaGeneratorNode>) {
+    Array.from(typesMap.values())
+      .filter((type) => type.sqlEntity)
+      .forEach((type) => {
+        type.fields.forEach((f) => {
+          if ((typeof f.type === 'string' || 'embedded' in f.type) && f.isList) {
+            console.warn(
+              `Type ${type.name} is an sql entity and have an array field: ${f.name}. Plain field or embedded field are not supported as array, the only way to define an array is through references (@foreignRef or @relationEntityRef).`,
+            )
+          }
+        })
       })
   }
 
