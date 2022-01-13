@@ -80,7 +80,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
-    const query = this.buildSort(params.sort, where)
+    const query = this.buildSort(params.sorts, where)
     const records = await this.buildTransaction(params.options, query)
       .limit(params.limit || this.pageSize)
       .offset(params.start || 0)
