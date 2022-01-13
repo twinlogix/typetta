@@ -73,6 +73,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return options?.trx ? (qb || this.qb()).transacting(options.trx) : qb || this.qb()
   }
 
+  private buildUpdate(changes: T['update'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+    if(typeof changes === 'function') {
+      return changes(qb || this.qb())
+    }
+    const updates = this.adaptUpdate(changes)
+    return (qb || this.qb()).update(updates)
+  }
+
   private adaptUpdate(changes: T['update']): object {
     return adaptUpdate({ update: changes, schema: this.schema, adapters: this.daoContext.adapters.knex })
   }
@@ -181,8 +189,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   protected async _updateMany(params: UpdateParams<T>): Promise<void> {
-    const updateObject = this.adaptUpdate(params.changes)
-    const update = this.qb().update(updateObject)
+    const update = this.buildUpdate(params.changes)
     const where = this.buildWhere(params.filter, update)
     await this.buildTransaction(params.options, where)
   }

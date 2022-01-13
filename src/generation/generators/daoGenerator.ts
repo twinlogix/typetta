@@ -7,7 +7,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     return [
       "import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';",
       `import * as types from '${this._config.tsTypesImport}';`,
-      "import { Collection, Db, Filter, Sort } from 'mongodb';",
+      "import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';",
       "import { Knex } from 'knex';",
     ]
   }
@@ -182,7 +182,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap, customScalarsMap, node.mongoEntity ? 'mongo' : 'sql').join(',\n'))
     const daoFilterFields = `type ${node.name}FilterFields = {\n` + daoFilterFieldsBody + `\n};`
     const daoRawFilter = `export type ${node.name}RawFilter = ${
-      node.mongoEntity ? '() => Filter<{ [key: string]: any }>' : node.sqlEntity ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+      node.mongoEntity ? '() => Filter<Document>' : node.sqlEntity ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
     }`
     const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields>;`
 
@@ -304,9 +304,11 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
   public _generateDAOUpdate(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoUpdateFieldsBody = indentMultiline(this._generateDAOUpdateFields(node, typesMap).join(',\n'))
+    const daoRawUpdate = `export type ${node.name}RawUpdate = ${
+      node.mongoEntity ? '() => UpdateFilter<Document>' : node.sqlEntity ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+    }`
     const daoUpdate = `export type ${node.name}Update = {\n` + daoUpdateFieldsBody + `\n};`
-
-    return daoUpdate
+    return [daoUpdate, daoRawUpdate].join('\n')
   }
 
   public _generateDAOUpdateFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
@@ -367,7 +369,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
     }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${
       node.name
-    }ExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;`
+    }RawUpdate, ${node.name}ExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`

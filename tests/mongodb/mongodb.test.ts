@@ -1,6 +1,3 @@
-global.TextEncoder = require('util').TextEncoder
-global.TextDecoder = require('util').TextDecoder
-
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
@@ -12,6 +9,9 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
+
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
 
 let replSet: MongoMemoryReplSet
 let con: MongoClient
@@ -1227,9 +1227,9 @@ test('Text filter test', async () => {
   const found6 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'Ft' } } })).map((o) => o.name)
 
   await dao.execQuery(async (dbs, entities) => {
-    await entities.organization.createIndex({ 'name': 'text' }, { name: 'nameIndex' })
+    await entities.organization.createIndex({ name: 'text' }, { name: 'nameIndex' })
   })
-  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => ([['score', { $meta: "textScore" }]])})).map(o => o.name)
+  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => [['score', { $meta: 'textScore' }]] })).map((o) => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes('Microsoft')).toBe(true)
@@ -1245,6 +1245,13 @@ test('Text filter test', async () => {
   expect(found5.includes('Lolft')).toBe(true)
   expect(found6.length).toBe(0)
   expect(found10.length).toBe(1)
+})
+
+test('Raw update', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, amounts: [new BigNumber(1)] } })
+  await dao.user.updateOne({ filter: { id: user.id }, changes: () => ({ $push: { amounts: dao.adapters.mongo.Decimal.modelToDB(new BigNumber(2)) } as any }) })
+  const user2 = await dao.user.findOne()
+  expect(user2?.amounts?.length).toBe(2)
 })
 
 // ------------------------------------------------------------------------

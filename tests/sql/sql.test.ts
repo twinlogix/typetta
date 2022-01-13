@@ -308,3 +308,10 @@ test('Text filter test', async () => {
   expect(found5.includes('Macrosoft')).toBe(true)
   expect(found5.includes('Lolft')).toBe(true)
 })
+
+test('Raw update', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.updateAll({ filter: { id: user.id }, changes: (qb) => qb.update({ name: 'FirstName2' }) })
+  const user2 = await dao.user.findOne()
+  expect(user2?.firstName).toBe('FirstName2')
+})
