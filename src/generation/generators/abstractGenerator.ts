@@ -12,7 +12,7 @@ export abstract class TsTypettaAbstractGenerator {
     this._config = config
   }
 
-  public abstract generateImports(): string[]
+  public abstract generateImports(typesMap: Map<string, TsTypettaGeneratorNode>): string[]
 
   public abstract generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string
 
