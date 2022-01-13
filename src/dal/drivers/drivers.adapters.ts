@@ -8,8 +8,8 @@ export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends Defau
   },
   keyof DefaultModelScalars
 > & {
-  [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key], DefaultMongoDBScalars[key], DefaultKnexJsScalars[key]>
-}
+    [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key], DefaultMongoDBScalars[key], DefaultKnexJsScalars[key]>
+  }
 
 export type DriverDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = {
   knex: KnexJSDataTypeAdapterMap<ModelScalars>
@@ -41,7 +41,7 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
         throw new Error("In order to define validate function you must define also 'modelToDB' and 'dbToModel' function")
       }
       if (adapter.generate) {
-        throw new Error("In order to define validate function you must define also 'modelToDB' and 'dbToModel' function")
+        throw new Error("In order to define generate function you must define also 'modelToDB' and 'dbToModel' function")
       }
       return map
     }
@@ -74,7 +74,7 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
         throw new Error("In order to define validate function you must define also 'modelToDB' and 'dbToModel' function")
       }
       if (adapter.generate) {
-        throw new Error("In order to define validate function you must define also 'modelToDB' and 'dbToModel' function")
+        throw new Error("In order to define generate function you must define also 'modelToDB' and 'dbToModel' function")
       }
       return map
     }
