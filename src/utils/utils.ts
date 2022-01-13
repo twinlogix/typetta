@@ -1,15 +1,13 @@
-import { QuantityOperators, EqualityOperators, ElementOperators, StringOperators } from '../dal/dao/filters/filters.types'
+import { QuantityOperators, EqualityOperators, ElementOperators } from '../dal/dao/filters/filters.types'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
-import BigNumber from 'bignumber.js'
 import { isPlainObject } from 'is-plain-object'
-import _ from 'lodash'
 
 export type OneKey<K extends string | number | symbol, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
 }[K]
 
-export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators | StringOperators }>(
+export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators }>(
   conditions: Filter,
   id: IDType | null,
 ): boolean {
@@ -19,7 +17,7 @@ export function hasIdFilter<IDType, Filter extends { id?: IDType | null | Quanti
 export function hasFieldFilter<
   FieldType,
   FieldName extends string,
-  Filter extends { [P in FieldName]?: FieldType | null | QuantityOperators<FieldType> | EqualityOperators<FieldType> | ElementOperators | StringOperators },
+  Filter extends { [P in FieldName]?: FieldType | null | QuantityOperators<FieldType> | EqualityOperators<FieldType> | ElementOperators },
   >(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
   return (
     (id &&
@@ -77,7 +75,7 @@ export function* reversed<T>(array: T[]): Iterable<T> {
 export const MONGODB_LOGIC_QUERY_PREFIXS = new Set(['$or', '$and', '$not', '$nor'])
 export const MONGODB_SINGLE_VALUE_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne'])
 export const MONGODB_ARRAY_VALUE_QUERY_PREFIXS = new Set(['$in', '$nin', '$all'])
-export const MONGODB_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne', '$in', '$nin', '$all', '$size', '$text', '$near', '$nearSphere'])
+export const MONGODB_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne', '$in', '$nin', '$all', '$size', '$near', '$nearSphere', '$contains', '$startsWith', '$endsWith'])
 
 export function setTraversing(object: any, path: string, value: any) {
   if (typeof object === 'object') {
@@ -125,12 +123,6 @@ export function deepCopy(obj: any): any {
   if (obj === null || obj === undefined) {
     return obj
   }
-  if (obj instanceof Date) {
-    return new Date(obj.getTime()) as any
-  }
-  if (obj instanceof BigNumber) {
-    return new BigNumber(obj) as any
-  }
   if (obj instanceof Array) {
     const cp = [] as any[]
       ; (obj as any[]).forEach((v) => {
@@ -156,7 +148,7 @@ export function deepMerge(weak: any, strong: any): any {
     return weak
   }
   if (!isPlainObject(weak) || !isPlainObject(strong)) {
-    return deepCopy(strong)
+    return strong
   }
 
   const strongKey = new Set(Object.keys(strong))

@@ -23,6 +23,7 @@ generates:
     config:
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
+      typettaImport: ../../src
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
     plugins:

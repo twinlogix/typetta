@@ -1,6 +1,5 @@
 import { GenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
-import _ from 'lodash'
 
 type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
   ? ProjectionType
@@ -235,7 +234,20 @@ export function isChangesContainedInProjection(containerP: GenericProjection, ch
 
 function subKeysOf(keys: string[], key: string): string[] {
   return keys
-    .filter((k) => _.head(k.split('.')) === key)
-    .map((k) => _.tail(k.split('.')).join('.'))
+    .filter((k) => head(k.split('.')) === key)
+    .map((k) => tail(k.split('.')).join('.'))
     .filter((k) => k.length !== 0)
+}
+
+function head(array: string[]): string | undefined {
+  return array.length > 0 ? array[0] : undefined;
+}
+
+function tail(array: string[]): string[] {
+  if (array.length > 0) {
+    const [_, ...t] = array;
+    return t;
+  } else {
+    return [];
+  }
 }

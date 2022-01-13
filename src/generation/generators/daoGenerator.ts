@@ -1,15 +1,35 @@
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
 import { findID, findNode, indentMultiline, isEmbed, isEntity, isForeignRef, isInnerRef, isRelationEntityRef, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
-import _ from 'lodash'
 
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
-  public generateImports(): string[] {
-    return [
-      "import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';",
-      `import * as types from '${this._config.tsTypesImport}';`,
-      "import { Collection, Db } from 'mongodb';",
+  public generateImports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+
+    const sqlSources = [...new Set([...typesMap.values()].flatMap((type) => (type.sqlEntity ? [type.sqlEntity.source] : [])))]
+    const hasSQLEntities = sqlSources.length > 0
+
+    const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.mongoEntity ? [type.mongoEntity.source] : [])))]
+    const hasMongoDBEntites = mongoSources.length > 0
+
+    const knexImports = [
+      `import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
       "import { Knex } from 'knex';",
+    ];
+
+    const mongodbImports = [
+      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
+      "import { Collection, Db, Filter, Sort } from 'mongodb';",
+    ];
+
+    const commonImports = [
+      `import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
+      `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}';`
+    ]
+
+    return [
+      ...commonImports,
+      ...(hasSQLEntities ? knexImports : []),
+      ...(hasMongoDBEntites ? mongodbImports : [])
     ]
   }
 
@@ -32,8 +52,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   }
 
   public generateExports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
-    const sqlSources = _.uniq([...typesMap.values()].flatMap((type) => (type.sqlEntity ? [type.sqlEntity.source] : [])))
-    const mongoSources = _.uniq([...typesMap.values()].flatMap((type) => (type.mongoEntity ? [type.mongoEntity.source] : [])))
+    const sqlSources = [...new Set([...typesMap.values()].flatMap((type) => (type.sqlEntity ? [type.sqlEntity.source] : [])))]
+    const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.mongoEntity ? [type.mongoEntity.source] : [])))]
     const hasMongoDBEntites = mongoSources.length > 0
     const hasSQLEntities = sqlSources.length > 0
     const sqlSourcesType = `Record<${sqlSources.map((v) => `'${v}'`).join(' | ')}, Knex>`
@@ -42,9 +62,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const contextDAOParamsDeclarations = Array.from(typesMap.values())
       .filter((node) => isEntity(node))
       .map((node) => {
-        return `${toFirstLower(node.name)}?: Pick<Partial<${node.name}DAOParams<MetadataType, OperationMetadataType>>, ${
-          node.fields.find((f) => f.isID)?.idGenerationStrategy === 'generator' ? "'idGenerator' | " : ''
-        }'middlewares' | 'metadata'>`
+        return `${toFirstLower(node.name)}?: Pick<Partial<${node.name}DAOParams<MetadataType, OperationMetadataType>>, ${node.fields.find((f) => f.isID)?.idGenerationStrategy === 'generator' ? "'idGenerator' | " : ''
+          }'middlewares' | 'metadata'>`
       })
       .join(',\n')
 
@@ -53,7 +72,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
     const mongoDBParams = hasMongoDBEntites ? `,\nmongo: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
-    const adaptersParams = ',\nscalars?: UserInputDriverDataTypeAdapterMap<types.Scalars>' // TODO: remove optionality if types.Scalars contains other
+    const adaptersParams = ',\nscalars?: UserInputDriverDataTypeAdapterMap<types.Scalars>'
 
     const dbsInputParam =
       hasMongoDBEntites && hasSQLEntities ? `mongo: ${mongoSourcesType}; knex: ${sqlSourcesType}` : hasSQLEntities ? `knex: ${sqlSourcesType}` : hasMongoDBEntites ? `mongo: ${mongoSourcesType}` : ''
@@ -97,11 +116,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         const daoImplementationInit = node.sqlEntity
           ? `, knex: this.knex.${node.sqlEntity!.source}, tableName: '${node.sqlEntity?.table}'`
           : node.mongoEntity
-          ? `, collection: this.mongo.${node.mongoEntity!.source}.collection('${node.mongoEntity?.collection}')`
-          : ''
-        const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...this.middlewares as DAOMiddleware<${
-          node.name
-        }DAOGenerics<MetadataType, OperationMetadataType>>[]]`
+            ? `, collection: this.mongo.${node.mongoEntity!.source}.collection('${node.mongoEntity?.collection}')`
+            : ''
+        const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...this.middlewares as DAOMiddleware<${node.name
+          }DAOGenerics<MetadataType, OperationMetadataType>>[]]`
         const daoIdGeneratorInit = node.fields.find((f) => f.isID)?.idGenerationStrategy === 'generator' ? `, idGenerator: this.overrides?.${toFirstLower(node.name)}?.idGenerator` : ''
         const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
@@ -180,14 +198,22 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAOFilter(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
-    const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap, customScalarsMap).join(',\n'))
+    const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap, customScalarsMap, node.mongoEntity ? 'mongo' : 'sql').join(',\n'))
     const daoFilterFields = `type ${node.name}FilterFields = {\n` + daoFilterFieldsBody + `\n};`
+    const daoRawFilter = `export type ${node.name}RawFilter = ${node.mongoEntity ? '() => Filter<{ [key: string]: any }>' : node.sqlEntity ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+      }`
     const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields>;`
 
-    return [daoFilterFields, daoFilter].join('\n')
+    return [daoFilterFields, daoFilter, daoRawFilter].join('\n')
   }
 
-  public _generateDAOFilterFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>, path: string = ''): string[] {
+  public _generateDAOFilterFields(
+    node: TsTypettaGeneratorNode,
+    typesMap: Map<string, TsTypettaGeneratorNode>,
+    customScalarsMap: Map<string, TsTypettaGeneratorScalar>,
+    entity: 'mongo' | 'sql',
+    path: string = '',
+  ): string[] {
     return node.fields
       .filter((field) => (typeof field.type === 'string' || isEmbed(field.type)) && !field.isExcluded)
       .map((field) => {
@@ -196,15 +222,14 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
           fieldName += field.name
           const fieldType = field.isList ? `${field.type}[]` : field.type
 
-          const stringOperators = field.type === 'string' ? ` | StringOperators` : ''
           const quantityOperators = field.type === 'number' || field.type === 'Date' ? ` | QuantityOperators<${field.type}>` : ''
           const geoOperators = customScalarsMap.get(field.type)?.isGeoPoint ? ` | GeospathialOperators` : ''
           const arrayOperators = field.isList ? ` | ArrayOperators<${fieldType}>` : ''
 
-          return [`'${fieldName}'?: ${fieldType} | null | EqualityOperators<${fieldType}> | ElementOperators` + stringOperators + quantityOperators + geoOperators + arrayOperators]
+          return [`'${fieldName}'?: ${fieldType} | null | EqualityOperators<${fieldType}> | ElementOperators | StringOperators` + quantityOperators + geoOperators + arrayOperators]
         } else if (isEmbed(field.type)) {
           const embeddedType = findNode(field.type.embed, typesMap)!
-          return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.')
+          return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, entity, path + field.name + '.')
         }
         return []
       })
@@ -219,7 +244,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const relationsBody = node.fields.flatMap((field) => {
       if (field.isList && (isInnerRef(field.type) || isForeignRef(field.type) || isRelationEntityRef(field.type)) && !field.isExcluded) {
         const nodeName = isInnerRef(field.type) ? field.type.innerRef : isForeignRef(field.type) ? field.type.foreignRef : field.type.destRef
-        const body = [`filter?: ${nodeName}Filter`, `sorts?: ${nodeName}Sort[]`, 'start?: number', 'limit?: number', `relations?: ${nodeName}Relations`].map((v) => `    ${v}`).join('\n')
+        const body = [`filter?: ${nodeName}Filter`, `sorts?: ${nodeName}Sort[] | ${nodeName}RawSort`, 'start?: number', 'limit?: number', `relations?: ${nodeName}Relations`]
+          .map((v) => `    ${v}`)
+          .join('\n')
         return `  ${field.name}?: {\n${body}\n  }`
       } else {
         return []
@@ -268,7 +295,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const daoSortFields = indentMultiline(this._generateDAOSortFields(node, typesMap).join('|\n'))
     const daoSortKeys = `export type ${node.name}SortKeys = \n${daoSortFields};`
     const daoSort = `export type ${node.name}Sort = OneKey<${node.name}SortKeys, SortDirection>;`
-    return `${daoSortKeys}\n${daoSort}`
+    const daoRawSort = `export type ${node.name}RawSort = ${node.mongoEntity ? '() => Sort' : node.sqlEntity ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'}`
+    return `${daoSortKeys}\n${daoSort}\n${daoRawSort}`
   }
 
   public _generateDAOSortFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
@@ -353,14 +381,11 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const idField = findID(node)!
     const dbDAOGenerics = node.sqlEntity ? 'KnexJsDAOGenerics' : node.mongoEntity ? 'MongoDBDAOGenerics' : 'DAOGenerics'
     const dbDAOParams = node.sqlEntity ? 'KnexJsDAOParams' : node.mongoEntity ? 'MongoDBDAOParams' : 'DAOParams'
-    const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${idField.coreType}', '${
-      idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
-    }', ${node.name}Filter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}Insert, ${node.name}Update, ${
-      node.name
-    }ExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;`
-    const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
-      node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
-    }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
+    const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${idField.coreType}', '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
+      }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${node.name
+      }ExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;`
+    const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
+      }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
     return [daoGenerics, daoParams].join('\n')
   }
 

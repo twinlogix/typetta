@@ -13,7 +13,6 @@ Si seguito un tutorial che permette di esplorare le funzionalità base di Typett
 Typetta è un pacchetto dalle dimensioni contenute che può essere installato tramite npm su qualsiasi progetto TypeScript. L'unica dipendenza di cui necessita esplicitamente è GraphQL. Entrambi si possono aggiungere al progetto molto semplicemente tramite npm:
 ```bash
 npm install @twinlogix/typetta --save
-npm install graphql --save
 ```
 
 ## Struttura del progetto
@@ -161,7 +160,6 @@ Di seguito il codice sorgente completo di questo primo esempio di utilizzo di Ty
 ```typescript
 import { MongoClient } from 'mongodb';
 import { DAOContext } from './dao';
-
 
 const main = async () => {
 

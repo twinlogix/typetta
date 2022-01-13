@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 export type LogicalOperators<FilterType> = {
   $and?: LogicalOperators<FilterType>[] | FilterType[]
   $not?: LogicalOperators<FilterType> | FilterType
@@ -25,14 +23,16 @@ export type ElementOperators = {
   $exists?: boolean
 }
 
-export type StringOperators = {
-  $text?: {
-    $search: string
-    $language?: string
-    $caseSensitive?: boolean
-    $diacriticSensitive?: boolean
-  }
-}
+export type StringOperators =
+  | {
+      $contains: string
+    }
+  | {
+      $startsWith: string
+    }
+  | {
+      $endsWith: string
+    }
 
 export type GeospathialOperators = {
   // $geoIntersect
