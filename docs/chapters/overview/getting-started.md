@@ -60,12 +60,7 @@ L'utilizzo di un linguaggio di modellazione standard come GraphQL mette a dispos
 
 Lo strumento principale di cui fa uso Typetta è un generatore di codice altamente customizzabile ed estensibile che si chiama [GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"}. Grazie ad esso lo sviluppaore ha a disposizione un'ampia gamma di generatori standard per i più diffusi linguaggi di programmazione, oltre ad un generatore di nostra creazione per produrre i singoli DAO in linguaggio TypeScript, che serviranno ad accedere al database.
 
-Di seguito i comandi per installare questo strumento ed il generatore di base per il linguaggio TypeScript:
-```bash
-npm install @graphql-codegen/cli --save-dev
-npm install @graphql-codegen/typescript --save-dev
-```
-Si noti che le due dipendenze vengono aggiunte come dev dependencies e quindi non influiranno sulla dimensione del progetto compilato.
+Typetta include già di default le dipendenze necessarie per l'utilizzo del generatore TypeScript, ma è possibile aggiungere altri generatori a piacimento, seguendo i riferimenti della guida ufficiale.
 
 A questo punto occorre configurare lo strumento di generazione creando il file *codegen.yml* come anticipato in precedenza. Di seguito la configurazione minima:
 
