@@ -49,9 +49,7 @@
     "uuid": "8.3.2",
     "apollo-server": "3.6.1",
     "apollo-server-testing": "2.25.3",
-    "sha256": "0.2.0",
-    "knex": "0.95.15",
-    "mongodb": "4.3.0"
+    "sha256": "0.2.0"
   },
   "dependencies": {
     "@graphql-codegen/plugin-helpers": "2.3.1",
@@ -64,7 +62,9 @@
     "type-fest": "0.16.0"
   },
   "peerDependencies": {
-    "graphql": "15.3.0"
+    "graphql": "15.3.0",
+    "knex": ">=0.95.15",
+    "mongodb": ">=4.3.0"
   },
   "peerDependenciesMeta": {
     "knex": {
