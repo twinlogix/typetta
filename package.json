@@ -68,14 +68,6 @@
     "knex": "0.95.15",
     "mongodb": "4.3.0"
   },
-  "peerDependenciesMeta": {
-    "knex": {
-      "optional": true
-    },
-    "mongodb": {
-      "optional": true
-    }
-  },
   "jest": {
     "rootDir": "./tests",
     "transform": {
