@@ -171,8 +171,8 @@ export function buildSelect<TRecord, TResult, ScalarsType>(
   return builder
 }
 
-export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuilder<TRecord, TResult>, sorts: AbstractSort[], schema: Schema<ScalarsType>): Knex.QueryBuilder<TRecord, TResult> {
-  sorts.forEach((s) => {
+export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuilder<TRecord, TResult>, sort: AbstractSort[], schema: Schema<ScalarsType>): Knex.QueryBuilder<TRecord, TResult> {
+  sort.forEach((s) => {
     const [sortKey, sortDirection] = Object.entries(s)[0]
     builder.orderBy(modelNameToDbName(sortKey, schema), sortDirection)
   })

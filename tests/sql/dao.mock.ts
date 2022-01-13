@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';
 import * as types from './models.mock';
-import { Collection, Db, Filter } from 'mongodb';
+import { Collection, Db, Filter, Sort } from 'mongodb';
 import { Knex } from 'knex';
 
 //--------------------------------------------------------------------------------
@@ -20,12 +20,13 @@ export const addressSchema: Schema<types.Scalars> = {
 type AddressFilterFields = {
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
+export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
+export type AddressRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AddressRelations = {
   cities?: {
-    filter?: CityFilter
-    sorts?: CitySort[]
+    filter?: CityFilter | CityRawFilter
+    sort?: CitySort[] | CityRawSort
     start?: number
     limit?: number
     relations?: CityRelations
@@ -40,6 +41,7 @@ export type AddressProjection = {
 export type AddressSortKeys = 
   'id';
 export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
+export type AddressRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AddressUpdate = {
   'id'?: string
@@ -49,7 +51,7 @@ export type AddressInsert = {
   id?: string,
 };
 
-type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRelations, AddressProjection, AddressSort, AddressInsert, AddressUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -99,7 +101,8 @@ type CityFilterFields = {
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
+export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
+export type CityRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type CityRelations = {
 
@@ -118,6 +121,7 @@ export type CitySortKeys =
   'id'|
   'name';
 export type CitySort = OneKey<CitySortKeys, SortDirection>;
+export type CityRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type CityUpdate = {
   'addressId'?: string,
@@ -131,7 +135,7 @@ export type CityInsert = {
   name: string,
 };
 
-type CityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRelations, CityProjection, CitySort, CityInsert, CityUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type CityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -180,7 +184,8 @@ type DeviceFilterFields = {
   'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
+export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
+export type DeviceRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DeviceRelations = {
 
@@ -198,6 +203,7 @@ export type DeviceSortKeys =
   'name'|
   'userId';
 export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
+export type DeviceRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DeviceUpdate = {
   'id'?: string,
@@ -211,7 +217,7 @@ export type DeviceInsert = {
   userId?: string,
 };
 
-type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceInsert, DeviceUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -261,7 +267,8 @@ type DogFilterFields = {
   'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
+export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
+export type DogRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DogRelations = {
 
@@ -279,6 +286,7 @@ export type DogSortKeys =
   'name'|
   'ownerId';
 export type DogSort = OneKey<DogSortKeys, SortDirection>;
+export type DogRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DogUpdate = {
   'id'?: string,
@@ -292,7 +300,7 @@ export type DogInsert = {
   ownerId: string,
 };
 
-type DogDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRelations, DogProjection, DogSort, DogInsert, DogUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type DogDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -342,7 +350,8 @@ type FriendsFilterFields = {
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'to'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type FriendsFilter = FriendsFilterFields & LogicalOperators<FriendsFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
+export type FriendsFilter = FriendsFilterFields & LogicalOperators<FriendsFilterFields>;
+export type FriendsRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FriendsRelations = {
 
@@ -359,6 +368,7 @@ export type FriendsSortKeys =
   'id'|
   'to';
 export type FriendsSort = OneKey<FriendsSortKeys, SortDirection>;
+export type FriendsRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FriendsUpdate = {
   'from'?: string,
@@ -372,7 +382,7 @@ export type FriendsInsert = {
   to: string,
 };
 
-type FriendsDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Friends, 'id', 'ID', 'generator', FriendsFilter, FriendsRelations, FriendsProjection, FriendsSort, FriendsInsert, FriendsUpdate, FriendsExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type FriendsDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Friends, 'id', 'ID', 'generator', FriendsFilter, FriendsRawFilter, FriendsRelations, FriendsProjection, FriendsSort, FriendsRawSort, FriendsInsert, FriendsUpdate, FriendsExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type FriendsDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FriendsDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -430,7 +440,8 @@ type OrganizationFilterFields = {
   'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
-export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
+export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
+export type OrganizationRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type OrganizationRelations = {
 
@@ -453,6 +464,7 @@ export type OrganizationSortKeys =
   'name'|
   'vatNumber';
 export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>;
+export type OrganizationRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type OrganizationUpdate = {
   'address'?: types.Address | null,
@@ -469,7 +481,7 @@ export type OrganizationInsert = {
   vatNumber?: string,
 };
 
-type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationInsert, OrganizationUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -578,19 +590,20 @@ type UserFilterFields = {
   'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators | StringOperators,
   'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators | StringOperators
 };
-export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields> | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>);
+export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
+export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserRelations = {
   dogs?: {
-    filter?: DogFilter
-    sorts?: DogSort[]
+    filter?: DogFilter | DogRawFilter
+    sort?: DogSort[] | DogRawSort
     start?: number
     limit?: number
     relations?: DogRelations
   }
   friends?: {
-    filter?: UserFilter
-    sorts?: UserSort[]
+    filter?: UserFilter | UserRawFilter
+    sort?: UserSort[] | UserRawSort
     start?: number
     limit?: number
     relations?: UserRelations
@@ -633,6 +646,7 @@ export type UserSortKeys =
   'localization'|
   'title';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
+export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserUpdate = {
   'amount'?: BigNumber | null,
@@ -664,7 +678,7 @@ export type UserInsert = {
   title?: LocalizedString,
 };
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRelations, UserProjection, UserSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {

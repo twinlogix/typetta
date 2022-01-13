@@ -11,7 +11,7 @@ export type RequestArgs<Filter, Sort> = {
   start?: number
   limit?: number
   filter?: Filter
-  sorts?: Sort[]
+  sort?: Sort[]
 }
 
 export type ReferenceChecksResponse<T> =
@@ -41,7 +41,7 @@ export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<Fil
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
   start?: number
   limit?: number
-  sorts?: T['sort'][]
+  sort?: T['sort']
 }
 
 export type InsertParams<T extends DAOGenerics> = {
@@ -72,12 +72,12 @@ export type DeleteParams<T extends DAOGenerics> = {
 
 export type AggregationFields<T extends DAOGenerics> = {
   [key: string]:
-    | { field: keyof T['sort']; operation: 'sum' | 'avg' | 'min' | 'max' }
-    | { field?: keyof T['sort']; operation: 'count' }
+    | { field: keyof T['pureSort']; operation: 'sum' | 'avg' | 'min' | 'max' }
+    | { field?: keyof T['pureSort']; operation: 'count' }
 }
 
 export type AggregateParams<T extends DAOGenerics> = {
-  by?: { [K in keyof T['sort']]: true }
+  by?: { [K in keyof T['pureSort']]: true }
   filter?: T['filter']
   aggregations: AggregationFields<T>
   start?: number
@@ -88,7 +88,7 @@ export type AggregateParams<T extends DAOGenerics> = {
 
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
   having?: { [K in keyof A['aggregations']]?: EqualityOperators<number> | QuantityOperators<number> | number }
-  sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
+  sort?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
 }
 
 export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
@@ -144,10 +144,12 @@ export type DAOGenerics<
   IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
   IDScalar extends keyof ScalarsType = any,
   IdGeneration extends IdGenerationStrategy = any,
-  FilterType = any,
+  PureFilterType = any,
+  RawFilterType = any,
   RelationsType = any,
   ProjectionType extends object = any,
-  SortType = any,
+  PureSortType = any,
+  RawSortType = any,
   InsertType extends object = any,
   UpdateType = any,
   ExcludedFields extends keyof ModelType = any,
@@ -166,10 +168,14 @@ export type DAOGenerics<
   idKey: IDKey
   idScalar: IDScalar
   idGeneration: IdGeneration
-  filter: FilterType
+  pureFilter: PureFilterType
+  rawFilter: RawFilterType
+  filter: PureFilterType | RawFilterType
   relations: RelationsType
   projection: ProjectionType
-  sort: SortType
+  pureSort: PureSortType
+  rawSort: RawSortType
+  sort: PureSortType[] | RawSortType
   insert: InsertType
   update: UpdateType
   exludedFields: ExcludedFields

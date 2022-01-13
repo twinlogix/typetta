@@ -97,7 +97,7 @@ test('Insert and retrieve', async () => {
   const all = await dao.user.findAll({
     filter: { 'credentials.password': 'password' },
     projection: true,
-    sorts: [{ 'credentials.username': 'asc' }],
+    sort: [{ 'credentials.username': 'asc' }],
   })
   expect(all.length).toBe(2)
   expect(all[0].live).toBe(true)

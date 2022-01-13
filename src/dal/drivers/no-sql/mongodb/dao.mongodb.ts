@@ -39,8 +39,11 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongo) : {}
   }
 
-  private buildSort(sorts?: T['sort'][]): [string, SortDirection][] {
-    return sorts ? adaptSorts(sorts, this.schema) : []
+  private buildSort(sort?: T['sort']): [string, SortDirection][] {
+    if(typeof sort === 'function') {
+      return sort()
+    }
+    return sort ? adaptSorts(sort, this.schema) : []
   }
 
   private buildChanges(update: T['update']) {
@@ -53,7 +56,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     }
     const filter = this.buildFilter(params.filter)
     const projection = this.buildProjection(params.projection)
-    const sort = this.buildSort(params.sorts)
+    const sort = this.buildSort(params.sort)
     const results = await this.collection.find(filter, { ...(params.options ?? {}), projection, sort, skip: params.start, limit: params.limit || this.pageSize } as FindOptions).toArray()
     const records = this.dbsToModels(results)
     return records
@@ -106,11 +109,11 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       return { ...p, [k]: v.operation === 'count' ? { [`$${v.operation}`]: {} } : { [`$${v.operation}`]: `$${modelNameToDbName(v.field as string, this.schema)}` } }
     }, {})
 
-    const sorts = args?.sorts
+    const sort = args?.sort
       ? [
           {
             // @ts-ignore
-            $sort: args.sorts.reduce<object>((p, s) => {
+            $sort: args.sort.reduce<object>((p, s) => {
               const [k, v] = Object.entries(s)[0]
               return {
                 ...p,
@@ -133,7 +136,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
             },
           },
           ...having,
-          ...sorts,
+          ...sort,
         ],
         params.options ?? {},
       )

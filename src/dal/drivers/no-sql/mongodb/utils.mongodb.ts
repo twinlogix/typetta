@@ -135,8 +135,8 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
   }, {})
 }
 
-export function adaptSorts<SortType, ScalarsType>(sorts: SortType[], schema: Schema<ScalarsType>): [string, SortDirection][] {
-  return sorts.flatMap((s) => {
+export function adaptSorts<SortType, ScalarsType>(sort: SortType[], schema: Schema<ScalarsType>): [string, SortDirection][] {
+  return sort.flatMap((s) => {
     return Object.entries(s).map(([k, v]) => {
       if(k === '$textScore') {
         return ['score', { $meta: "textScore" }] as [string, SortDirection]

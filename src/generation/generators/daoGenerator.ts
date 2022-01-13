@@ -8,7 +8,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     return [
       "import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';",
       `import * as types from '${this._config.tsTypesImport}';`,
-      "import { Collection, Db, Filter } from 'mongodb';",
+      "import { Collection, Db, Filter, Sort } from 'mongodb';",
       "import { Knex } from 'knex';",
     ]
   }
@@ -182,10 +182,12 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public _generateDAOFilter(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap, customScalarsMap, node.mongoEntity ? 'mongo' : 'sql').join(',\n'))
     const daoFilterFields = `type ${node.name}FilterFields = {\n` + daoFilterFieldsBody + `\n};`
-    const daoSpecificFilter = node.mongoEntity ? ' | (() => Filter<{ [key: string]: any }>)' : node.sqlEntity ? ' | ((builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>)' : ''
-    const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields>${daoSpecificFilter};`
+    const daoRawFilter = `export type ${node.name}RawFilter = ${
+      node.mongoEntity ? '() => Filter<{ [key: string]: any }>' : node.sqlEntity ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+    }`
+    const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields>;`
 
-    return [daoFilterFields, daoFilter].join('\n')
+    return [daoFilterFields, daoFilter, daoRawFilter].join('\n')
   }
 
   public _generateDAOFilterFields(
@@ -225,7 +227,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const relationsBody = node.fields.flatMap((field) => {
       if (field.isList && (isInnerRef(field.type) || isForeignRef(field.type) || isRelationEntityRef(field.type)) && !field.isExcluded) {
         const nodeName = isInnerRef(field.type) ? field.type.innerRef : isForeignRef(field.type) ? field.type.foreignRef : field.type.destRef
-        const body = [`filter?: ${nodeName}Filter`, `sorts?: ${nodeName}Sort[]`, 'start?: number', 'limit?: number', `relations?: ${nodeName}Relations`].map((v) => `    ${v}`).join('\n')
+        const body = [`filter?: ${nodeName}Filter | ${nodeName}RawFilter`, `sort?: ${nodeName}Sort[] | ${nodeName}RawSort`, 'start?: number', 'limit?: number', `relations?: ${nodeName}Relations`]
+          .map((v) => `    ${v}`)
+          .join('\n')
         return `  ${field.name}?: {\n${body}\n  }`
       } else {
         return []
@@ -274,12 +278,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const daoSortFields = indentMultiline(this._generateDAOSortFields(node, typesMap).join('|\n'))
     const daoSortKeys = `export type ${node.name}SortKeys = \n${daoSortFields};`
     const daoSort = `export type ${node.name}Sort = OneKey<${node.name}SortKeys, SortDirection>;`
-    return `${daoSortKeys}\n${daoSort}`
+    const daoRawSort = `export type ${node.name}RawSort = ${node.mongoEntity ? '() => Sort' : node.sqlEntity ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'}`
+    return `${daoSortKeys}\n${daoSort}\n${daoRawSort}`
   }
-
-  /*private _nodeContainsStringField(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): boolean {
-    return node.fields.some((f) => (typeof f.type === 'string' ? f.type === 'string' : 'embed' in f.type && this._nodeContainsStringField(findNode(f.type.embed, typesMap)!, typesMap)))
-  }*/
 
   public _generateDAOSortFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path: string = ''): string[] {
     return node.fields
@@ -365,7 +366,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const dbDAOParams = node.sqlEntity ? 'KnexJsDAOParams' : node.mongoEntity ? 'MongoDBDAOParams' : 'DAOParams'
     const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${idField.coreType}', '${
       idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
-    }', ${node.name}Filter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}Insert, ${node.name}Update, ${
+    }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${
       node.name
     }ExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${

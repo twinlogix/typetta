@@ -62,8 +62,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knex) : qb || this.qb()
   }
 
-  private buildSort(sorts?: T['sort'][], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    return buildSort(qb || this.qb(), (sorts || []) as unknown as AbstractSort[], this.schema)
+  private buildSort(sort?: T['sort'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+    if(typeof sort === 'function') {
+      return sort(qb || this.qb())
+    }
+    return buildSort(qb || this.qb(), (sort || []) as unknown as AbstractSort[], this.schema)
   }
 
   private buildTransaction(options?: Pick<T['driverFilterOptions'], 'trx'>, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
@@ -77,7 +80,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
-    const query = this.buildSort(params.sorts, where)
+    const query = this.buildSort(params.sort, where)
     const asd = query.toQuery().toString()
     const records = await this.buildTransaction(params.options, query)
       .limit(params.limit || this.pageSize)
@@ -132,7 +135,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
       return this.knex.raw(`${v.operation.toUpperCase()}(${v.field == null ? '*' : modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
     })
     const where = this.buildWhere(params.filter)
-    const sort = this.buildSort(args?.sorts, where)
+    const sort = this.buildSort(args?.sort, where)
     const select = sort.select([...byColumns, ...aggregations])
     const groupBy = byColumns.length > 0 ? select.groupBy(byColumns) : select.groupByRaw('(SELECT 1)')
     const having = args?.having ? buildHavingConditions(groupBy, args.having) : groupBy

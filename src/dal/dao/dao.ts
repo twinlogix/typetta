@@ -142,7 +142,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       filterKey +
       '-' +
       objectHash(params.projection || null, { respectType: false, unorderedArrays: true }) +
-      objectHash(params.sorts || null, { respectType: false, unorderedArrays: true }) +
+      objectHash(params.sort || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.metadata || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.options || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.relations || null, { respectType: false, unorderedArrays: true })
@@ -209,7 +209,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           projection: relationProjection,
           limit: relationFilter?.limit,
           start: relationFilter?.start,
-          sorts: relationFilter?.sorts,
+          sort: relationFilter?.sort,
           relations: relationFilter?.relations,
         }
         if (relation.reference === DAORelationReference.RELATION) {

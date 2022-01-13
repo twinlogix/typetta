@@ -137,7 +137,7 @@ test('Demo', async () => {
         filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
         limit: 2,
         start: 1,
-        sorts: [{ title: 'desc' }],
+        sort: [{ title: 'desc' }],
         relations: {
           tags: {
             filter: { name: 'Sport' },
@@ -177,7 +177,7 @@ test('Aggregate test', async () => {
       aggregations: { count: { field: 'authorId', operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
     },
-    { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { $lt: 150 } } },
+    { sort: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { $lt: 150 } } },
   )
   expect(aggregation1.length).toBe(4)
   expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
