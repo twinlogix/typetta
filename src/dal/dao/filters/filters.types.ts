@@ -54,9 +54,3 @@ export type GeospathialOperators = {
     $minDistance: number
   }
 }
-
-export type ArrayOperators<FieldType> = {
-  $all?: FieldType[]
-  // $elemMatch
-  $size: number
-}
