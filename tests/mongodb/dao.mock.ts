@@ -25,7 +25,7 @@ export type AddressRawFilter = () => Filter<{ [key: string]: any }>
 
 export type AddressRelations = {
   cities?: {
-    filter?: CityFilter | CityRawFilter
+    filter?: CityFilter
     sort?: CitySort[] | CityRawSort
     start?: number
     limit?: number
@@ -633,14 +633,14 @@ export type UserRawFilter = () => Filter<{ [key: string]: any }>
 
 export type UserRelations = {
   dogs?: {
-    filter?: DogFilter | DogRawFilter
+    filter?: DogFilter
     sort?: DogSort[] | DogRawSort
     start?: number
     limit?: number
     relations?: DogRelations
   }
   friends?: {
-    filter?: UserFilter | UserRawFilter
+    filter?: UserFilter
     sort?: UserSort[] | UserRawSort
     start?: number
     limit?: number

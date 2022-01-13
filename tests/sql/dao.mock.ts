@@ -25,7 +25,7 @@ export type AddressRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.Qu
 
 export type AddressRelations = {
   cities?: {
-    filter?: CityFilter | CityRawFilter
+    filter?: CityFilter
     sort?: CitySort[] | CityRawSort
     start?: number
     limit?: number
@@ -595,14 +595,14 @@ export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 
 export type UserRelations = {
   dogs?: {
-    filter?: DogFilter | DogRawFilter
+    filter?: DogFilter
     sort?: DogSort[] | DogRawSort
     start?: number
     limit?: number
     relations?: DogRelations
   }
   friends?: {
-    filter?: UserFilter | UserRawFilter
+    filter?: UserFilter
     sort?: UserSort[] | UserRawSort
     start?: number
     limit?: number

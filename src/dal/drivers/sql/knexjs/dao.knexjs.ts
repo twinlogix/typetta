@@ -81,7 +81,6 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
     const query = this.buildSort(params.sort, where)
-    const asd = query.toQuery().toString()
     const records = await this.buildTransaction(params.options, query)
       .limit(params.limit || this.pageSize)
       .offset(params.start || 0)
