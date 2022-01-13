@@ -541,7 +541,7 @@ test('insert validation fails', async () => {
       },
     })
     fail()
-  } catch (error) {
+  } catch (error: any) {
     expect(error.message).toBe('Password must be 3 character or more.')
   }
 })
@@ -562,7 +562,7 @@ test('update validation fails', async () => {
       changes: { 'usernamePasswordCredentials.password': 'p' },
     })
     fail()
-  } catch (error) {
+  } catch (error: any) {
     expect(error.message).toBe('Password must be 3 character or more.')
   }
 })
@@ -589,7 +589,7 @@ test('replace validation fails', async () => {
       },
     })
     fail()
-  } catch (error) {
+  } catch (error: any) {
     expect(error.message).toBe('Password must be 3 character or more.')
   }
 })
@@ -1144,7 +1144,7 @@ test('Simple transaction 2', async () => {
   try {
     await session.commitTransaction()
     expect(1).toBe(0)
-  } catch (error) {
+  } catch (error: any) {
     expect(error.ok).toBe(0)
   }
 })
