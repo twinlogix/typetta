@@ -64,7 +64,9 @@
     "type-fest": "0.16.0"
   },
   "peerDependencies": {
-    "graphql": "15.3.0"
+    "graphql": "15.3.0",
+    "knex": "0.95.15",
+    "mongodb": "4.3.0"
   },
   "peerDependenciesMeta": {
     "knex": {
