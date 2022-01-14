@@ -8,7 +8,6 @@ export enum Directives {
   RELATION_ENTITY_REF = 'relationEntityRef',
   EXCLUDE = 'exclude',
   ALIAS = 'alias',
-  GEOPOINT = 'geopoint',
 }
 
 export const DIRECTIVES = `
@@ -22,5 +21,4 @@ export const DIRECTIVES = `
   directive @${Directives.RELATION_ENTITY_REF}(entity: String!, refThis: RefPointer, refOther: RefPointer) on FIELD_DEFINITION
   directive @${Directives.EXCLUDE} on OBJECT | FIELD_DEFINITION
   directive @${Directives.ALIAS}(value: String!) on FIELD_DEFINITION
-  directive @${Directives.GEOPOINT} on SCALAR
 `

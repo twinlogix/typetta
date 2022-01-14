@@ -1,7 +1,7 @@
 global.TextEncoder = require('util').TextEncoder
 global.TextDecoder = require('util').TextDecoder
 
-import { identityAdapter, computedField } from '../../src'
+import { computedField } from '../../src'
 import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
@@ -56,22 +56,16 @@ beforeAll(async () => {
         },
       },
       ID: {
-        ...identityAdapter,
         generate: () => {
           return uuidv4()
         },
       },
-      IntAutoInc: identityAdapter,
       JSON: {
         knex: {
           dbToModel: (o: unknown) => JSON.parse(o as string),
           modelToDB: (o: any) => JSON.stringify(o),
         },
-        mongo: identityAdapter,
-      },
-      MongoID: {
-        mongo: identityAdapter,
-      },
+      }
     },
     overrides: {
       b: {

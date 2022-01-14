@@ -35,7 +35,6 @@ export type TsTypettaGeneratorNode = {
 export type TsTypettaGeneratorScalar = {
   type: 'scalar'
   name: string
-  isGeoPoint: boolean
 }
 
 export class TsTypettaGenerator {

@@ -1,6 +1,6 @@
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { identityAdapter, computedField } from '../../src'
+import { computedField } from '../../src'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -55,7 +55,6 @@ beforeEach(async () => {
       default: knexInstance,
     },
     scalars: {
-      ID: identityAdapter,
       Decimal: {
         dbToModel: (o: unknown) => new BigNumber(o as number),
         modelToDB: (o: BigNumber) => o,
