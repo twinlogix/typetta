@@ -1,4 +1,3 @@
-import BigNumber from "bignumber.js";
 import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src';
@@ -622,15 +621,15 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators | StringOperators,
-  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | StringOperators,
+  'amount'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
+  'amounts'?: any[] | null | EqualityOperators<any[]> | ElementOperators | StringOperators,
   'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | StringOperators,
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
-  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators | StringOperators | GeospathialOperators,
-  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators | StringOperators,
+  'localization'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
+  'title'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
   'usernamePasswordCredentials.password'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
   'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
@@ -688,15 +687,15 @@ export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = () => Sort
 
 export type UserUpdate = {
-  'amount'?: BigNumber | null,
-  'amounts'?: Array<BigNumber> | null,
+  'amount'?: any | null,
+  'amounts'?: Array<any> | null,
   'firstName'?: string | null,
   'friendsId'?: Array<string> | null,
   'id'?: string,
   'lastName'?: string | null,
   'live'?: boolean,
-  'localization'?: Coordinates | null,
-  'title'?: LocalizedString | null,
+  'localization'?: any | null,
+  'title'?: any | null,
   'usernamePasswordCredentials'?: types.UsernamePasswordCredentials | null,
   'usernamePasswordCredentials.password'?: any,
   'usernamePasswordCredentials.username'?: string
@@ -704,15 +703,15 @@ export type UserUpdate = {
 export type UserRawUpdate = () => UpdateFilter<Document>
 
 export type UserInsert = {
-  amount?: BigNumber,
-  amounts?: BigNumber[],
+  amount?: any,
+  amounts?: any[],
   firstName?: string,
   friendsId?: string[],
   id?: string,
   lastName?: string,
   live: boolean,
-  localization?: Coordinates,
-  title?: LocalizedString,
+  localization?: any,
+  title?: any,
   usernamePasswordCredentials?: types.UsernamePasswordCredentials,
 };
 

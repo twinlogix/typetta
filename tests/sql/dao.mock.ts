@@ -1,4 +1,3 @@
-import BigNumber from "bignumber.js";
 import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
@@ -583,18 +582,18 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators | StringOperators,
-  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | StringOperators,
+  'amount'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
+  'amounts'?: any[] | null | EqualityOperators<any[]> | ElementOperators | StringOperators,
   'bestFriendId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'credentials.another.test'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'credentials.password'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
   'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
-  'localization'?: Coordinates | null | EqualityOperators<Coordinates> | ElementOperators | StringOperators,
-  'title'?: LocalizedString | null | EqualityOperators<LocalizedString> | ElementOperators | StringOperators
+  'localization'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
+  'title'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -655,34 +654,34 @@ export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserUpdate = {
-  'amount'?: BigNumber | null,
-  'amounts'?: Array<BigNumber> | null,
+  'amount'?: any | null,
+  'amounts'?: Array<any> | null,
   'bestFriendId'?: string | null,
   'credentials'?: types.UsernamePasswordCredentials | null,
   'credentials.another'?: types.Another | null,
   'credentials.another.test'?: string | null,
-  'credentials.password'?: string,
+  'credentials.password'?: any,
   'credentials.username'?: string,
   'firstName'?: string | null,
   'id'?: string,
   'lastName'?: string | null,
   'live'?: boolean,
-  'localization'?: Coordinates | null,
-  'title'?: LocalizedString | null
+  'localization'?: any | null,
+  'title'?: any | null
 };
 export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserInsert = {
-  amount?: BigNumber,
-  amounts?: BigNumber[],
+  amount?: any,
+  amounts?: any[],
   bestFriendId?: string,
   credentials?: types.UsernamePasswordCredentials,
   firstName?: string,
   id?: string,
   lastName?: string,
   live: boolean,
-  localization?: Coordinates,
-  title?: LocalizedString,
+  localization?: any,
+  title?: any,
 };
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;

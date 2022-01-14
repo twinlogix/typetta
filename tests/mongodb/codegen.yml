@@ -13,9 +13,9 @@ generates:
       namingConvention: keep
       scalars:
         Date: Date
-        Decimal: BigNumber
-        Coordinates: Coordinates
-        LocalizedString: LocalizedString
+        Decimal: bignumber.js#BigNumber
+        Coordinates: ../../src#Coordinates
+        LocalizedString: ../../src#LocalizedString
   tests/mongodb/dao.mock.ts:
     config:
       schemaImport: './schema.graphql'
@@ -24,12 +24,5 @@ generates:
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
       skipTypename: true
-      scalars:
-        Date: Date
-        Decimal: BigNumber
-        Coordinates: Coordinates
-        LocalizedString: LocalizedString
     plugins:
-      - add:
-          content: 'import BigNumber from "bignumber.js";'
       - lib/generation/index.js
