@@ -1,6 +1,6 @@
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { identityAdapter, computedField } from '../../src'
+import { computedField } from '../../src'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -55,7 +55,6 @@ beforeEach(async () => {
       default: knexInstance,
     },
     scalars: {
-      ID: identityAdapter,
       Decimal: {
         dbToModel: (o: unknown) => new BigNumber(o as number),
         modelToDB: (o: BigNumber) => o,
@@ -75,17 +74,17 @@ beforeEach(async () => {
     },
   })
 
-  const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
-    ['Decimal', ['decimal', 'decimal ARRAY']],
-    ['Boolean', ['boolean', 'boolean ARRAY']],
-    ['Float', ['decimal', 'decimal ARRAY']],
-    ['Int', ['integer', 'integer ARRAY']],
-    ['DateTime', ['integer', 'integer ARRAY']],
-  ])
-  const defaultSpecificType: [string, string] = ['string', 'string ARRAY']
-  await dao.post.createTable(specificTypeMap, defaultSpecificType)
-  await dao.user.createTable(specificTypeMap, defaultSpecificType)
-  await dao.tag.createTable(specificTypeMap, defaultSpecificType)
+  const typeMap = {
+    Decimal: { singleType: 'decimal' },
+    Boolean: { singleType: 'boolean' },
+    Float: { singleType: 'decimal' },
+    Int: { singleType: 'integer' },
+    IntAutoInc: { singleType: 'INTEGER PRIMARY KEY AUTOINCREMENT' },
+  }
+  const defaultType = { singleType: 'string' }
+  await dao.post.createTable(typeMap, defaultType)
+  await dao.user.createTable(typeMap, defaultType)
+  await dao.tag.createTable(typeMap, defaultType)
 })
 
 test('Demo', async () => {

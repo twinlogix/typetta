@@ -184,13 +184,9 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
   }
 
   ScalarTypeDefinition(node: ScalarTypeDefinitionNode): TsTypettaGeneratorScalar {
-
-    const geoPointDirective = this._getDirectiveFromAstNode(node, Directives.GEOPOINT)
-
     return {
       type: 'scalar',
       name: node.name.value,
-      isGeoPoint: geoPointDirective != null
     }
   }
 }

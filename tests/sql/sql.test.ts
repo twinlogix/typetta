@@ -1,7 +1,5 @@
 import { DAOContext } from './dao.mock'
-import { Scalars } from './models.mock'
 import { Coordinates, LocalizedString } from '../../src'
-import { identityAdapter } from '../../src'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -46,24 +44,23 @@ beforeEach(async () => {
         modelToDB: (o: string) => sha256(o),
       },
       ID: {
-        ...identityAdapter,
         generate: () => uuidv4(),
       },
     },
   })
-  const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
-    ['Decimal', ['decimal', 'decimal ARRAY']],
-    ['Boolean', ['boolean', 'boolean ARRAY']],
-    ['Float', ['decimal', 'decimal ARRAY']],
-    ['Int', ['integer', 'integer ARRAY']],
-  ])
-  const defaultSpecificType: [string, string] = ['string', 'string ARRAY']
-  await dao.device.createTable(specificTypeMap, defaultSpecificType)
-  await dao.user.createTable(specificTypeMap, defaultSpecificType)
-  await dao.friends.createTable(specificTypeMap, defaultSpecificType)
-  await dao.dog.createTable(specificTypeMap, defaultSpecificType)
-  await dao.city.createTable(specificTypeMap, defaultSpecificType)
-  await dao.organization.createTable(specificTypeMap, defaultSpecificType)
+  const typeMap = {
+    Decimal: { singleType: 'decimal' },
+    Boolean: { singleType: 'boolean' },
+    Float: { singleType: 'decimal' },
+    Int: { singleType: 'integer' },
+  }
+  const defaultType = { singleType: 'string' }
+  await dao.device.createTable(typeMap, defaultType)
+  await dao.user.createTable(typeMap, defaultType)
+  await dao.friends.createTable(typeMap, defaultType)
+  await dao.dog.createTable(typeMap, defaultType)
+  await dao.city.createTable(typeMap, defaultType)
+  await dao.organization.createTable(typeMap, defaultType)
 })
 
 afterEach(async () => { })

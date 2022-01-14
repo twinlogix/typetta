@@ -1,9 +1,8 @@
 global.TextEncoder = require('util').TextEncoder
 global.TextDecoder = require('util').TextDecoder
 
+import { computedField } from '../../src'
 import { DAOContext } from './dao.mock'
-import { Scalars } from './models.mock'
-import { identityAdapter, computedField } from '../../src'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
@@ -57,22 +56,16 @@ beforeAll(async () => {
         },
       },
       ID: {
-        ...identityAdapter,
         generate: () => {
           return uuidv4()
         },
       },
-      IntAutoInc: identityAdapter,
       JSON: {
         knex: {
           dbToModel: (o: unknown) => JSON.parse(o as string),
           modelToDB: (o: any) => JSON.stringify(o),
         },
-        mongo: identityAdapter,
-      },
-      MongoID: {
-        mongo: identityAdapter,
-      },
+      }
     },
     overrides: {
       b: {
@@ -82,17 +75,17 @@ beforeAll(async () => {
       },
     },
   })
-  const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
-    ['Decimal', ['decimal', 'decimal ARRAY']],
-    ['Boolean', ['boolean', 'boolean ARRAY']],
-    ['Float', ['decimal', 'decimal ARRAY']],
-    ['Int', ['integer', 'integer ARRAY']],
-    ['IntAutoInc', ['INTEGER PRIMARY KEY AUTOINCREMENT', 'none']],
-  ])
-  const defaultSpecificType: [string, string] = ['string', 'string ARRAY']
-  await dao.d.createTable(specificTypeMap, defaultSpecificType)
-  await dao.e.createTable(specificTypeMap, defaultSpecificType)
-  await dao.f.createTable(specificTypeMap, defaultSpecificType)
+  const typeMap = {
+    Decimal: { singleType: 'decimal', arrayType: 'decimal ARRAY' },
+    Boolean: { singleType: 'boolean' },
+    Float: { singleType: 'decimal' },
+    Int: { singleType: 'integer' },
+    IntAutoInc: { singleType: 'INTEGER PRIMARY KEY AUTOINCREMENT' },
+  }
+  const defaultType = { singleType: 'string', arrayType: 'string ARRAY' }
+  await dao.d.createTable(typeMap, defaultType)
+  await dao.e.createTable(typeMap, defaultType)
+  await dao.f.createTable(typeMap, defaultType)
 })
 
 test('Test mongo', async () => {

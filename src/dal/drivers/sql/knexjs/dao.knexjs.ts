@@ -202,19 +202,19 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     await this.buildTransaction(params.options, where)
   }
 
-  public async createTable(specificTypeMap: Map<keyof T['scalars'], [string, string]>, defaultSpecificType: [string, string]): Promise<void> {
+  public async createTable(typeMap: Partial<Record<keyof T['scalars'], { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string }): Promise<void> {
     await this.knex.schema.createTable(this.tableName, (table) => {
       Object.entries(this.schema).forEach(([key, schemaField]) => {
         if ('scalar' in schemaField) {
-          const specificType = specificTypeMap.get(schemaField.scalar) || defaultSpecificType
-          const cb = table.specificType(schemaField.alias || key, specificType[schemaField.array ? 1 : 0])
+          const specificType = typeMap[schemaField.scalar] ?? defaultType
+          const cb = table.specificType(schemaField.alias || key, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
           if (!schemaField.required) {
             cb.nullable()
           }
         } else {
           embeddedScalars(schemaField.alias || key, schemaField.embedded).forEach(([subKey, subSchemaField]) => {
-            const specificType = specificTypeMap.get(subSchemaField.scalar) || defaultSpecificType
-            const cb = table.specificType(subKey, specificType[subSchemaField.array ? 1 : 0])
+            const specificType = typeMap[subSchemaField.scalar] ?? defaultType
+            const cb = table.specificType(subKey, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
             if (!subSchemaField.required) {
               cb.nullable()
             }
