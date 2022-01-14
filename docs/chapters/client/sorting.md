@@ -1,4 +1,4 @@
-# Ordinamento
+# Ordinamenti
 
 Le API `findAll` e `findPage`, che ritornano un elenco di record, supportano la funzionalità di ordinamento dei risultati.
 

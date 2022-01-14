@@ -27,7 +27,7 @@ main:
       - url: /chapters/client/projections
         title: Proiezioni
       - url: /chapters/client/sorting
-        title: Ordinamento
+        title: Ordinamenti
       - url: /chapters/client/relations
         title: Relazioni
         todo: true

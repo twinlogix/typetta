@@ -4,20 +4,14 @@ documents: null
 generates:
   tests/id_generator/models.mock.ts:
     plugins:
-      - add:
-          content: 'import BigNumber from "bignumber.js";'
-      - add:
-          content: 'import { Coordinates, LocalizedString } from "@twinlogix/typetta";'
-      - add:
-          content: 'import { ObjectId } from "mongodb"'
       - 'typescript'
     config:
       skipTypename: true
       namingConvention: keep
       scalars:
         JSON: any
-        Decimal: BigNumber
-        MongoID: ObjectId
+        Decimal: bignumber.js#BigNumber
+        MongoID: mongodb#ObjectId
         IntAutoInc: number
   tests/id_generator/dao.mock.ts:
     config:
@@ -27,6 +21,4 @@ generates:
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
     plugins:
-      - add:
-          content: 'import BigNumber from "bignumber.js";'
       - lib/generation/index.js

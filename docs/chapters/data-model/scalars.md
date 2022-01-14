@@ -5,7 +5,6 @@
   - [Mapping TypeScript](#mapping-typescript) 
   - [DataType Adapter](#datatype-adapter) 
   - [Validazione](#validazione) 
-  <!-- - [Scalari Geospaziali [Draft]](#scalari-geospaziali-draft)  -->
 
 ## Scalari Base
 
@@ -57,19 +56,19 @@ generates:
 ```
 La chiave di sinistra corrisponde al nome dello scalare aggiuntivo definito nello schema GraphQL, mentre il valore di destra è il tipo di dato TypeScript corrispondente.
 
-E' possibile creare anche scalari aggiuntivi che non abbiano una controparte in un tipo primitivo TypeScript, bensì un tipo o una classe proprietaria o di una libreria di terze parti. Per fare questo occorre aggiungere un ulteriore plugin di generazione che permette di inserire una riga di import all'inizio del file contenente le entità del modello applicativo. Di seguito un esempio di uno scalare Decimal mappato sul tipo di dato BigNumber della libreria [bignumber.js](https://mikemcl.github.io/bignumber.js/){:target="_blank"}:
+E' possibile creare anche scalari aggiuntivi che non abbiano una controparte in un tipo primitivo TypeScript, bensì un tipo o una classe proprietaria o di una libreria di terze parti. 
+
+Di seguito un esempio di uno scalare Decimal mappato sul tipo di dato BigNumber della libreria [bignumber.js](https://mikemcl.github.io/bignumber.js/){:target="_blank"}:
 
 ```yaml
 schema: "src/schema.graphql"
 generates:
   src/models.ts:
     plugins:
-      - add:
-          content: 'import BigNumber from "bignumber.js";'
       - "typescript"
     config:
       scalars:
-        Decimal: BigNumber
+        Decimal: bignumber.js#BigNumber
   [...]
 ```
 
@@ -145,28 +144,3 @@ const daoContext = new DAOContext({
   }
 });
 ```
-
-<!-- ### Scalari Geospaziali [Draft]
-
-In molti contesti applicativi risulta utile la definizione di un tipo di dato che identifichi una posizione precisa sul globo terrestre, definita dalle sue coordinate di latitudine e longitudine. Alcuni database supportano in maniera nativa o tramite degli appositi plugin questo tipo di dato e offrono svariate funzioni di query e ordinamento.
-
-Per supportare questo tipo di scalari, in Typetta è stata aggiunta una direttiva con la quale si può specificare che uno scalare aggiuntivo rappresenta una posizione geografica:
-
-```typescript
-scalar Coordinates @geopoint
-```
-
-Lo scalare in questione segue le stesse identiche regole di tutti gli altri scalari aggiuntivi perciò necessita di un DataType Adapter per fare in modo che venga correttamente trasformato nel tipo di dato atteso dal database target. La direttiva però permette al sistema di estendere i possibili filtri applicabili su un campo di questo tipo, in particolare aggiungendo le seguenti opzioni di query:
-
-```typescript
-{
-  $near?: {
-    $coordnates: Coordinate
-    $maxDistance?: number
-    $minDistance: number
-  }
-}
-``` -->
-
-
-

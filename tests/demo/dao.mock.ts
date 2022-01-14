@@ -1,4 +1,3 @@
-import BigNumber from "bignumber.js";
 import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
@@ -56,7 +55,7 @@ type PostFilterFields = {
   'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'clicks'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>,
-  'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | StringOperators | QuantityOperators<Date>,
+  'createdAt'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
@@ -109,7 +108,7 @@ export type PostUpdate = {
   'authorId'?: string,
   'body'?: string | null,
   'clicks'?: number | null,
-  'createdAt'?: Date,
+  'createdAt'?: any,
   'id'?: string,
   'metadata'?: types.PostMetadata | null,
   'metadata.region'?: string,
@@ -123,7 +122,7 @@ export type PostInsert = {
   authorId: string,
   body?: string,
   clicks?: number,
-  createdAt: Date,
+  createdAt: any,
   id?: string,
   metadata?: types.PostMetadata,
   title: string,
@@ -275,8 +274,8 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'createdAt'?: Date | null | EqualityOperators<Date> | ElementOperators | StringOperators | QuantityOperators<Date>,
-  'credentials.password'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
+  'createdAt'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
+  'credentials.password'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
   'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'email'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
@@ -323,9 +322,9 @@ export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserUpdate = {
-  'createdAt'?: Date,
+  'createdAt'?: any,
   'credentials'?: types.Credentials,
-  'credentials.password'?: string | null,
+  'credentials.password'?: any | null,
   'credentials.username'?: string | null,
   'email'?: string | null,
   'firstName'?: string | null,
@@ -335,7 +334,7 @@ export type UserUpdate = {
 export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserInsert = {
-  createdAt: Date,
+  createdAt: any,
   credentials: types.Credentials,
   email?: string,
   firstName?: string,
