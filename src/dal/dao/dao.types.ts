@@ -1,31 +1,10 @@
-import { DefaultModelScalars, EqualityOperators, Expand, LogicalOperators, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
+import { DefaultModelScalars, EqualityOperators, Expand, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
-import { PartialDeep } from 'type-fest'
 import { GraphQLResolveInfo } from 'graphql'
-
-export type RequestArgs<Filter, Sort> = {
-  start?: number
-  limit?: number
-  filter?: Filter
-  sort?: Sort[]
-}
-
-export type ReferenceChecksResponse<T> =
-  | true
-  | {
-      relation: DAORelation
-      record: PartialDeep<T>
-      failedReferences: any[]
-    }[]
-
-export type DAOResolver = {
-  load: (parents: any[], projections: any, relations: any) => Promise<any[]>
-  match: (source: any, value: any) => boolean
-}
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
@@ -72,9 +51,7 @@ export type DeleteParams<T extends DAOGenerics> = {
 }
 
 export type AggregationFields<T extends DAOGenerics> = {
-  [key: string]:
-    | { field: keyof T['pureSort']; operation: 'sum' | 'avg' | 'min' | 'max' }
-    | { field?: keyof T['pureSort']; operation: 'count' }
+  [key: string]: { field: keyof T['pureSort']; operation: 'sum' | 'avg' | 'min' | 'max' } | { field?: keyof T['pureSort']; operation: 'count' }
 }
 
 export type AggregateParams<T extends DAOGenerics> = {
