@@ -73,11 +73,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return options?.trx ? (qb || this.qb()).transacting(options.trx) : qb || this.qb()
   }
 
-  private buildUpdate(changes: T['update'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+  private buildUpdate(changes: T['update'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> | null {
     if (typeof changes === 'function') {
       return changes(qb || this.qb())
     }
     const updates = this.adaptUpdate(changes)
+    if(Object.keys(updates).length === 0) {
+      return null
+    }
     return (qb || this.qb()).update(updates)
   }
 
@@ -86,12 +89,15 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
+    if (params.limit === 0) {
+      return []
+    }
     const select = this.buildSelect(params.projection)
     const where = this.buildWhere(params.filter, select)
     const query = this.buildSort(params.sorts, where)
     const records = await this.buildTransaction(params.options, query)
-      .limit(params.limit || this.pageSize)
-      .offset(params.start || 0)
+      .limit(params.limit ?? this.pageSize)
+      .offset(params.start ?? 0)
     return this.dbsToModels(records)
   }
 
@@ -184,6 +190,9 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
 
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
     const update = this.buildUpdate(params.changes)
+    if(update === null) {
+      return
+    }
     const where = this.buildWhere(params.filter, update)
     await this.buildTransaction(params.options, where)
   }

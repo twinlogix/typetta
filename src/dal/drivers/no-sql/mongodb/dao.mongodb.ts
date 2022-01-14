@@ -60,7 +60,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     const filter = this.buildFilter(params.filter)
     const projection = this.buildProjection(params.projection)
     const sort = this.buildSort(params.sorts)
-    const results = await this.collection.find(filter, { ...(params.options ?? {}), projection, sort, skip: params.start, limit: params.limit || this.pageSize } as FindOptions).toArray()
+    const results = await this.collection.find(filter, { ...(params.options ?? {}), projection, sort, skip: params.start, limit: params.limit ?? this.pageSize } as FindOptions).toArray()
     const records = this.dbsToModels(results)
     return records
   }
