@@ -47,7 +47,10 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildChanges(update: T['update']) {
-    return adaptUpdate(update, this.schema, this.daoContext.adapters.mongo)
+    if(typeof update === 'function') {
+      return update()
+    }
+    return { $set: adaptUpdate(update, this.schema, this.daoContext.adapters.mongo) }
   }
 
   protected async _find<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
@@ -182,7 +185,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
     const changes = this.buildChanges(params.changes)
     const filter = this.buildFilter(params.filter)
-    await this.collection.updateOne(filter, { $set: changes }, { ...(params.options ?? {}), upsert: false, ignoreUndefined: true } as UpdateOptions)
+    await this.collection.updateOne(filter, changes, { ...(params.options ?? {}), upsert: false, ignoreUndefined: true } as UpdateOptions)
   }
 
   protected async _updateMany(params: UpdateParams<T>): Promise<void> {

@@ -151,7 +151,8 @@ export type DAOGenerics<
   PureSortType = any,
   RawSortType = any,
   InsertType extends object = any,
-  UpdateType = any,
+  PureUpdateType = any,
+  RawUpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   MetadataType = any,
   OperationMetadataType = any,
@@ -177,7 +178,9 @@ export type DAOGenerics<
   rawSort: RawSortType
   sort: PureSortType[] | RawSortType
   insert: InsertType
-  update: UpdateType
+  pureUpdate: PureUpdateType
+  rawUpdate: RawUpdateType
+  update: PureUpdateType | RawUpdateType
   exludedFields: ExcludedFields
   metadata: MetadataType
   operationMetadata: OperationMetadataType

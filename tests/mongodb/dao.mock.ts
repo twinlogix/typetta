@@ -1,8 +1,8 @@
 import BigNumber from "bignumber.js";
-import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, ArrayOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '../../src';
+import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src';
-import { Collection, Db, Filter, Sort } from 'mongodb';
+import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
 
 //--------------------------------------------------------------------------------
 //----------------------------------- ADDRESS ------------------------------------
@@ -21,7 +21,7 @@ type AddressFilterFields = {
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
-export type AddressRawFilter = () => Filter<{ [key: string]: any }>
+export type AddressRawFilter = () => Filter<Document>
 
 export type AddressRelations = {
   cities?: {
@@ -46,12 +46,13 @@ export type AddressRawSort = () => Sort
 export type AddressUpdate = {
   'id'?: string
 };
+export type AddressRawUpdate = () => UpdateFilter<Document>
 
 export type AddressInsert = {
   id?: string,
 };
 
-type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -102,7 +103,7 @@ type CityFilterFields = {
   'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
-export type CityRawFilter = () => Filter<{ [key: string]: any }>
+export type CityRawFilter = () => Filter<Document>
 
 export type CityRelations = {
 
@@ -128,6 +129,7 @@ export type CityUpdate = {
   'id'?: string,
   'name'?: string
 };
+export type CityRawUpdate = () => UpdateFilter<Document>
 
 export type CityInsert = {
   addressId: string,
@@ -135,7 +137,7 @@ export type CityInsert = {
   name: string,
 };
 
-type CityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type CityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -185,7 +187,7 @@ type DeviceFilterFields = {
   'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
-export type DeviceRawFilter = () => Filter<{ [key: string]: any }>
+export type DeviceRawFilter = () => Filter<Document>
 
 export type DeviceRelations = {
 
@@ -210,6 +212,7 @@ export type DeviceUpdate = {
   'name'?: string,
   'userId'?: string | null
 };
+export type DeviceRawUpdate = () => UpdateFilter<Document>
 
 export type DeviceInsert = {
   id?: string,
@@ -217,7 +220,7 @@ export type DeviceInsert = {
   userId?: string,
 };
 
-type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -268,7 +271,7 @@ type DogFilterFields = {
   'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
-export type DogRawFilter = () => Filter<{ [key: string]: any }>
+export type DogRawFilter = () => Filter<Document>
 
 export type DogRelations = {
 
@@ -293,6 +296,7 @@ export type DogUpdate = {
   'name'?: string,
   'ownerId'?: string
 };
+export type DogRawUpdate = () => UpdateFilter<Document>
 
 export type DogInsert = {
   id?: string,
@@ -300,7 +304,7 @@ export type DogInsert = {
   ownerId: string,
 };
 
-type DogDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type DogDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -359,7 +363,7 @@ type OrganizationFilterFields = {
   'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
-export type OrganizationRawFilter = () => Filter<{ [key: string]: any }>
+export type OrganizationRawFilter = () => Filter<Document>
 
 export type OrganizationRelations = {
 
@@ -391,6 +395,7 @@ export type OrganizationUpdate = {
   'name'?: string,
   'vatNumber'?: string | null
 };
+export type OrganizationRawUpdate = () => UpdateFilter<Document>
 
 export type OrganizationInsert = {
   address?: types.Address,
@@ -399,7 +404,7 @@ export type OrganizationInsert = {
   vatNumber?: string,
 };
 
-type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -478,7 +483,7 @@ type PostFilterFields = {
   'views'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
 };
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
-export type PostRawFilter = () => Filter<{ [key: string]: any }>
+export type PostRawFilter = () => Filter<Document>
 
 export type PostRelations = {
 
@@ -521,6 +526,7 @@ export type PostUpdate = {
   'title'?: string,
   'views'?: number
 };
+export type PostRawUpdate = () => UpdateFilter<Document>
 
 export type PostInsert = {
   authorId: string,
@@ -532,7 +538,7 @@ export type PostInsert = {
   views: number,
 };
 
-type PostDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type PostDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -617,9 +623,9 @@ export const userSchema: Schema<types.Scalars> = {
 
 type UserFilterFields = {
   'amount'?: BigNumber | null | EqualityOperators<BigNumber> | ElementOperators | StringOperators,
-  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | StringOperators | ArrayOperators<BigNumber[]>,
+  'amounts'?: BigNumber[] | null | EqualityOperators<BigNumber[]> | ElementOperators | StringOperators,
   'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | StringOperators | ArrayOperators<string[]>,
+  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | StringOperators,
   'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
   'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
@@ -629,7 +635,7 @@ type UserFilterFields = {
   'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
-export type UserRawFilter = () => Filter<{ [key: string]: any }>
+export type UserRawFilter = () => Filter<Document>
 
 export type UserRelations = {
   dogs?: {
@@ -695,6 +701,7 @@ export type UserUpdate = {
   'usernamePasswordCredentials.password'?: any,
   'usernamePasswordCredentials.username'?: string
 };
+export type UserRawUpdate = () => UpdateFilter<Document>
 
 export type UserInsert = {
   amount?: BigNumber,
@@ -709,7 +716,7 @@ export type UserInsert = {
   usernamePasswordCredentials?: types.UsernamePasswordCredentials,
 };
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
+type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars>;
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
