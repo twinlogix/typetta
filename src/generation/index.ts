@@ -2,7 +2,7 @@ import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaGenerator } from './generator'
 import { TsMongooseVisitor } from './visitor'
 import { Types, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin-helpers'
-import { parse, visit, GraphQLSchema } from 'graphql'
+import { visit, GraphQLSchema } from 'graphql'
 import { extname } from 'path'
 import { transformSchemaAST } from '@graphql-codegen/schema-ast'
 

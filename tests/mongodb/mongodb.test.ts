@@ -4,7 +4,7 @@ global.TextDecoder = require('util').TextDecoder
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
-import { computedField, identityAdapter, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128 } from 'mongodb'
@@ -18,11 +18,8 @@ let con: MongoClient
 let db: Db
 type DAOContextType = DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
 let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
-const scalars: UserInputDriverDataTypeAdapterMap<Scalars> = {
-  Coordinates: identityAdapter,
-  LocalizedString: identityAdapter,
+const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
   ID: {
-    ...identityAdapter,
     generate: () => uuidv4(),
   },
   Password: {
@@ -39,7 +36,6 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars> = {
     dbToModel: (o: unknown) => new BigNumber((o as Decimal128).toString()),
     modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
   },
-  JSON: identityAdapter,
 }
 
 function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {

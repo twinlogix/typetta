@@ -1,90 +1,58 @@
-import { DataTypeAdapter, DefaultModelScalars } from './drivers.types'
+import { DataTypeAdapter, DefaultModelScalars, identityAdapter } from './drivers.types'
 import { DefaultMongoDBScalars, mongoDbAdapters, MongoDBDataTypeAdapterMap } from './no-sql/mongodb/adapters.mongodb'
 import { DefaultKnexJsScalars, knexJsAdapters, KnexJSDataTypeAdapterMap } from './sql/knexjs/adapters.knexjs'
 
-export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = Omit<
+type Drivers = 'both' | 'mongo' | 'knex'
+export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends DefaultModelScalars, D extends Drivers> = Omit<
   {
-    [key in keyof ModelScalars]: UserInputDataTypeAdapter<ModelScalars[key], unknown, unknown>
+    [key in keyof ModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key], unknown, unknown, D>
   },
   keyof DefaultModelScalars
 > & {
-    [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key], DefaultMongoDBScalars[key], DefaultKnexJsScalars[key]>
-  }
+  [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key], DefaultMongoDBScalars[key], DefaultKnexJsScalars[key], D>
+}
 
 export type DriverDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = {
   knex: KnexJSDataTypeAdapterMap<ModelScalars>
   mongo: MongoDBDataTypeAdapterMap<ModelScalars>
 }
 
-export type UserInputDataTypeAdapter<ModelType, MongoDBType, KenxDBType> = Partial<DataTypeAdapter<ModelType, KenxDBType | MongoDBType>> & {
-  knex?: DataTypeAdapter<ModelType, KenxDBType>
-  mongo?: DataTypeAdapter<ModelType, MongoDBType>
-}
+export type UserInputDataTypeAdapter<ModelType, MongoDBType, KenxDBType, D extends Drivers> = Partial<DataTypeAdapter<ModelType, KenxDBType | MongoDBType>> &
+  (D extends 'both'
+    ? {
+        knex?: Partial<DataTypeAdapter<ModelType, KenxDBType>>
+        mongo?: Partial<DataTypeAdapter<ModelType, MongoDBType>>
+      }
+    : {})
 
-export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends DefaultModelScalars>(input: UserInputDriverDataTypeAdapterMap<ModelScalars>): DriverDataTypeAdapterMap<ModelScalars> {
-  const knex = Object.entries(input).reduce<KnexJSDataTypeAdapterMap<ModelScalars>>((map, [scalarName, dta]) => {
-    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown>
-    if (scalarName in map) {
-      const oldAdapter = map[scalarName as keyof ModelScalars]
-      return {
-        ...map,
-        [scalarName]: {
-          modelToDB: adapter.mongo?.modelToDB ?? adapter.modelToDB ?? oldAdapter.modelToDB,
-          dbToModel: adapter.mongo?.dbToModel ?? adapter.dbToModel ?? oldAdapter.dbToModel,
-          validate: adapter.mongo?.validate ?? adapter.validate ?? oldAdapter.validate,
-          generate: adapter.mongo?.generate ?? adapter.generate ?? oldAdapter.generate,
-        },
-      } as KnexJSDataTypeAdapterMap<ModelScalars>
-    }
-    if (!adapter.knex && (!adapter.modelToDB || !adapter.dbToModel)) {
-      if (adapter.validate) {
-        throw new Error("In order to define validate function you must define also 'modelToDB' and 'dbToModel' function")
-      }
-      if (adapter.generate) {
-        throw new Error("In order to define generate function you must define also 'modelToDB' and 'dbToModel' function")
-      }
-      return map
-    }
+export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends DefaultModelScalars>(
+  input: UserInputDriverDataTypeAdapterMap<ModelScalars, 'both' | 'knex' | 'mongo'>,
+  scalars: string[],
+): DriverDataTypeAdapterMap<ModelScalars> {
+  const mappedInput = { ...scalars.reduce((p, s) => ({ ...p, [s]: {} }), {}), ...input }
+  const knex = Object.entries(mappedInput).reduce<KnexJSDataTypeAdapterMap<ModelScalars>>((map, [scalarName, dta]) => {
+    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown, 'both'>
+    const oldAdapter = map[scalarName as keyof ModelScalars]
     return {
       ...map,
       [scalarName]: {
-        modelToDB: adapter.knex?.modelToDB ?? adapter.modelToDB,
-        dbToModel: adapter.knex?.dbToModel ?? adapter.dbToModel,
-        validate: adapter.knex?.validate ?? adapter.validate,
-        generate: adapter.knex?.generate ?? adapter.generate,
+        modelToDB: adapter.knex?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter.modelToDB,
+        dbToModel: adapter.knex?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter.dbToModel,
+        validate: adapter.knex?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter?.validate,
+        generate: adapter.knex?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter?.generate,
       },
     } as KnexJSDataTypeAdapterMap<ModelScalars>
   }, knexJsAdapters as KnexJSDataTypeAdapterMap<ModelScalars>)
-  const mongo = Object.entries(input).reduce<MongoDBDataTypeAdapterMap<ModelScalars>>((map, [scalarName, dta]) => {
-    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown>
-    if (scalarName in map) {
-      const oldAdapter = map[scalarName as keyof ModelScalars]
-      return {
-        ...map,
-        [scalarName]: {
-          modelToDB: adapter.mongo?.modelToDB ?? adapter.modelToDB ?? oldAdapter.modelToDB,
-          dbToModel: adapter.mongo?.dbToModel ?? adapter.dbToModel ?? oldAdapter.dbToModel,
-          validate: adapter.mongo?.validate ?? adapter.validate ?? oldAdapter.validate,
-          generate: adapter.mongo?.generate ?? adapter.generate ?? oldAdapter.generate,
-        },
-      } as MongoDBDataTypeAdapterMap<ModelScalars>
-    }
-    if (!adapter.mongo && (!adapter.modelToDB || !adapter.dbToModel)) {
-      if (adapter.validate) {
-        throw new Error("In order to define validate function you must define also 'modelToDB' and 'dbToModel' function")
-      }
-      if (adapter.generate) {
-        throw new Error("In order to define generate function you must define also 'modelToDB' and 'dbToModel' function")
-      }
-      return map
-    }
+  const mongo = Object.entries(mappedInput).reduce<MongoDBDataTypeAdapterMap<ModelScalars>>((map, [scalarName, dta]) => {
+    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown, 'both'>
+    const oldAdapter = map[scalarName as keyof ModelScalars]
     return {
       ...map,
       [scalarName]: {
-        modelToDB: adapter.mongo?.modelToDB ?? adapter.modelToDB,
-        dbToModel: adapter.mongo?.dbToModel ?? adapter.dbToModel,
-        validate: adapter.mongo?.validate ?? adapter.validate,
-        generate: adapter.mongo?.generate ?? adapter.generate,
+        modelToDB: adapter.mongo?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter.modelToDB,
+        dbToModel: adapter.mongo?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter.dbToModel,
+        validate: adapter.mongo?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter?.validate,
+        generate: adapter.mongo?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter?.generate,
       },
     } as MongoDBDataTypeAdapterMap<ModelScalars>
   }, mongoDbAdapters as MongoDBDataTypeAdapterMap<ModelScalars>)

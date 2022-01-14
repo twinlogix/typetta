@@ -1,7 +1,5 @@
 import { DAOContext } from './dao.mock'
-import { Scalars } from './models.mock'
 import { Coordinates, LocalizedString } from '../../src'
-import { identityAdapter } from '../../src'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -46,7 +44,6 @@ beforeEach(async () => {
         modelToDB: (o: string) => sha256(o),
       },
       ID: {
-        ...identityAdapter,
         generate: () => uuidv4(),
       },
     },
