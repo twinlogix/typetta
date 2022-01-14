@@ -1,7 +1,7 @@
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { Coordinates, LocalizedString } from '@twinlogix/typetta'
-import { knexJsAdapters, identityAdapter, SortDirection } from '@twinlogix/typetta'
+import { Coordinates, LocalizedString } from '../../src'
+import { identityAdapter } from '../../src'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -16,7 +16,7 @@ const config: Knex.Config = {
   useNullAsDefault: true,
 }
 
-beforeAll(async () => {})
+beforeAll(async () => { })
 
 beforeEach(async () => {
   knexInstance = knex(config)
@@ -66,7 +66,7 @@ beforeEach(async () => {
   await dao.organization.createTable(specificTypeMap, defaultSpecificType)
 })
 
-afterEach(async () => {})
+afterEach(async () => { })
 
 test('Insert and retrieve', async () => {
   await dao.user.insertOne({

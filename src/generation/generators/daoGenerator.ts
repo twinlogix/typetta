@@ -3,13 +3,28 @@ import { findID, findNode, indentMultiline, isEmbed, isEntity, isForeignRef, isI
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
 
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
-  public generateImports(): string[] {
-    return [
-      "import { DAOMiddleware, MongoDBDAOGenerics, KnexJsDAOGenerics, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, KnexJSDataTypeAdapterMap, MongoDBDataTypeAdapterMap, MongoDBDAOParams, KnexJsDAOParams, Schema, DAORelationType, DAORelationReference, AbstractMongoDBDAO, AbstractKnexJsDAO, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '@twinlogix/typetta';",
-      `import * as types from '${this._config.tsTypesImport}';`,
+  public generateImports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+    const sqlSources = [...new Set([...typesMap.values()].flatMap((type) => (type.sqlEntity ? [type.sqlEntity.source] : [])))]
+    const hasSQLEntities = sqlSources.length > 0
+
+    const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.mongoEntity ? [type.mongoEntity.source] : [])))]
+    const hasMongoDBEntites = mongoSources.length > 0
+
+    const knexImports = [`import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`, "import { Knex } from 'knex';"]
+
+    const mongodbImports = [
+      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
       "import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';",
-      "import { Knex } from 'knex';",
     ]
+
+    const commonImports = [
+      `import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter } from '${
+        this._config.typettaImport || '@twinlogix/typetta'
+      }';`,
+      `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}';`,
+    ]
+
+    return [...commonImports, ...(hasSQLEntities ? knexImports : []), ...(hasMongoDBEntites ? mongodbImports : [])]
   }
 
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {

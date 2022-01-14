@@ -4,7 +4,7 @@ global.TextDecoder = require('util').TextDecoder
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
-import { computedField, identityAdapter, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '@twinlogix/typetta'
+import { computedField, identityAdapter, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128 } from 'mongodb'
@@ -1229,7 +1229,7 @@ test('Text filter test', async () => {
   await dao.execQuery(async (dbs, entities) => {
     await entities.organization.createIndex({ name: 'text' }, { name: 'nameIndex' })
   })
-  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => [['score', { $meta: 'textScore' }]] })).map((o) => o.name)
+  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => ([['score', { $meta: "textScore" }]]) })).map(o => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes('Microsoft')).toBe(true)

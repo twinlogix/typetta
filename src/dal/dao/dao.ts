@@ -26,7 +26,7 @@ import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
 import { GraphQLResolveInfo } from 'graphql'
 import { PartialDeep } from 'type-fest'
-import objectHash from 'object-hash'
+import objectHash from 'object-hash';
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idField: T['idKey']

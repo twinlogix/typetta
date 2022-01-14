@@ -59,7 +59,7 @@ export class TsTypettaGenerator {
 
     const imports = this._generators
       .map((generator) => {
-        return generator.generateImports()
+        return generator.generateImports(typesMap)
       })
       .reduce((a, c) => [...a, ...c], [])
 
