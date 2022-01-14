@@ -37,11 +37,12 @@ export type FilterParams<T extends DAOGenerics> = {
 export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<FilterParams<T>, 'options'> & {
   projection?: P
   options?: T['driverFindOptions']
-}
-export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
   start?: number
-  limit?: number
   sorts?: T['sort']
+}
+
+export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
+  limit?: number
 }
 
 export type InsertParams<T extends DAOGenerics> = {

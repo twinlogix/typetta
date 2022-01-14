@@ -1,6 +1,6 @@
 import { transformObject } from '../../../../generation/utils'
 import { AbstractDAO } from '../../../dao/dao'
-import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
+import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection } from '../../../dao/projections/projections.types'
 import { KnexJsDAOGenerics, KnexJsDAOParams } from './dao.knexjs.types'
@@ -56,14 +56,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    if(typeof filter === 'function') {
+    if (typeof filter === 'function') {
       return filter(qb || this.qb())
     }
     return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knex) : qb || this.qb()
   }
 
   private buildSort(sort?: T['sort'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    if(typeof sort === 'function') {
+    if (typeof sort === 'function') {
       return sort(qb || this.qb())
     }
     return buildSort(qb || this.qb(), (sort || []) as unknown as AbstractSort[], this.schema)
@@ -74,7 +74,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private buildUpdate(changes: T['update'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    if(typeof changes === 'function') {
+    if (typeof changes === 'function') {
       return changes(qb || this.qb())
     }
     const updates = this.adaptUpdate(changes)
@@ -95,15 +95,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return this.dbsToModels(records)
   }
 
-  protected async _find<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
+  protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
     return this.getRecords(params)
-  }
-
-  protected async _findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['model']> | null> {
-    const select = this.buildSelect(params.projection)
-    const where = this.buildWhere(params.filter, select)
-    const record = await this.buildTransaction(params.options, where).first()
-    return record ? this.dbToModel(record) : null
   }
 
   protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
@@ -179,7 +172,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     const records = await this.buildTransaction(params.options, query)
     const inserted = records[0]
     if (typeof inserted === 'number') {
-      return (await this._findOne({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as T['filter'], options: params.options })) as Omit<T['model'], T['exludedFields']>
+      const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as T['filter'], options: params.options, limit: 1 })
+      return insertedRetrieved[0] as Omit<T['model'], T['exludedFields']>
     }
     return this.dbToModel(inserted) as Omit<T['model'], T['exludedFields']>
   }
@@ -188,7 +182,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     throw new Error(`Operation not supported. Use updateAll or apiV1.updateMany specifying the primary key field (${this.idField}) in order to update only one row.`)
   }
 
-  protected async _updateMany(params: UpdateParams<T>): Promise<void> {
+  protected async _updateAll(params: UpdateParams<T>): Promise<void> {
     const update = this.buildUpdate(params.changes)
     const where = this.buildWhere(params.filter, update)
     await this.buildTransaction(params.options, where)
@@ -202,7 +196,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     throw new Error(`Operation not supported. Use deleteAll or apiV1.delete specifying the primary key field (${this.idField}) in order to delete only one row.`)
   }
 
-  protected async _deleteMany(params: DeleteParams<T>): Promise<void> {
+  protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
     const deleteQ = this.qb().delete()
     const where = this.buildWhere(params.filter, deleteQ)
     await this.buildTransaction(params.options, where)

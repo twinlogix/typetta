@@ -6,7 +6,6 @@ import {
   DAOParams,
   DeleteParams,
   FilterParams,
-  FindOneParams,
   FindParams,
   InsertParams,
   ReplaceParams,
@@ -14,8 +13,8 @@ import {
   DAOGenerics,
   AggregateParams,
   AggregateResults,
-  AggregationFields,
   AggregatePostProcessing,
+  FindOneParams,
 } from './dao.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
@@ -25,8 +24,8 @@ import { DAORelation, DAORelationReference, DAORelationType } from './relations/
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
 import { GraphQLResolveInfo } from 'graphql'
+import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
-import objectHash from 'object-hash';
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idField: T['idKey']
@@ -83,18 +82,15 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) })
-    const records = beforeResults.continue ? await this._find(beforeResults.params) : beforeResults.records
+    const records = beforeResults.continue ? await this._findAll(beforeResults.params) : beforeResults.records
     const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
     const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
     return afterResults.records as ModelProjection<T['model'], T['projection'], P>[]
   }
 
   async findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindOneParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P> | null> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) })
-    const record = beforeResults.continue ? await this._findOne(beforeResults.params) : beforeResults.records.length > 0 ? beforeResults.records[0] : null
-    const resolvedRecors = record ? await this.resolveRelations([record], beforeResults.params.projection, beforeResults.params.relations) : []
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
-    return afterResults.records.length > 0 ? afterResults.records[0] : null
+    const results = await this.findAll({ ...params, limit: 1 })
+    return results.length > 0 ? results[0] : null
   }
 
   async findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
@@ -284,7 +280,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async updateAll(params: UpdateParams<T>): Promise<void> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'update', params })
     if (beforeResults.continue) {
-      await this._updateMany(beforeResults.params)
+      await this._updateAll(beforeResults.params)
     }
     await this.executeAfterMiddlewares({ operation: 'update', params: beforeResults.params }, beforeResults.middlewareIndex)
   }
@@ -308,7 +304,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async deleteAll(params: DeleteParams<T>): Promise<void> {
     const beforeResults = await this.executeBeforeMiddlewares({ operation: 'delete', params })
     if (beforeResults.continue) {
-      await this._deleteMany(beforeResults.params)
+      await this._deleteAll(beforeResults.params)
     }
     await this.executeAfterMiddlewares({ operation: 'delete', params: beforeResults.params }, beforeResults.middlewareIndex)
   }
@@ -376,16 +372,15 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   // -----------------------------------------------------------------------
   // ------------------------------ ABSTRACTS ------------------------------
   // -----------------------------------------------------------------------
-  protected abstract _find<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]>
-  protected abstract _findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['model']> | null>
+  protected abstract _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]>
   protected abstract _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }>
   protected abstract _exists(params: FilterParams<T>): Promise<boolean>
   protected abstract _count(params: FilterParams<T>): Promise<number>
   protected abstract _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
   protected abstract _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
   protected abstract _updateOne(params: UpdateParams<T>): Promise<void>
-  protected abstract _updateMany(params: UpdateParams<T>): Promise<void>
+  protected abstract _updateAll(params: UpdateParams<T>): Promise<void>
   protected abstract _replaceOne(params: ReplaceParams<T>): Promise<void>
   protected abstract _deleteOne(params: DeleteParams<T>): Promise<void>
-  protected abstract _deleteMany(params: DeleteParams<T>): Promise<void>
+  protected abstract _deleteAll(params: DeleteParams<T>): Promise<void>
 }

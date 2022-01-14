@@ -1,6 +1,6 @@
 import { transformObject } from '../../../../generation/utils'
 import { AbstractDAO } from '../../../dao/dao'
-import { FindParams, FindOneParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
+import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
@@ -53,7 +53,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return { $set: adaptUpdate(update, this.schema, this.daoContext.adapters.mongo) }
   }
 
-  protected async _find<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
+  protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
     if (params.limit === 0) {
       return []
     }
@@ -65,19 +65,9 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return records
   }
 
-  protected async _findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P>): Promise<PartialDeep<T['model']> | null> {
-    const filter = this.buildFilter(params.filter)
-    const projection = this.buildProjection(params.projection)
-    const result = await this.collection.findOne(filter, { ...(params.options ?? {}), projection } as FindOptions)
-    if (!result) {
-      return null
-    }
-    return this.dbToModel(result)
-  }
-
   protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
     const totalCount = await this._count(params)
-    const records = await this._find(params)
+    const records = await this._findAll(params)
     return { totalCount, records }
   }
 
@@ -188,7 +178,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     await this.collection.updateOne(filter, changes, { ...(params.options ?? {}), upsert: false, ignoreUndefined: true } as UpdateOptions)
   }
 
-  protected async _updateMany(params: UpdateParams<T>): Promise<void> {
+  protected async _updateAll(params: UpdateParams<T>): Promise<void> {
     const changes = this.buildChanges(params.changes)
     const filter = this.buildFilter(params.filter)
     await this.collection.updateMany(filter, changes, params.options ?? {})
@@ -205,7 +195,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     await this.collection.deleteOne(filter, params.options ?? {})
   }
 
-  protected async _deleteMany(params: DeleteParams<T>): Promise<void> {
+  protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
     const filter = this.buildFilter(params.filter)
     await this.collection.deleteMany(filter, params.options ?? {})
   }
