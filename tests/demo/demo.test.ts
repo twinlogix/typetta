@@ -75,17 +75,17 @@ beforeEach(async () => {
     },
   })
 
-  const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
-    ['Decimal', ['decimal', 'decimal ARRAY']],
-    ['Boolean', ['boolean', 'boolean ARRAY']],
-    ['Float', ['decimal', 'decimal ARRAY']],
-    ['Int', ['integer', 'integer ARRAY']],
-    ['DateTime', ['integer', 'integer ARRAY']],
-  ])
-  const defaultSpecificType: [string, string] = ['string', 'string ARRAY']
-  await dao.post.createTable(specificTypeMap, defaultSpecificType)
-  await dao.user.createTable(specificTypeMap, defaultSpecificType)
-  await dao.tag.createTable(specificTypeMap, defaultSpecificType)
+  const typeMap = {
+    Decimal: { singleType: 'decimal' },
+    Boolean: { singleType: 'boolean' },
+    Float: { singleType: 'decimal' },
+    Int: { singleType: 'integer' },
+    IntAutoInc: { singleType: 'INTEGER PRIMARY KEY AUTOINCREMENT' },
+  }
+  const defaultType = { singleType: 'string' }
+  await dao.post.createTable(typeMap, defaultType)
+  await dao.user.createTable(typeMap, defaultType)
+  await dao.tag.createTable(typeMap, defaultType)
 })
 
 test('Demo', async () => {
