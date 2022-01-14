@@ -1,14 +1,14 @@
-global.TextEncoder = require('util').TextEncoder
-global.TextDecoder = require('util').TextDecoder
-
+import { identityAdapter, computedField } from '../../src'
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
-import { identityAdapter, computedField } from '../../src'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
+
+global.TextEncoder = require('util').TextEncoder
+global.TextDecoder = require('util').TextDecoder
 
 const config: Knex.Config = {
   client: 'sqlite3',
@@ -82,14 +82,14 @@ beforeAll(async () => {
       },
     },
   })
-  const specificTypeMap: Map<keyof Scalars, [string, string]> = new Map([
-    ['Decimal', ['decimal', 'decimal ARRAY']],
-    ['Boolean', ['boolean', 'boolean ARRAY']],
-    ['Float', ['decimal', 'decimal ARRAY']],
-    ['Int', ['integer', 'integer ARRAY']],
-    ['IntAutoInc', ['INTEGER PRIMARY KEY AUTOINCREMENT', 'none']],
-  ])
-  const defaultSpecificType: [string, string] = ['string', 'string ARRAY']
+  const specificTypeMap = {
+    Decimal: { singleType: 'decimal', arrayType: 'decimal ARRAY' },
+    Boolean: { singleType: 'boolean' },
+    Float: { singleType: 'decimal' },
+    Int: { singleType: 'integer' },
+    IntAutoInc: { singleType: 'INTEGER PRIMARY KEY AUTOINCREMENT' },
+  }
+  const defaultSpecificType = { singleType: 'string', arrayType: 'string ARRAY' }
   await dao.d.createTable(specificTypeMap, defaultSpecificType)
   await dao.e.createTable(specificTypeMap, defaultSpecificType)
   await dao.f.createTable(specificTypeMap, defaultSpecificType)
