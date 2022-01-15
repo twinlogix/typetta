@@ -3,7 +3,7 @@ main:
     title: Overview
     children:
       - url: /
-        title: What is Typetta?
+        title: Cos'è Typetta?
       - url: /chapters/overview/getting-started
         title: Getting Started
   - data-model:
