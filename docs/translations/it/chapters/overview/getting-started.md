@@ -1,23 +1,23 @@
 # Getting Started
 
-This tutorial allows you to explore all basic Typetta functionalities providing step by step examples starting from intallation and followimg with the usage of this ORM on a NodeJS Typescript based project.
+Si seguito un tutorial che permette di esplorare le funzionalità base di Typetta con un semplice esempio passo passo di come installare ed utilizzare questo ORM su un qualsiasi progetto NodeJS su linguaggio TypeScript.
 
-  - [Installation](#installation)
-  - [Project structure](#project-structure)
-  - [The applicative model](#applicative-model)
-  - [Code generation](#code-generation)
-  - [A simple application](#simple-application)
+  - [Installazione](#installazione)
+  - [Struttura del progetto](#struttura-del-progetto)
+  - [Il modello applicativo](#il-modello-applicativo)
+  - [I generatori di codice](#i-generatori-di-codice)
+  - [Una semplice applicazione](#una-semplice-applicazione)
 
-## Installation
+## Installazione
 
-Typetta is a small sized package that can be installed using npm on any TypeScript project. The only explicit dependency is GraphQL. Both can be very simply added to a project using npm:
+Typetta è un pacchetto dalle dimensioni contenute che può essere installato tramite npm su qualsiasi progetto TypeScript. L'unica dipendenza di cui necessita esplicitamente è GraphQL. Entrambi si possono aggiungere al progetto molto semplicemente tramite npm:
 ```bash
 npm install @twinlogix/typetta --save
 ```
 
-## Project structure
+## Struttura del progetto
 
-Typetta does not depend on a specific project structure and therefore can be fully configurable. For our example we can think of having a TypeScript project structure like the following:
+Typetta non richiede alcuna particolare struttura del progetto su cui viene utilizzato ed è quindi completamente configurabile. Ipotizziamo quindi di avere un progetto TypeScript di base con la seguente struttura:
 ```
 MyProject
  ┣ src
@@ -26,9 +26,9 @@ MyProject
  ┗ tsconfig.json
 ```
 
-All you need is to add an applicative model in GraphQL language, typically found in src directory in a file named *schema.graphql* and also a config file named *codegen.yml* in the root for code generation purposes.
+Tutto ciò che serve è aggiungere un modello applicativo in linguaggio GraphQL, tipicamente in un file di nome *schema.graphql* nella directory src e un file di configurazione *codegen.yml* nella root per la generazione di codice. 
 
-The updated project structure becomes the following:
+La sruttura del progetto aggiornata risulta quindi la seguente:
 <pre>
 MyProject
  ┣ src
@@ -39,13 +39,13 @@ MyProject
  ┗ <b style="color: #bf1c31;">codegen.yml</b>
 </pre>
 
-## The applicative model
+## Il modello applicativo
 
-Inside the file *schema.graphql* you will have to insert the applicative model in GraphQL language. For a complete GraphQL syntax guide please refer directly to the official web site [graphql.org](https://graphql.org/learn/){:target="_blank"}.
+All'interno del file *schema.graphql* andrà inserito il modello applicativo in linguaggio GraphQL. Per una guida completa della sintassi GraphQL fare riferimento al sito ufficiale [graphql.org](https://graphql.org/learn/){:target="_blank"}.
 
-Typetta relies on customized directives to extend the standard model definitions allowing the developer to specify very useful details in binding to the data source. For a complete guide refer to section [Cos'è un'entità?](../data-model/entities).
+Typetta utilizza alcune direttive customizzate per aumentare l'espressività del modello e permettere allo sviluppatore di specificare dettagli utili alla connessione alla sorgente dati. Fare riferimento alla sezione [Cos'è un'entità?](../data-model/entities) per una guida completa.
 
-Here below you can see the simple definition of a User with a first and a last name.
+Di seguito la semplice definizone di un Utente con nome e cognome:
 ```typescript
 type User @mongoEntity {
   id: ID! @id
@@ -54,16 +54,15 @@ type User @mongoEntity {
 }
 ```
 
-## Code generation
+## I generatori di codice
 
-With Typetta, using a standard language such as GraphQL to model the application enables the developer to use many third party tools and libraries. As a consequence, the developing an application becomes a much quicker and productive experience.
+L'utilizzo di un linguaggio di modellazione standard come GraphQL mette a disposizione dello sviluppatore una serie di strumenti e librerie di terze parti che possono essere utilizzati in simbiosi con Typetta e rendono l'esperienza di sviluppo estremamente veloce e produttiva.
 
-Code generation in Typetta relies on GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"} a very customizable and extensible library.
-GraphQL Code Generator enables the developer to choose between many standard generators as well as our embedded generator that automatically provides DAO in TypeScript language.
+Lo strumento principale di cui fa uso Typetta è un generatore di codice altamente customizzabile ed estensibile che si chiama [GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"}. Grazie ad esso lo sviluppaore ha a disposizione un'ampia gamma di generatori standard per i più diffusi linguaggi di programmazione, oltre ad un generatore di nostra creazione per produrre i singoli DAO in linguaggio TypeScript, che serviranno ad accedere al database.
 
-Typetta already includes all default dependencies to use the TypeScript generator but it's also possible to add other generators following the official guide.
+Typetta include già di default le dipendenze necessarie per l'utilizzo del generatore TypeScript, ma è possibile aggiungere altri generatori a piacimento, seguendo i riferimenti della guida ufficiale.
 
-It's now time to configure with a minimum effort our first *codegen.yml*. This operation will enable the code generation.
+A questo punto occorre configurare lo strumento di generazione creando il file *codegen.yml* come anticipato in precedenza. Di seguito la configurazione minima:
 
 ```yaml
 schema: "src/schema.graphql"
@@ -80,7 +79,7 @@ generates:
 
 ```
 
-To allow code generation it's also useful to edit the file *package.json* inserting the following script:
+Per agevolare il processo di generazione può essere utile aggiungere uno specifico script nel file *package.json*:
 ```json
 {
   "scripts": {
@@ -89,19 +88,19 @@ To allow code generation it's also useful to edit the file *package.json* insert
 }
 ```
 
-Now let's do our first code generation running the wollowing command:
+A questo punto è possibile avviare la prima generazione eseguendo il comando appena aggiunto:
 
 ```bash
 npm run generate
 ```
 
-Using the above setup, the code generation command will create two files: *src/models.ts* with all TypeScript types inclued in *schema.graphql* and another file *src/dao.ts* with DAO and DAOContext. This two files will be useful for later.
+Data la configurazione d'esempio di cui sopra, il comando di generazione produrrà due distinti file *src/models.ts* contentente i tipi TypeScript relativi a tutte le entità di modello presenti nello *schema.graphql* e un file *src/dao.ts* contenente i DAO e il DAOContext che vedremo in seguito come utilizzare.
 
-## A simple application
+## Una semplice applicazione
 
-The following initial Typetta example writes and reads an entity on a MongoDB database (on ab SQL DB would be pretty much the same). this and other examples are available in a dedicated repository [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"} .
+Di seguito si mostra un utilizzo minimale di Typetta per la scrittura e lettura di un'entità su un database MongoDB (del tutto simile l'utilizzo per database SQL). Questo ed altri esempi sono disponibili in un repository dedicato all'indirizzo [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"}
 
-First things first... open a connection to the MongoDB database using the offical Driver:
+Come prima cosa occorre creare connessione e database MongoDB utilizzano il driver ufficiale:
 
 ```typescript
 import { MongoClient } from 'mongodb';
@@ -114,7 +113,7 @@ const main = async () => {
 main();
 ```
 
-Let's do our first DAOContext, our first Typetta code generated class. This class rappresents the central repo for all entity of the applicative model.
+Dopodiché possiamo già istanziare un DAOContext, prima classe generata da Typetta che rappresenta il repository centrale di tutte le entità del modello applicativo.
 
 ```typescript
 const daoContext = new DAOContext({
@@ -124,7 +123,7 @@ const daoContext = new DAOContext({
 });
 ```
 
-It's now time do do our first CRUD simple operations on User entity.
+A questo punto possiamo iniziare ad interagire con il database con alcune semplici operazioni CRUD sull'entità User che abbiamo definito nel modello applicaitvo.
 
 ```typescript
 const user1 = await daoContext.user.insertOne({
@@ -145,13 +144,13 @@ const users = await daoContext.user.findAll();
 users.forEach(user => console.log(`${user.firstName} ${user.lastName}`));
 ```
 
-Our personal version of Hello World example will print on console the following 2 names:
+Questa semplicissima porzione di codice stamperà a console il seguente testo:
 ```
 Mattia Minotti
 Edoardo Barbieri
 ```
 
-This is the complete source code for this initial Typetta example connected to a MongoDB:
+Di seguito il codice sorgente completo di questo primo esempio di utilizzo di Typetta con database MongoDB:
 
 ```typescript
 import { MongoClient } from 'mongodb';
