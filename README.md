@@ -1,8 +1,8 @@
-<div align="center">
+<div align = "center">
   <br>
   <br>
   <a href="https://twinlogix.github.io/typetta/">
-    <img src="https://github.com/twinlogix/typetta/blob/master/docs/assets/img/logo.png" width="316" height="50">
+    <img src = "https://github.com/twinlogix/typetta/blob/master/docs/assets/img/logo.png" width = "316" height = "50">
   </a>
   <br>
   Node.js ORM written in TypeScript for typing lovers.
@@ -11,35 +11,34 @@
   <br>
 </div>
 
-Typetta è un **ORM open-source** utilizzabile sulle piattaforme Node JS, Browser, Cordova, PhoneGap, Ionic, React Native, NativeScript, Expo ed Electron. E' scritto interamente in linguaggio TypeScript ed il suo obiettivo è di fornire un accesso evoluto e completamente tipato a tutti i **principali database SQL** (MySQL, PostgreSQL, Microsoft SQL Server, SQLLite3, CockroachDB, MariaDB, Oracle e Amazon Redshift) e al database NoSQL **MongoDB**.
+Typetta is an **open-source ORM** usable on Node JS, Browser, Cordova, PhoneGap, Ionic, React Native, NativeScript, Expo and Electron platforms. It is written entirely in TypeScript language and its goal is to provide advanced and fully typed access to all **main SQL databases** (MySQL, PostgreSQL, Microsoft SQL Server, SQLLite3, CockroachDB, MariaDB, Oracle and Amazon Redshift) and the NoSQL **MongoDB** database.
 
-Typetta può essere utilizzato in qualsiasi backend TypeScript (incluse applicazioni serverless e microservizi), ma il nostro consiglio è di utilizzarlo nello sviluppo di backend **GraphQL**, perchè noi amiamo GraphQL.
+Typetta can be used in any TypeScript backend (including serverless applications and microservices), but our advice is to use it when developing **GraphQL** backends, because we love GraphQL.
 
-# Come funziona?
+# How does it work?
 
-Puoi trovare tutte le informazioni utili, le guide e i tutorial su come utilizzare al meglio Typetta sulla [documentazione ufficiale](https://twinlogix.github.io/typetta/).
+You can find all the useful information, guides and tutorials on how to best use Typetta on the [official documentation](https://twinlogix.github.io/typetta/).
 
-# Principali Funzionalità
+# Main Features
 
-Di seguito le principali funzionalità che contraddistinguono Typetta:
+The following are the main features that distinguish Typetta:
 
-- Supporto completo ai principali database SQL e a MongoDB.
-- Multi database, inclusa la possibilità di query cross database.
-- Connessioni multiple e connection pooling.
-- Relazioni tra entità: 1-1, 1-n, n-m.
-- Typing dinamico dipendete dalle proiezioni di dato richieste.
-- Supporto di filtri geospaziali.
-- Paginazione.
-- Estensibile tramite sistema di middlewares.
-- Scalari customizzati e relativa serializzazione su database.
-- Gestione ID autogenerati.
-- Regole di validazione.
-- Campi calcolati.
-- Possibilità di creare query completamente customizzate.
-- Implementazione security policies di accesso al dato.
-- Supporto embedded documents sia su MongoDB che su SQL.
-- Generazione di codice automatica.
-- Integrazione semplice con backend GraphQL.
-- Transazioni.
+- Full support for major SQL databases and MongoDB.
+- Multi database, including the possibility of cross database queries.
+- Multiple connections and connection pooling.
+- Relations between entities: 1-1, 1-n, n-m.
+- Dynamic typing depends on the required data projections.
+- Support for geospatial filters.
+- Pagination.
+- Extensible through middlewares system.
+- Customized scalars and relative serialization on the database.
+- Management of self-generated IDs.
+- Validation rules.
+- Computed fields.
+- Ability to create fully customized queries.
+- Implementation of data access security policies.
+- Embedded documents support on both MongoDB and SQL.
+- Automatic code generation.
+- Simple integration with GraphQL backend.
+- Transactions.
 - Logging.
-
