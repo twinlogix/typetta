@@ -87,7 +87,11 @@
         "lines": 50,
         "statements": 50
       }
-    }
+    },
+    "coveragePathIgnorePatterns": [
+      "src/generation/",
+      "tests/"
+    ]
   },
   "homepage": "https://twinlogix.github.io/typetta/"
 }

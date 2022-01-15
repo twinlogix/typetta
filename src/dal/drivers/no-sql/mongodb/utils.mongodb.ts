@@ -122,6 +122,9 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
 
 export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
   return Object.entries(update).reduce((p, [k, v]) => {
+    if(v === undefined) {
+      return p
+    }
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {

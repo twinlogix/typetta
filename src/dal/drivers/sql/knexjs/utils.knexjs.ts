@@ -264,6 +264,7 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>
 }): object {
   return Object.entries(update).reduce((p, [k, v]) => {
+    if(v === undefined) return p
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
