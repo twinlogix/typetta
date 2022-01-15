@@ -30,10 +30,8 @@ main:
         title: Ordinamenti
       - url: /chapters/client/relations
         title: Relazioni
-        todo: true
       - url: /chapters/client/pagination
         title: Paginazione
-        todo: true
       - url: /chapters/client/aggregation
         title: Aggregazioni
         todo: true

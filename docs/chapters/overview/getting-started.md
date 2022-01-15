@@ -98,7 +98,7 @@ Data la configurazione d'esempio di cui sopra, il comando di generazione produrr
 
 ## Una semplice applicazione
 
-Di seguito si mostra un utilizzo minimale di Typetta per la scrittura e lettura di un'entità su un database MongoDB (del tutto simile l'utilizzo per database SQL). 
+Di seguito si mostra un utilizzo minimale di Typetta per la scrittura e lettura di un'entità su un database MongoDB (del tutto simile l'utilizzo per database SQL). Questo ed altri esempi sono disponibili in un repository dedicato all'indirizzo [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"}
 
 Come prima cosa occorre creare connessione e database MongoDB utilizzano il driver ufficiale:
 
