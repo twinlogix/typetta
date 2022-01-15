@@ -58,7 +58,7 @@ type User @mongoEntity {
 
 With Typetta, using a standard language such as GraphQL to model the application enables the developer to use many third party tools and libraries. As a consequence, the developing an application becomes a much quicker and productive experience.
 
-Code generation in Typetta relies on GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"} a very customizable and extensible library.
+Code generation in Typetta relies on [GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"} a very customizable and extensible library.
 GraphQL Code Generator enables the developer to choose between many standard generators as well as our embedded generator that automatically provides DAO in TypeScript language.
 
 Typetta already includes all default dependencies to use the TypeScript generator but it's also possible to add other generators following the official guide.
