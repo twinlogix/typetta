@@ -99,7 +99,7 @@ Using the above setup, the code generation command will create two files: *src/m
 
 ## A simple application
 
-The following initial Typetta example writes and reads an entity on a MongoDB database (on ab SQL DB would be pretty much the same). this and other examples are available in a dedicated repository [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"} .
+The following initial Typetta example writes and reads an entity on a MongoDB database (on ab SQL DB would be pretty much the same). This and other examples are available in a dedicated repository [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"} .
 
 First things first... open a connection to the MongoDB database using the official Driver:
 
