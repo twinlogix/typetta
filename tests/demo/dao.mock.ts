@@ -69,7 +69,7 @@ export type PostRelations = {
   tags?: {
     filter?: TagFilter
     sorts?: TagSort[] | TagRawSort
-    start?: number
+    skip?: number
     limit?: number
     relations?: TagRelations
   }
@@ -289,7 +289,7 @@ export type UserRelations = {
   posts?: {
     filter?: PostFilter
     sorts?: PostSort[] | PostRawSort
-    start?: number
+    skip?: number
     limit?: number
     relations?: PostRelations
   }
