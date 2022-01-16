@@ -16,7 +16,7 @@ export type FilterParams<T extends DAOGenerics> = {
 export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<FilterParams<T>, 'options'> & {
   projection?: P
   options?: T['driverFindOptions']
-  start?: number
+  skip?: number
   sorts?: T['sort']
 }
 
@@ -58,7 +58,7 @@ export type AggregateParams<T extends DAOGenerics> = {
   by?: { [K in keyof T['pureSort']]: true }
   filter?: T['filter']
   aggregations: AggregationFields<T>
-  start?: number
+  skip?: number
   limit?: number
   metadata?: T['operationMetadata']
   options?: T['driverFilterOptions']
@@ -66,7 +66,7 @@ export type AggregateParams<T extends DAOGenerics> = {
 
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
   having?: { [K in keyof A['aggregations']]?: EqualityOperators<number> | QuantityOperators<number> | number }
-  sort?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
+  sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
 }
 
 export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
