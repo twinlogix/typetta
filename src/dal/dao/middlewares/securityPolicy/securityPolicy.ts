@@ -23,6 +23,7 @@ export type SecurityPolicyDAOGenerics<
   OptionsType extends { securityContext: SecurityContext } = any,
   DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
+  NameType extends string = any
 > = DAOGenerics<
   ModelType,
   IDKey,
@@ -40,7 +41,13 @@ export type SecurityPolicyDAOGenerics<
   ExcludedFields,
   OptionsType,
   DriverContext,
-  ScalarsType
+  ScalarsType,
+  any,
+  any,
+  any,
+  any,
+  any,
+  NameType
 > & {
   securityContext: SecurityContext
 }

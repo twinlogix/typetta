@@ -16,6 +16,7 @@ import {
   AggregatePostProcessing,
   FindOneParams,
 } from './dao.types'
+import { LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection, projection } from './projections/projections.utils'
@@ -39,8 +40,24 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected driverContext: T['driverContext']
   protected schema: Schema<T['scalars']>
   protected idGenerator?: () => T['scalars'][T['idScalar']]
+  protected name: T['name']
+  protected logger?: LogFunction<T['name']>
 
-  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext: driverOptions }: DAOParams<T>) {
+  protected constructor({
+    idField,
+    idScalar,
+    idGeneration,
+    idGenerator,
+    daoContext,
+    name,
+    logger,
+    pageSize = 50,
+    relations = [],
+    middlewares = [],
+    schema,
+    metadata,
+    driverContext: driverOptions,
+  }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.idField = idField
     this.idGenerator = idGenerator
@@ -48,6 +65,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.pageSize = pageSize
     this.relations = relations
     this.idGeneration = idGeneration
+    this.name = name
+    this.logger = logger
     if (this.idGeneration === 'generator' && !this.idGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
     }
@@ -126,7 +145,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return afterResults.result as AggregateResults<T, A>
   }
 
-  public async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
+  protected async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
     params: Omit<FindParams<T, P>, 'start' | 'limit' | 'filter'>,
     filterKey: K,
     filterValues: T['filter'][K][],

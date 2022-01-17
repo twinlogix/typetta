@@ -5,6 +5,7 @@ import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { GraphQLResolveInfo } from 'graphql'
+import { LogFunction } from './log/log.types'
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
@@ -91,6 +92,8 @@ export type DAOParams<T extends DAOGenerics> = {
   pageSize?: number
   relations?: DAORelation[]
   middlewares?: DAOMiddleware<T>[]
+  logger?: LogFunction<T['name']>
+  name: T['name']
 }
 
 export type MiddlewareContext<T extends DAOGenerics> = {
@@ -134,7 +137,7 @@ export type DAOGenerics<
   ExcludedFields extends keyof ModelType = any,
   MetadataType = any,
   OperationMetadataType = any,
-  DriverContext = any,
+  DriverContextType = any,
   ScalarsType extends DefaultModelScalars = any,
   DriverFilterOptions = any,
   DriverFindOptions = any,
@@ -142,6 +145,7 @@ export type DAOGenerics<
   DriverUpdateOptions = any,
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
+  NameType extends string = any
 > = {
   model: ModelType
   idKey: IDKey
@@ -162,8 +166,9 @@ export type DAOGenerics<
   exludedFields: ExcludedFields
   metadata: MetadataType
   operationMetadata: OperationMetadataType
-  driverContext: DriverContext
+  driverContext: DriverContextType
   scalars: ScalarsType
+  name: NameType
 
   driverFilterOptions: DriverFilterOptions
   driverFindOptions: DriverFindOptions
