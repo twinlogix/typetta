@@ -60,7 +60,5 @@ The philosophy behind Typetta components has been to ensure ease of use and opti
 In case you are still in doubt, why use Typetta instead of other ORMs?
 
 -   It's the ONLY TypeScript ORM that has a full support for **SQL and MongoDB databases**.
-  
 -   A very **strict typing** system that 100% leverages TypeScript in providing types as reposes bases on the data type requested.
-
 -   Using standard **GraphQL** you can define the model. Using this standard opens the door  to a whole set of instruments and third party frameworks that are based on this standard.
