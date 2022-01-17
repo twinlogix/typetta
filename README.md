@@ -21,7 +21,7 @@ Typetta is an **open-source ORM** written in TypeScript that aims to allow a sea
 
 Typetta is pluggable into any TypeScript backend (including serverless applications and microservices) but in terms of gain we totally suggest using it in all **GraphQL** backends, because... because we simply love GraphQL.
 
-# How does Typetta work?
+## How does Typetta work?
 
 This section provides a high-level overview of how Prisma works and its most important technical components. For a more thorough introduction, visit the Prisma documentation.
 
