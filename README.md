@@ -9,6 +9,7 @@
   <br/>
   <br/>
   <div>
+    <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"/></a>
     <a href="https://www.codacy.com/gh/twinlogix/typetta/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=twinlogix/typetta&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/3c49f8a206cf4deeb41b289d151434f7"/></a>
     <img src="./coverage/badge.svg">
   </div>
