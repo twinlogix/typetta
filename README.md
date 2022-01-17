@@ -23,6 +23,8 @@ Typetta può essere utilizzato in qualsiasi backend TypeScript (incluse applicaz
 
 # Come funziona?
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/88d9ab0b7f5347028369599247fb9ca0)](https://app.codacy.com/gh/twinlogix/typetta?utm_source=github.com&utm_medium=referral&utm_content=twinlogix/typetta&utm_campaign=Badge_Grade_Settings)
+
 Puoi trovare tutte le informazioni utili, le guide e i tutorial su come utilizzare al meglio Typetta sulla [documentazione ufficiale](https://twinlogix.github.io/typetta/).
 
 # Principali Funzionalità
