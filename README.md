@@ -7,10 +7,11 @@
   <br>
   Node.js ORM written in TypeScript for typing lovers.
   <div>
-    
-    [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3c49f8a206cf4deeb41b289d151434f7)](https://www.codacy.com/gh/twinlogix/typetta/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=twinlogix/typetta&amp;utm_campaign=Badge_Grade)
-    
+    <a href="https://www.codacy.com/gh/twinlogix/typetta/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=twinlogix/typetta&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/3c49f8a206cf4deeb41b289d151434f7"/></a>
   </div>
+  <br/>
+  <br/>
+  <br/>
 </div>
 
 
