@@ -26,7 +26,7 @@ export type AddressRelations = {
   cities?: {
     filter?: CityFilter
     sorts?: CitySort[] | CityRawSort
-    start?: number
+    skip?: number
     limit?: number
     relations?: CityRelations
   }
@@ -602,14 +602,14 @@ export type UserRelations = {
   dogs?: {
     filter?: DogFilter
     sorts?: DogSort[] | DogRawSort
-    start?: number
+    skip?: number
     limit?: number
     relations?: DogRelations
   }
   friends?: {
     filter?: UserFilter
     sorts?: UserSort[] | UserRawSort
-    start?: number
+    skip?: number
     limit?: number
     relations?: UserRelations
   }
