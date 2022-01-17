@@ -2,4 +2,3 @@ node_modules
 lib
 .npmrc
 docs/_site
-coverage
