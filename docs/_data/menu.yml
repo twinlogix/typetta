@@ -34,7 +34,7 @@ main:
         title: Paginazione [eng soon]
       - url: /chapters/client/aggregations
         title: Aggregazioni [eng soon]
-      - url: /chapters/advanced/transactions
+      - url: /chapters/client/transactions
         title: Transazioni [eng soon]
       - url: /chapters/client/raw-databse-access
         title: Accesso diretto al database
