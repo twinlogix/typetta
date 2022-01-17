@@ -110,13 +110,13 @@ L'API [findPage](/typedoc/classes/AbstractDAO.html#findPage){:target="_blank"} p
 
 Questa API differisce dalla precedente `findAll` non per la possibilità di richiedere una pagina di risultati, cosa possibile anche con la `findAll`, ma per il valore di ritorno che contiene l'elenco dei record della pagina ed il conteggio totale dei record che rispondo alla query passata.
 
-Il parametro `start` identifica quanti recordo saltare, quindi se si vuole iniziare dal primo deve essere settato a 0 oppure omesso; il parametro `limit` identifica invece la dimensione della pagina, ossia il numero massimo di recordo tornati.
+Il parametro `skip` identifica quanti record saltare, quindi se si vuole iniziare dal primo deve essere settato a 0 oppure omesso; il parametro `limit` identifica invece la dimensione della pagina, ossia il numero massimo di record tornati.
 
 Di seguito un esempio di ricerca di una pagina di utenti filtrando per città:
 
 ```typescript
 const users = await daoContext.user.findAll({
-  start: 0,
+  skip: 0,
   limit: 10,
   filter: {
     "address.city": "Milan"

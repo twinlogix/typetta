@@ -89,7 +89,7 @@ Il risultato di un'interrogazione di questo tipo sarà il seguente:
 
 Quando si seleziona un'entità collegata attraverso la specifica di una proiezione, come default il sistema ritorna tutte le entità collegate. Nell'esempio precedente per ogni utente vengono caricati tutti i post, indipendentemente dal loro numero.
 
-Capita spesso che per questioni di performance o applicative, sia necessario limitare o filtrare anche le entità collegate. Typetta offre questa possibilità attraverso il parametro `relations` presente in ogni API di lettura. `relations` è una mappa chiave-valore che permette di esprire, per ogni relazione, i parametri di lettura `start`, `limit`, `filter`, `sorts` e, ricorsivamente, `relations`. In pratica permette di customizzare la richiesta di recupero delle entità collegate così come si potrebbe fare con una nuova lettura.
+Capita spesso che per questioni di performance o applicative, sia necessario limitare o filtrare anche le entità collegate. Typetta offre questa possibilità attraverso il parametro `relations` presente in ogni API di lettura. `relations` è una mappa chiave-valore che permette di esprire, per ogni relazione, i parametri di lettura `skip`, `limit`, `filter`, `sorts` e, ricorsivamente, `relations`. In pratica permette di customizzare la richiesta di recupero delle entità collegate così come si potrebbe fare con una nuova lettura.
 
 Si noti che non è data la possibilità di specifica `projection` in quanto le proiezioni sono già definite in maniera innestata nella chiamata API.
 
