@@ -33,21 +33,21 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildFilter(filter?: T['filter']): Filter<Document> {
-    if(typeof filter === 'function') {
+    if (typeof filter === 'function') {
       return filter()
     }
     return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongo) : {}
   }
 
   private buildSort(sort?: T['sort']): [string, SortDirection][] {
-    if(typeof sort === 'function') {
+    if (typeof sort === 'function') {
       return sort()
     }
     return sort ? adaptSorts(sort, this.schema) : []
   }
 
   private buildChanges(update: T['update']) {
-    if(typeof update === 'function') {
+    if (typeof update === 'function') {
       return update()
     }
     return { $set: adaptUpdate(update, this.schema, this.daoContext.adapters.mongo) }
@@ -60,7 +60,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     const filter = this.buildFilter(params.filter)
     const projection = this.buildProjection(params.projection)
     const sort = this.buildSort(params.sorts)
-    const results = await this.collection.find(filter, { ...(params.options ?? {}), projection, sort, skip: params.start, limit: params.limit ?? this.pageSize } as FindOptions).toArray()
+    const results = await this.collection.find(filter, { ...(params.options ?? {}), projection, sort, skip: params.skip, limit: params.limit ?? this.pageSize } as FindOptions).toArray()
     const records = this.dbsToModels(results)
     return records
   }
@@ -102,11 +102,11 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       return { ...p, [k]: v.operation === 'count' ? { [`$${v.operation}`]: {} } : { [`$${v.operation}`]: `$${modelNameToDbName(v.field as string, this.schema)}` } }
     }, {})
 
-    const sort = args?.sort
+    const sort = args?.sorts
       ? [
           {
             // @ts-ignore
-            $sort: args.sort.reduce<object>((p, s) => {
+            $sort: args.sorts.reduce<object>((p, s) => {
               const [k, v] = Object.entries(s)[0]
               return {
                 ...p,
@@ -118,6 +118,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       : []
     const filter = params.filter ? [{ $match: this.buildFilter(params.filter) }] : []
     const having = args?.having ? [{ $match: args.having }] : []
+    const skip = params.skip != null ? [{ $skip: params.skip }] : []
+    const limit = params.limit != null ? [{ $limit: params.limit }] : []
     const results = await this.collection
       .aggregate(
         [
@@ -130,6 +132,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
           },
           ...having,
           ...sort,
+          ...skip,
+          ...limit,
         ],
         params.options ?? {},
       )

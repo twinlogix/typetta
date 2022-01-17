@@ -97,7 +97,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     const query = this.buildSort(params.sorts, where)
     const records = await this.buildTransaction(params.options, query)
       .limit(params.limit ?? this.pageSize)
-      .offset(params.start ?? 0)
+      .offset(params.skip ?? 0)
     return this.dbsToModels(records)
   }
 
@@ -141,13 +141,13 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
       return this.knex.raw(`${v.operation.toUpperCase()}(${v.field == null ? '*' : modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
     })
     const where = this.buildWhere(params.filter)
-    const sort = this.buildSort(args?.sort, where)
+    const sort = this.buildSort(args?.sorts, where)
     const select = sort.select([...byColumns, ...aggregations])
     const groupBy = byColumns.length > 0 ? select.groupBy(byColumns) : select.groupByRaw('(SELECT 1)')
     const having = args?.having ? buildHavingConditions(groupBy, args.having) : groupBy
     const transactingQuery = await this.buildTransaction(params.options, having)
-      .limit(params.limit || this.pageSize)
-      .offset(params.start || 0)
+      .limit(params.limit ?? this.pageSize)
+      .offset(params.skip ?? 0)
     const results = await transactingQuery
     Object.keys(params.by || {}).forEach((v) => {
       const name = modelNameToDbName(v, this.schema)

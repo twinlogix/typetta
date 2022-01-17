@@ -199,11 +199,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const relationsFilter = getTraversing(relations, relation.field)
       const relationFilter = relationsFilter.length > 0 ? relationsFilter[0] : undefined
       if (relationProjection) {
-        const params = {
+        const params: FindParams<T> = {
           filter: relationFilter?.filter,
           projection: relationProjection,
           limit: relationFilter?.limit,
-          start: relationFilter?.start,
+          skip: relationFilter?.skip,
           sorts: relationFilter?.sorts,
           relations: relationFilter?.relations,
         }
@@ -256,7 +256,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     filterKey: K,
     filterValues: T['filter'][K][],
   ): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
-    if (params.start != null || params.limit != null || params.filter != null) {
+    if (params.skip != null || params.limit != null || params.filter != null) {
       return this.findAll({ ...params, filter: { $and: [{ [filterKey]: { $in: filterValues } }, params.filter ?? {}] } })
     }
     return await this.loadAll(params, filterKey, filterValues)

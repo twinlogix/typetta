@@ -332,17 +332,17 @@ test('find with start', async () => {
   for (let i = 0; i < 10; i++) {
     await dao.user.insertOne({ record: { firstName: '' + i, live: true } })
   }
-  const response1 = await dao.user.findAll({ start: 0 })
+  const response1 = await dao.user.findAll({ skip: 0 })
   expect(response1.length).toBe(10)
   expect(response1[0].firstName).toBe('0')
   expect(response1[1].firstName).toBe('1')
-  const response2 = await dao.user.findAll({ start: 5 })
+  const response2 = await dao.user.findAll({ skip: 5 })
   expect(response2.length).toBe(5)
   expect(response2[0].firstName).toBe('5')
   expect(response2[1].firstName).toBe('6')
-  const response3 = await dao.user.findAll({ start: 10 })
+  const response3 = await dao.user.findAll({ skip: 10 })
   expect(response3.length).toBe(0)
-  const response4 = await dao.user.findAll({ start: 20 })
+  const response4 = await dao.user.findAll({ skip: 20 })
   expect(response4.length).toBe(0)
 })
 
@@ -394,18 +394,18 @@ test('find with start and limit', async () => {
   for (let i = 0; i < 10; i++) {
     await dao.user.insertOne({ record: { firstName: '' + i, live: true } })
   }
-  const response1 = await dao.user.findAll({ start: 0, limit: 0 })
+  const response1 = await dao.user.findAll({ skip: 0, limit: 0 })
   expect(response1.length).toBe(0)
-  const response2 = await dao.user.findAll({ start: 1, limit: 1 })
+  const response2 = await dao.user.findAll({ skip: 1, limit: 1 })
   expect(response2.length).toBe(1)
   expect(response2[0].firstName).toBe('1')
-  const response3 = await dao.user.findAll({ start: 1, limit: 0 })
+  const response3 = await dao.user.findAll({ skip: 1, limit: 0 })
   expect(response3.length).toBe(0)
-  const response4 = await dao.user.findAll({ start: 2, limit: 2 })
+  const response4 = await dao.user.findAll({ skip: 2, limit: 2 })
   expect(response4.length).toBe(2)
   expect(response4[0].firstName).toBe('2')
   expect(response4[1].firstName).toBe('3')
-  const response5 = await dao.user.findAll({ start: 8, limit: 10 })
+  const response5 = await dao.user.findAll({ skip: 8, limit: 10 })
   expect(response5.length).toBe(2)
   expect(response5[0].firstName).toBe('8')
   expect(response5[1].firstName).toBe('9')
@@ -1113,14 +1113,16 @@ test('Aggregate test', async () => {
       },
       aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
+      skip: 1,
+      limit: 2
     },
-    { sort: [{ authorId: 'desc' }, { totalAuthorViews: 'desc' }], having: { totalAuthorViews: { $lt: 150 } } },
+    { sorts: [{ authorId: 'desc' }, { totalAuthorViews: 'desc' }], having: { totalAuthorViews: { $lt: 150 } } },
   )
-  expect(aggregation1.length).toBe(4)
-  expect(aggregation1[0]).toEqual({ count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en' })
-  expect(aggregation1[1]).toEqual({ count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it' })
-  expect(aggregation1[2]).toEqual({ count: 5, totalAuthorViews: 70, authorId: 'user_1', 'metadata.region': 'it' })
-  expect(aggregation1[3]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
+  expect(aggregation1.length).toBe(2)
+  //expect(aggregation1[0]).toEqual({ count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en' })
+  expect(aggregation1[0]).toEqual({ count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it' })
+  expect(aggregation1[1]).toEqual({ count: 5, totalAuthorViews: 70, authorId: 'user_1', 'metadata.region': 'it' })
+  //expect(aggregation1[3]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
 
   const aggregation2 = await dao.post.aggregate({
     aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' }, avgAuthorViews: { field: 'views', operation: 'avg' } },

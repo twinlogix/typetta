@@ -3,7 +3,7 @@ main:
     title: Overview
     children:
       - url: /
-        title: What is Typetta?
+        title: Cos'è Typetta?
       - url: /chapters/overview/getting-started
         title: Getting Started
   - data-model:
@@ -32,8 +32,9 @@ main:
         title: Relazioni
       - url: /chapters/client/pagination
         title: Paginazione
-      - url: /chapters/client/aggregations
+      - url: /chapters/client/aggregation
         title: Aggregazioni
+        todo: true
       - url: /chapters/client/raw-databse-access
         title: Accesso diretto al database
         todo: true

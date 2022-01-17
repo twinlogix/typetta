@@ -1,6 +1,6 @@
 # Getting Started
 
-This tutorial allows you to explore all basic Typetta functionalities providing step by step examples starting from intallation and followimg with the usage of this ORM on a NodeJS Typescript based project.
+This tutorial allows you to explore all basic Typetta functionalities providing step by step examples starting from installation and following with the usage of this ORM on a NodeJS Typescript based project.
 
   - [Installation](#installation)
   - [Project structure](#project-structure)
@@ -58,7 +58,7 @@ type User @mongoEntity {
 
 With Typetta, using a standard language such as GraphQL to model the application enables the developer to use many third party tools and libraries. As a consequence, the developing an application becomes a much quicker and productive experience.
 
-Code generation in Typetta relies on GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"} a very customizable and extensible library.
+Code generation in Typetta relies on [GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"} a very customizable and extensible library.
 GraphQL Code Generator enables the developer to choose between many standard generators as well as our embedded generator that automatically provides DAO in TypeScript language.
 
 Typetta already includes all default dependencies to use the TypeScript generator but it's also possible to add other generators following the official guide.
@@ -89,19 +89,19 @@ To allow code generation it's also useful to edit the file *package.json* insert
 }
 ```
 
-Now let's do our first code generation running the wollowing command:
+Now let's do our first code generation running the following command:
 
 ```bash
 npm run generate
 ```
 
-Using the above setup, the code generation command will create two files: *src/models.ts* with all TypeScript types inclued in *schema.graphql* and another file *src/dao.ts* with DAO and DAOContext. This two files will be useful for later.
+Using the above setup, the code generation command will create two files: *src/models.ts* with all TypeScript types included in *schema.graphql* and another file *src/dao.ts* with DAO and DAOContext. This two files will be useful for later.
 
 ## A simple application
 
-The following initial Typetta example writes and reads an entity on a MongoDB database (on ab SQL DB would be pretty much the same). this and other examples are available in a dedicated repository [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"} .
+The following initial Typetta example writes and reads an entity on a MongoDB database (on ab SQL DB would be pretty much the same). This and other examples are available in a dedicated repository [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"} .
 
-First things first... open a connection to the MongoDB database using the offical Driver:
+First things first... open a connection to the MongoDB database using the official Driver:
 
 ```typescript
 import { MongoClient } from 'mongodb';
@@ -114,7 +114,7 @@ const main = async () => {
 main();
 ```
 
-Let's do our first DAOContext, our first Typetta code generated class. This class rappresents the central repo for all entity of the applicative model.
+Let's do our first DAOContext, our first Typetta code generated class. This class represents the central repo for all entity of the applicative model.
 
 ```typescript
 const daoContext = new DAOContext({
