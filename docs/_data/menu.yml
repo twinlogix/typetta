@@ -34,11 +34,10 @@ main:
         title: Paginazione
       - url: /chapters/client/aggregations
         title: Aggregazioni
-      - url: /chapters/client/raw-databse-access
-        title: Accesso diretto al database
-        todo: true
       - url: /chapters/advanced/transactions
         title: Transazioni
+      - url: /chapters/client/raw-databse-access
+        title: Accesso diretto al database
         todo: true
   - database-drivers:
     title: Connettori ai Database
