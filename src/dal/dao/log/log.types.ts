@@ -14,6 +14,11 @@ export type LogArgs<DAOName extends string> = {
         duration: number
         affectedRecords?: number
       }
+    | {
+        state: 'failed'
+        duration: number
+        error?: Error
+      }
 }
 export type LogFunction<DAOName extends string> = (args: LogArgs<DAOName>) => Promise<void>
 
