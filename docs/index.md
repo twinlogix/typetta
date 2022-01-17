@@ -1,6 +1,6 @@
 # What is Typetta?
 
-Typetta is an **open-source ORM** that can be used with Node JS, Browser, Cordova, PhoneGap, Ionic, React Native, NativeScript, Expo and Electron projects. It's 100% written in TypeScript and aims to allow a seamless access to data in a typed fashion to all **main SQL databases** (MySQL, PostgreSQL, Microsoft SQL Server, SQLLite3, CockroachDB, MariaDB, Oracle e Amazon Redshift) and also to the NoSQL database **MongoDB**.
+Typetta is an **open-source ORM** written in TypeScript that aims to allow a seamless access to data in a typed fashion to all **main SQL databases** (MySQL, PostgreSQL, Microsoft SQL Server, SQLLite3, CockroachDB, MariaDB, Oracle e Amazon Redshift) and also to the NoSQL database **MongoDB**.
 
 Typetta is pluggable into any TypeScript backend (including serverless applications and microservices) but in terms of gain we totally suggest using it in all **GraphQL** backends, because... because we simply love GraphQL.
 
