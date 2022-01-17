@@ -6,11 +6,11 @@
   </a>
   <br>
   Node.js ORM written in TypeScript for typing lovers.
-  <br>
-  [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3c49f8a206cf4deeb41b289d151434f7)](https://www.codacy.com/gh/twinlogix/typetta/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=twinlogix/typetta&amp;utm_campaign=Badge_Grade)
-  <br>
-  <br>
 </div>
+
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3c49f8a206cf4deeb41b289d151434f7)](https://www.codacy.com/gh/twinlogix/typetta/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=twinlogix/typetta&amp;utm_campaign=Badge_Grade)
+
+
 
 Typetta è un **ORM open-source** utilizzabile sulle piattaforme Node JS, Browser, Cordova, PhoneGap, Ionic, React Native, NativeScript, Expo ed Electron. E' scritto interamente in linguaggio TypeScript ed il suo obiettivo è di fornire un accesso evoluto e completamente tipato a tutti i **principali database SQL** (MySQL, PostgreSQL, Microsoft SQL Server, SQLLite3, CockroachDB, MariaDB, Oracle e Amazon Redshift) e al database NoSQL **MongoDB**.
 
