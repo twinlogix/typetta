@@ -7,7 +7,7 @@ main:
       - url: /chapters/overview/getting-started
         title: Getting Started
   - data-model:
-    title: Modello Applicativo [eng soon]
+    title: Modello Applicativo
     children:
       - url: /chapters/data-model/scalars
         title: Scalari [eng soon]
