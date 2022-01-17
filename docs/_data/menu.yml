@@ -7,35 +7,35 @@ main:
       - url: /chapters/overview/getting-started
         title: Getting Started
   - data-model:
-    title: Modello Applicativo [to be translated]
+    title: Modello Applicativo [eng soon]
     children:
       - url: /chapters/data-model/scalars
-        title: Scalari [to be translated]
+        title: Scalari [eng soon]
       - url: /chapters/data-model/entities
-        title: Entità [to be translated]
+        title: Entità [eng soon]
       - url: /chapters/data-model/relations
-        title: Relazioni [to be translated]
+        title: Relazioni [eng soon]
   - client:
-    title: Database Client [to be translated]
+    title: Database Client
     children:
       - url: /chapters/client/dao-context
-        title: Il Contesto [to be translated]
+        title: Il Contesto [eng soon]
       - url: /chapters/client/read-write
-        title: Lettura e Scrittura [to be translated]
+        title: Lettura e Scrittura [eng soon]
       - url: /chapters/client/filters
-        title: Filtri [to be translated]
+        title: Filtri [eng soon]
       - url: /chapters/client/projections
-        title: Proiezioni [to be translated]
+        title: Proiezioni [eng soon]
       - url: /chapters/client/sorting
-        title: Ordinamenti [to be translated]
+        title: Ordinamenti [eng soon]
       - url: /chapters/client/relations
-        title: Relazioni [to be translated]
+        title: Relazioni [eng soon]
       - url: /chapters/client/pagination
-        title: Paginazione [to be translated]
+        title: Paginazione [eng soon]
       - url: /chapters/client/aggregations
-        title: Aggregazioni [to be translated]
+        title: Aggregazioni [eng soon]
       - url: /chapters/advanced/transactions
-        title: Transazioni [to be translated]
+        title: Transazioni [eng soon]
       - url: /chapters/client/raw-databse-access
         title: Accesso diretto al database
         todo: true
