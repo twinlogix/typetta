@@ -5,7 +5,7 @@
     <img src="https://github.com/twinlogix/typetta/blob/master/docs/assets/img/logo.png" width="316" height="50">
   </a>
   <br/>
-  Node.js ORM written in TypeScript for typing lovers.
+  Node.js ORM written in TypeScript for type lovers.
   <br/>
   <br/>
   <div>
