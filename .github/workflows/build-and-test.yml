@@ -25,4 +25,4 @@ jobs:
       - name: Test code generation
         run: npm run generate
       - name: Testing
-        run: npm run test-ci
+        run: npm run test

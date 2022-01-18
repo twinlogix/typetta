@@ -5,8 +5,8 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
-    "test": "jest --detectOpenHandles --no-cache --forceExit && make-coverage-badge",
-    "test-ci": "jest --detectOpenHandles --no-cache --forceExit",
+    "coverage": "jest --detectOpenHandles --no-cache --forceExit && make-coverage-badge",
+    "test": "jest --detectOpenHandles --no-cache --forceExit",
     "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
