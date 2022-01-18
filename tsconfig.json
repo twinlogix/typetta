@@ -8,6 +8,7 @@
     "outDir": "lib",
     "baseUrl": ".",
     "declaration": true,
+    "incremental": true,
     //"allowSyntheticDefaultImports": true,
     "strict": true,
     "noErrorTruncation": true,
