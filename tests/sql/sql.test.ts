@@ -15,14 +15,24 @@ const config: Knex.Config = {
   connection: ':memory:',
   useNullAsDefault: true,
   log: {
-    warn: () => {},
-    debug: () => {},
-    error: () => {},
-    deprecate: () => {},
+    warn: () => {
+      return
+    },
+    debug: () => {
+      return
+    },
+    error: () => {
+      return
+    },
+    deprecate: () => {
+      return
+    },
   },
 }
 
-beforeAll(async () => {})
+beforeAll(async () => {
+  return
+})
 
 beforeEach(async () => {
   knexInstance = knex(config)
@@ -77,7 +87,9 @@ beforeEach(async () => {
   await dao.address.createTable(typeMap, defaultType)
 })
 
-afterEach(async () => {})
+afterEach(async () => {
+  return
+})
 
 test('Insert and retrieve', async () => {
   await dao.user.insertOne({
@@ -601,15 +613,19 @@ test('not supported operation', async () => {
   try {
     await dao.user.deleteOne({ filter: { id: '' } })
     fail()
-  } catch {}
-  try {
-    await dao.user.replaceOne({ replace: { live: true }, filter: {} })
-    fail()
-  } catch {}
-  try {
-    await dao.user.updateOne({ changes: { live: false }, filter: {} })
-    fail()
-  } catch {}
+  } catch {
+    try {
+      await dao.user.replaceOne({ replace: { live: true }, filter: {} })
+      fail()
+    } catch {
+      try {
+        await dao.user.updateOne({ changes: { live: false }, filter: {} })
+        fail()
+      } catch {
+        return
+      }
+    }
+  }
 })
 
 test('Text filter test', async () => {

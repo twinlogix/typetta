@@ -1,4 +1,6 @@
+// tslint:disable-next-line: no-var-requires
 global.TextEncoder = require('util').TextEncoder
+// tslint:disable-next-line: no-var-requires
 global.TextDecoder = require('util').TextDecoder
 
 import { computedField } from '../../src'
@@ -16,10 +18,10 @@ const config: Knex.Config = {
   connection: ':memory:',
   useNullAsDefault: true,
   log: {
-    warn: () => {},
-    debug: () => {},
-    error: () => {},
-    deprecate: () => {},
+    warn: () => { return },
+    debug: () => { return },
+    error: () => { return },
+    deprecate: () => { return },
   },
 }
 
