@@ -138,7 +138,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       indentMultiline(
         `super({\n  ...params,\n  scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [${scalarsNameList
           .map((v) => `'${v}'`)
-          .join(', ')}]) : undefined\n})\nthis.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares || []\nthis.logger = params.log ? logInputToLogger(params.log) : undefined`,
+          .join(', ')}]) : undefined\n})\nthis.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares || []\nthis.logger = logInputToLogger(params.log)`,
       ) +
       '\n}'
 

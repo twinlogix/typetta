@@ -16,7 +16,7 @@ import {
   AggregatePostProcessing,
   FindOneParams,
 } from './dao.types'
-import { LogFunction } from './log/log.types'
+import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection, projection } from './projections/projections.utils'
@@ -386,6 +386,16 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       }
     }
     return params
+  }
+
+  protected createLog(log: Omit<LogArgs<T['name']>, 'log' | 'dao'>): LogArgs<T['name']> {
+    return {
+      ...log,
+      log: `[${log.date.toISOString()}](${log.info.state}: ${log.driver}.${log.operation}):${log.query ? ` "${log.query}"` : ''} ${
+        log.info.state === 'completed' ? `[${log.info.duration} ms]` : log.info.state === 'failed' ? `${log.info.error} [${log.info.duration} ms]` : ''
+      }`,
+      dao: this.name,
+    }
   }
 
   // -----------------------------------------------------------------------

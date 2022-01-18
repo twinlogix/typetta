@@ -51,7 +51,6 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
     overrides: {
       user: {},
     },
-    log: true
   })
 }
 

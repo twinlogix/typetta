@@ -25,6 +25,7 @@ beforeAll(async () => { })
 beforeEach(async () => {
   knexInstance = knex(config)
   dao = new DAOContext({
+    log: { maxQueryExecutionTime: 100000 },
     knex: {
       default: knexInstance,
     },
