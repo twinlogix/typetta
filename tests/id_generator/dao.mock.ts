@@ -528,7 +528,7 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     this.mongo = params.mongo
     this.knex = params.knex
     this.middlewares = params.middlewares || []
-    this.logger = params.log ? logInputToLogger(params.log) : undefined
+    this.logger = logInputToLogger(params.log)
   }
   
   public async execQuery<T>(run: (dbs: { mongo: Record<'a' | 'default', Db>; knex: Record<'default', Knex> }, entities: { a: Collection<Document>; b: Collection<Document>; c: Collection<Document>; d: Knex.QueryBuilder<any, unknown[]>; e: Knex.QueryBuilder<any, unknown[]>; f: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {

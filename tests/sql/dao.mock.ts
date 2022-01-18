@@ -795,7 +795,7 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     this.overrides = params.overrides
     this.knex = params.knex
     this.middlewares = params.middlewares || []
-    this.logger = params.log ? logInputToLogger(params.log) : undefined
+    this.logger = logInputToLogger(params.log)
   }
   
   public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex> }, entities: { address: Knex.QueryBuilder<any, unknown[]>; city: Knex.QueryBuilder<any, unknown[]>; device: Knex.QueryBuilder<any, unknown[]>; dog: Knex.QueryBuilder<any, unknown[]>; friends: Knex.QueryBuilder<any, unknown[]>; organization: Knex.QueryBuilder<any, unknown[]>; user: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {

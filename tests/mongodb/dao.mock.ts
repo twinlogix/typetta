@@ -825,7 +825,7 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     this.overrides = params.overrides
     this.mongo = params.mongo
     this.middlewares = params.middlewares || []
-    this.logger = params.log ? logInputToLogger(params.log) : undefined
+    this.logger = logInputToLogger(params.log)
   }
   
   public async execQuery<T>(run: (dbs: { mongo: Record<'default', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; organization: Collection<Document>; post: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {

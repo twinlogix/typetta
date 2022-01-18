@@ -4,10 +4,6 @@ documents: null
 generates:
   tests/mongodb/models.mock.ts:
     plugins:
-      - add:
-          content: 'import BigNumber from "bignumber.js";'
-      - add:
-          content: 'import { Coordinates, LocalizedString } from "@twinlogix/typetta";'
       - 'typescript'
     config:
       namingConvention: keep
