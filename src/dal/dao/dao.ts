@@ -388,12 +388,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return params
   }
 
-  protected createLog(log: Omit<LogArgs<T['name']>, 'log' | 'dao'>): LogArgs<T['name']> {
+  protected createLog(log: Omit<LogArgs<T['name']>, 'raw' | 'dao'>): LogArgs<T['name']> {
     return {
       ...log,
-      log: `[${log.date.toISOString()}](${log.info.state}: ${log.driver}.${log.operation}):${log.query ? ` "${log.query}"` : ''} ${
-        log.info.state === 'completed' ? `[${log.info.duration} ms]` : log.info.state === 'failed' ? `${log.info.error} [${log.info.duration} ms]` : ''
-      }`,
+      raw: `[${log.date.toISOString()}](dao: ${this.name}, op: ${log.operation}, driver: ${log.driver}):${log.query ? ` '${log.query}'` : ''} [${log.duration} ms${log.error ? `, ${log.error}` : ''}]`,
       dao: this.name,
     }
   }

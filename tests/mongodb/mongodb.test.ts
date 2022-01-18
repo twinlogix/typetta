@@ -51,6 +51,7 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
     overrides: {
       user: {},
     },
+    log: { maxQueryExecutionTime: 1000 }
   })
 }
 
@@ -699,6 +700,7 @@ test('insert and retrieve localized string field', async () => {
 test('middleware 1', async () => {
   let operationCount = 0
   const dao2 = new DAOContext<any>({
+    log: ['error', 'warning'],
     mongo: {
       default: db,
     },
