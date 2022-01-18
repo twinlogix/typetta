@@ -60,7 +60,7 @@ beforeAll(async () => {
   con = await MongoClient.connect(replSet.getUri(), {})
   db = con.db('test')
   dao = createDao()
-})
+}, 100000)
 
 beforeEach(async () => {
   const collections = await db.collections()

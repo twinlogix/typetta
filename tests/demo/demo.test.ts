@@ -91,7 +91,7 @@ beforeEach(async () => {
   await dao.post.createTable(typeMap, defaultType)
   await dao.user.createTable(typeMap, defaultType)
   await dao.tag.createTable(typeMap, defaultType)
-})
+}, 100000)
 
 test('Demo', async () => {
   const user = await dao.user.insertOne({

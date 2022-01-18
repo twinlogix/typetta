@@ -73,7 +73,7 @@ beforeEach(async () => {
   await dao.city.createTable(typeMap, defaultType)
   await dao.organization.createTable(typeMap, defaultType)
   await dao.address.createTable(typeMap, defaultType)
-}, 10000)
+}, 100000)
 
 afterEach(async () => { })
 

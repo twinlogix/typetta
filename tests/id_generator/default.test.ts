@@ -27,7 +27,7 @@ let mongoServer: MongoMemoryServer
 let db: Db
 let dao: DAOContext<{}>
 
-beforeAll(async () => {
+beforeEach(async () => {
   knexInstance = knex(config)
   mongoServer = await MongoMemoryServer.create()
   con = await MongoClient.connect(mongoServer.getUri(), {})
@@ -92,7 +92,7 @@ beforeAll(async () => {
   await dao.d.createTable(typeMap, defaultType)
   await dao.e.createTable(typeMap, defaultType)
   await dao.f.createTable(typeMap, defaultType)
-})
+}, 100000)
 
 test('Test mongo', async () => {
   const a = await dao.a.insertOne({ record: { value: 1 } }) // id generated from db
