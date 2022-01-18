@@ -1,9 +1,10 @@
-import { DAOContext } from './dao.mock'
-import { Scalars } from './models.mock'
 import { computedField } from '../../src'
+import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
+
+jest.setTimeout(20000)
 
 let knexInstance: Knex<any, unknown[]>
 let dao: DAOContext<any>
@@ -13,14 +14,15 @@ const config: Knex.Config = {
   connection: ':memory:',
   useNullAsDefault: true,
   log: {
-    warn: () => {},
-    debug: () => {},
-    error: () => {},
-    deprecate: () => {},
-  }
+    warn: () => { return },
+    debug: () => { return },
+    error: () => { return },
+    deprecate: () => { return },
+  },
 }
 
 let idCounter = 0
+
 beforeEach(async () => {
   knexInstance = knex(config)
   dao = new DAOContext({
@@ -142,7 +144,7 @@ test('Demo', async () => {
         filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
         limit: 2,
         skip: 1,
-        sorts: (qb) => (qb.orderBy('title', 'desc')),
+        sorts: (qb) => qb.orderBy('title', 'desc'),
         relations: {
           tags: {
             filter: { name: 'Sport' },
@@ -182,15 +184,15 @@ test('Aggregate test', async () => {
       aggregations: { count: { field: 'authorId', operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
       skip: 1,
-      limit: 2
+      limit: 2,
     },
     { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { $lt: 150 } } },
   )
   expect(aggregation1.length).toBe(2)
-  //expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
+  // expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
   expect(aggregation1[0]).toEqual({ count: 5, totalAuthorViews: 70, authorId: 'user_1', 'metadata.region': 'it' })
   expect(aggregation1[1]).toEqual({ count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en' })
-  //expect(aggregation1[3]).toEqual({ count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it' })
+  // expect(aggregation1[3]).toEqual({ count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it' })
   const aggregation2 = await dao.post.aggregate({
     aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' }, avgAuthorViews: { field: 'views', operation: 'avg' } },
   })

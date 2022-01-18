@@ -4,8 +4,9 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "jest --detectOpenHandles --no-cache --forceExit && make-coverage-badge",
+    "build": "tsc -p tsconfig.prod.json",
+    "coverage": "jest --detectOpenHandles --no-cache --forceExit && make-coverage-badge",
+    "test": "jest --detectOpenHandles --no-cache --forceExit",
     "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
@@ -31,7 +32,7 @@
     "url": "https://github.com/twinlogix/typetta/issues"
   },
   "devDependencies": {
-    "@graphql-codegen/add": "3.1.0",
+    "@graphql-codegen/add": "3.1.1",
     "@trivago/prettier-plugin-sort-imports": "3.1.1",
     "@types/jest": "27.4.0",
     "@types/node": "12.20.42",
@@ -49,16 +50,16 @@
     "sqlite3": "5.0.2",
     "ts-jest": "27.1.3",
     "tslint": "6.1.3",
-    "typedoc": "0.22.10",
+    "typedoc": "0.22.11",
     "typescript": "4.5.4",
     "uuid": "8.3.2"
   },
   "dependencies": {
     "@graphql-codegen/cli": "2.3.1",
-    "@graphql-codegen/plugin-helpers": "2.3.1",
+    "@graphql-codegen/plugin-helpers": "2.3.2",
     "@graphql-codegen/schema-ast": "2.4.1",
     "@graphql-codegen/typescript": "2.4.2",
-    "@graphql-codegen/visitor-plugin-common": "2.5.1",
+    "@graphql-codegen/visitor-plugin-common": "2.5.2",
     "dataloader": "2.0.0",
     "graphql": "15.8.0",
     "is-plain-object": "5.0.0",

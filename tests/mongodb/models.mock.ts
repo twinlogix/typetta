@@ -1,5 +1,3 @@
-import BigNumber from "bignumber.js";
-import { Coordinates, LocalizedString } from "@twinlogix/typetta";
 import { Coordinates } from '../../src';
 import { BigNumber } from 'bignumber.js';
 import { LocalizedString } from '../../src';
