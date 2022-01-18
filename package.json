@@ -64,7 +64,7 @@
     "knex": "0.95.15",
     "mongodb": "4.3.0",
     "object-hash": "2.2.0",
-    "type-fest": "0.21.3"
+    "type-fest": "2.9.0"
   },
   "jest": {
     "rootDir": "./",
