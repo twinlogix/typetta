@@ -11,7 +11,8 @@
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",
     "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
-    "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts"
+    "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts",
+    "release": "release-it"
   },
   "repository": {
     "type": "git",
@@ -43,6 +44,7 @@
     "jest": "27.4.7",
     "make-coverage-badge": "1.2.0",
     "mongodb-memory-server": "8.2.0",
+    "release-it": "14.12.3",
     "sha256": "0.2.0",
     "sqlite3": "5.0.2",
     "ts-jest": "27.1.3",
