@@ -7,7 +7,7 @@ on:
     branches: [master, develop]
   workflow_dispatch:
 jobs:
-  build-and-deploy:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -25,4 +25,4 @@ jobs:
       - name: Test code generation
         run: npm run generate
       - name: Testing
-        run: npm run test
+        run: npm run test-ci

@@ -1,10 +1,10 @@
 global.TextEncoder = require('util').TextEncoder
 global.TextDecoder = require('util').TextDecoder
 
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128 } from 'mongodb'
@@ -12,6 +12,8 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
+
+jest.setTimeout(20000)
 
 let replSet: MongoMemoryReplSet
 let con: MongoClient
@@ -51,7 +53,7 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
     overrides: {
       user: {},
     },
-    log: { maxQueryExecutionTime: 1000 }
+    log: { maxQueryExecutionTime: 1000 },
   })
 }
 
@@ -60,7 +62,7 @@ beforeAll(async () => {
   con = await MongoClient.connect(replSet.getUri(), {})
   db = con.db('test')
   dao = createDao()
-}, 100000)
+})
 
 beforeEach(async () => {
   const collections = await db.collections()
@@ -589,7 +591,7 @@ test('update with undefined', async () => {
   await dao.user.updateOne({ filter: { id: user.id }, changes: { live: undefined } })
   const user2 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true, id: true } })
   expect(user2?.live).toBe(true)
-  await dao.user.updateAll({ filter: { id: user.id }, changes: { live: undefined, firstName: "Mario" } })
+  await dao.user.updateAll({ filter: { id: user.id }, changes: { live: undefined, firstName: 'Mario' } })
   const user3 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true, id: true } })
   expect(user3?.live).toBe(true)
 })
@@ -1116,7 +1118,7 @@ test('Aggregate test', async () => {
       aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
       skip: 1,
-      limit: 2
+      limit: 2,
     },
     { sorts: [{ authorId: 'desc' }, { totalAuthorViews: 'desc' }], having: { totalAuthorViews: { $lt: 150 } } },
   )
@@ -1174,7 +1176,7 @@ test('Text filter test', async () => {
   await dao.execQuery(async (dbs, entities) => {
     await entities.organization.createIndex({ name: 'text' }, { name: 'nameIndex' })
   })
-  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => ([['score', { $meta: "textScore" }]]) })).map(o => o.name)
+  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => [['score', { $meta: 'textScore' }]] })).map((o) => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes('Microsoft')).toBe(true)

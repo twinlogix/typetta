@@ -1,9 +1,10 @@
-import { DAOContext } from './dao.mock'
-import { Scalars } from './models.mock'
 import { computedField } from '../../src'
+import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
+
+jest.setTimeout(20000)
 
 let knexInstance: Knex<any, unknown[]>
 let dao: DAOContext<any>
@@ -17,10 +18,11 @@ const config: Knex.Config = {
     debug: () => {},
     error: () => {},
     deprecate: () => {},
-  }
+  },
 }
 
 let idCounter = 0
+
 beforeEach(async () => {
   knexInstance = knex(config)
   dao = new DAOContext({
@@ -91,7 +93,7 @@ beforeEach(async () => {
   await dao.post.createTable(typeMap, defaultType)
   await dao.user.createTable(typeMap, defaultType)
   await dao.tag.createTable(typeMap, defaultType)
-}, 100000)
+})
 
 test('Demo', async () => {
   const user = await dao.user.insertOne({
@@ -142,7 +144,7 @@ test('Demo', async () => {
         filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
         limit: 2,
         skip: 1,
-        sorts: (qb) => (qb.orderBy('title', 'desc')),
+        sorts: (qb) => qb.orderBy('title', 'desc'),
         relations: {
           tags: {
             filter: { name: 'Sport' },
@@ -182,7 +184,7 @@ test('Aggregate test', async () => {
       aggregations: { count: { field: 'authorId', operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
       skip: 1,
-      limit: 2
+      limit: 2,
     },
     { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { $lt: 150 } } },
   )

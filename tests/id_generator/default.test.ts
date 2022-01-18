@@ -9,6 +9,8 @@ import { Db, Decimal128, MongoClient } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
 
+jest.setTimeout(20000)
+
 const config: Knex.Config = {
   client: 'sqlite3',
   connection: ':memory:',
@@ -18,7 +20,7 @@ const config: Knex.Config = {
     debug: () => {},
     error: () => {},
     deprecate: () => {},
-  }
+  },
 }
 
 let knexInstance: Knex<any, unknown[]>
@@ -71,7 +73,7 @@ beforeEach(async () => {
           dbToModel: (o: unknown) => JSON.parse(o as string),
           modelToDB: (o: any) => JSON.stringify(o),
         },
-      }
+      },
     },
     overrides: {
       b: {
@@ -92,7 +94,7 @@ beforeEach(async () => {
   await dao.d.createTable(typeMap, defaultType)
   await dao.e.createTable(typeMap, defaultType)
   await dao.f.createTable(typeMap, defaultType)
-}, 100000)
+})
 
 test('Test mongo', async () => {
   const a = await dao.a.insertOne({ record: { value: 1 } }) // id generated from db

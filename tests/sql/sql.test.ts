@@ -1,9 +1,11 @@
-import { DAOContext } from './dao.mock'
 import { Coordinates, LocalizedString } from '../../src'
+import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
 import { v4 as uuidv4 } from 'uuid'
+
+jest.setTimeout(20000)
 
 let knexInstance: Knex<any, unknown[]>
 let dao: DAOContext<{}>
@@ -17,10 +19,10 @@ const config: Knex.Config = {
     debug: () => {},
     error: () => {},
     deprecate: () => {},
-  }
+  },
 }
 
-beforeAll(async () => { })
+beforeAll(async () => {})
 
 beforeEach(async () => {
   knexInstance = knex(config)
@@ -54,9 +56,9 @@ beforeEach(async () => {
         generate: () => uuidv4(),
       },
       String: {
-        dbToModel: (o: any) => typeof o === 'string' ? o : o.toString(),
+        dbToModel: (o: any) => (typeof o === 'string' ? o : o.toString()),
         modelToDB: (o: string) => o,
-      }
+      },
     },
   })
   const typeMap = {
@@ -73,9 +75,9 @@ beforeEach(async () => {
   await dao.city.createTable(typeMap, defaultType)
   await dao.organization.createTable(typeMap, defaultType)
   await dao.address.createTable(typeMap, defaultType)
-}, 100000)
+})
 
-afterEach(async () => { })
+afterEach(async () => {})
 
 test('Insert and retrieve', async () => {
   await dao.user.insertOne({
@@ -581,7 +583,7 @@ test('update with undefined', async () => {
   await dao.user.updateAll({ filter: { id: user.id }, changes: { live: undefined } })
   const user2 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true, id: true } })
   expect(user2?.live).toBe(true)
-  await dao.user.updateAll({ filter: { id: user.id }, changes: { live: undefined, firstName: "Mario" } })
+  await dao.user.updateAll({ filter: { id: user.id }, changes: { live: undefined, firstName: 'Mario' } })
   const user3 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true, id: true } })
   expect(user3?.live).toBe(true)
 })
@@ -597,17 +599,17 @@ test('simple delete', async () => {
 
 test('not supported operation', async () => {
   try {
-    await dao.user.deleteOne({ filter: { id: "" } })
+    await dao.user.deleteOne({ filter: { id: '' } })
     fail()
-  } catch { }
+  } catch {}
   try {
     await dao.user.replaceOne({ replace: { live: true }, filter: {} })
     fail()
-  } catch { }
+  } catch {}
   try {
     await dao.user.updateOne({ changes: { live: false }, filter: {} })
     fail()
-  } catch { }
+  } catch {}
 })
 
 test('Text filter test', async () => {
