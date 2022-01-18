@@ -1,6 +1,7 @@
 import { transformObject } from '../../../../generation/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
+import { LogArgs } from '../../../dao/log/log.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
@@ -53,16 +54,24 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return { $set: adaptUpdate(update, this.schema, this.daoContext.adapters.mongo) }
   }
 
-  protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
-    if (params.limit === 0) {
-      return []
-    }
-    const filter = this.buildFilter(params.filter)
-    const projection = this.buildProjection(params.projection)
-    const sort = this.buildSort(params.sorts)
-    const results = await this.collection.find(filter, { ...(params.options ?? {}), projection, sort, skip: params.skip, limit: params.limit ?? this.pageSize } as FindOptions).toArray()
-    const records = this.dbsToModels(results)
-    return records
+  protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
+    return this.runQuery('find', async () => {
+      const filter = this.buildFilter(params.filter)
+      const projection = this.buildProjection(params.projection)
+      const sort = this.buildSort(params.sorts)
+      const options = { projection, sort, skip: params.skip, limit: params.limit ?? this.pageSize } as FindOptions
+      return [
+        async () => {
+          if (params.limit === 0) {
+            return []
+          }
+          const results = await this.collection.find(filter, { ...(params.options ?? {}), ...options }).toArray()
+          const records = this.dbsToModels(results)
+          return records
+        },
+        () => `collection.find(${JSON.stringify(filter)}, ${JSON.stringify(options)})`,
+      ]
+    })
   }
 
   protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
@@ -75,132 +84,179 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return (await this._count(params)) > 0
   }
 
-  protected async _count(params: FilterParams<T>): Promise<number> {
-    const filter = this.buildFilter(params.filter)
-    return this.collection.countDocuments(filter, params.options ?? {})
-  }
-
-  protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
-    if (params.by && Object.keys(params.by).length === 0) {
-      throw new Error("'by' params must contains at least one key.")
-    }
-    const groupKeys: { [key: string]: string } = {}
-    const byKeys = Object.keys(params.by || {})
-    const groupId = params.by
-      ? byKeys.reduce<object>((p, k) => {
-          const mappedName = k.split('.').join('_')
-          if (mappedName !== k) {
-            groupKeys[k] = mappedName
-          }
-          return { ...p, [mappedName]: `$${modelNameToDbName(k, this.schema)}` }
-        }, {})
-      : {}
-    const aggregation = Object.entries(params.aggregations).reduce<object>((p, [k, v]) => {
-      if (v.operation === 'count' && v.field) {
-        throw new Error('field value is not supported with aggregate count operation (MongoDB)')
-      }
-      return { ...p, [k]: v.operation === 'count' ? { [`$${v.operation}`]: {} } : { [`$${v.operation}`]: `$${modelNameToDbName(v.field as string, this.schema)}` } }
-    }, {})
-
-    const sort = args?.sorts
-      ? [
-          {
-            // @ts-ignore
-            $sort: args.sorts.reduce<object>((p, s) => {
-              const [k, v] = Object.entries(s)[0]
-              return {
-                ...p,
-                [byKeys.includes(k) ? `_id.${k}` : k]: (v as SortDirection) === 'asc' ? 1 : -1,
-              }
-            }, {}),
-          },
-        ]
-      : []
-    const filter = params.filter ? [{ $match: this.buildFilter(params.filter) }] : []
-    const having = args?.having ? [{ $match: args.having }] : []
-    const skip = params.skip != null ? [{ $skip: params.skip }] : []
-    const limit = params.limit != null ? [{ $limit: params.limit }] : []
-    const results = await this.collection
-      .aggregate(
-        [
-          ...filter,
-          {
-            $group: {
-              _id: groupId,
-              ...aggregation,
-            },
-          },
-          ...having,
-          ...sort,
-          ...skip,
-          ...limit,
-        ],
-        params.options ?? {},
-      )
-      .toArray()
-
-    const mappedResults = results.map((r) => {
-      const rId = r._id
-      for (const [k, v] of Object.entries(groupKeys)) {
-        if (rId[v]) {
-          rId[k] = rId[v]
-          delete rId[v]
-        }
-      }
-      delete r._id
-      return {
-        ...rId,
-        ...r,
-      }
+  protected _count(params: FilterParams<T>): Promise<number> {
+    return this.runQuery('find', async () => {
+      const filter = this.buildFilter(params.filter)
+      const options = params.options ?? {}
+      return [() => this.collection.countDocuments(filter, options), () => `collection.countDocuments(${JSON.stringify(filter)})`]
     })
-
-    if (params.by) {
-      return mappedResults as AggregateResults<T, A>
-    } else {
-      if (mappedResults.length === 0) {
-        return Object.keys(params.aggregations).reduce((p, k) => {
-          return {
-            ...p,
-            [k]: params.aggregations[k].operation === 'count' ? 0 : null,
-          }
-        }, {}) as AggregateResults<T, A>
-      }
-      return mappedResults[0] as AggregateResults<T, A>
-    }
   }
 
-  protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
-    const record = this.modelToDb(params.record)
-    const result = await this.collection.insertOne(record, params.options ?? {})
-    const inserted = await this.collection.findOne({ _id: result.insertedId }, params.options ?? {})
-    return this.dbToModel(inserted!) as Omit<T['model'], T['exludedFields']>
+  protected _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
+    return this.runQuery('aggregate', async () => {
+      if (params.by && Object.keys(params.by).length === 0) {
+        throw new Error("'by' params must contains at least one key.")
+      }
+      const groupKeys: { [key: string]: string } = {}
+      const byKeys = Object.keys(params.by || {})
+      const groupId = params.by
+        ? byKeys.reduce<object>((p, k) => {
+            const mappedName = k.split('.').join('_')
+            if (mappedName !== k) {
+              groupKeys[k] = mappedName
+            }
+            return { ...p, [mappedName]: `$${modelNameToDbName(k, this.schema)}` }
+          }, {})
+        : {}
+      const aggregation = Object.entries(params.aggregations).reduce<object>((p, [k, v]) => {
+        if (v.operation === 'count' && v.field) {
+          throw new Error('field value is not supported with aggregate count operation (MongoDB)')
+        }
+        return { ...p, [k]: v.operation === 'count' ? { [`$${v.operation}`]: {} } : { [`$${v.operation}`]: `$${modelNameToDbName(v.field as string, this.schema)}` } }
+      }, {})
+
+      const sort = args?.sorts
+        ? [
+            {
+              // @ts-ignore
+              $sort: args.sorts.reduce<object>((p, s) => {
+                const [k, v] = Object.entries(s)[0]
+                return {
+                  ...p,
+                  [byKeys.includes(k) ? `_id.${k}` : k]: (v as SortDirection) === 'asc' ? 1 : -1,
+                }
+              }, {}),
+            },
+          ]
+        : []
+      const filter = params.filter ? [{ $match: this.buildFilter(params.filter) }] : []
+      const having = args?.having ? [{ $match: args.having }] : []
+      const skip = params.skip != null ? [{ $skip: params.skip }] : []
+      const limit = params.limit != null ? [{ $limit: params.limit }] : []
+      const options = params.options ?? {}
+      const pipeline = [...filter, { $group: { _id: groupId, ...aggregation } }, ...having, ...sort, ...skip, ...limit]
+      return [
+        async () => {
+          const results = await this.collection.aggregate(pipeline, options).toArray()
+          const mappedResults = results.map((r) => {
+            const rId = r._id
+            for (const [k, v] of Object.entries(groupKeys)) {
+              if (rId[v]) {
+                rId[k] = rId[v]
+                delete rId[v]
+              }
+            }
+            delete r._id
+            return {
+              ...rId,
+              ...r,
+            }
+          })
+
+          if (params.by) {
+            return mappedResults as AggregateResults<T, A>
+          } else {
+            if (mappedResults.length === 0) {
+              return Object.keys(params.aggregations).reduce((p, k) => {
+                return {
+                  ...p,
+                  [k]: params.aggregations[k].operation === 'count' ? 0 : null,
+                }
+              }, {}) as AggregateResults<T, A>
+            }
+            return mappedResults[0] as AggregateResults<T, A>
+          }
+        },
+        () => `collection.aggregate(${JSON.stringify(pipeline)})`,
+      ]
+    })
+  }
+
+  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
+    return this.runQuery('insert', async () => {
+      const record = this.modelToDb(params.record)
+      const options = params.options ?? {}
+      return [
+        async () => {
+          const result = await this.collection.insertOne(record, options)
+          const inserted = await this.collection.findOne({ _id: result.insertedId }, options)
+          return this.dbToModel(inserted!) as Omit<T['model'], T['exludedFields']>
+        },
+        () => `collection.insertOne(${JSON.stringify(record)})`,
+      ]
+    })
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
-    const changes = this.buildChanges(params.changes)
-    const filter = this.buildFilter(params.filter)
-    await this.collection.updateOne(filter, changes, { ...(params.options ?? {}), upsert: false, ignoreUndefined: true } as UpdateOptions)
+    await this.runQuery('update', async () => {
+      const changes = this.buildChanges(params.changes)
+      const filter = this.buildFilter(params.filter)
+      const options = { ...(params.options ?? {}), upsert: false, ignoreUndefined: true }
+      return [() => this.collection.updateOne(filter, changes, options), () => `collection.updateOne(${JSON.stringify(filter)}, ${JSON.stringify(changes)})`]
+    })
   }
 
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
-    const changes = this.buildChanges(params.changes)
-    const filter = this.buildFilter(params.filter)
-    await this.collection.updateMany(filter, changes, params.options ?? {})
+    await this.runQuery('update', async () => {
+      const changes = this.buildChanges(params.changes)
+      const filter = this.buildFilter(params.filter)
+      const options = { ...(params.options ?? {}), upsert: false, ignoreUndefined: true }
+      return [() => this.collection.updateMany(filter, changes, options), () => `collection.updateMany(${JSON.stringify(filter)}, ${JSON.stringify(changes)})`]
+    })
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
-    const replace = this.modelToDb(params.replace)
-    const filter = this.buildFilter(params.filter)
-    await this.collection.replaceOne(filter, replace, params.options ?? {})
+    await this.runQuery('replace', async () => {
+      const replace = this.modelToDb(params.replace)
+      const filter = this.buildFilter(params.filter)
+      const options = params.options ?? {}
+      return [() => this.collection.replaceOne(filter, replace, options), () => `collection.replaceOne(${JSON.stringify(filter)}, ${JSON.stringify(replace)})`]
+    })
   }
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
-    const filter = this.buildFilter(params.filter)
-    await this.collection.deleteOne(filter, params.options ?? {})
+    await this.runQuery('delete', async () => {
+      const filter = this.buildFilter(params.filter)
+      const options = params.options ?? {}
+      return [() => this.collection.deleteOne(filter, options), () => `collection.deleteOne(${JSON.stringify(filter)})`]
+    })
   }
 
   protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
-    const filter = this.buildFilter(params.filter)
-    await this.collection.deleteMany(filter, params.options ?? {})
+    await this.runQuery('delete', async () => {
+      const filter = this.buildFilter(params.filter)
+      const options = params.options ?? {}
+      return [() => this.collection.deleteMany(filter, options), () => `collection.deleteMany(${JSON.stringify(filter)})`]
+    })
+  }
+
+  private async runQuery<R>(operation: LogArgs<T['name']>['operation'], body: () => Promise<[() => Promise<R>, () => string]>): Promise<R> {
+    const start = new Date()
+    try {
+      const [promiseGenerator, queryGenerator] = await body()
+      try {
+        const result = await promiseGenerator()
+        const finish = new Date()
+        const duration = finish.getTime() - start.getTime()
+        await this.log({ duration, operation, level: 'debug', query: queryGenerator, date: finish })
+        return result
+      } catch (error: unknown) {
+        const finish = new Date()
+        const duration = finish.getTime() - start.getTime()
+        await this.log({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
+        throw error
+      }
+    } catch (error: unknown) {
+      const finish = new Date()
+      const duration = finish.getTime() - start.getTime()
+      await this.log({ error, duration, operation, level: 'error', date: finish })
+      throw error
+    }
+  }
+
+  private async log(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }) {
+    if (this.logger) {
+      await this.logger(this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
+    }
   }
 }
