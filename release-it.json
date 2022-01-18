@@ -1,5 +1,0 @@
-{
-  "git": {
-    "commitMessage": "build: ${version}"
-  }
-}

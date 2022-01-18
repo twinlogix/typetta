@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "1.0.0-beta.16",
+  "version": "1.0.0-beta.17",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -99,5 +99,10 @@
       "json-summary"
     ]
   },
-  "homepage": "https://twinlogix.github.io/typetta/"
+  "homepage": "https://twinlogix.github.io/typetta/",
+  "release-it": {
+    "git": {
+      "commitMessage": "chore: release ${version}"
+    }
+  }
 }
