@@ -3,41 +3,43 @@ main:
     title: Overview
     children:
       - url: /
-        title: What is Typetta?
+        title: Cos'è Typetta?
       - url: /chapters/overview/getting-started
         title: Getting Started
   - data-model:
     title: Modello Applicativo
     children:
       - url: /chapters/data-model/scalars
-        title: Scalari [eng soon]
+        title: Scalari
       - url: /chapters/data-model/entities
-        title: Entità [eng soon]
+        title: Entità
       - url: /chapters/data-model/relations
-        title: Relazioni [eng soon]
+        title: Relazioni
   - client:
     title: Database Client
     children:
       - url: /chapters/client/dao-context
-        title: Il Contesto [eng soon]
+        title: Il Contesto
       - url: /chapters/client/read-write
-        title: Lettura e Scrittura [eng soon]
+        title: Lettura e Scrittura
       - url: /chapters/client/filters
-        title: Filtri [eng soon]
+        title: Filtri
       - url: /chapters/client/projections
-        title: Proiezioni [eng soon]
+        title: Proiezioni
       - url: /chapters/client/sorting
-        title: Ordinamenti [eng soon]
+        title: Ordinamenti
       - url: /chapters/client/relations
-        title: Relazioni [eng soon]
+        title: Relazioni
       - url: /chapters/client/pagination
-        title: Paginazione [eng soon]
-      - url: /chapters/client/aggregations
-        title: Aggregazioni [eng soon]
-      - url: /chapters/client/transactions
-        title: Transazioni [eng soon]
+        title: Paginazione
+      - url: /chapters/client/aggregation
+        title: Aggregazioni
+        todo: true
       - url: /chapters/client/raw-databse-access
         title: Accesso diretto al database
+        todo: true
+      - url: /chapters/advanced/transactions
+        title: Transazioni
         todo: true
   - database-drivers:
     title: Connettori ai Database

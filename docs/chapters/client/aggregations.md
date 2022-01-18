@@ -91,13 +91,13 @@ L'API di aggregazione può ricevere, opzionalmente, un parametro `filter` esatta
 
 Oltre a questa possibilità, così come avviene tipicamente sui principali database SQL, Typetta mette a disposizione la possibilità di filtrare e ordinare anche per i campi frutto di raggruppamento o aggregazione. Questo secondo step di elaborazione può essere definito tramite un secondo parametro dell'API `aggregate`.
 
-Di seguito un esempio di interrogazione di tutti gli utenti, raggruppati per sesso, la cui età media è maggiore o ugual di 18 anni, ordinati per età media:
+Di seguito un esempio di interrogazione di tutti gli utenti, raggruppati per città di residenza, la cui età media è maggiore o ugual di 18 anni, ordinati per età media:
 
 ```typescript
 const res = await dao.user.aggregate(
   {
     by: {
-      gender: true
+      'address.city': true
     },
     aggregations: { 
       averageAge: { field: 'age', operation: 'avg' } 

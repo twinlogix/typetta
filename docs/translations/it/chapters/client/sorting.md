@@ -1,6 +1,6 @@
 # Ordinamenti
 
-Le API `findOne`, `findAll` e `findPage` supportano la funzionalità di ordinamento dei risultati.
+Le API `findAll` e `findPage`, che ritornano un elenco di record, supportano la funzionalità di ordinamento dei risultati.
 
 Di seguito un semplice esempio di utilizzo i cui vengono ricercati degli utenti ordinati per data di nascita:
 

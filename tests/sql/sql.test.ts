@@ -12,6 +12,12 @@ const config: Knex.Config = {
   client: 'sqlite3',
   connection: ':memory:',
   useNullAsDefault: true,
+  log: {
+    warn: () => {},
+    debug: () => {},
+    error: () => {},
+    deprecate: () => {},
+  }
 }
 
 beforeAll(async () => { })
@@ -66,7 +72,7 @@ beforeEach(async () => {
   await dao.city.createTable(typeMap, defaultType)
   await dao.organization.createTable(typeMap, defaultType)
   await dao.address.createTable(typeMap, defaultType)
-})
+}, 10000)
 
 afterEach(async () => { })
 

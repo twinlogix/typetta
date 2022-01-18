@@ -12,6 +12,12 @@ const config: Knex.Config = {
   client: 'sqlite3',
   connection: ':memory:',
   useNullAsDefault: true,
+  log: {
+    warn: () => {},
+    debug: () => {},
+    error: () => {},
+    deprecate: () => {},
+  }
 }
 
 let idCounter = 0
