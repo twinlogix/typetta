@@ -279,26 +279,24 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     try {
       query = queryBuilder()
       if ('skipReason' in query) {
-        await this.log({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
+        this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
         return skipDefault as Awaited<R>
       }
       const result = await query
       const records = transform ? await transform(result) : undefined
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      await this.log({ duration, operation, level: 'query', query, date: finish })
+      this.knexLog({ duration, operation, level: 'query', query, date: finish })
       return records as Awaited<R>
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      await this.log({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
+      this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
       throw error
     }
   }
 
-  private async log(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }) {
-    if (this.logger) {
-      await this.logger(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
-    }
+  private knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }) {
+    this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 }

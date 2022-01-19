@@ -41,7 +41,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected schema: Schema<T['scalars']>
   protected idGenerator?: () => T['scalars'][T['idScalar']]
   protected name: T['name']
-  protected logger?: LogFunction<T['name']>
+  private logger?: LogFunction<T['name']>
 
   protected constructor({
     idField,
@@ -418,11 +418,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   ): Promise<R> {
     if (this.logger) {
       const start = new Date()
-      const result = body()
+      const result = await body()
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
       const query = JSON.stringify({ ...params, options: undefined })
-      this.logger(this.createLog({ date: start, level: 'debug', duration, operation, query }))
+      this.log(this.createLog({ date: start, level: 'debug', duration, operation, query }))
       return result
     }
     return body()
@@ -435,6 +435,20 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         log.error ? `, ${log.error}` : ''
       }]`,
       dao: this.name,
+    }
+  }
+
+  protected log(args: LogArgs<T['name']>) {
+    if (this.logger) {
+      // this method is not await in order to avoid system slowdowns
+      // the order of the emission of logs is not guaranteed
+      this.logger(args)
+        .then(() => {
+          return
+        })
+        .catch(() => {
+          return
+        })
     }
   }
 
