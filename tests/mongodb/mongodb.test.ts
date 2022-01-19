@@ -1,10 +1,12 @@
+// tslint:disable-next-line: no-var-requires
 global.TextEncoder = require('util').TextEncoder
+// tslint:disable-next-line: no-var-requires
 global.TextDecoder = require('util').TextDecoder
 
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128 } from 'mongodb'
@@ -12,6 +14,8 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
+
+jest.setTimeout(20000)
 
 let replSet: MongoMemoryReplSet
 let con: MongoClient
@@ -51,6 +55,7 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
     overrides: {
       user: {},
     },
+    log: { maxQueryExecutionTime: 100000 },
   })
 }
 
@@ -263,7 +268,7 @@ test('safe find', async () => {
   // Info to projection
   const response10 = await dao.user.findOne({ projection: {} as GraphQLResolveInfo })
   typeAssert<Test<typeof response10, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
-  //expect(response10).toBeDefined()
+  // expect(response10).toBeDefined()
 })
 
 // ------------------------------------------------------------------------
@@ -588,7 +593,7 @@ test('update with undefined', async () => {
   await dao.user.updateOne({ filter: { id: user.id }, changes: { live: undefined } })
   const user2 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true, id: true } })
   expect(user2?.live).toBe(true)
-  await dao.user.updateAll({ filter: { id: user.id }, changes: { live: undefined, firstName: "Mario" } })
+  await dao.user.updateAll({ filter: { id: user.id }, changes: { live: undefined, firstName: 'Mario' } })
   const user3 = await dao.user.findOne({ filter: { id: user.id }, projection: { live: true, id: true } })
   expect(user3?.live).toBe(true)
 })
@@ -699,6 +704,7 @@ test('insert and retrieve localized string field', async () => {
 test('middleware 1', async () => {
   let operationCount = 0
   const dao2 = new DAOContext<any>({
+    log: ['error', 'warning'],
     mongo: {
       default: db,
     },
@@ -821,7 +827,7 @@ test('middleware 1', async () => {
   const luigi = await dao2.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } })
   expect(luigi!.firstName).toBe('Luigi')
 
-  expect(operationCount).toBe(5)
+  expect(operationCount).toBe(4)
 })
 
 test('middleware 2', async () => {
@@ -1114,15 +1120,15 @@ test('Aggregate test', async () => {
       aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
       filter: { 'metadata.visible': true, views: { $gt: 0 } },
       skip: 1,
-      limit: 2
+      limit: 2,
     },
     { sorts: [{ authorId: 'desc' }, { totalAuthorViews: 'desc' }], having: { totalAuthorViews: { $lt: 150 } } },
   )
   expect(aggregation1.length).toBe(2)
-  //expect(aggregation1[0]).toEqual({ count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en' })
+  // expect(aggregation1[0]).toEqual({ count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en' })
   expect(aggregation1[0]).toEqual({ count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it' })
   expect(aggregation1[1]).toEqual({ count: 5, totalAuthorViews: 70, authorId: 'user_1', 'metadata.region': 'it' })
-  //expect(aggregation1[3]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
+  // expect(aggregation1[3]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
 
   const aggregation2 = await dao.post.aggregate({
     aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' }, avgAuthorViews: { field: 'views', operation: 'avg' } },
@@ -1153,6 +1159,16 @@ test('Aggregate test', async () => {
   expect(aggregation5[0].avg).toBe(null)
   expect(aggregation5[0].sum).toBe(0)
   expect(aggregation5[0].count).toBe(10)
+
+  const aggregation6 = await dao.post.aggregate({
+    by: {
+      id: true,
+    },
+    aggregations: { count: { operation: 'count' } },
+  })
+  for(const a of aggregation6) {
+    expect(a.count).toBe(1)
+  }
 })
 
 test('Text filter test', async () => {
@@ -1172,7 +1188,7 @@ test('Text filter test', async () => {
   await dao.execQuery(async (dbs, entities) => {
     await entities.organization.createIndex({ name: 'text' }, { name: 'nameIndex' })
   })
-  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => ([['score', { $meta: "textScore" }]]) })).map(o => o.name)
+  const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => [['score', { $meta: 'textScore' }]] })).map((o) => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes('Microsoft')).toBe(true)

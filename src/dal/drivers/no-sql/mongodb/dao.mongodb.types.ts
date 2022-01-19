@@ -19,8 +19,8 @@ export type MongoDBDAOGenerics<
   ExcludedFields extends keyof ModelType = any,
   MetadataType = any,
   OperationMetadataType = any,
-  DriverContext = any,
   ScalarsType extends DefaultModelScalars = any,
+  NameType extends string = any
 > = Omit<
   DAOGenerics<
     ModelType,
@@ -39,14 +39,15 @@ export type MongoDBDAOGenerics<
     ExcludedFields,
     MetadataType,
     OperationMetadataType,
-    DriverContext,
+    any,
     ScalarsType,
     CountOptions,
     FindOptions,
     InsertOneOptions,
     UpdateOptions,
     ReplaceOptions,
-    DeleteOptions
+    DeleteOptions,
+    NameType
   >,
   'driverContext'
 > & { driverContext: { collection: Collection } }

@@ -1,4 +1,6 @@
+// tslint:disable-next-line: no-var-requires
 global.TextEncoder = require('util').TextEncoder
+// tslint:disable-next-line: no-var-requires
 global.TextDecoder = require('util').TextDecoder
 
 import { computedField } from '../../src'
@@ -9,16 +11,18 @@ import { Db, Decimal128, MongoClient } from 'mongodb'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
 
+jest.setTimeout(20000)
+
 const config: Knex.Config = {
   client: 'sqlite3',
   connection: ':memory:',
   useNullAsDefault: true,
   log: {
-    warn: () => {},
-    debug: () => {},
-    error: () => {},
-    deprecate: () => {},
-  }
+    warn: () => { return },
+    debug: () => { return },
+    error: () => { return },
+    deprecate: () => { return },
+  },
 }
 
 let knexInstance: Knex<any, unknown[]>
@@ -27,7 +31,7 @@ let mongoServer: MongoMemoryServer
 let db: Db
 let dao: DAOContext<{}>
 
-beforeAll(async () => {
+beforeEach(async () => {
   knexInstance = knex(config)
   mongoServer = await MongoMemoryServer.create()
   con = await MongoClient.connect(mongoServer.getUri(), {})
@@ -71,7 +75,7 @@ beforeAll(async () => {
           dbToModel: (o: unknown) => JSON.parse(o as string),
           modelToDB: (o: any) => JSON.stringify(o),
         },
-      }
+      },
     },
     overrides: {
       b: {

@@ -1,3 +1,4 @@
+import { LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
@@ -78,7 +79,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
       return changes(qb || this.qb())
     }
     const updates = this.adaptUpdate(changes)
-    if(Object.keys(updates).length === 0) {
+    if (Object.keys(updates).length === 0) {
       return null
     }
     return (qb || this.qb()).update(updates)
@@ -89,19 +90,25 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
-    if (params.limit === 0) {
-      return []
-    }
-    const select = this.buildSelect(params.projection)
-    const where = this.buildWhere(params.filter, select)
-    const query = this.buildSort(params.sorts, where)
-    const records = await this.buildTransaction(params.options, query)
-      .limit(params.limit ?? this.pageSize)
-      .offset(params.skip ?? 0)
-    return this.dbsToModels(records)
+    return this.runQuery(
+      'findAll',
+      () => {
+        if (params.limit === 0) {
+          return { skipReason: 'Limit is 0. Skip.' }
+        }
+        const select = this.buildSelect(params.projection)
+        const where = this.buildWhere(params.filter, select)
+        const sort = this.buildSort(params.sorts, where)
+        return this.buildTransaction(params.options, sort)
+          .limit(params.limit ?? this.pageSize)
+          .offset(params.skip ?? 0)
+      },
+      (results) => this.dbsToModels(results),
+      [],
+    )
   }
 
-  protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
+  protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
     return this.getRecords(params)
   }
 
@@ -118,14 +125,19 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return (await this._count(params)) > 0
   }
 
-  protected async _count(params: FilterParams<T>): Promise<number> {
-    const count = this.qb().count(this.idField, { as: 'all' })
-    const where = this.buildWhere(params.filter, count)
-    const result = await this.buildTransaction(params.options, where)
-    return result[0].all as number
+  protected _count(params: FilterParams<T>): Promise<number> {
+    return this.runQuery(
+      'count',
+      () => {
+        const count = this.qb().count(this.idField, { as: 'all' })
+        const where = this.buildWhere(params.filter, count)
+        return this.buildTransaction(params.options, where)
+      },
+      (result) => result[0].all as number,
+    )
   }
 
-  protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
+  protected _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
     /**
      * In case by is omitted: maybe is safer this approach
      * SELECT count(*)
@@ -133,82 +145,105 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
      * WHERE 1 = 0
      * GROUP BY dummy.x;
      */
-    if (params.by && Object.keys(params.by).length === 0) {
-      throw new Error("'by' params must contains at least one key.")
-    }
-    const byColumns = Object.keys(params.by || {}).map((v) => modelNameToDbName(v, this.schema))
-    const aggregations = Object.entries(params.aggregations).map(([k, v]) => {
-      return this.knex.raw(`${v.operation.toUpperCase()}(${v.field == null ? '*' : modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
-    })
-    const where = this.buildWhere(params.filter)
-    const sort = this.buildSort(args?.sorts, where)
-    const select = sort.select([...byColumns, ...aggregations])
-    const groupBy = byColumns.length > 0 ? select.groupBy(byColumns) : select.groupByRaw('(SELECT 1)')
-    const having = args?.having ? buildHavingConditions(groupBy, args.having) : groupBy
-    const transactingQuery = await this.buildTransaction(params.options, having)
-      .limit(params.limit ?? this.pageSize)
-      .offset(params.skip ?? 0)
-    const results = await transactingQuery
-    Object.keys(params.by || {}).forEach((v) => {
-      const name = modelNameToDbName(v, this.schema)
-      for (const result of results) {
-        const value = result[name]
-        delete result[name]
-        result[v] = value
-      }
-    })
-    if (params.by) {
-      return results as AggregateResults<T, A>
-    } else {
-      if (results.length === 0) {
-        return Object.keys(params.aggregations).reduce((p, k) => {
-          return {
-            ...p,
-            [k]: params.aggregations[k].operation === 'count' ? 0 : null,
+    return this.runQuery(
+      'aggregate',
+      () => {
+        if (params.by && Object.keys(params.by).length === 0) {
+          throw new Error("'by' params must contains at least one key.")
+        }
+        const byColumns = Object.keys(params.by || {}).map((v) => modelNameToDbName(v, this.schema))
+        const aggregations = Object.entries(params.aggregations).map(([k, v]) => {
+          return this.knex.raw(`${v.operation.toUpperCase()}(${v.field == null ? '*' : modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
+        })
+        const where = this.buildWhere(params.filter)
+        const sort = this.buildSort(args?.sorts, where)
+        const select = sort.select([...byColumns, ...aggregations])
+        const groupBy = byColumns.length > 0 ? select.groupBy(byColumns) : select.groupByRaw('(SELECT 1)')
+        const having = args?.having ? buildHavingConditions(groupBy, args.having) : groupBy
+        return this.buildTransaction(params.options, having)
+          .limit(params.limit ?? this.pageSize)
+          .offset(params.skip ?? 0)
+      },
+      async (results) => {
+        Object.keys(params.by || {}).forEach((v) => {
+          const name = modelNameToDbName(v, this.schema)
+          for (const result of results) {
+            const value = result[name]
+            delete result[name]
+            result[v] = value
           }
-        }, {}) as AggregateResults<T, A>
-      }
-      return results[0] as AggregateResults<T, A>
-    }
+        })
+        if (params.by) {
+          return results as AggregateResults<T, A>
+        } else {
+          if (results.length === 0) {
+            return Object.keys(params.aggregations).reduce((p, k) => {
+              return {
+                ...p,
+                [k]: params.aggregations[k].operation === 'count' ? 0 : null,
+              }
+            }, {}) as AggregateResults<T, A>
+          }
+          return results[0] as AggregateResults<T, A>
+        }
+      },
+    )
   }
 
-  protected async _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
-    const record = this.modelToDb(params.record as PartialDeep<T['model']>)
-    const query = this.qb().insert(record, '*')
-    const records = await this.buildTransaction(params.options, query)
-    const inserted = records[0]
-    if (typeof inserted === 'number') {
-      const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as T['filter'], options: params.options, limit: 1 })
-      return insertedRetrieved[0] as Omit<T['model'], T['exludedFields']>
-    }
-    return this.dbToModel(inserted) as Omit<T['model'], T['exludedFields']>
+  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
+    return this.runQuery(
+      'insertOne',
+      () => {
+        const record = this.modelToDb(params.record as PartialDeep<T['model']>)
+        const query = this.qb().insert(record, '*')
+        return this.buildTransaction(params.options, query)
+      },
+      async (records) => {
+        const inserted = records[0]
+        if (typeof inserted === 'number') {
+          const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as T['filter'], options: params.options, limit: 1 })
+          return insertedRetrieved[0] as Omit<T['model'], T['exludedFields']>
+        }
+        return this.dbToModel(inserted) as Omit<T['model'], T['exludedFields']>
+      },
+    )
   }
 
   protected _updateOne(params: UpdateParams<T>): Promise<void> {
-    throw new Error(`Operation not supported. Use updateAll or apiV1.updateMany specifying the primary key field (${this.idField}) in order to update only one row.`)
+    return this.runQuery('updateOne', () => {
+      throw new Error(`Operation not supported. Use updateAll specifying the primary key field (${this.idField}) in order to update only one row.`)
+    })
   }
 
-  protected async _updateAll(params: UpdateParams<T>): Promise<void> {
-    const update = this.buildUpdate(params.changes)
-    if(update === null) {
-      return
-    }
-    const where = this.buildWhere(params.filter, update)
-    await this.buildTransaction(params.options, where)
+  protected _updateAll(params: UpdateParams<T>): Promise<void> {
+    return this.runQuery('updateAll', () => {
+      const update = this.buildUpdate(params.changes)
+      if (update === null) {
+        return { skipReason: 'No changes. Skip.' }
+      }
+      const where = this.buildWhere(params.filter, update)
+      return this.buildTransaction(params.options, where)
+    })
   }
 
   protected _replaceOne(params: ReplaceParams<T>): Promise<void> {
-    throw new Error(`Operation not supported.`)
+    return this.runQuery('replaceOne', () => {
+      throw new Error(`Operation not supported.`)
+    })
   }
 
   protected _deleteOne(params: DeleteParams<T>): Promise<void> {
-    throw new Error(`Operation not supported. Use deleteAll or apiV1.delete specifying the primary key field (${this.idField}) in order to delete only one row.`)
+    return this.runQuery('deleteOne', () => {
+      throw new Error(`Operation not supported. Use deleteAll specifying the primary key field (${this.idField}) in order to delete only one row.`)
+    })
   }
 
-  protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
-    const deleteQ = this.qb().delete()
-    const where = this.buildWhere(params.filter, deleteQ)
-    await this.buildTransaction(params.options, where)
+  protected _deleteAll(params: DeleteParams<T>): Promise<void> {
+    return this.runQuery('deleteAll', () => {
+      const deleteQ = this.qb().delete()
+      const where = this.buildWhere(params.filter, deleteQ)
+      return this.buildTransaction(params.options, where)
+    })
   }
 
   public async createTable(typeMap: Partial<Record<keyof T['scalars'], { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string }): Promise<void> {
@@ -231,5 +266,37 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         }
       })
     })
+  }
+
+  private async runQuery<R = undefined>(
+    operation: LogArgs<T['name']>['operation'],
+    queryBuilder: () => Knex.QueryBuilder<any, any> | { skipReason: string },
+    transform?: (result: any) => R,
+    skipDefault?: Awaited<R>,
+  ): Promise<Awaited<R>> {
+    const start = new Date()
+    let query: Knex.QueryBuilder<any, any> | undefined | { skipReason: string }
+    try {
+      query = queryBuilder()
+      if ('skipReason' in query) {
+        this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
+        return skipDefault as Awaited<R>
+      }
+      const result = await query
+      const records = transform ? await transform(result) : undefined
+      const finish = new Date()
+      const duration = finish.getTime() - start.getTime()
+      this.knexLog({ duration, operation, level: 'query', query, date: finish })
+      return records as Awaited<R>
+    } catch (error: unknown) {
+      const finish = new Date()
+      const duration = finish.getTime() - start.getTime()
+      this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
+      throw error
+    }
+  }
+
+  private knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }) {
+    this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 }

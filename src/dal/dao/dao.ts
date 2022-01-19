@@ -16,10 +16,10 @@ import {
   AggregatePostProcessing,
   FindOneParams,
 } from './dao.types'
+import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection, projection } from './projections/projections.utils'
-import { addRelationRefToProjection } from './relations/relations'
 import { DAORelation, DAORelationReference, DAORelationType } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
@@ -39,8 +39,24 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected driverContext: T['driverContext']
   protected schema: Schema<T['scalars']>
   protected idGenerator?: () => T['scalars'][T['idScalar']]
+  protected name: T['name']
+  private logger?: LogFunction<T['name']>
 
-  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext: driverOptions }: DAOParams<T>) {
+  protected constructor({
+    idField,
+    idScalar,
+    idGeneration,
+    idGenerator,
+    daoContext,
+    name,
+    logger,
+    pageSize = 50,
+    relations = [],
+    middlewares = [],
+    schema,
+    metadata,
+    driverContext: driverOptions,
+  }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.idField = idField
     this.idGenerator = idGenerator
@@ -48,6 +64,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.pageSize = pageSize
     this.relations = relations
     this.idGeneration = idGeneration
+    this.name = name
+    this.logger = logger
     if (this.idGeneration === 'generator' && !this.idGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
     }
@@ -81,11 +99,13 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) })
-    const records = beforeResults.continue ? await this._findAll(beforeResults.params) : beforeResults.records
-    const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
-    return afterResults.records as ModelProjection<T['model'], T['projection'], P>[]
+    return this.logOperation('findAll', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) })
+      const records = beforeResults.continue ? await this._findAll(beforeResults.params) : beforeResults.records
+      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
+      const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
+      return afterResults.records as ModelProjection<T['model'], T['projection'], P>[]
+    })
   }
 
   async findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindOneParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P> | null> {
@@ -96,37 +116,45 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
     params: FindParams<T, P> = {},
   ): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) })
-    const { totalCount, records } = beforeResults.continue ? await this._findPage(beforeResults.params) : { records: beforeResults.records, totalCount: beforeResults.totalCount ?? 0 }
-    const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex)
-    return {
-      totalCount: afterResults.totalCount ?? 0,
-      records: afterResults.records as ModelProjection<T['model'], T['projection'], P>[],
-    }
+    return this.logOperation('findPage', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) })
+      const { totalCount, records } = beforeResults.continue ? await this._findPage(beforeResults.params) : { records: beforeResults.records, totalCount: beforeResults.totalCount ?? 0 }
+      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
+      const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex)
+      return {
+        totalCount: afterResults.totalCount ?? 0,
+        records: afterResults.records as ModelProjection<T['model'], T['projection'], P>[],
+      }
+    })
   }
 
   async exists(params: FilterParams<T>): Promise<boolean> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
-    return this._exists(beforeResults.params)
+    return this.logOperation('exists', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
+      return this._exists(beforeResults.params)
+    })
   }
 
   async count(params: FilterParams<T> = {}): Promise<number> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
-    return this._count(beforeResults.params)
+    return this.logOperation('count', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params })
+      return this._count(beforeResults.params)
+    })
   }
 
   async aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'aggregate', params, args })
-    const result = beforeResults.continue ? await this._aggregate(params, args) : beforeResults.result
-    const afterResults = await this.executeAfterMiddlewares(
-      { operation: 'aggregate', params: beforeResults.params, args: beforeResults.args, result: result as AggregateResults<T, AggregateParams<T>> },
-      beforeResults.middlewareIndex,
-    )
-    return afterResults.result as AggregateResults<T, A>
+    return this.logOperation('aggregate', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'aggregate', params, args })
+      const result = beforeResults.continue ? await this._aggregate(params, args) : beforeResults.result
+      const afterResults = await this.executeAfterMiddlewares(
+        { operation: 'aggregate', params: beforeResults.params, args: beforeResults.args, result: result as AggregateResults<T, AggregateParams<T>> },
+        beforeResults.middlewareIndex,
+      )
+      return afterResults.result as AggregateResults<T, A>
+    })
   }
 
-  public async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
+  protected async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
     params: Omit<FindParams<T, P>, 'start' | 'limit' | 'filter'>,
     filterKey: K,
     filterValues: T['filter'][K][],
@@ -167,24 +195,24 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }) as ModelProjection<T['model'], T['projection'], P>[]
   }
 
-  private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(projection?: P): P | undefined {
-    if (projection === true || !projection) {
-      return projection
+  private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(proj?: P): P | undefined {
+    if (proj === true || !proj) {
+      return proj
     }
-    const dbProjections = deepCopy(projection)
+    const dbProjections = deepCopy(proj)
     this.relations.forEach((relation) => {
       if (relation.reference === DAORelationReference.INNER) {
-        addRelationRefToProjection(relation.field, relation.refFrom, dbProjections)
-      }
-    })
-    this.relations.forEach((relation) => {
-      if (relation.reference === DAORelationReference.FOREIGN) {
-        setTraversing(dbProjections, relation.refTo, true)
-      }
-    })
-    this.relations.forEach((relation) => {
-      if (relation.reference === DAORelationReference.RELATION) {
-        setTraversing(dbProjections, relation.refThis.refTo, true)
+        if (getTraversing(dbProjections, relation.field).length > 0) {
+          setTraversing(dbProjections, relation.refFrom, true)
+        }
+      } else if (relation.reference === DAORelationReference.FOREIGN) {
+        if (getTraversing(dbProjections, relation.field).length > 0) {
+          setTraversing(dbProjections, relation.refTo, true)
+        }
+      } else if (relation.reference === DAORelationReference.RELATION) {
+        if (getTraversing(dbProjections, relation.field).length > 0) {
+          setTraversing(dbProjections, relation.refThis.refTo, true)
+        }
       }
     })
     return dbProjections
@@ -197,7 +225,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     for (const relation of this.relations) {
       const relationProjection = getProjection(projections as GenericProjection, relation.field)
       const relationsFilter = getTraversing(relations, relation.field)
-      const relationFilter = relationsFilter.length > 0 ? relationsFilter[0] : undefined
+      const relationFilter: FindParams<T>['relations'] = relationsFilter.length > 0 ? relationsFilter[0] : undefined
       if (relationProjection) {
         const params: FindParams<T> = {
           filter: relationFilter?.filter,
@@ -206,6 +234,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           skip: relationFilter?.skip,
           sorts: relationFilter?.sorts,
           relations: relationFilter?.relations,
+          options: relationFilter?.options,
         }
         if (relation.reference === DAORelationReference.RELATION) {
           const rels = await this.daoContext.dao(relation.relationDao).loadAll(
@@ -263,50 +292,62 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params })
-    const record = beforeResults.continue ? await this._insertOne(beforeResults.params) : beforeResults.record
-    const afterResults = await this.executeAfterMiddlewares({ operation: 'insert', params: beforeResults.params, record }, beforeResults.middlewareIndex)
-    return afterResults.record
+    return this.logOperation('insertOne', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params })
+      const record = beforeResults.continue ? await this._insertOne(beforeResults.params) : beforeResults.record
+      const afterResults = await this.executeAfterMiddlewares({ operation: 'insert', params: beforeResults.params, record }, beforeResults.middlewareIndex)
+      return afterResults.record
+    })
   }
 
   async updateOne(params: UpdateParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'update', params })
-    if (beforeResults.continue) {
-      await this._updateOne(beforeResults.params)
-    }
-    await this.executeAfterMiddlewares({ operation: 'update', params: beforeResults.params }, beforeResults.middlewareIndex)
+    return this.logOperation('updateOne', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'update', params })
+      if (beforeResults.continue) {
+        await this._updateOne(beforeResults.params)
+      }
+      await this.executeAfterMiddlewares({ operation: 'update', params: beforeResults.params }, beforeResults.middlewareIndex)
+    })
   }
 
   async updateAll(params: UpdateParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'update', params })
-    if (beforeResults.continue) {
-      await this._updateAll(beforeResults.params)
-    }
-    await this.executeAfterMiddlewares({ operation: 'update', params: beforeResults.params }, beforeResults.middlewareIndex)
+    return this.logOperation('updateAll', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'update', params })
+      if (beforeResults.continue) {
+        await this._updateAll(beforeResults.params)
+      }
+      await this.executeAfterMiddlewares({ operation: 'update', params: beforeResults.params }, beforeResults.middlewareIndex)
+    })
   }
 
   async replaceOne(params: ReplaceParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'replace', params })
-    if (beforeResults.continue) {
-      await this._replaceOne(beforeResults.params)
-    }
-    await this.executeAfterMiddlewares({ operation: 'replace', params: beforeResults.params }, beforeResults.middlewareIndex)
+    return this.logOperation('replaceOne', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'replace', params })
+      if (beforeResults.continue) {
+        await this._replaceOne(beforeResults.params)
+      }
+      await this.executeAfterMiddlewares({ operation: 'replace', params: beforeResults.params }, beforeResults.middlewareIndex)
+    })
   }
 
   async deleteOne(params: DeleteParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'delete', params })
-    if (beforeResults.continue) {
-      await this._deleteOne(beforeResults.params)
-    }
-    await this.executeAfterMiddlewares({ operation: 'delete', params: beforeResults.params }, beforeResults.middlewareIndex)
+    return this.logOperation('deleteOne', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'delete', params })
+      if (beforeResults.continue) {
+        await this._deleteOne(beforeResults.params)
+      }
+      await this.executeAfterMiddlewares({ operation: 'delete', params: beforeResults.params }, beforeResults.middlewareIndex)
+    })
   }
 
   async deleteAll(params: DeleteParams<T>): Promise<void> {
-    const beforeResults = await this.executeBeforeMiddlewares({ operation: 'delete', params })
-    if (beforeResults.continue) {
-      await this._deleteAll(beforeResults.params)
-    }
-    await this.executeAfterMiddlewares({ operation: 'delete', params: beforeResults.params }, beforeResults.middlewareIndex)
+    return this.logOperation('deleteAll', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'delete', params })
+      if (beforeResults.continue) {
+        await this._deleteAll(beforeResults.params)
+      }
+      await this.executeAfterMiddlewares({ operation: 'delete', params: beforeResults.params }, beforeResults.middlewareIndex)
+    })
   }
 
   private createMiddlewareContext(): MiddlewareContext<T> {
@@ -367,6 +408,47 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       }
     }
     return params
+  }
+
+  private async logOperation<R>(
+    operation: LogArgs<T['name']>['operation'],
+    params: FindParams<T> | FindOneParams<T> | InsertParams<T> | UpdateParams<T> | ReplaceParams<T> | DeleteParams<T>,
+    body: () => Promise<R>,
+  ): Promise<R> {
+    if (this.logger) {
+      const start = new Date()
+      const result = await body()
+      const finish = new Date()
+      const duration = finish.getTime() - start.getTime()
+      const query = JSON.stringify({ ...params, options: undefined })
+      this.log(this.createLog({ date: start, level: 'debug', duration, operation, query }))
+      return result
+    }
+    return body()
+  }
+
+  protected createLog(log: Omit<LogArgs<T['name']>, 'raw' | 'dao'>): LogArgs<T['name']> {
+    return {
+      ...log,
+      raw: `[${log.date.toISOString()}] (dao: ${this.name}, op: ${log.operation}${log.driver ? `, driver: ${log.driver}` : ''}):${log.query ? ` ${log.query}` : ''} [${log.duration} ms${
+        log.error ? `, ${log.error}` : ''
+      }]`,
+      dao: this.name,
+    }
+  }
+
+  protected log(args: LogArgs<T['name']>) {
+    if (this.logger) {
+      // this method is not await in order to avoid system slowdowns
+      // the order of the emission of logs is not guaranteed
+      this.logger(args)
+        .then(() => {
+          return
+        })
+        .catch(() => {
+          return
+        })
+    }
   }
 
   // -----------------------------------------------------------------------

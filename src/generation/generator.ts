@@ -13,7 +13,6 @@ export type RelationEntityRefFieldType = { sourceRef: string; destRef: string; e
 export type TsTypettaGeneratorField = {
   name: string
   type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType
-  coreType: string
   graphqlType: string
   isRequired: boolean
   isID: boolean
@@ -35,6 +34,8 @@ export type TsTypettaGeneratorNode = {
 export type TsTypettaGeneratorScalar = {
   type: 'scalar'
   name: string
+  isString: boolean
+  isQuantity: boolean
 }
 
 export class TsTypettaGenerator {
