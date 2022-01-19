@@ -216,7 +216,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     for (const relation of this.relations) {
       const relationProjection = getProjection(projections as GenericProjection, relation.field)
       const relationsFilter = getTraversing(relations, relation.field)
-      const relationFilter = relationsFilter.length > 0 ? relationsFilter[0] : undefined
+      const relationFilter: FindParams<T>['relations'] = relationsFilter.length > 0 ? relationsFilter[0] : undefined
       if (relationProjection) {
         const params: FindParams<T> = {
           filter: relationFilter?.filter,
@@ -225,6 +225,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           skip: relationFilter?.skip,
           sorts: relationFilter?.sorts,
           relations: relationFilter?.relations,
+          options: relationFilter?.options,
         }
         if (relation.reference === DAORelationReference.RELATION) {
           const rels = await this.daoContext.dao(relation.relationDao).loadAll(
