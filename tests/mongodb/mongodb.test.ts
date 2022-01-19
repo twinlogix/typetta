@@ -1159,6 +1159,16 @@ test('Aggregate test', async () => {
   expect(aggregation5[0].avg).toBe(null)
   expect(aggregation5[0].sum).toBe(0)
   expect(aggregation5[0].count).toBe(10)
+
+  const aggregation6 = await dao.post.aggregate({
+    by: {
+      id: true,
+    },
+    aggregations: { count: { operation: 'count' } },
+  })
+  for(const a of aggregation6) {
+    expect(a.count).toBe(1)
+  }
 })
 
 test('Text filter test', async () => {

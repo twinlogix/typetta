@@ -14,10 +14,18 @@ const config: Knex.Config = {
   connection: ':memory:',
   useNullAsDefault: true,
   log: {
-    warn: () => { return },
-    debug: () => { return },
-    error: () => { return },
-    deprecate: () => { return },
+    warn: () => {
+      return
+    },
+    debug: () => {
+      return
+    },
+    error: () => {
+      return
+    },
+    deprecate: () => {
+      return
+    },
   },
 }
 
@@ -93,6 +101,7 @@ beforeEach(async () => {
   await dao.post.createTable(typeMap, defaultType)
   await dao.user.createTable(typeMap, defaultType)
   await dao.tag.createTable(typeMap, defaultType)
+  await dao.postType.createTable(typeMap, defaultType)
 })
 
 test('Demo', async () => {
@@ -160,6 +169,7 @@ test('Demo', async () => {
 })
 
 test('Aggregate test', async () => {
+  const type1 = await dao.postType.insertOne({ record: { name: 'type1', id: '1' } })
   for (let i = 0; i < 100; i++) {
     await dao.post.insertOne({
       record: {
@@ -170,10 +180,14 @@ test('Aggregate test', async () => {
         metadata: {
           region: i % 2 === 0 ? 'it' : 'en',
           visible: i % 2 === 0 || i === 99,
+          typeId: type1.id,
         },
       },
     })
   }
+
+  const p = await dao.post.findOne({ projection: { metadata: { type: { name: true } } } })
+  expect(p?.metadata?.type?.name).toBe('type1')
 
   const aggregation1 = await dao.post.aggregate(
     {
@@ -226,4 +240,14 @@ test('Aggregate test', async () => {
   expect(aggregation5[0].count).toBe(0)
   expect(aggregation5[0].count2).toBe(10)
   expect(aggregation5[0].count3).toBe(10)
+
+  const aggregation6 = await dao.post.aggregate({
+    by: {
+      id: true,
+    },
+    aggregations: { count: { field: 'id', operation: 'count' } },
+  })
+  for (const a of aggregation6) {
+    expect(a.count).toBe(1)
+  }
 })

@@ -40,6 +40,13 @@ type Tag @sqlEntity {
 }
 
 type PostMetadata {
+  typeId: ID!
+  type: PostType @innerRef
   region: String!
   visible: Boolean!
+}
+
+type PostType @sqlEntity {
+  id: ID! @id(from: "user")
+  name: String!
 }

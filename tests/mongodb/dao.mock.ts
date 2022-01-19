@@ -1,5 +1,3 @@
-// tslint:disable-next-line: max-classes-per-file
-
 import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src';
