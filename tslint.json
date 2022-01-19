@@ -18,5 +18,8 @@
     "max-line-length": {
       "options": [200]
     }
+  },
+  "linterOptions": {
+    "exclude": ["lib", "tests/**/*.mock.ts"]
   }
 }
