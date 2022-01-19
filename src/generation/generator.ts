@@ -45,7 +45,7 @@ export class TsTypettaGenerator {
     this._generators = [new TsTypettaDAOGenerator(config)]
   }
 
-  public generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string {
+  public generate(nodes: readonly (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string {
     const typesMap = new Map<string, TsTypettaGeneratorNode>()
     nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
 

@@ -1,17 +1,16 @@
 import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaGenerator } from './generator'
 import { TsMongooseVisitor } from './visitor'
-import { Types, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin-helpers'
-import { visit, GraphQLSchema } from 'graphql'
-import { extname } from 'path'
+import { Types, PluginFunction, PluginValidateFn, oldVisit } from '@graphql-codegen/plugin-helpers'
 import { transformSchemaAST } from '@graphql-codegen/schema-ast'
+import { GraphQLSchema } from 'graphql'
+import { extname } from 'path'
 
 export const plugin: PluginFunction<TypeScriptTypettaPluginConfig> = async (schema: GraphQLSchema, documents: Types.DocumentFile[], config: TypeScriptTypettaPluginConfig): Promise<string> => {
-
-  const { schema: _schema, ast } = transformSchemaAST(schema, config);
+  const { schema: _schema, ast } = transformSchemaAST(schema, config)
 
   const visitor = new TsMongooseVisitor(schema, config)
-  const visitorResult = visit(ast, { leave: visitor as any })
+  const visitorResult = oldVisit(ast, { leave: visitor as any })
 
   const generator = new TsTypettaGenerator(config)
   return generator.generate(visitorResult.definitions)

@@ -68,6 +68,9 @@
     "object-hash": "2.2.0",
     "type-fest": "2.9.0"
   },
+  "resolutions": {
+    "graphql": "16.2.0"
+  },
   "jest": {
     "rootDir": "./",
     "transform": {
