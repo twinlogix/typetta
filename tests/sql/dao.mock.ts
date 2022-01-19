@@ -37,8 +37,7 @@ export type AddressProjection = {
   id?: boolean,
 };
 
-export type AddressSortKeys = 
-  'id';
+export type AddressSortKeys = 'id';
 export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
 export type AddressRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -116,10 +115,7 @@ export type CityProjection = {
   name?: boolean,
 };
 
-export type CitySortKeys = 
-  'addressId'|
-  'id'|
-  'name';
+export type CitySortKeys = 'addressId' | 'id' | 'name';
 export type CitySort = OneKey<CitySortKeys, SortDirection>;
 export type CityRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -199,10 +195,7 @@ export type DeviceProjection = {
   userId?: boolean,
 };
 
-export type DeviceSortKeys = 
-  'id'|
-  'name'|
-  'userId';
+export type DeviceSortKeys = 'id' | 'name' | 'userId';
 export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
 export type DeviceRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -283,10 +276,7 @@ export type DogProjection = {
   ownerId?: boolean,
 };
 
-export type DogSortKeys = 
-  'id'|
-  'name'|
-  'ownerId';
+export type DogSortKeys = 'id' | 'name' | 'ownerId';
 export type DogSort = OneKey<DogSortKeys, SortDirection>;
 export type DogRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -366,10 +356,7 @@ export type FriendsProjection = {
   to?: boolean,
 };
 
-export type FriendsSortKeys = 
-  'from'|
-  'id'|
-  'to';
+export type FriendsSortKeys = 'from' | 'id' | 'to';
 export type FriendsSort = OneKey<FriendsSortKeys, SortDirection>;
 export type FriendsRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -462,11 +449,7 @@ export type OrganizationProjection = {
   vatNumber?: boolean,
 };
 
-export type OrganizationSortKeys = 
-  'address.id'|
-  'id'|
-  'name'|
-  'vatNumber';
+export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber';
 export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>;
 export type OrganizationRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -637,19 +620,7 @@ export type UserProjection = {
   title?: boolean,
 };
 
-export type UserSortKeys = 
-  'amount'|
-  'amounts'|
-  'bestFriendId'|
-  'credentials.another.test'|
-  'credentials.password'|
-  'credentials.username'|
-  'firstName'|
-  'id'|
-  'lastName'|
-  'live'|
-  'localization'|
-  'title';
+export type UserSortKeys = 'amount' | 'amounts' | 'bestFriendId' | 'credentials.another.test' | 'credentials.password' | 'credentials.username' | 'firstName' | 'id' | 'lastName' | 'live' | 'localization' | 'title';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 

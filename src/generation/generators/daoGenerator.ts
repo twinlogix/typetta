@@ -294,8 +294,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   // ------------------------------------------------ SORT ---------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
   public _generateDAOSort(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoSortFields = indentMultiline(this._generateDAOSortFields(node, typesMap).join('|\n'))
-    const daoSortKeys = `export type ${node.name}SortKeys = \n${daoSortFields};`
+    const daoSortFields = this._generateDAOSortFields(node, typesMap).join(' | ')
+    const daoSortKeys = `export type ${node.name}SortKeys = ${daoSortFields};`
     const daoSort = `export type ${node.name}Sort = OneKey<${node.name}SortKeys, SortDirection>;`
     const daoRawSort = `export type ${node.name}RawSort = ${node.mongoEntity ? '() => Sort' : node.sqlEntity ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'}`
     return `${daoSortKeys}\n${daoSort}\n${daoRawSort}`

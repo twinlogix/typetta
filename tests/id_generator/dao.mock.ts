@@ -39,9 +39,7 @@ export type AProjection = {
   value?: boolean,
 };
 
-export type ASortKeys = 
-  'id'|
-  'value';
+export type ASortKeys = 'id' | 'value';
 export type ASort = OneKey<ASortKeys, SortDirection>;
 export type ARawSort = () => Sort
 
@@ -112,9 +110,7 @@ export type BProjection = {
   value?: boolean,
 };
 
-export type BSortKeys = 
-  'id'|
-  'value';
+export type BSortKeys = 'id' | 'value';
 export type BSort = OneKey<BSortKeys, SortDirection>;
 export type BRawSort = () => Sort
 
@@ -186,9 +182,7 @@ export type CProjection = {
   value?: boolean,
 };
 
-export type CSortKeys = 
-  'id'|
-  'value';
+export type CSortKeys = 'id' | 'value';
 export type CSort = OneKey<CSortKeys, SortDirection>;
 export type CRawSort = () => Sort
 
@@ -260,9 +254,7 @@ export type DProjection = {
   value?: boolean,
 };
 
-export type DSortKeys = 
-  'id'|
-  'value';
+export type DSortKeys = 'id' | 'value';
 export type DSort = OneKey<DSortKeys, SortDirection>;
 export type DRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -333,9 +325,7 @@ export type EProjection = {
   value?: boolean,
 };
 
-export type ESortKeys = 
-  'id'|
-  'value';
+export type ESortKeys = 'id' | 'value';
 export type ESort = OneKey<ESortKeys, SortDirection>;
 export type ERawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -407,9 +397,7 @@ export type FProjection = {
   value?: boolean,
 };
 
-export type FSortKeys = 
-  'id'|
-  'value';
+export type FSortKeys = 'id' | 'value';
 export type FSort = OneKey<FSortKeys, SortDirection>;
 export type FRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 

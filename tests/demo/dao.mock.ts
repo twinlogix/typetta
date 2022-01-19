@@ -91,16 +91,7 @@ export type PostProjection = {
   views?: boolean,
 };
 
-export type PostSortKeys = 
-  'authorId'|
-  'body'|
-  'clicks'|
-  'createdAt'|
-  'id'|
-  'metadata.region'|
-  'metadata.visible'|
-  'title'|
-  'views';
+export type PostSortKeys = 'authorId' | 'body' | 'clicks' | 'createdAt' | 'id' | 'metadata.region' | 'metadata.visible' | 'title' | 'views';
 export type PostSort = OneKey<PostSortKeys, SortDirection>;
 export type PostRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -192,10 +183,7 @@ export type TagProjection = {
   postId?: boolean,
 };
 
-export type TagSortKeys = 
-  'id'|
-  'name'|
-  'postId';
+export type TagSortKeys = 'id' | 'name' | 'postId';
 export type TagSort = OneKey<TagSortKeys, SortDirection>;
 export type TagRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -310,14 +298,7 @@ export type UserProjection = {
   totalPostsViews?: boolean,
 };
 
-export type UserSortKeys = 
-  'createdAt'|
-  'credentials.password'|
-  'credentials.username'|
-  'email'|
-  'firstName'|
-  'id'|
-  'lastName';
+export type UserSortKeys = 'createdAt' | 'credentials.password' | 'credentials.username' | 'email' | 'firstName' | 'id' | 'lastName';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 

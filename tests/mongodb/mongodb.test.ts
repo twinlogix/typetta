@@ -827,7 +827,7 @@ test('middleware 1', async () => {
   const luigi = await dao2.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } })
   expect(luigi!.firstName).toBe('Luigi')
 
-  expect(operationCount).toBe(5)
+  expect(operationCount).toBe(4)
 })
 
 test('middleware 2', async () => {

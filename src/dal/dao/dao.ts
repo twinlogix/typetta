@@ -20,7 +20,6 @@ import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection, projection } from './projections/projections.utils'
-import { addRelationRefToProjection } from './relations/relations'
 import { DAORelation, DAORelationReference, DAORelationType } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
@@ -196,24 +195,24 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }) as ModelProjection<T['model'], T['projection'], P>[]
   }
 
-  private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(projection?: P): P | undefined {
-    if (projection === true || !projection) {
-      return projection
+  private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(proj?: P): P | undefined {
+    if (proj === true || !proj) {
+      return proj
     }
-    const dbProjections = deepCopy(projection)
+    const dbProjections = deepCopy(proj)
     this.relations.forEach((relation) => {
       if (relation.reference === DAORelationReference.INNER) {
-        addRelationRefToProjection(relation.field, relation.refFrom, dbProjections)
-      }
-    })
-    this.relations.forEach((relation) => {
-      if (relation.reference === DAORelationReference.FOREIGN) {
-        setTraversing(dbProjections, relation.refTo, true)
-      }
-    })
-    this.relations.forEach((relation) => {
-      if (relation.reference === DAORelationReference.RELATION) {
-        setTraversing(dbProjections, relation.refThis.refTo, true)
+        if (getTraversing(dbProjections, relation.field).length > 0) {
+          setTraversing(dbProjections, relation.refFrom, true)
+        }
+      } else if (relation.reference === DAORelationReference.FOREIGN) {
+        if (getTraversing(dbProjections, relation.field).length > 0) {
+          setTraversing(dbProjections, relation.refTo, true)
+        }
+      } else if (relation.reference === DAORelationReference.RELATION) {
+        if (getTraversing(dbProjections, relation.field).length > 0) {
+          setTraversing(dbProjections, relation.refThis.refTo, true)
+        }
       }
     })
     return dbProjections

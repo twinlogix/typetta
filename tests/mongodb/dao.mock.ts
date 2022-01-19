@@ -1,3 +1,5 @@
+// tslint:disable-next-line: max-classes-per-file
+
 import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src';
@@ -37,8 +39,7 @@ export type AddressProjection = {
   id?: boolean,
 };
 
-export type AddressSortKeys = 
-  'id';
+export type AddressSortKeys = 'id';
 export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
 export type AddressRawSort = () => Sort
 
@@ -116,10 +117,7 @@ export type CityProjection = {
   name?: boolean,
 };
 
-export type CitySortKeys = 
-  'addressId'|
-  'id'|
-  'name';
+export type CitySortKeys = 'addressId' | 'id' | 'name';
 export type CitySort = OneKey<CitySortKeys, SortDirection>;
 export type CityRawSort = () => Sort
 
@@ -199,10 +197,7 @@ export type DeviceProjection = {
   userId?: boolean,
 };
 
-export type DeviceSortKeys = 
-  'id'|
-  'name'|
-  'userId';
+export type DeviceSortKeys = 'id' | 'name' | 'userId';
 export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
 export type DeviceRawSort = () => Sort
 
@@ -283,10 +278,7 @@ export type DogProjection = {
   ownerId?: boolean,
 };
 
-export type DogSortKeys = 
-  'id'|
-  'name'|
-  'ownerId';
+export type DogSortKeys = 'id' | 'name' | 'ownerId';
 export type DogSort = OneKey<DogSortKeys, SortDirection>;
 export type DogRawSort = () => Sort
 
@@ -379,11 +371,7 @@ export type OrganizationProjection = {
   vatNumber?: boolean,
 };
 
-export type OrganizationSortKeys = 
-  'address.id'|
-  'id'|
-  'name'|
-  'vatNumber';
+export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber';
 export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>;
 export type OrganizationRawSort = () => Sort
 
@@ -502,15 +490,7 @@ export type PostProjection = {
   views?: boolean,
 };
 
-export type PostSortKeys = 
-  'authorId'|
-  'body'|
-  'clicks'|
-  'id'|
-  'metadata.region'|
-  'metadata.visible'|
-  'title'|
-  'views';
+export type PostSortKeys = 'authorId' | 'body' | 'clicks' | 'id' | 'metadata.region' | 'metadata.visible' | 'title' | 'views';
 export type PostSort = OneKey<PostSortKeys, SortDirection>;
 export type PostRawSort = () => Sort
 
@@ -671,18 +651,7 @@ export type UserProjection = {
   } | boolean,
 };
 
-export type UserSortKeys = 
-  'amount'|
-  'amounts'|
-  'firstName'|
-  'friendsId'|
-  'id'|
-  'lastName'|
-  'live'|
-  'localization'|
-  'title'|
-  'usernamePasswordCredentials.password'|
-  'usernamePasswordCredentials.username';
+export type UserSortKeys = 'amount' | 'amounts' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = () => Sort
 
