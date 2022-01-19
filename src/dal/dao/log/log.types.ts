@@ -1,9 +1,9 @@
-export type LogLevel = 'warning' | 'error' | 'debug'
+export type LogLevel = 'warning' | 'error' | 'query' | 'debug'
 export type LogArgs<DAOName extends string> = {
   raw: string
   date: Date
   level: LogLevel
-  operation?: 'find' | 'aggregate' | 'insert' | 'update' | 'replace' | 'delete'
+  operation?: 'count' | 'findAll' | 'findPage' | 'exists' | 'aggregate' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'deleteOne' | 'deleteAll'
   dao?: DAOName
   driver?: 'mongo' | 'knex'
   query?: string

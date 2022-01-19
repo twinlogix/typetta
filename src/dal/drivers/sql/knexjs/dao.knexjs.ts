@@ -91,7 +91,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
 
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     return this.runQuery(
-      'find',
+      'findAll',
       () => {
         if (params.limit === 0) {
           return { skipReason: 'Limit is 0. Skip.' }
@@ -127,7 +127,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
 
   protected _count(params: FilterParams<T>): Promise<number> {
     return this.runQuery(
-      'find',
+      'count',
       () => {
         const count = this.qb().count(this.idField, { as: 'all' })
         const where = this.buildWhere(params.filter, count)
@@ -192,7 +192,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
     return this.runQuery(
-      'update',
+      'insertOne',
       () => {
         const record = this.modelToDb(params.record as PartialDeep<T['model']>)
         const query = this.qb().insert(record, '*')
@@ -210,13 +210,13 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   protected _updateOne(params: UpdateParams<T>): Promise<void> {
-    return this.runQuery('update', () => {
+    return this.runQuery('updateOne', () => {
       throw new Error(`Operation not supported. Use updateAll specifying the primary key field (${this.idField}) in order to update only one row.`)
     })
   }
 
   protected _updateAll(params: UpdateParams<T>): Promise<void> {
-    return this.runQuery('update', () => {
+    return this.runQuery('updateAll', () => {
       const update = this.buildUpdate(params.changes)
       if (update === null) {
         return { skipReason: 'No changes. Skip.' }
@@ -227,19 +227,19 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   protected _replaceOne(params: ReplaceParams<T>): Promise<void> {
-    return this.runQuery('replace', () => {
+    return this.runQuery('replaceOne', () => {
       throw new Error(`Operation not supported.`)
     })
   }
 
   protected _deleteOne(params: DeleteParams<T>): Promise<void> {
-    return this.runQuery('delete', () => {
+    return this.runQuery('deleteOne', () => {
       throw new Error(`Operation not supported. Use deleteAll specifying the primary key field (${this.idField}) in order to delete only one row.`)
     })
   }
 
   protected _deleteAll(params: DeleteParams<T>): Promise<void> {
-    return this.runQuery('delete', () => {
+    return this.runQuery('deleteAll', () => {
       const deleteQ = this.qb().delete()
       const where = this.buildWhere(params.filter, deleteQ)
       return this.buildTransaction(params.options, where)
@@ -279,14 +279,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     try {
       query = queryBuilder()
       if ('skipReason' in query) {
-        await this.log({ duration: 0, operation, level: 'debug', query: query.skipReason, date: start })
+        await this.log({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
         return skipDefault as Awaited<R>
       }
       const result = await query
       const records = transform ? await transform(result) : undefined
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      await this.log({ duration, operation, level: 'debug', query, date: finish })
+      await this.log({ duration, operation, level: 'query', query, date: finish })
       return records as Awaited<R>
     } catch (error: unknown) {
       const finish = new Date()
