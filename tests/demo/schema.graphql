@@ -1,6 +1,6 @@
-scalar Decimal
-scalar Password
-scalar DateTime
+scalar Decimal @quantitative
+scalar Password @textual
+scalar DateTime @quantitative
 scalar JSON
 
 type Credentials {

@@ -52,15 +52,15 @@ export const postSchema: Schema<types.Scalars> = {
 };
 
 type PostFilterFields = {
-  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'clicks'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>,
-  'createdAt'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
-  'title'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'views'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
+  'authorId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'body'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'clicks'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'createdAt'?: types.Scalars['DateTime'] | null | EqualityOperators<types.Scalars['DateTime']> | ElementOperators | QuantityOperators<types.Scalars['DateTime']>,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'metadata.region'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'metadata.visible'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
+  'title'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'views'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
 export type PostRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -105,28 +105,28 @@ export type PostSort = OneKey<PostSortKeys, SortDirection>;
 export type PostRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type PostUpdate = {
-  'authorId'?: string,
-  'body'?: string | null,
-  'clicks'?: number | null,
-  'createdAt'?: any,
-  'id'?: string,
+  'authorId'?: types.Scalars['ID'],
+  'body'?: types.Scalars['String'] | null,
+  'clicks'?: types.Scalars['Int'] | null,
+  'createdAt'?: types.Scalars['DateTime'],
+  'id'?: types.Scalars['ID'],
   'metadata'?: types.PostMetadata | null,
-  'metadata.region'?: string,
-  'metadata.visible'?: boolean,
-  'title'?: string,
-  'views'?: number
+  'metadata.region'?: types.Scalars['String'],
+  'metadata.visible'?: types.Scalars['Boolean'],
+  'title'?: types.Scalars['String'],
+  'views'?: types.Scalars['Int']
 };
 export type PostRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type PostInsert = {
-  authorId: string,
-  body?: string,
-  clicks?: number,
-  createdAt: any,
-  id?: string,
+  authorId: types.Scalars['ID'],
+  body?: types.Scalars['String'],
+  clicks?: types.Scalars['Int'],
+  createdAt: types.Scalars['DateTime'],
+  id?: types.Scalars['ID'],
   metadata?: types.PostMetadata,
-  title: string,
-  views: number,
+  title: types.Scalars['String'],
+  views: types.Scalars['Int'],
 };
 
 type PostDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'post'>;
@@ -175,9 +175,9 @@ export const tagSchema: Schema<types.Scalars> = {
 };
 
 type TagFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'postId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'postId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type TagFilter = TagFilterFields & LogicalOperators<TagFilterFields>;
 export type TagRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -200,16 +200,16 @@ export type TagSort = OneKey<TagSortKeys, SortDirection>;
 export type TagRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type TagUpdate = {
-  'id'?: string,
-  'name'?: string | null,
-  'postId'?: string
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String'] | null,
+  'postId'?: types.Scalars['ID']
 };
 export type TagRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type TagInsert = {
-  id?: string,
-  name?: string,
-  postId: string,
+  id?: types.Scalars['ID'],
+  name?: types.Scalars['String'],
+  postId: types.Scalars['ID'],
 };
 
 type TagDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Tag, 'id', 'ID', 'generator', TagFilter, TagRawFilter, TagRelations, TagProjection, TagSort, TagRawSort, TagInsert, TagUpdate, TagRawUpdate, TagExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'tag'>;
@@ -274,13 +274,13 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'createdAt'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'credentials.password'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'email'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'createdAt'?: types.Scalars['DateTime'] | null | EqualityOperators<types.Scalars['DateTime']> | ElementOperators | QuantityOperators<types.Scalars['DateTime']>,
+  'credentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators | StringOperators,
+  'credentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'email'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -322,24 +322,24 @@ export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserUpdate = {
-  'createdAt'?: any,
+  'createdAt'?: types.Scalars['DateTime'],
   'credentials'?: types.Credentials,
-  'credentials.password'?: any | null,
-  'credentials.username'?: string | null,
-  'email'?: string | null,
-  'firstName'?: string | null,
-  'id'?: string,
-  'lastName'?: string | null
+  'credentials.password'?: types.Scalars['Password'] | null,
+  'credentials.username'?: types.Scalars['String'] | null,
+  'email'?: types.Scalars['String'] | null,
+  'firstName'?: types.Scalars['String'] | null,
+  'id'?: types.Scalars['ID'],
+  'lastName'?: types.Scalars['String'] | null
 };
 export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserInsert = {
-  createdAt: any,
+  createdAt: types.Scalars['DateTime'],
   credentials: types.Credentials,
-  email?: string,
-  firstName?: string,
-  id?: string,
-  lastName?: string,
+  email?: types.Scalars['String'],
+  firstName?: types.Scalars['String'],
+  id?: types.Scalars['ID'],
+  lastName?: types.Scalars['String'],
 };
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;

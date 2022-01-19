@@ -17,7 +17,7 @@ export const addressSchema: Schema<types.Scalars> = {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
 export type AddressRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -43,12 +43,12 @@ export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
 export type AddressRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AddressUpdate = {
-  'id'?: string
+  'id'?: types.Scalars['ID']
 };
 export type AddressRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AddressInsert = {
-  id?: string,
+  id?: types.Scalars['ID'],
 };
 
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'address'>;
@@ -97,9 +97,9 @@ export const citySchema: Schema<types.Scalars> = {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'addressId'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 export type CityRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -124,16 +124,16 @@ export type CitySort = OneKey<CitySortKeys, SortDirection>;
 export type CityRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type CityUpdate = {
-  'addressId'?: string,
-  'id'?: string,
-  'name'?: string
+  'addressId'?: types.Scalars['String'],
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String']
 };
 export type CityRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type CityInsert = {
-  addressId: string,
-  id?: string,
-  name: string,
+  addressId: types.Scalars['String'],
+  id?: types.Scalars['ID'],
+  name: types.Scalars['String'],
 };
 
 type CityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'city'>;
@@ -181,9 +181,9 @@ export const deviceSchema: Schema<types.Scalars> = {
 };
 
 type DeviceFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
 export type DeviceRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -207,16 +207,16 @@ export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
 export type DeviceRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DeviceUpdate = {
-  'id'?: string,
-  'name'?: string,
-  'userId'?: string | null
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String'],
+  'userId'?: types.Scalars['ID'] | null
 };
 export type DeviceRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DeviceInsert = {
-  id?: string,
-  name: string,
-  userId?: string,
+  id?: types.Scalars['ID'],
+  name: types.Scalars['String'],
+  userId?: types.Scalars['ID'],
 };
 
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'device'>;
@@ -265,9 +265,9 @@ export const dogSchema: Schema<types.Scalars> = {
 };
 
 type DogFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'ownerId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
 export type DogRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -291,16 +291,16 @@ export type DogSort = OneKey<DogSortKeys, SortDirection>;
 export type DogRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DogUpdate = {
-  'id'?: string,
-  'name'?: string,
-  'ownerId'?: string
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String'],
+  'ownerId'?: types.Scalars['ID']
 };
 export type DogRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DogInsert = {
-  id?: string,
-  name: string,
-  ownerId: string,
+  id?: types.Scalars['ID'],
+  name: types.Scalars['String'],
+  ownerId: types.Scalars['ID'],
 };
 
 type DogDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'dog'>;
@@ -349,9 +349,9 @@ export const friendsSchema: Schema<types.Scalars> = {
 };
 
 type FriendsFilterFields = {
-  'from'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'to'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'from'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'to'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type FriendsFilter = FriendsFilterFields & LogicalOperators<FriendsFilterFields>;
 export type FriendsRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -374,16 +374,16 @@ export type FriendsSort = OneKey<FriendsSortKeys, SortDirection>;
 export type FriendsRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FriendsUpdate = {
-  'from'?: string,
-  'id'?: string,
-  'to'?: string
+  'from'?: types.Scalars['ID'],
+  'id'?: types.Scalars['ID'],
+  'to'?: types.Scalars['ID']
 };
 export type FriendsRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FriendsInsert = {
-  from: string,
-  id?: string,
-  to: string,
+  from: types.Scalars['ID'],
+  id?: types.Scalars['ID'],
+  to: types.Scalars['ID'],
 };
 
 type FriendsDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Friends, 'id', 'ID', 'generator', FriendsFilter, FriendsRawFilter, FriendsRelations, FriendsProjection, FriendsSort, FriendsRawSort, FriendsInsert, FriendsUpdate, FriendsRawUpdate, FriendsExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'friends'>;
@@ -439,10 +439,10 @@ export const organizationSchema: Schema<types.Scalars> = {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'address.id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'vatNumber'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 export type OrganizationRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -472,18 +472,18 @@ export type OrganizationRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex
 
 export type OrganizationUpdate = {
   'address'?: types.Address | null,
-  'address.id'?: string,
-  'id'?: string,
-  'name'?: string,
-  'vatNumber'?: string | null
+  'address.id'?: types.Scalars['ID'],
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String'],
+  'vatNumber'?: types.Scalars['String'] | null
 };
 export type OrganizationRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type OrganizationInsert = {
   address?: types.Address,
-  id?: string,
-  name: string,
-  vatNumber?: string,
+  id?: types.Scalars['ID'],
+  name: types.Scalars['String'],
+  vatNumber?: types.Scalars['String'],
 };
 
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'organization'>;
@@ -582,18 +582,18 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'amount'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'amounts'?: any[] | null | EqualityOperators<any[]> | ElementOperators | StringOperators,
-  'bestFriendId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'credentials.another.test'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'credentials.password'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'credentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
-  'localization'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'title'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators
+  'amount'?: types.Scalars['Decimal'] | null | EqualityOperators<types.Scalars['Decimal']> | ElementOperators,
+  'amounts'?: types.Scalars['Decimal'][] | null | EqualityOperators<types.Scalars['Decimal'][]> | ElementOperators,
+  'bestFriendId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'credentials.another.test'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'credentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators,
+  'credentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'live'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
+  'localization'?: types.Scalars['Coordinates'] | null | EqualityOperators<types.Scalars['Coordinates']> | ElementOperators,
+  'title'?: types.Scalars['LocalizedString'] | null | EqualityOperators<types.Scalars['LocalizedString']> | ElementOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -654,34 +654,34 @@ export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserUpdate = {
-  'amount'?: any | null,
-  'amounts'?: Array<any> | null,
-  'bestFriendId'?: string | null,
+  'amount'?: types.Scalars['Decimal'] | null,
+  'amounts'?: types.Scalars['Decimal'][] | null,
+  'bestFriendId'?: types.Scalars['ID'] | null,
   'credentials'?: types.UsernamePasswordCredentials | null,
   'credentials.another'?: types.Another | null,
-  'credentials.another.test'?: string | null,
-  'credentials.password'?: any,
-  'credentials.username'?: string,
-  'firstName'?: string | null,
-  'id'?: string,
-  'lastName'?: string | null,
-  'live'?: boolean,
-  'localization'?: any | null,
-  'title'?: any | null
+  'credentials.another.test'?: types.Scalars['String'] | null,
+  'credentials.password'?: types.Scalars['Password'],
+  'credentials.username'?: types.Scalars['String'],
+  'firstName'?: types.Scalars['String'] | null,
+  'id'?: types.Scalars['ID'],
+  'lastName'?: types.Scalars['String'] | null,
+  'live'?: types.Scalars['Boolean'],
+  'localization'?: types.Scalars['Coordinates'] | null,
+  'title'?: types.Scalars['LocalizedString'] | null
 };
 export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserInsert = {
-  amount?: any,
-  amounts?: any[],
-  bestFriendId?: string,
+  amount?: types.Scalars['Decimal'],
+  amounts?: types.Scalars['Decimal'][],
+  bestFriendId?: types.Scalars['ID'],
   credentials?: types.UsernamePasswordCredentials,
-  firstName?: string,
-  id?: string,
-  lastName?: string,
-  live: boolean,
-  localization?: any,
-  title?: any,
+  firstName?: types.Scalars['String'],
+  id?: types.Scalars['ID'],
+  lastName?: types.Scalars['String'],
+  live: types.Scalars['Boolean'],
+  localization?: types.Scalars['Coordinates'],
+  title?: types.Scalars['LocalizedString'],
 };
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;
