@@ -14,7 +14,7 @@ export function logInputToLogger<DAOName extends string>(info?: LogInput<DAOName
         ((Array.isArray(info) && info.includes(args.level)) ||
           ('maxQueryExecutionTime' in info && args.duration != null && info.maxQueryExecutionTime <= args.duration && (!info.level || info.level.includes(args.level)))))
     ) {
-      const f = args.level === 'warning' ? 'warn' : args.level
+      const f = args.level === 'warning' ? 'warn' : args.level === 'query' ? 'debug' : args.level
       console[f](args.raw)
     }
   }

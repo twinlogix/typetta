@@ -24,8 +24,8 @@ export const aSchema: Schema<types.Scalars> = {
 };
 
 type AFilterFields = {
-  'id'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
+  'id'?: types.Scalars['MongoID'] | null | EqualityOperators<types.Scalars['MongoID']> | ElementOperators,
+  'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type AFilter = AFilterFields & LogicalOperators<AFilterFields>;
 export type ARawFilter = () => Filter<Document>
@@ -39,20 +39,18 @@ export type AProjection = {
   value?: boolean,
 };
 
-export type ASortKeys = 
-  'id'|
-  'value';
+export type ASortKeys = 'id' | 'value';
 export type ASort = OneKey<ASortKeys, SortDirection>;
 export type ARawSort = () => Sort
 
 export type AUpdate = {
-  'id'?: any,
-  'value'?: number
+  'id'?: types.Scalars['MongoID'],
+  'value'?: types.Scalars['Int']
 };
 export type ARawUpdate = () => UpdateFilter<Document>
 
 export type AInsert = {
-  value: number,
+  value: types.Scalars['Int'],
 };
 
 type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, ARawFilter, ARelations, AProjection, ASort, ARawSort, AInsert, AUpdate, ARawUpdate, AExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'a'>;
@@ -97,8 +95,8 @@ export const bSchema: Schema<types.Scalars> = {
 };
 
 type BFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type BFilter = BFilterFields & LogicalOperators<BFilterFields>;
 export type BRawFilter = () => Filter<Document>
@@ -112,21 +110,19 @@ export type BProjection = {
   value?: boolean,
 };
 
-export type BSortKeys = 
-  'id'|
-  'value';
+export type BSortKeys = 'id' | 'value';
 export type BSort = OneKey<BSortKeys, SortDirection>;
 export type BRawSort = () => Sort
 
 export type BUpdate = {
-  'id'?: string,
-  'value'?: number
+  'id'?: types.Scalars['ID'],
+  'value'?: types.Scalars['Int']
 };
 export type BRawUpdate = () => UpdateFilter<Document>
 
 export type BInsert = {
-  id?: string,
-  value: number,
+  id?: types.Scalars['ID'],
+  value: types.Scalars['Int'],
 };
 
 type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BRawFilter, BRelations, BProjection, BSort, BRawSort, BInsert, BUpdate, BRawUpdate, BExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'b'>;
@@ -171,8 +167,8 @@ export const cSchema: Schema<types.Scalars> = {
 };
 
 type CFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type CFilter = CFilterFields & LogicalOperators<CFilterFields>;
 export type CRawFilter = () => Filter<Document>
@@ -186,21 +182,19 @@ export type CProjection = {
   value?: boolean,
 };
 
-export type CSortKeys = 
-  'id'|
-  'value';
+export type CSortKeys = 'id' | 'value';
 export type CSort = OneKey<CSortKeys, SortDirection>;
 export type CRawSort = () => Sort
 
 export type CUpdate = {
-  'id'?: string,
-  'value'?: number
+  'id'?: types.Scalars['ID'],
+  'value'?: types.Scalars['Int']
 };
 export type CRawUpdate = () => UpdateFilter<Document>
 
 export type CInsert = {
-  id: string,
-  value: number,
+  id: types.Scalars['ID'],
+  value: types.Scalars['Int'],
 };
 
 type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CRawFilter, CRelations, CProjection, CSort, CRawSort, CInsert, CUpdate, CRawUpdate, CExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'c'>;
@@ -245,8 +239,8 @@ export const dSchema: Schema<types.Scalars> = {
 };
 
 type DFilterFields = {
-  'id'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
+  'id'?: types.Scalars['IntAutoInc'] | null | EqualityOperators<types.Scalars['IntAutoInc']> | ElementOperators,
+  'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type DFilter = DFilterFields & LogicalOperators<DFilterFields>;
 export type DRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -260,20 +254,18 @@ export type DProjection = {
   value?: boolean,
 };
 
-export type DSortKeys = 
-  'id'|
-  'value';
+export type DSortKeys = 'id' | 'value';
 export type DSort = OneKey<DSortKeys, SortDirection>;
 export type DRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DUpdate = {
-  'id'?: any,
-  'value'?: number
+  'id'?: types.Scalars['IntAutoInc'],
+  'value'?: types.Scalars['Int']
 };
 export type DRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DInsert = {
-  value: number,
+  value: types.Scalars['Int'],
 };
 
 type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DRawFilter, DRelations, DProjection, DSort, DRawSort, DInsert, DUpdate, DRawUpdate, DExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'd'>;
@@ -318,8 +310,8 @@ export const eSchema: Schema<types.Scalars> = {
 };
 
 type EFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type EFilter = EFilterFields & LogicalOperators<EFilterFields>;
 export type ERawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -333,21 +325,19 @@ export type EProjection = {
   value?: boolean,
 };
 
-export type ESortKeys = 
-  'id'|
-  'value';
+export type ESortKeys = 'id' | 'value';
 export type ESort = OneKey<ESortKeys, SortDirection>;
 export type ERawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type EUpdate = {
-  'id'?: string,
-  'value'?: number
+  'id'?: types.Scalars['ID'],
+  'value'?: types.Scalars['Int']
 };
 export type ERawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type EInsert = {
-  id?: string,
-  value: number,
+  id?: types.Scalars['ID'],
+  value: types.Scalars['Int'],
 };
 
 type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, ERawFilter, ERelations, EProjection, ESort, ERawSort, EInsert, EUpdate, ERawUpdate, EExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'e'>;
@@ -392,8 +382,8 @@ export const fSchema: Schema<types.Scalars> = {
 };
 
 type FFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'value'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type FFilter = FFilterFields & LogicalOperators<FFilterFields>;
 export type FRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -407,21 +397,19 @@ export type FProjection = {
   value?: boolean,
 };
 
-export type FSortKeys = 
-  'id'|
-  'value';
+export type FSortKeys = 'id' | 'value';
 export type FSort = OneKey<FSortKeys, SortDirection>;
 export type FRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FUpdate = {
-  'id'?: string,
-  'value'?: number
+  'id'?: types.Scalars['ID'],
+  'value'?: types.Scalars['Int']
 };
 export type FRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FInsert = {
-  id: string,
-  value: number,
+  id: types.Scalars['ID'],
+  value: types.Scalars['Int'],
 };
 
 type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FRawFilter, FRelations, FProjection, FSort, FRawSort, FInsert, FUpdate, FRawUpdate, FExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'f'>;

@@ -1,6 +1,6 @@
-scalar Decimal
-scalar Password
-scalar DateTime
+scalar Decimal @quantitative
+scalar Password @textual
+scalar DateTime @quantitative
 scalar JSON
 
 type Credentials {
@@ -40,6 +40,13 @@ type Tag @sqlEntity {
 }
 
 type PostMetadata {
+  typeId: ID!
+  type: PostType @innerRef
   region: String!
   visible: Boolean!
+}
+
+type PostType @sqlEntity {
+  id: ID! @id(from: "user")
+  name: String!
 }

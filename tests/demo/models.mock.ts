@@ -40,7 +40,15 @@ export type Post = {
 export type PostMetadata = {
   __typename?: 'PostMetadata';
   region: Scalars['String'];
+  type?: Maybe<PostType>;
+  typeId: Scalars['ID'];
   visible: Scalars['Boolean'];
+};
+
+export type PostType = {
+  __typename?: 'PostType';
+  id: Scalars['ID'];
+  name: Scalars['String'];
 };
 
 export type Tag = {

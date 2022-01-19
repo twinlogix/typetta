@@ -17,7 +17,7 @@ export const addressSchema: Schema<types.Scalars> = {
 };
 
 type AddressFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
 export type AddressRawFilter = () => Filter<Document>
@@ -37,18 +37,17 @@ export type AddressProjection = {
   id?: boolean,
 };
 
-export type AddressSortKeys = 
-  'id';
+export type AddressSortKeys = 'id';
 export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
 export type AddressRawSort = () => Sort
 
 export type AddressUpdate = {
-  'id'?: string
+  'id'?: types.Scalars['ID']
 };
 export type AddressRawUpdate = () => UpdateFilter<Document>
 
 export type AddressInsert = {
-  id?: string,
+  id?: types.Scalars['ID'],
 };
 
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'address'>;
@@ -97,9 +96,9 @@ export const citySchema: Schema<types.Scalars> = {
 };
 
 type CityFilterFields = {
-  'addressId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'addressId'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 export type CityRawFilter = () => Filter<Document>
@@ -116,24 +115,21 @@ export type CityProjection = {
   name?: boolean,
 };
 
-export type CitySortKeys = 
-  'addressId'|
-  'id'|
-  'name';
+export type CitySortKeys = 'addressId' | 'id' | 'name';
 export type CitySort = OneKey<CitySortKeys, SortDirection>;
 export type CityRawSort = () => Sort
 
 export type CityUpdate = {
-  'addressId'?: string,
-  'id'?: string,
-  'name'?: string
+  'addressId'?: types.Scalars['String'],
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String']
 };
 export type CityRawUpdate = () => UpdateFilter<Document>
 
 export type CityInsert = {
-  addressId: string,
-  id?: string,
-  name: string,
+  addressId: types.Scalars['String'],
+  id?: types.Scalars['ID'],
+  name: types.Scalars['String'],
 };
 
 type CityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'city'>;
@@ -181,9 +177,9 @@ export const deviceSchema: Schema<types.Scalars> = {
 };
 
 type DeviceFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'userId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
 export type DeviceRawFilter = () => Filter<Document>
@@ -199,24 +195,21 @@ export type DeviceProjection = {
   userId?: boolean,
 };
 
-export type DeviceSortKeys = 
-  'id'|
-  'name'|
-  'userId';
+export type DeviceSortKeys = 'id' | 'name' | 'userId';
 export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
 export type DeviceRawSort = () => Sort
 
 export type DeviceUpdate = {
-  'id'?: string,
-  'name'?: string,
-  'userId'?: string | null
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String'],
+  'userId'?: types.Scalars['ID'] | null
 };
 export type DeviceRawUpdate = () => UpdateFilter<Document>
 
 export type DeviceInsert = {
-  id?: string,
-  name: string,
-  userId?: string,
+  id?: types.Scalars['ID'],
+  name: types.Scalars['String'],
+  userId?: types.Scalars['ID'],
 };
 
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'device'>;
@@ -265,9 +258,9 @@ export const dogSchema: Schema<types.Scalars> = {
 };
 
 type DogFilterFields = {
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'ownerId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'ownerId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
 export type DogRawFilter = () => Filter<Document>
@@ -283,24 +276,21 @@ export type DogProjection = {
   ownerId?: boolean,
 };
 
-export type DogSortKeys = 
-  'id'|
-  'name'|
-  'ownerId';
+export type DogSortKeys = 'id' | 'name' | 'ownerId';
 export type DogSort = OneKey<DogSortKeys, SortDirection>;
 export type DogRawSort = () => Sort
 
 export type DogUpdate = {
-  'id'?: string,
-  'name'?: string,
-  'ownerId'?: string
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String'],
+  'ownerId'?: types.Scalars['ID']
 };
 export type DogRawUpdate = () => UpdateFilter<Document>
 
 export type DogInsert = {
-  id?: string,
-  name: string,
-  ownerId: string,
+  id?: types.Scalars['ID'],
+  name: types.Scalars['String'],
+  ownerId: types.Scalars['ID'],
 };
 
 type DogDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'dog'>;
@@ -356,10 +346,10 @@ export const organizationSchema: Schema<types.Scalars> = {
 };
 
 type OrganizationFilterFields = {
-  'address.id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'name'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'vatNumber'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'address.id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'vatNumber'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 export type OrganizationRawFilter = () => Filter<Document>
@@ -379,28 +369,24 @@ export type OrganizationProjection = {
   vatNumber?: boolean,
 };
 
-export type OrganizationSortKeys = 
-  'address.id'|
-  'id'|
-  'name'|
-  'vatNumber';
+export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber';
 export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>;
 export type OrganizationRawSort = () => Sort
 
 export type OrganizationUpdate = {
   'address'?: types.Address | null,
-  'address.id'?: string,
-  'id'?: string,
-  'name'?: string,
-  'vatNumber'?: string | null
+  'address.id'?: types.Scalars['ID'],
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String'],
+  'vatNumber'?: types.Scalars['String'] | null
 };
 export type OrganizationRawUpdate = () => UpdateFilter<Document>
 
 export type OrganizationInsert = {
   address?: types.Address,
-  id?: string,
-  name: string,
-  vatNumber?: string,
+  id?: types.Scalars['ID'],
+  name: types.Scalars['String'],
+  vatNumber?: types.Scalars['String'],
 };
 
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'organization'>;
@@ -472,14 +458,14 @@ export const postSchema: Schema<types.Scalars> = {
 };
 
 type PostFilterFields = {
-  'authorId'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'body'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'clicks'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'metadata.region'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'metadata.visible'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
-  'title'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'views'?: number | null | EqualityOperators<number> | ElementOperators | StringOperators | QuantityOperators<number>
+  'authorId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'body'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'clicks'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'metadata.region'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'metadata.visible'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
+  'title'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'views'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
 export type PostRawFilter = () => Filter<Document>
@@ -502,39 +488,31 @@ export type PostProjection = {
   views?: boolean,
 };
 
-export type PostSortKeys = 
-  'authorId'|
-  'body'|
-  'clicks'|
-  'id'|
-  'metadata.region'|
-  'metadata.visible'|
-  'title'|
-  'views';
+export type PostSortKeys = 'authorId' | 'body' | 'clicks' | 'id' | 'metadata.region' | 'metadata.visible' | 'title' | 'views';
 export type PostSort = OneKey<PostSortKeys, SortDirection>;
 export type PostRawSort = () => Sort
 
 export type PostUpdate = {
-  'authorId'?: string,
-  'body'?: string | null,
-  'clicks'?: number | null,
-  'id'?: string,
+  'authorId'?: types.Scalars['ID'],
+  'body'?: types.Scalars['String'] | null,
+  'clicks'?: types.Scalars['Int'] | null,
+  'id'?: types.Scalars['ID'],
   'metadata'?: types.PostMetadata | null,
-  'metadata.region'?: string,
-  'metadata.visible'?: boolean,
-  'title'?: string,
-  'views'?: number
+  'metadata.region'?: types.Scalars['String'],
+  'metadata.visible'?: types.Scalars['Boolean'],
+  'title'?: types.Scalars['String'],
+  'views'?: types.Scalars['Int']
 };
 export type PostRawUpdate = () => UpdateFilter<Document>
 
 export type PostInsert = {
-  authorId: string,
-  body?: string,
-  clicks?: number,
-  id?: string,
+  authorId: types.Scalars['ID'],
+  body?: types.Scalars['String'],
+  clicks?: types.Scalars['Int'],
+  id?: types.Scalars['ID'],
   metadata?: types.PostMetadata,
-  title: string,
-  views: number,
+  title: types.Scalars['String'],
+  views: types.Scalars['Int'],
 };
 
 type PostDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'post'>;
@@ -621,17 +599,17 @@ export const userSchema: Schema<types.Scalars> = {
 };
 
 type UserFilterFields = {
-  'amount'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'amounts'?: any[] | null | EqualityOperators<any[]> | ElementOperators | StringOperators,
-  'firstName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'friendsId'?: string[] | null | EqualityOperators<string[]> | ElementOperators | StringOperators,
-  'id'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'lastName'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators,
-  'live'?: boolean | null | EqualityOperators<boolean> | ElementOperators | StringOperators,
-  'localization'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'title'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'usernamePasswordCredentials.password'?: any | null | EqualityOperators<any> | ElementOperators | StringOperators,
-  'usernamePasswordCredentials.username'?: string | null | EqualityOperators<string> | ElementOperators | StringOperators
+  'amount'?: types.Scalars['Decimal'] | null | EqualityOperators<types.Scalars['Decimal']> | ElementOperators,
+  'amounts'?: types.Scalars['Decimal'][] | null | EqualityOperators<types.Scalars['Decimal'][]> | ElementOperators,
+  'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'friendsId'?: types.Scalars['ID'][] | null | EqualityOperators<types.Scalars['ID'][]> | ElementOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'live'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
+  'localization'?: types.Scalars['Coordinates'] | null | EqualityOperators<types.Scalars['Coordinates']> | ElementOperators,
+  'title'?: types.Scalars['LocalizedString'] | null | EqualityOperators<types.Scalars['LocalizedString']> | ElementOperators,
+  'usernamePasswordCredentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators,
+  'usernamePasswordCredentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
 export type UserRawFilter = () => Filter<Document>
@@ -671,47 +649,36 @@ export type UserProjection = {
   } | boolean,
 };
 
-export type UserSortKeys = 
-  'amount'|
-  'amounts'|
-  'firstName'|
-  'friendsId'|
-  'id'|
-  'lastName'|
-  'live'|
-  'localization'|
-  'title'|
-  'usernamePasswordCredentials.password'|
-  'usernamePasswordCredentials.username';
+export type UserSortKeys = 'amount' | 'amounts' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = () => Sort
 
 export type UserUpdate = {
-  'amount'?: any | null,
-  'amounts'?: Array<any> | null,
-  'firstName'?: string | null,
-  'friendsId'?: Array<string> | null,
-  'id'?: string,
-  'lastName'?: string | null,
-  'live'?: boolean,
-  'localization'?: any | null,
-  'title'?: any | null,
+  'amount'?: types.Scalars['Decimal'] | null,
+  'amounts'?: types.Scalars['Decimal'][] | null,
+  'firstName'?: types.Scalars['String'] | null,
+  'friendsId'?: types.Scalars['ID'][] | null,
+  'id'?: types.Scalars['ID'],
+  'lastName'?: types.Scalars['String'] | null,
+  'live'?: types.Scalars['Boolean'],
+  'localization'?: types.Scalars['Coordinates'] | null,
+  'title'?: types.Scalars['LocalizedString'] | null,
   'usernamePasswordCredentials'?: types.UsernamePasswordCredentials | null,
-  'usernamePasswordCredentials.password'?: any,
-  'usernamePasswordCredentials.username'?: string
+  'usernamePasswordCredentials.password'?: types.Scalars['Password'],
+  'usernamePasswordCredentials.username'?: types.Scalars['String']
 };
 export type UserRawUpdate = () => UpdateFilter<Document>
 
 export type UserInsert = {
-  amount?: any,
-  amounts?: any[],
-  firstName?: string,
-  friendsId?: string[],
-  id?: string,
-  lastName?: string,
-  live: boolean,
-  localization?: any,
-  title?: any,
+  amount?: types.Scalars['Decimal'],
+  amounts?: types.Scalars['Decimal'][],
+  firstName?: types.Scalars['String'],
+  friendsId?: types.Scalars['ID'][],
+  id?: types.Scalars['ID'],
+  lastName?: types.Scalars['String'],
+  live: types.Scalars['Boolean'],
+  localization?: types.Scalars['Coordinates'],
+  title?: types.Scalars['LocalizedString'],
   usernamePasswordCredentials?: types.UsernamePasswordCredentials,
 };
 

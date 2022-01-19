@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "1.0.0-beta.18",
+  "version": "1.0.0-beta.22",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -39,7 +39,7 @@
     "@types/object-hash": "2.2.1",
     "@types/sha256": "0.2.0",
     "@types/uuid": "8.3.4",
-    "apollo-server": "3.6.1",
+    "apollo-server": "3.6.2",
     "apollo-server-testing": "2.25.3",
     "bignumber.js": "9.0.2",
     "jest": "27.4.7",
@@ -64,7 +64,7 @@
     "graphql": "15.8.0",
     "is-plain-object": "5.0.0",
     "knex": "0.95.15",
-    "mongodb": "4.3.0",
+    "mongodb": "4.3.1",
     "object-hash": "2.2.0",
     "type-fest": "2.9.0"
   },

@@ -55,7 +55,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
-    return this.runQuery('find', async () => {
+    return this.runQuery('findAll', async () => {
       const filter = this.buildFilter(params.filter)
       const projection = this.buildProjection(params.projection)
       const sort = this.buildSort(params.sorts)
@@ -85,7 +85,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected _count(params: FilterParams<T>): Promise<number> {
-    return this.runQuery('find', async () => {
+    return this.runQuery('count', async () => {
       const filter = this.buildFilter(params.filter)
       const options = params.options ?? {}
       return [() => this.collection.countDocuments(filter, options), () => `collection.countDocuments(${JSON.stringify(filter)})`]
@@ -173,7 +173,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
-    return this.runQuery('insert', async () => {
+    return this.runQuery('insertOne', async () => {
       const record = this.modelToDb(params.record)
       const options = params.options ?? {}
       return [
@@ -188,7 +188,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
-    await this.runQuery('update', async () => {
+    await this.runQuery('updateOne', async () => {
       const changes = this.buildChanges(params.changes)
       const filter = this.buildFilter(params.filter)
       const options = { ...(params.options ?? {}), upsert: false, ignoreUndefined: true }
@@ -197,7 +197,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
-    await this.runQuery('update', async () => {
+    await this.runQuery('updateAll', async () => {
       const changes = this.buildChanges(params.changes)
       const filter = this.buildFilter(params.filter)
       const options = { ...(params.options ?? {}), upsert: false, ignoreUndefined: true }
@@ -206,7 +206,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
-    await this.runQuery('replace', async () => {
+    await this.runQuery('replaceOne', async () => {
       const replace = this.modelToDb(params.replace)
       const filter = this.buildFilter(params.filter)
       const options = params.options ?? {}
@@ -215,7 +215,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
-    await this.runQuery('delete', async () => {
+    await this.runQuery('deleteOne', async () => {
       const filter = this.buildFilter(params.filter)
       const options = params.options ?? {}
       return [() => this.collection.deleteOne(filter, options), () => `collection.deleteOne(${JSON.stringify(filter)})`]
@@ -223,7 +223,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
-    await this.runQuery('delete', async () => {
+    await this.runQuery('deleteAll', async () => {
       const filter = this.buildFilter(params.filter)
       const options = params.options ?? {}
       return [() => this.collection.deleteMany(filter, options), () => `collection.deleteMany(${JSON.stringify(filter)})`]
@@ -238,25 +238,23 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
         const result = await promiseGenerator()
         const finish = new Date()
         const duration = finish.getTime() - start.getTime()
-        await this.log({ duration, operation, level: 'debug', query: queryGenerator, date: finish })
+        this.mongoLog({ duration, operation, level: 'query', query: queryGenerator, date: finish })
         return result
       } catch (error: unknown) {
         const finish = new Date()
         const duration = finish.getTime() - start.getTime()
-        await this.log({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
+        this.mongoLog({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
         throw error
       }
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      await this.log({ error, duration, operation, level: 'error', date: finish })
+      this.mongoLog({ error, duration, operation, level: 'error', date: finish })
       throw error
     }
   }
 
-  private async log(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }) {
-    if (this.logger) {
-      await this.logger(this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
-    }
+  private mongoLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }) {
+    this.log(this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
   }
 }
