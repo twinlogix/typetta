@@ -334,11 +334,11 @@ await daoContext.user.findAll({
 
 ## Filtri avanzati, dipendenti dal driver
 
-La filosofia di Typetta è quella di uniformare, semplificare e tipizzare tutto ciò che può essere comune tra le varie sorgenti dati e al tempo stesso non togliere alcuna possibilità all'utente nell'utilizzo delle funzioni avanzate dei sottostanti database. Se un utente necessità di una particolare funzionalità fornita solo da uno dei database supportati, con la sua sintassi specifica, deve poterlo fare senza dover rinunciare a tutte le altre facilitazioni che Typetta offre.
+Typetta, come molti altri ORM, offre la possibilità di [accedere direttamente alle funzionalità del database](raw-databse-access.md) al fine di garantire la massima flessibilità all'utente. Per quanto riguarda i filtri, questo si traduce nella possibilità di creare condizioni completamente dipendenti dal driver sottostante.
 
-Per questo motivo tutte le API che ricevono il parametro filter accettano sia un tipo di dato generato da Typetta con le regole e gli operatori descritti precedentemente, ma in alternativa anche una funzione che permette di esprimere il filtro utilizzando riferimenti, sintassi e funzionalità del driver sottostante.
+Tutte le API che ricevono il parametro `filter` accettano sia un tipo di dato generato da Typetta con le regole e gli operatori descritti precedentemente, che una funzione che permette di esprimere il filtro utilizzando riferimenti, sintassi e potenzialità di SQL o MongoDB.
 
-In pseudo-codice risulta come nel seguente esempio:
+In pseudo-codice questa possibilità è esemplificata di seguito:
 ```typescript
 await daoContext.user.findAll({
   projection: {
@@ -354,7 +354,7 @@ Si noti che questo approccio permette di descrivere un filtro specifico per un d
 
 ### MongoDB
 
-Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:targte=_Blank}, la creazione di un filtro specifico consiste in una funzione che ritorna `Filter<WithId<Document>>`. 
+Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:targte=_Blank}, la creazione di un filtro specifico consiste in una funzione che ritorna `Filter<TSchema>`. 
 
 Ipotizziamo per esempio di voler utilizzare l'operatore `$text` di MongoDB che è un'operatore molto specifico che, tramite un indice testuale sulla collection, è in grado di eseguire una ricerca full text complessa. Non essendo una funzionalità disponibile su altri database o disponibile ma in modalità molto diverse, non è stata fattorizzata da Typetta. Con il meccanismo di filtri specifici per il driver è tuttavia molto semplice utilizzarla:
 
