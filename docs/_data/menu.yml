@@ -10,36 +10,54 @@ main:
     title: Modello Applicativo
     children:
       - url: /chapters/data-model/scalars
-        title: Scalari [eng soon]
+        title: Scalars [eng soon]
       - url: /chapters/data-model/entities
-        title: Entità [eng soon]
+        title: Entities [eng soon]
       - url: /chapters/data-model/relations
-        title: Relazioni [eng soon]
+        title: Relations [eng soon]
   - client:
     title: Database Client
     children:
       - url: /chapters/client/dao-context
-        title: Il Contesto [eng soon]
+        title: Context [eng soon]
       - url: /chapters/client/read-write
-        title: Lettura e Scrittura [eng soon]
+        title: Read and Write [eng soon]
       - url: /chapters/client/filters
-        title: Filtri [eng soon]
+        title: Filters [eng soon]
       - url: /chapters/client/projections
-        title: Proiezioni [eng soon]
+        title: Projections [eng soon]
       - url: /chapters/client/sorting
-        title: Ordinamenti [eng soon]
+        title: Sorts [eng soon]
       - url: /chapters/client/relations
-        title: Relazioni [eng soon]
+        title: Relations [eng soon]
       - url: /chapters/client/pagination
-        title: Paginazione [eng soon]
+        title: Pagination [eng soon]
       - url: /chapters/client/aggregations
-        title: Aggregazioni [eng soon]
+        title: Aggregations [eng soon]
       - url: /chapters/client/transactions
-        title: Transazioni [eng soon]
+        title: Transactions [eng soon]
       - url: /chapters/client/raw-databse-access
-        title: Accesso diretto al database [eng soon]
+        title: Database direct access [eng soon]
+      - url: /chapters/client/logging
+        title: Logging
+        todo: true
+      - url: /chapters/advanced/mocking
+        title: Mocking
+        todo: true
   - database-drivers:
-    title: Connettori ai Database
+    title: Middlewares
+    children:
+      - url: /chapters/middleware/architecture
+        title: Middleware Architecture
+        todo: true
+      - url: /chapters/middleware/computed-fields
+        title: Virtual Fields
+        todo: true
+      - url: /chapters/middleware/security-policies
+        title: Security Policies
+        todo: true
+  - database-drivers:
+    title: Database Drivers
     children:
       - url: /chapters/database-drivers/mongodb
         title: MongoDB
@@ -47,13 +65,8 @@ main:
       - url: /chapters/database-drivers/sql
         title: SQL
         todo: true
-  - reference:
-    title: Reference
-    children:
-      - url: /typedoc/index.html
-        title: TypeDoc Reference
   - advanced:
-    title: Utilizzo Avanzato
+    title: Advanced Topics
     children:
       - url: /chapters/database-drivers/typing
         title: Type Safety
@@ -64,18 +77,8 @@ main:
       - url: /chapters/advanced/n-1-problem
         title: N+1 Problem
         todo: true
-      - url: /chapters/advanced/middlewares
-        title: Middleware
-        todo: true
-      - url: /chapters/data-model/computed-fields
-        title: Campi calcolati
-        todo: true
-      - url: /chapters/advanced/security-policies
-        title: Sicurezza
-        todo: true
-      - url: /chapters/advanced/mocking
-        title: Mocking
-        todo: true
-      - url: /chapters/advanced/logging
-        title: Logging
-        todo: true
+  - reference:
+    title: Reference
+    children:
+      - url: /typedoc/index.html
+        title: TypeDoc Reference
