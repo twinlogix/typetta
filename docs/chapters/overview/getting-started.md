@@ -4,7 +4,7 @@ This tutorial allows you to explore all basic Typetta functionalities providing 
 
   - [Installation](#installation)
   - [Project structure](#project-structure)
-  - [The applicative model](#applicative-model)
+  - [The data model](#data-model)
   - [Code generation](#code-generation)
   - [A simple application](#simple-application)
 
@@ -26,7 +26,7 @@ MyProject
  ┗ tsconfig.json
 ```
 
-All you need is to add an applicative model in GraphQL language, typically found in src directory in a file named *schema.graphql* and also a config file named *codegen.yml* in the root for code generation purposes.
+All you need is to add a data model in GraphQL language, typically found in src directory in a file named *schema.graphql* and also a config file named *codegen.yml* in the root for code generation purposes.
 
 The updated project structure becomes the following:
 <pre>
@@ -39,9 +39,9 @@ MyProject
  ┗ <b style="color: #bf1c31;">codegen.yml</b>
 </pre>
 
-## The applicative model
+## The data model
 
-Inside the file *schema.graphql* you will have to insert the applicative model in GraphQL language. For a complete GraphQL syntax guide please refer directly to the official web site [graphql.org](https://graphql.org/learn/){:target="_blank"}.
+Inside the file *schema.graphql* you will have to insert the data model in GraphQL language. For a complete GraphQL syntax guide please refer directly to the official web site [graphql.org](https://graphql.org/learn/){:target="_blank"}.
 
 Typetta relies on customized directives to extend the standard model definitions allowing the developer to specify very useful details in binding to the data source. For a complete guide refer to section [Cos'è un'entità?](../data-model/entities).
 
@@ -114,7 +114,7 @@ const main = async () => {
 main();
 ```
 
-Let's do our first DAOContext, our first Typetta code generated class. This class represents the central repo for all entity of the applicative model.
+Let's do our first DAOContext, our first Typetta code generated class. This class represents the central repo for all entity of the data model.
 
 ```typescript
 const daoContext = new DAOContext({

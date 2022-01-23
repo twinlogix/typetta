@@ -1,4 +1,4 @@
-# Scalari
+# Scalars
 
 - [Basic Scalars](#basic-scalars) 
 - [Additional Scalars](#additional-scalars) 
@@ -6,7 +6,7 @@
   - [Scalar Adapter](#scalar-adapter) 
   - [Validation](#validation) 
 
-## Basic Sclars
+## Basic Scalars
 
 The GraphQL specification comes with a set of basic scalar types to draw from when modeling an entity. This set consists of:
 - **Int**: a signed 32‐bit integer number.

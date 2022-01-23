@@ -7,16 +7,16 @@ main:
       - url: /chapters/overview/getting-started
         title: Getting Started
   - data-model:
-    title: Modello Applicativo
+    title: Data Model
     children:
       - url: /chapters/data-model/scalars
-        title: Scalars [eng soon]
+        title: Scalars
       - url: /chapters/data-model/entities
         title: Entities [eng soon]
       - url: /chapters/data-model/relations
         title: Relations [eng soon]
   - client:
-    title: Database Client
+    title: Typetta Client
     children:
       - url: /chapters/client/dao-context
         title: Context [eng soon]
@@ -57,7 +57,7 @@ main:
         title: Security Policies
         todo: true
   - database-drivers:
-    title: Database Drivers
+    title: Data Sources Drivers
     children:
       - url: /chapters/database-drivers/mongodb
         title: MongoDB
