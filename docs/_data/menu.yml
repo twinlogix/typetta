@@ -12,7 +12,7 @@ main:
       - url: /chapters/data-model/scalars
         title: Scalars
       - url: /chapters/data-model/entities
-        title: Entities [eng soon]
+        title: Entities
       - url: /chapters/data-model/relations
         title: Relations [eng soon]
   - client:
