@@ -14,7 +14,7 @@ main:
       - url: /chapters/data-model/entities
         title: Entities
       - url: /chapters/data-model/relations
-        title: Relations [eng soon]
+        title: Relations
   - client:
     title: Typetta Client
     children:

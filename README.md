@@ -2,7 +2,7 @@
   <br/>
   <br/>
   <a href="https://twinlogix.github.io/typetta/">
-    <img src="/docs/assets/img/logo.png" width="316" height="50">
+    <img src="https://raw.githubusercontent.com/twinlogix/typetta/master/docs/assets/img/logo.png" width="316" height="50">
   </a>
   <br/>
   Node.js ORM written in TypeScript for type lovers.
@@ -13,7 +13,7 @@
     <a href="https://opensource.org/licenses/Apache-2.0" target="_blank"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"/></a>
     <img src="https://github.com/twinlogix/typetta/actions/workflows/build-and-test.yml/badge.svg" />    
     <a href="https://www.codacy.com/gh/twinlogix/typetta/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=twinlogix/typetta&amp;utm_campaign=Badge_Grade" target="_blank"><img src="https://app.codacy.com/project/badge/Grade/3c49f8a206cf4deeb41b289d151434f7"/></a>
-    <img src="./coverage/badge.svg" />
+    <img src="https://raw.githubusercontent.com/twinlogix/typetta/master/coverage/badge.svg" />
   </div>
   <br/>
   <br/>
