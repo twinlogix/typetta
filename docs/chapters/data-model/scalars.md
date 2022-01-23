@@ -1,21 +1,21 @@
 # Scalari
 
-- [Scalari Base](#scalari-base) 
-- [Scalari Aggiuntivi](#scalari-aggiuntivi) 
-  - [Mapping TypeScript](#mapping-typescript) 
-  - [DataType Adapter](#datatype-adapter) 
-  - [Validazione](#validazione) 
+- [Basic Scalars](#basic-scalars) 
+- [Additional Scalars](#additional-scalars) 
+  - [TypeScript mapping](#typescript-mapping) 
+  - [Scalar Adapter](#scalar-adapter) 
+  - [Validation](#validation) 
 
-## Scalari Base
+## Basic Sclars
 
-La specifica GraphQL ha un elenco di scalari di base, una sorta di tipi di dato standard, da cui attingere nella modellazione di un'entità. Questo elenco si compone di:
-- **Int**: un intero con segno a 32‐bit.
-- **Float**: un intero con segno a double-precision e floating-point.
-- **String**: una sequenza di caratteri UTF‐8.
-- **Boolean**: un booleano true/false.
-- **ID**: un identificatore univoco.
+The GraphQL specification comes with a set of basic scalar types to draw from when modeling an entity. This set consists of:
+- **Int**: a signed 32‐bit integer number.
+- **Float**: a signed, double precision, floating point number.
+- **String**: a UTF‐8 characters sequence.
+- **Boolean**: a true/false value.
+- **ID**: a unique identifier.
 
-Questi scalari possono essere utilizzati per la modellazione di un'entità come nell'esempio seguente:
+These scalars can be used for modeling an entity as in the following example:
 ```typescript
 type User {
   id: ID!
@@ -25,22 +25,22 @@ type User {
 }
 ```
 
-## Scalari Aggiuntivi
+## Additional Scalars
 
-Questo insieme di scalari standard può poi essere esteso con un numero a piacere di scalari aggiuntivi, che possono essere definiti nello schema GraphQL *schema.graphql* con la seguente sintassi:
+This set of basic scalars can then be extended with any number of additional scalars, which can be defined in the GraphQL schema (by default in a *schema.graphql* file) with the following syntax:
 
 ```typescript
 scalar Timestamp
 scalar DateTime
 ```
 
-Ogni volta che si definisce un nuovo scalare occorre configurare il sistema affinchè sappia come esso deve essere rappresentato nel tipo di dato TypeScript e come deve essere serializzato e deserializzato su ogni driver (SQL, MongoDB ed eventuali altri aggiuntivi). 
+Every time a new scalar is defined, the system must be configured so that it knows how it must be represented as a TypeScript type and how it must be serialized and deserialized on each driver (SQL, MongoDB and any other additional ones).
 
-Il meccanismo di estensibilità dato dagli scalari aggiuntivi è molto potente perchè permette di aumentare l'espressività del modello applicativo e di creare regole di validazione del dato che vengono applicate da Typetta prima di storicizzare il dato su database.
+The extensibility mechanism given by the additional scalars allows the user to increase the expressiveness of the application domain model and to create validation rules for a more accurate and strict data model design.
 
-### Mapping TypeScript
+### TypeScript mapping
 
-Il mapping di uno scalare aggiuntivo nel relativo tipo TypeScript va configurato nel file di configurazione del generatore *codegen.yml*. Come si può vedere nell'esempio seguente, in questo file possiamo aggiungere tutti i mapping necessari all'interno della sezione *config* del generatore standard TypeScript:
+Additional scalar mapping to TypeScript types must be set in the *codegen.yml* generator configuration file. As you can see in the following example, in this file we can add all the necessary mappings inside the *config* section of the standard [GraphQL CodeGen TypeScript](https://www.graphql-code-generator.com/plugins/typescript){:target="_blank"} generator:
 
 ```yaml
 schema: "src/schema.graphql"
@@ -54,11 +54,11 @@ generates:
         DateTime: Date
   [...]
 ```
-La chiave di sinistra corrisponde al nome dello scalare aggiuntivo definito nello schema GraphQL, mentre il valore di destra è il tipo di dato TypeScript corrispondente.
+The key represents to the additional scalar name as it is defined in the GraphQL schema, while the value is the corresponding TypeScript type.
 
-E' possibile creare anche scalari aggiuntivi che non abbiano una controparte in un tipo primitivo TypeScript, bensì un tipo o una classe proprietaria o di una libreria di terze parti. 
+You can also create additional scalars that do not have a counterpart in a primitive TypeScript type, but rather to a type or a class from your own or a third-party library.
 
-Di seguito un esempio di uno scalare Decimal mappato sul tipo di dato BigNumber della libreria [bignumber.js](https://mikemcl.github.io/bignumber.js/){:target="_blank"}:
+Below is an example of a Decimal scalar mapped to the BigNumber type of the library [bignumber.js](https://mikemcl.github.io/bignumber.js/){:target="_blank"}:
 
 ```yaml
 schema: "src/schema.graphql"
@@ -74,17 +74,17 @@ generates:
 
 ### Scalar Adapter
 
-La seconda specifica necessaria per l'utilizzo di uno scalare aggiuntivo è la definizione del suo cosiddetto *adapter*.
+Additional scalars need a second specification that defines how Typetva must deal with them, a so-called *adapter*.
 
-Uno ``Scalar Adapter`` è un oggetto che contiene le specifiche di come il sistema deve comportarsi con lo specifico scalare in merito a:
-- Serializzazione sul database
-- Deserializzazione dal database
-- Validazione
-- Autogenerazione
+A ``Scalar Adapter`` is an object that contains all the details about how the system should behave with the specific scalar regarding:
+- Database serialization
+- Database deserialization
+- Validation
+- Auto-generation
 
-Gli Scalar adapters vanno configurati a livello di DAOContext e sono condivisi da tutti i DAO.
+Scalar adapters must be configured at the DAOContext level and are shared by all DAOs.
 
-Di seguito un esempio di Scalar Adapter per lo scalare Decimal già descritto precedentemente. Il tipo di dato TypeScript su cui è mappato questo scalare è BigNumber, mentre il tipo di dato su cui deve essere serializzato su MongoDB è il Decimal128.
+Following an example of a Scalar Adapter for the Decimal scalar already described above. The TypeScript type this scalar is mapped to is BigNumber, while the data type to which it must be serialized on MongoDB is Decimal128.
 
 ```typescript
 const decimalAdapter = {
@@ -93,8 +93,7 @@ const decimalAdapter = {
 };
 ```
 
-Nel caso si stiano utilizzando sorgenti dati di tipo diverso, sia MongoDB che SQL, è possibile specificare due adapter diversi come nel seguente esempio in cui per SQL il tipo di dato Decimal viene storicizzato in un campo di tipo stringa:
-
+If you are using different data sources, as an example you have both a MongoDB and a SQL databse, you can specify two different adapters for the same scalar.In the following additional example the Decimal type is also stored in a SQL database ad a string:
 ```typescript
 const decimalAdapter = {
   mongo: {
@@ -107,7 +106,7 @@ const decimalAdapter = {
   }
 };
 ```
-La configurazione del DAOContext con lo scalar adapter di cui sopra risulta quindi la seguente:
+The configuration of the DAOContext with the above scalar adapter is therefore the following:
 
 ```typescript
 const daoContext = new DAOContext({
@@ -117,17 +116,17 @@ const daoContext = new DAOContext({
 });
 ```
 
-### Validazione
+### Validation
 
-Ogni `Scalar Adapter` permette la specifica di regole di validazione che vengono applicate sia alla lettura che alla scrittura dello scalare su ogni sorgente dati.
+A `Scalar Adapter` can also contain validation rules that are applied to both reading and writing the scalar on each data source.
 
-Ipotizziamo per esempio di voler creare uno scalare aggiuntivo che rappresenti solamente numeri interi positivi:
+For example, suppose we want to create an additional scalar that represents only positive integers:
 
 ```typescript
 scalar IntPositive
 ```
 
-E' possibile difinire un semplice validatore ed il relativo `Scalar Adapter` come segue:
+We can define a simple validator and its `Scalar Adapter` as follows:
 
 ```typescript
 const daoContext = new DAOContext({
