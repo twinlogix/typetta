@@ -1,6 +1,6 @@
 import { Schema } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../dal/drivers/drivers.types'
-import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, RelationEntityRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
 
 export function toFirstLower(typeName: string) {
   return typeName.charAt(0).toLowerCase() + typeName.slice(1)
@@ -21,32 +21,12 @@ export function findField(node: TsTypettaGeneratorNode, fieldPath: string, types
   } else {
     const key = fieldPathSplitted.shift()
     const tmpField = node.fields.find((f) => f.name === key)
-    if (tmpField && isEmbed(tmpField.type)) {
+    if (tmpField && tmpField.type.kind === 'embedded') {
       const embeddedType = findNode(tmpField.type.embed, typesMap)
       return embeddedType && findField(embeddedType, fieldPathSplitted.join('.'), typesMap)
     }
     return tmpField
   }
-}
-
-export function isEmbed(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType): type is EmbedFieldType {
-  return (type as EmbedFieldType).embed !== undefined
-}
-
-export function isInnerRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType): type is InnerRefFieldType {
-  return (type as InnerRefFieldType).innerRef !== undefined
-}
-
-export function isForeignRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType): type is ForeignRefFieldType {
-  return (type as ForeignRefFieldType).foreignRef !== undefined
-}
-
-export function isRelationEntityRef(type: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType): type is RelationEntityRefFieldType {
-  return (type as RelationEntityRefFieldType).entity !== undefined
-}
-
-export function isEntity(node: TsTypettaGeneratorNode): boolean {
-  return node.mongoEntity !== undefined || node.sqlEntity !== undefined
 }
 
 export function indentMultiline(str: string, count = 1): string {

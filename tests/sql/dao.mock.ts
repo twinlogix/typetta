@@ -82,7 +82,7 @@ export type CityExcludedFields = 'computedAddressName' | 'computedName'
 
 export const citySchema: Schema<types.Scalars> = {
   'addressId': {
-    scalar: 'String', 
+    scalar: 'ID', 
     required: true
   },
   'id': {
@@ -96,7 +96,7 @@ export const citySchema: Schema<types.Scalars> = {
 };
 
 type CityFilterFields = {
-  'addressId'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'addressId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
@@ -120,14 +120,14 @@ export type CitySort = OneKey<CitySortKeys, SortDirection>;
 export type CityRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type CityUpdate = {
-  'addressId'?: types.Scalars['String'],
+  'addressId'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String']
 };
 export type CityRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type CityInsert = {
-  addressId: types.Scalars['String'],
+  addressId: types.Scalars['ID'],
   id?: types.Scalars['ID'],
   name: types.Scalars['String'],
 };
@@ -497,7 +497,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type UserExcludedFields = 'bestFriend' | 'dogs'
+export type UserExcludedFields = 'bestFriend' | 'dogs' | 'friends'
 
 export const userSchema: Schema<types.Scalars> = {
   'amount': {

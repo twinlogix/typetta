@@ -33,7 +33,7 @@ export type Another = {
 
 export type City = {
   __typename?: 'City';
-  addressId: Scalars['String'];
+  addressId: Scalars['ID'];
   computedAddressName?: Maybe<Scalars['String']>;
   computedName?: Maybe<Scalars['String']>;
   id: Scalars['ID'];

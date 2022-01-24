@@ -19,14 +19,14 @@ type UsernamePasswordCredentials {
 type City @mongoEntity {
   id: ID! @id
   name: String!
-  addressId: String!
+  addressId: ID!
   computedName: String @exclude
   computedAddressName: String @exclude
 }
 
 type Address @mongoEntity(collection: "addresses") {
   id: ID! @id
-  cities: [City!] @foreignRef(refFrom: "addressId")
+  cities: [City!] @foreignRef
 }
 
 type Organization @mongoEntity {

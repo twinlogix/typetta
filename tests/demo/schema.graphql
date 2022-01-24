@@ -30,7 +30,7 @@ type Post @sqlEntity {
   authorId: ID! @alias(value: "aId")
   author: User @innerRef
   metadata: PostMetadata
-  tags: [Tag!] @foreignRef(refFrom: "postId")
+  tags: [Tag!] @foreignRef
 }
 
 type Tag @sqlEntity {

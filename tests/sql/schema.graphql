@@ -24,7 +24,7 @@ type UsernamePasswordCredentials {
 type City @sqlEntity {
   id: ID! @id
   name: String!
-  addressId: String!
+  addressId: ID!
   computedName: String @exclude
   computedAddressName: String @exclude
 }

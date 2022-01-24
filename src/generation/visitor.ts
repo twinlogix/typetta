@@ -1,16 +1,15 @@
+import { IdGenerationStrategy } from '..'
+import { TypeScriptTypettaPluginConfig } from './config'
+import { Directives } from './directives'
+import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
+import { toFirstLower } from './utils'
 import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 import autoBind from 'auto-bind'
-import { TypeScriptTypettaPluginConfig } from './config'
 import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
-import { EmbedFieldType, ForeignRefFieldType, InnerRefFieldType, RelationEntityRefFieldType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
-import { toFirstLower } from './utils'
-import { Directives } from './directives'
-import { IdGenerationStrategy } from '..'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
 export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig, ParsedConfig> {
-
   constructor(private _schema: GraphQLSchema, pluginConfig: TypeScriptTypettaPluginConfig) {
     super(pluginConfig, {
       scalars: buildScalars(_schema, pluginConfig.scalars!, DEFAULT_SCALARS),
@@ -74,11 +73,11 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     const resFields: TsTypettaGeneratorField[] = []
 
     fields.forEach((field) => {
-      const coreType = getBaseTypeNode(field.type)
-      const coreTypeName = this.convertName(coreType, { useTypesPrefix: false })
-      const schemaType = this._schema.getType(coreType.name.value)
+      const graphqlType = getBaseTypeNode(field.type)
+      const graphqlTypeName = this.convertName(graphqlType, { useTypesPrefix: false })
+      const schemaType = this._schema.getType(graphqlType.name.value)
 
-      let resFieldType: string | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType
+      let resFieldType: FieldTypeType
       let innerRefDirective
       let foreignRefDirective
       let relationEntityRefDirective
@@ -90,43 +89,39 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         if (innerRefDirective) {
           const refFrom = this._getDirectiveArgValue<string>(innerRefDirective, 'refFrom')!
           const refTo = this._getDirectiveArgValue<string>(innerRefDirective, 'refTo')!
-          resFieldType = { innerRef: coreTypeName, refFrom, refTo }
+          resFieldType = { kind: 'innerRef', innerRef: graphqlTypeName, refFrom, refTo }
         } else if (foreignRefDirective) {
           const refFrom = this._getDirectiveArgValue<string>(foreignRefDirective, 'refFrom')!
           const refTo = this._getDirectiveArgValue<string>(foreignRefDirective, 'refTo')!
-          resFieldType = { foreignRef: coreTypeName, refFrom, refTo }
+          resFieldType = { kind: 'foreignRef', foreignRef: graphqlTypeName, refFrom, refTo }
         } else if (relationEntityRefDirective) {
           const entity = this._getDirectiveArgValue<string>(relationEntityRefDirective, 'entity')!
           const refThis = this._getDirectiveArgValue<{ refFrom: string; refTo?: string }>(relationEntityRefDirective, 'refThis')!
           const refOther = this._getDirectiveArgValue<{ refFrom: string; refTo?: string }>(relationEntityRefDirective, 'refOther')!
-          resFieldType = { entity, refThis, refOther, destRef: coreTypeName, sourceRef: node.name.value }
+          resFieldType = { kind: 'relationEntityRef', entity, refThis, refOther, destRef: graphqlTypeName, sourceRef: node.name.value }
         } else {
-          resFieldType = { embed: coreTypeName }
+          resFieldType = { kind: 'embedded', embed: graphqlTypeName }
         }
       } else if (isEnumType(schemaType)) {
-        resFieldType = this.scalars.String
+        resFieldType = { kind: 'scalar', scalar: this.scalars.String }
       } else {
-        if (this.scalars[coreType.name.value]) {
-          resFieldType = this.scalars[coreType.name.value]
+        if (this.scalars[graphqlType.name.value]) {
+          resFieldType = { kind: 'scalar', scalar: this.scalars[graphqlType.name.value] }
         } else {
-          throw new Error(`Type mapping not found for custom scalar '${coreType.name.value}'.`)
+          throw new Error(`Type mapping not found for custom scalar '${graphqlType.name.value}'.`)
         }
       }
 
       const idDirective = this._getDirectiveFromAstNode(field, Directives.ID)
       const idGenerationStrategy = idDirective ? this._getDirectiveArgValue<IdGenerationStrategy>(idDirective, 'from') ?? 'generator' : undefined
-      if(idGenerationStrategy && idGenerationStrategy !== 'db' && idGenerationStrategy !== 'generator' && idGenerationStrategy !== 'user') {
+      if (idGenerationStrategy && idGenerationStrategy !== 'db' && idGenerationStrategy !== 'generator' && idGenerationStrategy !== 'user') {
         throw new Error('@id(from: "db" | "generator" | "user") from must be either "db", "generator" or "user"')
       }
 
       const excludeDirective = this._getDirectiveFromAstNode(field, Directives.EXCLUDE)
 
       const aliasDirective = this._getDirectiveFromAstNode(field, Directives.ALIAS)
-      const alias = (
-        aliasDirective != null ?
-          this._getDirectiveArgValue<string>(aliasDirective, 'value')!
-          : undefined
-      );
+      const alias = aliasDirective != null ? this._getDirectiveArgValue<string>(aliasDirective, 'value')! : undefined
 
       if (aliasDirective && excludeDirective) {
         throw new Error(`@alias and @exclude directives of field '${field.name.value}' are incompatible.`)
@@ -143,16 +138,16 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
 
       const fieldAttribute = {
         name: field.name.value,
-        graphqlType: coreType.name.value,
+        graphqlType: graphqlType.name.value,
         type: resFieldType,
         isRequired: field.type.kind === Kind.NON_NULL_TYPE,
         isID: idDirective != null,
         idGenerationStrategy,
         isList: field.type.kind === Kind.LIST_TYPE || (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE),
         isExcluded: excludeDirective != null,
-        alias
+        alias,
       }
-      if(fieldAttribute.isID && !fieldAttribute.isRequired) {
+      if (fieldAttribute.isID && !fieldAttribute.isRequired) {
         throw new Error(`Field '${field.name.value}' has @id directive, it must be a required field (!).`)
       }
       resFields.push(fieldAttribute)
@@ -163,7 +158,6 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
 
   ObjectTypeDefinition(node: ObjectTypeDefinitionNode): TsTypettaGeneratorNode {
     const plainName = this.convertName(node, { useTypesPrefix: false })
-    const prefixedName = this.convertName(node)
 
     const mongoEntityDirective = this._getDirectiveFromAstNode(node, Directives.MONGO_ENTITY)
     const collection = (mongoEntityDirective && this._getDirectiveArgValue<string>(mongoEntityDirective, 'collection')) || toFirstLower(plainName) + 's'
@@ -175,12 +169,14 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
 
     const fields = this._buildFields(node.fields!, node)
 
+    if (mongoEntityDirective && sqlEntityDirective) {
+      throw new Error(`Type ${plainName} is a @mongoEntity and a @sqlEntity at the same time. A type can be related to only one source.`)
+    }
+
     return {
       type: 'type',
       name: plainName,
-      prefixedName,
-      mongoEntity: mongoEntityDirective ? { collection, source: mongoSource } : undefined,
-      sqlEntity: sqlEntityDirective ? { table, source: knexSource } : undefined,
+      entity: mongoEntityDirective ? { type: 'mongo', collection, source: mongoSource } : sqlEntityDirective ? { type: 'sql', table, source: knexSource } : undefined,
       fields,
     }
   }
@@ -190,7 +186,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       type: 'scalar',
       name: node.name.value,
       isQuantity: this._getDirectiveFromAstNode(node, Directives.QUANTITY_SCALAR) ? true : false,
-      isString: this._getDirectiveFromAstNode(node, Directives.STRING_SCALAR) ? true : false
+      isString: this._getDirectiveFromAstNode(node, Directives.STRING_SCALAR) ? true : false,
     }
   }
 }
