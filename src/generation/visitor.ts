@@ -141,8 +141,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         throw new Error(`@alias and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
       }
 
-      // const assd = this._getDirectiveFromAstNode(coreType, Directives.STRING_SCALAR)
-      resFields.push({
+      const fieldAttribute = {
         name: field.name.value,
         graphqlType: coreType.name.value,
         type: resFieldType,
@@ -152,7 +151,11 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         isList: field.type.kind === Kind.LIST_TYPE || (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE),
         isExcluded: excludeDirective != null,
         alias
-      })
+      }
+      if(fieldAttribute.isID && !fieldAttribute.isRequired) {
+        throw new Error(`Field '${field.name.value}' has @id directive, it must be a required field (!).`)
+      }
+      resFields.push(fieldAttribute)
     })
 
     return resFields

@@ -5,7 +5,7 @@ scalar Password
 scalar JSON
 
 type Device @mongoEntity {
-  id: ID! @id
+  id: ID @id
   name: String!
   userId: ID
   user: User @innerRef
