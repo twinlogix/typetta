@@ -31,6 +31,25 @@ export type Another = {
   test?: Maybe<Scalars['String']>;
 };
 
+export type Author = {
+  __typename?: 'Author';
+  books?: Maybe<Array<Maybe<Book>>>;
+  id: Scalars['ID'];
+};
+
+export type AuthorBook = {
+  __typename?: 'AuthorBook';
+  authorId: Scalars['ID'];
+  bookId: Scalars['ID'];
+  id: Scalars['ID'];
+};
+
+export type Book = {
+  __typename?: 'Book';
+  authors?: Maybe<Array<Maybe<Author>>>;
+  id: Scalars['ID'];
+};
+
 export type City = {
   __typename?: 'City';
   addressId: Scalars['ID'];

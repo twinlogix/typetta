@@ -72,3 +72,19 @@ type Dog @sqlEntity {
   ownerId: ID!
   owner: User @innerRef
 }
+
+type Author @sqlEntity {
+  id: ID! @id
+  books: [Book] @relationEntityRef(entity: "AuthorBook")
+}
+
+type AuthorBook @sqlEntity {
+  id: ID! @id
+  authorId: ID!
+  bookId: ID!
+}
+
+type Book @sqlEntity {
+  id: ID! @id
+  authors: [Author] @relationEntityRef(entity: "AuthorBook")
+}

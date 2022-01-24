@@ -179,43 +179,41 @@ export class TsTypettaGenerator {
             const sourceRefType = findNode(field.type.sourceRef, typesMap)!
             const destRefType = findNode(field.type.destRef, typesMap)!
             if (!refType) {
-              throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} that cannot be resolved.`)
+              throw new Error(`Field ${type.name}.${field.name} is related to ${field.type.entity} that cannot be resolved.`)
             }
-            if (field.type.refThis) {
-              const refFromField = findField(refType, field.type.refThis.refFrom, typesMap)
-              if (!refFromField) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} with refThis.refFrom = '${field.type.refThis.refFrom}' that cannot be resolved.`)
-              }
-              if (field.type.refThis.refTo) {
-                const refToField = findField(sourceRefType, field.type.refThis.refTo, typesMap)
-                if (!refToField) {
-                  throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.sourceRef} with refThis.refTo = '${field.type.refThis.refTo}' that cannot be resolved.`)
-                }
-              }
-            } else {
-              const refFrom = toFirstLower(field.type.sourceRef) + 'Id'
-              const refFromField = findField(refType, refFrom, typesMap)
-              if (!refFromField) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} with refThis.refFrom ${refThisrefFrom} that cannot be resolved.`)
-              }
+
+            // Ref this check (source type)
+            const refThisRefFrom = field.type.refThis?.refFrom ?? `${toFirstLower(field.type.sourceRef)}Id`
+            const refThisRefFromField = findField(refType, refThisRefFrom, typesMap)
+            if (!refThisRefFromField) {
+              throw new Error(`Field ${type.name}.${field.name} is related to ${field.type.entity} with refThis.refFrom = '${refThisRefFrom}' that cannot be resolved.`)
             }
-            if (field.type.refOther) {
-              const refFromField = findField(refType, field.type.refOther.refFrom, typesMap)
-              if (!refFromField) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} with refOther.refFrom = '${field.type.refOther.refFrom}' that cannot be resolved.`)
-              }
-              if (field.type.refOther.refTo) {
-                const refToField = findField(destRefType, field.type.refOther.refTo, typesMap)
-                if (!refToField) {
-                  throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.destRef} with refOther.refTo = '${field.type.refOther.refTo}' that cannot be resolved.`)
-                }
-              }
-            } else {
-              const refOtherrefFrom = toFirstLower(field.type.destRef) + 'Id'
-              const refFromField = findField(refType, refOtherrefFrom, typesMap)
-              if (!refFromField) {
-                throw new Error(`Field ${field.name} of type ${type.name} has a reference to ${field.type.entity} with refOther.refFrom ${refOtherrefFrom} that cannot be resolved.`)
-              }
+            const refThisRefTo = field.type.refThis?.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refThisRefToField = findField(sourceRefType, refThisRefTo, typesMap)
+            if (!refThisRefToField) {
+              throw new Error(`Field ${type.name}.${field.name} is related to ${field.type.sourceRef} with refThis.refTo = '${refThisRefTo}' that cannot be resolved.`)
+            }
+            if (refThisRefToField.graphqlType !== refThisRefFromField.graphqlType) {
+              throw new Error(
+                `Field '${refType.name}.${refThisRefFrom}: ${refThisRefFromField.graphqlType}' is related to '${sourceRefType.name}.${refThisRefTo}: ${refThisRefToField.graphqlType}' but they have different scalar type.`,
+              )
+            }
+
+            // Ref other check (dest type)
+            const refOtherRefFrom = field.type.refOther?.refFrom ?? `${toFirstLower(field.type.destRef)}Id`
+            const refOtherRefFromField = findField(refType, refOtherRefFrom, typesMap)
+            if (!refOtherRefFromField) {
+              throw new Error(`Field ${type.name}.${field.name} is related to ${field.type.entity} with refOther.refFrom = '${refOtherRefFrom}' that cannot be resolved.`)
+            }
+            const refOtherRefTo = field.type.refOther?.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refOtherRefToField = findField(destRefType, refOtherRefTo, typesMap)
+            if (!refOtherRefToField) {
+              throw new Error(`Field ${type.name}.${field.name} is related to ${field.type.destRef} with refOther.refTo = '${refOtherRefTo}' that cannot be resolved.`)
+            }
+            if (refOtherRefToField.graphqlType !== refOtherRefFromField.graphqlType) {
+              throw new Error(
+                `Field '${refType.name}.${refOtherRefFrom}: ${refOtherRefFromField.graphqlType}' is related to '${destRefType.name}.${refOtherRefTo}: ${refThisRefToField.graphqlType}' but they have different scalar type.`,
+              )
             }
           }
         }

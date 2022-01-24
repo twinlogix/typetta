@@ -75,6 +75,228 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKne
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------ AUTHOR ------------------------------------
+//--------------------------------------------------------------------------------
+
+export type AuthorExcludedFields = 'books'
+
+export const authorSchema: Schema<types.Scalars> = {
+  'id': {
+    scalar: 'ID', 
+    required: true
+  }
+};
+
+type AuthorFilterFields = {
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+};
+export type AuthorFilter = AuthorFilterFields & LogicalOperators<AuthorFilterFields>;
+export type AuthorRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type AuthorRelations = {
+  books?: {
+    filter?: BookFilter
+    sorts?: BookSort[] | BookRawSort
+    skip?: number
+    limit?: number
+    relations?: BookRelations
+  }
+}
+
+export type AuthorProjection = {
+  books?: BookProjection | boolean,
+  id?: boolean,
+};
+
+export type AuthorSortKeys = 'id';
+export type AuthorSort = OneKey<AuthorSortKeys, SortDirection>;
+export type AuthorRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type AuthorUpdate = {
+  'id'?: types.Scalars['ID']
+};
+export type AuthorRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type AuthorInsert = {
+  id?: types.Scalars['ID'],
+};
+
+type AuthorDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Author, 'id', 'ID', 'generator', AuthorFilter, AuthorRawFilter, AuthorRelations, AuthorProjection, AuthorSort, AuthorRawSort, AuthorInsert, AuthorUpdate, AuthorRawUpdate, AuthorExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'author'>;
+export type AuthorDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AuthorDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: AuthorDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: authorSchema, 
+      relations: overrideRelations(
+        [
+          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.RELATION, field: 'books', relationDao: 'authorBook', entityDao: 'book', refThis: { refFrom: 'authorId', refTo: 'id' }, refOther: { refFrom: 'bookId', refTo: 'id' } }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
+//---------------------------------- AUTHORBOOK ----------------------------------
+//--------------------------------------------------------------------------------
+
+export type AuthorBookExcludedFields = never
+
+export const authorBookSchema: Schema<types.Scalars> = {
+  'authorId': {
+    scalar: 'ID', 
+    required: true
+  },
+  'bookId': {
+    scalar: 'ID', 
+    required: true
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  }
+};
+
+type AuthorBookFilterFields = {
+  'authorId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'bookId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+};
+export type AuthorBookFilter = AuthorBookFilterFields & LogicalOperators<AuthorBookFilterFields>;
+export type AuthorBookRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type AuthorBookRelations = {
+
+}
+
+export type AuthorBookProjection = {
+  authorId?: boolean,
+  bookId?: boolean,
+  id?: boolean,
+};
+
+export type AuthorBookSortKeys = 'authorId' | 'bookId' | 'id';
+export type AuthorBookSort = OneKey<AuthorBookSortKeys, SortDirection>;
+export type AuthorBookRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type AuthorBookUpdate = {
+  'authorId'?: types.Scalars['ID'],
+  'bookId'?: types.Scalars['ID'],
+  'id'?: types.Scalars['ID']
+};
+export type AuthorBookRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type AuthorBookInsert = {
+  authorId: types.Scalars['ID'],
+  bookId: types.Scalars['ID'],
+  id?: types.Scalars['ID'],
+};
+
+type AuthorBookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.AuthorBook, 'id', 'ID', 'generator', AuthorBookFilter, AuthorBookRawFilter, AuthorBookRelations, AuthorBookProjection, AuthorBookSort, AuthorBookRawSort, AuthorBookInsert, AuthorBookUpdate, AuthorBookRawUpdate, AuthorBookExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'authorBook'>;
+export type AuthorBookDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class AuthorBookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: AuthorBookDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: authorBookSchema, 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
+//------------------------------------- BOOK -------------------------------------
+//--------------------------------------------------------------------------------
+
+export type BookExcludedFields = 'authors'
+
+export const bookSchema: Schema<types.Scalars> = {
+  'id': {
+    scalar: 'ID', 
+    required: true
+  }
+};
+
+type BookFilterFields = {
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+};
+export type BookFilter = BookFilterFields & LogicalOperators<BookFilterFields>;
+export type BookRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type BookRelations = {
+  authors?: {
+    filter?: AuthorFilter
+    sorts?: AuthorSort[] | AuthorRawSort
+    skip?: number
+    limit?: number
+    relations?: AuthorRelations
+  }
+}
+
+export type BookProjection = {
+  authors?: AuthorProjection | boolean,
+  id?: boolean,
+};
+
+export type BookSortKeys = 'id';
+export type BookSort = OneKey<BookSortKeys, SortDirection>;
+export type BookRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type BookUpdate = {
+  'id'?: types.Scalars['ID']
+};
+export type BookRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+
+export type BookInsert = {
+  id?: types.Scalars['ID'],
+};
+
+type BookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Book, 'id', 'ID', 'generator', BookFilter, BookRawFilter, BookRelations, BookProjection, BookSort, BookRawSort, BookInsert, BookUpdate, BookRawUpdate, BookExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'book'>;
+export type BookDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<BookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: BookDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: bookSchema, 
+      relations: overrideRelations(
+        [
+          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.RELATION, field: 'authors', relationDao: 'authorBook', entityDao: 'author', refThis: { refFrom: 'bookId', refTo: 'id' }, refOther: { refFrom: 'authorId', refTo: 'id' } }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------- CITY -------------------------------------
 //--------------------------------------------------------------------------------
 
@@ -684,6 +906,9 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   middlewares?: DAOContextMiddleware<MetadataType, OperationMetadataType>[]
   overrides?: { 
     address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    author?: Pick<Partial<AuthorDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    authorBook?: Pick<Partial<AuthorBookDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    book?: Pick<Partial<BookDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     city?: Pick<Partial<CityDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     dog?: Pick<Partial<DogDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
@@ -693,14 +918,17 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   },
   knex: Record<'default', Knex>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'knex'>,
-  log?: LogInput<'address' | 'city' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>
+  log?: LogInput<'address' | 'author' | 'authorBook' | 'book' | 'city' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>
 };
 
-type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | FriendsDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | AuthorDAOGenerics<MetadataType, OperationMetadataType> | AuthorBookDAOGenerics<MetadataType, OperationMetadataType> | BookDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | FriendsDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
 
 export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined;
+  private _author: AuthorDAO<MetadataType, OperationMetadataType> | undefined;
+  private _authorBook: AuthorBookDAO<MetadataType, OperationMetadataType> | undefined;
+  private _book: BookDAO<MetadataType, OperationMetadataType> | undefined;
   private _city: CityDAO<MetadataType, OperationMetadataType> | undefined;
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined;
   private _dog: DogDAO<MetadataType, OperationMetadataType> | undefined;
@@ -713,13 +941,31 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
   
   private middlewares: DAOContextMiddleware<MetadataType, OperationMetadataType>[]
   
-  private logger?: LogFunction<'address' | 'city' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>
+  private logger?: LogFunction<'address' | 'author' | 'authorBook' | 'book' | 'city' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>
   
   get address() {
     if(!this._address) {
       this._address = new AddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, knex: this.knex.default, tableName: 'addresses', middlewares: [...(this.overrides?.address?.middlewares || []), ...this.middlewares as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger });
     }
     return this._address;
+  }
+  get author() {
+    if(!this._author) {
+      this._author = new AuthorDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.author, knex: this.knex.default, tableName: 'authors', middlewares: [...(this.overrides?.author?.middlewares || []), ...this.middlewares as DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'author', logger: this.logger });
+    }
+    return this._author;
+  }
+  get authorBook() {
+    if(!this._authorBook) {
+      this._authorBook = new AuthorBookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.authorBook, knex: this.knex.default, tableName: 'authorBooks', middlewares: [...(this.overrides?.authorBook?.middlewares || []), ...this.middlewares as DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'authorBook', logger: this.logger });
+    }
+    return this._authorBook;
+  }
+  get book() {
+    if(!this._book) {
+      this._book = new BookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.book, knex: this.knex.default, tableName: 'books', middlewares: [...(this.overrides?.book?.middlewares || []), ...this.middlewares as DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'book', logger: this.logger });
+    }
+    return this._book;
   }
   get city() {
     if(!this._city) {
@@ -769,8 +1015,8 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
     this.logger = logInputToLogger(params.log)
   }
   
-  public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex> }, entities: { address: Knex.QueryBuilder<any, unknown[]>; city: Knex.QueryBuilder<any, unknown[]>; device: Knex.QueryBuilder<any, unknown[]>; dog: Knex.QueryBuilder<any, unknown[]>; friends: Knex.QueryBuilder<any, unknown[]>; organization: Knex.QueryBuilder<any, unknown[]>; user: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
-    return run({ knex: this.knex }, { address: this.knex.default.table('addresses'), city: this.knex.default.table('citys'), device: this.knex.default.table('devices'), dog: this.knex.default.table('dogs'), friends: this.knex.default.table('friendss'), organization: this.knex.default.table('organizations'), user: this.knex.default.table('users') })
+  public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex> }, entities: { address: Knex.QueryBuilder<any, unknown[]>; author: Knex.QueryBuilder<any, unknown[]>; authorBook: Knex.QueryBuilder<any, unknown[]>; book: Knex.QueryBuilder<any, unknown[]>; city: Knex.QueryBuilder<any, unknown[]>; device: Knex.QueryBuilder<any, unknown[]>; dog: Knex.QueryBuilder<any, unknown[]>; friends: Knex.QueryBuilder<any, unknown[]>; organization: Knex.QueryBuilder<any, unknown[]>; user: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
+    return run({ knex: this.knex }, { address: this.knex.default.table('addresses'), author: this.knex.default.table('authors'), authorBook: this.knex.default.table('authorBooks'), book: this.knex.default.table('books'), city: this.knex.default.table('citys'), device: this.knex.default.table('devices'), dog: this.knex.default.table('dogs'), friends: this.knex.default.table('friendss'), organization: this.knex.default.table('organizations'), user: this.knex.default.table('users') })
   }
 
 }
