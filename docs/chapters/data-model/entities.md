@@ -1,20 +1,20 @@
-# Entità
+# Entities
 
-Ogni modello applicativo è formato da un'insieme di entità. Tali entità in Typetta vengono definite in linguaggio GraphQL, seguendo i principi e la sintassi descritta nella documentazione ufficiale sul sito [graphql.org](https://graphql.org/learn/){:target="_blank"}.
+A **data model** is made up of a set of entities. Such entities in Typetta are defined in **GraphQL** language, following the principles and syntax included in the official specification on [graphql.org](https://graphql.org/learn/){:target="_blank"}.
 
-  - [Entità semplici](#entità-semplici)
-  - [Entità storicizzate](#entità-storicizzate)
-    - [Entità SQL](#entità-sql)
-    - [Entità MongoDB](#entità-mongodb)
+  - [Entity definition](#entity-definition)
+  - [Stored Entity](#stored-entity)
+    - [MongoDB Entity](#mongodb-entity)
+    - [SQL Entity](#sql-entity)
   - [ID](#id)
-  - [Enumerazioni](#enumerazioni)
-  - [Entità embedded](#entità-embedded)
+  - [Enumerations](#enumerations)
+  - [Embedded Entities](#embedded-entities)
   - [Alias](#alias)
-  - [Campi esclusi](#campi-esclusi)
+  - [Excluded Fields](#excluded-fields)
   
-## Entità semplici
+## Entity definition
 
-La definizione di base di un'entità è quindi quella di un tipo GraphQL con un elenco di campi:
+The basic definition of an entity is therefore that of a GraphQL type with a list of fields:
 
 ```typescript
 type User {
@@ -24,44 +24,20 @@ type User {
 }
 ```
 
-Si noti che, seguendo la sintassi GraphQL, ogni campo può essere annotato come obbligatorio o opzionale aggiungendo o meno l'operatore `!` dopo al tipo.
+Note that, according GraphQL syntax, each field can be annotated as required or optional by adding or not the `!` operator after the type name.
 
-Senza ulteriori specifiche, un'entità come la precedente produrrà solamente il relativo tipo TypeScript ma nessun componente di accesso al dato in quanto non risulta essere un'entità direttamente storicizzata su database.
+Without further specifications, an entity such as the previous one will only produce the relative TypeScript type. No data access components will be generated as it does not appear to be an entity directly stored on a data source.
 
-## Entità storicizzate
+## Stored Entity
 
-Affinchè un'entità risulti collegata alla relativa struttura dati su database e permetta le relative operazioni CRUD, essa deve essere annotata esplicitamente. Esistono ad oggi due classi di driver disponibili in Typetta (SQL e MongoDB) e due relative annotazioni `sqlEntity` e `mongoEntity`.
+For an entity to be connected to its data structure on a data source and to allow the related CRUD operations, it must be explicitly annotated with a GraphQL directive. There are currently two database drivers available in Typetta, one for SQL databases and one for MongoDB, and two related directives `@sqlEntity` and `@mongoEntity`.
 
-Una volta aggiunta una di queste annotazioni, l'entità risulta accoppiata alla relativa struttura dati: alla tabella su SQL o alla collection su MongoDB.
+Once one of these annotations has been added, the entity is coupled to its data structure: to the table on SQL or to the collection on MongoDB.
 
-### Entità SQL
+### MongoDB Entity
 
-Per specificare al sistema che un'entità rappresenta una tabella SQL si può definire come segue:
-```typescript
-type User @sqlEntity {
-  id: ID!
-  firstName: String
-  lastName: String
-}
-```
+To specify to the system that an entity is binded to a MongoDB collection, it must be defined as follows:
 
-L'annotazione `sqlEntity` riceve inoltre due parametri opzionali:
-- `source`: che rappresenta il data source SQL in cui risiede la tabella che rappresenta questa entità. Si tratta di un'etichetta logica la cui configurazione andrà settata sul DAOContext. Il valore di default è `default`.
-
-- `table`: che rappresenta il nome della tabella SQL, il valore di default è il nome dell'entità pluralizzato aggiungendo una s finale e con l'iniziale minuscola (quindi nell'esempio di cui sopra sarebbe `users`).
-
-Di seguito quindi un esempio completo:
-```typescript
-type User @sqlEntity(source: "secondary-database", table: "_users") {
-  id: ID!
-  firstName: String
-  lastName: String
-}
-```
-
-### Entità MongoDB
-
-Per specificare al sistema che un'entità rappresenta una collection MongoDB si può definire come segue:
 ```typescript
 type User @mongoEntity {
   id: ID!
@@ -70,12 +46,12 @@ type User @mongoEntity {
 }
 ```
 
-L'annotazione `mongoEntity` riceve inoltre due parametri opzionali:
-- `source`: che rappresenta il data source MongoDB in cui risiede la collection che rappresenta questa entità. Si tratta di un'etichetta logica la cui configurazione andrà settata sul DAOContext. Il valore di default è `default`.
+`@mongoEntity` directive also accepts two optional params:
+- `source`: represents the MongoDB database where the collection this entity is binded to resides. It is a logical label whose configuration will be set on the DAOContext. The default is `default`.
 
-- `collection`: che rappresenta il nome della collection MongoDB, il valore di default è il nome dell'entità pluralizzato aggiungendo una s finale e con l'iniziale minuscola (quindi nell'esempio di cui sopra sarebbe `users`).
+- `collection`: represents the MongoDB collection name, the default is the pluralized camel case entity name (so in the example above it would be `users`).
 
-Di seguito quindi un esempio completo:
+Following a complete example:
 ```typescript
 type User @mongoEntity(source: "secondary-database", collection: "_users") {
   id: ID!
@@ -84,11 +60,36 @@ type User @mongoEntity(source: "secondary-database", collection: "_users") {
 }
 ```
 
+### SQL Entity
+
+To specify to the system that an entity is binded to a SQL table, it must must be defined as follows:
+```typescript
+type User @sqlEntity {
+  id: ID!
+  firstName: String
+  lastName: String
+}
+```
+
+`@sqlEntity` directive also accepts two optional params:
+- `source`: represents the SQL database where the table this entity is binded to resides. It is a logical label whose configuration will be set on the DAOContext. The default is `default`.
+
+- `table`: represents the SQL table name, the default is the pluralized camel case entity name (so in the example above it would be `users`).
+
+Following a complete example:
+```typescript
+type User @sqlEntity(source: "secondary-database", table: "_users") {
+  id: ID!
+  firstName: String
+  lastName: String
+}
+```
+
 ## ID
 
-Ogni entità storicizzata necessita di un identificativo univoco. Qualsiasi campo dell'entità può essere annotato come `@id` purchè abbia come tipo uno scalare e non un'altra entità. Non c'è alcuna correlazione tra lo scalare GraphQL ID e l'id dell'entità. 
+Each stored entity needs a unique identifier. Any entity field can be annotated as `@id` as long as it has a scalar type and not another entity type. There is no correlation between the scalar GraphQL ID and the entity identifier.
 
-Per definire l'id di un'entità si deve utilizzare la direttiva `@id` come nel seguente esempio:
+To define the entity identifier you need to add the `@id` directive as in the following example:
 ```typescript
 type User @mongoEntity {
   id: ID! @id
@@ -97,8 +98,9 @@ type User @mongoEntity {
 }
 ```
 
-Tale direttiva riceve anche un parametro opzionale `from` che può assumere i seguenti valori:
-- `db`: quando l'id viene autogenerato dal DB, sia esso un intero autoincrementale SQL o una stringa univoca come in MongoDB.
+
+This directive also receives an optional `from` parameter which can take the following values:
+- `db`: when the id is auto-generated by the DB, be it a SQL auto-increment integer or a MongoDB ObjectID or whatever the database supports.
 
 ```typescript
 type User @mongoEntity {
@@ -107,9 +109,11 @@ type User @mongoEntity {
 }
 ```
 
-- `user`: quando l'id viene generato manualmente dall'utilizzatore di Typetta, sarà quindi un campo obbligatorio di ogni operazione di insert.
+- `user`: when the id is manually generated by the user, it will therefore be a mandatory field of every insert operation.
 
-- `generator`: quando l'id viene autogenerato da Typetta con una logica configurabile a livello di DAOContext o di singolo DAO. Si può creare un generatore di ID per ogni scalare che verrà quindi invocato per tutti i campi dello specifico scalare annotati con la direttiva `@id`. Un esempio di utilizzo è il caso in cui tutti gli ID debbano essere gestiti come UUID creati a livello applicativo. Per ottenere questo si può quindi configurare il DAOContext come segue:
+- `generator`: when the id is auto-generated by Typetta with configurable logic at DAOContext or single DAO level. An ID generator can be specified for each scalar and it will then be invoked for all fields of that specific scalar annotated with the `@id` directive. 
+
+A simple example of `generator` policy can be the following where all entites identifiers are of type ID and must be managed as UUIDs auto-generated by the system. To achieve this, the DAOContext can then be configured as follows:
 
 ```typescript
 import { v4 as uuidv4 } from 'uuid'
@@ -123,7 +127,7 @@ const daoContext = new DAOContext({
 });
 ```
 
-Se si vuole un comportamento diverso per un singolo DAO, si può creare un override come il seguente:
+If you want different behavior for a single DAO, you can create an override like the following:
 
 ```typescript
 import { v4 as uuidv4 } from 'uuid'
@@ -146,9 +150,9 @@ const daoContext = new DAOContext({
 });
 ```
 
-## Enumerazioni
+## Enumerations
 
-La specifica GraphQL prevede la definizione di enumerazioni con la seguente sintassi:
+The GraphQL specification provides for the definition of enumerations with the following syntax:
 ```typescript
 enum UserType {
   ADMINISTRATOR
@@ -156,7 +160,7 @@ enum UserType {
 }
 ```
 
-Un'enumerazione può essere utilizzata esattamente come uno scalare per definire i campi di un'entità, come dall'esempio seguente:
+An enumeration can be used just like a scalar to define the fields of an entity, as in the following example:
 ```typescript
 type User {
   id: ID!
@@ -166,13 +170,13 @@ type User {
 }
 ```
 
-Typetta supporta le enumerazioni sia a livello di tipo TypeScript che a livello di database, sia SQL che MongoDB, dove vengono serializzate in tipo di dato stringa.
+Typetta supports enumerations both at TypeScript and database level. They are serialized to string data type by default on both SQL and MongoDB.
 
-## Entità embedded
+## Embedded Entities
 
-Un'entità embedded è un'entità non direttamente storicizzata in una tabella SQL o in una collection MongoDB, ma inclusa solamente dentro ad un'altra entità con una logica di composizione. Le entità embedded sono un concetto tipico dei database documentali, che tuttavia può essere parzialmente supportato anche dai database SQL, come descritto in seguito. 
+An embedded entity is an entity not directly stored in a dedicated SQL table or MongoDB collection, but included only inside another entity with a logic of composition. Embedded entities are a typical concept of document databases, which however can also be partially supported by SQL databases, as described below.
 
-In Typetta ogni entità può avere uno o più campi che a loro volta sono altre entità embedded. Queste seconde entità non possono essere annotate come `@sqlEntity` o `@mongoEntity`. Di seguito un semplice esempio: 
+In Typetta each entity can have one or more fields which are not of scalar type by refer to embedded entities. These referred entities cannot be annotated as `@sqlEntity` or `@mongoEntity`. Here is a simple example:
 
 ```typescript
 type Address {
@@ -191,11 +195,11 @@ type User @mongoEntity {
 }
 ```
 
-Typetta offre il più avanzato supporto possibile alle entità embedded su MongoDB, che vengono trasformate in embedded documents, dando quindi la possibilità di selezionare, filtrare e ordinare i campi delle entità embedded. Sui database SQL queste entità vengono invece appiattite su molteplici colonne, offerndo anche in questo caso la possibilità di selezionare, filtrare e ordinare i campi delle entità embedded.
+Typetta offers the most advanced support to embedded entities on MongoDB, which are translated into embedded documents, thus giving the possibility to select, filter and sort the fields of them. On SQL databases these entities are instead flattened on multiple columns of the root table, offering also in this case the possibility to select, filter and sort. However, embedded entity arrays are not supported on SQL due to database limits.
 
 ## Alias
 
-Ogni campo di un'entità storicizzata ha una corrispondenza diretta con la relativa colonna SQL o la relativa chiave del documento MongoDB e tale corrispondenza è data dal nome del campo stesso. Nel caso si voglia disaccoppiare il nome dell'entità del modello applicativo dalla chiave presente sul database si può utilizzare la direttiva alias:
+Each field of a stored entity has a direct correspondence with the binded SQL column or the binded key of the MongoDB document and this correspondence is given by the name of the field itself. If you want to decouple the name of the entity of the data model from the database structure, you can use the `@alias` directive as following:
 
 ```typescript
 type User @mongoEntity {
@@ -206,13 +210,13 @@ type User @mongoEntity {
 }
 ```
 
-Nel precedente esempio il tipo TypeScript generato avrà i campi `firstName:string` e `lastName:string`, mentre i documenti della connection MongoDB avrà due chiavi `name` e `surname`.
+In the above example the generated TypeScript type will have the fields `firstName: string` and `lastName: string`, while the MongoDB documents will have two keys `name` and `surname`.
 
-## Campi esclusi
+## Excluded Fields
 
-E' possibile definire dei campi nel modello applicativo che non hanno corrispondenza nella tabella SQL o nella collection MongoDB. Questi campi si riflettono quindi sul tipo di dato TypeScript ma non vengono né serializzati né deserializzati sul database.
+You can define fields in the data model that have no correspondence in the SQL table or in the MongoDB collection. These fields are then reflected on the TypeScript data type but are neither serialized nor deserialized on the database.
 
-Per definire un campo esluso si può utilizzare la direttiva `@exclude` come di seguito:
+To define an excluded field you can use the `@exclude` directive as follows:
 
 ```typescript
 type User @mongoEntity {

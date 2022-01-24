@@ -1,28 +1,29 @@
-# Relazioni
+# Relations
 
-Una relazione è una connessione tra due entità del modello applicativo. Tale connessione permette l'accesso di una o più entità collegate in entrambe le direzioni, per rendere la consultazione del dato più veloce ed agevole.
+A relation is a connection between two entities of the data model. This connection allows the user to load entites starting from a root and selecting a projection of an entire graph, making data loading a faster and easier activity.
 
-In Typetta le relazioni tra entità sono definite tramite l'aggiunta di **riferimenti** tra un'entità ed un altra.
+In Typetta relations between entities are defined by adding **references** between one entity and another.
 
-  - [Riferimento tra Entità](#riferimento-tra-entità)
+  - [References between Entities](#references-between-entities)
     - [InnerRef](#innerref)
     - [ForeignRef](#foreignref)
     - [RelationEntityRef](#relationentityref)
-  - [Cardinalità Relazioni](#cardinalità-relazioni)
-    - [Relazione 1-1](#relazione-1-1)
-    - [Relazione 1-n](#relazione-1-n)
-    - [Relanzione n-m](#relanzione-n-m)
-  - [Relazioni ricorsive](#relazioni-ricorsive)
+  - [Cardinality](#cardinality)
+    - [1-1 relation](#1-1-relation)
+    - [1-n relation](#1-n-relation)
+    - [n-m relation](#n-m-relation)
+  - [Recursive Relations](#recursive-relations)
 
-## Riferimento tra Entità
+## References between Entities
 
-In Typetta una relazione è definita dichiarando su ogni entità connessa il riferimento alla controparte. E' possibile, se lo si vuole, creare anche delle connessioni mono direzionali da un'entità ad un'altra senza avere la connesione inversa.
+In Typetta a relation is defined by creating a reference from a field and to the counterpart on each connected entity. It is possible, if desired, to also create mono-directional connections from one entity to another without having the inverse connection.
 
-Per definire un riferimento ad un'altra entità, Typetta mette a disposizione tre diverse direttive: `@innerRef`, `@foreignRef` e `@relationEntityRef`
+To define a reference to another entity, Typetta provides three different directives: `@innerRef`, `@foreignRef` and `@relationEntityRef`.
 
 ### InnerRef
 
-Un `@innerRef` identifica una connessione tramite un riferimento tra un campo dell'entità sorgente e l'id dell'entità destinazione. Prendiamo come esempio il seguente modello:
+
+`@ innerRef` identifies a connection through a reference between a field of the source entity and the id of the target entity. Let's take the following model as an example:
 
 ```typescript
 type User @mongoEntity {
@@ -39,11 +40,12 @@ type Post @mongoEntity {
 }
 ```
 
-In questo caso il campo `user` dell'entità `Post` è un campo virtuale che non viene valorizzato direttamente sulla collection dell'entità `Post`, ma viene popolato successivamente caricando l'utente referenziato dal campo adiacente `userId`.
+In this case, the `user` field of the `Post` entity is a virtual field that isn't stored directly in the data source inside the `Post` entity, but is subsequently populated by loading the user referenced by the adjacent `userId` field.
 
-Si chiama `@innerRef` perchè il riferimento alle entità collegate si trova all'interno dell'entità contenente la relazione. Per convenzione, tale riferimento (nell'esempio il campo `userId`) deve avere lo stesso identico nome del campo relazione con il suffisso `Id`. Sempre per convenzione, il campo dell'entità connessa che viene messo in relazione è il campo annotato come `@id`. Quindi in questo caso `Post.userId` fa riferimento a `User.id`.
+It is called `@innerRef` because the reference to the connected entities is inside the entity containing the relation. By convention, this reference (in the example the `userId` field) must have the exact same name as the relation field with the suffix `Id`. Again by convention, the connected entity field that is referenced is the field annotated as `@id`. So in this case `Post.userId` refers to `User.id`.
 
-Entrambe queste configurazioni possono comunque essere modificate ed esplicitate dall'utente per avere più flessibilità, si veda il più complesso esempio di seguito:
+Both of these configurations can still be modified and made explicit by the user to have more flexibility, see the more complex example below:
+
 ```typescript
 type User @mongoEntity {
   id: ID! @id
@@ -62,7 +64,7 @@ type Post @mongoEntity {
 
 ### ForeignRef
 
-Un `@foreignRef` identifica una connessione complementare rispetto alla precedente `@innerRef` e prende questo nome perchè il riferimento alle entità collegate si trova nelle entità collegate stesse e non nell'entità contenente la relazione. Prendiamo come esempio il modello precedente che andiamo ad arricchire con un riferimento tra utente ed i suoi post:
+`@foreignRef` identifies a complementary connection to the previous `@innerRef` and gets this name because the reference to the connected entities is the connected entities themselves and not in the entity containing the relation. Let's take as an example the previous model that we are going to enrich with a reference between the user and his posts:
 
 ```typescript
 type User @mongoEntity {
@@ -80,11 +82,12 @@ type Post @mongoEntity {
 }
 ```
 
-Anche in questo caso il campo `posts` dell'entità `User` è un campo virtuale che non viene valorizzato direttamente sulla collection dell'entità User, ma viene popolato successivamente, su richiesta, quando vengono caricati tutti i post di un utente.
+Also in this case the `posts` field of the `User` entity is a virtual field that isn't stored on the data source structure that represent the User entity, but is subsequently populated, on request, from another data source structure (another table or collection).
 
-In questo caso, contrariamente a quanto era per gli `@innerRef`, è sempre necessario specificare un parametro `refFrom` che identifica il campo dell'entità connessa che fa riferimento all'id dell'entità destinazione. Nell'esempio abbiamo che `Post.userId` fa riferimento a `User.id`. 
+In this case, contrary to what was the case with `@innerRef`, it is always necessary to specify a `refFrom` parameter that identifies the connected entity field referencing the target entity identifier. In the example we have that `Post.userId` refers to `User.id`.
 
-Anche in questo caso c'è la possibilità di esplicitare anche il parametro `refTo` per gestire casi più complessi. Si veda l'esempio di seguito:
+There is also the possibility to specify the `refTo` parameter to handle more complex cases, as demostated in the following example:
+
 ```typescript
 type User @mongoEntity {
   id: ID! @id
@@ -104,7 +107,7 @@ type Post @mongoEntity {
 
 ### RelationEntityRef 
 
-Può capitare, tipicamente nelle relazioni con cardinalità n-m, che due entità siano collegate da riferimenti che non risiedono né nell'una né nell'altra, bensì in un'entità terza. Ipotizziamo un modello applicativo come il seguente:
+Relations with cardinality n-m are tipically designed using a third entity that connects both other entities referencing them by id. Let's assume a data model like the following:
 
 ```typescript
 type Post @mongoEntity {
@@ -125,11 +128,11 @@ type PostCategory @mongoEntity {
 }
 ```
 
-Ogni post può avere più categorie ed ogni categoria può avere più post. Sarebbe stato possibile creare un `@foreignRef` tra Post e PostCategory ed un ulteriore `@innerRef` tra PostCategory e Category, ma così facendo si obbligava il modello applicativo ad esplicitare la presenza di una collection (o una tabella su SQL) di collegamento puramente legata alla rappresentazione del dato su database.
+Each post can have multiple categories and each category can have multiple posts. It would have been possible to create a `@foreignRef` between Post and PostCategory and a further `@innerRef` between PostCategory and Category, but doing so forced the data model to make explicit the presence of a purely connection structure (a MongoDB collection or SQL table) linked to the representation of the data on the database.
 
-Grazie al riferimento `@relationEntityRef` la relazione `Post.categories` risulta invece essere molto più chiara e trasparente per l'utilizzatore. Si noti che questa direttiva, come le precedenti, si basa su una convenzione per cui i campi all'interno dell'entità di collegamento devono avere lo stesso nome dell'entità collegata, con iniziale minuscola, seguito da `Id`. 
+Thanks to the reference `@relationEntityRef` the relation `Post.categories` turns out to be much clearer and more transparent for the user. Note that this directive, like the previous ones, is based on a convention that fields within the connecting entity must have the same name as the connected entities, with a lowercase initial, followed by `Id`.
 
-Come nei casi precedenti, tuttavia, è possibile esplicitare ogni signolo riferimento, come nell'esempio seguente:
+As in the previous cases, however, each single reference can be made explicit:
 
 ```typescript
 type Post @mongoEntity {
@@ -152,13 +155,15 @@ type PostCategory @mongoEntity {
 
 Nell'esempio di cui sopra, come si può intuire, `PostCategory.idOfAPost` fa riferimento a `Post.id`, mentre `PostCategory.idOfACategory` fa riferimento a `Category.id`.
 
-## Cardinalità Relazioni
+In the above example, as you can guess, `PostCategory.idOfAPost` refers to `Post.id`, while `PostCategory.idOfACategory` refers to `Category.id`.
 
-Utilizzando i riferimenti descritti nelle sezioni precedenti, Typetta permette di gestire con la massima flessibilità relazioni tra entità con ogni tipo di cardinalità. Di seguito vengono mostrati alcuni esempi di relazioni 1-1, 1-n ed n-m. 
+## Cardinality
 
-### Relazione 1-1
+Using references as described in the previous sections, Typetta allows you to manage relations between entities with any type of cardinality and maximum flexibility. Some examples of relations 1-1, 1-n and n-m are shown below.
 
-Di seguito un esempio di relazione 1-1 fra un utente e il suo profilo:
+### 1-1 relation
+
+Following is an example of a 1-1 relation between a user and their profile:
 
 ```typescript
 type User @mongoEntity {
@@ -176,9 +181,9 @@ type Profile @mongoEntity {
 }
 ```
 
-### Relazione 1-n
+### 1-n relation
 
-Di seguito un esempio di relazione 1-n fra un utente ed i suoi post:
+Below is an example of a 1-n relation between a user and his posts:
 
 ```typescript
 type User @mongoEntity {
@@ -196,9 +201,9 @@ type Post @mongoEntity {
 }
 ```
 
-### Relanzione n-m
+### n-m relation
 
-Di seguito un esempio di relazione n-m fra post e categorie:
+Finally an example of an n-m relation between posts and categories:
 
 ```typescript
 type Post @mongoEntity {
@@ -219,11 +224,11 @@ type PostCategory @mongoEntity {
 }
 ```
 
-## Relazioni ricorsive
+## Recursive Relations
 
-Una relazione può essere connettere anche un'entità con sè stessa e può essere di qualsiasi cardinalità. Le relazioni ricorsive sono gestite nello stesso modo delle altre relazioni, tramite le direttive `@innerRef`, `@foreignReg` e `@relationEntityRef`.
+A relation can also connect an entity with itself and can be of any cardinality. Recursive relations are handled in the same way as other relations, through the `@innerRef`,` @foreignReg` and `@relationEntityRef` directives.
 
-Di seguito un esempio si relazione ricorsiva con cardinalità 1-1:
+Here is an example of a recursive relationship with cardinality 1-1:
 
 ```typescript
 type User @mongoEntity {
@@ -235,7 +240,7 @@ type User @mongoEntity {
 }
 ```
 
-Con cardinalità 1-n:
+With 1-n cardinality:
 
 ```typescript
 type User @mongoEntity {
@@ -247,7 +252,7 @@ type User @mongoEntity {
 }
 ```
 
-E con cardinalità n-m tramite `@relationEntityRef`:
+Anc with n-m cardinality using `@relationEntityRef`:
 
 ```typescript
 type User @mongoEntity {

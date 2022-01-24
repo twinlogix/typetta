@@ -9,7 +9,7 @@ Typetta is pluggable into any TypeScript backend (including serverless applicati
   - [Why Typetta?](#why-typetta)
   
 ## How to use Typetta?
-With Typetta everything spins around the *applicative model*, the entities that describe the applicative domain and all underlying relations between them. This model is described in standard GraphQL, using all basic concepts (scalars, types, enumerations, etc...) and some custom directives.
+With Typetta everything spins around the *data model*, the entities that describe the applicative domain and all underlying relations between them. This model is described in standard GraphQL, using all basic concepts (scalars, types, enumerations, etc...) and some custom directives.
 
 Starting from the model output of the analysis of the domain, Typetta provides a range of code generators for:
 

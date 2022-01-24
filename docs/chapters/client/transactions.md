@@ -68,7 +68,7 @@ Di seguito un esempio di avvio di una transazione, recupero e modifica di inform
       changes: { balance: user.balance + 10 }, 
       options: { trx }
     });
-    await session.commit()
+    await trx.commit()
   } catch(e) {
     await trx.rollback()
   }
