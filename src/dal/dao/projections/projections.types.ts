@@ -2,6 +2,7 @@ import { Expand, OmitUndefinedAndNeverKeys } from '../../../utils/utils.types'
 import { GraphQLResolveInfo } from 'graphql'
 import { PartialDeep, Primitive } from 'type-fest'
 import { PartialObjectDeep } from 'type-fest/source/partial-deep'
+import { DAOGenerics } from '../dao.types'
 
 export type AnyProjection<ProjectionType extends object> = true | undefined | PartialObjectDeep<ProjectionType>
 
@@ -43,15 +44,15 @@ type Selector<ProjectionType extends object, P extends AnyProjection<ProjectionT
  * If a StaticProjection was given the projection information is carried at compilation time by this type.
  * It is used as return type in all the finds operations.
  */
-export type ModelProjection<ModelType extends object, ProjectionType extends object, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = Selector<ProjectionType, P> extends infer S
+export type ModelProjection<T extends DAOGenerics, P extends AnyProjection<T['projection']> | GraphQLResolveInfo> = Selector<T['projection'], P> extends infer S
   ? S extends 'all'
-    ? ModelType & { __projection: 'all' }
+    ? Omit<T['model'], T['relationFields']> & { __projection: 'all' }
     : S extends 'specific'
-    ? P extends ProjectionType
-      ? Expand<StaticModelProjection<ModelType, ProjectionType, P>>
+    ? P extends T['projection']
+      ? Expand<StaticModelProjection<T['model'], T['projection'], P>>
       : never
     : S extends 'unknown'
-    ? PartialDeep<ModelType> & { __projection: 'unknown' }
+    ? PartialDeep<T['model']> & { __projection: 'unknown' }
     : { __projection: 'empty' }
   : never
 

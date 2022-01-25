@@ -167,12 +167,17 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAOExludedFields(node: TsTypettaGeneratorNode): string {
-    const daoFilterFieldsBody = node.fields
-      .filter((n) => n.isExcluded || n.type.kind === 'innerRef' || n.type.kind === 'foreignRef' || n.type.kind === 'relationEntityRef')
+    const exludedFields = node.fields
+      .filter((n) => n.isExcluded)
       .map((n) => `'${n.name}'`)
       .join(' | ')
-    const daoExludedFields = `export type ${node.name}ExcludedFields = ${daoFilterFieldsBody ? daoFilterFieldsBody : 'never'}`
-    return [daoExludedFields].join('\n')
+    const relationsFields = node.fields
+      .filter((n) => n.type.kind === 'innerRef' || n.type.kind === 'foreignRef' || n.type.kind === 'relationEntityRef')
+      .map((n) => `'${n.name}'`)
+      .join(' | ')
+    const daoExludedFields = `export type ${node.name}ExcludedFields = ${exludedFields ? exludedFields : 'never'}`
+    const daoRelationFields = `export type ${node.name}RelationFields = ${relationsFields ? relationsFields : 'never'}`
+    return [daoExludedFields, daoRelationFields].join('\n')
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -393,7 +398,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
     }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${
       node.name
-    }RawUpdate, ${node.name}ExcludedFields, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(node.name)}'>;`
+    }RawUpdate, ${node.name}ExcludedFields, ${node.name}RelationFields, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(node.name)}'>;`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`

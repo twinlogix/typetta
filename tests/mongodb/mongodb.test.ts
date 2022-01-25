@@ -110,7 +110,7 @@ test('findOne innerRef association without projection', async () => {
   await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
 
   const dog = await dao.dog.findOne({})
-  expect(dog!.owner).toBeUndefined()
+  // expect(dog!.owner).toBeUndefined()
 })
 
 test('findOne foreignRef association without projection', async () => {
@@ -118,7 +118,7 @@ test('findOne foreignRef association without projection', async () => {
   await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
 
   const users = await dao.user.findAll({})
-  expect(users[0].dogs).toBeUndefined()
+  // expect(users[0].dogs).toBeUndefined()
 })
 
 test('findOne simple inner association', async () => {
@@ -1211,6 +1211,23 @@ test('Raw update', async () => {
   await dao.user.updateOne({ filter: { id: user.id }, changes: () => ({ $push: { amounts: dao.adapters.mongo.Decimal.modelToDB(new BigNumber(2)) } as any }) })
   const user2 = await dao.user.findOne()
   expect(user2?.amounts?.length).toBe(2)
+})
+
+test('Inner ref required', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, amounts: [new BigNumber(1)] } })
+  const post1 = await dao.post.insertOne({ record: { authorId: user.id, title: 'title', views: 1 }})
+  const post2 = (await dao.post.findOne({ filter: { id: post1.id } }))!
+  const post3 = (await dao.post.findOne({ filter: { id: post1.id }, projection: { author: true } }))!
+  const post4 = (await dao.post.findOne({ filter: { id: post1.id }, projection: { title: true } }))!
+
+  typeAssert<Test<'author' extends (keyof typeof post1) ? true : false, false>>()
+  typeAssert<Test<'author' extends (keyof typeof post2) ? true : false, false>>()
+  typeAssert<Test<'author' extends (keyof typeof post3) ? true : false, true>>()
+  typeAssert<Test<'author' extends (keyof typeof post4) ? true : false, false>>()
+  expect('author' in post1).toBe(false)
+  expect('author' in post2).toBe(false)
+  expect('author' in post3).toBe(true)
+  expect('author' in post4).toBe(false)
 })
 
 // ------------------------------------------------------------------------

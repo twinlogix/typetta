@@ -1,4 +1,3 @@
-import { UserProjection } from './mongodb/dao.mock'
 import {
   hasIdFilter,
   GenericProjection,
@@ -11,6 +10,7 @@ import {
   mergeProjections,
   projection,
 } from '../src'
+import { UserProjection } from './mongodb/dao.mock'
 import { ApolloServer } from 'apollo-server'
 import gql from 'graphql-tag'
 
@@ -19,7 +19,7 @@ const { createTestClient } = require('apollo-server-testing')
 type Pass = 'pass'
 export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T; expected: U }) : { actual: T; expected: U }
 
-export function typeAssert<T extends Pass>() { }
+export function typeAssert<T extends Pass>() { return }
 
 test('infoToProjection test', async () => {
   const typeDefs = gql`
@@ -448,29 +448,6 @@ test('mergeStaticProjection', () => {
     f: { a: true, b: true, f: { a: true } },
     u: true,
   })
-  type AP = ModelProjection<A, AProj, typeof pc>
-  /*typeAssert<Test<AP, {
-        a: undefined | number | null
-        b?: number | undefined
-        c: {
-            a: undefined | number | null
-            b?: number | undefined
-        } | {
-            v: number
-        } | null | undefined
-        d?: {
-            f?: {
-                a: undefined | number | null
-            }[] | undefined
-        } | undefined
-        f?: {
-            a: undefined | number | null
-            b?: number | undefined
-            f?: {
-                a: undefined | number | null
-            }[] | undefined
-        }[] | undefined
-    }>>()*/
 
   type LongProj = { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: { c: true } } } } } } } } } } } } } } } } } } } } } } } }
   type LongMerge = MergeGenericProjection<LongProj, LongProj>

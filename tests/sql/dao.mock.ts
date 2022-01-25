@@ -7,7 +7,8 @@ import { Knex } from 'knex';
 //----------------------------------- ADDRESS ------------------------------------
 //--------------------------------------------------------------------------------
 
-export type AddressExcludedFields = 'cities'
+export type AddressExcludedFields = never
+export type AddressRelationFields = 'cities'
 
 export const addressSchema: Schema<types.Scalars> = {
   'id': {
@@ -50,7 +51,7 @@ export type AddressInsert = {
   id?: types.Scalars['ID'],
 };
 
-type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'address'>;
+type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address'>;
 export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -78,7 +79,8 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKne
 //------------------------------------ AUTHOR ------------------------------------
 //--------------------------------------------------------------------------------
 
-export type AuthorExcludedFields = 'books'
+export type AuthorExcludedFields = never
+export type AuthorRelationFields = 'books'
 
 export const authorSchema: Schema<types.Scalars> = {
   'id': {
@@ -121,7 +123,7 @@ export type AuthorInsert = {
   id?: types.Scalars['ID'],
 };
 
-type AuthorDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Author, 'id', 'ID', 'generator', AuthorFilter, AuthorRawFilter, AuthorRelations, AuthorProjection, AuthorSort, AuthorRawSort, AuthorInsert, AuthorUpdate, AuthorRawUpdate, AuthorExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'author'>;
+type AuthorDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Author, 'id', 'ID', 'generator', AuthorFilter, AuthorRawFilter, AuthorRelations, AuthorProjection, AuthorSort, AuthorRawSort, AuthorInsert, AuthorUpdate, AuthorRawUpdate, AuthorExcludedFields, AuthorRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'author'>;
 export type AuthorDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AuthorDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -150,6 +152,7 @@ export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnex
 //--------------------------------------------------------------------------------
 
 export type AuthorBookExcludedFields = never
+export type AuthorBookRelationFields = never
 
 export const authorBookSchema: Schema<types.Scalars> = {
   'authorId': {
@@ -201,7 +204,7 @@ export type AuthorBookInsert = {
   id?: types.Scalars['ID'],
 };
 
-type AuthorBookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.AuthorBook, 'id', 'ID', 'generator', AuthorBookFilter, AuthorBookRawFilter, AuthorBookRelations, AuthorBookProjection, AuthorBookSort, AuthorBookRawSort, AuthorBookInsert, AuthorBookUpdate, AuthorBookRawUpdate, AuthorBookExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'authorBook'>;
+type AuthorBookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.AuthorBook, 'id', 'ID', 'generator', AuthorBookFilter, AuthorBookRawFilter, AuthorBookRelations, AuthorBookProjection, AuthorBookSort, AuthorBookRawSort, AuthorBookInsert, AuthorBookUpdate, AuthorBookRawUpdate, AuthorBookExcludedFields, AuthorBookRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'authorBook'>;
 export type AuthorBookDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class AuthorBookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -229,7 +232,8 @@ export class AuthorBookDAO<MetadataType, OperationMetadataType> extends Abstract
 //------------------------------------- BOOK -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type BookExcludedFields = 'authors'
+export type BookExcludedFields = never
+export type BookRelationFields = 'authors'
 
 export const bookSchema: Schema<types.Scalars> = {
   'id': {
@@ -272,7 +276,7 @@ export type BookInsert = {
   id?: types.Scalars['ID'],
 };
 
-type BookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Book, 'id', 'ID', 'generator', BookFilter, BookRawFilter, BookRelations, BookProjection, BookSort, BookRawSort, BookInsert, BookUpdate, BookRawUpdate, BookExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'book'>;
+type BookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Book, 'id', 'ID', 'generator', BookFilter, BookRawFilter, BookRelations, BookProjection, BookSort, BookRawSort, BookInsert, BookUpdate, BookRawUpdate, BookExcludedFields, BookRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'book'>;
 export type BookDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<BookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -301,6 +305,7 @@ export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 //--------------------------------------------------------------------------------
 
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
+export type CityRelationFields = never
 
 export const citySchema: Schema<types.Scalars> = {
   'addressId': {
@@ -354,7 +359,7 @@ export type CityInsert = {
   name: types.Scalars['String'],
 };
 
-type CityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'city'>;
+type CityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, CityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'city'>;
 export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -382,7 +387,8 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 //------------------------------------ DEVICE ------------------------------------
 //--------------------------------------------------------------------------------
 
-export type DeviceExcludedFields = 'user'
+export type DeviceExcludedFields = never
+export type DeviceRelationFields = 'user'
 
 export const deviceSchema: Schema<types.Scalars> = {
   'id': {
@@ -434,7 +440,7 @@ export type DeviceInsert = {
   userId?: types.Scalars['ID'],
 };
 
-type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'device'>;
+type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device'>;
 export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -462,7 +468,8 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnex
 //------------------------------------- DOG --------------------------------------
 //--------------------------------------------------------------------------------
 
-export type DogExcludedFields = 'owner'
+export type DogExcludedFields = never
+export type DogRelationFields = 'owner'
 
 export const dogSchema: Schema<types.Scalars> = {
   'id': {
@@ -515,7 +522,7 @@ export type DogInsert = {
   ownerId: types.Scalars['ID'],
 };
 
-type DogDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'dog'>;
+type DogDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, DogRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'dog'>;
 export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -544,6 +551,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
 //--------------------------------------------------------------------------------
 
 export type FriendsExcludedFields = never
+export type FriendsRelationFields = never
 
 export const friendsSchema: Schema<types.Scalars> = {
   'from': {
@@ -595,7 +603,7 @@ export type FriendsInsert = {
   to: types.Scalars['ID'],
 };
 
-type FriendsDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Friends, 'id', 'ID', 'generator', FriendsFilter, FriendsRawFilter, FriendsRelations, FriendsProjection, FriendsSort, FriendsRawSort, FriendsInsert, FriendsUpdate, FriendsRawUpdate, FriendsExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'friends'>;
+type FriendsDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Friends, 'id', 'ID', 'generator', FriendsFilter, FriendsRawFilter, FriendsRelations, FriendsProjection, FriendsSort, FriendsRawSort, FriendsInsert, FriendsUpdate, FriendsRawUpdate, FriendsExcludedFields, FriendsRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'friends'>;
 export type FriendsDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FriendsDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -624,6 +632,7 @@ export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKne
 //--------------------------------------------------------------------------------
 
 export type OrganizationExcludedFields = 'computedName'
+export type OrganizationRelationFields = never
 
 export const organizationSchema: Schema<types.Scalars> = {
   'address': {
@@ -691,7 +700,7 @@ export type OrganizationInsert = {
   vatNumber?: types.Scalars['String'],
 };
 
-type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'organization'>;
+type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization'>;
 export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -719,7 +728,8 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type UserExcludedFields = 'bestFriend' | 'dogs' | 'friends'
+export type UserExcludedFields = never
+export type UserRelationFields = 'bestFriend' | 'dogs' | 'friends'
 
 export const userSchema: Schema<types.Scalars> = {
   'amount': {
@@ -877,7 +887,7 @@ export type UserInsert = {
   title?: types.Scalars['LocalizedString'],
 };
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;
+type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {

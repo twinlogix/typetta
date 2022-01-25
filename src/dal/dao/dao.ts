@@ -98,24 +98,24 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.schema = schema
   }
 
-  async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
+  async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<ModelProjection<T, P>[]> {
     return this.logOperation('findAll', params, async () => {
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) })
       const records = beforeResults.continue ? await this._findAll(beforeResults.params) : beforeResults.records
       const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
       const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex)
-      return afterResults.records as ModelProjection<T['model'], T['projection'], P>[]
+      return afterResults.records as ModelProjection<T, P>[]
     })
   }
 
-  async findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindOneParams<T, P> = {}): Promise<ModelProjection<T['model'], T['projection'], P> | null> {
+  async findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindOneParams<T, P> = {}): Promise<ModelProjection<T, P> | null> {
     const results = await this.findAll({ ...params, limit: 1 })
     return results.length > 0 ? results[0] : null
   }
 
   async findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
     params: FindParams<T, P> = {},
-  ): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }> {
+  ): Promise<{ totalCount: number; records: ModelProjection<T, P>[] }> {
     return this.logOperation('findPage', params, async () => {
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) })
       const { totalCount, records } = beforeResults.continue ? await this._findPage(beforeResults.params) : { records: beforeResults.records, totalCount: beforeResults.totalCount ?? 0 }
@@ -123,7 +123,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex)
       return {
         totalCount: afterResults.totalCount ?? 0,
-        records: afterResults.records as ModelProjection<T['model'], T['projection'], P>[],
+        records: afterResults.records as ModelProjection<T, P>[],
       }
     })
   }
@@ -158,9 +158,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     params: Omit<FindParams<T, P>, 'start' | 'limit' | 'filter'>,
     filterKey: K,
     filterValues: T['filter'][K][],
-    hasKey?: (record: ModelProjection<T['model'], T['projection'], P>, key: T['filter'][K]) => boolean,
+    hasKey?: (record: ModelProjection<T, P>, key: T['filter'][K]) => boolean,
     buildFilter?: (filterKey: K, filterValues: readonly T['filter'][K][]) => T['filter'],
-  ): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
+  ): Promise<ModelProjection<T, P>[]> {
     const hash =
       filterKey +
       '-' +
@@ -192,7 +192,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         throw r
       }
       return r
-    }) as ModelProjection<T['model'], T['projection'], P>[]
+    }) as ModelProjection<T, P>[]
   }
 
   private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(proj?: P): P | undefined {
@@ -284,14 +284,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     params: FindParams<T, P>,
     filterKey: K,
     filterValues: T['filter'][K][],
-  ): Promise<ModelProjection<T['model'], T['projection'], P>[]> {
+  ): Promise<ModelProjection<T, P>[]> {
     if (params.skip != null || params.limit != null || params.filter != null) {
       return this.findAll({ ...params, filter: { $and: [{ [filterKey]: { $in: filterValues } }, params.filter ?? {}] } })
     }
     return await this.loadAll(params, filterKey, filterValues)
   }
 
-  async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
+  async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     return this.logOperation('insertOne', params, async () => {
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params })
       const record = beforeResults.continue ? await this._insertOne(beforeResults.params) : beforeResults.record
@@ -459,7 +459,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _exists(params: FilterParams<T>): Promise<boolean>
   protected abstract _count(params: FilterParams<T>): Promise<number>
   protected abstract _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
-  protected abstract _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
+  protected abstract _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>>
   protected abstract _updateOne(params: UpdateParams<T>): Promise<void>
   protected abstract _updateAll(params: UpdateParams<T>): Promise<void>
   protected abstract _replaceOne(params: ReplaceParams<T>): Promise<void>

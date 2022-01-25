@@ -7,7 +7,8 @@ import { Knex } from 'knex';
 //------------------------------------- POST -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type PostExcludedFields = 'author' | 'tags'
+export type PostExcludedFields = never
+export type PostRelationFields = 'author' | 'tags'
 
 export const postSchema: Schema<types.Scalars> = {
   'authorId': {
@@ -128,7 +129,7 @@ export type PostInsert = {
   views: types.Scalars['Int'],
 };
 
-type PostDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'post'>;
+type PostDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post'>;
 export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -159,6 +160,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 //--------------------------------------------------------------------------------
 
 export type PostTypeExcludedFields = never
+export type PostTypeRelationFields = never
 
 export const postTypeSchema: Schema<types.Scalars> = {
   'id': {
@@ -202,7 +204,7 @@ export type PostTypeInsert = {
   name: types.Scalars['String'],
 };
 
-type PostTypeDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.PostType, 'id', 'ID', 'user', PostTypeFilter, PostTypeRawFilter, PostTypeRelations, PostTypeProjection, PostTypeSort, PostTypeRawSort, PostTypeInsert, PostTypeUpdate, PostTypeRawUpdate, PostTypeExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'postType'>;
+type PostTypeDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.PostType, 'id', 'ID', 'user', PostTypeFilter, PostTypeRawFilter, PostTypeRelations, PostTypeProjection, PostTypeSort, PostTypeRawSort, PostTypeInsert, PostTypeUpdate, PostTypeRawUpdate, PostTypeExcludedFields, PostTypeRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'postType'>;
 export type PostTypeDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<PostTypeDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -231,6 +233,7 @@ export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractKn
 //--------------------------------------------------------------------------------
 
 export type TagExcludedFields = never
+export type TagRelationFields = never
 
 export const tagSchema: Schema<types.Scalars> = {
   'id': {
@@ -281,7 +284,7 @@ export type TagInsert = {
   postId: types.Scalars['ID'],
 };
 
-type TagDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Tag, 'id', 'ID', 'generator', TagFilter, TagRawFilter, TagRelations, TagProjection, TagSort, TagRawSort, TagInsert, TagUpdate, TagRawUpdate, TagExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'tag'>;
+type TagDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Tag, 'id', 'ID', 'generator', TagFilter, TagRawFilter, TagRelations, TagProjection, TagSort, TagRawSort, TagInsert, TagUpdate, TagRawUpdate, TagExcludedFields, TagRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'tag'>;
 export type TagDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<TagDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<TagDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -309,7 +312,8 @@ export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type UserExcludedFields = 'averageViewsPerPost' | 'posts' | 'totalPostsViews'
+export type UserExcludedFields = 'averageViewsPerPost' | 'totalPostsViews'
+export type UserRelationFields = 'posts'
 
 export const userSchema: Schema<types.Scalars> = {
   'createdAt': {
@@ -404,7 +408,7 @@ export type UserInsert = {
   lastName?: types.Scalars['String'],
 };
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;
+type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {

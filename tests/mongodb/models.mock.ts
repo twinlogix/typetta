@@ -62,7 +62,7 @@ export type Organization = {
 
 export type Post = {
   __typename?: 'Post';
-  author?: Maybe<User>;
+  author: User;
   authorId: Scalars['ID'];
   body?: Maybe<Scalars['String']>;
   clicks?: Maybe<Scalars['Int']>;
