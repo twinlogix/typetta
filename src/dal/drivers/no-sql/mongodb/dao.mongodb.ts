@@ -6,7 +6,7 @@ import { AnyProjection } from '../../../dao/projections/projections.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
 import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
-import { Collection, Document, WithId, Filter, UpdateOptions, FindOptions, OptionalId, SortDirection } from 'mongodb'
+import { Collection, Document, WithId, Filter, FindOptions, OptionalId, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
@@ -118,6 +118,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       const sort = args?.sorts
         ? [
             {
+              // eslint-disable-next-line
               // @ts-ignore
               $sort: args.sorts.reduce<object>((p, s) => {
                 const [k, v] = Object.entries(s)[0]

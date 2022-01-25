@@ -1,8 +1,8 @@
 import { Expand, OmitUndefinedAndNeverKeys } from '../../../utils/utils.types'
+import { DAOGenerics } from '../dao.types'
 import { GraphQLResolveInfo } from 'graphql'
 import { PartialDeep, Primitive } from 'type-fest'
 import { PartialObjectDeep } from 'type-fest/source/partial-deep'
-import { DAOGenerics } from '../dao.types'
 
 export type AnyProjection<ProjectionType extends object> = true | undefined | PartialObjectDeep<ProjectionType>
 
@@ -27,7 +27,7 @@ export type MergeGenericProjection<T1 extends GenericProjection, T2 extends Gene
       [K in keyof T1 | keyof T2]: T1 extends Record<K, any> ? (T2 extends Record<K, any> ? MergeGenericProjection<T1[K], T2[K]> : T1[K]) : T2 extends Record<K, any> ? T2[K] : never
     }>
 
-type Selector<ProjectionType extends object, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = {} extends Required<P>
+type Selector<ProjectionType extends object, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = object extends Required<P>
   ? 'empty'
   : [true] extends [P]
   ? 'all'

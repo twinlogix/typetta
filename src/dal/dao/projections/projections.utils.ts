@@ -48,6 +48,8 @@ export function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defau
   if (context.selectionSet) {
     return context.selectionSet.selections.reduce(
       (proj: any, selection: any) => {
+        const inlineFragmentRef = selection.typeCondition.name.value
+        const fragmentRef = info.fragments[selection.name.value].typeCondition.name.value
         switch (selection.kind) {
           case 'Field':
             if (selection && selection.selectionSet && selection.selectionSet.selections) {
@@ -71,11 +73,10 @@ export function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defau
                 [selection.name.value]: true,
               }
             }
+            break
           case 'InlineFragment':
-            const inlineFragmentRef = selection.typeCondition.name.value
             return fragmentToProjections(info, proj, selection, inlineFragmentRef, type, schema)
           case 'FragmentSpread':
-            const fragmentRef = info.fragments[selection.name.value].typeCondition.name.value
             return fragmentToProjections(info, proj, info.fragments[selection.name.value], fragmentRef, type, schema)
           default:
             return {}
@@ -161,7 +162,7 @@ export function getProjection(projections: GenericProjection, path: string): Gen
   }
 }
 
-export function isProjectionIntersected(p1: GenericProjection, p2: GenericProjection, ignoredKeys: string[] = [], dotNotation: boolean = false): boolean {
+export function isProjectionIntersected(p1: GenericProjection, p2: GenericProjection, ignoredKeys: string[] = [], dotNotation = false): boolean {
   if (p1 === false || p2 === false) {
     return false
   }
@@ -180,7 +181,7 @@ export function isProjectionIntersected(p1: GenericProjection, p2: GenericProjec
   return false
 }
 
-export function isProjectionContained(container: GenericProjection, contained: GenericProjection, ignoredKeys: string[] = [], dotNotation: boolean = false): [boolean, GenericProjection] {
+export function isProjectionContained(container: GenericProjection, contained: GenericProjection, ignoredKeys: string[] = [], dotNotation = false): [boolean, GenericProjection] {
   if (container === contained) {
     return [true, false]
   }
@@ -240,14 +241,14 @@ function subKeysOf(keys: string[], key: string): string[] {
 }
 
 function head(array: string[]): string | undefined {
-  return array.length > 0 ? array[0] : undefined;
+  return array.length > 0 ? array[0] : undefined
 }
 
 function tail(array: string[]): string[] {
   if (array.length > 0) {
-    const [_, ...t] = array;
-    return t;
+    const [_, ...t] = array
+    return t
   } else {
-    return [];
+    return []
   }
 }

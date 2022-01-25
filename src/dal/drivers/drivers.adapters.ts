@@ -23,7 +23,7 @@ export type UserInputDataTypeAdapter<ModelType, MongoDBType, KenxDBType, D exten
         knex?: Partial<DataTypeAdapter<ModelType, KenxDBType>>
         mongo?: Partial<DataTypeAdapter<ModelType, MongoDBType>>
       }
-    : {})
+    : unknown)
 
 export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends DefaultModelScalars>(
   input: UserInputDriverDataTypeAdapterMap<ModelScalars, 'both' | 'knex' | 'mongo'>,

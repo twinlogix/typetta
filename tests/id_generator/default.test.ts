@@ -1,8 +1,3 @@
-// tslint:disable-next-line: no-var-requires
-global.TextEncoder = require('util').TextEncoder
-// tslint:disable-next-line: no-var-requires
-global.TextDecoder = require('util').TextDecoder
-
 import { computedField } from '../../src'
 import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
@@ -18,10 +13,18 @@ const config: Knex.Config = {
   connection: ':memory:',
   useNullAsDefault: true,
   log: {
-    warn: () => { return },
-    debug: () => { return },
-    error: () => { return },
-    deprecate: () => { return },
+    warn: () => {
+      return
+    },
+    debug: () => {
+      return
+    },
+    error: () => {
+      return
+    },
+    deprecate: () => {
+      return
+    },
   },
 }
 
@@ -29,7 +32,7 @@ let knexInstance: Knex<any, unknown[]>
 let con: MongoClient
 let mongoServer: MongoMemoryServer
 let db: Db
-let dao: DAOContext<{}>
+let dao: DAOContext
 
 beforeEach(async () => {
   knexInstance = knex(config)

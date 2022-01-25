@@ -2,7 +2,6 @@ import {
   hasIdFilter,
   GenericProjection,
   MergeGenericProjection,
-  ModelProjection,
   getProjection,
   isChangesContainedInProjection,
   isProjectionContained,
@@ -12,14 +11,15 @@ import {
 } from '../src'
 import { UserProjection } from './mongodb/dao.mock'
 import { ApolloServer } from 'apollo-server'
+import { createTestClient } from 'apollo-server-testing'
 import gql from 'graphql-tag'
-
-const { createTestClient } = require('apollo-server-testing')
 
 type Pass = 'pass'
 export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T; expected: U }) : { actual: T; expected: U }
 
-export function typeAssert<T extends Pass>() { return }
+export function typeAssert<T extends Pass>() {
+  return
+}
 
 test('infoToProjection test', async () => {
   const typeDefs = gql`
@@ -282,7 +282,7 @@ test('isProjectionContained test', () => {
       h: number
       i: number
     }
-    j: {}
+    j: unknown
   }
   const allowedProjection = {
     a: true,
