@@ -18,8 +18,8 @@ main:
   - client:
     title: Typetta Client
     children:
-      - url: /chapters/client/dao-context
-        title: Context [eng soon]
+      - url: /chapters/client/context
+        title: Context
       - url: /chapters/client/read-write
         title: Read and Write [eng soon]
       - url: /chapters/client/filters
