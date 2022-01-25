@@ -84,7 +84,7 @@ export function setTraversing(object: any, path: string, value: any) {
         object[pathSplitted[0]] = {}
       }
       if (Array.isArray(object[pathSplitted[0]])) {
-        ;(object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
+        (object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
       } else {
         setTraversing(object[pathSplitted[0]], pathSplitted.slice(1).join('.'), value)
       }
