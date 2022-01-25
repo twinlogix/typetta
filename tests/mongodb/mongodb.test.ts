@@ -1166,7 +1166,7 @@ test('Aggregate test', async () => {
     },
     aggregations: { count: { operation: 'count' } },
   })
-  for(const a of aggregation6) {
+  for (const a of aggregation6) {
     expect(a.count).toBe(1)
   }
 })
@@ -1215,19 +1215,26 @@ test('Raw update', async () => {
 
 test('Inner ref required', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, amounts: [new BigNumber(1)] } })
-  const post1 = await dao.post.insertOne({ record: { authorId: user.id, title: 'title', views: 1 }})
+  const post0 = await dao.post.insertOne({ record: { authorId: 'random', title: 'title', views: 1 } })
+  const post1 = await dao.post.insertOne({ record: { authorId: user.id, title: 'title', views: 1 } })
   const post2 = (await dao.post.findOne({ filter: { id: post1.id } }))!
   const post3 = (await dao.post.findOne({ filter: { id: post1.id }, projection: { author: true } }))!
   const post4 = (await dao.post.findOne({ filter: { id: post1.id }, projection: { title: true } }))!
 
-  typeAssert<Test<'author' extends (keyof typeof post1) ? true : false, false>>()
-  typeAssert<Test<'author' extends (keyof typeof post2) ? true : false, false>>()
-  typeAssert<Test<'author' extends (keyof typeof post3) ? true : false, true>>()
-  typeAssert<Test<'author' extends (keyof typeof post4) ? true : false, false>>()
+  typeAssert<Test<'author' extends keyof typeof post1 ? true : false, false>>()
+  typeAssert<Test<'author' extends keyof typeof post2 ? true : false, false>>()
+  typeAssert<Test<'author' extends keyof typeof post3 ? true : false, true>>()
+  typeAssert<Test<'author' extends keyof typeof post4 ? true : false, false>>()
   expect('author' in post1).toBe(false)
   expect('author' in post2).toBe(false)
   expect('author' in post3).toBe(true)
   expect('author' in post4).toBe(false)
+  try {
+    await dao.post.findOne({ filter: { id: post0.id }, projection: { author: true } })
+    fail()
+  } catch (error: any) {
+    expect((error.message as string).startsWith('dao: post'))
+  }
 })
 
 // ------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src';
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
@@ -63,7 +63,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
       schema: addressSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
+          { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -227,7 +227,7 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMong
       schema: deviceSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
+          { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -309,7 +309,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
       schema: dogSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user' }
+          { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -406,7 +406,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
       schema: organizationSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
+          { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -533,7 +533,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       schema: postSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user' }
+          { type: '1-1', reference: 'inner', field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user', required: true }
         ]
       ), 
       idGeneration: 'generator', 
@@ -701,8 +701,8 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       schema: userSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog' },
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.INNER, field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user' }
+          { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
+          { type: '1-n', reference: 'inner', field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
       idGeneration: 'generator', 

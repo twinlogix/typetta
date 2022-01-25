@@ -1,4 +1,4 @@
-import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
 import { Knex } from 'knex';
@@ -63,7 +63,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKne
       schema: addressSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
+          { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -135,7 +135,7 @@ export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnex
       schema: authorSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.RELATION, field: 'books', relationDao: 'authorBook', entityDao: 'book', refThis: { refFrom: 'authorId', refTo: 'id' }, refOther: { refFrom: 'bookId', refTo: 'id' } }
+          { type: '1-n', reference: 'relation', field: 'books', relationDao: 'authorBook', entityDao: 'book', refThis: { refFrom: 'authorId', refTo: 'id' }, refOther: { refFrom: 'bookId', refTo: 'id' }, required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -288,7 +288,7 @@ export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       schema: bookSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.RELATION, field: 'authors', relationDao: 'authorBook', entityDao: 'author', refThis: { refFrom: 'bookId', refTo: 'id' }, refOther: { refFrom: 'authorId', refTo: 'id' } }
+          { type: '1-n', reference: 'relation', field: 'authors', relationDao: 'authorBook', entityDao: 'author', refThis: { refFrom: 'bookId', refTo: 'id' }, refOther: { refFrom: 'authorId', refTo: 'id' }, required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -452,7 +452,7 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnex
       schema: deviceSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
+          { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -534,7 +534,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
       schema: dogSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user' }
+          { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -712,7 +712,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
       schema: organizationSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
+          { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -899,9 +899,9 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       schema: userSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'bestFriend', refFrom: 'bestFriendId', refTo: 'id', dao: 'user' },
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog' },
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.RELATION, field: 'friends', relationDao: 'friends', entityDao: 'user', refThis: { refFrom: 'from', refTo: 'id' }, refOther: { refFrom: 'to', refTo: 'id' } }
+          { type: '1-1', reference: 'inner', field: 'bestFriend', refFrom: 'bestFriendId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
+          { type: '1-n', reference: 'relation', field: 'friends', relationDao: 'friends', entityDao: 'user', refThis: { refFrom: 'from', refTo: 'id' }, refOther: { refFrom: 'to', refTo: 'id' }, required: false }
         ]
       ), 
       idGeneration: 'generator', 
