@@ -3,7 +3,7 @@ global.TextEncoder = require('util').TextEncoder
 // tslint:disable-next-line: no-var-requires
 global.TextDecoder = require('util').TextDecoder
 
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
@@ -18,7 +18,7 @@ import { v4 as uuidv4 } from 'uuid'
 jest.setTimeout(20000)
 
 let replSet: MongoMemoryReplSet
-let con: MongoClient
+let connection: MongoClient
 let db: Db
 type DAOContextType = DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
 let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
@@ -45,10 +45,10 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
 function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {
   return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
     mongo: {
-      default: db,
+      default: db
     },
     metadata: {
-      conn: con,
+      conn: connection,
       dao: createDao,
     },
     scalars,
@@ -60,9 +60,10 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
 }
 
 beforeAll(async () => {
-  replSet = await MongoMemoryReplSet.create({ replSet: { count: 3 } })
-  con = await MongoClient.connect(replSet.getUri(), {})
-  db = con.db('test')
+  const mongo = await inMemoryMongoDb()
+  replSet = mongo.replSet
+  connection = mongo.connection
+  db = mongo.db
   dao = createDao()
 })
 
@@ -706,7 +707,7 @@ test('middleware 1', async () => {
   const dao2 = new DAOContext<any>({
     log: ['error', 'warning'],
     mongo: {
-      default: db,
+      default: db
     },
     scalars,
     overrides: {
@@ -833,7 +834,7 @@ test('middleware 1', async () => {
 test('middleware 2', async () => {
   const dao2 = new DAOContext<any>({
     mongo: {
-      default: db,
+      default: db
     },
     scalars,
     overrides: {
@@ -875,7 +876,7 @@ test('middleware options', async () => {
   const dao2 = new DAOContext<{ m1?: string; m2?: string }, { m3: string }>({
     metadata: { m1: 'test1', m2: 'no' },
     mongo: {
-      default: db,
+      default: db
     },
     scalars,
     overrides: {
@@ -901,7 +902,7 @@ test('middleware options', async () => {
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
     mongo: {
-      default: db,
+      default: db
     },
     scalars,
     overrides: {
@@ -931,7 +932,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
     mongo: {
-      default: db,
+      default: db
     },
     scalars,
     overrides: {
@@ -954,7 +955,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const customDao = new DAOContext<any>({
     mongo: {
-      default: db,
+      default: db
     },
     scalars,
     overrides: {
@@ -983,7 +984,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao2 = new DAOContext<any>({
     mongo: {
-      default: db,
+      default: db
     },
     scalars,
     overrides: {
@@ -1060,7 +1061,7 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 // ------------------------------------------------------------------------
 
 test('Simple transaction', async () => {
-  const session = con.startSession()
+  const session = connection.startSession()
   session.startTransaction({
     readConcern: { level: 'local' },
     writeConcern: { w: 'majority' },
@@ -1080,7 +1081,7 @@ test('Simple transaction', async () => {
 
 test('Simple transaction 2', async () => {
   await dao.user.insertOne({ record: { id: '123', live: true } })
-  const session = con.startSession()
+  const session = connection.startSession()
   session.startTransaction({
     readConcern: { level: 'local' },
     writeConcern: { w: 'majority' },
@@ -1237,13 +1238,20 @@ test('Inner ref required', async () => {
   }
 })
 
+test('Mock entity', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.mockedEntity.insertOne({ record: { name: 'name', userId: user.id } })
+  const mocked = await dao.mockedEntity.findAll({ projection: { user: true } })
+  expect(mocked[0].user.firstName).toBe('FirstName')
+})
+
 // ------------------------------------------------------------------------
 // ------------------------- SECURITY POLICIES ----------------------------
 // ------------------------------------------------------------------------
 
 afterAll(async () => {
-  if (con) {
-    await con.close()
+  if (connection) {
+    await connection.close()
   }
   if (replSet) {
     await replSet.stop()

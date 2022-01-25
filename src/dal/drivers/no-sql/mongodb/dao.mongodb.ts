@@ -10,11 +10,20 @@ import { Collection, Document, WithId, Filter, UpdateOptions, FindOptions, Optio
 import { PartialDeep } from 'type-fest'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
-  protected collection: Collection
+  private collection: Collection | null
+  private collectionPromise: Collection | Promise<Collection>
 
   protected constructor({ collection, idGenerator, ...params }: MongoDBDAOParams<T>) {
     super({ ...params, driverContext: { collection }, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate })
-    this.collection = collection
+    this.collection = null
+    this.collectionPromise = collection
+  }
+
+  private async getCollection(): Promise<Collection> {
+    if (!this.collection) {
+      this.collection = await this.collectionPromise
+    }
+    return this.collection!
   }
 
   private dbsToModels(objects: WithId<Document>[]): PartialDeep<T['model']>[] {
@@ -65,7 +74,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
           if (params.limit === 0) {
             return []
           }
-          const results = await this.collection.find(filter, { ...(params.options ?? {}), ...options }).toArray()
+          const results = await (await this.getCollection()).find(filter, { ...(params.options ?? {}), ...options }).toArray()
           const records = this.dbsToModels(results)
           return records
         },
@@ -85,15 +94,15 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected _count(params: FilterParams<T>): Promise<number> {
-    return this.runQuery('count', async () => {
+    return this.runQuery('count', async (collection) => {
       const filter = this.buildFilter(params.filter)
       const options = params.options ?? {}
-      return [() => this.collection.countDocuments(filter, options), () => `collection.countDocuments(${JSON.stringify(filter)})`]
+      return [() => collection.countDocuments(filter, options), () => `collection.countDocuments(${JSON.stringify(filter)})`]
     })
   }
 
   protected _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
-    return this.runQuery('aggregate', async () => {
+    return this.runQuery('aggregate', async (collection) => {
       if (params.by && Object.keys(params.by).length === 0) {
         throw new Error("'by' params must contains at least one key.")
       }
@@ -137,7 +146,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       const pipeline = [...filter, { $group: { _id: groupId, ...aggregation } }, ...having, ...sort, ...skip, ...limit]
       return [
         async () => {
-          const results = await this.collection.aggregate(pipeline, options).toArray()
+          const results = await collection.aggregate(pipeline, options).toArray()
           const mappedResults = results.map((r) => {
             const rId = r._id
             for (const [k, v] of Object.entries(groupKeys)) {
@@ -173,13 +182,13 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
-    return this.runQuery('insertOne', async () => {
+    return this.runQuery('insertOne', async (collection) => {
       const record = this.modelToDb(params.record)
       const options = params.options ?? {}
       return [
         async () => {
-          const result = await this.collection.insertOne(record, options)
-          const inserted = await this.collection.findOne({ _id: result.insertedId }, options)
+          const result = await collection.insertOne(record, options)
+          const inserted = await collection.findOne({ _id: result.insertedId }, options)
           return this.dbToModel(inserted!) as Omit<T['model'], T['insertExcludedFields']>
         },
         () => `collection.insertOne(${JSON.stringify(record)})`,
@@ -188,52 +197,53 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
-    await this.runQuery('updateOne', async () => {
+    await this.runQuery('updateOne', async (collection) => {
       const changes = this.buildChanges(params.changes)
       const filter = this.buildFilter(params.filter)
       const options = { ...(params.options ?? {}), upsert: false, ignoreUndefined: true }
-      return [() => this.collection.updateOne(filter, changes, options), () => `collection.updateOne(${JSON.stringify(filter)}, ${JSON.stringify(changes)})`]
+      return [() => collection.updateOne(filter, changes, options), () => `collection.updateOne(${JSON.stringify(filter)}, ${JSON.stringify(changes)})`]
     })
   }
 
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
-    await this.runQuery('updateAll', async () => {
+    await this.runQuery('updateAll', async (collection) => {
       const changes = this.buildChanges(params.changes)
       const filter = this.buildFilter(params.filter)
       const options = { ...(params.options ?? {}), upsert: false, ignoreUndefined: true }
-      return [() => this.collection.updateMany(filter, changes, options), () => `collection.updateMany(${JSON.stringify(filter)}, ${JSON.stringify(changes)})`]
+      return [() => collection.updateMany(filter, changes, options), () => `collection.updateMany(${JSON.stringify(filter)}, ${JSON.stringify(changes)})`]
     })
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
-    await this.runQuery('replaceOne', async () => {
+    await this.runQuery('replaceOne', async (collection) => {
       const replace = this.modelToDb(params.replace)
       const filter = this.buildFilter(params.filter)
       const options = params.options ?? {}
-      return [() => this.collection.replaceOne(filter, replace, options), () => `collection.replaceOne(${JSON.stringify(filter)}, ${JSON.stringify(replace)})`]
+      return [() => collection.replaceOne(filter, replace, options), () => `collection.replaceOne(${JSON.stringify(filter)}, ${JSON.stringify(replace)})`]
     })
   }
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
-    await this.runQuery('deleteOne', async () => {
+    await this.runQuery('deleteOne', async (collection) => {
       const filter = this.buildFilter(params.filter)
       const options = params.options ?? {}
-      return [() => this.collection.deleteOne(filter, options), () => `collection.deleteOne(${JSON.stringify(filter)})`]
+      return [() => collection.deleteOne(filter, options), () => `collection.deleteOne(${JSON.stringify(filter)})`]
     })
   }
 
   protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
-    await this.runQuery('deleteAll', async () => {
+    await this.runQuery('deleteAll', async (collection) => {
       const filter = this.buildFilter(params.filter)
       const options = params.options ?? {}
-      return [() => this.collection.deleteMany(filter, options), () => `collection.deleteMany(${JSON.stringify(filter)})`]
+      return [() => collection.deleteMany(filter, options), () => `collection.deleteMany(${JSON.stringify(filter)})`]
     })
   }
 
-  private async runQuery<R>(operation: LogArgs<T['name']>['operation'], body: () => Promise<[() => Promise<R>, () => string]>): Promise<R> {
+  private async runQuery<R>(operation: LogArgs<T['name']>['operation'], body: (collection: Collection) => Promise<[() => Promise<R>, () => string]>): Promise<R> {
     const start = new Date()
     try {
-      const [promiseGenerator, queryGenerator] = await body()
+      const collection = await this.getCollection()
+      const [promiseGenerator, queryGenerator] = await body(collection)
       try {
         const result = await promiseGenerator()
         const finish = new Date()

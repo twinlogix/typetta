@@ -159,11 +159,13 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
   ObjectTypeDefinition(node: ObjectTypeDefinitionNode): TsTypettaGeneratorNode {
     const plainName = this.convertName(node, { useTypesPrefix: false })
 
-    const mongoEntityDirective = this._getDirectiveFromAstNode(node, Directives.MONGO_ENTITY)
+    const entityEntityDirective = this._getDirectiveFromAstNode(node, Directives.ENTITY)
+
+    const mongoEntityDirective = this._getDirectiveFromAstNode(node, Directives.MONGO)
     const collection = (mongoEntityDirective && this._getDirectiveArgValue<string>(mongoEntityDirective, 'collection')) || toFirstLower(plainName) + 's'
     const mongoSource = (mongoEntityDirective && this._getDirectiveArgValue<string>(mongoEntityDirective, 'source')) || 'default'
 
-    const sqlEntityDirective = this._getDirectiveFromAstNode(node, Directives.SQL_ENTITY)
+    const sqlEntityDirective = this._getDirectiveFromAstNode(node, Directives.SQL)
     const table = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'table')) || toFirstLower(plainName) + 's'
     const knexSource = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'source')) || 'default'
 
@@ -172,11 +174,20 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     if (mongoEntityDirective && sqlEntityDirective) {
       throw new Error(`Type ${plainName} is a @mongoEntity and a @sqlEntity at the same time. A type can be related to only one source.`)
     }
+    if ((mongoEntityDirective || sqlEntityDirective) && !entityEntityDirective) {
+      throw new Error(`Directives @${Directives.MONGO} and @${Directives.SQL} must be defined with @${Directives.ENTITY}.`)
+    }
 
     return {
       type: 'type',
       name: plainName,
-      entity: mongoEntityDirective ? { type: 'mongo', collection, source: mongoSource } : sqlEntityDirective ? { type: 'sql', table, source: knexSource } : undefined,
+      entity: mongoEntityDirective
+        ? { type: 'mongo', collection, source: mongoSource }
+        : sqlEntityDirective
+        ? { type: 'sql', table, source: knexSource }
+        : entityEntityDirective
+        ? { type: 'mongo', collection: toFirstLower(plainName) + 's', source: '', isMocked: true }
+        : undefined,
       fields,
     }
   }

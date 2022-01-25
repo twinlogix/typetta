@@ -4,7 +4,7 @@ scalar Decimal
 scalar Password
 scalar JSON
 
-type Device @sqlEntity {
+type Device @entity @sql {
   id: ID! @id 
   name: String!
   userId: ID
@@ -21,7 +21,7 @@ type UsernamePasswordCredentials {
   another: Another @alias(value: "a")
 }
 
-type City @sqlEntity {
+type City @entity @sql {
   id: ID! @id
   name: String!
   addressId: ID!
@@ -29,12 +29,12 @@ type City @sqlEntity {
   computedAddressName: String @exclude
 }
 
-type Address @sqlEntity(table: "addresses") {
+type Address @entity @sql(table: "addresses") {
   id: ID! @id
   cities: [City!] @foreignRef(refFrom: "addressId")
 }
 
-type Organization @sqlEntity {
+type Organization @entity @sql {
   id: ID! @id
   name: String!
   vatNumber: String
@@ -42,7 +42,7 @@ type Organization @sqlEntity {
   computedName: String @exclude
 }
 
-type User @sqlEntity {
+type User @entity @sql {
   id: ID! @id @alias(value: "ID")
   credentials: UsernamePasswordCredentials @alias(value: "cred")
   firstName: String @alias(value: "name")
@@ -60,31 +60,31 @@ type User @sqlEntity {
   friends: [User] @relationEntityRef(entity: "Friends", refThis: { refFrom: "from" }, refOther: { refFrom: "to" })
 }
 
-type Friends @sqlEntity {
+type Friends @entity @sql {
   id: ID! @id
   from: ID!
   to: ID!
 }
 
-type Dog @sqlEntity {
+type Dog @entity @sql {
   id: ID! @id
   name: String!
   ownerId: ID!
   owner: User @innerRef
 }
 
-type Author @sqlEntity {
+type Author @entity @sql {
   id: ID! @id
   books: [Book] @relationEntityRef(entity: "AuthorBook")
 }
 
-type AuthorBook @sqlEntity {
+type AuthorBook @entity @sql {
   id: ID! @id
   authorId: ID!
   bookId: ID!
 }
 
-type Book @sqlEntity {
+type Book @entity @sql {
   id: ID! @id
   authors: [Author] @relationEntityRef(entity: "AuthorBook")
 }

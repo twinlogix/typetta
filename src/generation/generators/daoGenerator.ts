@@ -1,8 +1,8 @@
+import { DAORelation } from '../../dal/dao/relations/relations.types'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
 import { findID, findNode, indentMultiline, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
 import { DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
-import { DAORelation } from '../../dal/dao/relations/relations.types'
 
 export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateImports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
@@ -15,7 +15,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const knexImports = [`import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`, "import { Knex } from 'knex';"]
 
     const mongodbImports = [
-      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
+      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
       "import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';",
     ]
 
@@ -49,7 +49,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
   public generateExports(typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string[] {
     const sqlSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'sql' ? [type.entity.source] : [])))]
-    const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'mongo' ? [type.entity.source] : [])))]
+    const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'mongo' && !type.entity.isMocked ? [type.entity.source] : [])))]
     const hasMongoDBEntites = mongoSources.length > 0
     const hasSQLEntities = sqlSources.length > 0
     const sqlSourcesType = `Record<${sqlSources.map((v) => `'${v}'`).join(' | ')}, Knex>`
@@ -80,7 +80,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const dbsParam = hasMongoDBEntites && hasSQLEntities ? 'mongo: this.mongo, knex: this.knex' : hasSQLEntities ? 'knex: this.knex' : hasMongoDBEntites ? 'mongo: this.mongo' : ''
     const entitiesInputParam = Array.from(typesMap.values())
       .flatMap((node) => {
-        return node.entity?.type === 'mongo'
+        return node.entity?.type === 'mongo' && !node.entity.isMocked
           ? [`${toFirstLower(node.name)}: Collection<Document>`]
           : node.entity?.type === 'sql'
           ? [`${toFirstLower(node.name)}: Knex.QueryBuilder<any, unknown[]>`]
@@ -89,7 +89,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .join('; ')
     const entitiesParam = Array.from(typesMap.values())
       .flatMap((node) => {
-        return node.entity?.type === 'mongo'
+        return node.entity?.type === 'mongo' && !node.entity.isMocked
           ? [`${toFirstLower(node.name)}: this.mongo.${node.entity.source}.collection('${node.entity.collection}')`]
           : node.entity?.type === 'sql'
           ? [`${toFirstLower(node.name)}: this.knex.${node.entity!.source}.table('${node.entity!.table}')`]
@@ -122,8 +122,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         const daoImplementationInit =
           node.entity?.type === 'sql'
             ? `, knex: this.knex.${node.entity!.source}, tableName: '${node.entity?.table}'`
-            : node.entity?.type === 'mongo'
+            : node.entity?.type === 'mongo' && !node.entity.isMocked
             ? `, collection: this.mongo.${node.entity!.source}.collection('${node.entity?.collection}')`
+            : node.entity?.type === 'mongo' && node.entity.isMocked
+            ? `, collection: inMemoryMongoDb().then(m => m.db.collection('${node.entity?.collection}'))`
             : ''
         const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...this.middlewares as DAOMiddleware<${
           node.name

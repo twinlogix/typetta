@@ -2,15 +2,14 @@ import { QuantityOperators, EqualityOperators, ElementOperators } from '../dal/d
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
+import { MongoClient } from 'mongodb'
+import { MongoMemoryReplSet } from 'mongodb-memory-server'
 
 export type OneKey<K extends string | number | symbol, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
 }[K]
 
-export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators }>(
-  conditions: Filter,
-  id: IDType | null,
-): boolean {
+export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators }>(conditions: Filter, id: IDType | null): boolean {
   return hasFieldFilter<IDType, 'id', Filter>(conditions, 'id', id)
 }
 
@@ -18,7 +17,7 @@ export function hasFieldFilter<
   FieldType,
   FieldName extends string,
   Filter extends { [P in FieldName]?: FieldType | null | QuantityOperators<FieldType> | EqualityOperators<FieldType> | ElementOperators },
-  >(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
+>(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
   return (
     (id &&
       conditions[fieldName] &&
@@ -87,7 +86,7 @@ export function setTraversing(object: any, path: string, value: any) {
         object[pathSplitted[0]] = {}
       }
       if (Array.isArray(object[pathSplitted[0]])) {
-        ; (object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
+        ;(object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
       } else {
         setTraversing(object[pathSplitted[0]], pathSplitted.slice(1).join('.'), value)
       }
@@ -125,9 +124,9 @@ export function deepCopy(obj: any): any {
   }
   if (obj instanceof Array) {
     const cp = [] as any[]
-      ; (obj as any[]).forEach((v) => {
-        cp.push(v)
-      })
+    ;(obj as any[]).forEach((v) => {
+      cp.push(v)
+    })
     return cp.map((n: any) => deepCopy(n)) as any
   }
   if (isPlainObject(obj)) {
@@ -167,4 +166,11 @@ export function deepMerge(weak: any, strong: any): any {
     }
   })
   return result
+}
+
+export async function inMemoryMongoDb() {
+  const replSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } })
+  const connection = await MongoClient.connect(replSet.getUri(), {})
+  const db = connection.db('__mock')
+  return { replSet, connection, db }
 }

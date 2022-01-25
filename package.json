@@ -44,7 +44,6 @@
     "bignumber.js": "9.0.2",
     "jest": "27.4.7",
     "make-coverage-badge": "1.2.0",
-    "mongodb-memory-server": "8.2.0",
     "release-it": "14.12.3",
     "sha256": "0.2.0",
     "@vscode/sqlite3": "5.0.7",
@@ -64,7 +63,8 @@
     "graphql": "15.8.0",
     "is-plain-object": "5.0.0",
     "object-hash": "2.2.0",
-    "type-fest": "2.9.0"
+    "type-fest": "2.9.0",
+    "mongodb-memory-server": "8.2.0"
   },
   "peerDependencies": {
     "knex": "1.0.1",
