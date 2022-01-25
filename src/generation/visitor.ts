@@ -172,7 +172,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     const fields = this._buildFields(node.fields!, node)
 
     if (mongoEntityDirective && sqlEntityDirective) {
-      throw new Error(`Type ${plainName} is a @mongoEntity and a @sqlEntity at the same time. A type can be related to only one source.`)
+      throw new Error(`Type ${plainName} is a @mongodb and a @sqlEntity at the same time. A type can be related to only one source.`)
     }
     if ((mongoEntityDirective || sqlEntityDirective) && !entityEntityDirective) {
       throw new Error(`Directives @${Directives.MONGO} and @${Directives.SQL} must be defined with @${Directives.ENTITY}.`)

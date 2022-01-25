@@ -1,7 +1,7 @@
 export enum Directives {
   ID = 'id',
   ENTITY = 'entity',
-  MONGO = 'mongo',
+  MONGO = 'mongodb',
   SQL = 'sql',
   EMBEDDED = 'embedded',
   INNER_REF = 'innerRef',

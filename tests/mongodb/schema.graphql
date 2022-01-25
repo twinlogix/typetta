@@ -4,7 +4,7 @@ scalar Decimal
 scalar Password
 scalar JSON
 
-type Device @entity @mongo {
+type Device @entity @mongodb {
   id: ID! @id
   name: String!
   userId: ID
@@ -16,7 +16,7 @@ type UsernamePasswordCredentials {
   password: Password! @alias(value: "pwd")
 }
 
-type City @entity @mongo {
+type City @entity @mongodb {
   id: ID! @id
   name: String!
   addressId: ID!
@@ -24,12 +24,12 @@ type City @entity @mongo {
   computedAddressName: String @exclude
 }
 
-type Address @entity @mongo(collection: "addresses") {
+type Address @entity @mongodb(collection: "addresses") {
   id: ID! @id
   cities: [City!] @foreignRef
 }
 
-type Organization @entity @mongo {
+type Organization @entity @mongodb {
   id: ID! @id
   name: String!
   vatNumber: String
@@ -37,7 +37,7 @@ type Organization @entity @mongo {
   computedName: String @exclude
 }
 
-type User @entity @mongo {
+type User @entity @mongodb {
   id: ID! @id @alias(value: "ID")
   usernamePasswordCredentials: UsernamePasswordCredentials @alias(value: "cred")
   firstName: String @alias(value: "name")
@@ -52,14 +52,14 @@ type User @entity @mongo {
   dogs: [Dog!] @foreignRef(refFrom: "ownerId")
 }
 
-type Dog @entity @mongo {
+type Dog @entity @mongodb {
   id: ID! @id
   name: String!
   ownerId: ID!
   owner: User @innerRef
 }
 
-type Post @entity @mongo {
+type Post @entity @mongodb {
   id: ID! @id
   title: String!
   body: String
