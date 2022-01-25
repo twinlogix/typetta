@@ -7,6 +7,7 @@
     "build": "tsc -p tsconfig.prod.json",
     "coverage": "jest --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
     "test": "jest --detectOpenHandles --no-cache --forceExit",
+    "lint": "eslint . --quiet --ext .js,.jsx,.ts,.tsx",
     "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
