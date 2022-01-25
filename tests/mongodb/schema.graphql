@@ -66,7 +66,7 @@ type Post @mongoEntity {
   views: Int!
   clicks: Int
   authorId: ID! @alias(value: "aId")
-  author: User @innerRef
+  author: User! @innerRef
   metadata: PostMetadata
 }
 

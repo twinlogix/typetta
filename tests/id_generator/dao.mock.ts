@@ -1,4 +1,4 @@
-import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
 import { Knex } from 'knex';
@@ -10,6 +10,7 @@ import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
 //--------------------------------------------------------------------------------
 
 export type AExcludedFields = never
+export type ARelationFields = never
 
 export const aSchema: Schema<types.Scalars> = {
   'id': {
@@ -53,7 +54,7 @@ export type AInsert = {
   value: types.Scalars['Int'],
 };
 
-type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, ARawFilter, ARelations, AProjection, ASort, ARawSort, AInsert, AUpdate, ARawUpdate, AExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'a'>;
+type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, ARawFilter, ARelations, AProjection, ASort, ARawSort, AInsert, AUpdate, ARawUpdate, AExcludedFields, ARelationFields, MetadataType, OperationMetadataType, types.Scalars, 'a'>;
 export type ADAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<ADAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
@@ -82,6 +83,7 @@ export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 //--------------------------------------------------------------------------------
 
 export type BExcludedFields = never
+export type BRelationFields = never
 
 export const bSchema: Schema<types.Scalars> = {
   'id': {
@@ -125,7 +127,7 @@ export type BInsert = {
   value: types.Scalars['Int'],
 };
 
-type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BRawFilter, BRelations, BProjection, BSort, BRawSort, BInsert, BUpdate, BRawUpdate, BExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'b'>;
+type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BRawFilter, BRelations, BProjection, BSort, BRawSort, BInsert, BUpdate, BRawUpdate, BExcludedFields, BRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'b'>;
 export type BDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -154,6 +156,7 @@ export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 //--------------------------------------------------------------------------------
 
 export type CExcludedFields = never
+export type CRelationFields = never
 
 export const cSchema: Schema<types.Scalars> = {
   'id': {
@@ -197,7 +200,7 @@ export type CInsert = {
   value: types.Scalars['Int'],
 };
 
-type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CRawFilter, CRelations, CProjection, CSort, CRawSort, CInsert, CUpdate, CRawUpdate, CExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'c'>;
+type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CRawFilter, CRelations, CProjection, CSort, CRawSort, CInsert, CUpdate, CRawUpdate, CExcludedFields, CRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'c'>;
 export type CDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<CDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -226,6 +229,7 @@ export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 //--------------------------------------------------------------------------------
 
 export type DExcludedFields = never
+export type DRelationFields = never
 
 export const dSchema: Schema<types.Scalars> = {
   'id': {
@@ -268,7 +272,7 @@ export type DInsert = {
   value: types.Scalars['Int'],
 };
 
-type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DRawFilter, DRelations, DProjection, DSort, DRawSort, DInsert, DUpdate, DRawUpdate, DExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'd'>;
+type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DRawFilter, DRelations, DProjection, DSort, DRawSort, DInsert, DUpdate, DRawUpdate, DExcludedFields, DRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'd'>;
 export type DDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -297,6 +301,7 @@ export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
 //--------------------------------------------------------------------------------
 
 export type EExcludedFields = never
+export type ERelationFields = never
 
 export const eSchema: Schema<types.Scalars> = {
   'id': {
@@ -340,7 +345,7 @@ export type EInsert = {
   value: types.Scalars['Int'],
 };
 
-type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, ERawFilter, ERelations, EProjection, ESort, ERawSort, EInsert, EUpdate, ERawUpdate, EExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'e'>;
+type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, ERawFilter, ERelations, EProjection, ESort, ERawSort, EInsert, EUpdate, ERawUpdate, EExcludedFields, ERelationFields, MetadataType, OperationMetadataType, types.Scalars, 'e'>;
 export type EDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -369,6 +374,7 @@ export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
 //--------------------------------------------------------------------------------
 
 export type FExcludedFields = never
+export type FRelationFields = never
 
 export const fSchema: Schema<types.Scalars> = {
   'id': {
@@ -412,7 +418,7 @@ export type FInsert = {
   value: types.Scalars['Int'],
 };
 
-type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FRawFilter, FRelations, FProjection, FSort, FRawSort, FInsert, FUpdate, FRawUpdate, FExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'f'>;
+type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FRawFilter, FRelations, FProjection, FSort, FRawSort, FInsert, FUpdate, FRawUpdate, FExcludedFields, FRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'f'>;
 export type FDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {

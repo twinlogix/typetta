@@ -106,13 +106,13 @@ export type MiddlewareContext<T extends DAOGenerics> = {
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 
 export interface DAO<T extends DAOGenerics> {
-  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<ModelProjection<T['model'], T['projection'], P>[]>
-  findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<ModelProjection<T['model'], T['projection'], P> | null>
-  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: ModelProjection<T['model'], T['projection'], P>[] }>
+  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<ModelProjection<T, P>[]>
+  findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<ModelProjection<T, P> | null>
+  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: ModelProjection<T, P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
   aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
-  insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>>
+  insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>
   replaceOne(params: ReplaceParams<T>): Promise<void>
@@ -135,6 +135,7 @@ export type DAOGenerics<
   PureUpdateType = any,
   RawUpdateType = any,
   ExcludedFields extends keyof ModelType = any,
+  RelationsFields extends keyof ModelType = any,
   MetadataType = any,
   OperationMetadataType = any,
   DriverContextType = any,
@@ -164,6 +165,8 @@ export type DAOGenerics<
   rawUpdate: RawUpdateType
   update: PureUpdateType | RawUpdateType
   exludedFields: ExcludedFields
+  relationFields: RelationsFields
+  insertExcludedFields: ExcludedFields | RelationsFields
   metadata: MetadataType
   operationMetadata: OperationMetadataType
   driverContext: DriverContextType

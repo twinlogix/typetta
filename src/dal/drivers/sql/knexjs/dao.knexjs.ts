@@ -190,7 +190,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['exludedFields']>> {
+  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     return this.runQuery(
       'insertOne',
       () => {
@@ -202,9 +202,9 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         const inserted = records[0]
         if (typeof inserted === 'number') {
           const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as T['filter'], options: params.options, limit: 1 })
-          return insertedRetrieved[0] as Omit<T['model'], T['exludedFields']>
+          return insertedRetrieved[0] as Omit<T['model'], T['insertExcludedFields']>
         }
-        return this.dbToModel(inserted) as Omit<T['model'], T['exludedFields']>
+        return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
       },
     )
   }

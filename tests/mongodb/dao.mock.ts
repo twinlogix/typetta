@@ -1,4 +1,4 @@
-import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, DAORelationType, DAORelationReference, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src';
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
@@ -7,7 +7,8 @@ import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
 //----------------------------------- ADDRESS ------------------------------------
 //--------------------------------------------------------------------------------
 
-export type AddressExcludedFields = 'cities'
+export type AddressExcludedFields = never
+export type AddressRelationFields = 'cities'
 
 export const addressSchema: Schema<types.Scalars> = {
   'id': {
@@ -50,7 +51,7 @@ export type AddressInsert = {
   id?: types.Scalars['ID'],
 };
 
-type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'address'>;
+type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address'>;
 export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -62,7 +63,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
       schema: addressSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city' }
+          { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -79,6 +80,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
 //--------------------------------------------------------------------------------
 
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
+export type CityRelationFields = never
 
 export const citySchema: Schema<types.Scalars> = {
   'addressId': {
@@ -132,7 +134,7 @@ export type CityInsert = {
   name: types.Scalars['String'],
 };
 
-type CityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'city'>;
+type CityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, CityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'city'>;
 export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -160,7 +162,8 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 //------------------------------------ DEVICE ------------------------------------
 //--------------------------------------------------------------------------------
 
-export type DeviceExcludedFields = 'user'
+export type DeviceExcludedFields = never
+export type DeviceRelationFields = 'user'
 
 export const deviceSchema: Schema<types.Scalars> = {
   'id': {
@@ -212,7 +215,7 @@ export type DeviceInsert = {
   userId?: types.Scalars['ID'],
 };
 
-type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'device'>;
+type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device'>;
 export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -224,7 +227,7 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMong
       schema: deviceSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user' }
+          { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -240,7 +243,8 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMong
 //------------------------------------- DOG --------------------------------------
 //--------------------------------------------------------------------------------
 
-export type DogExcludedFields = 'owner'
+export type DogExcludedFields = never
+export type DogRelationFields = 'owner'
 
 export const dogSchema: Schema<types.Scalars> = {
   'id': {
@@ -293,7 +297,7 @@ export type DogInsert = {
   ownerId: types.Scalars['ID'],
 };
 
-type DogDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'dog'>;
+type DogDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, DogRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'dog'>;
 export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -305,7 +309,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
       schema: dogSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user' }
+          { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -322,6 +326,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
 //--------------------------------------------------------------------------------
 
 export type OrganizationExcludedFields = 'computedName'
+export type OrganizationRelationFields = never
 
 export const organizationSchema: Schema<types.Scalars> = {
   'address': {
@@ -389,7 +394,7 @@ export type OrganizationInsert = {
   vatNumber?: types.Scalars['String'],
 };
 
-type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'organization'>;
+type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization'>;
 export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -401,7 +406,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
       schema: organizationSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city' }
+          { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
         ]
       ), 
       idGeneration: 'generator', 
@@ -417,7 +422,8 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
 //------------------------------------- POST -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type PostExcludedFields = 'author'
+export type PostExcludedFields = never
+export type PostRelationFields = 'author'
 
 export const postSchema: Schema<types.Scalars> = {
   'authorId': {
@@ -515,7 +521,7 @@ export type PostInsert = {
   views: types.Scalars['Int'],
 };
 
-type PostDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'post'>;
+type PostDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post'>;
 export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -527,7 +533,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       schema: postSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_ONE, reference: DAORelationReference.INNER, field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user' }
+          { type: '1-1', reference: 'inner', field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user', required: true }
         ]
       ), 
       idGeneration: 'generator', 
@@ -543,7 +549,8 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
-export type UserExcludedFields = 'dogs' | 'friends'
+export type UserExcludedFields = never
+export type UserRelationFields = 'dogs' | 'friends'
 
 export const userSchema: Schema<types.Scalars> = {
   'amount': {
@@ -682,7 +689,7 @@ export type UserInsert = {
   usernamePasswordCredentials?: types.UsernamePasswordCredentials,
 };
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;
+type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -694,8 +701,8 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       schema: userSchema, 
       relations: overrideRelations(
         [
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.FOREIGN, field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog' },
-          { type: DAORelationType.ONE_TO_MANY, reference: DAORelationReference.INNER, field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user' }
+          { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
+          { type: '1-n', reference: 'inner', field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
       idGeneration: 'generator', 

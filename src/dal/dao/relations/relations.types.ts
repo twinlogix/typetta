@@ -1,29 +1,20 @@
-export enum DAORelationType {
-  ONE_TO_ONE,
-  ONE_TO_MANY,
-}
-
-export enum DAORelationReference {
-  INNER,
-  FOREIGN,
-  RELATION,
-}
-
 export type DAORelation =
   | {
-      type: DAORelationType
-      reference: DAORelationReference.FOREIGN | DAORelationReference.INNER
+      type: '1-1' | '1-n'
+      reference: 'foreign' | 'inner'
       field: string
       refFrom: string
       refTo: string
       dao: string
+      required: boolean
     }
   | {
-      type: DAORelationType
-      reference: DAORelationReference.RELATION
+      type: '1-1' | '1-n'
+      reference: 'relation'
       field: string
       refThis: { refFrom: string; refTo: string }
       refOther: { refFrom: string; refTo: string }
       relationDao: string
       entityDao: string
+      required: boolean
     }

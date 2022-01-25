@@ -17,10 +17,11 @@ export type KnexJsDAOGenerics<
   PureUpdateType = any,
   RawUpdateType = any,
   ExcludedFields extends keyof ModelType = any,
+  RelationsFields extends keyof ModelType = any,
   MetadataType = any,
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
-  NameType extends string = any
+  NameType extends string = any,
 > = Omit<
   DAOGenerics<
     ModelType,
@@ -37,6 +38,7 @@ export type KnexJsDAOGenerics<
     PureUpdateType,
     RawUpdateType,
     ExcludedFields,
+    RelationsFields,
     MetadataType,
     OperationMetadataType,
     any,
