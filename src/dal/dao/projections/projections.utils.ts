@@ -48,8 +48,6 @@ export function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defau
   if (context.selectionSet) {
     return context.selectionSet.selections.reduce(
       (proj: any, selection: any) => {
-        const inlineFragmentRef = selection.typeCondition.name.value
-        const fragmentRef = info.fragments[selection.name.value].typeCondition.name.value
         switch (selection.kind) {
           case 'Field':
             if (selection && selection.selectionSet && selection.selectionSet.selections) {
@@ -73,11 +71,15 @@ export function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defau
                 [selection.name.value]: true,
               }
             }
-            break
-          case 'InlineFragment':
+            return {}
+          case 'InlineFragment': {
+            const inlineFragmentRef = selection.typeCondition.name.value
             return fragmentToProjections(info, proj, selection, inlineFragmentRef, type, schema)
-          case 'FragmentSpread':
+          }
+          case 'FragmentSpread': {
+            const fragmentRef = info.fragments[selection.name.value].typeCondition.name.value
             return fragmentToProjections(info, proj, info.fragments[selection.name.value], fragmentRef, type, schema)
+          }
           default:
             return {}
         }
