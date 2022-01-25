@@ -52,8 +52,8 @@ export type MongoDBDAOGenerics<
     NameType
   >,
   'driverContext'
-> & { driverContext: { collection: Promise<Collection> | Collection } }
+> & { driverContext: { collection: Collection } }
 
 export type MongoDBDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverContext'> & {
-  collection: Promise<Collection> | Collection
+  collection: Collection
 }

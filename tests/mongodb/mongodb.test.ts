@@ -5,7 +5,7 @@ global.TextDecoder = require('util').TextDecoder
 
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb } from '../../src'
 import { Test, typeAssert } from '../utils.test'
-import { CityProjection, DAOContext, UserProjection } from './dao.mock'
+import { CityProjection, DAOContext, mockedDAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -45,7 +45,8 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
 function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {
   return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
     mongo: {
-      default: db
+      default: db,
+      __mock: db,
     },
     metadata: {
       conn: connection,
@@ -707,7 +708,8 @@ test('middleware 1', async () => {
   const dao2 = new DAOContext<any>({
     log: ['error', 'warning'],
     mongo: {
-      default: db
+      default: db,
+      __mock: db,
     },
     scalars,
     overrides: {
@@ -834,7 +836,8 @@ test('middleware 1', async () => {
 test('middleware 2', async () => {
   const dao2 = new DAOContext<any>({
     mongo: {
-      default: db
+      default: db,
+      __mock: db,
     },
     scalars,
     overrides: {
@@ -876,7 +879,8 @@ test('middleware options', async () => {
   const dao2 = new DAOContext<{ m1?: string; m2?: string }, { m3: string }>({
     metadata: { m1: 'test1', m2: 'no' },
     mongo: {
-      default: db
+      default: db,
+      __mock: db,
     },
     scalars,
     overrides: {
@@ -902,7 +906,8 @@ test('middleware options', async () => {
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
     mongo: {
-      default: db
+      default: db,
+      __mock: db,
     },
     scalars,
     overrides: {
@@ -932,7 +937,8 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
     mongo: {
-      default: db
+      default: db,
+      __mock: db,
     },
     scalars,
     overrides: {
@@ -955,7 +961,8 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const customDao = new DAOContext<any>({
     mongo: {
-      default: db
+      default: db,
+      __mock: db,
     },
     scalars,
     overrides: {
@@ -984,7 +991,8 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao2 = new DAOContext<any>({
     mongo: {
-      default: db
+      default: db,
+      __mock: db,
     },
     scalars,
     overrides: {

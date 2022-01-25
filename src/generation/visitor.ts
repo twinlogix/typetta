@@ -186,7 +186,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         : sqlEntityDirective
         ? { type: 'sql', table, source: knexSource }
         : entityEntityDirective
-        ? { type: 'mongo', collection: toFirstLower(plainName) + 's', source: '', isMocked: true }
+        ? { type: 'mongo', collection: toFirstLower(plainName) + 's', source: '__mock' }
         : undefined,
       fields,
     }

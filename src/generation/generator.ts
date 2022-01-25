@@ -33,7 +33,7 @@ export type TsTypettaGeneratorField = {
 export type TsTypettaGeneratorNode = {
   type: 'type'
   name: string
-  entity?: { type: 'mongo'; collection: string; source: string; isMocked?: boolean } | { type: 'sql'; table: string; source: string }
+  entity?: { type: 'mongo'; collection: string; source: string } | { type: 'sql'; table: string; source: string }
   fields: TsTypettaGeneratorField[]
 }
 
