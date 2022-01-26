@@ -51,6 +51,14 @@ export type Dog = {
   ownerId: Scalars['ID'];
 };
 
+export type MockedEntity = {
+  __typename?: 'MockedEntity';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  user: User;
+  userId: Scalars['ID'];
+};
+
 export type Organization = {
   __typename?: 'Organization';
   address?: Maybe<Address>;

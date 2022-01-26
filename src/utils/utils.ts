@@ -2,15 +2,16 @@ import { QuantityOperators, EqualityOperators, ElementOperators } from '../dal/d
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
+import knex, { Knex } from 'knex'
+import { Db, MongoClient } from 'mongodb'
+import { MongoMemoryReplSet } from 'mongodb-memory-server'
+import { MockDAOContextParams } from '..'
 
 export type OneKey<K extends string | number | symbol, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
 }[K]
 
-export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators }>(
-  conditions: Filter,
-  id: IDType | null,
-): boolean {
+export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators }>(conditions: Filter, id: IDType | null): boolean {
   return hasFieldFilter<IDType, 'id', Filter>(conditions, 'id', id)
 }
 
@@ -18,7 +19,7 @@ export function hasFieldFilter<
   FieldType,
   FieldName extends string,
   Filter extends { [P in FieldName]?: FieldType | null | QuantityOperators<FieldType> | EqualityOperators<FieldType> | ElementOperators },
-  >(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
+>(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
   return (
     (id &&
       conditions[fieldName] &&
@@ -87,7 +88,7 @@ export function setTraversing(object: any, path: string, value: any) {
         object[pathSplitted[0]] = {}
       }
       if (Array.isArray(object[pathSplitted[0]])) {
-        ; (object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
+        ;(object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
       } else {
         setTraversing(object[pathSplitted[0]], pathSplitted.slice(1).join('.'), value)
       }
@@ -125,9 +126,9 @@ export function deepCopy(obj: any): any {
   }
   if (obj instanceof Array) {
     const cp = [] as any[]
-      ; (obj as any[]).forEach((v) => {
-        cp.push(v)
-      })
+    ;(obj as any[]).forEach((v) => {
+      cp.push(v)
+    })
     return cp.map((n: any) => deepCopy(n)) as any
   }
   if (isPlainObject(obj)) {
@@ -167,4 +168,59 @@ export function deepMerge(weak: any, strong: any): any {
     }
   })
   return result
+}
+
+export async function inMemoryMongoDb(): Promise<{ replSet: MongoMemoryReplSet; connection: MongoClient; db: Db }> {
+  const replSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } })
+  const connection = await MongoClient.connect(replSet.getUri(), {})
+  const db = connection.db('__mock')
+  return { replSet, connection, db }
+}
+
+export function inMemorySqlite(): Knex<any, unknown> {
+  return knex({
+    client: 'sqlite3',
+    connection: ':memory:',
+    useNullAsDefault: true,
+    log: {
+      warn: () => {
+        return
+      },
+      debug: () => {
+        return
+      },
+      error: () => {
+        return
+      },
+      deprecate: () => {
+        return
+      },
+    },
+  })
+}
+
+export async function createMockedDAOContext<T extends object>(params: MockDAOContextParams<T>, mongoSources: string[], knexSources: string[]): Promise<T> {
+  const beforeMongo = { ...Object.fromEntries(mongoSources.map((v) => [v, 'mock'])), ...((params as any).mongo ?? {}) }
+  const mongo = Object.fromEntries(
+    await Promise.all(
+      Object.entries(beforeMongo).map(async ([k, v]) => {
+        if (typeof v === 'string') {
+          return [k, (await inMemoryMongoDb()).db]
+        }
+        return [k, v]
+      }),
+    ),
+  )
+  const beforeKnex = { ...Object.fromEntries(knexSources.map((v) => [v, 'mock'])), ...((params as any).knex ?? {}) }
+  const knex = Object.fromEntries(
+    await Promise.all(
+      Object.entries(beforeKnex).map(async ([k, v]) => {
+        if (typeof v === 'string') {
+          return [k, inMemorySqlite()]
+        }
+        return [k, v]
+      }),
+    ),
+  )
+  return { ...params, mongo, knex } as T
 }

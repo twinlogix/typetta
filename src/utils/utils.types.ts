@@ -41,3 +41,20 @@ export type Coordinates = {
 }
 
 export type TypeTraversal<T, Path extends string> = Path extends keyof T ? T[Path] : Path extends `${infer R}.${infer F}` ? (R extends keyof T ? TypeTraversal<T[R], F> : never) : never
+
+
+type MongoMockDAOContextParams<T> = T extends Record<'mongo', object>
+  ? Omit<T, 'mongo'> & {
+      mongo?: {
+        [K in keyof T['mongo']]?: T['mongo'][K] | 'mock'
+      }
+    }
+  : T
+type KnexMockDAOContextParams<T> = T extends Record<'knex', object>
+  ? Omit<T, 'knex'> & {
+      knex?: {
+        [K in keyof T['knex']]?: T['knex'][K] | 'mock'
+      }
+    }
+  : T
+export type MockDAOContextParams<T> = MongoMockDAOContextParams<KnexMockDAOContextParams<T>>
