@@ -7,11 +7,12 @@
     "build": "tsc -p tsconfig.prod.json",
     "coverage": "jest --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
     "test": "jest --detectOpenHandles --no-cache --forceExit",
-    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id",
+    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",
     "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
+    "generate-multitenant": "graphql-codegen --config tests/multitenant/codegen.yml",
     "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts",
     "release": "release-it"
   },

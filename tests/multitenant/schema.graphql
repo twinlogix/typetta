@@ -1,0 +1,30 @@
+scalar Password
+scalar Email
+scalar Username
+scalar TenantId
+scalar Date
+
+type UsernamePasswordCredentials {
+  username: Username!
+  password: Password!
+}
+
+type Hotel @mongoEntity {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  name: String!
+  description: String
+  
+  deletionDate: Date
+  tenantId: TenantId!
+}
+
+type User @mongoEntity {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  email: Email!
+  credentials: UsernamePasswordCredentials @alias(value: "cred")
+  firstName: String
+  lastName: String
+
+  deletionDate: Date
+  tenantId: TenantId!
+}
