@@ -1,5 +1,5 @@
 import { DefaultModelScalars } from '../../../drivers/drivers.types'
-import { DAOGenerics, IdGenerationStrategy } from '../../dao.types'
+import { DAOGenerics, IdGenerationStrategy, MiddlewareContext } from '../../dao.types'
 import { projection } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
@@ -61,43 +61,61 @@ export type MultiTenantDAOGenerics<
 >
 
 export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdKey extends keyof T['model'] & keyof T['metadata']>(args: {
-  tenantIdField: TenantIdKey
+  tenantKey: TenantIdKey
   rawOperations?: 'forbidden' | 'warning' | 'allowed'
 }): DAOMiddleware<T> {
+  const rawOpPolicy = args.rawOperations ?? 'forbidden'
+  const key = args.tenantKey
+
+  function getTenantId(context: MiddlewareContext<T>): T['metadata'][TenantIdKey] | null {
+    if (!context.metadata) {
+      return null
+    }
+    return context.metadata[key]
+  }
+  function elabFilter(filter: T['filter'] | undefined, tenantId: T['metadata'][TenantIdKey]): T['filter'] {
+    if (!filter) {
+      return { [key]: tenantId }
+    }
+    if (typeof filter === 'function') {
+      if (rawOpPolicy === 'forbidden') {
+        throw new Error(`Raw filter is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
+      }
+      if (rawOpPolicy === 'warning') {
+        // TODO: log warning
+      }
+      return filter
+    } else {
+      return { $and: [{ [key]: tenantId }, filter] }
+    }
+  }
   return buildMiddleware<T>({
     beforeInsert: async (params, context) => {
-      if (!context.metadata) {
-        return { continue: true, params }
+      const tenantId = getTenantId(context)
+      if (!tenantId) {
+        return
       }
-      const tenantId = context.metadata[args.tenantIdField]
-      if (params.record[args.tenantIdField] == null || params.record[args.tenantIdField] !== tenantId) {
-        throw new Error(`Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[args.tenantIdField]} instead.`)
+      if (params.record[key] == null || params.record[key] !== tenantId) {
+        throw new Error(`Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[key]} instead.`)
       }
     },
     beforeFind: async (params, context) => {
-      if (!context.metadata) {
-        return { continue: true, params }
+      const tenantId = getTenantId(context)
+      if (!tenantId) {
+        return
       }
-      const tenantId = context.metadata[args.tenantIdField]
-      if (!params.filter) {
-        return { continue: true, params: { ...params, filter: { [args.tenantIdField]: tenantId } } }
+      return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) } }
+    },
+    beforeUpdate: async (params, context) => {
+      const tenantId = getTenantId(context)
+      if (!tenantId) {
+        return
       }
-      if (typeof params.filter !== 'function') {
-        return { continue: true, params: { ...params, filter: { $and: [{ [args.tenantIdField]: tenantId }, params.filter] } } }
+      const filter = elabFilter(params.filter, tenantId)
+
+      if (typeof params.changes === 'function') {
       } else {
-        // needed in order to check tenantId in afterFind
-        return { continue: true, params: { ...params, projection: projection<any>().merge(params.projection, { [args.tenantIdField]: true }) } }
       }
     },
-    afterFind: async (params, records, totalCount, context) => {
-      if (!context.metadata) {
-        return { continue: true, params, records, totalCount }
-      }
-      const tenantId = context.metadata[args.tenantIdField]
-      if (records.flatMap((v) => (v[args.tenantIdField] ? [v[args.tenantIdField]] : [])).some((tId) => tId !== tenantId)) {
-        throw new Error(`Invalid tenant ID in find. Current selected tenant ID is ${context.metadata?.tenantId}.`)
-      }
-    },
-    // beforeUpdate: async (params, context) => {},
   })
 }

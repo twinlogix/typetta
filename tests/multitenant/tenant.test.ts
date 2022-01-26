@@ -78,7 +78,7 @@ async function createDao(): Promise<DAOContext<DaoMetadata>> {
     },
     middlewares: [
       tenantSecurityPolicy({
-        tenantIdField: 'tenantId',
+        tenantKey: '',
       }),
     ],
   })
