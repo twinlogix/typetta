@@ -1,5 +1,5 @@
-import { UserInputDriverDataTypeAdapterMap } from '../../src'
-import { DAOContext } from './dao.mock'
+import { inMemoryMongoDb, UserInputDriverDataTypeAdapterMap, buildMiddleware, mergeProjections, projection, tenantSecurityPolicy } from '../../src'
+import { DAOContext, HotelDAOGenerics } from './dao.mock'
 import { Scalars } from './models.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -12,101 +12,102 @@ global.TextDecoder = require('util').TextDecoder
 
 jest.setTimeout(20000)
 
-
-let replSet: MongoMemoryReplSet
-let con: MongoClient
-let db: Db
-type DAOContextType = DAOContext<{ dao: () => DAOContextType }>
-let dao: DAOContext<{ dao: () => DAOContextType }>
-
-const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
-  Password: {
-    dbToModel: (o: unknown) => o as string,
-    modelToDB: (o: string) => sha256('random_salt' + o),
-    validate: (o: string) => {
-      if (o.length < 5) {
-        return new Error('The password must be 5 character or more.')
-      }
-      return true
-    },
-  },
-  Email: {
-    validate: (o: string) => {
-      if (o.split('@').length === 2) {
-        return true
-      } else {
-        throw new Error('The email is invalid')
-      }
-    },
-  },
-  TenantId: {
-    dbToModel: (o: unknown) => (o as Int32).value,
-    modelToDB: (o: number) => new Int32(o as number),
-    validate: (o: number) => {
-      if (Number.isInteger(o) && o > 0) {
-        return true
-      } else {
-        throw new Error('Tenant ID must be a positive integer')
-      }
-    },
-  },
-  Username: {
-    validate: (username: string) => {
-      if (!username.match(/^[0-9a-z]+$/)) {
-        throw new Error('The username can contains only alphanumerical characters')
-      }
-      if (username.length < 3 || username.length > 20) {
-        throw new Error('The username must consist of at least 3 characters up to a maximum of 20')
-      }
-      return true
-    },
-  },
+type DaoMetadata = {
+  mongodb: {
+    replSet: MongoMemoryReplSet
+    connection: MongoClient
+    db: Db
+  }
+  tenantId: number
+  dao: () => Promise<DAOContext<DaoMetadata>>
 }
+let dao: DAOContext<DaoMetadata>
 
-function createDao(): DAOContextType {
-  return new DAOContext<{ dao: () => DAOContextType }>({
+async function createDao(): Promise<DAOContext<DaoMetadata>> {
+  const mongodb = await inMemoryMongoDb()
+  return new DAOContext<DaoMetadata>({
     mongo: {
-      default: db,
+      default: mongodb.db,
     },
     metadata: {
       dao: createDao,
+      mongodb,
+      tenantId: 1,
     },
-    scalars,
-    overrides: {
-      user: {},
+    scalars: {
+      Password: {
+        modelToDB: (o: string) => sha256('random_salt' + o),
+        validate: (o: string) => {
+          if (o.length < 5) {
+            return new Error('The password must be 5 character or more.')
+          }
+          return true
+        },
+      },
+      Email: {
+        validate: (o: string) => {
+          if (o.split('@').length === 2) {
+            return true
+          } else {
+            throw new Error('The email is invalid')
+          }
+        },
+      },
+      TenantId: {
+        dbToModel: (o: unknown) => (o as Int32).value,
+        modelToDB: (o: number) => new Int32(o as number),
+        validate: (o: number) => {
+          if (Number.isInteger(o) && o > 0) {
+            return true
+          } else {
+            throw new Error('Tenant ID must be a positive integer')
+          }
+        },
+      },
+      Username: {
+        validate: (username: string) => {
+          if (!username.match(/^[0-9a-z]+$/)) {
+            throw new Error('The username can contains only alphanumerical characters')
+          }
+          if (username.length < 3 || username.length > 20) {
+            throw new Error('The username must consist of at least 3 characters up to a maximum of 20')
+          }
+          return true
+        },
+      },
     },
-    log: { maxQueryExecutionTime: 100000 },
+    middlewares: [
+      tenantSecurityPolicy({
+        tenantIdField: 'tenantId',
+      }),
+    ],
   })
 }
 
 beforeAll(async () => {
-  replSet = await MongoMemoryReplSet.create({ replSet: { count: 3 } })
-  con = await MongoClient.connect(replSet.getUri(), {})
-  db = con.db('test')
-  dao = createDao()
+  dao = await createDao()
 })
 
 beforeEach(async () => {
-  const collections = await db.collections()
-  for (const collection of collections) {
+  const collections = await dao.metadata?.mongodb.db.collections()
+  for (const collection of collections ?? []) {
     await collection.deleteMany({})
   }
 })
 
 test('empty find', async () => {
-  
-  const users = await dao.user.findAll({})
-  expect(users.length).toBe(0)
+  await dao.user.insertOne({ record: { email: 'luca@hotel.com', tenantId: 2 } })
 
-  const user = await dao.user.findOne({})
-  expect(user).toBeNull()
+  const user1 = await dao.user.findOne({ filter: { email: 'luca@hotel.com' } })
+  const user2 = await dao.user.findOne({ filter: { tenantId: 2 } })
+  const user3 = await dao.user.findOne({ filter: { tenantId: 1 } })
 })
 
 afterAll(async () => {
-  if (con) {
-    await con.close()
+  if (dao.metadata?.mongodb.connection) {
+    await dao.metadata.mongodb.connection.close()
   }
-  if (replSet) {
-    await replSet.stop()
+  if (dao.metadata?.mongodb.replSet) {
+    await dao.metadata.mongodb.replSet.stop()
   }
 })

@@ -9,7 +9,7 @@ type UsernamePasswordCredentials {
   password: Password!
 }
 
-type Hotel @mongoEntity {
+type Hotel @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   name: String!
   description: String
@@ -18,7 +18,7 @@ type Hotel @mongoEntity {
   tenantId: TenantId!
 }
 
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   email: Email!
   credentials: UsernamePasswordCredentials @alias(value: "cred")
