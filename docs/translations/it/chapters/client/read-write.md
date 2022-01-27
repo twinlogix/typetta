@@ -21,7 +21,7 @@ Di seguito un elenco di queste operazioni:
 Nelle successive sezioni verranno mostrate le principali operazioni che ogni DAO mette a disposizione per leggere e manipolare i dati relativi ad una o più entità di modello. Tutti gli esempi che verranno mostrati faranno riferimento al seguente modello applicativo:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
@@ -29,7 +29,7 @@ type User @mongoEntity {
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef

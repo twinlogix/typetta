@@ -47,7 +47,7 @@ Typetta relies on customized directives to extend the standard model definitions
 
 Here below you can see the simple definition of a User with a first and a last name.
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String

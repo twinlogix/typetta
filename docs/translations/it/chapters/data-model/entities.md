@@ -38,7 +38,7 @@ Una volta aggiunta una di queste annotazioni, l'entità risulta accoppiata alla 
 
 Per specificare al sistema che un'entità rappresenta una tabella SQL si può definire come segue:
 ```typescript
-type User @sqlEntity {
+type User @entity @sql {
   id: ID!
   firstName: String
   lastName: String
@@ -52,7 +52,7 @@ L'annotazione `sqlEntity` riceve inoltre due parametri opzionali:
 
 Di seguito quindi un esempio completo:
 ```typescript
-type User @sqlEntity(source: "secondary-database", table: "_users") {
+type User @entity @sql(source: "secondary-database", table: "_users") {
   id: ID!
   firstName: String
   lastName: String
@@ -63,7 +63,7 @@ type User @sqlEntity(source: "secondary-database", table: "_users") {
 
 Per specificare al sistema che un'entità rappresenta una collection MongoDB si può definire come segue:
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID!
   firstName: String
   lastName: String
@@ -77,7 +77,7 @@ L'annotazione `mongoEntity` riceve inoltre due parametri opzionali:
 
 Di seguito quindi un esempio completo:
 ```typescript
-type User @mongoEntity(source: "secondary-database", collection: "_users") {
+type User @entity @mongodb(source: "secondary-database", collection: "_users") {
   id: ID!
   firstName: String
   lastName: String
@@ -90,7 +90,7 @@ Ogni entità storicizzata necessita di un identificativo univoco. Qualsiasi camp
 
 Per definire l'id di un'entità si deve utilizzare la direttiva `@id` come nel seguente esempio:
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
@@ -101,7 +101,7 @@ Tale direttiva riceve anche un parametro opzionale `from` che può assumere i se
 - `db`: quando l'id viene autogenerato dal DB, sia esso un intero autoincrementale SQL o una stringa univoca come in MongoDB.
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: String! @id(from: "db") @alias(value: "_id")
   name: String!
 }
@@ -172,7 +172,7 @@ Typetta supporta le enumerazioni sia a livello di tipo TypeScript che a livello 
 
 Un'entità embedded è un'entità non direttamente storicizzata in una tabella SQL o in una collection MongoDB, ma inclusa solamente dentro ad un'altra entità con una logica di composizione. Le entità embedded sono un concetto tipico dei database documentali, che tuttavia può essere parzialmente supportato anche dai database SQL, come descritto in seguito. 
 
-In Typetta ogni entità può avere uno o più campi che a loro volta sono altre entità embedded. Queste seconde entità non possono essere annotate come `@sqlEntity` o `@mongoEntity`. Di seguito un semplice esempio: 
+In Typetta ogni entità può avere uno o più campi che a loro volta sono altre entità embedded. Queste seconde entità non possono essere annotate come `@entity @sql` o `@entity @mongodb`. Di seguito un semplice esempio: 
 
 ```typescript
 type Address {
@@ -183,7 +183,7 @@ type Address {
   country: String
 }
 
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
@@ -198,7 +198,7 @@ Typetta offre il più avanzato supporto possibile alle entità embedded su Mongo
 Ogni campo di un'entità storicizzata ha una corrispondenza diretta con la relativa colonna SQL o la relativa chiave del documento MongoDB e tale corrispondenza è data dal nome del campo stesso. Nel caso si voglia disaccoppiare il nome dell'entità del modello applicativo dalla chiave presente sul database si può utilizzare la direttiva alias:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String @alias(value: "name")
   lastName: String @alias(value: "surname")
@@ -215,7 +215,7 @@ E' possibile definire dei campi nel modello applicativo che non hanno corrispond
 Per definire un campo esluso si può utilizzare la direttiva `@exclude` come di seguito:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String

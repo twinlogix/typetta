@@ -20,7 +20,7 @@ Questo comportamento di base è giustificato dal fatto che il sistema recupera d
 Prendendo ad esempio il seguente modello applicativo:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
@@ -28,7 +28,7 @@ type User @mongoEntity {
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
