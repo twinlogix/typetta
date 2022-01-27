@@ -26,6 +26,7 @@ import DataLoader from 'dataloader'
 import { GraphQLResolveInfo } from 'graphql'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
+import { isArray } from 'util'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idField: T['idKey']
@@ -167,7 +168,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       objectHash(params.metadata || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.options || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.relations || null, { respectType: false, unorderedArrays: true })
-    const hasKeyF = hasKey ?? ((record, key) => getTraversing(record, filterKey as string).includes(key))
+    const hasKeyF = hasKey ?? ((record, key) => getTraversing(record, filterKey as string).some((v) => v === key || (typeof v === 'object' && 'equals' in v && v.equals(key))))
     const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { $in: values } }))
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
@@ -284,12 +285,13 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   private async loadAllOrFindAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
     params: FindParams<T, P>,
     filterKey: K,
-    filterValues: T['filter'][K][],
+    filterValues: T['filter'][K] | T['filter'][K][],
   ): Promise<ModelProjection<T, P>[]> {
+    const values = Array.isArray(filterValues) ? filterValues : [filterValues]
     if (params.skip != null || params.limit != null || params.filter != null) {
-      return this.findAll({ ...params, filter: { $and: [{ [filterKey]: { $in: filterValues } }, params.filter ?? {}] } })
+      return this.findAll({ ...params, filter: { $and: [{ [filterKey]: { $in: values } }, params.filter ?? {}] } })
     }
-    return await this.loadAll(params, filterKey, filterValues)
+    return await this.loadAll(params, filterKey, values)
   }
 
   async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
