@@ -38,7 +38,7 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
 
 export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {
   const c = name.split('.')
-  const k = c.shift()!
+  const k = c.shift() ?? name
   const schemaField = schema[k]
   const n = (schemaField && schemaField.alias) || k
   if (c.length === 0) {
@@ -122,7 +122,7 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
 
 export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
   return Object.entries(update).reduce((p, [k, v]) => {
-    if(v === undefined) {
+    if (v === undefined) {
       return p
     }
     const schemaField = getSchemaFieldTraversing(k, schema)
@@ -141,8 +141,8 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
 export function adaptSorts<SortType, ScalarsType>(sort: SortType[], schema: Schema<ScalarsType>): [string, SortDirection][] {
   return sort.flatMap((s) => {
     return Object.entries(s).map(([k, v]) => {
-      if(k === '$textScore') {
-        return ['score', { $meta: "textScore" }] as [string, SortDirection]
+      if (k === '$textScore') {
+        return ['score', { $meta: 'textScore' }] as [string, SortDirection]
       }
       return [modelNameToDbName(k, schema), v] as [string, SortDirection]
     })

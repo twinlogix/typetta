@@ -24,7 +24,13 @@ export type MergeGenericProjection<T1 extends GenericProjection, T2 extends Gene
   : T2 extends false
   ? T1
   : Expand<{
-      [K in keyof T1 | keyof T2]: T1 extends Record<K, any> ? (T2 extends Record<K, any> ? MergeGenericProjection<T1[K], T2[K]> : T1[K]) : T2 extends Record<K, any> ? T2[K] : never
+      [K in keyof T1 | keyof T2]: T1 extends Record<K, GenericProjection>
+        ? T2 extends Record<K, GenericProjection>
+          ? MergeGenericProjection<T1[K], T2[K]>
+          : T1[K]
+        : T2 extends Record<K, GenericProjection>
+        ? T2[K]
+        : never
     }>
 
 type Selector<ProjectionType extends Record<string, unknown>, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = Record<string, unknown> extends Required<P>
@@ -122,7 +128,7 @@ type StaticModelProjectionParam<ModelType, ProjectionType, P extends ProjectionT
     > & { __projection?: P }
   : never
 
-type MP<ModelType extends object, P extends PartialObjectDeep<any>> = Expand<
+/* type MP<ModelType extends object, P extends PartialObjectDeep<any>> = Expand<
   {
     [K in keyof P]: P[K] extends true // true: T
       ? ModelType extends Partial<Record<K, any>>
@@ -145,3 +151,4 @@ type MP<ModelType extends object, P extends PartialObjectDeep<any>> = Expand<
 >
 
 type MPS<T, P extends object, K extends keyof P> = T extends (infer O)[] ? MPS<O, P, K>[] : T extends object ? MP<T, P[K]> : never
+*/

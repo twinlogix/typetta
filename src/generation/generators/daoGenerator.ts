@@ -92,7 +92,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         return node.entity?.type === 'mongo'
           ? [`${toFirstLower(node.name)}: this.mongo.${node.entity.source}.collection('${node.entity.collection}')`]
           : node.entity?.type === 'sql'
-          ? [`${toFirstLower(node.name)}: this.knex.${node.entity!.source}.table('${node.entity!.table}')`]
+          ? [`${toFirstLower(node.name)}: this.knex.${node.entity.source}.table('${node.entity.table}')`]
           : []
       })
       .join(', ')
@@ -133,14 +133,13 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .map((node) => {
         const daoImplementationInit =
           node.entity?.type === 'sql'
-            ? `, knex: this.knex.${node.entity!.source}, tableName: '${node.entity?.table}'`
+            ? `, knex: this.knex.${node.entity.source}, tableName: '${node.entity?.table}'`
             : node.entity?.type === 'mongo'
-            ? `, collection: this.mongo.${node.entity!.source}.collection('${node.entity?.collection}')`
+            ? `, collection: this.mongo.${node.entity.source}.collection('${node.entity?.collection}')`
             : ''
         const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...this.middlewares as DAOMiddleware<${
           node.name
         }DAOGenerics<MetadataType, OperationMetadataType>>[]]`
-        const daoIdGeneratorInit = node.fields.find((f) => f.isID)?.idGenerationStrategy === 'generator' ? `, idGenerator: this.overrides?.${toFirstLower(node.name)}?.idGenerator` : ''
         const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
         )}${daoImplementationInit}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger });`
@@ -428,7 +427,6 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAO(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const idField = findID(node)!
     const daoName = node.entity?.type === 'sql' ? 'AbstractKnexJsDAO' : node.entity?.type === 'mongo' ? 'AbstractMongoDBDAO' : 'AbstractDAO'
     const daoBody = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap) + '\n')
     return `export class ${node.name}DAO<MetadataType, OperationMetadataType> extends ${daoName}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>> {\n` + daoBody + '\n}'

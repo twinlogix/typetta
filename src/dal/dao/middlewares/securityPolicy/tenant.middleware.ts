@@ -1,6 +1,5 @@
 import { DefaultModelScalars } from '../../../drivers/drivers.types'
 import { DAOGenerics, IdGenerationStrategy, MiddlewareContext } from '../../dao.types'
-import { projection } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 

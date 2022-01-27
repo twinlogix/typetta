@@ -180,7 +180,10 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
         async () => {
           const result = await this.collection.insertOne(record, options)
           const inserted = await this.collection.findOne({ _id: result.insertedId }, options)
-          return this.dbToModel(inserted!) as Omit<T['model'], T['insertExcludedFields']>
+          if(!inserted) {
+            throw new Error(`One just inserted document with id ${result.insertedId.toHexString()} was not retrieved correctly.`)
+          }
+          return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
         },
         () => `collection.insertOne(${JSON.stringify(record)})`,
       ]

@@ -21,38 +21,35 @@ export type MongoDBDAOGenerics<
   MetadataType = any,
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
-  NameType extends string = any
-> = Omit<
-  DAOGenerics<
-    ModelType,
-    IDKey,
-    IDScalar,
-    IdGeneration,
-    PureFilterType,
-    RawFilterType,
-    RelationsType,
-    ProjectionType,
-    PureSortType,
-    RawSortType,
-    InsertType,
-    PureUpdateType,
-    RawUpdateType,
-    ExcludedFields,
-    RelationsFields,
-    MetadataType,
-    OperationMetadataType,
-    any,
-    ScalarsType,
-    CountOptions,
-    FindOptions,
-    InsertOneOptions,
-    UpdateOptions,
-    ReplaceOptions,
-    DeleteOptions,
-    NameType
-  >,
-  'driverContext'
-> & { driverContext: { collection: Collection } }
+  NameType extends string = any,
+> = DAOGenerics<
+  ModelType,
+  IDKey,
+  IDScalar,
+  IdGeneration,
+  PureFilterType,
+  RawFilterType,
+  RelationsType,
+  ProjectionType,
+  PureSortType,
+  RawSortType,
+  InsertType,
+  PureUpdateType,
+  RawUpdateType,
+  ExcludedFields,
+  RelationsFields,
+  MetadataType,
+  OperationMetadataType,
+  { collection: Collection },
+  ScalarsType,
+  CountOptions,
+  FindOptions,
+  InsertOneOptions,
+  UpdateOptions,
+  ReplaceOptions,
+  DeleteOptions,
+  NameType
+>
 
 export type MongoDBDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverContext'> & {
   collection: Collection

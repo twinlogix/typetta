@@ -26,7 +26,6 @@ import DataLoader from 'dataloader'
 import { GraphQLResolveInfo } from 'graphql'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
-import { isArray } from 'util'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idField: T['idKey']
@@ -184,7 +183,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       )
       this.dataLoaders.set(hash, newDataLoader)
     }
-    const dataLoader = this.dataLoaders.get(hash)!
+    const dataLoader = this.dataLoaders.get(hash)
+    if (!dataLoader) {
+      return []
+    }
     const results = await dataLoader.loadMany(filterValues)
     return results.flatMap((r) => {
       if (r instanceof Error) {
@@ -267,7 +269,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return records
   }
 
-  private setResult(record: PartialDeep<T['model']>, relation: DAORelation, results: ModelProjection<any, T['projection']>[]) {
+  private setResult(record: PartialDeep<T['model']>, relation: DAORelation, results: ModelProjection<DAOGenerics, T['projection']>[]) {
     if (relation.type === '1-n') {
       setTraversing(record, relation.field, results)
     } else {
