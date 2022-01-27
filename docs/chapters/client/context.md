@@ -5,27 +5,27 @@
   - [DAO (Data Access Object)](#daos-data-access-objects)
 
 
-The heart of Typetta is a type-safe, self-generated query builder tailor-made to the data model. The best way to start using it is to follow all the steps of [Getting Started](../overview/getting-started.md).
+The heart of Typetta is a type-safe, self-generated query builder tailor-made to the data model. The best way to start using it is to follow our [Getting Started](../overview/getting-started.md).
 
-Each time the data model is modified, you can execute a supplied generator that creates and updates all TypeScript types, a DAOContext class and all the related DAOs. These objects allow the user to access the data sources in a powerful and type-safe way, using the Typetta query builder.
+Each time the data model is modified, you can execute a supplied generator that creates and updates all TypeScript types, a DAOContext class and all the related DAOs. These objects allow you to access the data sources in a powerful and type-safe way, using the Typetta query builder.
 
-To generate simply run the command:
+Simply run the following command to start the generation:
 
-`` '' bash
+```bash
 npx graphql-codegen
-``
+```
 
 It is also possible to run it in *watch mode* so that any change to the GraphQL Schema will automatically trigger a new generation:
 
-`` '' bash
+```bash
 npx graphql-codegen --watch
-``
+```
 
 For any additional details on the generation tool, refer to the official documentation [GraphQL Code Generatore](https://www.graphql-code-generator.com/docs/getting-started){:target="_blank"}.
 
-The main result of the generation process is a component we called `DAOContext`. The DAOContext is a container for so-called `DAO`s, data access objects that allow you to perform all operations on the entities of the data model.
+The main result of the generation process is a component we called `DAOContext`. It is a container for so-called `DAO`s, data access objects that allow you to perform all operations on the entities of the data model.
 
-The role of the DAOContext is absolutely central because it is on it that a whole series of settings can be configured that can modify the behavior of the entire data access system or of a single DAO. It also represents a perimeter and a replicable context, so it is possible to instantiate any number of DAOContext, each with different settings.
+The role of the DAOContext is absolutely central because it is on it that a whole series of settings can be configured that can modify the behavior of the entire data access system. It also represents a replicable unit, so it is possible to instantiate any number of DAOContext, each with different settings.
 
 ## How to create a Context
 

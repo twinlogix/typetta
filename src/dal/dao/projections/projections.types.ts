@@ -27,7 +27,7 @@ export type MergeGenericProjection<T1 extends GenericProjection, T2 extends Gene
       [K in keyof T1 | keyof T2]: T1 extends Record<K, any> ? (T2 extends Record<K, any> ? MergeGenericProjection<T1[K], T2[K]> : T1[K]) : T2 extends Record<K, any> ? T2[K] : never
     }>
 
-type Selector<ProjectionType extends object, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = object extends Required<P>
+type Selector<ProjectionType extends Record<string, unknown>, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = Record<string, unknown> extends Required<P>
   ? 'empty'
   : [true] extends [P]
   ? 'all'
