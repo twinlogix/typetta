@@ -1,11 +1,11 @@
-// tslint:disable-next-line: no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 global.TextEncoder = require('util').TextEncoder
-// tslint:disable-next-line: no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 global.TextDecoder = require('util').TextDecoder
 
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb } from '../../src'
 import { Test, typeAssert } from '../utils.test'
-import { CityProjection, DAOContext, mockedDAOContext, UserProjection } from './dao.mock'
+import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
