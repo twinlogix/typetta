@@ -1,0 +1,27 @@
+overwrite: true
+schema: 'tests/multitenant/schema.graphql'
+documents: null
+generates:
+  tests/multitenant/models.mock.ts:
+    plugins:
+      - 'typescript'
+    config:
+      namingConvention: keep
+      scalars:
+        ID: mongodb#ObjectId
+        Date: Date
+        Decimal: bignumber.js#BigNumber
+        Email: string
+        Password: string
+        TenantId: number
+        Username: string
+  tests/multitenant/dao.mock.ts:
+    config:
+      schemaImport: './schema.graphql'
+      tsTypesImport: ./models.mock
+      typettaImport: ../../src
+      namingConvention: keep
+      defaultIdGenerationStrategy: 'generator'
+      skipTypename: true
+    plugins:
+      - lib/generation/index.js
