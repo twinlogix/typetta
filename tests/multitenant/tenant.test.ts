@@ -1,13 +1,13 @@
-import { inMemoryMongoDb, UserInputDriverDataTypeAdapterMap, buildMiddleware, mergeProjections, projection, tenantSecurityPolicy } from '../../src'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+global.TextEncoder = require('util').TextEncoder
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+global.TextDecoder = require('util').TextDecoder
+
+import { inMemoryMongoDb, tenantSecurityPolicy } from '../../src'
 import { DAOContext } from './dao.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
-
-// tslint:disable-next-line: no-var-requires
-global.TextEncoder = require('util').TextEncoder
-// tslint:disable-next-line: no-var-requires
-global.TextDecoder = require('util').TextDecoder
 
 jest.setTimeout(20000)
 
