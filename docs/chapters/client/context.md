@@ -76,14 +76,14 @@ const daoContext = new DAOContext({
 At this point, each stored entity can refer to a data source (therefore a database) by specifying its logical name. If no explicit data source is specified, the default, mandatory one will always be taken. 
 
 ```typescript
-type User @mongoEntity(source: "secondary") {
+type User @entity @mongodb(source: "secondary") {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @sqlEntity {
+type Post @entity @sql {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -100,14 +100,14 @@ Note that different entities can reside in different data sources, even heteroge
 The given code generator automatically creates a series of DAOs, one for each stored entity of the data model. Let's assume we have a simple schema like the one below:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @sqlEntity {
+type Post @entity @sql {
   id: ID! @id
   userId: ID!
   user: User! @innerRef

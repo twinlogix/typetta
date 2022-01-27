@@ -13,14 +13,14 @@ Quando un modello applicativo contiene entità connesse tra loro, tutte le API d
 Prendendo come esempio il seguente modello applicativo:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -29,7 +29,7 @@ type Post @mongoEntity {
   categories: [Category!]! @innerRef
 }
 
-type Category @mongoEntity {
+type Category @entity @mongodb {
   id: ID! @id
   name: String!
 }
