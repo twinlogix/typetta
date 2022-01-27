@@ -47,7 +47,7 @@ Typetta utilizza alcune direttive customizzate per aumentare l'espressività del
 
 Di seguito la semplice definizone di un Utente con nome e cognome:
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String

@@ -4,7 +4,7 @@ scalar Decimal
 scalar Password
 scalar JSON
 
-type Device @mongoEntity {
+type Device @entity @mongodb {
   id: ID! @id
   name: String!
   userId: ID
@@ -16,7 +16,7 @@ type UsernamePasswordCredentials {
   password: Password! @alias(value: "pwd")
 }
 
-type City @mongoEntity {
+type City @entity @mongodb {
   id: ID! @id
   name: String!
   addressId: ID!
@@ -24,12 +24,12 @@ type City @mongoEntity {
   computedAddressName: String @exclude
 }
 
-type Address @mongoEntity(collection: "addresses") {
+type Address @entity @mongodb(collection: "addresses") {
   id: ID! @id
   cities: [City!] @foreignRef
 }
 
-type Organization @mongoEntity {
+type Organization @entity @mongodb {
   id: ID! @id
   name: String!
   vatNumber: String
@@ -37,7 +37,7 @@ type Organization @mongoEntity {
   computedName: String @exclude
 }
 
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id @alias(value: "ID")
   usernamePasswordCredentials: UsernamePasswordCredentials @alias(value: "cred")
   firstName: String @alias(value: "name")
@@ -52,14 +52,14 @@ type User @mongoEntity {
   dogs: [Dog!] @foreignRef(refFrom: "ownerId")
 }
 
-type Dog @mongoEntity {
+type Dog @entity @mongodb {
   id: ID! @id
   name: String!
   ownerId: ID!
   owner: User @innerRef
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   title: String!
   body: String
@@ -73,4 +73,11 @@ type Post @mongoEntity {
 type PostMetadata {
   region: String!
   visible: Boolean!
+}
+
+type MockedEntity @entity {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  name: String!
+  userId: ID!
+  user: User! @innerRef
 }

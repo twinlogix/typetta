@@ -75,14 +75,14 @@ const daoContext = new DAOContext({
 A questo punto, ogni entità storicizzata può far riferimento ad una sorgente dati (quindi un database) specificandone il nome logico. Nel caso non venga specificata alcuna sorgente dati esplicita verrà sempre presa quella di default, obbligatoria. 
 
 ```typescript
-type User @mongoEntity(source: "secondary") {
+type User @entity @mongodb(source: "secondary") {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @sqlEntity {
+type Post @entity @sql {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -99,14 +99,14 @@ Si noti che entità diverse possono risiedere in sorgenti dati diverse, anche et
 Come detto in precedenza, la generazione di codice crea automaticamente una serie di DAO, uno per ogni entità storicizzata del modello applicativo. Ipotizziamo di avere un semplice modello applicativo come il precedente, qui di seguito riportato:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @sqlEntity {
+type Post @entity @sql {
   id: ID! @id
   userId: ID!
   user: User! @innerRef

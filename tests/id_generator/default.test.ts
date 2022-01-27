@@ -1,5 +1,5 @@
 import { computedField } from '../../src'
-import { DAOContext } from './dao.mock'
+import { DAOContext, mockedDAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
@@ -40,7 +40,7 @@ beforeEach(async () => {
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
 
-  dao = new DAOContext({
+  dao = await mockedDAOContext({
     mongo: {
       default: db,
       a: db,

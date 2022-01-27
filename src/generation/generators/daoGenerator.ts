@@ -15,12 +15,12 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const knexImports = [`import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`, "import { Knex } from 'knex';"]
 
     const mongodbImports = [
-      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
+      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '${this._config.typettaImport || '@twinlogix/typetta'}';`,
       "import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';",
     ]
 
     const commonImports = [
-      `import { DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '${
+      `import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '${
         this._config.typettaImport || '@twinlogix/typetta'
       }';`,
       `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}';`,
@@ -99,6 +99,18 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const execQueryF =
       `public async execQuery<T>(run: (dbs: { ${dbsInputParam} }, entities: { ${entitiesInputParam} }) => Promise<T>): Promise<T> {\n` + `  return run({ ${dbsParam} }, { ${entitiesParam} })\n` + `}`
 
+    const createTableBody = Array.from(typesMap.values())
+      .flatMap((node) => {
+        return node.entity?.type === 'sql' ? [`this.${toFirstLower(node.name)}.createTable(typeMap, defaultType)`] : []
+      })
+      .join('\n  ')
+    const createTableF =
+      createTableBody.length > 0
+        ? `public async createTables(typeMap: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>` +
+          `, defaultType: { singleType: string; arrayType?: string }): Promise<void> {\n` +
+          `  ${createTableBody.trimEnd()}\n}`
+        : ''
+
     const daoContextParamsExport = `export type DAOContextParams<MetadataType, OperationMetadataType> = {\n${indentMultiline(
       `${metadata}${middlewares}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${loggerParams}`,
     )}\n};`
@@ -151,7 +163,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       ) +
       '\n}'
 
-    const declarations = [daoDeclarations, overridesDeclaration, middlewareDeclaration, loggerDeclaration, daoGetters, daoConstructor, execQueryF].join('\n\n')
+    const declarations = [daoDeclarations, overridesDeclaration, middlewareDeclaration, loggerDeclaration, daoGetters, daoConstructor, execQueryF, createTableF].join('\n\n')
 
     const daoExport =
       'export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {\n\n' + indentMultiline(declarations) + '\n\n}'
@@ -160,7 +172,12 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .filter((node) => node.entity)
       .map((n) => `${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
       .join(' | ')}>`
-    return [[daoContextParamsExport, daoContextMiddleware, daoExport].join('\n\n')]
+
+    const daoMockFunction = `export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
+  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, [${mongoSources.map((v) => `'${v}'`)}], [${sqlSources.map((v) => `'${v}'`)}])
+  return new DAOContext(newParams)
+}`
+    return [[daoContextParamsExport, daoContextMiddleware, daoExport, daoMockFunction].join('\n\n')]
   }
 
   // ---------------------------------------------------------------------------------------------------------

@@ -10,7 +10,7 @@ import { Collection, Document, WithId, Filter, FindOptions, OptionalId, SortDire
 import { PartialDeep } from 'type-fest'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
-  protected collection: Collection
+  private collection: Collection
 
   protected constructor({ collection, idGenerator, ...params }: MongoDBDAOParams<T>) {
     super({ ...params, driverContext: { collection }, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate })
@@ -153,7 +153,6 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
               ...r,
             }
           })
-
           if (params.by) {
             return mappedResults as AggregateResults<T, A>
           } else {

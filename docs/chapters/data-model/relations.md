@@ -26,13 +26,13 @@ To define a reference to another entity, Typetta provides three different direct
 `@ innerRef` identifies a connection through a reference between a field of the source entity and the id of the target entity. Let's take the following model as an example:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -47,14 +47,14 @@ It is called `@innerRef` because the reference to the connected entities is insi
 Both of these configurations can still be modified and made explicit by the user to have more flexibility, see the more complex example below:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   anotherId: ID!
   firstName: String
   lastName: String
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   anotherUserId: ID!
   user: User! @innerRef(refFrom: "anotherUserId", refTo: "anotherId")
@@ -67,14 +67,14 @@ type Post @mongoEntity {
 `@foreignRef` identifies a complementary connection to the previous `@innerRef` and gets this name because the reference to the connected entities is the connected entities themselves and not in the entity containing the relation. Let's take as an example the previous model that we are going to enrich with a reference between the user and his posts:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -89,7 +89,7 @@ In this case, contrary to what was the case with `@innerRef`, it is always neces
 There is also the possibility to specify the `refTo` parameter to handle more complex cases, as demostated in the following example:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   anotherId: ID!
   firstName: String
@@ -97,7 +97,7 @@ type User @mongoEntity {
   posts: [Post!] @foreignRef(refFrom: "anotherUserId", refTo: "anotherId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   anotherUserId: ID!
   user: User! @innerRef(refFrom: "anotherUserId", refTo: "anotherId")
@@ -110,18 +110,18 @@ type Post @mongoEntity {
 Relations with cardinality n-m are tipically designed using a third entity that connects both other entities referencing them by id. Let's assume a data model like the following:
 
 ```typescript
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   content: String!
   categories: [Category!] @relationEntityRef(entity: "PostCategory")
 }
 
-type Category @mongoEntity {
+type Category @entity @mongodb {
   id: ID! @id
   name: String!
 }
 
-type PostCategory @mongoEntity {
+type PostCategory @entity @mongodb {
   id: ID! @id
   postId: ID!
   categoryId: ID!
@@ -135,18 +135,18 @@ Thanks to the reference `@relationEntityRef` the relation `Post.categories` turn
 As in the previous cases, however, each single reference can be made explicit:
 
 ```typescript
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   content: String!
   categories: [Category!] @relationEntityRef(entity: "PostCategory", refThis: { refFrom: "idOfAPost" }, refOther: { refFrom: "idOfACategory" })
 }
 
-type Category @mongoEntity {
+type Category @entity @mongodb {
   id: ID! @id
   name: String!
 }
 
-type PostCategory @mongoEntity {
+type PostCategory @entity @mongodb {
   id: ID! @id
   idOfAPost: ID!
   idOfACategory: ID!
@@ -166,14 +166,14 @@ Using references as described in the previous sections, Typetta allows you to ma
 Following is an example of a 1-1 relation between a user and their profile:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   profile: Profile @foreignRef(refFrom: "userId") 
 }
 
-type Profile @mongoEntity {
+type Profile @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -186,14 +186,14 @@ type Profile @mongoEntity {
 Below is an example of a 1-n relation between a user and his posts:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -206,18 +206,18 @@ type Post @mongoEntity {
 Finally an example of an n-m relation between posts and categories:
 
 ```typescript
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   content: String!
   categories: [Category!] @relationEntityRef(entity: "PostCategory", refThis: { refFrom: "idOfAPost" }, refOther: { refFrom: "idOfACategory" })
 }
 
-type Category @mongoEntity {
+type Category @entity @mongodb {
   id: ID! @id
   name: String!
 }
 
-type PostCategory @mongoEntity {
+type PostCategory @entity @mongodb {
   id: ID! @id
   idOfAPost: ID!
   idOfACategory: ID!
@@ -231,7 +231,7 @@ A relation can also connect an entity with itself and can be of any cardinality.
 Here is an example of a recursive relationship with cardinality 1-1:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
@@ -243,7 +243,7 @@ type User @mongoEntity {
 With 1-n cardinality:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
@@ -255,14 +255,14 @@ type User @mongoEntity {
 Anc with n-m cardinality using `@relationEntityRef`:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   friends: [User!] @relationEntityRef(entity: "Friends", refThis: { refFrom: "from" }, refOther: { refFrom: "to" })
 }
 
-type Friends @mongoEntity {
+type Friends @entity @mongodb {
   id: ID! @id
   from: ID!
   to: ID!

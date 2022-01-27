@@ -8,7 +8,7 @@ type Credentials {
     password: Password
 }
 
-type User @sqlEntity {
+type User @entity @sql {
   id: ID! @id
   credentials: Credentials!
   createdAt: DateTime!
@@ -20,7 +20,7 @@ type User @sqlEntity {
   posts: [Post!] @foreignRef(refFrom: "authorId")
 }
 
-type Post @sqlEntity {
+type Post @entity @sql {
   id: ID! @id
   createdAt: DateTime!
   title: String!
@@ -33,7 +33,7 @@ type Post @sqlEntity {
   tags: [Tag!] @foreignRef
 }
 
-type Tag @sqlEntity {
+type Tag @entity @sql {
   id: ID! @id
   postId: ID!
   name: String
@@ -46,7 +46,7 @@ type PostMetadata {
   visible: Boolean!
 }
 
-type PostType @sqlEntity {
+type PostType @entity @sql {
   id: ID! @id(from: "user")
   name: String!
 }

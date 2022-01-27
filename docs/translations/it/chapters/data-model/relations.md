@@ -25,13 +25,13 @@ Per definire un riferimento ad un'altra entità, Typetta mette a disposizione tr
 Un `@innerRef` identifica una connessione tramite un riferimento tra un campo dell'entità sorgente e l'id dell'entità destinazione. Prendiamo come esempio il seguente modello:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -45,14 +45,14 @@ Si chiama `@innerRef` perchè il riferimento alle entità collegate si trova all
 
 Entrambe queste configurazioni possono comunque essere modificate ed esplicitate dall'utente per avere più flessibilità, si veda il più complesso esempio di seguito:
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   anotherId: ID!
   firstName: String
   lastName: String
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   anotherUserId: ID!
   user: User! @innerRef(refFrom: "anotherUserId", refTo: "anotherId")
@@ -65,14 +65,14 @@ type Post @mongoEntity {
 Un `@foreignRef` identifica una connessione complementare rispetto alla precedente `@innerRef` e prende questo nome perchè il riferimento alle entità collegate si trova nelle entità collegate stesse e non nell'entità contenente la relazione. Prendiamo come esempio il modello precedente che andiamo ad arricchire con un riferimento tra utente ed i suoi post:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -86,7 +86,7 @@ In questo caso, contrariamente a quanto era per gli `@innerRef`, è sempre neces
 
 Anche in questo caso c'è la possibilità di esplicitare anche il parametro `refTo` per gestire casi più complessi. Si veda l'esempio di seguito:
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   anotherId: ID!
   firstName: String
@@ -94,7 +94,7 @@ type User @mongoEntity {
   posts: [Post!] @foreignRef(refFrom: "anotherUserId", refTo: "anotherId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   anotherUserId: ID!
   user: User! @innerRef(refFrom: "anotherUserId", refTo: "anotherId")
@@ -107,18 +107,18 @@ type Post @mongoEntity {
 Può capitare, tipicamente nelle relazioni con cardinalità n-m, che due entità siano collegate da riferimenti che non risiedono né nell'una né nell'altra, bensì in un'entità terza. Ipotizziamo un modello applicativo come il seguente:
 
 ```typescript
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   content: String!
   categories: [Category!] @relationEntityRef(entity: "PostCategory")
 }
 
-type Category @mongoEntity {
+type Category @entity @mongodb {
   id: ID! @id
   name: String!
 }
 
-type PostCategory @mongoEntity {
+type PostCategory @entity @mongodb {
   id: ID! @id
   postId: ID!
   categoryId: ID!
@@ -132,18 +132,18 @@ Grazie al riferimento `@relationEntityRef` la relazione `Post.categories` risult
 Come nei casi precedenti, tuttavia, è possibile esplicitare ogni signolo riferimento, come nell'esempio seguente:
 
 ```typescript
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   content: String!
   categories: [Category!] @relationEntityRef(entity: "PostCategory", refThis: { refFrom: "idOfAPost" }, refOther: { refFrom: "idOfACategory" })
 }
 
-type Category @mongoEntity {
+type Category @entity @mongodb {
   id: ID! @id
   name: String!
 }
 
-type PostCategory @mongoEntity {
+type PostCategory @entity @mongodb {
   id: ID! @id
   idOfAPost: ID!
   idOfACategory: ID!
@@ -161,14 +161,14 @@ Utilizzando i riferimenti descritti nelle sezioni precedenti, Typetta permette d
 Di seguito un esempio di relazione 1-1 fra un utente e il suo profilo:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   profile: Profile @foreignRef(refFrom: "userId") 
 }
 
-type Profile @mongoEntity {
+type Profile @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -181,14 +181,14 @@ type Profile @mongoEntity {
 Di seguito un esempio di relazione 1-n fra un utente ed i suoi post:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   posts: [Post!] @foreignRef(refFrom: "userId")
 }
 
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   userId: ID!
   user: User! @innerRef
@@ -201,18 +201,18 @@ type Post @mongoEntity {
 Di seguito un esempio di relazione n-m fra post e categorie:
 
 ```typescript
-type Post @mongoEntity {
+type Post @entity @mongodb {
   id: ID! @id
   content: String!
   categories: [Category!] @relationEntityRef(entity: "PostCategory", refThis: { refFrom: "idOfAPost" }, refOther: { refFrom: "idOfACategory" })
 }
 
-type Category @mongoEntity {
+type Category @entity @mongodb {
   id: ID! @id
   name: String!
 }
 
-type PostCategory @mongoEntity {
+type PostCategory @entity @mongodb {
   id: ID! @id
   idOfAPost: ID!
   idOfACategory: ID!
@@ -226,7 +226,7 @@ Una relazione può essere connettere anche un'entità con sè stessa e può esse
 Di seguito un esempio si relazione ricorsiva con cardinalità 1-1:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
@@ -238,7 +238,7 @@ type User @mongoEntity {
 Con cardinalità 1-n:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
@@ -250,14 +250,14 @@ type User @mongoEntity {
 E con cardinalità n-m tramite `@relationEntityRef`:
 
 ```typescript
-type User @mongoEntity {
+type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
   friends: [User!] @relationEntityRef(entity: "Friends", refThis: { refFrom: "from" }, refOther: { refFrom: "to" })
 }
 
-type Friends @mongoEntity {
+type Friends @entity @mongodb {
   id: ID! @id
   from: ID!
   to: ID!
