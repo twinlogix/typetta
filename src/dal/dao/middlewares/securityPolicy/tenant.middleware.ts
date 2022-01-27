@@ -60,6 +60,7 @@ export type MultiTenantDAOGenerics<
   NameType
 >
 
+const ERROR_PREFIX = '[Tenant Middleware] '
 export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdKey extends keyof T['model'] & keyof T['metadata']>(args: {
   tenantKey: TenantIdKey
   rawOperations?: 'forbidden' | 'warning' | 'allowed'
@@ -79,43 +80,67 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
     }
     if (typeof filter === 'function') {
       if (rawOpPolicy === 'forbidden') {
-        throw new Error(`Raw filter is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
+        throw new Error(`${ERROR_PREFIX}Raw filter is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
       }
       if (rawOpPolicy === 'warning') {
         // TODO: log warning
       }
       return filter
     } else {
+      if (filter[key] && filter[key] !== tenantId) {
+        throw new Error(`${ERROR_PREFIX}Invalid tenant ID in find. Current selected tenant ID is ${tenantId}, but received ${filter[key]} instead.`)
+      }
       return { $and: [{ [key]: tenantId }, filter] }
     }
   }
   return buildMiddleware<T>({
     beforeInsert: async (params, context) => {
       const tenantId = getTenantId(context)
-      if (!tenantId) {
-        return
+      if (!tenantId) return
+      if (params.record[key] == null) {
+        return { continue: true, params: { ...params, record: { ...params.record, [key]: tenantId } } }
       }
-      if (params.record[key] == null || params.record[key] !== tenantId) {
-        throw new Error(`Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[key]} instead.`)
+      if (params.record[key] !== tenantId) {
+        throw new Error(`${ERROR_PREFIX}[Tenant middleware]: Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[key]} instead.`)
       }
     },
     beforeFind: async (params, context) => {
       const tenantId = getTenantId(context)
-      if (!tenantId) {
-        return
-      }
+      if (!tenantId) return
       return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) } }
     },
     beforeUpdate: async (params, context) => {
       const tenantId = getTenantId(context)
-      if (!tenantId) {
-        return
-      }
+      if (!tenantId) return
       const filter = elabFilter(params.filter, tenantId)
-
       if (typeof params.changes === 'function') {
+        if (rawOpPolicy === 'forbidden') {
+          throw new Error(`${ERROR_PREFIX}Raw filter is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
+        }
+        if (rawOpPolicy === 'warning') {
+          // TODO: log warning
+        }
+        return { continue: true, params: { ...params, filter } }
       } else {
+        if (params.changes[key] && params.changes[key] !== tenantId) {
+          throw new Error(`${ERROR_PREFIX}Invalid tenant ID in update. Current selected tenant ID is ${tenantId}, but received ${params.changes[key]} instead.`)
+        }
+        return { continue: true, params: { ...params, filter, changes: { ...params.changes, [key]: tenantId } } }
       }
+    },
+    beforeReplace: async (params, context) => {
+      const tenantId = getTenantId(context)
+      if (!tenantId) return
+      const filter = elabFilter(params.filter, tenantId)
+      if (params.replace[key] && params.replace[key] !== tenantId) {
+        throw new Error(`${ERROR_PREFIX}Invalid tenant ID in replace. Current selected tenant ID is ${tenantId}, but received ${params.replace[key]} instead.`)
+      }
+      return { continue: true, params: { ...params, filter, replace: { ...params.replace, [key]: tenantId } } }
+    },
+    beforeDelete: async (params, context) => {
+      const tenantId = getTenantId(context)
+      if (!tenantId) return
+      return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) } }
     },
   })
 }

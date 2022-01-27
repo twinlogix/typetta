@@ -1,6 +1,5 @@
 import { inMemoryMongoDb, UserInputDriverDataTypeAdapterMap, buildMiddleware, mergeProjections, projection, tenantSecurityPolicy } from '../../src'
-import { DAOContext, HotelDAOGenerics } from './dao.mock'
-import { Scalars } from './models.mock'
+import { DAOContext } from './dao.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
@@ -13,26 +12,24 @@ global.TextDecoder = require('util').TextDecoder
 jest.setTimeout(20000)
 
 type DaoMetadata = {
-  mongodb: {
-    replSet: MongoMemoryReplSet
-    connection: MongoClient
-    db: Db
-  }
   tenantId: number
-  dao: () => Promise<DAOContext<DaoMetadata>>
+  dao: (tenantId: number, db: Db) => DAOContext<DaoMetadata>
 }
-let dao: DAOContext<DaoMetadata>
-
-async function createDao(): Promise<DAOContext<DaoMetadata>> {
-  const mongodb = await inMemoryMongoDb()
+let dao1: DAOContext<DaoMetadata>
+let dao2: DAOContext<DaoMetadata>
+let mongodb: {
+  replSet: MongoMemoryReplSet
+  connection: MongoClient
+  db: Db
+}
+function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
   return new DAOContext<DaoMetadata>({
     mongo: {
-      default: mongodb.db,
+      default: db,
     },
     metadata: {
       dao: createDao,
-      mongodb,
-      tenantId: 1,
+      tenantId,
     },
     scalars: {
       Password: {
@@ -54,7 +51,7 @@ async function createDao(): Promise<DAOContext<DaoMetadata>> {
         },
       },
       TenantId: {
-        dbToModel: (o: unknown) => (o as Int32).value,
+        dbToModel: (o: unknown) => o as number,
         modelToDB: (o: number) => new Int32(o as number),
         validate: (o: number) => {
           if (Number.isInteger(o) && o > 0) {
@@ -78,36 +75,140 @@ async function createDao(): Promise<DAOContext<DaoMetadata>> {
     },
     middlewares: [
       tenantSecurityPolicy({
-        tenantKey: '',
+        tenantKey: 'tenantId',
       }),
     ],
   })
 }
 
 beforeAll(async () => {
-  dao = await createDao()
+  mongodb = await inMemoryMongoDb()
+  dao1 = createDao(1, mongodb.db)
+  dao2 = createDao(2, mongodb.db)
 })
 
 beforeEach(async () => {
-  const collections = await dao.metadata?.mongodb.db.collections()
+  const collections = await mongodb.db.collections()
   for (const collection of collections ?? []) {
     await collection.deleteMany({})
   }
 })
 
-test('empty find', async () => {
-  await dao.user.insertOne({ record: { email: 'luca@hotel.com', tenantId: 2 } })
+test('crud tenant test', async () => {
+  const user0t2 = await dao2.user.insertOne({ record: { email: '2@hotel.com', tenantId: 2 } })
+  try {
+    await dao1.user.insertOne({ record: { email: '1@hotel.com', tenantId: 2 } })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
+  const user0t1 = await dao1.user.insertOne({ record: { email: '1@hotel.com' } })
+  expect(user0t1.tenantId).toBe(1)
+  const user1t1 = await dao1.user.insertOne({ record: { email: '1@hotel.com', tenantId: 1 } })
+  expect(user1t1.tenantId).toBe(1)
 
-  const user1 = await dao.user.findOne({ filter: { email: 'luca@hotel.com' } })
-  const user2 = await dao.user.findOne({ filter: { tenantId: 2 } })
-  const user3 = await dao.user.findOne({ filter: { tenantId: 1 } })
+  const user2t1 = await dao1.user.findOne({ filter: { id: user0t2.id } })
+  expect(user2t1).toBe(null)
+
+  const user3t1 = await dao1.user.findOne({ filter: { id: user0t1.id } })
+  expect(user3t1?.tenantId).toBe(1)
+
+  try {
+    await dao1.user.findOne({ filter: { tenantId: 2 } })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
+
+  try {
+    await dao1.user.updateOne({ filter: { tenantId: 1 }, changes: { tenantId: 2 } })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
+  try {
+    await dao1.user.updateOne({ filter: { tenantId: 2 }, changes: { email: 't2@gmail.com' } })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
+  await dao1.user.updateOne({ filter: { id: user0t1.id }, changes: { email: 'tt1@gmail.com' } })
+  const user4t1 = await dao1.user.findOne({ filter: { email: 'tt1@gmail.com' } })
+  expect(user4t1?.email).toBe('tt1@gmail.com')
+
+  try {
+    await dao1.user.replaceOne({ filter: { tenantId: 2 }, replace: { email: 't2@gmail.com' } })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
+  try {
+    await dao1.user.replaceOne({ filter: { tenantId: 1 }, replace: { email: 't2@gmail.com', tenantId: 2 } })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
+
+  await dao1.user.replaceOne({ filter: { id: user0t1.id }, replace: { email: 'a@gmail.com' } })
+  const user5t1 = await dao1.user.findOne({ filter: { id: user0t1.id } })
+  expect(user5t1?.email).toBe('a@gmail.com')
+  expect(user5t1?.tenantId).toBe(1)
+  await dao1.user.replaceOne({ filter: { id: user0t1.id }, replace: { email: 'a@gmail.com', tenantId: 1 } })
+  const user5t2 = await dao1.user.findOne({ filter: { id: user0t1.id } })
+  expect(user5t2?.email).toBe('a@gmail.com')
+  expect(user5t2?.tenantId).toBe(1)
+
+  try {
+    await dao1.user.deleteOne({ filter: { tenantId: 2 } })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
+  await dao1.user.deleteAll({ filter: { tenantId: 1 } })
+  const users = await dao1.user.findAll({ filter: { tenantId: 1 } })
+  expect(users.length).toBe(0)
+})
+
+test('tenant wrong ref test', async () => {
+  const u1 = await dao1.user.insertOne({ record: { email: 'u1@gmail.com' } })
+  const h1 = await dao1.hotel.insertOne({ record: { name: 'H1', tenantId: 1 } })
+  const h2 = await dao2.hotel.insertOne({ record: { name: 'H2', tenantId: 2 } })
+  const r1 = await dao1.room.insertOne({ record: { hotelId: h1.id, size: '1' } })
+  const r2 = await dao2.room.insertOne({ record: { hotelId: h2.id, size: '2' } })
+  await dao1.reservation.insertOne({ record: { roomId: r1.id, userId: u1.id } })
+  await dao2.reservation.insertOne({ record: { roomId: r2.id, userId: u1.id } })
+  await dao1.reservation.insertOne({ record: { roomId: r2.id, userId: u1.id } })
+  await dao2.reservation.insertOne({ record: { roomId: r1.id, userId: u1.id } })
+
+  const user = await dao1.user.findOne({ filter: { id: u1.id }, projection: { reservations: { room: { size: true } } } })
+  expect(user?.reservations.length).toBe(2)
+  expect(user?.reservations[0]?.room?.size).toBe('1')
+  expect(user?.reservations[1]?.room).toBe(null)
+})
+
+test('tenant raw operation test', async () => {
+  try {
+    await dao1.user.findOne({ filter: () => ({}) })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
+  try {
+    await dao1.user.updateOne({
+      filter: {},
+      changes: () => ({
+        $inc: { a: 1 },
+      }),
+    })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
 })
 
 afterAll(async () => {
-  if (dao.metadata?.mongodb.connection) {
-    await dao.metadata.mongodb.connection.close()
-  }
-  if (dao.metadata?.mongodb.replSet) {
-    await dao.metadata.mongodb.replSet.stop()
+  if (mongodb.connection) {
+    await mongodb.connection.close()
+    await mongodb.replSet.stop()
   }
 })

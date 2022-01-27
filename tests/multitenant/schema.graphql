@@ -24,7 +24,28 @@ type User @entity @mongodb {
   credentials: UsernamePasswordCredentials @alias(value: "cred")
   firstName: String
   lastName: String
+  reservations: [Reservation]! @foreignRef
 
   deletionDate: Date
-  tenantId: TenantId!
+  tenantId: TenantId
+}
+
+type Reservation @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  userId: ID!
+  roomId: ID!
+  room: Room @innerRef
+
+  deletionDate: Date
+  tenantId: TenantId
+}
+
+type Room @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  hotelId: ID!
+  hotel: Hotel! @innerRef
+  size: String!
+
+  deletionDate: Date
+  tenantId: TenantId
 }

@@ -27,6 +27,26 @@ export type Hotel = {
   tenantId: Scalars['TenantId'];
 };
 
+export type Reservation = {
+  __typename?: 'Reservation';
+  deletionDate?: Maybe<Scalars['Date']>;
+  id: Scalars['ID'];
+  room?: Maybe<Room>;
+  roomId: Scalars['ID'];
+  tenantId?: Maybe<Scalars['TenantId']>;
+  userId: Scalars['ID'];
+};
+
+export type Room = {
+  __typename?: 'Room';
+  deletionDate?: Maybe<Scalars['Date']>;
+  hotel: Hotel;
+  hotelId: Scalars['ID'];
+  id: Scalars['ID'];
+  size: Scalars['String'];
+  tenantId?: Maybe<Scalars['TenantId']>;
+};
+
 export type User = {
   __typename?: 'User';
   credentials?: Maybe<UsernamePasswordCredentials>;
@@ -35,7 +55,8 @@ export type User = {
   firstName?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   lastName?: Maybe<Scalars['String']>;
-  tenantId: Scalars['TenantId'];
+  reservations: Array<Maybe<Reservation>>;
+  tenantId?: Maybe<Scalars['TenantId']>;
 };
 
 export type UsernamePasswordCredentials = {
