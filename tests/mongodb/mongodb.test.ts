@@ -1,11 +1,11 @@
-// tslint:disable-next-line: no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 global.TextEncoder = require('util').TextEncoder
-// tslint:disable-next-line: no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 global.TextDecoder = require('util').TextDecoder
 
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb } from '../../src'
 import { Test, typeAssert } from '../utils.test'
-import { CityProjection, DAOContext, mockedDAOContext, UserProjection } from './dao.mock'
+import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -193,8 +193,10 @@ test('find nested foreignRef association', async () => {
   const response = await dao.organization.findAll({ projection: { id: true, address: { id: true, cities: { id: true, name: true } } } })
   expect(response.length).toBe(1)
   expect(response[0].address?.cities?.length).toBe(2)
-  expect((response[0].address?.cities)![0].name).toBe('City 1')
-  expect((response[0].address?.cities)![1].name).toBe('City 2')
+  if (response[0].address?.cities) {
+    expect(response[0].address.cities[0].name).toBe('City 1')
+    expect(response[0].address.cities[1].name).toBe('City 2')
+  }
 })
 
 // ------------------------------------------------------------------------

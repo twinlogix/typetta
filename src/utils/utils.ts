@@ -88,7 +88,7 @@ export function setTraversing(object: any, path: string, value: any) {
         object[pathSplitted[0]] = {}
       }
       if (Array.isArray(object[pathSplitted[0]])) {
-        ;(object[pathSplitted[0]] as any[]).forEach((o) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
+        object[pathSplitted[0]].forEach((o: unknown) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
       } else {
         setTraversing(object[pathSplitted[0]], pathSplitted.slice(1).join('.'), value)
       }
@@ -125,8 +125,8 @@ export function deepCopy(obj: any): any {
     return obj
   }
   if (obj instanceof Array) {
-    const cp = [] as any[]
-    ;(obj as any[]).forEach((v) => {
+    const cp: Record<string, unknown>[] = []
+    obj.forEach((v) => {
       cp.push(v)
     })
     return cp.map((n: any) => deepCopy(n)) as any

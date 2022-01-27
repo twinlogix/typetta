@@ -26,3 +26,5 @@ jobs:
         run: npm run generate
       - name: Testing
         run: npm run test
+      - name: ESLint
+        run: npm run lint
