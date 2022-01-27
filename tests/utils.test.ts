@@ -17,7 +17,7 @@ import gql from 'graphql-tag'
 type Pass = 'pass'
 export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T; expected: U }) : { actual: T; expected: U }
 
-export function typeAssert<T extends Pass>() {
+export function typeAssert<T extends Pass>(): void {
   return
 }
 

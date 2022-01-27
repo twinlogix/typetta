@@ -248,7 +248,7 @@ function head(array: string[]): string | undefined {
 
 function tail(array: string[]): string[] {
   if (array.length > 0) {
-    const [_, ...t] = array
+    const [, ...t] = array
     return t
   } else {
     return []
