@@ -222,12 +222,12 @@ export function isProjectionContained(container: GenericProjection, contained: G
   return [true, false]
 }
 
-export function isChangesContainedInProjection(containerP: GenericProjection, changes: object): boolean {
+export function isFieldsContainedInProjection(containerP: GenericProjection, obj: object): boolean {
   if (typeof containerP === 'boolean') {
     return containerP
   } else {
-    for (const [key, value] of Object.entries(changes)) {
-      if (!containerP[key] || (typeof value === 'object' && !isChangesContainedInProjection(containerP[key], value))) {
+    for (const [key, value] of Object.entries(obj)) {
+      if (!containerP[key] || (typeof value === 'object' && !isFieldsContainedInProjection(containerP[key], value))) {
         return false
       }
     }

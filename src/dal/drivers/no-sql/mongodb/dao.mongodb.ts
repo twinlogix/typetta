@@ -260,4 +260,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   private mongoLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }) {
     this.log(this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
   }
+
+  protected _driver(): 'mongo' | 'knex' {
+    return 'mongo'
+  }
 }

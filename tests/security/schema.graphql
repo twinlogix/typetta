@@ -1,0 +1,50 @@
+scalar Password
+scalar Email
+scalar Username
+scalar Date
+
+enum Role {
+  ANALYST,  # read all permitted fields from his Hotel
+  OWNER,    # read/write on entities referred to his Hotel
+  ADMIN,    # everything
+}
+
+type HotelRole {
+  role: Role!
+  hotelId: ID!
+}
+
+type Hotel @entity @mongodb {
+  id: ID! @id
+  name: String!
+  description: String
+  totalCustomers: Int!
+}
+
+type User @entity @mongodb {
+  id: ID! @id
+  email: Email!
+  firstName: String
+  lastName: String
+  reservations: [Reservation]! @foreignRef
+  totalPayments: Int
+  roles: [HotelRole]!
+}
+
+type Reservation @entity @mongodb { #can read only if userId is user | hotelId is of owner | is admin
+  id: ID! @id
+  userId: ID!
+  roomId: ID!
+  room: Room @innerRef
+
+  hotelId: ID!
+}
+
+type Room @entity @mongodb {
+  id: ID! @id
+  from: Date!
+  to: Date!
+  hotelId: ID!
+  hotel: Hotel! @innerRef
+  description: String!
+}

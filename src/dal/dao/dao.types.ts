@@ -98,6 +98,7 @@ export type DAOParams<T extends DAOGenerics> = {
 
 export type MiddlewareContext<T extends DAOGenerics> = {
   daoName: T['name']
+  daoDriver: 'mongo' | 'knex'
   schema: Schema<T['scalars']>
   idField: T['idKey']
   driver: T['driverContext']

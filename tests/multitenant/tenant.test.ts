@@ -72,7 +72,7 @@ function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
       tenantSecurityPolicy({
         tenantKey: 'tenantId',
       }),
-    ],
+    ]
   })
 }
 

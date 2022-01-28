@@ -3,7 +3,7 @@ import {
   GenericProjection,
   MergeGenericProjection,
   getProjection,
-  isChangesContainedInProjection,
+  isFieldsContainedInProjection,
   isProjectionContained,
   isProjectionIntersected,
   mergeProjections,
@@ -222,11 +222,11 @@ test('isProjectionIntersected test', () => {
 })
 
 test('isChangesContainedInProjection test', () => {
-  expect(isChangesContainedInProjection(true, {})).toBe(true)
-  expect(isChangesContainedInProjection(false, {})).toBe(false)
-  expect(isChangesContainedInProjection({ a: true }, { b: 2 })).toBe(false)
-  expect(isChangesContainedInProjection({ a: true }, { a: 3 })).toBe(true)
-  expect(isChangesContainedInProjection({ a: { b: true } }, { a: { b: { c: 4 } } })).toBe(true)
+  expect(isFieldsContainedInProjection(true, {})).toBe(true)
+  expect(isFieldsContainedInProjection(false, {})).toBe(false)
+  expect(isFieldsContainedInProjection({ a: true }, { b: 2 })).toBe(false)
+  expect(isFieldsContainedInProjection({ a: true }, { a: 3 })).toBe(true)
+  expect(isFieldsContainedInProjection({ a: { b: true } }, { a: { b: { c: 4 } } })).toBe(true)
 })
 
 test('getProjection test', () => {

@@ -138,7 +138,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
 
       const fieldAttribute = {
         name: field.name.value,
-        graphqlType: graphqlType.name.value,
+        graphqlType: isEnumType(schemaType) ? 'String' : graphqlType.name.value,
         type: resFieldType,
         isRequired: field.type.kind === Kind.NON_NULL_TYPE,
         isID: idDirective != null,

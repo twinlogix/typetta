@@ -356,7 +356,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private createMiddlewareContext(): MiddlewareContext<T> {
-    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata: this.metadata, logger: this.logger, daoName: this.name }
+    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata: this.metadata, logger: this.logger, daoName: this.name, daoDriver: this._driver() }
   }
 
   private async executeBeforeMiddlewares<I extends MiddlewareInput<T>>(input: I): Promise<SelectBeforeMiddlewareOutputType<T, I> & { middlewareIndex?: number }> {
@@ -470,4 +470,5 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _replaceOne(params: ReplaceParams<T>): Promise<void>
   protected abstract _deleteOne(params: DeleteParams<T>): Promise<void>
   protected abstract _deleteAll(params: DeleteParams<T>): Promise<void>
+  protected abstract _driver(): 'mongo' | 'knex'
 }
