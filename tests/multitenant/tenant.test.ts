@@ -1,13 +1,13 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextEncoder = require('util').TextEncoder
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextDecoder = require('util').TextDecoder
-
 import { inMemoryMongoDb, tenantSecurityPolicy } from '../../src'
 import { DAOContext } from './dao.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+global.TextEncoder = require('util').TextEncoder
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+global.TextDecoder = require('util').TextDecoder
 
 jest.setTimeout(20000)
 
@@ -167,6 +167,16 @@ test('crud tenant test', async () => {
   await dao1.user.deleteAll({ filter: { tenantId: 1 } })
   const users = await dao1.user.findAll({ filter: { tenantId: 1 } })
   expect(users.length).toBe(0)
+
+  try {
+    await dao1.user.aggregate({
+      filter: { tenantId: 2 },
+      aggregations: { count: { operation: 'count' } },
+    })
+    fail()
+  } catch (error: any) {
+    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  }
 })
 
 test('tenant wrong ref test', async () => {
@@ -184,6 +194,14 @@ test('tenant wrong ref test', async () => {
   expect(user?.reservations.length).toBe(2)
   expect(user?.reservations[0]?.room?.size).toBe('1')
   expect(user?.reservations[1]?.room).toBe(null)
+
+  const res = await dao1.reservation.aggregate({
+    by: {
+      userId: true,
+    },
+    aggregations: { count: { operation: 'count' } },
+  })
+  expect(res[0].count).toBe(2)
 })
 
 test('tenant raw operation test', async () => {

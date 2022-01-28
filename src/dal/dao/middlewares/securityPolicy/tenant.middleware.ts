@@ -141,5 +141,11 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
       if (!tenantId) return
       return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) } }
     },
+    beforeAggregate: async (params, args, context) => {
+      const tenantId = getTenantId(context)
+      if (!tenantId) return
+      const asd = elabFilter(params.filter, tenantId)
+      return { continue: true, params: { ...params, filter: asd }, args }
+    },
   })
 }

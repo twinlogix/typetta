@@ -143,7 +143,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
     return this.logOperation('aggregate', params, async () => {
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'aggregate', params, args })
-      const result = beforeResults.continue ? await this._aggregate(params, args) : beforeResults.result
+      const result = beforeResults.continue ? await this._aggregate(beforeResults.params, beforeResults.args) : beforeResults.result
       const afterResults = await this.executeAfterMiddlewares(
         { operation: 'aggregate', params: beforeResults.params, args: beforeResults.args, result: result as AggregateResults<T, AggregateParams<T>> },
         beforeResults.middlewareIndex,
