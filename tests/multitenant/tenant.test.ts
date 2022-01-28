@@ -4,11 +4,6 @@ import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextEncoder = require('util').TextEncoder
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextDecoder = require('util').TextDecoder
-
 jest.setTimeout(20000)
 
 type DaoMetadata = {
@@ -99,8 +94,8 @@ test('crud tenant test', async () => {
   try {
     await dao1.user.insertOne({ record: { email: '1@hotel.com', tenantId: 2 } })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
   const user0t1 = await dao1.user.insertOne({ record: { email: '1@hotel.com' } })
   expect(user0t1.tenantId).toBe(1)
@@ -116,21 +111,21 @@ test('crud tenant test', async () => {
   try {
     await dao1.user.findOne({ filter: { tenantId: 2 } })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
 
   try {
     await dao1.user.updateOne({ filter: { tenantId: 1 }, changes: { tenantId: 2 } })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
   try {
     await dao1.user.updateOne({ filter: { tenantId: 2 }, changes: { email: 't2@gmail.com' } })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
   await dao1.user.updateOne({ filter: { id: user0t1.id }, changes: { email: 'tt1@gmail.com' } })
   const user4t1 = await dao1.user.findOne({ filter: { email: 'tt1@gmail.com' } })
@@ -139,14 +134,14 @@ test('crud tenant test', async () => {
   try {
     await dao1.user.replaceOne({ filter: { tenantId: 2 }, replace: { email: 't2@gmail.com' } })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
   try {
     await dao1.user.replaceOne({ filter: { tenantId: 1 }, replace: { email: 't2@gmail.com', tenantId: 2 } })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
 
   await dao1.user.replaceOne({ filter: { id: user0t1.id }, replace: { email: 'a@gmail.com' } })
@@ -161,8 +156,8 @@ test('crud tenant test', async () => {
   try {
     await dao1.user.deleteOne({ filter: { tenantId: 2 } })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
   await dao1.user.deleteAll({ filter: { tenantId: 1 } })
   const users = await dao1.user.findAll({ filter: { tenantId: 1 } })
@@ -174,8 +169,8 @@ test('crud tenant test', async () => {
       aggregations: { count: { operation: 'count' } },
     })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
 })
 
@@ -208,8 +203,8 @@ test('tenant raw operation test', async () => {
   try {
     await dao1.user.findOne({ filter: () => ({}) })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
   try {
     await dao1.user.updateOne({
@@ -219,8 +214,8 @@ test('tenant raw operation test', async () => {
       }),
     })
     fail()
-  } catch (error: any) {
-    expect(error.message.startsWith('[Tenant Middleware]')).toBe(true)
+  } catch (error) {
+    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
 })
 

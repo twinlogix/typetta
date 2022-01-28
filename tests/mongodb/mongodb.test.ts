@@ -1,7 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextEncoder = require('util').TextEncoder
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextDecoder = require('util').TextDecoder
 
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb } from '../../src'
 import { Test, typeAssert } from '../utils.test'
@@ -1101,7 +1097,7 @@ test('Simple transaction 2', async () => {
   await dao.user.deleteOne({ filter: { id: '123' } })
   try {
     await session.commitTransaction()
-    expect(1).toBe(0)
+    fail()
   } catch (error: any) {
     expect(error.ok).toBe(0)
   }
