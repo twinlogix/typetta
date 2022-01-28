@@ -2,7 +2,7 @@ import { Directives } from '../generation/directives'
 import { gql } from 'graphql-tag'
 
 export const typeDefs = gql`
-  type RefPointer = { refFrom: String!, refTo: String }
+  type RefPointer { refFrom: String!, refTo: String }
   directive @${Directives.ID}(from: String) on FIELD_DEFINITION
   directive @${Directives.ENTITY} on OBJECT
   directive @${Directives.MONGO}(collection: String, source: String) on OBJECT
