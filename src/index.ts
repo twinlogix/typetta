@@ -1,4 +1,5 @@
 export * from './utils/utils.types'
+export * from './utils/utils.typeDefs'
 export * from './utils/utils'
 export * from './generation/index'
 export * from './dal/daoContext/daoContext'
