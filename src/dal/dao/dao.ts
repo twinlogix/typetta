@@ -356,7 +356,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private createMiddlewareContext(): MiddlewareContext<T> {
-    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata: this.metadata }
+    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata: this.metadata, logger: this.logger, daoName: this.name }
   }
 
   private async executeBeforeMiddlewares<I extends MiddlewareInput<T>>(input: I): Promise<SelectBeforeMiddlewareOutputType<T, I> & { middlewareIndex?: number }> {

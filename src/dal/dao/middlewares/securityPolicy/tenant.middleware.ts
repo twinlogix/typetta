@@ -73,7 +73,7 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
     }
     return context.metadata[key]
   }
-  function elabFilter(filter: T['filter'] | undefined, tenantId: T['metadata'][TenantIdKey]): T['filter'] {
+  function elabFilter(filter: T['filter'] | undefined, tenantId: T['metadata'][TenantIdKey], context: MiddlewareContext<T>): T['filter'] {
     if (!filter) {
       return { [key]: tenantId }
     }
@@ -81,8 +81,13 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
       if (rawOpPolicy === 'forbidden') {
         throw new Error(`${ERROR_PREFIX}Raw filter is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
       }
-      if (rawOpPolicy === 'warning') {
-        // TODO: log warning
+      if (rawOpPolicy === 'warning' && context.logger) {
+        context.logger({
+          date: new Date(),
+          level: 'warning',
+          dao: context.daoName,
+          raw: `A raw filter will be executed while using tenantSecurityPolicy middleware. Unsafe operations could occur.`,
+        })
       }
       return filter
     } else {
@@ -106,18 +111,23 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
     beforeFind: async (params, context) => {
       const tenantId = getTenantId(context)
       if (!tenantId) return
-      return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) } }
+      return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId, context) } }
     },
     beforeUpdate: async (params, context) => {
       const tenantId = getTenantId(context)
       if (!tenantId) return
-      const filter = elabFilter(params.filter, tenantId)
+      const filter = elabFilter(params.filter, tenantId, context)
       if (typeof params.changes === 'function') {
         if (rawOpPolicy === 'forbidden') {
-          throw new Error(`${ERROR_PREFIX}Raw filter is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
+          throw new Error(`${ERROR_PREFIX}Raw changes is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
         }
-        if (rawOpPolicy === 'warning') {
-          // TODO: log warning
+        if (rawOpPolicy === 'warning' && context.logger) {
+          context.logger({
+            date: new Date(),
+            level: 'warning',
+            dao: context.daoName,
+            raw: `A raw update will be executed while using tenantSecurityPolicy middleware. Unsafe operations could occur.`,
+          })
         }
         return { continue: true, params: { ...params, filter } }
       } else {
@@ -130,7 +140,7 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
     beforeReplace: async (params, context) => {
       const tenantId = getTenantId(context)
       if (!tenantId) return
-      const filter = elabFilter(params.filter, tenantId)
+      const filter = elabFilter(params.filter, tenantId, context)
       if (params.replace[key] && params.replace[key] !== tenantId) {
         throw new Error(`${ERROR_PREFIX}Invalid tenant ID in replace. Current selected tenant ID is ${tenantId}, but received ${params.replace[key]} instead.`)
       }
@@ -139,12 +149,12 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
     beforeDelete: async (params, context) => {
       const tenantId = getTenantId(context)
       if (!tenantId) return
-      return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) } }
+      return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId, context) } }
     },
     beforeAggregate: async (params, args, context) => {
       const tenantId = getTenantId(context)
       if (!tenantId) return
-      const asd = elabFilter(params.filter, tenantId)
+      const asd = elabFilter(params.filter, tenantId, context)
       return { continue: true, params: { ...params, filter: asd }, args }
     },
   })
