@@ -40,7 +40,6 @@ function createDao(metadata: DaoMetadata, db: Db): DAOContext<DaoMetadata> {
       },
       reservation: {
         middlewares: [
-          requiredProjection({ hotelId: true }),
           roleSecurityPolicy('hotelId', {
             ADMIN: true,
             OWNER: {
@@ -68,20 +67,20 @@ beforeAll(async () => {
     {
       user: { id: 'u1' },
       roles: [
-        { hotelId: 'u1', role: Role.OWNER },
-        { hotelId: 'u2', role: Role.OWNER },
-        { hotelId: 'u3', role: Role.ANALYST },
+        { hotelId: 'u1', role: 'OWNER' },
+        { hotelId: 'u2', role: 'OWNER' },
+        { hotelId: 'u3', role: 'ANALYST' },
       ],
     },
     mongodb.db,
   )
-  daoAdmin = createDao({ user: { id: 'u2' }, roles: [{ hotelId: '', role: Role.ADMIN }] }, mongodb.db) //TODO: hotelId: null
+  daoAdmin = createDao({ user: { id: 'u2' }, roles: [{ all: true, role: 'ADMIN' }] }, mongodb.db)
   daoAnalyst = createDao(
     {
       user: { id: 'u2' },
       roles: [
-        { hotelId: 'u2', role: Role.ANALYST },
-        { hotelId: 'u3', role: Role.ANALYST },
+        { hotelId: 'u2', role: 'ANALYST' },
+        { hotelId: 'u3', role: 'ANALYST' },
       ],
     },
     mongodb.db,

@@ -11,7 +11,8 @@ enum Role {
 
 type HotelRole {
   role: Role!
-  hotelId: ID!
+  hotelId: ID
+  all: Boolean
 }
 
 type Hotel @entity @mongodb {

@@ -26,7 +26,8 @@ export type Hotel = {
 
 export type HotelRole = {
   __typename?: 'HotelRole';
-  hotelId: Scalars['ID'];
+  all?: Maybe<Scalars['Boolean']>;
+  hotelId?: Maybe<Scalars['ID']>;
   role: Role;
 };
 

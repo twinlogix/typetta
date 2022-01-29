@@ -33,7 +33,9 @@ export type AsdDAOGenerics<
   RawUpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   RelationsFields extends keyof ModelType = any,
-  MetadataType extends { roles: ({ [C in K]: ModelType[K] } & { role: RoleType })[] } = { roles: ({ [C in K]: ModelType[K] } & { role: RoleType })[] },
+  MetadataType extends { roles: ({ [C in K]?: ModelType[K] | null } & { role: RoleType; all?: boolean | null })[] } = {
+    roles: ({ [C in K]?: ModelType[K] | null } & { role: RoleType; all?: boolean | null })[]
+  },
   OperationMetadataType = any,
   DriverContextType = any,
   ScalarsType extends DefaultModelScalars = any,
@@ -105,13 +107,21 @@ export function roleSecurityPolicy<K extends keyof T['model'], RoleType extends 
         }
       }
       if (params.filter && typeof params.filter === 'function') {
-        return // TODO
+        return {
+          continue: true,
+          params: {
+            ...params,
+            filter: params.filter, // TODO
+            projection: mergeProjections((params.projection ?? true) as GenericProjection, { [key]: true }) as T['projection'],
+          },
+        }
       }
       return {
         continue: true,
         params: {
           ...params,
           filter: params.filter ? { $and: [params.filter, baseFilter] } : baseFilter,
+          projection: mergeProjections((params.projection ?? true) as GenericProjection, { [key]: true }) as T['projection'],
         },
       }
     },
