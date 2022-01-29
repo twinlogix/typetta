@@ -26,9 +26,8 @@ export type Hotel = {
 
 export type HotelRole = {
   __typename?: 'HotelRole';
-  all?: Maybe<Scalars['Boolean']>;
-  hotelId?: Maybe<Scalars['ID']>;
   role: Role;
+  values?: Maybe<Array<Scalars['ID']>>;
 };
 
 export type Reservation = {
@@ -61,9 +60,9 @@ export type User = {
   __typename?: 'User';
   email: Scalars['Email'];
   firstName?: Maybe<Scalars['String']>;
+  hotelRoles: Array<HotelRole>;
   id: Scalars['ID'];
   lastName?: Maybe<Scalars['String']>;
   reservations: Array<Maybe<Reservation>>;
-  roles: Array<Maybe<HotelRole>>;
   totalPayments?: Maybe<Scalars['Int']>;
 };

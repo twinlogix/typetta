@@ -1,7 +1,6 @@
-import { DefaultModelScalars } from '../../../..'
-import { DAOGenerics, IdGenerationStrategy } from '../../dao.types'
+import { DAOGenerics } from '../../dao.types'
 import { GenericProjection } from '../../projections/projections.types'
-import { isFieldsContainedInProjection, isProjectionContained, mergeProjections } from '../../projections/projections.utils'
+import { isProjectionContained, mergeProjections } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 
@@ -15,104 +14,48 @@ export type Permission<T extends DAOGenerics> =
     }
   | boolean
 
-export type AsdDAOGenerics<
-  RoleType extends string,
-  K extends keyof ModelType,
-  ModelType extends object = any,
-  IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
-  IDScalar extends keyof ScalarsType = any,
-  IdGeneration extends IdGenerationStrategy = any,
-  PureFilterType = any,
-  RawFilterType = any,
-  RelationsType = any,
-  ProjectionType extends object = any,
-  PureSortType = any,
-  RawSortType = any,
-  InsertType extends object = any,
-  PureUpdateType = any,
-  RawUpdateType = any,
-  ExcludedFields extends keyof ModelType = any,
-  RelationsFields extends keyof ModelType = any,
-  MetadataType extends { roles: ({ [C in K]?: ModelType[K] | null } & { role: RoleType; all?: boolean | null })[] } = {
-    roles: ({ [C in K]?: ModelType[K] | null } & { role: RoleType; all?: boolean | null })[]
-  },
-  OperationMetadataType = any,
-  DriverContextType = any,
-  ScalarsType extends DefaultModelScalars = any,
-  DriverFilterOptions = any,
-  DriverFindOptions = any,
-  DriverInsertOptions = any,
-  DriverUpdateOptions = any,
-  DriverReplaceOptions = any,
-  DriverDeleteOptions = any,
-  NameType extends string = any,
-> = DAOGenerics<
-  ModelType,
-  IDKey,
-  IDScalar,
-  IdGeneration,
-  PureFilterType,
-  RawFilterType,
-  RelationsType,
-  ProjectionType,
-  PureSortType,
-  RawSortType,
-  InsertType,
-  PureUpdateType,
-  RawUpdateType,
-  ExcludedFields,
-  RelationsFields,
-  MetadataType,
-  OperationMetadataType,
-  DriverContextType,
-  ScalarsType,
-  DriverFilterOptions,
-  DriverFindOptions,
-  DriverInsertOptions,
-  DriverUpdateOptions,
-  DriverReplaceOptions,
-  DriverDeleteOptions,
-  NameType
->
-
-export function roleSecurityPolicy<K extends keyof T['model'], RoleType extends string, T extends AsdDAOGenerics<RoleType, K>>(
-  key: K,
-  permissions: Partial<Record<RoleType, Permission<T>>>,
-): DAOMiddleware<T> {
+export function roleSecurityPolicy<K extends keyof T['model'], RoleType extends string, T extends DAOGenerics>(args: {
+  key: K
+  permissions: Partial<Record<RoleType, Permission<T>>>
+  roles: (context: T['metadata']) => ({ values?: T['model'][K][] | null } & { role: RoleType })[]
+}): DAOMiddleware<T> {
   return buildMiddleware({
     beforeFind: async (params, context) => {
       if (!context.metadata) return
-      const baseFilter: T['filter'] = {
-        [key]: {
-          $in: context.metadata.roles.flatMap((role) => {
-            const permission = permissions[role.role]
-            if (permission && (permission === true || permission.read)) {
-              return [role[key]]
-            }
-            return []
-          }),
-        },
-      }
-      const largerProjection = context.metadata.roles.reduce<GenericProjection>((proj, role) => {
-        const permission = permissions[role.role]
+      const roles = args.roles(context.metadata)
+      const baseFilter: T['filter'] = roles.find((role) => role.values == null)
+        ? {}
+        : {
+            [args.key]: {
+              $in: roles.flatMap((role) => {
+                const permission = args.permissions[role.role]
+                if (permission && (permission === true || permission.read)) {
+                  return role.values
+                }
+                return []
+              }),
+            },
+          }
+      const largerProjection = roles.reduce<GenericProjection>((proj, role) => {
+        const permission = args.permissions[role.role]
         if (permission) {
-          return mergeProjections(proj, permission as GenericProjection)
+          return mergeProjections(proj, typeof permission === 'boolean' ? permission : permission.read ?? false)
         }
         return proj
       }, false)
-      if (params.projection) {
-        const [contained, invalidFields] = isProjectionContained(largerProjection, params.projection)
-        if (!contained) {
-          throw new Error(`Access to restricted fields: ${JSON.stringify(invalidFields)}`)
-        }
+
+      const [contained, invalidFields] = isProjectionContained(largerProjection, params.projection ?? true)
+      if (!contained) {
+        throw new Error(`Access to restricted fields: Roles [${roles.map((role) => role.role).join(',')}] can't access fields ${JSON.stringify(invalidFields)} of ${context.daoName} entities`)
       }
+
       if (params.filter && typeof params.filter === 'function') {
         return {
           continue: true,
           params: {
             ...params,
             filter: params.filter, // TODO
-            projection: mergeProjections((params.projection ?? true) as GenericProjection, { [key]: true }) as T['projection'],
+            projection: mergeProjections((params.projection ?? true) as GenericProjection, { [args.key]: true }) as T['projection'],
           },
         }
       }
@@ -121,20 +64,21 @@ export function roleSecurityPolicy<K extends keyof T['model'], RoleType extends 
         params: {
           ...params,
           filter: params.filter ? { $and: [params.filter, baseFilter] } : baseFilter,
-          projection: mergeProjections((params.projection ?? true) as GenericProjection, { [key]: true }) as T['projection'],
+          projection: mergeProjections((params.projection ?? true) as GenericProjection, { [args.key]: true }) as T['projection'],
         },
       }
     },
     afterFind: async (params, records, totalCount, context) => {
       if (!context.metadata) return
+      const roles = args.roles(context.metadata)
       for (const record of records) {
-        const role = context.metadata.roles.find((r) => r[key] === record[key])
+        const role = roles.find((r) => r.values == null || r.values.includes(record[args.key]))
         if (role) {
-          const permission = permissions[role.role]
-          const proj = typeof permission === 'boolean' ? permission : permission?.read ?? false
-          if (!isFieldsContainedInProjection(proj, record)) {
-            // TODO: add not valid fields
-            throw new Error(`Access to restricted fields: `)
+          const permission = args.permissions[role.role]
+          const proj = mergeProjections(typeof permission === 'boolean' ? permission : permission?.read ?? false, { [args.key]: true })
+          const [contained, invalidFields] = isProjectionContained(proj, params.projection ?? true)
+          if (!contained) {
+            throw new Error(`Access to restricted fields: Role ${role.role} can't access fields ${JSON.stringify(invalidFields)} of ${context.daoName} entities`)
           }
         }
       }

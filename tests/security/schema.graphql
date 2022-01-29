@@ -11,8 +11,7 @@ enum Role {
 
 type HotelRole {
   role: Role!
-  hotelId: ID
-  all: Boolean
+  values: [ID!]
 }
 
 type Hotel @entity @mongodb {
@@ -29,7 +28,7 @@ type User @entity @mongodb {
   lastName: String
   reservations: [Reservation]! @foreignRef
   totalPayments: Int
-  roles: [HotelRole]!
+  hotelRoles: [HotelRole!]!
 }
 
 type Reservation @entity @mongodb { #can read only if userId is user | hotelId is of owner | is admin

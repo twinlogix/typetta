@@ -13,9 +13,9 @@ import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document, SortDirection } from 'mongodb'
 
-export function adaptProjection<ProjectionType extends object, ScalarsType>(projection: AnyProjection<ProjectionType>, schema: Schema<ScalarsType>): AnyProjection<ProjectionType> {
+export function adaptProjection<ProjectionType extends object, ScalarsType>(projection: AnyProjection<ProjectionType>, schema: Schema<ScalarsType>, defaultTrue?: true): AnyProjection<ProjectionType> {
   if (projection === true || projection === undefined) {
-    return undefined
+    return defaultTrue
   }
   return Object.entries(projection).reduce<object>((result, [k, v]) => {
     if (k in schema) {
@@ -29,7 +29,7 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
       }
       return {
         ...result,
-        [name]: adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded),
+        [name]: adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded, true),
       }
     }
     return result

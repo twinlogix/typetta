@@ -294,28 +294,26 @@ export const userSchema: Schema<types.Scalars> = {
   'firstName': {
     scalar: 'String'
   },
+  'hotelRoles': {
+    embedded: {
+      'role': {
+        scalar: 'String', 
+        required: true
+      },
+      'values': {
+        scalar: 'ID', 
+        array: true
+      }
+    }, 
+    required: true, 
+    array: true
+  },
   'id': {
     scalar: 'ID', 
     required: true
   },
   'lastName': {
     scalar: 'String'
-  },
-  'roles': {
-    embedded: {
-      'all': {
-        scalar: 'Boolean'
-      },
-      'hotelId': {
-        scalar: 'ID'
-      },
-      'role': {
-        scalar: 'Role', 
-        required: true
-      }
-    }, 
-    required: true, 
-    array: true
   },
   'totalPayments': {
     scalar: 'Int'
@@ -325,11 +323,10 @@ export const userSchema: Schema<types.Scalars> = {
 type UserFilterFields = {
   'email'?: types.Scalars['Email'] | null | EqualityOperators<types.Scalars['Email']> | ElementOperators,
   'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'hotelRoles.role'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'hotelRoles.values'?: types.Scalars['ID'][] | null | EqualityOperators<types.Scalars['ID'][]> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'roles.all'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
-  'roles.hotelId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'roles.role'?: types.Scalars['Role'] | null | EqualityOperators<types.Scalars['Role']> | ElementOperators,
   'totalPayments'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
@@ -348,30 +345,28 @@ export type UserRelations = {
 export type UserProjection = {
   email?: boolean,
   firstName?: boolean,
+  hotelRoles?: {
+    role?: boolean,
+    values?: boolean,
+  } | boolean,
   id?: boolean,
   lastName?: boolean,
   reservations?: ReservationProjection | boolean,
-  roles?: {
-    all?: boolean,
-    hotelId?: boolean,
-    role?: boolean,
-  } | boolean,
   totalPayments?: boolean,
 };
 
-export type UserSortKeys = 'email' | 'firstName' | 'id' | 'lastName' | 'roles.all' | 'roles.hotelId' | 'roles.role' | 'totalPayments';
+export type UserSortKeys = 'email' | 'firstName' | 'hotelRoles.role' | 'hotelRoles.values' | 'id' | 'lastName' | 'totalPayments';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
 export type UserRawSort = () => Sort
 
 export type UserUpdate = {
   'email'?: types.Scalars['Email'],
   'firstName'?: types.Scalars['String'] | null,
+  'hotelRoles'?: types.HotelRole[],
+  'hotelRoles.role'?: types.Scalars['String'],
+  'hotelRoles.values'?: types.Scalars['ID'][] | null,
   'id'?: types.Scalars['ID'],
   'lastName'?: types.Scalars['String'] | null,
-  'roles'?: types.HotelRole[],
-  'roles.all'?: types.Scalars['Boolean'] | null,
-  'roles.hotelId'?: types.Scalars['ID'] | null,
-  'roles.role'?: types.Scalars['Role'],
   'totalPayments'?: types.Scalars['Int'] | null
 };
 export type UserRawUpdate = () => UpdateFilter<Document>
@@ -379,9 +374,9 @@ export type UserRawUpdate = () => UpdateFilter<Document>
 export type UserInsert = {
   email: types.Scalars['Email'],
   firstName?: types.Scalars['String'],
+  hotelRoles: types.HotelRole[],
   id?: types.Scalars['ID'],
   lastName?: types.Scalars['String'],
-  roles: types.HotelRole[],
   totalPayments?: types.Scalars['Int'],
 };
 

@@ -1,5 +1,8 @@
+import { DAOGenerics } from '../dao.types'
+import { Schema } from '../schemas/schemas.types'
 import { GenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
+import { PartialDeep } from 'type-fest'
 
 type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
   ? ProjectionType

@@ -10,25 +10,21 @@ jest.setTimeout(20000)
 
 type DaoMetadata = {
   user: { id: string }
-  roles: HotelRole[]
+  hotelRoles: HotelRole[]
 }
-let daoOwner: DAOContext<DaoMetadata>
-let daoAdmin: DAOContext<DaoMetadata>
-let daoAnalyst: DAOContext<DaoMetadata>
+let unsafeDao: DAOContext<DaoMetadata>
 let mongodb: {
   replSet: MongoMemoryReplSet
   connection: MongoClient
   db: Db
 }
 
-function createDao(metadata: DaoMetadata, db: Db): DAOContext<DaoMetadata> {
+function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMetadata> {
   return new DAOContext<DaoMetadata>({
     mongo: {
       default: db,
     },
-    metadata: {
-      ...metadata,
-    },
+    metadata,
     scalars: {
       ID: {
         generate: () => uuidv4(),
@@ -38,21 +34,47 @@ function createDao(metadata: DaoMetadata, db: Db): DAOContext<DaoMetadata> {
       user: {
         middlewares: [],
       },
+      hotel: {
+        middlewares: [
+          roleSecurityPolicy({
+            key: 'id',
+            permissions: {
+              ADMIN: true,
+              OWNER: {
+                read: true,
+                update: true,
+                insert: true,
+                replace: true,
+                aggregate: true,
+              },
+              ANALYST: {
+                read: { totalCustomers: true },
+                update: false,
+              },
+            },
+            roles: (metadata) => metadata.hotelRoles
+          }),
+        ],
+      },
       reservation: {
         middlewares: [
-          roleSecurityPolicy('hotelId', {
-            ADMIN: true,
-            OWNER: {
-              read: true,
-              update: true,
-              insert: true,
-              replace: true,
-              aggregate: true,
+          roleSecurityPolicy({
+            key: 'hotelId',
+            permissions: {
+              ADMIN: true,
+              OWNER: {
+                read: true,
+                update: true,
+                insert: true,
+                replace: true,
+                aggregate: true,
+              },
+              ANALYST: {
+                read: { roomId: true },
+                update: false,
+              },
             },
-            ANALYST: {
-              read: { roomId: true },
-              update: false,
-            },
+            roles: (metadata) => metadata.hotelRoles
           }),
         ],
       },
@@ -60,31 +82,23 @@ function createDao(metadata: DaoMetadata, db: Db): DAOContext<DaoMetadata> {
   })
 }
 
+async function creadeDaoWithUserRoles(userId: string): Promise<DAOContext<DaoMetadata>> {
+  const user = await unsafeDao.user.findOne({ filter: { id: userId }, projection: { hotelRoles: true, id: true } })
+  if (!user) {
+    throw new Error('User does not exists')
+  }
+  return createDao(
+    {
+      hotelRoles: user.hotelRoles,
+      user: { id: userId },
+    },
+    mongodb.db,
+  )
+}
+
 beforeAll(async () => {
   mongodb = await inMemoryMongoDb()
-
-  daoOwner = createDao(
-    {
-      user: { id: 'u1' },
-      roles: [
-        { hotelId: 'u1', role: 'OWNER' },
-        { hotelId: 'u2', role: 'OWNER' },
-        { hotelId: 'u3', role: 'ANALYST' },
-      ],
-    },
-    mongodb.db,
-  )
-  daoAdmin = createDao({ user: { id: 'u2' }, roles: [{ all: true, role: 'ADMIN' }] }, mongodb.db)
-  daoAnalyst = createDao(
-    {
-      user: { id: 'u2' },
-      roles: [
-        { hotelId: 'u2', role: 'ANALYST' },
-        { hotelId: 'u3', role: 'ANALYST' },
-      ],
-    },
-    mongodb.db,
-  )
+  unsafeDao = createDao(undefined, mongodb.db)
 })
 
 beforeEach(async () => {
@@ -95,10 +109,30 @@ beforeEach(async () => {
 })
 
 test('crud tenant test', async () => {
-  // await daoOwner.user.insertOne({ record: { email: '', role: Role.CUSTOMER, firstName: '1' } })
-  // await daoOwner.user.insertOne({ record: { email: '', role: Role.CUSTOMER, firstName: '2' } })
-  const asd = await daoOwner.user.findAll({ filter: { $and: [{ $or: [{ firstName: '1' }, { firstName: '2' }] }, { $or: [{ firstName: '1' }, { firstName: '3' }] }] } })
-  return
+  const user = await unsafeDao.user.insertOne({
+    record: {
+      id: 'u1',
+      email: '',
+      hotelRoles: [
+        { values: ['h1', 'h2'], role: 'OWNER' },
+        { values: ['h3'], role: 'ANALYST' },
+      ],
+      firstName: 'owner',
+    },
+  })
+
+  await unsafeDao.hotel.insertOne({ record: { name: 'AHotel 1', totalCustomers: 2, id: 'h1' } })
+  await unsafeDao.hotel.insertOne({ record: { name: 'AHotel 2', totalCustomers: 2, id: 'h2' } })
+  await unsafeDao.hotel.insertOne({ record: { name: 'BHotel 3', totalCustomers: 2, id: 'h3' } })
+  await unsafeDao.hotel.insertOne({ record: { name: 'AHotel 4', totalCustomers: 2, id: 'h4' } })
+
+  const dao = await creadeDaoWithUserRoles(user.id)
+
+  const hotels1 = await dao.hotel.findAll({ filter: { name: { $startsWith: 'AHotel' } } })
+
+  const hotels2 = await dao.hotel.findAll({ projection: { totalCustomers: true, name: true } })
+
+  console.log(hotels1)
 })
 
 afterAll(async () => {
