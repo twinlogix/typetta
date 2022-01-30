@@ -40,9 +40,8 @@ main:
         title: Database direct access [eng soon]
       - url: /chapters/client/logging
         title: Logging [eng soon]
-      - url: /chapters/advanced/mocking
-        title: Mocking
-        todo: true
+      - url: /chapters/client/mocking
+        title: Mocking [eng soon]
   - database-drivers:
     title: Middlewares
     children:
