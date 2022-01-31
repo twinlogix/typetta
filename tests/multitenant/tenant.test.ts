@@ -1,5 +1,5 @@
 import { inMemoryMongoDb, tenantSecurityPolicy } from '../../src'
-import { DAOContext } from './dao.mock'
+import { createGroupMiddleware, DAOContext } from './dao.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
@@ -69,10 +69,18 @@ function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
       },
     },
     middlewares: [
-      tenantSecurityPolicy({
-        tenantKey: 'tenantId',
-      }),
-    ]
+      createGroupMiddleware(
+        {
+          hotel: true,
+          user: true,
+          reservation: true,
+          room: true,
+        },
+        tenantSecurityPolicy({
+          tenantKey: 'tenantId',
+        }),
+      ),
+    ],
   })
 }
 
@@ -172,6 +180,11 @@ test('crud tenant test', async () => {
   } catch (error) {
     expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
+
+  await dao1.tenant.insertOne({ record: { id: 1, info: 'T1' } })
+  await dao1.tenant.insertOne({ record: { id: 2, info: 'T2' } })
+  const tenants = await dao1.tenant.findAll()
+  expect(tenants.length).toBe(2)
 })
 
 test('tenant wrong ref test', async () => {

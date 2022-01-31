@@ -432,7 +432,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 
 export type DAOContextParams<MetadataType, OperationMetadataType> = {
   metadata?: MetadataType
-  middlewares?: DAOContextMiddleware<MetadataType, OperationMetadataType>[]
+  middlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: { 
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     postType?: Pick<Partial<PostTypeDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
@@ -456,31 +456,31 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
   private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];
   private knex: Record<'default', Knex>;
   
-  private middlewares: DAOContextMiddleware<MetadataType, OperationMetadataType>[]
+  private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
   private logger?: LogFunction<'post' | 'postType' | 'tag' | 'user'>
   
   get post() {
     if(!this._post) {
-      this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, knex: this.knex.default, tableName: 'posts', middlewares: [...(this.overrides?.post?.middlewares || []), ...this.middlewares as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger });
+      this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, knex: this.knex.default, tableName: 'posts', middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger });
     }
     return this._post;
   }
   get postType() {
     if(!this._postType) {
-      this._postType = new PostTypeDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.postType, knex: this.knex.default, tableName: 'postTypes', middlewares: [...(this.overrides?.postType?.middlewares || []), ...this.middlewares as DAOMiddleware<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'postType', logger: this.logger });
+      this._postType = new PostTypeDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.postType, knex: this.knex.default, tableName: 'postTypes', middlewares: [...(this.overrides?.postType?.middlewares || []), ...selectMiddleware('postType', this.middlewares) as DAOMiddleware<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'postType', logger: this.logger });
     }
     return this._postType;
   }
   get tag() {
     if(!this._tag) {
-      this._tag = new TagDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tag, knex: this.knex.default, tableName: 'tags', middlewares: [...(this.overrides?.tag?.middlewares || []), ...this.middlewares as DAOMiddleware<TagDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tag', logger: this.logger });
+      this._tag = new TagDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tag, knex: this.knex.default, tableName: 'tags', middlewares: [...(this.overrides?.tag?.middlewares || []), ...selectMiddleware('tag', this.middlewares) as DAOMiddleware<TagDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tag', logger: this.logger });
     }
     return this._tag;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, knex: this.knex.default, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...this.middlewares as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
+      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, knex: this.knex.default, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
     }
     return this._user;
   }
@@ -509,6 +509,34 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
 
 }
 
+
+//--------------------------------------------------------------------------------
+//------------------------------------- UTILS ------------------------------------
+//--------------------------------------------------------------------------------
+
+type DAOName = keyof DAOMiddlewareMap<any, any>
+type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
+  post: PostDAOGenerics<MetadataType, OperationMetadataType>
+  postType: PostTypeDAOGenerics<MetadataType, OperationMetadataType>
+  tag: TagDAOGenerics<MetadataType, OperationMetadataType>
+  user: UserDAOGenerics<MetadataType, OperationMetadataType>
+}
+type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
+  entities: { [K in N]: true }
+  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>
+}
+export function createGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType>(
+  entities: { [K in N]: true },
+  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>,
+): GroupMiddleware<N, MetadataType, OperationMetadataType> {
+  return { entities, middleware }
+}
+function selectMiddleware<MetadataType, OperationMetadataType>(
+  name: DAOName,
+  middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<DAOName, MetadataType, OperationMetadataType>)[],
+): DAOContextMiddleware<MetadataType, OperationMetadataType>[] {
+  return middlewares.flatMap((m) => ('entities' in m ? (Object.keys(m.entities).includes(name) ? [m.middleware] : []) : [m]))
+}
 export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
   const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, [], ['default'])
   return new DAOContext(newParams)
