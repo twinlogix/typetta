@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src';
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
@@ -36,7 +36,8 @@ export type AddressRelations = {
 export type AddressProjection = {
   cities?: CityProjection | boolean,
   id?: boolean,
-};
+}
+export type AddressParams<P extends AddressProjection> = ParamProjection<types.Address, AddressProjection, P>
 
 export type AddressSortKeys = 'id';
 export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
@@ -105,9 +106,7 @@ type CityFilterFields = {
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 export type CityRawFilter = () => Filter<Document>
 
-export type CityRelations = {
-
-}
+export type CityRelations = Record<never, string>
 
 export type CityProjection = {
   addressId?: boolean,
@@ -115,7 +114,8 @@ export type CityProjection = {
   computedName?: boolean,
   id?: boolean,
   name?: boolean,
-};
+}
+export type CityParams<P extends CityProjection> = ParamProjection<types.City, CityProjection, P>
 
 export type CitySortKeys = 'addressId' | 'id' | 'name';
 export type CitySort = OneKey<CitySortKeys, SortDirection>;
@@ -187,16 +187,15 @@ type DeviceFilterFields = {
 export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
 export type DeviceRawFilter = () => Filter<Document>
 
-export type DeviceRelations = {
-
-}
+export type DeviceRelations = Record<never, string>
 
 export type DeviceProjection = {
   id?: boolean,
   name?: boolean,
   user?: UserProjection | boolean,
   userId?: boolean,
-};
+}
+export type DeviceParams<P extends DeviceProjection> = ParamProjection<types.Device, DeviceProjection, P>
 
 export type DeviceSortKeys = 'id' | 'name' | 'userId';
 export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
@@ -269,16 +268,15 @@ type DogFilterFields = {
 export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
 export type DogRawFilter = () => Filter<Document>
 
-export type DogRelations = {
-
-}
+export type DogRelations = Record<never, string>
 
 export type DogProjection = {
   id?: boolean,
   name?: boolean,
   owner?: UserProjection | boolean,
   ownerId?: boolean,
-};
+}
+export type DogParams<P extends DogProjection> = ParamProjection<types.Dog, DogProjection, P>
 
 export type DogSortKeys = 'id' | 'name' | 'ownerId';
 export type DogSort = OneKey<DogSortKeys, SortDirection>;
@@ -352,16 +350,15 @@ type MockedEntityFilterFields = {
 export type MockedEntityFilter = MockedEntityFilterFields & LogicalOperators<MockedEntityFilterFields>;
 export type MockedEntityRawFilter = () => Filter<Document>
 
-export type MockedEntityRelations = {
-
-}
+export type MockedEntityRelations = Record<never, string>
 
 export type MockedEntityProjection = {
   id?: boolean,
   name?: boolean,
   user?: UserProjection | boolean,
   userId?: boolean,
-};
+}
+export type MockedEntityParams<P extends MockedEntityProjection> = ParamProjection<types.MockedEntity, MockedEntityProjection, P>
 
 export type MockedEntitySortKeys = 'id' | 'name' | 'userId';
 export type MockedEntitySort = OneKey<MockedEntitySortKeys, SortDirection>;
@@ -441,9 +438,7 @@ type OrganizationFilterFields = {
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 export type OrganizationRawFilter = () => Filter<Document>
 
-export type OrganizationRelations = {
-
-}
+export type OrganizationRelations = Record<never, string>
 
 export type OrganizationProjection = {
   address?: {
@@ -454,7 +449,8 @@ export type OrganizationProjection = {
   id?: boolean,
   name?: boolean,
   vatNumber?: boolean,
-};
+}
+export type OrganizationParams<P extends OrganizationProjection> = ParamProjection<types.Organization, OrganizationProjection, P>
 
 export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber';
 export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>;
@@ -558,9 +554,7 @@ type PostFilterFields = {
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
 export type PostRawFilter = () => Filter<Document>
 
-export type PostRelations = {
-
-}
+export type PostRelations = Record<never, string>
 
 export type PostProjection = {
   author?: UserProjection | boolean,
@@ -574,7 +568,8 @@ export type PostProjection = {
   } | boolean,
   title?: boolean,
   views?: boolean,
-};
+}
+export type PostParams<P extends PostProjection> = ParamProjection<types.Post, PostProjection, P>
 
 export type PostSortKeys = 'authorId' | 'body' | 'clicks' | 'id' | 'metadata.region' | 'metadata.visible' | 'title' | 'views';
 export type PostSort = OneKey<PostSortKeys, SortDirection>;
@@ -736,7 +731,8 @@ export type UserProjection = {
     password?: boolean,
     username?: boolean,
   } | boolean,
-};
+}
+export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'amount' | 'amounts' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;

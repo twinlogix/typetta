@@ -20,7 +20,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     ]
 
     const commonImports = [
-      `import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '${
+      `import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '${
         this._config.typettaImport || '@twinlogix/typetta'
       }';`,
       `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}';`,
@@ -306,7 +306,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
         return []
       }
     })
-    return [`export type ${node.name}Relations = {\n` + relationsBody.join('\n') + `\n}`]
+    return [`export type ${node.name}Relations = ${relationsBody.length > 0 ? `{\n${relationsBody.join('\n')}\n}` : 'Record<never, string>'}`]
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -315,8 +315,9 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
 
   public _generateDAOProjection(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoProjectionBody = indentMultiline(this._generateDAOProjectionFields(node, typesMap))
-    const daoProjection = `export type ${node.name}Projection = {\n` + daoProjectionBody + `\n};`
-    return daoProjection
+    const daoProjection = `export type ${node.name}Projection = {\n` + daoProjectionBody + `\n}`
+    const daoParams = `export type ${node.name}Params<P extends ${node.name}Projection> = ParamProjection<types.${node.name}, ${node.name}Projection, P>`
+    return [daoProjection, daoParams].join('\n')
   }
 
   public _generateDAOProjectionFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {

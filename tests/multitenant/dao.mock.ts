@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src';
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
@@ -42,9 +42,7 @@ type HotelFilterFields = {
 export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields>;
 export type HotelRawFilter = () => Filter<Document>
 
-export type HotelRelations = {
-
-}
+export type HotelRelations = Record<never, string>
 
 export type HotelProjection = {
   deletionDate?: boolean,
@@ -52,7 +50,8 @@ export type HotelProjection = {
   id?: boolean,
   name?: boolean,
   tenantId?: boolean,
-};
+}
+export type HotelParams<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
 
 export type HotelSortKeys = 'deletionDate' | 'description' | 'id' | 'name' | 'tenantId';
 export type HotelSort = OneKey<HotelSortKeys, SortDirection>;
@@ -137,9 +136,7 @@ type ReservationFilterFields = {
 export type ReservationFilter = ReservationFilterFields & LogicalOperators<ReservationFilterFields>;
 export type ReservationRawFilter = () => Filter<Document>
 
-export type ReservationRelations = {
-
-}
+export type ReservationRelations = Record<never, string>
 
 export type ReservationProjection = {
   deletionDate?: boolean,
@@ -148,7 +145,8 @@ export type ReservationProjection = {
   roomId?: boolean,
   tenantId?: boolean,
   userId?: boolean,
-};
+}
+export type ReservationParams<P extends ReservationProjection> = ParamProjection<types.Reservation, ReservationProjection, P>
 
 export type ReservationSortKeys = 'deletionDate' | 'id' | 'roomId' | 'tenantId' | 'userId';
 export type ReservationSort = OneKey<ReservationSortKeys, SortDirection>;
@@ -233,9 +231,7 @@ type RoomFilterFields = {
 export type RoomFilter = RoomFilterFields & LogicalOperators<RoomFilterFields>;
 export type RoomRawFilter = () => Filter<Document>
 
-export type RoomRelations = {
-
-}
+export type RoomRelations = Record<never, string>
 
 export type RoomProjection = {
   deletionDate?: boolean,
@@ -244,7 +240,8 @@ export type RoomProjection = {
   id?: boolean,
   size?: boolean,
   tenantId?: boolean,
-};
+}
+export type RoomParams<P extends RoomProjection> = ParamProjection<types.Room, RoomProjection, P>
 
 export type RoomSortKeys = 'deletionDate' | 'hotelId' | 'id' | 'size' | 'tenantId';
 export type RoomSort = OneKey<RoomSortKeys, SortDirection>;
@@ -315,14 +312,13 @@ type TenantFilterFields = {
 export type TenantFilter = TenantFilterFields & LogicalOperators<TenantFilterFields>;
 export type TenantRawFilter = () => Filter<Document>
 
-export type TenantRelations = {
-
-}
+export type TenantRelations = Record<never, string>
 
 export type TenantProjection = {
   id?: boolean,
   info?: boolean,
-};
+}
+export type TenantParams<P extends TenantProjection> = ParamProjection<types.Tenant, TenantProjection, P>
 
 export type TenantSortKeys = 'id' | 'info';
 export type TenantSort = OneKey<TenantSortKeys, SortDirection>;
@@ -442,7 +438,8 @@ export type UserProjection = {
   lastName?: boolean,
   reservations?: ReservationProjection | boolean,
   tenantId?: boolean,
-};
+}
+export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'credentials.password' | 'credentials.username' | 'deletionDate' | 'email' | 'firstName' | 'id' | 'lastName' | 'tenantId';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;

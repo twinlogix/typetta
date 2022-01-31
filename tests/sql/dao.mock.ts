@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
 import { Knex } from 'knex';
@@ -36,7 +36,8 @@ export type AddressRelations = {
 export type AddressProjection = {
   cities?: CityProjection | boolean,
   id?: boolean,
-};
+}
+export type AddressParams<P extends AddressProjection> = ParamProjection<types.Address, AddressProjection, P>
 
 export type AddressSortKeys = 'id';
 export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
@@ -108,7 +109,8 @@ export type AuthorRelations = {
 export type AuthorProjection = {
   books?: BookProjection | boolean,
   id?: boolean,
-};
+}
+export type AuthorParams<P extends AuthorProjection> = ParamProjection<types.Author, AuthorProjection, P>
 
 export type AuthorSortKeys = 'id';
 export type AuthorSort = OneKey<AuthorSortKeys, SortDirection>;
@@ -177,15 +179,14 @@ type AuthorBookFilterFields = {
 export type AuthorBookFilter = AuthorBookFilterFields & LogicalOperators<AuthorBookFilterFields>;
 export type AuthorBookRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type AuthorBookRelations = {
-
-}
+export type AuthorBookRelations = Record<never, string>
 
 export type AuthorBookProjection = {
   authorId?: boolean,
   bookId?: boolean,
   id?: boolean,
-};
+}
+export type AuthorBookParams<P extends AuthorBookProjection> = ParamProjection<types.AuthorBook, AuthorBookProjection, P>
 
 export type AuthorBookSortKeys = 'authorId' | 'bookId' | 'id';
 export type AuthorBookSort = OneKey<AuthorBookSortKeys, SortDirection>;
@@ -261,7 +262,8 @@ export type BookRelations = {
 export type BookProjection = {
   authors?: AuthorProjection | boolean,
   id?: boolean,
-};
+}
+export type BookParams<P extends BookProjection> = ParamProjection<types.Book, BookProjection, P>
 
 export type BookSortKeys = 'id';
 export type BookSort = OneKey<BookSortKeys, SortDirection>;
@@ -330,9 +332,7 @@ type CityFilterFields = {
 export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
 export type CityRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type CityRelations = {
-
-}
+export type CityRelations = Record<never, string>
 
 export type CityProjection = {
   addressId?: boolean,
@@ -340,7 +340,8 @@ export type CityProjection = {
   computedName?: boolean,
   id?: boolean,
   name?: boolean,
-};
+}
+export type CityParams<P extends CityProjection> = ParamProjection<types.City, CityProjection, P>
 
 export type CitySortKeys = 'addressId' | 'id' | 'name';
 export type CitySort = OneKey<CitySortKeys, SortDirection>;
@@ -412,16 +413,15 @@ type DeviceFilterFields = {
 export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
 export type DeviceRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type DeviceRelations = {
-
-}
+export type DeviceRelations = Record<never, string>
 
 export type DeviceProjection = {
   id?: boolean,
   name?: boolean,
   user?: UserProjection | boolean,
   userId?: boolean,
-};
+}
+export type DeviceParams<P extends DeviceProjection> = ParamProjection<types.Device, DeviceProjection, P>
 
 export type DeviceSortKeys = 'id' | 'name' | 'userId';
 export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
@@ -494,16 +494,15 @@ type DogFilterFields = {
 export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
 export type DogRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type DogRelations = {
-
-}
+export type DogRelations = Record<never, string>
 
 export type DogProjection = {
   id?: boolean,
   name?: boolean,
   owner?: UserProjection | boolean,
   ownerId?: boolean,
-};
+}
+export type DogParams<P extends DogProjection> = ParamProjection<types.Dog, DogProjection, P>
 
 export type DogSortKeys = 'id' | 'name' | 'ownerId';
 export type DogSort = OneKey<DogSortKeys, SortDirection>;
@@ -576,15 +575,14 @@ type FriendsFilterFields = {
 export type FriendsFilter = FriendsFilterFields & LogicalOperators<FriendsFilterFields>;
 export type FriendsRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type FriendsRelations = {
-
-}
+export type FriendsRelations = Record<never, string>
 
 export type FriendsProjection = {
   from?: boolean,
   id?: boolean,
   to?: boolean,
-};
+}
+export type FriendsParams<P extends FriendsProjection> = ParamProjection<types.Friends, FriendsProjection, P>
 
 export type FriendsSortKeys = 'from' | 'id' | 'to';
 export type FriendsSort = OneKey<FriendsSortKeys, SortDirection>;
@@ -665,9 +663,7 @@ type OrganizationFilterFields = {
 export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
 export type OrganizationRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type OrganizationRelations = {
-
-}
+export type OrganizationRelations = Record<never, string>
 
 export type OrganizationProjection = {
   address?: {
@@ -678,7 +674,8 @@ export type OrganizationProjection = {
   id?: boolean,
   name?: boolean,
   vatNumber?: boolean,
-};
+}
+export type OrganizationParams<P extends OrganizationProjection> = ParamProjection<types.Organization, OrganizationProjection, P>
 
 export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber';
 export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>;
@@ -850,7 +847,8 @@ export type UserProjection = {
   live?: boolean,
   localization?: boolean,
   title?: boolean,
-};
+}
+export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'amount' | 'amounts' | 'bestFriendId' | 'credentials.another.test' | 'credentials.password' | 'credentials.username' | 'firstName' | 'id' | 'lastName' | 'live' | 'localization' | 'title';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;

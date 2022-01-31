@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
 import { Knex } from 'knex';
@@ -31,14 +31,13 @@ type AFilterFields = {
 export type AFilter = AFilterFields & LogicalOperators<AFilterFields>;
 export type ARawFilter = () => Filter<Document>
 
-export type ARelations = {
-
-}
+export type ARelations = Record<never, string>
 
 export type AProjection = {
   id?: boolean,
   value?: boolean,
-};
+}
+export type AParams<P extends AProjection> = ParamProjection<types.A, AProjection, P>
 
 export type ASortKeys = 'id' | 'value';
 export type ASort = OneKey<ASortKeys, SortDirection>;
@@ -103,14 +102,13 @@ type BFilterFields = {
 export type BFilter = BFilterFields & LogicalOperators<BFilterFields>;
 export type BRawFilter = () => Filter<Document>
 
-export type BRelations = {
-
-}
+export type BRelations = Record<never, string>
 
 export type BProjection = {
   id?: boolean,
   value?: boolean,
-};
+}
+export type BParams<P extends BProjection> = ParamProjection<types.B, BProjection, P>
 
 export type BSortKeys = 'id' | 'value';
 export type BSort = OneKey<BSortKeys, SortDirection>;
@@ -176,14 +174,13 @@ type CFilterFields = {
 export type CFilter = CFilterFields & LogicalOperators<CFilterFields>;
 export type CRawFilter = () => Filter<Document>
 
-export type CRelations = {
-
-}
+export type CRelations = Record<never, string>
 
 export type CProjection = {
   id?: boolean,
   value?: boolean,
-};
+}
+export type CParams<P extends CProjection> = ParamProjection<types.C, CProjection, P>
 
 export type CSortKeys = 'id' | 'value';
 export type CSort = OneKey<CSortKeys, SortDirection>;
@@ -249,14 +246,13 @@ type DFilterFields = {
 export type DFilter = DFilterFields & LogicalOperators<DFilterFields>;
 export type DRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type DRelations = {
-
-}
+export type DRelations = Record<never, string>
 
 export type DProjection = {
   id?: boolean,
   value?: boolean,
-};
+}
+export type DParams<P extends DProjection> = ParamProjection<types.D, DProjection, P>
 
 export type DSortKeys = 'id' | 'value';
 export type DSort = OneKey<DSortKeys, SortDirection>;
@@ -321,14 +317,13 @@ type EFilterFields = {
 export type EFilter = EFilterFields & LogicalOperators<EFilterFields>;
 export type ERawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type ERelations = {
-
-}
+export type ERelations = Record<never, string>
 
 export type EProjection = {
   id?: boolean,
   value?: boolean,
-};
+}
+export type EParams<P extends EProjection> = ParamProjection<types.E, EProjection, P>
 
 export type ESortKeys = 'id' | 'value';
 export type ESort = OneKey<ESortKeys, SortDirection>;
@@ -394,14 +389,13 @@ type FFilterFields = {
 export type FFilter = FFilterFields & LogicalOperators<FFilterFields>;
 export type FRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type FRelations = {
-
-}
+export type FRelations = Record<never, string>
 
 export type FProjection = {
   id?: boolean,
   value?: boolean,
-};
+}
+export type FParams<P extends FProjection> = ParamProjection<types.F, FProjection, P>
 
 export type FSortKeys = 'id' | 'value';
 export type FSort = OneKey<FSortKeys, SortDirection>;

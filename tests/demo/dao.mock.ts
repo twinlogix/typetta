@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
 import { Knex } from 'knex';
@@ -97,7 +97,8 @@ export type PostProjection = {
   tags?: TagProjection | boolean,
   title?: boolean,
   views?: boolean,
-};
+}
+export type PostParams<P extends PostProjection> = ParamProjection<types.Post, PostProjection, P>
 
 export type PostSortKeys = 'authorId' | 'body' | 'clicks' | 'createdAt' | 'id' | 'metadata.region' | 'metadata.typeId' | 'metadata.visible' | 'title' | 'views';
 export type PostSort = OneKey<PostSortKeys, SortDirection>;
@@ -180,14 +181,13 @@ type PostTypeFilterFields = {
 export type PostTypeFilter = PostTypeFilterFields & LogicalOperators<PostTypeFilterFields>;
 export type PostTypeRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type PostTypeRelations = {
-
-}
+export type PostTypeRelations = Record<never, string>
 
 export type PostTypeProjection = {
   id?: boolean,
   name?: boolean,
-};
+}
+export type PostTypeParams<P extends PostTypeProjection> = ParamProjection<types.PostType, PostTypeProjection, P>
 
 export type PostTypeSortKeys = 'id' | 'name';
 export type PostTypeSort = OneKey<PostTypeSortKeys, SortDirection>;
@@ -257,15 +257,14 @@ type TagFilterFields = {
 export type TagFilter = TagFilterFields & LogicalOperators<TagFilterFields>;
 export type TagRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
-export type TagRelations = {
-
-}
+export type TagRelations = Record<never, string>
 
 export type TagProjection = {
   id?: boolean,
   name?: boolean,
   postId?: boolean,
-};
+}
+export type TagParams<P extends TagProjection> = ParamProjection<types.Tag, TagProjection, P>
 
 export type TagSortKeys = 'id' | 'name' | 'postId';
 export type TagSort = OneKey<TagSortKeys, SortDirection>;
@@ -381,7 +380,8 @@ export type UserProjection = {
   lastName?: boolean,
   posts?: PostProjection | boolean,
   totalPostsViews?: boolean,
-};
+}
+export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'createdAt' | 'credentials.password' | 'credentials.username' | 'email' | 'firstName' | 'id' | 'lastName';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;

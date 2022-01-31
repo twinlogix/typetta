@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src';
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
@@ -37,16 +37,15 @@ type HotelFilterFields = {
 export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields>;
 export type HotelRawFilter = () => Filter<Document>
 
-export type HotelRelations = {
-
-}
+export type HotelRelations = Record<never, string>
 
 export type HotelProjection = {
   description?: boolean,
   id?: boolean,
   name?: boolean,
   totalCustomers?: boolean,
-};
+}
+export type HotelParams<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
 
 export type HotelSortKeys = 'description' | 'id' | 'name' | 'totalCustomers';
 export type HotelSort = OneKey<HotelSortKeys, SortDirection>;
@@ -126,9 +125,7 @@ type ReservationFilterFields = {
 export type ReservationFilter = ReservationFilterFields & LogicalOperators<ReservationFilterFields>;
 export type ReservationRawFilter = () => Filter<Document>
 
-export type ReservationRelations = {
-
-}
+export type ReservationRelations = Record<never, string>
 
 export type ReservationProjection = {
   hotelId?: boolean,
@@ -136,7 +133,8 @@ export type ReservationProjection = {
   room?: RoomProjection | boolean,
   roomId?: boolean,
   userId?: boolean,
-};
+}
+export type ReservationParams<P extends ReservationProjection> = ParamProjection<types.Reservation, ReservationProjection, P>
 
 export type ReservationSortKeys = 'hotelId' | 'id' | 'roomId' | 'userId';
 export type ReservationSort = OneKey<ReservationSortKeys, SortDirection>;
@@ -221,9 +219,7 @@ type RoomFilterFields = {
 export type RoomFilter = RoomFilterFields & LogicalOperators<RoomFilterFields>;
 export type RoomRawFilter = () => Filter<Document>
 
-export type RoomRelations = {
-
-}
+export type RoomRelations = Record<never, string>
 
 export type RoomProjection = {
   description?: boolean,
@@ -232,7 +228,8 @@ export type RoomProjection = {
   hotelId?: boolean,
   id?: boolean,
   to?: boolean,
-};
+}
+export type RoomParams<P extends RoomProjection> = ParamProjection<types.Room, RoomProjection, P>
 
 export type RoomSortKeys = 'description' | 'from' | 'hotelId' | 'id' | 'to';
 export type RoomSort = OneKey<RoomSortKeys, SortDirection>;
@@ -353,7 +350,8 @@ export type UserProjection = {
     role?: boolean,
   } | boolean,
   totalPayments?: boolean,
-};
+}
+export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'email' | 'firstName' | 'id' | 'lastName' | 'roles.hotelId' | 'roles.role' | 'totalPayments';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
