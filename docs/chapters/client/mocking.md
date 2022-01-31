@@ -15,7 +15,7 @@ La funzionalità di mocking è inoltre utile per finalità di testing.
 Per creare un contesto interamente mock, Typetta mette a disposizione una funzione di utilità, generata analogamente al ``DAOContext``, che riceve gli stessi identici parametri del suo costruttore ad esclusione dei riferimenti alla sorgente dati. 
 
 ```typescript
-const daoContext = createMockedDAOContext();
+const daoContext = mockedDAOContext();
 ```
 
 Il ``DAOContext`` così ottenuto può essere utilizzato allo stesso identico modo di quello già descritto nei capitoli precedenti, rendendo la presenza o meno della sorgente dati trasparente al resto del sistema. La sorgente dati mock partirà vuota, senza alcun dato ed alcuna struttura.
@@ -27,19 +27,19 @@ Nel caso di entità dichiarare solo come ``@entity``, il DAO che viene prodotto 
 Nel caso ci siano entità di tipo ``@entity @sql``, siccome l'accesso al dato su database relazionali richiede la presenza di tabelle precedentemente create, occorre chiamare sul ``DAOContext`` mock un ulteriore metodo di inzializzazione ``createTables``. Di seguito un esempio:
 
 ```typescript
-const daoContext = createMockedDAOContext();
+const daoContext = mockedDAOContext();
 daoContext.createTables();
 ```
 
 ## Mocking di alcune sorgenti dati
 
-In certi casi può essere utile creare un ``DAOContext`` che abbia solo alcune sorgenti dati mock e altre reali. Per fare questo la funzione ``createMockedDAOContext`` permette la specifica, opzionale, delle sorgenti dati prevesti dal modello dati. Le sorgenti dati non specificata vengono mockate.
+In certi casi può essere utile creare un ``DAOContext`` che abbia solo alcune sorgenti dati mock e altre reali. Per fare questo la funzione ``mockedDAOContext`` permette la specifica, opzionale, delle sorgenti dati prevesti dal modello dati. Le sorgenti dati non specificata vengono mockate.
 
 ```typescript
 const mongoClient = new MongoClient(process.env.MONGODB_URL!);
 const mongoDb = mongoClient.db(process.env.MONGODB_DATABASE_NAME);
 
-const daoContext = createMockedDAOContext({
+const daoContext = mockedDAOContext({
   mongodb: {
     default: mongoDb,
     // another not specified data source => mocked
