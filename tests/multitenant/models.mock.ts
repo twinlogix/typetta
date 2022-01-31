@@ -47,6 +47,12 @@ export type Room = {
   tenantId?: Maybe<Scalars['TenantId']>;
 };
 
+export type Tenant = {
+  __typename?: 'Tenant';
+  id: Scalars['Int'];
+  info: Scalars['String'];
+};
+
 export type User = {
   __typename?: 'User';
   credentials?: Maybe<UsernamePasswordCredentials>;

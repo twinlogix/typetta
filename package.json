@@ -8,7 +8,7 @@
     "coverage": "jest --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
     "test": "jest --detectOpenHandles --no-cache --forceExit",
     "lint": "eslint . --quiet --ext .js,.jsx,.ts,.tsx",
-    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run security",
+    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run generate-security",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",

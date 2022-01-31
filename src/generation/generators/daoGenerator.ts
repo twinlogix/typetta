@@ -68,7 +68,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .join(',\n')
 
     const metadata = `metadata?: MetadataType`
-    const middlewares = `\nmiddlewares?: DAOContextMiddleware<MetadataType, OperationMetadataType>[]`
+    const middlewares = `\nmiddlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]`
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
     const mongoDBParams = hasMongoDBEntites ? `,\nmongo: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
@@ -125,7 +125,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const mongoDBFields = hasMongoDBEntites ? `\nprivate mongo: ${mongoSourcesType};` : ''
     const knexJsFields = hasSQLEntities ? `\nprivate knex: ${sqlSourcesType};` : ''
     const overridesDeclaration = `private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];${mongoDBFields}${knexJsFields}`
-    const middlewareDeclaration = 'private middlewares: DAOContextMiddleware<MetadataType, OperationMetadataType>[]'
+    const middlewareDeclaration = 'private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]'
     const loggerDeclaration = `private logger?: LogFunction<${daoNamesType}>`
 
     const daoGetters = Array.from(typesMap.values())
@@ -137,9 +137,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
             : node.entity?.type === 'mongo'
             ? `, collection: this.mongo.${node.entity.source}.collection('${node.entity?.collection}')`
             : ''
-        const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...this.middlewares as DAOMiddleware<${
-          node.name
-        }DAOGenerics<MetadataType, OperationMetadataType>>[]]`
+        const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...selectMiddleware('${toFirstLower(
+          node.name,
+        )}', this.middlewares) as DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
         const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
         )}${daoImplementationInit}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger });`
@@ -172,11 +172,39 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .map((n) => `${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
       .join(' | ')}>`
 
-    const daoMockFunction = `export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
+    const utilsCode = `
+//--------------------------------------------------------------------------------
+//------------------------------------- UTILS ------------------------------------
+//--------------------------------------------------------------------------------
+
+type DAOName = keyof DAOMiddlewareMap<any, any>
+type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
+${Array.from(typesMap.values())
+  .filter((node) => node.entity)
+  .map((n) => `  ${toFirstLower(n.name)}: ${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
+  .join('\n')}
+}
+type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
+  entities: { [K in N]: true }
+  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>
+}
+export function createGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType>(
+  entities: { [K in N]: true },
+  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>,
+): GroupMiddleware<N, MetadataType, OperationMetadataType> {
+  return { entities, middleware }
+}
+function selectMiddleware<MetadataType, OperationMetadataType>(
+  name: DAOName,
+  middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<DAOName, MetadataType, OperationMetadataType>)[],
+): DAOContextMiddleware<MetadataType, OperationMetadataType>[] {
+  return middlewares.flatMap((m) => ('entities' in m ? (Object.keys(m.entities).includes(name) ? [m.middleware] : []) : [m]))
+}
+export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
   const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, [${mongoSources.map((v) => `'${v}'`)}], [${sqlSources.map((v) => `'${v}'`)}])
   return new DAOContext(newParams)
 }`
-    return [[daoContextParamsExport, daoContextMiddleware, daoExport, daoMockFunction].join('\n\n')]
+    return [[daoContextParamsExport, daoContextMiddleware, daoExport, utilsCode].join('\n\n')]
   }
 
   // ---------------------------------------------------------------------------------------------------------
