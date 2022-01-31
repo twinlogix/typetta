@@ -130,7 +130,7 @@ test('crud tenant test', async () => {
 
   const hotels1 = await dao.hotel.findAll({ filter: { name: { $startsWith: 'AHotel' } } })
 
-  const hotels2 = await dao.hotel.findAll({ projection: { totalCustomers: true, name: true } })
+  const hotels2 = await dao.hotel.findAll({ projection: { totalCustomers: true } })
 
   console.log(hotels1)
 })

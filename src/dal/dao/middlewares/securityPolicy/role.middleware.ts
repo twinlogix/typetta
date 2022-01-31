@@ -6,9 +6,9 @@ import { buildMiddleware } from '../utils/builder'
 
 export type Permission<T extends DAOGenerics> =
   | {
+      insert?: boolean
       read?: boolean | T['projection']
       update?: boolean
-      insert?: boolean
       replace?: boolean
       aggregate?: boolean
     }
@@ -20,6 +20,11 @@ export function roleSecurityPolicy<K extends keyof T['model'], RoleType extends 
   roles: (context: T['metadata']) => ({ values?: T['model'][K][] | null } & { role: RoleType })[]
 }): DAOMiddleware<T> {
   return buildMiddleware({
+    beforeInsert: async (params, context) => {
+      if (!context.metadata) return
+      const roles = args.roles(context.metadata)
+      // ...
+    },
     beforeFind: async (params, context) => {
       if (!context.metadata) return
       const roles = args.roles(context.metadata)
@@ -72,13 +77,20 @@ export function roleSecurityPolicy<K extends keyof T['model'], RoleType extends 
       if (!context.metadata) return
       const roles = args.roles(context.metadata)
       for (const record of records) {
-        const role = roles.find((r) => r.values == null || r.values.includes(record[args.key]))
-        if (role) {
-          const permission = args.permissions[role.role]
-          const proj = mergeProjections(typeof permission === 'boolean' ? permission : permission?.read ?? false, { [args.key]: true })
-          const [contained, invalidFields] = isProjectionContained(proj, params.projection ?? true)
+        const applicableRoles = roles.filter((r) => r.values == null || r.values.includes(record[args.key]))
+        if (applicableRoles.length > 0) {
+          const largerProjection = applicableRoles.reduce(
+            (proj, role) => {
+              const permission = args.permissions[role.role]
+              return mergeProjections(typeof permission === 'boolean' ? permission : permission?.read ?? false, proj)
+            },
+            { [args.key]: true } as GenericProjection,
+          )
+          const [contained, invalidFields] = isProjectionContained(largerProjection, params.projection ?? true)
           if (!contained) {
-            throw new Error(`Access to restricted fields: Role ${role.role} can't access fields ${JSON.stringify(invalidFields)} of ${context.daoName} entities`)
+            throw new Error(
+              `Access to restricted fields: Roles [${applicableRoles.map((role) => role.role).join(',')}] can't access fields ${JSON.stringify(invalidFields)} of ${context.daoName} entities`,
+            )
           }
         }
       }
