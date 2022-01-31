@@ -39,11 +39,9 @@ main:
       - url: /chapters/client/raw-databse-access
         title: Database direct access [eng soon]
       - url: /chapters/client/logging
-        title: Logging
-        todo: true
-      - url: /chapters/advanced/mocking
-        title: Mocking
-        todo: true
+        title: Logging [eng soon]
+      - url: /chapters/client/mocking
+        title: Mocking [eng soon]
   - database-drivers:
     title: Middlewares
     children:

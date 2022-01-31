@@ -49,7 +49,7 @@ const knexInstance = knex({
 })
 
 const daoContext = new DAOContext({
-  mongo: { default: mongoDb },
+  mongodb: { default: mongoDb },
   knex: { default: knexInstance },
 });
 ```
@@ -62,7 +62,7 @@ The mechanism for defining data sources in the DAOContext provides for the possi
 
 ```typescript
 const daoContext = new DAOContext({
-  mongo: { 
+  mongodb: { 
     default: primaryMongoDb,
     secondary: secondaryMongoDb,
   },
