@@ -157,7 +157,7 @@ export type DAOGenerics<
   idGeneration: IdGeneration
   pureFilter: PureFilterType
   rawFilter: RawFilterType
-  filter: PureFilterType | RawFilterType
+  filter: PureFilterType | RawFilterType | (PureFilterType | RawFilterType)[]
   relations: RelationsType
   projection: ProjectionType
   pureSort: PureSortType

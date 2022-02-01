@@ -1,4 +1,3 @@
-
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
@@ -98,6 +97,16 @@ test('simple findOne', async () => {
   expect(user).toBeDefined()
   expect(user!.firstName).toBe('FirstName')
   expect(user!.lastName).toBe('LastName')
+})
+
+test('simple findOne multiple filter', async () => {
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '1', live: true } })
+
+  const users = await dao.user.findAll({ filter: [{ lastName: '2' }, () => ({ name: '2' })] })
+  expect(users.length).toBe(1)
+  expect(users[0].lastName).toBe('2')
 })
 
 // ------------------------------------------------------------------------
@@ -737,7 +746,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'update') {
-                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -747,7 +756,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'delete') {
-                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -757,7 +766,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'replace') {
-                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -783,7 +792,7 @@ test('middleware 1', async () => {
                   operation: 'find',
                   params: args.params,
                   records: args.records.map((record) => {
-                    if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1' && record.firstName) {
+                    if (typeof args.params.filter === 'object' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1' && record.firstName) {
                       return { ...record, firstName: record.firstName + ' OK' }
                     }
                     return record

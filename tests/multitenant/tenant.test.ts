@@ -1,5 +1,5 @@
 import { inMemoryMongoDb, tenantSecurityPolicy } from '../../src'
-import { createGroupMiddleware, DAOContext } from './dao.mock'
+import { DAOContext, groupMiddleware } from './dao.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
@@ -69,12 +69,20 @@ function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
       },
     },
     middlewares: [
-      createGroupMiddleware(
+      groupMiddleware.excludes(
+        {
+          tenant: true,
+          hotel: true,
+          reservation: true
+        },
+        tenantSecurityPolicy({
+          tenantKey: 'tenantId',
+        }),
+      ),
+      groupMiddleware.includes(
         {
           hotel: true,
-          user: true,
-          reservation: true,
-          room: true,
+          reservation: true
         },
         tenantSecurityPolicy({
           tenantKey: 'tenantId',
@@ -98,16 +106,16 @@ beforeEach(async () => {
 })
 
 test('crud tenant test', async () => {
-  const user0t2 = await dao2.user.insertOne({ record: { email: '2@hotel.com', tenantId: 2 } })
+  const user0t2 = await dao2.user.insertOne({ record: { firstName: 'Mario', email: '2@hotel.com', tenantId: 2 } })
   try {
     await dao1.user.insertOne({ record: { email: '1@hotel.com', tenantId: 2 } })
     fail()
   } catch (error) {
     expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
   }
-  const user0t1 = await dao1.user.insertOne({ record: { email: '1@hotel.com' } })
+  const user0t1 = await dao1.user.insertOne({ record: { firstName: 'Mario', email: '1@hotel.com' } })
   expect(user0t1.tenantId).toBe(1)
-  const user1t1 = await dao1.user.insertOne({ record: { email: '1@hotel.com', tenantId: 1 } })
+  const user1t1 = await dao1.user.insertOne({ record: { firstName: 'Mario', email: '1@hotel.com', tenantId: 1 } })
   expect(user1t1.tenantId).toBe(1)
 
   const user2t1 = await dao1.user.findOne({ filter: { id: user0t2.id } })
@@ -115,6 +123,10 @@ test('crud tenant test', async () => {
 
   const user3t1 = await dao1.user.findOne({ filter: { id: user0t1.id } })
   expect(user3t1?.tenantId).toBe(1)
+
+  const userst2 = await dao2.user.findAll({ filter: () => ({ firstName: 'Mario' }) })
+  expect(userst2.length).toBe(1)
+  expect(userst2[0].id).toStrictEqual(user0t2.id)
 
   try {
     await dao1.user.findOne({ filter: { tenantId: 2 } })
@@ -213,12 +225,6 @@ test('tenant wrong ref test', async () => {
 })
 
 test('tenant raw operation test', async () => {
-  try {
-    await dao1.user.findOne({ filter: () => ({}) })
-    fail()
-  } catch (error) {
-    expect((error as Error).message.startsWith('[Tenant Middleware]')).toBe(true)
-  }
   try {
     await dao1.user.updateOne({
       filter: {},

@@ -521,23 +521,48 @@ type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
   tag: TagDAOGenerics<MetadataType, OperationMetadataType>
   user: UserDAOGenerics<MetadataType, OperationMetadataType>
 }
-type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
-  entities: { [K in N]: true }
+type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
+  | IncludeGroupMiddleware<N, MetadataType, OperationMetadataType>
+  | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
+type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
+  include: { [K in N]: true }
   middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>
 }
-export function createGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType>(
-  entities: { [K in N]: true },
-  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>,
-): GroupMiddleware<N, MetadataType, OperationMetadataType> {
-  return { entities, middleware }
+type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
+  exclude: { [K in N]: true }
+  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
+}
+export const groupMiddleware = {
+  includes<N extends DAOName, MetadataType, OperationMetadataType>(
+    include: { [K in N]: true },
+    middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>,
+  ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
+    return { include, middleware }
+  },
+  excludes<N extends DAOName, MetadataType, OperationMetadataType>(
+    exclude: { [K in N]: true },
+    middleware: ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>['middleware'],
+  ): ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
+    return { exclude, middleware }
+  },
 }
 function selectMiddleware<MetadataType, OperationMetadataType>(
   name: DAOName,
   middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<DAOName, MetadataType, OperationMetadataType>)[],
 ): DAOContextMiddleware<MetadataType, OperationMetadataType>[] {
-  return middlewares.flatMap((m) => ('entities' in m ? (Object.keys(m.entities).includes(name) ? [m.middleware] : []) : [m]))
+  return middlewares.flatMap((m) =>
+    'include' in m
+      ? Object.keys(m.include).includes(name)
+        ? [m.middleware]
+        : []
+      : 'exclude' in m
+      ? !Object.keys(m.exclude).includes(name)
+        ? [m.middleware as DAOContextMiddleware<MetadataType, OperationMetadataType>]
+        : []
+      : [m],
+  )
 }
 export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, [], ['default'])
+  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default'], [])
   return new DAOContext(newParams)
 }

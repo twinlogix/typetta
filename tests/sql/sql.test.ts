@@ -200,6 +200,16 @@ test('simple findAll', async () => {
   expect(users[0].lastName).toBe('LastName')
 })
 
+test('simple findOne multiple filter', async () => {
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '1', live: true } })
+
+  const users = await dao.user.findAll({ filter: [{ lastName: '2' }, (qb) => qb.where('name', '=', '2')] })
+  expect(users.length).toBe(1)
+  expect(users[0].lastName).toBe('2')
+})
+
 test('simple findAll with custom where', async () => {
   await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   await dao.user.insertOne({ record: { firstName: 'asd', lastName: 'asd', live: true } })
