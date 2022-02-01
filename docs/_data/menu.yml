@@ -48,16 +48,19 @@ main:
       - url: /chapters/middlewares/architecture
         title: Middleware Architecture
       - url: /chapters/middlewares/virtual-fields
-        title: Virtual Fields
+        title: Projection Dependency
         todo: true
-      - url: /chapters/middlewares/soft-delete
-        title: Soft Delete
+      - url: /chapters/middlewares/virtual-fields
+        title: Virtual Fields
         todo: true
       - url: /chapters/middlewares/multi-tenancy
         title: Multi Tenancy
         todo: true
       - url: /chapters/middlewares/security-policies
         title: Security Policies
+        todo: true
+      - url: /chapters/middlewares/soft-delete
+        title: Paranoid Soft Delete
         todo: true
   - database-drivers:
     title: Database Drivers
