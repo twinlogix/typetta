@@ -19,11 +19,11 @@ import {
 import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
-import { getProjection, projection } from './projections/projections.utils'
+import { getProjection, infoToProjection } from './projections/projections.utils'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
-import { GraphQLResolveInfo } from 'graphql'
+import { getNamedType, GraphQLResolveInfo } from 'graphql'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 
@@ -407,9 +407,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   private infoToProjection<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P>): FindParams<T, P> {
     if (params.projection && typeof params.projection === 'object' && (typeof params.projection.path === 'object' || typeof params.projection.schema === 'object')) {
+      const info = params.projection as GraphQLResolveInfo
       return {
         ...params,
-        projection: projection().fromInfo(params.projection as GraphQLResolveInfo) as P,
+        projection: infoToProjection(info, undefined, info.fieldNodes[0], getNamedType(info.returnType), info.schema) as P
       }
     }
     return params

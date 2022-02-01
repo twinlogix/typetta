@@ -1,8 +1,5 @@
-import { DAOGenerics } from '../dao.types'
-import { Schema } from '../schemas/schemas.types'
 import { GenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
-import { PartialDeep } from 'type-fest'
 
 type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
   ? ProjectionType
@@ -15,18 +12,12 @@ export function mergeGenericProjection<P1 extends GenericProjection, P2 extends 
 }
 export interface ProjectionBuilderInterface<ProjectionType extends GenericProjection> {
   merge<P1 extends ProjectionType, P2 extends ProjectionType>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2>
-
-  fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): ProjectionType | true
 }
 
 export function projection<ProjectionType extends GenericProjection>(): ProjectionBuilderInterface<ProjectionType> {
   return new (class implements ProjectionBuilderInterface<ProjectionType> {
     merge<P1 extends ProjectionType, P2 extends ProjectionType>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2> {
       return mergeProjections(p1 as GenericProjection, p2 as GenericProjection) as SelectProjection<ProjectionType, P1, P2>
-    }
-
-    fromInfo(info: GraphQLResolveInfo, defaults?: any, context?: FieldNode, type?: GraphQLNamedType, schema?: GraphQLSchema): ProjectionType | true {
-      return infoToProjection(info, defaults, context ? context : info.fieldNodes[0], type ? type : getNamedType(info.returnType), schema ? schema : info.schema)
     }
   })()
 }

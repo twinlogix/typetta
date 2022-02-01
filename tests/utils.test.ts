@@ -8,10 +8,12 @@ import {
   isProjectionIntersected,
   mergeProjections,
   projection,
+  infoToProjection,
 } from '../src'
 import { UserProjection } from './mongodb/dao.mock'
 import { ApolloServer } from 'apollo-server'
 import { createTestClient } from 'apollo-server-testing'
+import { getNamedType, GraphQLResolveInfo } from 'graphql'
 import gql from 'graphql-tag'
 
 type Pass = 'pass'
@@ -51,8 +53,8 @@ test('infoToProjection test', async () => {
 
   const resolvers = {
     Query: {
-      testInfoToProjection: async (parent: any, args: any, ctx: any, info: any) => {
-        return { res: JSON.stringify(projection<any>().fromInfo(info)), __typename: 'T' }
+      testInfoToProjection: async (parent: any, args: any, ctx: any, info: GraphQLResolveInfo) => {
+        return { res: JSON.stringify(infoToProjection(info, undefined, info.fieldNodes[0], getNamedType(info.returnType), info.schema)), __typename: 'T' }
       },
     },
   }

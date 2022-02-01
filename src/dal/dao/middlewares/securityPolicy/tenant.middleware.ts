@@ -33,7 +33,7 @@ export function tenantSecurityPolicy<T extends DAOGenerics, TenantIdKey extends 
         return { continue: true, params: { ...params, record: { ...params.record, [key]: tenantId } } }
       }
       if (params.record[key] !== tenantId) {
-        throw new Error(`${ERROR_PREFIX}[Tenant middleware]: Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[key]} instead.`)
+        throw new Error(`${ERROR_PREFIX}Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[key]} instead.`)
       }
     },
     beforeFind: async (params, context) => {
@@ -82,8 +82,7 @@ export function tenantSecurityPolicy<T extends DAOGenerics, TenantIdKey extends 
     beforeAggregate: async (params, args, context) => {
       const tenantId = getTenantId(context)
       if (!tenantId) return
-      const asd = elabFilter(params.filter, tenantId)
-      return { continue: true, params: { ...params, filter: asd }, args }
+      return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) }, args }
     },
   })
 }
