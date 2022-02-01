@@ -45,17 +45,22 @@ main:
   - middlewares:
     title: Middlewares
     children:
-      - url: /chapters/middleware/architecture
+      - url: /chapters/middlewares/architecture
         title: Middleware Architecture
-        todo: true
-      - url: /chapters/middleware/computed-fields
+      - url: /chapters/middlewares/virtual-fields
         title: Virtual Fields
         todo: true
-      - url: /chapters/middleware/security-policies
+      - url: /chapters/middlewares/soft-delete
+        title: Soft Delete
+        todo: true
+      - url: /chapters/middlewares/multi-tenancy
+        title: Multi Tenancy
+        todo: true
+      - url: /chapters/middlewares/security-policies
         title: Security Policies
         todo: true
   - database-drivers:
-    title: Data Sources Drivers
+    title: Database Drivers
     children:
       - url: /chapters/database-drivers/mongodb
         title: MongoDB
