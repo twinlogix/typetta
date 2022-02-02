@@ -57,12 +57,6 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    if (filter && Array.isArray(filter)) {
-      return filter.reduce((builder: Knex.QueryBuilder<any, any>, f: T['filter']) => this.buildWhere(f, builder), (qb || this.qb()).and)
-    }
-    if (typeof filter === 'function') {
-      return filter(qb || this.qb())
-    }
     return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knex) : qb || this.qb()
   }
 

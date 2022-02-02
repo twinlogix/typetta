@@ -104,7 +104,7 @@ test('simple findOne multiple filter', async () => {
   await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
   await dao.user.insertOne({ record: { firstName: '2', lastName: '1', live: true } })
 
-  const users = await dao.user.findAll({ filter: [{ lastName: '2' }, () => ({ name: '2' })] })
+  const users = await dao.user.findAll({ filter: { $and: [{ lastName: '2' }, () => ({ name: '2' })] } })
   expect(users.length).toBe(1)
   expect(users[0].lastName).toBe('2')
 })

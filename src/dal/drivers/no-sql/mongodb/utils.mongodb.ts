@@ -12,6 +12,7 @@ import { DefaultModelScalars, identityAdapter } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document, SortDirection } from 'mongodb'
+import { DAOGenerics } from '../../../dao/dao.types'
 
 export function adaptProjection<ProjectionType extends object, ScalarsType>(projection: AnyProjection<ProjectionType>, schema: Schema<ScalarsType>, defaultTrue?: true): AnyProjection<ProjectionType> {
   if (projection === true || projection === undefined) {
@@ -48,11 +49,14 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   }
 }
 
-export function adaptFilter<FilterType extends AbstractFilter, ScalarsType extends DefaultModelScalars>(
-  filter: FilterType,
+export function adaptFilter<ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
+  filter: T['filter'],
   schema: Schema<ScalarsType>,
   adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
 ): Filter<Document> {
+  if(typeof filter === 'function') {
+    return filter()
+  }
   return Object.entries(filter).reduce<Filter<Document>>((result, [k, v]) => {
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)

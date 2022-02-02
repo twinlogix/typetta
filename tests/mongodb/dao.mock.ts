@@ -20,7 +20,7 @@ export const addressSchema: Schema<types.Scalars> = {
 type AddressFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
+export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields | AddressRawFilter>
 export type AddressRawFilter = () => Filter<Document>
 
 export type AddressRelations = {
@@ -103,7 +103,7 @@ type CityFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
-export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
+export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields | CityRawFilter>
 export type CityRawFilter = () => Filter<Document>
 
 export type CityRelations = Record<never, string>
@@ -184,7 +184,7 @@ type DeviceFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
+export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields | DeviceRawFilter>
 export type DeviceRawFilter = () => Filter<Document>
 
 export type DeviceRelations = Record<never, string>
@@ -265,7 +265,7 @@ type DogFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'ownerId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
+export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields | DogRawFilter>
 export type DogRawFilter = () => Filter<Document>
 
 export type DogRelations = Record<never, string>
@@ -347,7 +347,7 @@ type MockedEntityFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type MockedEntityFilter = MockedEntityFilterFields & LogicalOperators<MockedEntityFilterFields>;
+export type MockedEntityFilter = MockedEntityFilterFields & LogicalOperators<MockedEntityFilterFields | MockedEntityRawFilter>
 export type MockedEntityRawFilter = () => Filter<Document>
 
 export type MockedEntityRelations = Record<never, string>
@@ -435,7 +435,7 @@ type OrganizationFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'vatNumber'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
-export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
+export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields | OrganizationRawFilter>
 export type OrganizationRawFilter = () => Filter<Document>
 
 export type OrganizationRelations = Record<never, string>
@@ -551,7 +551,7 @@ type PostFilterFields = {
   'title'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'views'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
+export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields | PostRawFilter>
 export type PostRawFilter = () => Filter<Document>
 
 export type PostRelations = Record<never, string>
@@ -695,7 +695,7 @@ type UserFilterFields = {
   'usernamePasswordCredentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators,
   'usernamePasswordCredentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
-export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
+export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields | UserRawFilter>
 export type UserRawFilter = () => Filter<Document>
 
 export type UserRelations = {

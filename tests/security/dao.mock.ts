@@ -34,7 +34,7 @@ type HotelFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'totalCustomers'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields>;
+export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields | HotelRawFilter>
 export type HotelRawFilter = () => Filter<Document>
 
 export type HotelRelations = Record<never, string>
@@ -122,7 +122,7 @@ type ReservationFilterFields = {
   'roomId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type ReservationFilter = ReservationFilterFields & LogicalOperators<ReservationFilterFields>;
+export type ReservationFilter = ReservationFilterFields & LogicalOperators<ReservationFilterFields | ReservationRawFilter>
 export type ReservationRawFilter = () => Filter<Document>
 
 export type ReservationRelations = Record<never, string>
@@ -216,7 +216,7 @@ type RoomFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'to'?: types.Scalars['Date'] | null | EqualityOperators<types.Scalars['Date']> | ElementOperators
 };
-export type RoomFilter = RoomFilterFields & LogicalOperators<RoomFilterFields>;
+export type RoomFilter = RoomFilterFields & LogicalOperators<RoomFilterFields | RoomRawFilter>
 export type RoomRawFilter = () => Filter<Document>
 
 export type RoomRelations = Record<never, string>
@@ -326,7 +326,7 @@ type UserFilterFields = {
   'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'totalPayments'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
+export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields | UserRawFilter>
 export type UserRawFilter = () => Filter<Document>
 
 export type UserRelations = {

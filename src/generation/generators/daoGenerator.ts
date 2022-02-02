@@ -290,7 +290,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
     const daoRawFilter = `export type ${node.name}RawFilter = ${
       node.entity?.type === 'mongo' ? '() => Filter<Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
     }`
-    const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields>;`
+    const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields | ${node.name}RawFilter>`
 
     return [daoFilterFields, daoFilter, daoRawFilter].join('\n')
   }

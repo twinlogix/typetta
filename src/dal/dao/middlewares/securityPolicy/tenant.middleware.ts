@@ -20,10 +20,10 @@ export function tenantSecurityPolicy<T extends DAOGenerics, TenantIdKey extends 
     if (!filter) {
       return { [key]: tenantId }
     }
-    if (typeof filter === 'object' && !Array.isArray(filter) && filter[key] && filter[key] !== tenantId) {
+    if (typeof filter === 'object' && filter[key] && filter[key] !== tenantId) {
       throw new Error(`${ERROR_PREFIX}Invalid tenant ID in find. Current selected tenant ID is ${tenantId}, but received ${filter[key]} instead.`)
     }
-    return Array.isArray(filter) ? [{ [key]: tenantId }, ...filter] : [{ [key]: tenantId }, filter]
+    return { $and: [{ [key]: tenantId }, filter] }
   }
   return buildMiddleware<T>({
     beforeInsert: async (params, context) => {

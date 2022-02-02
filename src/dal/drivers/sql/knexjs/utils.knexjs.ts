@@ -27,12 +27,15 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   }
 }
 
-export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars>(
+export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
-  filter: AbstractFilter,
+  filter: T['filter'],
   schema: Schema<ScalarsType>,
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>,
 ): Knex.QueryBuilder<TRecord, TResult> {
+  if(typeof filter === 'function') {
+    return filter(builder)
+  }
   Object.entries(filter).forEach(([k, v]) => {
     const schemaField = getSchemaFieldTraversing(k, schema)
     if (schemaField) {

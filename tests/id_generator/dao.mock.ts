@@ -28,7 +28,7 @@ type AFilterFields = {
   'id'?: types.Scalars['MongoID'] | null | EqualityOperators<types.Scalars['MongoID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type AFilter = AFilterFields & LogicalOperators<AFilterFields>;
+export type AFilter = AFilterFields & LogicalOperators<AFilterFields | ARawFilter>
 export type ARawFilter = () => Filter<Document>
 
 export type ARelations = Record<never, string>
@@ -99,7 +99,7 @@ type BFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type BFilter = BFilterFields & LogicalOperators<BFilterFields>;
+export type BFilter = BFilterFields & LogicalOperators<BFilterFields | BRawFilter>
 export type BRawFilter = () => Filter<Document>
 
 export type BRelations = Record<never, string>
@@ -171,7 +171,7 @@ type CFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type CFilter = CFilterFields & LogicalOperators<CFilterFields>;
+export type CFilter = CFilterFields & LogicalOperators<CFilterFields | CRawFilter>
 export type CRawFilter = () => Filter<Document>
 
 export type CRelations = Record<never, string>
@@ -243,7 +243,7 @@ type DFilterFields = {
   'id'?: types.Scalars['IntAutoInc'] | null | EqualityOperators<types.Scalars['IntAutoInc']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type DFilter = DFilterFields & LogicalOperators<DFilterFields>;
+export type DFilter = DFilterFields & LogicalOperators<DFilterFields | DRawFilter>
 export type DRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DRelations = Record<never, string>
@@ -314,7 +314,7 @@ type EFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type EFilter = EFilterFields & LogicalOperators<EFilterFields>;
+export type EFilter = EFilterFields & LogicalOperators<EFilterFields | ERawFilter>
 export type ERawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type ERelations = Record<never, string>
@@ -386,7 +386,7 @@ type FFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type FFilter = FFilterFields & LogicalOperators<FFilterFields>;
+export type FFilter = FFilterFields & LogicalOperators<FFilterFields | FRawFilter>
 export type FRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FRelations = Record<never, string>

@@ -39,7 +39,7 @@ type HotelFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'tenantId'?: types.Scalars['TenantId'] | null | EqualityOperators<types.Scalars['TenantId']> | ElementOperators
 };
-export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields>;
+export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields | HotelRawFilter>
 export type HotelRawFilter = () => Filter<Document>
 
 export type HotelRelations = Record<never, string>
@@ -133,7 +133,7 @@ type ReservationFilterFields = {
   'tenantId'?: types.Scalars['TenantId'] | null | EqualityOperators<types.Scalars['TenantId']> | ElementOperators,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type ReservationFilter = ReservationFilterFields & LogicalOperators<ReservationFilterFields>;
+export type ReservationFilter = ReservationFilterFields & LogicalOperators<ReservationFilterFields | ReservationRawFilter>
 export type ReservationRawFilter = () => Filter<Document>
 
 export type ReservationRelations = Record<never, string>
@@ -228,7 +228,7 @@ type RoomFilterFields = {
   'size'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'tenantId'?: types.Scalars['TenantId'] | null | EqualityOperators<types.Scalars['TenantId']> | ElementOperators
 };
-export type RoomFilter = RoomFilterFields & LogicalOperators<RoomFilterFields>;
+export type RoomFilter = RoomFilterFields & LogicalOperators<RoomFilterFields | RoomRawFilter>
 export type RoomRawFilter = () => Filter<Document>
 
 export type RoomRelations = Record<never, string>
@@ -309,7 +309,7 @@ type TenantFilterFields = {
   'id'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'info'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
-export type TenantFilter = TenantFilterFields & LogicalOperators<TenantFilterFields>;
+export type TenantFilter = TenantFilterFields & LogicalOperators<TenantFilterFields | TenantRawFilter>
 export type TenantRawFilter = () => Filter<Document>
 
 export type TenantRelations = Record<never, string>
@@ -413,7 +413,7 @@ type UserFilterFields = {
   'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'tenantId'?: types.Scalars['TenantId'] | null | EqualityOperators<types.Scalars['TenantId']> | ElementOperators
 };
-export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
+export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields | UserRawFilter>
 export type UserRawFilter = () => Filter<Document>
 
 export type UserRelations = {

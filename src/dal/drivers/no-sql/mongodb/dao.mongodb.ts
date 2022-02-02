@@ -34,12 +34,6 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildFilter(filter?: T['filter']): Filter<Document> {
-    if(filter && Array.isArray(filter)) {
-      return { $and: filter.map((f: T['filter']) => this.buildFilter(f)) }
-    }
-    if (typeof filter === 'function') {
-      return filter()
-    }
     return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongo) : {}
   }
 
