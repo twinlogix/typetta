@@ -1229,6 +1229,26 @@ test('Raw update', async () => {
   expect(user2?.amounts?.length).toBe(2)
 })
 
+test('Raw find', async () => {
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '1', live: true } })
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
+  const users = await dao.user.findAll({
+    filter: { $or: [{ $and: [() => ({ name: '1' }), () => ({ lastName: '1' })] }, { $and: [() => ({ name: '2' }), () => ({ lastName: '2' })] }] },
+    sorts: [{ firstName: 'asc' }],
+  })
+  expect(users.length).toBe(2)
+  expect(users[0].firstName).toBe('1')
+  expect(users[1].firstName).toBe('2')
+  const users1 = await dao.user.findAll({
+    filter: { $or: [() => ({ name: '1', lastName: '1' }), { $and: [() => ({ name: '2' }), () => ({ lastName: '2' })] }] },
+    sorts: [{ firstName: 'asc' }],
+  })
+  expect(users1.length).toBe(2)
+  expect(users1[0].firstName).toBe('1')
+  expect(users1[1].firstName).toBe('2')
+})
+
 test('Inner ref required', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, amounts: [new BigNumber(1)] } })
   const post0 = await dao.post.insertOne({ record: { authorId: 'random', title: 'title', views: 1 } })

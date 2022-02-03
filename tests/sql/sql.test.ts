@@ -669,3 +669,23 @@ test('Raw update', async () => {
   const user2 = await dao.user.findOne()
   expect(user2?.firstName).toBe('FirstName2')
 })
+
+test('Raw find', async () => {
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '1', live: true } })
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
+  const users = await dao.user.findAll({
+    filter: { $or: [{ $and: [(qb) => qb.where('name', '=', '1'), (qb) => qb.where('surname', '=', '1')] }, { $and: [(qb) => qb.where('name', '=', '2'), (qb) => qb.where('surname', '=', '2')] }] },
+    sorts: [{ firstName: 'asc' }],
+  })
+  expect(users.length).toBe(2)
+  expect(users[0].firstName).toBe('1')
+  expect(users[1].firstName).toBe('2')
+  const users1 = await dao.user.findAll({
+    filter: { $or: [(qb) => qb.where('name', '=', '1').and.where('surname', '=', '1'), { $and: [(qb) => qb.where('name', '=', '2'), (qb) => qb.where('surname', '=', '2')] }] },
+    sorts: [{ firstName: 'asc' }],
+  })
+  expect(users1.length).toBe(2)
+  expect(users1[0].firstName).toBe('1')
+  expect(users1[1].firstName).toBe('2')
+})
