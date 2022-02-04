@@ -444,9 +444,9 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   log?: LogInput<'post' | 'postType' | 'tag' | 'user'>
 };
 
-type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType> | PostTypeDAOGenerics<MetadataType, OperationMetadataType> | TagDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType> | PostTypeDAOGenerics<MetadataType, OperationMetadataType> | TagDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined;
   private _postType: PostTypeDAO<MetadataType, OperationMetadataType> | undefined;

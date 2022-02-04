@@ -451,9 +451,9 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   log?: LogInput<'a' | 'b' | 'c' | 'd' | 'e' | 'f'>
 };
 
-type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType> | BDAOGenerics<MetadataType, OperationMetadataType> | CDAOGenerics<MetadataType, OperationMetadataType> | DDAOGenerics<MetadataType, OperationMetadataType> | EDAOGenerics<MetadataType, OperationMetadataType> | FDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType> | BDAOGenerics<MetadataType, OperationMetadataType> | CDAOGenerics<MetadataType, OperationMetadataType> | DDAOGenerics<MetadataType, OperationMetadataType> | EDAOGenerics<MetadataType, OperationMetadataType> | FDAOGenerics<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _a: ADAO<MetadataType, OperationMetadataType> | undefined;
   private _b: BDAO<MetadataType, OperationMetadataType> | undefined;

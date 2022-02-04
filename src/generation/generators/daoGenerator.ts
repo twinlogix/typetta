@@ -165,9 +165,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const declarations = [daoDeclarations, overridesDeclaration, middlewareDeclaration, loggerDeclaration, daoGetters, daoConstructor, execQueryF, createTableF].join('\n\n')
 
     const daoExport =
-      'export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {\n\n' + indentMultiline(declarations) + '\n\n}'
+      'export class DAOContext<MetadataType = never, OperationMetadataType = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {\n\n' + indentMultiline(declarations) + '\n\n}'
 
-    const daoContextMiddleware = `type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<${Array.from(typesMap.values())
+    const daoContextMiddleware = `type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<${Array.from(typesMap.values())
       .filter((node) => node.entity)
       .map((n) => `${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
       .join(' | ')}>`
