@@ -33,7 +33,11 @@ daoContext.createTables();
 
 ## Mocking di alcune sorgenti dati
 
-In certi casi può essere utile creare un ``DAOContext`` che abbia solo alcune sorgenti dati mock e altre reali. Per fare questo la funzione ``mockedDAOContext`` permette la specifica, opzionale, delle sorgenti dati prevesti dal modello dati. Le sorgenti dati non specificata vengono mockate.
+In certi casi può essere utile creare un ``DAOContext`` che abbia solo alcune sorgenti dati mock e altre reali. 
+
+La funzione ``mockedDAOContext`` permette di specificare esplicitamente tutte le sorgenti dati preveste dal modello dati, esattamente come si può fare istanziando direttamente il ``DAOContext``. Le sorgenti dati che non vengono specificate vengono automatichamente mockate dal sistema.
+
+Di seguito un esempio in cui viene configurato un database MongoDB di default, ogni ulteriore datasource viene mockato automaticamente da Typetta.
 
 ```typescript
 const mongoClient = new MongoClient(process.env.MONGODB_URL!);
