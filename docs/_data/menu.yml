@@ -69,6 +69,9 @@ main:
       - url: /chapters/database-drivers/typing
         title: Type Safety
         todo: true
+      - url: /chapters/advanced/graphql
+        title: Using with GraphQL
+        todo: true
       - url: /chapters/advanced/n-1-problem
         title: N+1 Problem
         todo: true
@@ -77,3 +80,12 @@ main:
     children:
       - url: /typedoc/index.html
         title: TypeDoc Reference
+  - reference:
+    title: Help & Support
+    children:
+      - url: /chapters/help-and-support/Roadmap
+        title: Roadmap
+        todo: true
+      - url: /chapters/help-and-support/support
+        title: Support
+        todo: true
