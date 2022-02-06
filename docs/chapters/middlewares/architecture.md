@@ -1,6 +1,6 @@
 # Middleware Architecture
 
-I middleware sono un potente strumento con cui **estendere le funzionalità** base di Typetta aggiungendo allo strato di accesso al dato controlli e automatismi. Essi sono costituiti da una o più funzioni che vengono invocate in cascata nel ciclo di vita di un'operazione, sia nella fase precedente che in quella successiva all'interazione con la sorgente dati. 
+I middleware sono un potente strumento con cui **estendere le funzionalità** base di Typetta, aggiungendo allo strato di accesso al dato una serie di controlli e automatismi customizzati. Essi sono costituiti da una o più funzioni che vengono invocate in cascata nel ciclo di vita di un'operazione, sia nella fase precedente che in quella successiva all'interazione con la sorgente dati. 
 
 Queste funzioni ricevono tutti i parametri in input all'operazione e ne possono cambiare il valore, così da modificarne o estenderne il comportamento o.
 

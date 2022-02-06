@@ -47,38 +47,27 @@ main:
     children:
       - url: /chapters/middlewares/architecture
         title: Middleware Architecture
-      - url: /chapters/middlewares/virtual-fields
+      - url: /chapters/middlewares/projection-dependency
         title: Projection Dependency
-        todo: true
-      - url: /chapters/middlewares/virtual-fields
-        title: Virtual Fields
-        todo: true
+      - url: /chapters/middlewares/computed-fields
+        title: Computed Fields
       - url: /chapters/middlewares/multi-tenancy
         title: Multi Tenancy
-        todo: true
       - url: /chapters/middlewares/security-policies
         title: Security Policies
-        todo: true
-      - url: /chapters/middlewares/soft-delete
-        title: Paranoid Soft Delete
         todo: true
   - database-drivers:
     title: Database Drivers
     children:
       - url: /chapters/database-drivers/mongodb
         title: MongoDB
-        todo: true
       - url: /chapters/database-drivers/sql
         title: SQL
-        todo: true
   - advanced:
     title: Advanced Topics
     children:
       - url: /chapters/database-drivers/typing
         title: Type Safety
-        todo: true
-      - url: /chapters/database-drivers/data-mapper
-        title: Data Mapper Pattern
         todo: true
       - url: /chapters/advanced/n-1-problem
         title: N+1 Problem
