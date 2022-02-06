@@ -85,7 +85,5 @@ main:
     children:
       - url: /chapters/help-and-support/Roadmap
         title: Roadmap
-        todo: true
       - url: /chapters/help-and-support/support
         title: Support
-        todo: true
