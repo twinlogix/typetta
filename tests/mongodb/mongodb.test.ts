@@ -563,7 +563,7 @@ test('Insert default', async () => {
   expect(e2.opt2).toBe(true)  
 
   const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
-  expect(e3.opt1).toBe(null)  
+  expect(e3.opt1).toBe(undefined)  
 })
 
 test('update validation fails', async () => {
