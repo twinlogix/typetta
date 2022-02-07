@@ -8,6 +8,7 @@ import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
 import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
 import { Collection, Document, WithId, Filter, FindOptions, OptionalId, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
+import { filterUndefiend } from '../../../../utils/utils'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
   private collection: Collection
@@ -171,7 +172,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     return this.runQuery('insertOne', async () => {
-      const record = this.modelToDb(params.record)
+      const record = this.modelToDb(filterUndefiend(params.record))
       const options = params.options ?? {}
       return [
         async () => {

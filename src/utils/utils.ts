@@ -1,3 +1,4 @@
+import { MockDAOContextParams } from '..'
 import { QuantityOperators, EqualityOperators, ElementOperators } from '../dal/dao/filters/filters.types'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
@@ -5,7 +6,6 @@ import { isPlainObject } from 'is-plain-object'
 import knex, { Knex } from 'knex'
 import { Db, MongoClient } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
-import { MockDAOContextParams } from '..'
 
 export type OneKey<K extends string | number | symbol, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
@@ -223,4 +223,8 @@ export async function createMockedDAOContext<T extends object>(params: MockDAOCo
     ),
   )
   return { ...params, mongo, knex } as T
+}
+
+export function filterUndefiend<T extends object>(obj: T): T {
+  return Object.fromEntries(Object.entries(obj).filter((v) => v[1] !== undefined)) as T
 }

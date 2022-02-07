@@ -159,6 +159,112 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 
 
 //--------------------------------------------------------------------------------
+//----------------------------- DEFAULTFIELDSENTITY ------------------------------
+//--------------------------------------------------------------------------------
+
+export type DefaultFieldsEntityExcludedFields = never
+export type DefaultFieldsEntityRelationFields = never
+
+export const defaultFieldsEntitySchema: Schema<types.Scalars> = {
+  'creationDate': {
+    scalar: 'Int', 
+    required: true, 
+    defaultGenerationStrategy: 'middleware'
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'live': {
+    scalar: 'Live', 
+    required: true, 
+    defaultGenerationStrategy: 'generator'
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  },
+  'opt1': {
+    scalar: 'Live', 
+    defaultGenerationStrategy: 'middleware'
+  },
+  'opt2': {
+    scalar: 'Live', 
+    defaultGenerationStrategy: 'generator'
+  }
+};
+
+type DefaultFieldsEntityFilterFields = {
+  'creationDate'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'live'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'opt1'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators,
+  'opt2'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators
+};
+export type DefaultFieldsEntityFilter = DefaultFieldsEntityFilterFields & LogicalOperators<DefaultFieldsEntityFilterFields | DefaultFieldsEntityRawFilter>
+export type DefaultFieldsEntityRawFilter = () => Filter<Document>
+
+export type DefaultFieldsEntityRelations = Record<never, string>
+
+export type DefaultFieldsEntityProjection = {
+  creationDate?: boolean,
+  id?: boolean,
+  live?: boolean,
+  name?: boolean,
+  opt1?: boolean,
+  opt2?: boolean,
+}
+export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = ParamProjection<types.DefaultFieldsEntity, DefaultFieldsEntityProjection, P>
+
+export type DefaultFieldsEntitySortKeys = 'creationDate' | 'id' | 'live' | 'name' | 'opt1' | 'opt2';
+export type DefaultFieldsEntitySort = OneKey<DefaultFieldsEntitySortKeys, SortDirection>;
+export type DefaultFieldsEntityRawSort = () => Sort
+
+export type DefaultFieldsEntityUpdate = {
+  'creationDate'?: types.Scalars['Int'],
+  'id'?: types.Scalars['ID'],
+  'live'?: types.Scalars['Live'],
+  'name'?: types.Scalars['String'],
+  'opt1'?: types.Scalars['Live'] | null,
+  'opt2'?: types.Scalars['Live'] | null
+};
+export type DefaultFieldsEntityRawUpdate = () => UpdateFilter<Document>
+
+export type DefaultFieldsEntityInsert = {
+  creationDate?: types.Scalars['Int'],
+  id: types.Scalars['ID'],
+  live?: types.Scalars['Live'],
+  name: types.Scalars['String'],
+  opt1?: types.Scalars['Live'],
+  opt2?: types.Scalars['Live'],
+};
+
+type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', 'user', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity'>;
+export type DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: defaultFieldsEntitySchema, 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'user', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------ DEVICE ------------------------------------
 //--------------------------------------------------------------------------------
 
@@ -796,6 +902,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   overrides?: { 
     address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     city?: Pick<Partial<CityDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    defaultFieldsEntity?: Pick<Partial<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     dog?: Pick<Partial<DogDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     mockedEntity?: Pick<Partial<MockedEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
@@ -805,15 +912,16 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   },
   mongo: Record<'default' | '__mock', Db>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
-  log?: LogInput<'address' | 'city' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>
+  log?: LogInput<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>
 };
 
-type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | MockedEntityDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | PostDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | MockedEntityDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | PostDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
 
 export class DAOContext<MetadataType = never, OperationMetadataType = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined;
   private _city: CityDAO<MetadataType, OperationMetadataType> | undefined;
+  private _defaultFieldsEntity: DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> | undefined;
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined;
   private _dog: DogDAO<MetadataType, OperationMetadataType> | undefined;
   private _mockedEntity: MockedEntityDAO<MetadataType, OperationMetadataType> | undefined;
@@ -826,7 +934,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
-  private logger?: LogFunction<'address' | 'city' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>
+  private logger?: LogFunction<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>
   
   get address() {
     if(!this._address) {
@@ -839,6 +947,12 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
       this._city = new CityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.city, collection: this.mongo.default.collection('citys'), middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger });
     }
     return this._city;
+  }
+  get defaultFieldsEntity() {
+    if(!this._defaultFieldsEntity) {
+      this._defaultFieldsEntity = new DefaultFieldsEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, collection: this.mongo.default.collection('defaultFieldsEntitys'), middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger });
+    }
+    return this._defaultFieldsEntity;
   }
   get device() {
     if(!this._device) {
@@ -880,7 +994,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
   constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Coordinates', 'Decimal', 'JSON', 'LocalizedString', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
+      scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Coordinates', 'Decimal', 'JSON', 'Live', 'LocalizedString', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
     })
     this.overrides = params.overrides
     this.mongo = params.mongo
@@ -888,8 +1002,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
     this.logger = logInputToLogger(params.log)
   }
   
-  public async execQuery<T>(run: (dbs: { mongo: Record<'default' | '__mock', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; mockedEntity: Collection<Document>; organization: Collection<Document>; post: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongo: this.mongo }, { address: this.mongo.default.collection('addresses'), city: this.mongo.default.collection('citys'), device: this.mongo.default.collection('devices'), dog: this.mongo.default.collection('dogs'), mockedEntity: this.mongo.__mock.collection('mockedEntitys'), organization: this.mongo.default.collection('organizations'), post: this.mongo.default.collection('posts'), user: this.mongo.default.collection('users') })
+  public async execQuery<T>(run: (dbs: { mongo: Record<'default' | '__mock', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; defaultFieldsEntity: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; mockedEntity: Collection<Document>; organization: Collection<Document>; post: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
+    return run({ mongo: this.mongo }, { address: this.mongo.default.collection('addresses'), city: this.mongo.default.collection('citys'), defaultFieldsEntity: this.mongo.default.collection('defaultFieldsEntitys'), device: this.mongo.default.collection('devices'), dog: this.mongo.default.collection('dogs'), mockedEntity: this.mongo.__mock.collection('mockedEntitys'), organization: this.mongo.default.collection('organizations'), post: this.mongo.default.collection('posts'), user: this.mongo.default.collection('users') })
   }
   
   
@@ -905,6 +1019,7 @@ type DAOName = keyof DAOMiddlewareMap<any, any>
 type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
   address: AddressDAOGenerics<MetadataType, OperationMetadataType>
   city: CityDAOGenerics<MetadataType, OperationMetadataType>
+  defaultFieldsEntity: DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>
   device: DeviceDAOGenerics<MetadataType, OperationMetadataType>
   dog: DogDAOGenerics<MetadataType, OperationMetadataType>
   mockedEntity: MockedEntityDAOGenerics<MetadataType, OperationMetadataType>

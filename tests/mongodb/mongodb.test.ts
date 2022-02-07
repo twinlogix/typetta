@@ -498,6 +498,74 @@ test('insert validation fails', async () => {
   }
 })
 
+test('Insert default', async () => {
+  try {
+    await dao.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    fail()
+  } catch (error: unknown) {
+    expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
+  }
+
+  const dao1 = new DAOContext({
+    mongo: {
+      default: db,
+      __mock: db,
+    },
+    scalars: {
+      ...scalars,
+      Live: {
+        generate: () => true,
+      },
+    },
+  })
+
+  try {
+    await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    fail()
+  } catch (error: unknown) {
+    expect(((error as Error).message as string).startsWith('Fields creationDate should have been generated from a middleware but it is undefined')).toBe(true)
+  }
+
+  const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
+  expect(e1.live).toBe(true)
+
+  const dao2 = new DAOContext({
+    mongo: {
+      default: db,
+      __mock: db,
+    },
+    scalars: {
+      ...scalars,
+      Live: {
+        generate: () => true,
+      },
+    },
+    overrides: {
+      defaultFieldsEntity: {
+        middlewares: [
+          buildMiddleware({
+            beforeInsert: async (params) => {
+              return {
+                continue: true,
+                params: { ...params, record: { ...params.record, creationDate: 1234 } },
+              }
+            },
+          }),
+        ],
+      },
+    },
+  })
+
+  const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
+  expect(e2.live).toBe(true)
+  expect(e2.creationDate).toBe(1234)
+  expect(e2.opt1).toBe(undefined)  
+  expect(e2.opt2).toBe(true)  
+
+  const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
+  expect(e3.opt1).toBe(undefined)  
+})
+
 test('update validation fails', async () => {
   await dao.user.insertOne({
     record: {

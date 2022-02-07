@@ -19,6 +19,7 @@ import {
 } from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
+import { filterUndefiend } from '../../../../utils/utils'
 
 type AbstractFilter = {
   [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators
@@ -191,14 +192,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return this.runQuery(
       'insertOne',
       () => {
-        const record = this.modelToDb(params.record as PartialDeep<T['model']>)
+        const record = this.modelToDb(filterUndefiend<PartialDeep<T['model']>>(params.record))
         const query = this.qb().insert(record, '*')
         return this.buildTransaction(params.options, query)
       },
       async (records) => {
         const inserted = records[0]
         if (typeof inserted === 'number') {
-          const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as T['filter'], options: params.options, limit: 1 })
+          const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] ?? inserted } as T['filter'], options: params.options, limit: 1 })
           return insertedRetrieved[0] as Omit<T['model'], T['insertExcludedFields']>
         }
         return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
