@@ -21,56 +21,56 @@ main:
       - url: /chapters/client/context
         title: Context
       - url: /chapters/client/read-write
-        title: Read and Write [eng soon]
+        title: Read and Write
       - url: /chapters/client/filters
-        title: Filters [eng soon]
+        title: Filters
       - url: /chapters/client/projections
-        title: Projections [eng soon]
+        title: Projections
       - url: /chapters/client/sorting
-        title: Sorts [eng soon]
+        title: Sorts
       - url: /chapters/client/relations
-        title: Relations [eng soon]
+        title: Relations
       - url: /chapters/client/pagination
-        title: Pagination [eng soon]
+        title: Pagination
       - url: /chapters/client/aggregations
-        title: Aggregations [eng soon]
+        title: Aggregations
       - url: /chapters/client/transactions
-        title: Transactions [eng soon]
+        title: Transactions
       - url: /chapters/client/raw-databse-access
-        title: Database direct access [eng soon]
+        title: Database direct access
       - url: /chapters/client/logging
-        title: Logging [eng soon]
+        title: Logging
       - url: /chapters/client/mocking
-        title: Mocking [eng soon]
-  - database-drivers:
+        title: Mocking
+  - middlewares:
     title: Middlewares
     children:
-      - url: /chapters/middleware/architecture
+      - url: /chapters/middlewares/architecture
         title: Middleware Architecture
-        todo: true
-      - url: /chapters/middleware/computed-fields
-        title: Virtual Fields
-        todo: true
-      - url: /chapters/middleware/security-policies
+      - url: /chapters/middlewares/projection-dependency
+        title: Projection Dependency
+      - url: /chapters/middlewares/computed-fields
+        title: Computed Fields
+      - url: /chapters/middlewares/multi-tenancy
+        title: Multi Tenancy
+      - url: /chapters/middlewares/security-policies
         title: Security Policies
         todo: true
   - database-drivers:
-    title: Data Sources Drivers
+    title: Database Drivers
     children:
       - url: /chapters/database-drivers/mongodb
         title: MongoDB
-        todo: true
       - url: /chapters/database-drivers/sql
         title: SQL
-        todo: true
   - advanced:
     title: Advanced Topics
     children:
       - url: /chapters/database-drivers/typing
         title: Type Safety
         todo: true
-      - url: /chapters/database-drivers/data-mapper
-        title: Data Mapper Pattern
+      - url: /chapters/advanced/graphql
+        title: Using with GraphQL
         todo: true
       - url: /chapters/advanced/n-1-problem
         title: N+1 Problem
@@ -80,3 +80,10 @@ main:
     children:
       - url: /typedoc/index.html
         title: TypeDoc Reference
+  - reference:
+    title: Help & Support
+    children:
+      - url: /chapters/help-and-support/Roadmap
+        title: Roadmap
+      - url: /chapters/help-and-support/support
+        title: Support
