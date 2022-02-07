@@ -16,6 +16,7 @@ export type Scalars = {
   Coordinates: Coordinates;
   Decimal: BigNumber;
   JSON: any;
+  Live: boolean;
   LocalizedString: LocalizedString;
   Password: any;
 };
@@ -33,6 +34,16 @@ export type City = {
   computedName?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
+};
+
+export type DefaultFieldsEntity = {
+  __typename?: 'DefaultFieldsEntity';
+  creationDate: Scalars['Int'];
+  id: Scalars['ID'];
+  live: Scalars['Live'];
+  name: Scalars['String'];
+  opt1?: Maybe<Scalars['Live']>;
+  opt2?: Maybe<Scalars['Live']>;
 };
 
 export type Device = {

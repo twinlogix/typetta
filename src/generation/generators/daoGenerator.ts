@@ -264,7 +264,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
     return node.fields
       .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {
-        const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}`
+        const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}${field.defaultGenerationStrategy ? `, \ndefaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : ''}`
         if (field.type.kind === 'scalar') {
           // return [`'${field.name}': { scalar: '${field.graphqlType}'}${decorators}`]
           const scalar = `{\n${indentMultiline(`scalar: '${field.graphqlType}'${decorators}`)}\n}`
@@ -445,7 +445,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
         if ((field.isID && field.idGenerationStrategy === 'db') || field.isExcluded) {
           return []
         }
-        const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired)
+        const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired && !field.defaultGenerationStrategy)
         if (field.type.kind === 'scalar') {
           return [`${field.name}${required ? '' : '?'}: types.Scalars['${field.graphqlType}']${field.isList ? '[]' : ''},`]
         }

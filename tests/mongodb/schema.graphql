@@ -3,6 +3,7 @@ scalar LocalizedString
 scalar Decimal
 scalar Password
 scalar JSON
+scalar Live
 
 type Device @entity @mongodb {
   id: ID! @id
@@ -80,4 +81,14 @@ type MockedEntity @entity {
   name: String!
   userId: ID!
   user: User! @innerRef
+}
+
+type DefaultFieldsEntity @entity @mongodb {
+  id: ID! @id(from: "user")
+  name: String!
+  live: Live! @default(from: "generator")
+  creationDate: Int! @default
+
+  opt1: Live @default(from: "middleware")
+  opt2: Live @default(from: "generator")
 }
