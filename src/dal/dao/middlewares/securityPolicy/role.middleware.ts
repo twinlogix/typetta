@@ -4,7 +4,22 @@ import { isProjectionContained, mergeProjections } from '../../projections/proje
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 
-export type Permission<T extends DAOGenerics> =
+type SecurityContext<T extends DAOGenerics, Permissions extends string> = {
+  permissions?: {
+    [K in Permissions]?: {
+      [K in keyof T['model']]?: T['model'][K] extends (infer O)[] ? O : T['model'][K] | T['model'][K][]
+    }
+  }
+}
+
+type EntitySecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
+  permissions: {
+    [Key in Permissions]?: CRUDSecurityPolicy<T>
+  }
+  default?: CRUDSecurityPolicy<T>
+}
+
+export type CRUDSecurityPolicy<T extends DAOGenerics> =
   | {
       insert?: boolean
       read?: boolean | T['projection']
@@ -16,10 +31,9 @@ export type Permission<T extends DAOGenerics> =
 
 type Role<T extends DAOGenerics, K extends keyof T['model'], RoleType> = { values?: T['model'][K][] | null } & { role: RoleType }
 const ERROR_PREFIX = '[Role Middleware] '
-export function roleSecurityPolicy<K extends keyof T['model'], RoleType extends string, T extends DAOGenerics>(args: {
-  key: K
-  permissions: Partial<Record<RoleType, Permission<T>>>
-  roles: (context: T['metadata']) => Role<T, K, RoleType>[]
+export function roleSecurityPolicy<Permissions extends string, T extends DAOGenerics>(args: {
+  securityContext: SecurityContext<T, Permissions>
+  permissions: EntitySecurityPolicy<T, Permissions>
 }): DAOMiddleware<T> {
   function getBaseFilter(roles: Role<T, K, RoleType>[]): T['filter'] {
     return roles.find((role) => role.values == null)

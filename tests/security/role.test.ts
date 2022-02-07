@@ -1,6 +1,6 @@
 import { inMemoryMongoDb } from '../../src'
 import { roleSecurityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/role.middleware'
-import { DAOContext } from './dao.mock'
+import { DAOContext, HotelDAOGenerics } from './dao.mock'
 import { HotelRole } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -37,31 +37,48 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       hotel: {
         middlewares: [
           roleSecurityPolicy({
-            key: 'id',
-            permissions: {
-              ADMIN: true,
-              OWNER: {
-                read: true,
-                update: true,
-                insert: true,
-                replace: true,
-                aggregate: true,
-              },
-              ANALYST: {
-                read: { totalCustomers: true },
-                update: false,
+            securityContext: {
+              permissions: {
+                ADMIN: {
+                  id: '1',
+                },
               },
             },
-            roles: (metadata) => metadata.hotelRoles
+            permissions: {
+              permissions: {
+                ADMIN: true,
+                OWNER: {
+                  read: true,
+                  update: true,
+                  insert: true,
+                  replace: true,
+                  aggregate: true,
+                },
+                ANALYST: {
+                  read: { totalCustomers: true },
+                  update: false,
+                },
+              },
+            },
           }),
         ],
       },
       reservation: {
         middlewares: [
           roleSecurityPolicy({
-            key: 'hotelId',
+            securityContext: {
+              permissions: {
+                ADMIN: {
+                  hotelId: ['1', '2'],
+                },
+                OWNER: {
+                  id: [] // my user
+                }
+              }
+            }
             permissions: {
-              ADMIN: true,
+              permissions: {
+                ADMIN: true,
               OWNER: {
                 read: true,
                 update: true,
@@ -73,8 +90,8 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
                 read: { roomId: true },
                 update: false,
               },
+              }
             },
-            roles: (metadata) => metadata.hotelRoles
           }),
         ],
       },
