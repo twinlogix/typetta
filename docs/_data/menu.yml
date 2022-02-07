@@ -36,25 +36,30 @@ main:
         title: Aggregations
       - url: /chapters/client/transactions
         title: Transactions
+      - url: /chapters/client/middlewares
+        title: Middlewares
       - url: /chapters/client/raw-databse-access
         title: Database direct access
       - url: /chapters/client/logging
         title: Logging
       - url: /chapters/client/mocking
         title: Mocking
-  - middlewares:
-    title: Middlewares
+  - advanced:
+    title: Advanced Topics
     children:
-      - url: /chapters/middlewares/architecture
-        title: Middleware Architecture
-      - url: /chapters/middlewares/projection-dependency
+      - url: /chapters/advanced/projection-dependency
         title: Projection Dependency
-      - url: /chapters/middlewares/computed-fields
+      - url: /chapters/advanced/computed-fields
         title: Computed Fields
-      - url: /chapters/middlewares/multi-tenancy
+      - url: /chapters/advanced/multi-tenancy
         title: Multi Tenancy
-      - url: /chapters/middlewares/security-policies
+      - url: /chapters/advanced/security-policies
         title: Security Policies
+        todo: true
+      - url: /chapters/advanced/type-safety
+        title: Type Safety
+      - url: /chapters/advanced/graphql
+        title: Using with GraphQL
         todo: true
   - database-drivers:
     title: Database Drivers
@@ -63,18 +68,6 @@ main:
         title: MongoDB
       - url: /chapters/database-drivers/sql
         title: SQL
-  - advanced:
-    title: Advanced Topics
-    children:
-      - url: /chapters/database-drivers/typing
-        title: Type Safety
-        todo: true
-      - url: /chapters/advanced/graphql
-        title: Using with GraphQL
-        todo: true
-      - url: /chapters/advanced/n-1-problem
-        title: N+1 Problem
-        todo: true
   - reference:
     title: Reference
     children:
@@ -83,7 +76,7 @@ main:
   - reference:
     title: Help & Support
     children:
-      - url: /chapters/help-and-support/Roadmap
+      - url: /chapters/help-and-support/roadmap
         title: Roadmap
       - url: /chapters/help-and-support/support
         title: Support

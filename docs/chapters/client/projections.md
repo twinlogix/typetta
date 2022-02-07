@@ -75,7 +75,7 @@ Tutte le operazione che ritornano dei record prevedono anche la possibilità di 
 Di seguito una query di ricerca di un utente che richiede solamente il nome e il cognome:
 
 ```typescript
-const users = await daoContext.user.findOne({ 
+const user = await daoContext.user.findOne({ 
   filter: { 
     firstName: "Mattia" 
   },
@@ -97,7 +97,7 @@ La query precedente ritornerà un oggetto come il seguente:
 Allo stesso modo è possibile selezionare i campi di un'entità embedded, quindi la seguente query: 
 
 ```typescript
-const users = await daoContext.user.findOne({ 
+const user = await daoContext.user.findOne({ 
   filter: { 
     firstName: "Mattia" 
   },
@@ -126,7 +126,7 @@ Ritornerà il seguente risultato:
 Sebbene sia buona norma specificare sempre l'elenco completo dei campi necessari, sia per questioni di efficienza che di correttezza, per le entità embedded è possibile selezionare anche l'intera entità in una proiezione con la seguente sintassi:
 
 ```typescript
-const users = await daoContext.user.findOne({ 
+const user = await daoContext.user.findOne({ 
   filter: { 
     firstName: "Mattia" 
   },
@@ -161,7 +161,7 @@ Tramite la specifica di una proiezione esplicita l'utente può decidere di selez
 Dato il modello applicativo precedente, è quindi possibile selezionare un utente con i suoi post:
 
 ```typescript
-const users = await daoContext.user.findOne({ 
+const user = await daoContext.user.findOne({ 
   filter: { 
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -179,7 +179,7 @@ const users = await daoContext.user.findOne({
 Il sistema supporta la possibilità di richiedere campi con una profondità a piacere, è quindi possibile caricare per esempio un utente, i suoi post e per ogni post nuovamente l'utente:
 
 ```typescript
-const users = await daoContext.user.findOne({ 
+const user = await daoContext.user.findOne({ 
   filter: { 
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
