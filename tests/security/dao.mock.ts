@@ -22,6 +22,20 @@ export const hotelSchema: Schema<types.Scalars> = {
     scalar: 'String', 
     required: true
   },
+  'ownership': {
+    embedded: {
+      'factor': {
+        scalar: 'Float', 
+        required: true
+      },
+      'userId': {
+        scalar: 'ID', 
+        required: true
+      }
+    }, 
+    required: true, 
+    array: true
+  },
   'totalCustomers': {
     scalar: 'Int', 
     required: true
@@ -32,6 +46,8 @@ type HotelFilterFields = {
   'description'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'ownership.factor'?: types.Scalars['Float'] | null | EqualityOperators<types.Scalars['Float']> | ElementOperators | QuantityOperators<types.Scalars['Float']>,
+  'ownership.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'totalCustomers'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields | HotelRawFilter>
@@ -43,11 +59,15 @@ export type HotelProjection = {
   description?: boolean,
   id?: boolean,
   name?: boolean,
+  ownership?: {
+    factor?: boolean,
+    userId?: boolean,
+  } | boolean,
   totalCustomers?: boolean,
 }
 export type HotelParams<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
 
-export type HotelSortKeys = 'description' | 'id' | 'name' | 'totalCustomers';
+export type HotelSortKeys = 'description' | 'id' | 'name' | 'ownership.factor' | 'ownership.userId' | 'totalCustomers';
 export type HotelSort = OneKey<HotelSortKeys, SortDirection>;
 export type HotelRawSort = () => Sort
 
@@ -55,6 +75,9 @@ export type HotelUpdate = {
   'description'?: types.Scalars['String'] | null,
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'],
+  'ownership'?: types.Ownership[],
+  'ownership.factor'?: types.Scalars['Float'],
+  'ownership.userId'?: types.Scalars['ID'],
   'totalCustomers'?: types.Scalars['Int']
 };
 export type HotelRawUpdate = () => UpdateFilter<Document>
@@ -63,10 +86,11 @@ export type HotelInsert = {
   description?: types.Scalars['String'],
   id?: types.Scalars['ID'],
   name: types.Scalars['String'],
+  ownership: types.Ownership[],
   totalCustomers: types.Scalars['Int'],
 };
 
-export type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', 'generator', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel'>;
+type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', 'generator', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel'>;
 export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -479,7 +503,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
 //------------------------------------- UTILS ------------------------------------
 //--------------------------------------------------------------------------------
 
-type DAOName = keyof DAOMiddlewareMap<any, any>
+type DAOName = keyof DAOMiddlewareMap<never, never>
 type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
   hotel: HotelDAOGenerics<MetadataType, OperationMetadataType>
   reservation: ReservationDAOGenerics<MetadataType, OperationMetadataType>
@@ -527,7 +551,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
-export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
+export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
   const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default'], [])
   return new DAOContext(newParams)
 }

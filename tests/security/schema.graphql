@@ -3,15 +3,16 @@ scalar Email
 scalar Username
 scalar Date
 
-enum Role {
-  ANALYST,  # read all permitted fields from his Hotel
-  OWNER,    # read/write on entities referred to his Hotel
-  ADMIN,    # everything
+enum RoleCode {
+  HOTEL_OWNER,
+  ADMIN,
 }
 
-type HotelRole {
-  role: Role!
-  values: [ID!]
+enum Permission {
+  MANAGE_ROOM,
+  READONLY_ROOM,
+  MANAGE_RESERVATION,
+  READONLY_RESERVATION
 }
 
 type Hotel @entity @mongodb {
@@ -21,6 +22,18 @@ type Hotel @entity @mongodb {
   totalCustomers: Int!
 }
 
+type Role @entity @mongodb {
+  id: ID! @id
+  code: RoleCode!
+  permissions: [Permission]!
+}
+
+type UserRole {
+  userId: ID!
+  roleId: ID!
+  hotelId: ID
+}
+
 type User @entity @mongodb {
   id: ID! @id
   email: Email!
@@ -28,15 +41,14 @@ type User @entity @mongodb {
   lastName: String
   reservations: [Reservation]! @foreignRef
   totalPayments: Int
-  hotelRoles: [HotelRole!]!
+  roles: [UserRole!]! 
 }
 
-type Reservation @entity @mongodb { #can read only if userId is user | hotelId is of owner | is admin
+type Reservation @entity @mongodb {
   id: ID! @id
   userId: ID!
   roomId: ID!
   room: Room @innerRef
-
   hotelId: ID!
 }
 

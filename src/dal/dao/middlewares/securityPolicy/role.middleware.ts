@@ -4,6 +4,14 @@ import { isProjectionContained, mergeProjections } from '../../projections/proje
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 
+/*const DENY: CRUDSecurityPolicy<DAOGenerics> = {
+  insert: false,
+  read: false,
+  update: false,
+  replace: false,
+  aggregate: false
+}*/
+
 type SecurityContext<T extends DAOGenerics, Permissions extends string> = {
   permissions?: {
     [K in Permissions]?: {
@@ -12,7 +20,7 @@ type SecurityContext<T extends DAOGenerics, Permissions extends string> = {
   }
 }
 
-type EntitySecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
+type SecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
   permissions: {
     [Key in Permissions]?: CRUDSecurityPolicy<T>
   }
@@ -32,8 +40,8 @@ export type CRUDSecurityPolicy<T extends DAOGenerics> =
 type Role<T extends DAOGenerics, K extends keyof T['model'], RoleType> = { values?: T['model'][K][] | null } & { role: RoleType }
 const ERROR_PREFIX = '[Role Middleware] '
 export function roleSecurityPolicy<Permissions extends string, T extends DAOGenerics>(args: {
-  securityContext: SecurityContext<T, Permissions>
-  permissions: EntitySecurityPolicy<T, Permissions>
+  securityContext: (metadata: T['metadata'] | undefined) => SecurityContext<T, Permissions>
+  securityPolicy: SecurityPolicy<T, Permissions>
 }): DAOMiddleware<T> {
   function getBaseFilter(roles: Role<T, K, RoleType>[]): T['filter'] {
     return roles.find((role) => role.values == null)
@@ -41,7 +49,7 @@ export function roleSecurityPolicy<Permissions extends string, T extends DAOGene
       : {
           [args.key]: {
             $in: roles.flatMap((role) => {
-              const permission = args.permissions[role.role]
+              const permission = args.securityPolicy[role.role]
               if (permission && (permission === true || permission.read)) {
                 return role.values
               }
@@ -61,7 +69,7 @@ export function roleSecurityPolicy<Permissions extends string, T extends DAOGene
       }
       const canInsert = roles.some((role) => {
         if (role.values == null || role.values.includes(value)) {
-          const permission = args.permissions[role.role]
+          const permission = args.securityPolicy[role.role]
           if (permission === true || (typeof permission === 'object' && permission.insert)) {
             return true
           }
@@ -76,7 +84,7 @@ export function roleSecurityPolicy<Permissions extends string, T extends DAOGene
       if (!context.metadata) return
       const roles = args.roles(context.metadata)
       const widestProjection = roles.reduce<GenericProjection>((proj, role) => {
-        const permission = args.permissions[role.role]
+        const permission = args.securityPolicy[role.role]
         if (permission) {
           return mergeProjections(proj, typeof permission === 'boolean' ? true : permission.read ?? false)
         }
@@ -109,7 +117,7 @@ export function roleSecurityPolicy<Permissions extends string, T extends DAOGene
         if (applicableRoles.length > 0) {
           const largerProjection = applicableRoles.reduce(
             (proj, role) => {
-              const permission = args.permissions[role.role]
+              const permission = args.securityPolicy[role.role]
               return mergeProjections(typeof permission === 'boolean' ? permission : permission?.read ?? false, proj)
             },
             { [args.key]: true } as GenericProjection,

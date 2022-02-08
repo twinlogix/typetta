@@ -28,7 +28,8 @@ export const hotelSchema: Schema<types.Scalars> = {
   },
   'tenantId': {
     scalar: 'TenantId', 
-    required: true
+    required: true, 
+    defaultGenerationStrategy: 'middleware'
   }
 };
 
@@ -70,7 +71,7 @@ export type HotelInsert = {
   deletionDate?: types.Scalars['Date'],
   description?: types.Scalars['String'],
   name: types.Scalars['String'],
-  tenantId: types.Scalars['TenantId'],
+  tenantId?: types.Scalars['TenantId'],
 };
 
 type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', 'db', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel'>;
@@ -118,7 +119,9 @@ export const reservationSchema: Schema<types.Scalars> = {
     required: true
   },
   'tenantId': {
-    scalar: 'TenantId'
+    scalar: 'TenantId', 
+    required: true, 
+    defaultGenerationStrategy: 'middleware'
   },
   'userId': {
     scalar: 'ID', 
@@ -156,7 +159,7 @@ export type ReservationUpdate = {
   'deletionDate'?: types.Scalars['Date'] | null,
   'id'?: types.Scalars['ID'],
   'roomId'?: types.Scalars['ID'],
-  'tenantId'?: types.Scalars['TenantId'] | null,
+  'tenantId'?: types.Scalars['TenantId'],
   'userId'?: types.Scalars['ID']
 };
 export type ReservationRawUpdate = () => UpdateFilter<Document>
@@ -217,7 +220,9 @@ export const roomSchema: Schema<types.Scalars> = {
     required: true
   },
   'tenantId': {
-    scalar: 'TenantId'
+    scalar: 'TenantId', 
+    required: true, 
+    defaultGenerationStrategy: 'middleware'
   }
 };
 
@@ -252,7 +257,7 @@ export type RoomUpdate = {
   'hotelId'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID'],
   'size'?: types.Scalars['String'],
-  'tenantId'?: types.Scalars['TenantId'] | null
+  'tenantId'?: types.Scalars['TenantId']
 };
 export type RoomRawUpdate = () => UpdateFilter<Document>
 
@@ -399,7 +404,9 @@ export const userSchema: Schema<types.Scalars> = {
     scalar: 'String'
   },
   'tenantId': {
-    scalar: 'TenantId'
+    scalar: 'TenantId', 
+    required: true, 
+    defaultGenerationStrategy: 'middleware'
   }
 };
 
@@ -454,7 +461,7 @@ export type UserUpdate = {
   'firstName'?: types.Scalars['String'] | null,
   'id'?: types.Scalars['ID'],
   'lastName'?: types.Scalars['String'] | null,
-  'tenantId'?: types.Scalars['TenantId'] | null
+  'tenantId'?: types.Scalars['TenantId']
 };
 export type UserRawUpdate = () => UpdateFilter<Document>
 
@@ -576,7 +583,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
 //------------------------------------- UTILS ------------------------------------
 //--------------------------------------------------------------------------------
 
-type DAOName = keyof DAOMiddlewareMap<any, any>
+type DAOName = keyof DAOMiddlewareMap<never, never>
 type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
   hotel: HotelDAOGenerics<MetadataType, OperationMetadataType>
   reservation: ReservationDAOGenerics<MetadataType, OperationMetadataType>
@@ -625,7 +632,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
-export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
+export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
   const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default'], [])
   return new DAOContext(newParams)
 }

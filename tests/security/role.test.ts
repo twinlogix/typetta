@@ -1,6 +1,6 @@
 import { inMemoryMongoDb } from '../../src'
 import { roleSecurityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/role.middleware'
-import { DAOContext, HotelDAOGenerics } from './dao.mock'
+import { DAOContext, HotelDAOGenerics, UserParams } from './dao.mock'
 import { HotelRole } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -19,6 +19,9 @@ let mongodb: {
   db: Db
 }
 
+function elab(user: UserParams<{ totalPayments: true }>): number {
+  return user.totalPayments ?? 0
+}
 function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMetadata> {
   return new DAOContext<DaoMetadata>({
     mongo: {
@@ -37,14 +40,14 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       hotel: {
         middlewares: [
           roleSecurityPolicy({
-            securityContext: {
+            securityContext: () => ({
               permissions: {
                 ADMIN: {
-                  id: '1',
+                  'ownership.userId': metadata.user.id,
                 },
               },
-            },
-            permissions: {
+            }),
+            securityPolicy: {
               permissions: {
                 ADMIN: true,
                 OWNER: {
@@ -66,31 +69,22 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       reservation: {
         middlewares: [
           roleSecurityPolicy({
-            securityContext: {
+            securityContext: (metadata) => ({
               permissions: {
-                ADMIN: {
-                  hotelId: ['1', '2'],
+                MANAGE_RESERVATION: {
+                  userId: metadata?.user.id,
+                  hotelId: ['1', '2']
                 },
-                OWNER: {
-                  id: [] // my user
-                }
-              }
-            }
-            permissions: {
+                MANAGE_HOTEL: { }
+              },
+            }),
+            securityPolicy: {
               permissions: {
-                ADMIN: true,
-              OWNER: {
-                read: true,
-                update: true,
-                insert: true,
-                replace: true,
-                aggregate: true,
+                MANAGE_RESERVATION: true,
+                READONLY_RESERVATION: {
+                  read: true,
+                },
               },
-              ANALYST: {
-                read: { roomId: true },
-                update: false,
-              },
-              }
             },
           }),
         ],

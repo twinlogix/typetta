@@ -1162,7 +1162,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
 //------------------------------------- UTILS ------------------------------------
 //--------------------------------------------------------------------------------
 
-type DAOName = keyof DAOMiddlewareMap<any, any>
+type DAOName = keyof DAOMiddlewareMap<never, never>
 type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
   address: AddressDAOGenerics<MetadataType, OperationMetadataType>
   author: AuthorDAOGenerics<MetadataType, OperationMetadataType>
@@ -1217,7 +1217,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
-export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
+export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
   const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default'], [])
   return new DAOContext(newParams)
 }
