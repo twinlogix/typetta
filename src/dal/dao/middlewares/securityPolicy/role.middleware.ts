@@ -1,22 +1,11 @@
 import { DAOGenerics } from '../../dao.types'
-import { GenericProjection } from '../../projections/projections.types'
-import { isProjectionContained, mergeProjections } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 
-/*const DENY: CRUDSecurityPolicy<DAOGenerics> = {
-  insert: false,
-  read: false,
-  update: false,
-  replace: false,
-  aggregate: false
-}*/
 
 type SecurityContext<T extends DAOGenerics, Permissions extends string> = {
-  permissions?: {
-    [K in Permissions]?: {
-      [K in keyof T['model']]?: T['model'][K] extends (infer O)[] ? O : T['model'][K] | T['model'][K][]
-    }
+  [Kp in Permissions]?: {
+    [K in keyof T['model']]?: T['model'][K][]
   }
 }
 
@@ -25,7 +14,6 @@ type SecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
     [Key in Permissions]?: CRUDSecurityPolicy<T>
   }
 }
-
 export type CRUDSecurityPolicy<T extends DAOGenerics> =
   | {
       insert?: boolean
@@ -38,9 +26,11 @@ export type CRUDSecurityPolicy<T extends DAOGenerics> =
 
 const ERROR_PREFIX = '[Role Middleware] '
 export function roleSecurityPolicy<Permissions extends string, T extends DAOGenerics>(args: {
-  securityContext: (metadata: T['metadata'] | undefined) => SecurityContext<T, Permissions>
+  securityContext: SecurityContext<T, Permissions>
   securityPolicy: SecurityPolicy<T, Permissions>
 }): DAOMiddleware<T> {
+
+  console.log(args)
   /*function getBaseFilter(roles: Role<T, K, RoleType>[]): T['filter'] {
     return roles.find((role) => role.values == null)
       ? {}
@@ -58,7 +48,7 @@ export function roleSecurityPolicy<Permissions extends string, T extends DAOGene
   }
 */
   return buildMiddleware({
-   /* beforeInsert: async (params, context) => {
+    /* beforeInsert: async (params, context) => {
       if (!context.metadata) return
       const roles = args.roles(context.metadata)
       const value = params.record[args.key]

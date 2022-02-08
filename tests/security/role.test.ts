@@ -1,6 +1,6 @@
 import { DAOGenerics, Expand, inMemoryMongoDb } from '../../src'
 import { roleSecurityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/role.middleware'
-import { DAOContext, UserParam, UserRoleParam } from './dao.mock'
+import { DAOContext, UserDAOGenerics, UserParam, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -32,43 +32,17 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       },
     })
   }
-  /*type ASDD= {
-    role: {
-      permissions: Maybe<Permission>[];
-  }
-    hotelId?: Maybe<string> | undefined;
-    tenantId?: Maybe<number> | undefined;
-    userId?: Maybe<string> | undefined;
-}[]
-  function getPermissions2<Permission extends string, G extends DAOGenerics, Keys extends keyof G['model']>(
-    keys: { [K in Keys]: K },
-    permissionKeys: Permission[]
-    permission:
-    roles: UserRoleParam<{ role: { permissions: true }; hotelId: true; userId: true; tenantId: true }>[],
-  ): HicPermission<G, Keys> {
-    return Object.values(Permission).reduce((permissions, key) => {
-      const asd = Object.entries(keys).reduce((obj, [k, v]) => {
-        const permissions = roles.flatMap((v) => (v.role.permissions.includes(key as Permission) && v.hotelId ? [v.hotelId] : []))
-        const hotel = keys.hotelId && permissions.length > 0 ? { [keys.hotelId]: permissions } : {}
-        return { ...obj, ...hotel }
-      }, {})
 
-      return { ...permissions, [key]: asd }
-    }, {})
-  }*/
-
-  type HicPermission<G extends DAOGenerics, Key extends keyof G['model']> = Expand<{ [K in Permission]?: { [sK in Key]: G['model'][sK][] } }>
-  function getPermissions<G extends DAOGenerics, H extends keyof G['model'], U extends keyof G['model'], T extends keyof G['model']>(
-    keys: { hotelId?: H; userId?: U; tenantId?: T },
-    roles: UserRoleParam<{ role: { permissions: true }; hotelId: true; userId: true; tenantId: true }>[],
-  ): HicPermission<G, H | U | T> {
+  function getPermissions(roles: UserRoleParam<{ role: { permissions: true }; hotelId: true; userId: true; tenantId: true }>[]): {
+    [K in Permission]?: { hotelId: string[]; userId: string[]; tenantId: number[] }
+  } {
     return Object.values(Permission).reduce((permissions, key) => {
       const hotelPermissions = roles.flatMap((v) => (v.role.permissions.includes(key as Permission) && v.hotelId ? [v.hotelId] : []))
-      const hotel = keys.hotelId && hotelPermissions.length > 0 ? { [keys.hotelId]: hotelPermissions } : {}
+      const hotel = hotelPermissions.length > 0 ? { hotelId: hotelPermissions } : {}
       const userPermissions = roles.flatMap((v) => (v.role.permissions.includes(key as Permission) && v.userId ? [v.userId] : []))
-      const user = keys.userId && userPermissions.length > 0 ? { [keys.userId]: userPermissions } : {}
+      const user = userPermissions.length > 0 ? { userId: userPermissions } : {}
       const tenantPermissions = roles.flatMap((v) => (v.role.permissions.includes(key as Permission) && v.tenantId ? [v.tenantId] : []))
-      const tenant = keys.tenantId && tenantPermissions.length > 0 ? { [keys.tenantId]: tenantPermissions } : {}
+      const tenant = tenantPermissions.length > 0 ? { tenantId: tenantPermissions } : {}
       const permission = { ...hotel, ...user, ...tenant }
       if (Object.keys(permission).length > 0) {
         return { ...permissions, [key]: permission }
@@ -77,9 +51,8 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       }
     }, {})
   }
-  const hotelPermissions = getPermissions({ hotelId: 'id', tenantId: 'tenantId' }, metadata.user.roles)
-  const userPermissions = getPermissions({ userId: 'id' }, metadata.user.roles)
-  const reservationPermissions = getPermissions({ hotelId: 'hotelId', userId: 'userId', tenantId: 'tenantId' }, metadata.user.roles)
+
+  const permissions = getPermissions(metadata.user.roles)
   return new DAOContext<DaoMetadata>({
     mongo: {
       default: db,
@@ -91,10 +64,11 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       },
     },
     overrides: {
-      user: {
+      /*user: {
         middlewares: [
-          roleSecurityPolicy({
-            securityContext: () => ({ permissions: getPermissions({ userId: 'id' }, metadata.user.roles) }),
+          roleSecurityPolicy<'hotelId' | 'tenantId' | 'userId', Permission, UserDAOGenerics<DaoMetadata, never>, { userId: 'id' }>({
+            securityContext: permissions,
+            keyOverrides: { userId: 'id' },
             securityPolicy: {
               permissions: {
                 MANAGE_USER: true,
@@ -102,11 +76,11 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
             },
           }),
         ],
-      },
-      hotel: {
+      },*/
+     /* hotel: {
         middlewares: [
           roleSecurityPolicy({
-            securityContext: () => ({ permissions: getPermissions({ hotelId: 'id', tenantId: 'tenantId' }, metadata.user.roles) }),
+            securityContext: () => ({ permissions }),
             securityPolicy: {
               permissions: {
                 MANAGE_HOTEL: true,
@@ -114,11 +88,11 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
             },
           }),
         ],
-      },
+      },*/
       room: {
         middlewares: [
           roleSecurityPolicy({
-            securityContext: () => ({ permissions: getPermissions({ hotelId: 'hotelId', tenantId: 'tenantId' }, metadata.user.roles) }),
+            securityContext: permissions,
             securityPolicy: {
               permissions: {
                 MANAGE_ROOM: true,
@@ -133,7 +107,7 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       reservation: {
         middlewares: [
           roleSecurityPolicy({
-            securityContext: () => ({ permissions: getPermissions({ hotelId: 'hotelId', userId: 'userId', tenantId: 'tenantId' }, metadata.user.roles) }),
+            securityContext: permissions,
             securityPolicy: {
               permissions: {
                 MANAGE_RESERVATION: true,
@@ -176,7 +150,7 @@ beforeEach(async () => {
 
 test('crud tenant test', async () => {
   await unsafeDao.role.insertOne({ record: { code: 'TENANT_ADMIN', permissions: ['MANAGE_ROOM', 'MANAGE_RESERVATION', 'MANAGE_HOTEL'] } })
-  await unsafeDao.role.insertOne({ record: { code: 'HOTEL_OWNER', permissions: ['MANAGE_ROOM', 'MANAGE_RESERVATION'] } })
+  await unsafeDao.role.insertOne({ record: { code: 'HOTEL_OWNER', permissions: ['MANAGE_ROOM', 'MANAGE_RESERVATION', 'MANAGE_HOTEL'] } })
   await unsafeDao.role.insertOne({ record: { code: 'IS_USER', permissions: ['MANAGE_USER', 'READONLY_ROOM', 'MANAGE_RESERVATION'] } })
   const user = await unsafeDao.user.insertOne({
     record: {
