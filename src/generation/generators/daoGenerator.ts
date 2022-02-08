@@ -269,7 +269,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         }`
         if (field.type.kind === 'scalar') {
           // return [`'${field.name}': { scalar: '${field.graphqlType}'}${decorators}`]
-          const scalar = `{\n${indentMultiline(`scalar: '${field.graphqlType}'${decorators}`)}\n}`
+          const scalar = `{\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`)}\n}`
           return [`'${field.name}': ${scalar}`]
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
@@ -304,9 +304,10 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         let fieldName = path
         if (field.type.kind === 'scalar') {
           fieldName += field.name
-          const fieldType = field.isList ? `types.Scalars['${field.graphqlType}'][]` : `types.Scalars['${field.graphqlType}']`
+          const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
+          const fieldType = field.isList ? `${baseType}[]` : baseType
           const quantityOperators = field.graphqlType === 'Int' || field.graphqlType === 'Float' || customScalarsMap.get(field.graphqlType)?.isQuantity ? ` | QuantityOperators<${fieldType}>` : ''
-          const stringOperators = field.graphqlType === 'String' || customScalarsMap.get(field.graphqlType)?.isString ? ` | StringOperators` : ''
+          const stringOperators = field.graphqlType === 'String' || customScalarsMap.get(field.graphqlType)?.isString || field.isEnum ? ` | StringOperators` : ''
           return [`'${fieldName}'?: ${fieldType} | null | EqualityOperators<${fieldType}> | ElementOperators` + stringOperators + quantityOperators]
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
@@ -419,7 +420,8 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
       .map((field) => {
         const fieldName = path + field.name
         if (field.type.kind === 'scalar') {
-          const fieldType = field.isList ? `types.Scalars['${field.graphqlType}'][]` : `types.Scalars['${field.graphqlType}']`
+          const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
+          const fieldType = field.isList ? `${baseType}[]` : baseType
           return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
@@ -449,7 +451,8 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         }
         const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired && !field.defaultGenerationStrategy)
         if (field.type.kind === 'scalar') {
-          return [`${field.name}${required ? '' : '?'}: types.Scalars['${field.graphqlType}']${field.isList ? '[]' : ''},`]
+          const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
+          return [`${field.name}${required ? '' : '?'}: ${baseType}${field.isList ? '[]' : ''},`]
         }
         if (field.type.kind === 'embedded') {
           return [`${field.name}${required ? '' : '?'}: types.${field.type.embed}${field.isList ? '[]' : ''},`]
@@ -467,7 +470,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
     const idField = getID(node)
     const dbDAOGenerics = node.entity?.type === 'sql' ? 'KnexJsDAOGenerics' : node.entity?.type === 'mongo' ? 'MongoDBDAOGenerics' : 'DAOGenerics'
     const dbDAOParams = node.entity?.type === 'sql' ? 'KnexJsDAOParams' : node.entity?.type === 'mongo' ? 'MongoDBDAOParams' : 'DAOParams'
-    const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${idField.graphqlType}', '${
+    const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${idField.isEnum ? 'String' : idField.graphqlType}', '${
       idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'
     }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${
       node.name
@@ -493,7 +496,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
     const generatedRelations = `[\n${indentMultiline(this._generateRelations(node, typesMap).join(',\n'))}\n]`
     const relations = `relations: overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
     const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'}'`
-    const idScalar = `idScalar: '${idField.graphqlType}'`
+    const idScalar = `idScalar: '${idField.isEnum ? 'String' : idField.graphqlType}'`
     const constructorBody = `super({ ${indentMultiline(`\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema, \n${relations}, \n${idGenerator}, \n${idScalar}`)} \n});`
     return `public constructor(params: ${node.name}DAOParams<MetadataType, OperationMetadataType>){\n` + indentMultiline(constructorBody) + '\n}'
   }

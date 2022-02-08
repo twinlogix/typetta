@@ -1,7 +1,7 @@
 import { inMemoryMongoDb } from '../../src'
 import { roleSecurityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/role.middleware'
-import { DAOContext, HotelDAOGenerics, UserParams } from './dao.mock'
-import { HotelRole } from './models.mock'
+import { DAOContext, UserParams } from './dao.mock'
+import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
@@ -9,8 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 jest.setTimeout(20000)
 
 type DaoMetadata = {
-  user: { id: string }
-  hotelRoles: HotelRole[]
+  user: UserParams<{ id: true; roles: { role: { permissions: true }; hotelId: true } }>
 }
 let unsafeDao: DAOContext<DaoMetadata>
 let mongodb: {
@@ -19,10 +18,20 @@ let mongodb: {
   db: Db
 }
 
-function elab(user: UserParams<{ totalPayments: true }>): number {
-  return user.totalPayments ?? 0
-}
 function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMetadata> {
+  if (!metadata) {
+    return new DAOContext<DaoMetadata>({
+      mongo: {
+        default: db,
+      },
+      metadata,
+      scalars: {
+        ID: {
+          generate: () => uuidv4(),
+        },
+      },
+    })
+  }
   return new DAOContext<DaoMetadata>({
     mongo: {
       default: db,
@@ -42,25 +51,14 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
           roleSecurityPolicy({
             securityContext: () => ({
               permissions: {
-                ADMIN: {
-                  'ownership.userId': metadata.user.id,
+                MANAGE_HOTEL: {
+                  id: metadata.user.roles.flatMap((v) => (v.role.permissions.includes('MANAGE_HOTEL') && v.hotelId ? [v.hotelId] : [])) ?? [],
                 },
               },
             }),
             securityPolicy: {
               permissions: {
-                ADMIN: true,
-                OWNER: {
-                  read: true,
-                  update: true,
-                  insert: true,
-                  replace: true,
-                  aggregate: true,
-                },
-                ANALYST: {
-                  read: { totalCustomers: true },
-                  update: false,
-                },
+                MANAGE_HOTEL: true,
               },
             },
           }),
@@ -73,9 +71,9 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
               permissions: {
                 MANAGE_RESERVATION: {
                   userId: metadata?.user.id,
-                  hotelId: ['1', '2']
+                  hotelId: ['1', '2'],
                 },
-                MANAGE_HOTEL: { }
+                MANAGE_HOTEL: {},
               },
             }),
             securityPolicy: {
@@ -94,14 +92,13 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
 }
 
 async function creadeDaoWithUserRoles(userId: string): Promise<DAOContext<DaoMetadata>> {
-  const user = await unsafeDao.user.findOne({ filter: { id: userId }, projection: { hotelRoles: true, id: true } })
+  const user = await unsafeDao.user.findOne({ filter: { id: userId }, projection: { id: true, roles: { hotelId: true, role: { permissions: true } } } })
   if (!user) {
     throw new Error('User does not exists')
   }
   return createDao(
     {
-      hotelRoles: user.hotelRoles,
-      user: { id: userId },
+      user,
     },
     mongodb.db,
   )
@@ -120,17 +117,16 @@ beforeEach(async () => {
 })
 
 test('crud tenant test', async () => {
+  await unsafeDao.role.insertOne({ record: { permissions: ['MANAGE_ROOM', 'MANAGE_RESERVATION', 'MANAGE_HOTEL'], code: 'HOTEL_OWNER' } })
   const user = await unsafeDao.user.insertOne({
     record: {
       id: 'u1',
       email: '',
-      hotelRoles: [
-        { values: ['h1', 'h2'], role: 'OWNER' },
-        { values: ['h3'], role: 'ANALYST' },
-      ],
       firstName: 'owner',
     },
   })
+  await unsafeDao.userRole.insertOne({ record: { roleCode: 'HOTEL_OWNER', userId: user.id, hotelId: 'h1' } })
+  await unsafeDao.userRole.insertOne({ record: { roleCode: 'HOTEL_OWNER', userId: user.id, hotelId: 'h2' } })
 
   await unsafeDao.hotel.insertOne({ record: { name: 'AHotel 1', totalCustomers: 2, id: 'h1' } })
   await unsafeDao.hotel.insertOne({ record: { name: 'AHotel 2', totalCustomers: 2, id: 'h2' } })

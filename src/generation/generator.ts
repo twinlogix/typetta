@@ -27,6 +27,7 @@ export type TsTypettaGeneratorField = {
   idGenerationStrategy?: IdGenerationStrategy
   isList: boolean
   isExcluded: boolean
+  isEnum: boolean
   defaultGenerationStrategy?: DefaultGenerationStrategy
   alias?: string
 }

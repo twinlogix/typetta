@@ -12,7 +12,8 @@ enum Permission {
   MANAGE_ROOM,
   READONLY_ROOM,
   MANAGE_RESERVATION,
-  READONLY_RESERVATION
+  READONLY_RESERVATION,
+  MANAGE_HOTEL
 }
 
 type Hotel @entity @mongodb {
@@ -23,15 +24,19 @@ type Hotel @entity @mongodb {
 }
 
 type Role @entity @mongodb {
-  id: ID! @id
-  code: RoleCode!
+  code: RoleCode! @id(from: "user")
   permissions: [Permission]!
 }
 
-type UserRole {
-  userId: ID!
-  roleId: ID!
+type UserRole @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  refUserId: ID!
+  roleCode: RoleCode!
+  role: Role! @innerRef(refFrom: "roleCode", refTo: "code")
+
   hotelId: ID
+  userId: ID
+  tenantId: ID
 }
 
 type User @entity @mongodb {
@@ -41,7 +46,7 @@ type User @entity @mongodb {
   lastName: String
   reservations: [Reservation]! @foreignRef
   totalPayments: Int
-  roles: [UserRole!]! 
+  roles: [UserRole!]! @foreignRef(refTo: "refUserId")
 }
 
 type Reservation @entity @mongodb {

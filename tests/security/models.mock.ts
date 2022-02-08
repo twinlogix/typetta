@@ -21,22 +21,18 @@ export type Hotel = {
   description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
-  ownership: Array<Ownership>;
   totalCustomers: Scalars['Int'];
 };
 
-export type HotelRole = {
-  __typename?: 'HotelRole';
-  role: Role;
-  values?: Maybe<Array<Scalars['ID']>>;
-};
+export const Permission = {
+  MANAGE_HOTEL: 'MANAGE_HOTEL',
+  MANAGE_RESERVATION: 'MANAGE_RESERVATION',
+  MANAGE_ROOM: 'MANAGE_ROOM',
+  READONLY_RESERVATION: 'READONLY_RESERVATION',
+  READONLY_ROOM: 'READONLY_ROOM'
+} as const;
 
-export type Ownership = {
-  __typename?: 'Ownership';
-  factor: Scalars['Float'];
-  userId: Scalars['ID'];
-};
-
+export type Permission = typeof Permission[keyof typeof Permission];
 export type Reservation = {
   __typename?: 'Reservation';
   hotelId: Scalars['ID'];
@@ -46,13 +42,18 @@ export type Reservation = {
   userId: Scalars['ID'];
 };
 
-export const Role = {
+export type Role = {
+  __typename?: 'Role';
+  code: RoleCode;
+  permissions: Array<Maybe<Permission>>;
+};
+
+export const RoleCode = {
   ADMIN: 'ADMIN',
-  ANALYST: 'ANALYST',
-  OWNER: 'OWNER'
+  HOTEL_OWNER: 'HOTEL_OWNER'
 } as const;
 
-export type Role = typeof Role[keyof typeof Role];
+export type RoleCode = typeof RoleCode[keyof typeof RoleCode];
 export type Room = {
   __typename?: 'Room';
   description: Scalars['String'];
@@ -67,9 +68,18 @@ export type User = {
   __typename?: 'User';
   email: Scalars['Email'];
   firstName?: Maybe<Scalars['String']>;
-  hotelRoles: Array<HotelRole>;
   id: Scalars['ID'];
   lastName?: Maybe<Scalars['String']>;
   reservations: Array<Maybe<Reservation>>;
+  roles: Array<UserRole>;
   totalPayments?: Maybe<Scalars['Int']>;
+};
+
+export type UserRole = {
+  __typename?: 'UserRole';
+  hotelId?: Maybe<Scalars['ID']>;
+  id: Scalars['ID'];
+  role: Role;
+  roleCode: RoleCode;
+  userId: Scalars['ID'];
 };
