@@ -37,7 +37,7 @@ export type AddressProjection = {
   cities?: CityProjection | boolean,
   id?: boolean,
 }
-export type AddressParams<P extends AddressProjection> = ParamProjection<types.Address, AddressProjection, P>
+export type AddressParam<P extends AddressProjection> = ParamProjection<types.Address, AddressProjection, P>
 
 export type AddressSortKeys = 'id';
 export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
@@ -110,7 +110,7 @@ export type AuthorProjection = {
   books?: BookProjection | boolean,
   id?: boolean,
 }
-export type AuthorParams<P extends AuthorProjection> = ParamProjection<types.Author, AuthorProjection, P>
+export type AuthorParam<P extends AuthorProjection> = ParamProjection<types.Author, AuthorProjection, P>
 
 export type AuthorSortKeys = 'id';
 export type AuthorSort = OneKey<AuthorSortKeys, SortDirection>;
@@ -186,7 +186,7 @@ export type AuthorBookProjection = {
   bookId?: boolean,
   id?: boolean,
 }
-export type AuthorBookParams<P extends AuthorBookProjection> = ParamProjection<types.AuthorBook, AuthorBookProjection, P>
+export type AuthorBookParam<P extends AuthorBookProjection> = ParamProjection<types.AuthorBook, AuthorBookProjection, P>
 
 export type AuthorBookSortKeys = 'authorId' | 'bookId' | 'id';
 export type AuthorBookSort = OneKey<AuthorBookSortKeys, SortDirection>;
@@ -263,7 +263,7 @@ export type BookProjection = {
   authors?: AuthorProjection | boolean,
   id?: boolean,
 }
-export type BookParams<P extends BookProjection> = ParamProjection<types.Book, BookProjection, P>
+export type BookParam<P extends BookProjection> = ParamProjection<types.Book, BookProjection, P>
 
 export type BookSortKeys = 'id';
 export type BookSort = OneKey<BookSortKeys, SortDirection>;
@@ -341,7 +341,7 @@ export type CityProjection = {
   id?: boolean,
   name?: boolean,
 }
-export type CityParams<P extends CityProjection> = ParamProjection<types.City, CityProjection, P>
+export type CityParam<P extends CityProjection> = ParamProjection<types.City, CityProjection, P>
 
 export type CitySortKeys = 'addressId' | 'id' | 'name';
 export type CitySort = OneKey<CitySortKeys, SortDirection>;
@@ -441,7 +441,7 @@ export type DefaultFieldsEntityProjection = {
   opt1?: boolean,
   opt2?: boolean,
 }
-export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = ParamProjection<types.DefaultFieldsEntity, DefaultFieldsEntityProjection, P>
+export type DefaultFieldsEntityParam<P extends DefaultFieldsEntityProjection> = ParamProjection<types.DefaultFieldsEntity, DefaultFieldsEntityProjection, P>
 
 export type DefaultFieldsEntitySortKeys = 'creationDate' | 'id' | 'live' | 'name' | 'opt1' | 'opt2';
 export type DefaultFieldsEntitySort = OneKey<DefaultFieldsEntitySortKeys, SortDirection>;
@@ -527,7 +527,7 @@ export type DeviceProjection = {
   user?: UserProjection | boolean,
   userId?: boolean,
 }
-export type DeviceParams<P extends DeviceProjection> = ParamProjection<types.Device, DeviceProjection, P>
+export type DeviceParam<P extends DeviceProjection> = ParamProjection<types.Device, DeviceProjection, P>
 
 export type DeviceSortKeys = 'id' | 'name' | 'userId';
 export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
@@ -608,7 +608,7 @@ export type DogProjection = {
   owner?: UserProjection | boolean,
   ownerId?: boolean,
 }
-export type DogParams<P extends DogProjection> = ParamProjection<types.Dog, DogProjection, P>
+export type DogParam<P extends DogProjection> = ParamProjection<types.Dog, DogProjection, P>
 
 export type DogSortKeys = 'id' | 'name' | 'ownerId';
 export type DogSort = OneKey<DogSortKeys, SortDirection>;
@@ -688,7 +688,7 @@ export type FriendsProjection = {
   id?: boolean,
   to?: boolean,
 }
-export type FriendsParams<P extends FriendsProjection> = ParamProjection<types.Friends, FriendsProjection, P>
+export type FriendsParam<P extends FriendsProjection> = ParamProjection<types.Friends, FriendsProjection, P>
 
 export type FriendsSortKeys = 'from' | 'id' | 'to';
 export type FriendsSort = OneKey<FriendsSortKeys, SortDirection>;
@@ -781,7 +781,7 @@ export type OrganizationProjection = {
   name?: boolean,
   vatNumber?: boolean,
 }
-export type OrganizationParams<P extends OrganizationProjection> = ParamProjection<types.Organization, OrganizationProjection, P>
+export type OrganizationParam<P extends OrganizationProjection> = ParamProjection<types.Organization, OrganizationProjection, P>
 
 export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber';
 export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>;
@@ -954,7 +954,7 @@ export type UserProjection = {
   localization?: boolean,
   title?: boolean,
 }
-export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
+export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'amount' | 'amounts' | 'bestFriendId' | 'credentials.another.test' | 'credentials.password' | 'credentials.username' | 'firstName' | 'id' | 'lastName' | 'live' | 'localization' | 'title';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;

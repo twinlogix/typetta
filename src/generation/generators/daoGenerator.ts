@@ -343,7 +343,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
   public _generateDAOProjection(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoProjectionBody = indentMultiline(this._generateDAOProjectionFields(node, typesMap))
     const daoProjection = `export type ${node.name}Projection = {\n` + daoProjectionBody + `\n}`
-    const daoParams = `export type ${node.name}Params<P extends ${node.name}Projection> = ParamProjection<types.${node.name}, ${node.name}Projection, P>`
+    const daoParams = `export type ${node.name}Param<P extends ${node.name}Projection> = ParamProjection<types.${node.name}, ${node.name}Projection, P>`
     return [daoProjection, daoParams].join('\n')
   }
 

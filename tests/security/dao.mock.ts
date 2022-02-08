@@ -45,7 +45,7 @@ export type HotelProjection = {
   name?: boolean,
   totalCustomers?: boolean,
 }
-export type HotelParams<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
+export type HotelParam<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
 
 export type HotelSortKeys = 'description' | 'id' | 'name' | 'totalCustomers';
 export type HotelSort = OneKey<HotelSortKeys, SortDirection>;
@@ -134,7 +134,7 @@ export type ReservationProjection = {
   roomId?: boolean,
   userId?: boolean,
 }
-export type ReservationParams<P extends ReservationProjection> = ParamProjection<types.Reservation, ReservationProjection, P>
+export type ReservationParam<P extends ReservationProjection> = ParamProjection<types.Reservation, ReservationProjection, P>
 
 export type ReservationSortKeys = 'hotelId' | 'id' | 'roomId' | 'userId';
 export type ReservationSort = OneKey<ReservationSortKeys, SortDirection>;
@@ -229,7 +229,7 @@ export type RoomProjection = {
   id?: boolean,
   to?: boolean,
 }
-export type RoomParams<P extends RoomProjection> = ParamProjection<types.Room, RoomProjection, P>
+export type RoomParam<P extends RoomProjection> = ParamProjection<types.Room, RoomProjection, P>
 
 export type RoomSortKeys = 'description' | 'from' | 'hotelId' | 'id' | 'to';
 export type RoomSort = OneKey<RoomSortKeys, SortDirection>;
@@ -351,7 +351,7 @@ export type UserProjection = {
   reservations?: ReservationProjection | boolean,
   totalPayments?: boolean,
 }
-export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
+export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'email' | 'firstName' | 'hotelRoles.role' | 'hotelRoles.values' | 'id' | 'lastName' | 'totalPayments';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
