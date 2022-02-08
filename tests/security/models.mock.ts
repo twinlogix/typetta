@@ -21,6 +21,7 @@ export type Hotel = {
   description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
+  ownership: Array<Ownership>;
   totalCustomers: Scalars['Int'];
 };
 
@@ -28,6 +29,12 @@ export type HotelRole = {
   __typename?: 'HotelRole';
   role: Role;
   values?: Maybe<Array<Scalars['ID']>>;
+};
+
+export type Ownership = {
+  __typename?: 'Ownership';
+  factor: Scalars['Float'];
+  userId: Scalars['ID'];
 };
 
 export type Reservation = {

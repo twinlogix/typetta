@@ -73,7 +73,7 @@ function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
         {
           tenant: true,
         },
-        defaultValueMiddleware('tenantId', (metadata) => metadata?.tenantId ?? -1),
+        defaultValueMiddleware('tenantId', () => tenantId),
       ),
       groupMiddleware.excludes(
         {
