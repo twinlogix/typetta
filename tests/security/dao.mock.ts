@@ -22,6 +22,10 @@ export const hotelSchema: Schema<types.Scalars> = {
     scalar: 'String', 
     required: true
   },
+  'tenantId': {
+    scalar: 'Int', 
+    required: true
+  },
   'totalCustomers': {
     scalar: 'Int', 
     required: true
@@ -32,6 +36,7 @@ type HotelFilterFields = {
   'description'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'tenantId'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'totalCustomers'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
 export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields | HotelRawFilter>
@@ -43,11 +48,12 @@ export type HotelProjection = {
   description?: boolean,
   id?: boolean,
   name?: boolean,
+  tenantId?: boolean,
   totalCustomers?: boolean,
 }
-export type HotelParams<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
+export type HotelParam<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
 
-export type HotelSortKeys = 'description' | 'id' | 'name' | 'totalCustomers';
+export type HotelSortKeys = 'description' | 'id' | 'name' | 'tenantId' | 'totalCustomers';
 export type HotelSort = OneKey<HotelSortKeys, SortDirection>;
 export type HotelRawSort = () => Sort
 
@@ -55,6 +61,7 @@ export type HotelUpdate = {
   'description'?: types.Scalars['String'] | null,
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'],
+  'tenantId'?: types.Scalars['Int'],
   'totalCustomers'?: types.Scalars['Int']
 };
 export type HotelRawUpdate = () => UpdateFilter<Document>
@@ -63,6 +70,7 @@ export type HotelInsert = {
   description?: types.Scalars['String'],
   id?: types.Scalars['ID'],
   name: types.Scalars['String'],
+  tenantId: types.Scalars['Int'],
   totalCustomers: types.Scalars['Int'],
 };
 
@@ -110,6 +118,10 @@ export const reservationSchema: Schema<types.Scalars> = {
     scalar: 'ID', 
     required: true
   },
+  'tenantId': {
+    scalar: 'Int', 
+    required: true
+  },
   'userId': {
     scalar: 'ID', 
     required: true
@@ -120,6 +132,7 @@ type ReservationFilterFields = {
   'hotelId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'roomId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'tenantId'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type ReservationFilter = ReservationFilterFields & LogicalOperators<ReservationFilterFields | ReservationRawFilter>
@@ -132,11 +145,12 @@ export type ReservationProjection = {
   id?: boolean,
   room?: RoomProjection | boolean,
   roomId?: boolean,
+  tenantId?: boolean,
   userId?: boolean,
 }
-export type ReservationParams<P extends ReservationProjection> = ParamProjection<types.Reservation, ReservationProjection, P>
+export type ReservationParam<P extends ReservationProjection> = ParamProjection<types.Reservation, ReservationProjection, P>
 
-export type ReservationSortKeys = 'hotelId' | 'id' | 'roomId' | 'userId';
+export type ReservationSortKeys = 'hotelId' | 'id' | 'roomId' | 'tenantId' | 'userId';
 export type ReservationSort = OneKey<ReservationSortKeys, SortDirection>;
 export type ReservationRawSort = () => Sort
 
@@ -144,6 +158,7 @@ export type ReservationUpdate = {
   'hotelId'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID'],
   'roomId'?: types.Scalars['ID'],
+  'tenantId'?: types.Scalars['Int'],
   'userId'?: types.Scalars['ID']
 };
 export type ReservationRawUpdate = () => UpdateFilter<Document>
@@ -152,6 +167,7 @@ export type ReservationInsert = {
   hotelId: types.Scalars['ID'],
   id?: types.Scalars['ID'],
   roomId: types.Scalars['ID'],
+  tenantId: types.Scalars['Int'],
   userId: types.Scalars['ID'],
 };
 
@@ -211,7 +227,7 @@ export type RoleProjection = {
   code?: boolean,
   permissions?: boolean,
 }
-export type RoleParams<P extends RoleProjection> = ParamProjection<types.Role, RoleProjection, P>
+export type RoleParam<P extends RoleProjection> = ParamProjection<types.Role, RoleProjection, P>
 
 export type RoleSortKeys = 'code' | 'permissions';
 export type RoleSort = OneKey<RoleSortKeys, SortDirection>;
@@ -276,6 +292,10 @@ export const roomSchema: Schema<types.Scalars> = {
     scalar: 'ID', 
     required: true
   },
+  'tenantId': {
+    scalar: 'Int', 
+    required: true
+  },
   'to': {
     scalar: 'Date', 
     required: true
@@ -287,6 +307,7 @@ type RoomFilterFields = {
   'from'?: types.Scalars['Date'] | null | EqualityOperators<types.Scalars['Date']> | ElementOperators,
   'hotelId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'tenantId'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'to'?: types.Scalars['Date'] | null | EqualityOperators<types.Scalars['Date']> | ElementOperators
 };
 export type RoomFilter = RoomFilterFields & LogicalOperators<RoomFilterFields | RoomRawFilter>
@@ -300,11 +321,12 @@ export type RoomProjection = {
   hotel?: HotelProjection | boolean,
   hotelId?: boolean,
   id?: boolean,
+  tenantId?: boolean,
   to?: boolean,
 }
-export type RoomParams<P extends RoomProjection> = ParamProjection<types.Room, RoomProjection, P>
+export type RoomParam<P extends RoomProjection> = ParamProjection<types.Room, RoomProjection, P>
 
-export type RoomSortKeys = 'description' | 'from' | 'hotelId' | 'id' | 'to';
+export type RoomSortKeys = 'description' | 'from' | 'hotelId' | 'id' | 'tenantId' | 'to';
 export type RoomSort = OneKey<RoomSortKeys, SortDirection>;
 export type RoomRawSort = () => Sort
 
@@ -313,6 +335,7 @@ export type RoomUpdate = {
   'from'?: types.Scalars['Date'],
   'hotelId'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID'],
+  'tenantId'?: types.Scalars['Int'],
   'to'?: types.Scalars['Date']
 };
 export type RoomRawUpdate = () => UpdateFilter<Document>
@@ -322,6 +345,7 @@ export type RoomInsert = {
   from: types.Scalars['Date'],
   hotelId: types.Scalars['ID'],
   id?: types.Scalars['ID'],
+  tenantId: types.Scalars['Int'],
   to: types.Scalars['Date'],
 };
 
@@ -412,7 +436,7 @@ export type UserProjection = {
   roles?: UserRoleProjection | boolean,
   totalPayments?: boolean,
 }
-export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
+export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'email' | 'firstName' | 'id' | 'lastName' | 'totalPayments';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
@@ -448,7 +472,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'reservations', refFrom: 'userId', refTo: 'id', dao: 'reservation', required: true },
-          { type: '1-n', reference: 'foreign', field: 'roles', refFrom: 'userId', refTo: 'id', dao: 'userRole', required: true }
+          { type: '1-n', reference: 'foreign', field: 'roles', refFrom: 'refUserId', refTo: 'id', dao: 'userRole', required: true }
         ]
       ), 
       idGeneration: 'generator', 
@@ -476,20 +500,28 @@ export const userRoleSchema: Schema<types.Scalars> = {
     required: true, 
     alias: '_id'
   },
+  'refUserId': {
+    scalar: 'ID', 
+    required: true
+  },
   'roleCode': {
     scalar: 'String', 
     required: true
   },
+  'tenantId': {
+    scalar: 'Int'
+  },
   'userId': {
-    scalar: 'ID', 
-    required: true
+    scalar: 'ID'
   }
 };
 
 type UserRoleFilterFields = {
   'hotelId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'refUserId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'roleCode'?: types.RoleCode | null | EqualityOperators<types.RoleCode> | ElementOperators | StringOperators,
+  'tenantId'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
 export type UserRoleFilter = UserRoleFilterFields & LogicalOperators<UserRoleFilterFields | UserRoleRawFilter>
@@ -500,28 +532,34 @@ export type UserRoleRelations = Record<never, string>
 export type UserRoleProjection = {
   hotelId?: boolean,
   id?: boolean,
+  refUserId?: boolean,
   role?: RoleProjection | boolean,
   roleCode?: boolean,
+  tenantId?: boolean,
   userId?: boolean,
 }
-export type UserRoleParams<P extends UserRoleProjection> = ParamProjection<types.UserRole, UserRoleProjection, P>
+export type UserRoleParam<P extends UserRoleProjection> = ParamProjection<types.UserRole, UserRoleProjection, P>
 
-export type UserRoleSortKeys = 'hotelId' | 'id' | 'roleCode' | 'userId';
+export type UserRoleSortKeys = 'hotelId' | 'id' | 'refUserId' | 'roleCode' | 'tenantId' | 'userId';
 export type UserRoleSort = OneKey<UserRoleSortKeys, SortDirection>;
 export type UserRoleRawSort = () => Sort
 
 export type UserRoleUpdate = {
   'hotelId'?: types.Scalars['ID'] | null,
   'id'?: types.Scalars['ID'],
+  'refUserId'?: types.Scalars['ID'],
   'roleCode'?: types.RoleCode,
-  'userId'?: types.Scalars['ID']
+  'tenantId'?: types.Scalars['Int'] | null,
+  'userId'?: types.Scalars['ID'] | null
 };
 export type UserRoleRawUpdate = () => UpdateFilter<Document>
 
 export type UserRoleInsert = {
   hotelId?: types.Scalars['ID'],
+  refUserId: types.Scalars['ID'],
   roleCode: types.RoleCode,
-  userId: types.Scalars['ID'],
+  tenantId?: types.Scalars['Int'],
+  userId?: types.Scalars['ID'],
 };
 
 type UserRoleDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.UserRole, 'id', 'ID', 'db', UserRoleFilter, UserRoleRawFilter, UserRoleRelations, UserRoleProjection, UserRoleSort, UserRoleRawSort, UserRoleInsert, UserRoleUpdate, UserRoleRawUpdate, UserRoleExcludedFields, UserRoleRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'userRole'>;

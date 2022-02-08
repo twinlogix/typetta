@@ -4,8 +4,10 @@ scalar Username
 scalar Date
 
 enum RoleCode {
+  SUPERADMIN,
   HOTEL_OWNER,
-  ADMIN,
+  IS_USER
+  TENANT_ADMIN
 }
 
 enum Permission {
@@ -13,15 +15,10 @@ enum Permission {
   READONLY_ROOM,
   MANAGE_RESERVATION,
   READONLY_RESERVATION,
-  MANAGE_HOTEL
+  MANAGE_HOTEL,
+  MANAGE_USER
 }
 
-type Hotel @entity @mongodb {
-  id: ID! @id
-  name: String!
-  description: String
-  totalCustomers: Int!
-}
 
 type Role @entity @mongodb {
   code: RoleCode! @id(from: "user")
@@ -36,7 +33,7 @@ type UserRole @entity @mongodb {
 
   hotelId: ID
   userId: ID
-  tenantId: ID
+  tenantId: Int
 }
 
 type User @entity @mongodb {
@@ -46,7 +43,16 @@ type User @entity @mongodb {
   lastName: String
   reservations: [Reservation]! @foreignRef
   totalPayments: Int
-  roles: [UserRole!]! @foreignRef(refTo: "refUserId")
+  roles: [UserRole!]! @foreignRef(refFrom: "refUserId")
+}
+
+type Hotel @entity @mongodb {
+  id: ID! @id
+  name: String!
+  description: String
+  totalCustomers: Int!
+
+  tenantId: Int!
 }
 
 type Reservation @entity @mongodb {
@@ -55,6 +61,8 @@ type Reservation @entity @mongodb {
   roomId: ID!
   room: Room @innerRef
   hotelId: ID!
+
+  tenantId: Int!
 }
 
 type Room @entity @mongodb {
@@ -64,4 +72,6 @@ type Room @entity @mongodb {
   hotelId: ID!
   hotel: Hotel! @innerRef
   description: String!
+
+  tenantId: Int!
 }

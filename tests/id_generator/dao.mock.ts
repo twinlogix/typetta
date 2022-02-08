@@ -37,7 +37,7 @@ export type AProjection = {
   id?: boolean,
   value?: boolean,
 }
-export type AParams<P extends AProjection> = ParamProjection<types.A, AProjection, P>
+export type AParam<P extends AProjection> = ParamProjection<types.A, AProjection, P>
 
 export type ASortKeys = 'id' | 'value';
 export type ASort = OneKey<ASortKeys, SortDirection>;
@@ -108,7 +108,7 @@ export type BProjection = {
   id?: boolean,
   value?: boolean,
 }
-export type BParams<P extends BProjection> = ParamProjection<types.B, BProjection, P>
+export type BParam<P extends BProjection> = ParamProjection<types.B, BProjection, P>
 
 export type BSortKeys = 'id' | 'value';
 export type BSort = OneKey<BSortKeys, SortDirection>;
@@ -180,7 +180,7 @@ export type CProjection = {
   id?: boolean,
   value?: boolean,
 }
-export type CParams<P extends CProjection> = ParamProjection<types.C, CProjection, P>
+export type CParam<P extends CProjection> = ParamProjection<types.C, CProjection, P>
 
 export type CSortKeys = 'id' | 'value';
 export type CSort = OneKey<CSortKeys, SortDirection>;
@@ -252,7 +252,7 @@ export type DProjection = {
   id?: boolean,
   value?: boolean,
 }
-export type DParams<P extends DProjection> = ParamProjection<types.D, DProjection, P>
+export type DParam<P extends DProjection> = ParamProjection<types.D, DProjection, P>
 
 export type DSortKeys = 'id' | 'value';
 export type DSort = OneKey<DSortKeys, SortDirection>;
@@ -323,7 +323,7 @@ export type EProjection = {
   id?: boolean,
   value?: boolean,
 }
-export type EParams<P extends EProjection> = ParamProjection<types.E, EProjection, P>
+export type EParam<P extends EProjection> = ParamProjection<types.E, EProjection, P>
 
 export type ESortKeys = 'id' | 'value';
 export type ESort = OneKey<ESortKeys, SortDirection>;
@@ -395,7 +395,7 @@ export type FProjection = {
   id?: boolean,
   value?: boolean,
 }
-export type FParams<P extends FProjection> = ParamProjection<types.F, FProjection, P>
+export type FParam<P extends FProjection> = ParamProjection<types.F, FProjection, P>
 
 export type FSortKeys = 'id' | 'value';
 export type FSort = OneKey<FSortKeys, SortDirection>;

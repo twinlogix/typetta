@@ -24,7 +24,6 @@ type SecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
   permissions: {
     [Key in Permissions]?: CRUDSecurityPolicy<T>
   }
-  default?: CRUDSecurityPolicy<T>
 }
 
 export type CRUDSecurityPolicy<T extends DAOGenerics> =

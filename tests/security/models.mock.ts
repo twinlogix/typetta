@@ -21,6 +21,7 @@ export type Hotel = {
   description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
+  tenantId: Scalars['Int'];
   totalCustomers: Scalars['Int'];
 };
 
@@ -28,6 +29,7 @@ export const Permission = {
   MANAGE_HOTEL: 'MANAGE_HOTEL',
   MANAGE_RESERVATION: 'MANAGE_RESERVATION',
   MANAGE_ROOM: 'MANAGE_ROOM',
+  MANAGE_USER: 'MANAGE_USER',
   READONLY_RESERVATION: 'READONLY_RESERVATION',
   READONLY_ROOM: 'READONLY_ROOM'
 } as const;
@@ -39,6 +41,7 @@ export type Reservation = {
   id: Scalars['ID'];
   room?: Maybe<Room>;
   roomId: Scalars['ID'];
+  tenantId: Scalars['Int'];
   userId: Scalars['ID'];
 };
 
@@ -49,8 +52,10 @@ export type Role = {
 };
 
 export const RoleCode = {
-  ADMIN: 'ADMIN',
-  HOTEL_OWNER: 'HOTEL_OWNER'
+  HOTEL_OWNER: 'HOTEL_OWNER',
+  IS_USER: 'IS_USER',
+  SUPERADMIN: 'SUPERADMIN',
+  TENANT_ADMIN: 'TENANT_ADMIN'
 } as const;
 
 export type RoleCode = typeof RoleCode[keyof typeof RoleCode];
@@ -61,6 +66,7 @@ export type Room = {
   hotel: Hotel;
   hotelId: Scalars['ID'];
   id: Scalars['ID'];
+  tenantId: Scalars['Int'];
   to: Scalars['Date'];
 };
 
@@ -79,7 +85,9 @@ export type UserRole = {
   __typename?: 'UserRole';
   hotelId?: Maybe<Scalars['ID']>;
   id: Scalars['ID'];
+  refUserId: Scalars['ID'];
   role: Role;
   roleCode: RoleCode;
-  userId: Scalars['ID'];
+  tenantId?: Maybe<Scalars['Int']>;
+  userId?: Maybe<Scalars['ID']>;
 };

@@ -52,7 +52,7 @@ export type HotelProjection = {
   name?: boolean,
   tenantId?: boolean,
 }
-export type HotelParams<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
+export type HotelParam<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
 
 export type HotelSortKeys = 'deletionDate' | 'description' | 'id' | 'name' | 'tenantId';
 export type HotelSort = OneKey<HotelSortKeys, SortDirection>;
@@ -149,7 +149,7 @@ export type ReservationProjection = {
   tenantId?: boolean,
   userId?: boolean,
 }
-export type ReservationParams<P extends ReservationProjection> = ParamProjection<types.Reservation, ReservationProjection, P>
+export type ReservationParam<P extends ReservationProjection> = ParamProjection<types.Reservation, ReservationProjection, P>
 
 export type ReservationSortKeys = 'deletionDate' | 'id' | 'roomId' | 'tenantId' | 'userId';
 export type ReservationSort = OneKey<ReservationSortKeys, SortDirection>;
@@ -246,7 +246,7 @@ export type RoomProjection = {
   size?: boolean,
   tenantId?: boolean,
 }
-export type RoomParams<P extends RoomProjection> = ParamProjection<types.Room, RoomProjection, P>
+export type RoomParam<P extends RoomProjection> = ParamProjection<types.Room, RoomProjection, P>
 
 export type RoomSortKeys = 'deletionDate' | 'hotelId' | 'id' | 'size' | 'tenantId';
 export type RoomSort = OneKey<RoomSortKeys, SortDirection>;
@@ -323,7 +323,7 @@ export type TenantProjection = {
   id?: boolean,
   info?: boolean,
 }
-export type TenantParams<P extends TenantProjection> = ParamProjection<types.Tenant, TenantProjection, P>
+export type TenantParam<P extends TenantProjection> = ParamProjection<types.Tenant, TenantProjection, P>
 
 export type TenantSortKeys = 'id' | 'info';
 export type TenantSort = OneKey<TenantSortKeys, SortDirection>;
@@ -446,7 +446,7 @@ export type UserProjection = {
   reservations?: ReservationProjection | boolean,
   tenantId?: boolean,
 }
-export type UserParams<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
+export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'credentials.password' | 'credentials.username' | 'deletionDate' | 'email' | 'firstName' | 'id' | 'lastName' | 'tenantId';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
