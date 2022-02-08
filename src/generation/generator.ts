@@ -1,4 +1,4 @@
-import { IdGenerationStrategy } from '..'
+import { DefaultGenerationStrategy, IdGenerationStrategy } from '..'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
@@ -27,6 +27,7 @@ export type TsTypettaGeneratorField = {
   idGenerationStrategy?: IdGenerationStrategy
   isList: boolean
   isExcluded: boolean
+  defaultGenerationStrategy?: DefaultGenerationStrategy
   alias?: string
 }
 

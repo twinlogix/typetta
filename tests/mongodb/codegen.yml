@@ -12,6 +12,7 @@ generates:
         Decimal: bignumber.js#BigNumber
         Coordinates: ../../src#Coordinates
         LocalizedString: ../../src#LocalizedString
+        Live: boolean
   tests/mongodb/dao.mock.ts:
     config:
       schemaImport: './schema.graphql'

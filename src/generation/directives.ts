@@ -9,6 +9,7 @@ export enum Directives {
   RELATION_ENTITY_REF = 'relationEntityRef',
   EXCLUDE = 'exclude',
   ALIAS = 'alias',
+  DEFAULT = 'default',
   QUANTITY_SCALAR = 'quantitative',
   STRING_SCALAR = 'textual',
 }
