@@ -14,6 +14,22 @@ export function findNode(code: string, typesMap: Map<string, TsTypettaGeneratorN
   return typesMap.get(code)
 }
 
+export function getID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField {
+  const field = node.fields.find((field) => field.isID)
+  if(!field) {
+    throw new Error(`Id field in node ${node.name} not found!`)
+  }
+  return field
+}
+
+export function getNode(code: string, typesMap: Map<string, TsTypettaGeneratorNode>): TsTypettaGeneratorNode {
+  const node = typesMap.get(code)
+  if(!node) {
+    throw new Error(`Node with code ${code} not found!`)
+  }
+  return node
+}
+
 export function findField(node: TsTypettaGeneratorNode, fieldPath: string, typesMap: Map<string, TsTypettaGeneratorNode>): TsTypettaGeneratorField | undefined {
   const fieldPathSplitted = fieldPath.split('.')
   if (fieldPathSplitted.length === 1) {

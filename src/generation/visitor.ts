@@ -6,6 +6,7 @@ import { toFirstLower } from './utils'
 import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 import autoBind from 'auto-bind'
 import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
+import { DefaultGenerationStrategy } from '../dal/dao/dao.types'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
@@ -115,7 +116,16 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       const idDirective = this._getDirectiveFromAstNode(field, Directives.ID)
       const idGenerationStrategy = idDirective ? this._getDirectiveArgValue<IdGenerationStrategy>(idDirective, 'from') ?? 'generator' : undefined
       if (idGenerationStrategy && idGenerationStrategy !== 'db' && idGenerationStrategy !== 'generator' && idGenerationStrategy !== 'user') {
-        throw new Error('@id(from: "db" | "generator" | "user") from must be either "db", "generator" or "user"')
+        throw new Error(`@id(from: "db" | "generator" | "user") "from" must be either "db", "generator" or "user" but it is ${idGenerationStrategy}`)
+      }
+
+      const defaultDirective = this._getDirectiveFromAstNode(field, Directives.DEFAULT)
+      const defaultGenerationStrategy = defaultDirective ? this._getDirectiveArgValue<DefaultGenerationStrategy>(defaultDirective, 'from') ?? 'middleware' : undefined
+      if (defaultDirective && defaultGenerationStrategy !== 'generator' && defaultGenerationStrategy !== 'middleware') {
+        throw new Error(`@default(from: "generator" | "middleware") "from" must be either "generator" or "middleware" but it is ${defaultGenerationStrategy}`)
+      }
+      if(defaultDirective && defaultGenerationStrategy === 'generator' && resFieldType.kind === 'embedded') {
+        throw new Error(`@default(from: "generator") cannot be used on embdedded fields`)
       }
 
       const excludeDirective = this._getDirectiveFromAstNode(field, Directives.EXCLUDE)
@@ -135,6 +145,18 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       if (aliasDirective && relationEntityRefDirective) {
         throw new Error(`@alias and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
       }
+      if (defaultDirective && innerRefDirective) {
+        throw new Error(`@default and @innerRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (defaultDirective && foreignRefDirective) {
+        throw new Error(`@default and @foreignRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (defaultDirective && relationEntityRefDirective) {
+        throw new Error(`@default and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (defaultDirective && idDirective) {
+        throw new Error(`@default and @id directives of field '${field.name.value}' are incompatible.`)
+      }
 
       const fieldAttribute = {
         name: field.name.value,
@@ -145,6 +167,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         idGenerationStrategy,
         isList: field.type.kind === Kind.LIST_TYPE || (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE),
         isExcluded: excludeDirective != null,
+        defaultGenerationStrategy,
         alias,
       }
       if (fieldAttribute.isID && !fieldAttribute.isRequired) {

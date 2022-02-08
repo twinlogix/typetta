@@ -3,6 +3,7 @@ scalar LocalizedString
 scalar Decimal
 scalar Password
 scalar JSON
+scalar Live
 
 type Device @entity @sql {
   id: ID! @id 
@@ -87,4 +88,14 @@ type AuthorBook @entity @sql {
 type Book @entity @sql {
   id: ID! @id
   authors: [Author] @relationEntityRef(entity: "AuthorBook")
+}
+
+type DefaultFieldsEntity @entity @sql {
+  id: ID! @id(from: "user")
+  name: String!
+  live: Live! @default(from: "generator")
+  creationDate: Int! @default
+
+  opt1: Live @default(from: "middleware")
+  opt2: Live @default(from: "generator")
 }

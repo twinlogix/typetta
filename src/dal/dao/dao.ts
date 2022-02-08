@@ -18,6 +18,7 @@ import {
 } from './dao.types'
 import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
+import { buildMiddleware } from './middlewares/utils/builder'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection, infoToProjection } from './projections/projections.utils'
 import { DAORelation } from './relations/relations.types'
@@ -42,21 +43,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected name: T['name']
   private logger?: LogFunction<T['name']>
 
-  protected constructor({
-    idField,
-    idScalar,
-    idGeneration,
-    idGenerator,
-    daoContext,
-    name,
-    logger,
-    pageSize = 50,
-    relations = [],
-    middlewares = [],
-    schema,
-    metadata,
-    driverContext: driverOptions,
-  }: DAOParams<T>) {
+  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, name, logger, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.idField = idField
     this.idGenerator = idGenerator
@@ -69,6 +56,35 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     if (this.idGeneration === 'generator' && !this.idGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
     }
+    Object.entries(schema)
+      .flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v.scalar] as const] : []))
+      .forEach(([key, scalar]) => {
+        if (!daoContext.adapters[this._driver()][scalar].generate) {
+          throw new Error(`Generator for scalar ${scalar} is needed for generate default fields ${key}. Define one in DAOContext or in DAOParams.`)
+        }
+      })
+    const defaultMiddleware = buildMiddleware<T>({
+      beforeInsert: async (params, context) => {
+        const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v] as const] : []))
+        const record = fieldsToGenerate.reduce((record, [key, schema]) => {
+          const generator = this.daoContext.adapters[context.daoDriver][schema.scalar].generate
+          if (record[key] == null && generator) {
+            return {
+              ...record,
+              [key]: generator(),
+            }
+          }
+          return record
+        }, params.record)
+        const fieldsToHave = Object.entries(schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'middleware' ? [[k, v] as const] : []))
+        fieldsToHave.forEach(([key, schema]) => {
+          if (schema.required && record[key] == null) {
+            throw new Error(`Fields ${key} should have been generated from a middleware but it is ${record[key]}`)
+          }
+        })
+        return { continue: true, params: { ...params, record } }
+      },
+    })
     this.middlewares = [
       {
         before: async (args, context) => {
@@ -92,9 +108,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         },
       },
       ...middlewares,
+      ...(Object.values(schema).some((v) => v.defaultGenerationStrategy) ? [defaultMiddleware] : []),
     ]
     this.metadata = metadata
-    this.driverContext = driverOptions
+    this.driverContext = driverContext
     this.schema = schema
   }
 
@@ -410,7 +427,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const info = params.projection as GraphQLResolveInfo
       return {
         ...params,
-        projection: infoToProjection(info, undefined, info.fieldNodes[0], getNamedType(info.returnType), info.schema) as P
+        projection: infoToProjection(info, undefined, info.fieldNodes[0], getNamedType(info.returnType), info.schema) as P,
       }
     }
     return params

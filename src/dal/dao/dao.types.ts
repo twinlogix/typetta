@@ -107,6 +107,7 @@ export type MiddlewareContext<T extends DAOGenerics> = {
 }
 
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
+export type DefaultGenerationStrategy = 'middleware' | 'generator'
 
 export interface DAO<T extends DAOGenerics> {
   findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<ModelProjection<T, P>[]>

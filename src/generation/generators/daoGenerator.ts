@@ -1,6 +1,6 @@
 import { DAORelation } from '../../dal/dao/relations/relations.types'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
-import { findID, findNode, indentMultiline, toFirstLower } from '../utils'
+import { getID, getNode, indentMultiline, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
 import { DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 
@@ -38,8 +38,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSort = this._generateDAOSort(node, typesMap)
       const daoUpdate = this._generateDAOUpdate(node, typesMap)
-      const daoInsert = this._generateDAOInsert(node, typesMap)
-      const daoParams = this._generateDAOParams(node, typesMap)
+      const daoInsert = this._generateDAOInsert(node)
+      const daoParams = this._generateDAOParams(node)
       const dao = this._generateDAO(node, typesMap)
       return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
@@ -177,7 +177,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 //------------------------------------- UTILS ------------------------------------
 //--------------------------------------------------------------------------------
 
-type DAOName = keyof DAOMiddlewareMap<any, any>
+type DAOName = keyof DAOMiddlewareMap<never, never>
 type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
 ${Array.from(typesMap.values())
   .filter((node) => node.entity)
@@ -225,7 +225,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
-export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
+export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
   const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default'], [])
   return new DAOContext(newParams)
 }`
@@ -264,13 +264,15 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
     return node.fields
       .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {
-        const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}`
+        const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}${
+          field.defaultGenerationStrategy ? `, \ndefaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : ''
+        }`
         if (field.type.kind === 'scalar') {
           // return [`'${field.name}': { scalar: '${field.graphqlType}'}${decorators}`]
           const scalar = `{\n${indentMultiline(`scalar: '${field.graphqlType}'${decorators}`)}\n}`
           return [`'${field.name}': ${scalar}`]
         } else if (field.type.kind === 'embedded') {
-          const embeddedType = findNode(field.type.embed, typesMap)!
+          const embeddedType = getNode(field.type.embed, typesMap)
           const embeddedFields = indentMultiline(this._generateDAOSchemaFields(embeddedType, typesMap, path + field.name + '.').join(',\n'))
           const embedded = `{\n${indentMultiline(`embedded: {\n${embeddedFields}\n}${decorators}`)}\n}`
           return [`'${field.name}': ${embedded}`]
@@ -307,7 +309,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
           const stringOperators = field.graphqlType === 'String' || customScalarsMap.get(field.graphqlType)?.isString ? ` | StringOperators` : ''
           return [`'${fieldName}'?: ${fieldType} | null | EqualityOperators<${fieldType}> | ElementOperators` + stringOperators + quantityOperators]
         } else if (field.type.kind === 'embedded') {
-          const embeddedType = findNode(field.type.embed, typesMap)!
+          const embeddedType = getNode(field.type.embed, typesMap)
           return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.')
         }
         return []
@@ -351,16 +353,16 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
         if (field.type.kind === 'scalar') {
           return `${field.name}?: boolean,`
         } else if (field.type.kind === 'innerRef') {
-          const linkedType = findNode(field.type.innerRef, typesMap)!
+          const linkedType = getNode(field.type.innerRef, typesMap)
           return `${field.name}?: ${linkedType.name}Projection | boolean,`
         } else if (field.type.kind === 'foreignRef') {
-          const linkedType = findNode(field.type.foreignRef, typesMap)!
+          const linkedType = getNode(field.type.foreignRef, typesMap)
           return `${field.name}?: ${linkedType.name}Projection | boolean,`
         } else if (field.type.kind === 'relationEntityRef') {
-          const linkedType = findNode(field.type.destRef, typesMap)!
+          const linkedType = getNode(field.type.destRef, typesMap)
           return `${field.name}?: ${linkedType.name}Projection | boolean,`
         } else if (field.type.kind === 'embedded') {
-          const embeddedType = findNode(field.type.embed, typesMap)!
+          const embeddedType = getNode(field.type.embed, typesMap)
           const embeddedProjection = indentMultiline(this._generateDAOProjectionFields(embeddedType, typesMap))
           return `${field.name}?: {\n${embeddedProjection}\n} | boolean,`
         }
@@ -390,7 +392,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
           fieldName += field.name
           return [`'${fieldName}'`]
         } else if (field.type.kind === 'embedded') {
-          const embeddedType = findNode(field.type.embed, typesMap)!
+          const embeddedType = getNode(field.type.embed, typesMap)
           return this._generateDAOSortFields(embeddedType, typesMap, path + field.name + '.')
         }
         return []
@@ -420,7 +422,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
           const fieldType = field.isList ? `types.Scalars['${field.graphqlType}'][]` : `types.Scalars['${field.graphqlType}']`
           return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
         } else if (field.type.kind === 'embedded') {
-          const embeddedType = findNode(field.type.embed, typesMap)!
+          const embeddedType = getNode(field.type.embed, typesMap)
           const fieldType = field.isList ? `types.${embeddedType.name}[]` : `types.${embeddedType.name}`
           return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, path + field.name + '.')]
         }
@@ -433,19 +435,19 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
   // ----------------------------------------------- INSERT --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOInsert(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoInsertBody = indentMultiline(this._generateDAOInsertFields(node, typesMap))
+  public _generateDAOInsert(node: TsTypettaGeneratorNode): string {
+    const daoInsertBody = indentMultiline(this._generateDAOInsertFields(node))
     const daoInsert = `export type ${node.name}Insert = {\n` + daoInsertBody + `\n};`
     return daoInsert
   }
 
-  public _generateDAOInsertFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+  public _generateDAOInsertFields(node: TsTypettaGeneratorNode): string {
     return node.fields
       .flatMap((field) => {
         if ((field.isID && field.idGenerationStrategy === 'db') || field.isExcluded) {
           return []
         }
-        const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired)
+        const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired && !field.defaultGenerationStrategy)
         if (field.type.kind === 'scalar') {
           return [`${field.name}${required ? '' : '?'}: types.Scalars['${field.graphqlType}']${field.isList ? '[]' : ''},`]
         }
@@ -461,8 +463,8 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
   // ----------------------------------------------- PARAMS --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOParams(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const idField = findID(node)!
+  public _generateDAOParams(node: TsTypettaGeneratorNode): string {
+    const idField = getID(node)
     const dbDAOGenerics = node.entity?.type === 'sql' ? 'KnexJsDAOGenerics' : node.entity?.type === 'mongo' ? 'MongoDBDAOGenerics' : 'DAOGenerics'
     const dbDAOParams = node.entity?.type === 'sql' ? 'KnexJsDAOParams' : node.entity?.type === 'mongo' ? 'MongoDBDAOParams' : 'DAOParams'
     const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${idField.graphqlType}', '${
@@ -487,7 +489,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
   }
 
   private _generateConstructorMethod(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const idField = findID(node)!
+    const idField = getID(node)
     const generatedRelations = `[\n${indentMultiline(this._generateRelations(node, typesMap).join(',\n'))}\n]`
     const relations = `relations: overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
     const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'}'`
@@ -507,8 +509,8 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
   private _generateRelation(field: TsTypettaGeneratorField, node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path = ''): string[] {
     const type: DAORelation['type'] = field.isList ? '1-n' : '1-1'
     if (field.type.kind === 'innerRef') {
-      const linkedType = findNode(field.type.innerRef, typesMap)!
-      const linkedTypeIdField = findID(linkedType)!
+      const linkedType = getNode(field.type.innerRef, typesMap)
+      const linkedTypeIdField = getID(linkedType)
       const reference: DAORelation['reference'] = 'inner'
       const refField = path + field.name
       const refFrom = field.type.refFrom ? field.type.refFrom : path + field.name + 'Id'
@@ -516,7 +518,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
       const dao = toFirstLower(field.type.innerRef)
       return [`{ type: '${type}', reference: '${reference}', field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}', required: ${field.isRequired} }`]
     } else if (field.type.kind === 'foreignRef') {
-      const idField = findID(node)!
+      const idField = getID(node)
       const reference: DAORelation['reference'] = 'foreign'
       const refField = path + field.name
       const refFrom = field.type.refFrom ?? `${toFirstLower(node.name)}Id`
@@ -524,7 +526,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
       const dao = toFirstLower(field.type.foreignRef)
       return [`{ type: '${type}', reference: '${reference}', field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}', required: ${field.isRequired} }`]
     } else if (field.type.kind === 'relationEntityRef') {
-      const idField = findID(node)!
+      const idField = getID(node)
       const reference: DAORelation['reference'] = 'relation'
       const refField = path + field.name
       const refThisRefFrom = field.type.refThis?.refFrom ?? toFirstLower(field.type.sourceRef) + 'Id'
@@ -537,7 +539,7 @@ export async function mockedDAOContext<MetadataType = any, OperationMetadataType
         `{ type: '${type}', reference: '${reference}', field: '${refField}', relationDao: '${relationDao}', entityDao: '${entityDao}', refThis: { refFrom: '${refThisRefFrom}', refTo: '${refThisRefTo}' }, refOther: { refFrom: '${refOtherRefFrom}', refTo: '${refOtherRefTo}' }, required: ${field.isRequired} }`,
       ]
     } else if (field.type.kind === 'embedded') {
-      const embeddedType = findNode(field.type.embed, typesMap)!
+      const embeddedType = getNode(field.type.embed, typesMap)
       return this._generateRelations(embeddedType, typesMap, path + field.name + '.')
     }
     return []

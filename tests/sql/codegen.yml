@@ -14,6 +14,7 @@ generates:
         LocalizedString: ../../src#LocalizedString
         JSON: any
         Password: string
+        Live: boolean
   tests/sql/dao.mock.ts:
     config:
       skipTypename: true
