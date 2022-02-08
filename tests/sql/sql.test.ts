@@ -1,4 +1,4 @@
-import { buildMiddleware, Coordinates, knexJsAdapters, LocalizedString, UserInputDriverDataTypeAdapterMap } from '../../src'
+import { buildMiddleware, Coordinates, defaultValueMiddleware, knexJsAdapters, LocalizedString, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
 import BigNumber from 'bignumber.js'
@@ -613,14 +613,7 @@ test('Insert default', async () => {
     overrides: {
       defaultFieldsEntity: {
         middlewares: [
-          buildMiddleware({
-            beforeInsert: async (params) => {
-              return {
-                continue: true,
-                params: { ...params, record: { ...params.record, creationDate: 1234 } },
-              }
-            },
-          }),
+          defaultValueMiddleware('creationDate', () => 1234),
         ],
       },
     },

@@ -33,7 +33,7 @@ export type Reservation = {
   id: Scalars['ID'];
   room?: Maybe<Room>;
   roomId: Scalars['ID'];
-  tenantId?: Maybe<Scalars['TenantId']>;
+  tenantId: Scalars['TenantId'];
   userId: Scalars['ID'];
 };
 
@@ -44,7 +44,7 @@ export type Room = {
   hotelId: Scalars['ID'];
   id: Scalars['ID'];
   size: Scalars['String'];
-  tenantId?: Maybe<Scalars['TenantId']>;
+  tenantId: Scalars['TenantId'];
 };
 
 export type Tenant = {
@@ -62,7 +62,7 @@ export type User = {
   id: Scalars['ID'];
   lastName?: Maybe<Scalars['String']>;
   reservations: Array<Maybe<Reservation>>;
-  tenantId?: Maybe<Scalars['TenantId']>;
+  tenantId: Scalars['TenantId'];
 };
 
 export type UsernamePasswordCredentials = {

@@ -1,4 +1,4 @@
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
@@ -543,14 +543,7 @@ test('Insert default', async () => {
     overrides: {
       defaultFieldsEntity: {
         middlewares: [
-          buildMiddleware({
-            beforeInsert: async (params) => {
-              return {
-                continue: true,
-                params: { ...params, record: { ...params.record, creationDate: 1234 } },
-              }
-            },
-          }),
+          defaultValueMiddleware('creationDate', () => 1234),
         ],
       },
     },

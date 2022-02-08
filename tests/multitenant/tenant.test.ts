@@ -1,4 +1,4 @@
-import { inMemoryMongoDb, tenantSecurityPolicy } from '../../src'
+import { defaultValueMiddleware, inMemoryMongoDb, tenantSecurityPolicy } from '../../src'
 import { DAOContext, groupMiddleware } from './dao.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -72,8 +72,14 @@ function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
       groupMiddleware.excludes(
         {
           tenant: true,
+        },
+        defaultValueMiddleware('tenantId', (metadata) => metadata?.tenantId ?? -1),
+      ),
+      groupMiddleware.excludes(
+        {
+          tenant: true,
           hotel: true,
-          reservation: true
+          reservation: true,
         },
         tenantSecurityPolicy({
           tenantKey: 'tenantId',
@@ -82,7 +88,7 @@ function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
       groupMiddleware.includes(
         {
           hotel: true,
-          reservation: true
+          reservation: true,
         },
         tenantSecurityPolicy({
           tenantKey: 'tenantId',
@@ -106,7 +112,7 @@ beforeEach(async () => {
 })
 
 test('crud tenant test', async () => {
-  const user0t2 = await dao2.user.insertOne({ record: { firstName: 'Mario', email: '2@hotel.com', tenantId: 2 } })
+  const user0t2 = await dao2.user.insertOne({ record: { firstName: 'Mario', email: '2@hotel.com' } })
   try {
     await dao1.user.insertOne({ record: { email: '1@hotel.com', tenantId: 2 } })
     fail()
@@ -115,7 +121,7 @@ test('crud tenant test', async () => {
   }
   const user0t1 = await dao1.user.insertOne({ record: { firstName: 'Mario', email: '1@hotel.com' } })
   expect(user0t1.tenantId).toBe(1)
-  const user1t1 = await dao1.user.insertOne({ record: { firstName: 'Mario', email: '1@hotel.com', tenantId: 1 } })
+  const user1t1 = await dao1.user.insertOne({ record: { firstName: 'Mario', email: '1@hotel.com' } })
   expect(user1t1.tenantId).toBe(1)
 
   const user2t1 = await dao1.user.findOne({ filter: { id: user0t2.id } })
@@ -201,8 +207,8 @@ test('crud tenant test', async () => {
 
 test('tenant wrong ref test', async () => {
   const u1 = await dao1.user.insertOne({ record: { email: 'u1@gmail.com' } })
-  const h1 = await dao1.hotel.insertOne({ record: { name: 'H1', tenantId: 1 } })
-  const h2 = await dao2.hotel.insertOne({ record: { name: 'H2', tenantId: 2 } })
+  const h1 = await dao1.hotel.insertOne({ record: { name: 'H1' } })
+  const h2 = await dao2.hotel.insertOne({ record: { name: 'H2' } })
   const r1 = await dao1.room.insertOne({ record: { hotelId: h1.id, size: '1' } })
   const r2 = await dao2.room.insertOne({ record: { hotelId: h2.id, size: '2' } })
   await dao1.reservation.insertOne({ record: { roomId: r1.id, userId: u1.id } })
