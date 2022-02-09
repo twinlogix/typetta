@@ -7,7 +7,8 @@ enum RoleCode {
   SUPERADMIN,
   HOTEL_OWNER,
   IS_USER
-  TENANT_ADMIN
+  TENANT_ADMIN,
+  ANALYST
 }
 
 enum Permission {
@@ -16,7 +17,8 @@ enum Permission {
   MANAGE_RESERVATION,
   READONLY_RESERVATION,
   MANAGE_HOTEL,
-  MANAGE_USER
+  MANAGE_USER,
+  ANALYST
 }
 
 

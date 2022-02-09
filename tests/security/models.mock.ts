@@ -26,6 +26,7 @@ export type Hotel = {
 };
 
 export const Permission = {
+  ANALYST: 'ANALYST',
   MANAGE_HOTEL: 'MANAGE_HOTEL',
   MANAGE_RESERVATION: 'MANAGE_RESERVATION',
   MANAGE_ROOM: 'MANAGE_ROOM',
@@ -52,6 +53,7 @@ export type Role = {
 };
 
 export const RoleCode = {
+  ANALYST: 'ANALYST',
   HOTEL_OWNER: 'HOTEL_OWNER',
   IS_USER: 'IS_USER',
   SUPERADMIN: 'SUPERADMIN',

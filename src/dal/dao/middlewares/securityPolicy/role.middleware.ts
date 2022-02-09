@@ -1,7 +1,7 @@
 import { DAOGenerics } from '../../dao.types'
+import { isProjectionContained, mergeProjections } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
-
 
 type SecurityContext<T extends DAOGenerics, Permissions extends string> = {
   [Kp in Permissions]?: {
@@ -10,9 +10,7 @@ type SecurityContext<T extends DAOGenerics, Permissions extends string> = {
 }
 
 type SecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
-  permissions: {
-    [Key in Permissions]?: CRUDSecurityPolicy<T>
-  }
+  [Key in Permissions]?: CRUDSecurityPolicy<T>
 }
 export type CRUDSecurityPolicy<T extends DAOGenerics> =
   | {
@@ -26,11 +24,9 @@ export type CRUDSecurityPolicy<T extends DAOGenerics> =
 
 const ERROR_PREFIX = '[Role Middleware] '
 export function roleSecurityPolicy<Permissions extends string, T extends DAOGenerics>(args: {
-  securityContext: SecurityContext<T, Permissions>
   securityPolicy: SecurityPolicy<T, Permissions>
+  securityContext: (metadata: T['metadata']) => SecurityContext<T, Permissions>
 }): DAOMiddleware<T> {
-
-  console.log(args)
   /*function getBaseFilter(roles: Role<T, K, RoleType>[]): T['filter'] {
     return roles.find((role) => role.values == null)
       ? {}
@@ -47,6 +43,10 @@ export function roleSecurityPolicy<Permissions extends string, T extends DAOGene
         }
   }
 */
+
+  function getProjection(crud: CRUDSecurityPolicy<T>): T['projection'] | boolean {
+    return crud === true ? true : crud === false ? false : crud.read
+  }
   return buildMiddleware({
     /* beforeInsert: async (params, context) => {
       if (!context.metadata) return
@@ -67,33 +67,48 @@ export function roleSecurityPolicy<Permissions extends string, T extends DAOGene
       if (!canInsert) {
         throw new Error(`${ERROR_PREFIX}Invalid insert: roles [${roles.map((role) => role.role).join(',')}] does not have permission to insert ${context.daoName} entities`)
       }
-    },
+    },*/
     beforeFind: async (params, context) => {
       if (!context.metadata) return
-      const roles = args.roles(context.metadata)
-      const widestProjection = roles.reduce<GenericProjection>((proj, role) => {
-        const permission = args.securityPolicy[role.role]
-        if (permission) {
-          return mergeProjections(proj, typeof permission === 'boolean' ? true : permission.read ?? false)
+      const securityContext = args.securityContext(context.metadata)
+      const policies = Object.entries(args.securityPolicy).flatMap(([k, v]) => {
+        const permission = k as Permissions
+        const crud = v as CRUDSecurityPolicy<T>
+        const projection = getProjection(crud)
+        if (securityContext[permission] && projection) {
+          const domain = securityContext[permission]
+          return [{ domain, projection, permission }]
         }
-        return proj
-      }, false)
+        return []
+      })
+      //TODO: we can exclude some policies based on filter
+      const widestProjection = policies.reduce<true | T['projection']>((proj, policy) => mergeProjections(policy.projection, proj), false)
       const [contained, invalidFields] = isProjectionContained(widestProjection, params.projection ?? true)
       if (!contained) {
         throw new Error(
-          `${ERROR_PREFIX}Access to restricted fields: roles [${roles.map((role) => role.role).join(',')}] can't access fields ${JSON.stringify(invalidFields)} of ${context.daoName} entities`,
+          `${ERROR_PREFIX}Access to restricted fields: permissions [${policies.map((policy) => policy.permission).join(',')}] can't access fields ${JSON.stringify(invalidFields)} of ${
+            context.daoName
+          } entities`,
         )
       }
-      return {
-        continue: true,
-        params: {
-          ...params,
-          filter: params.filter ? { $and: [getBaseFilter(roles), params.filter] } : getBaseFilter(roles),
-          projection: mergeProjections((params.projection ?? true) as GenericProjection, { [args.key]: true }) as T['projection'],
-        },
-      }
+      const domains = policies.reduce<{ [K in keyof T['model']]?: T['model'][K][] }>((sum, policy) => {
+        if (policy.domain) {
+          return Object.entries(policy.domain).reduce<{ [K in keyof T['model']]?: T['model'][K][] }>((partialSum, [key, domainValues]) => {
+            const summedDomainValues = partialSum[key]
+            if (summedDomainValues) {
+              const set = new Set([...summedDomainValues, ...domainValues])
+              return { ...partialSum, [key]: [...set] }
+            } else {
+              return { ...partialSum, [key]: domainValues }
+            }
+          }, sum)
+        }
+        return sum
+      }, {})
+      const domainFilters = { $or: Object.entries(domains).map(([k, v]) => ({ [k]: { $in: v } })) }
+      return { continue: true, params: { ...params, filter: params.filter ? { $and: [params.filter, domainFilters] } : domainFilters } }
     },
-    beforeUpdate: async (params, context) => {
+    /*beforeUpdate: async (params, context) => {
       if (!context.metadata) return
       const roles = args.roles(context.metadata)
     },
