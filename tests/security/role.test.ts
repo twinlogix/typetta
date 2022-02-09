@@ -1,6 +1,6 @@
 import { Expand, inMemoryMongoDb } from '../../src'
 import { roleSecurityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/role.middleware'
-import { DAOContext, UserParam, UserRoleParam } from './dao.mock'
+import { DAOContext, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -8,22 +8,23 @@ import { v4 as uuidv4 } from 'uuid'
 
 jest.setTimeout(20000)
 
+type SecurityDomain = { hotelId?: string[]; userId?: string[]; tenantId?: number[] }
 type DomainPermissions = {
-  [K in Permission]?: { hotelId?: string[]; userId?: string[]; tenantId?: number[] }
+  [K in Permission]?: SecurityDomain
 }
 type DaoMetadata = {
   permissions: DomainPermissions
 }
-let unsafeDao: DAOContext<DaoMetadata>
+let unsafeDao: DAOContext<DaoMetadata, { securityDomain: SecurityDomain }>
 let mongodb: {
   replSet: MongoMemoryReplSet
   connection: MongoClient
   db: Db
 }
 
-function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMetadata> {
+function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMetadata, { securityDomain: SecurityDomain }> {
   if (!metadata) {
-    return new DAOContext<DaoMetadata>({
+    return new DAOContext<DaoMetadata, { securityDomain: SecurityDomain }>({
       mongo: {
         default: db,
       },
@@ -36,31 +37,32 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
     })
   }
 
-  type MappedDomainPermissions<Mapping extends object> = Expand<{
-    [K in Permission]?: { [sK in Exclude<keyof Mapping, ''>]?: Mapping[sK] }
+  type MappedSecurityDomain<Mapping extends object> = { [sK in Exclude<keyof Mapping, ''>]?: Mapping[sK] }
+
+  type MappedSecurityContext<Mapping extends object> = Expand<{
+    [K in Permission]?: MappedSecurityDomain<Mapping>
   }>
-  function mapPermissions<H extends string = '', U extends string = '', T extends string = ''>(
+  function mapSecurityContext<H extends string = '', U extends string = '', T extends string = ''>(
     permissions: DomainPermissions,
     map: { hotelId?: H; userId?: U; tenantId?: T },
-  ): MappedDomainPermissions<{ [K in H]: string[] } & { [K in U]: string[] } & { [K in T]: number[] }> {
-    return Object.fromEntries(
-      Object.entries(permissions).flatMap(([k, v]) => {
-        const entries = Object.entries(map).flatMap(([key, value]) => {
-          if (value && v[key as 'hotelId' | 'userId' | 'tenantId']) {
-            return [[value, v[key as 'hotelId' | 'userId' | 'tenantId']]]
-          }
-          return []
-        })
-        if (entries.length > 0) {
-          return [[k, Object.fromEntries(entries)]]
-        } else {
-          return []
-        }
-      }),
-    )
+  ): MappedSecurityContext<{ [K in H]: string[] } & { [K in U]: string[] } & { [K in T]: number[] }> {
+    return Object.entries(permissions).reduce((p, [k, v]) => {
+      return { ...p, [k]: mapSecurityDomain(v, map) }
+    }, {})
   }
-
-  return new DAOContext<DaoMetadata>({
+  function mapSecurityDomain<H extends string = '', U extends string = '', T extends string = ''>(
+    domain: SecurityDomain,
+    map: { hotelId?: H; userId?: U; tenantId?: T },
+  ): MappedSecurityDomain<{ [K in H]: string[] } & { [K in U]: string[] } & { [K in T]: number[] }> {
+    const entries = Object.entries(map).flatMap(([key, value]) => {
+      if (value && domain[key as 'hotelId' | 'userId' | 'tenantId']) {
+        return [[value, domain[key as 'hotelId' | 'userId' | 'tenantId']]] as const
+      }
+      return []
+    })
+    return Object.fromEntries(entries) as MappedSecurityDomain<{ [K in H]: string[] } & { [K in U]: string[] } & { [K in T]: number[] }>
+  }
+  return new DAOContext({
     mongo: {
       default: db,
     },
@@ -74,7 +76,8 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       user: {
         middlewares: [
           roleSecurityPolicy({
-            securityContext: (metadata) => mapPermissions(metadata.permissions, { userId: 'id' }),
+            securityContext: (metadata) => mapSecurityContext(metadata.permissions, { userId: 'id' }),
+            securityDomains: (metadata) => mapSecurityDomain(metadata.securityDomain, { userId: 'id' }),
             securityPolicy: {
               MANAGE_USER: true,
             },
@@ -84,7 +87,8 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       hotel: {
         middlewares: [
           roleSecurityPolicy({
-            securityContext: (metadata) => mapPermissions(metadata.permissions, { tenantId: 'tenantId', hotelId: 'id' }),
+            securityContext: (metadata) => mapSecurityContext(metadata.permissions, { hotelId: 'id', tenantId: 'tenantId' }),
+            securityDomains: (metadata) => mapSecurityDomain(metadata.securityDomain, { hotelId: 'id', tenantId: 'tenantId' }),
             securityPolicy: {
               MANAGE_HOTEL: true,
               ANALYST: { read: { totalCustomers: true } },
@@ -96,6 +100,7 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
         middlewares: [
           roleSecurityPolicy({
             securityContext: (metadata) => metadata.permissions,
+            securityDomains: (metadata) => metadata.securityDomain,
             securityPolicy: {
               MANAGE_ROOM: true,
               READONLY_ROOM: {
@@ -109,6 +114,7 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
         middlewares: [
           roleSecurityPolicy({
             securityContext: (metadata) => metadata.permissions,
+            securityDomains: (metadata) => metadata.securityDomain,
             securityPolicy: {
               MANAGE_RESERVATION: true,
               READONLY_RESERVATION: {
@@ -122,7 +128,7 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
   })
 }
 
-async function creadeDaoWithUserRoles(userId: string): Promise<DAOContext<DaoMetadata>> {
+async function creadeDaoWithUserRoles(userId: string): Promise<DAOContext<DaoMetadata, { securityDomain: SecurityDomain }>> {
   const user = await unsafeDao.user.findOne({ filter: { id: userId }, projection: { id: true, roles: { role: { permissions: true }, hotelId: true, userId: true, tenantId: true } } })
   if (!user) {
     throw new Error('User does not exists')
@@ -192,7 +198,7 @@ test('crud tenant test', async () => {
 
   const dao = await creadeDaoWithUserRoles(user.id)
 
-  const hotels1 = await dao.hotel.findAll({ filter: { name: { $startsWith: 'AHotel' } } })
+  const hotels1 = await dao.hotel.findAll({ filter: { name: { $startsWith: 'AHotel' } }, metadata: { securityDomain: { tenantId: [3] } } })
 
   const hotels2 = await dao.hotel.findAll({ projection: { totalCustomers: true } })
 

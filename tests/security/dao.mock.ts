@@ -374,6 +374,70 @@ export class RoomDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------ ROOM2 -------------------------------------
+//--------------------------------------------------------------------------------
+
+export type Room2ExcludedFields = never
+export type Room2RelationFields = never
+
+export const room2Schema: Schema<types.Scalars> = {
+  'id': {
+    scalar: 'Int', 
+    required: true
+  }
+};
+
+type Room2FilterFields = {
+  'id'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
+};
+export type Room2Filter = Room2FilterFields & LogicalOperators<Room2FilterFields | Room2RawFilter>
+export type Room2RawFilter = () => Filter<Document>
+
+export type Room2Relations = Record<never, string>
+
+export type Room2Projection = {
+  id?: boolean,
+}
+export type Room2Param<P extends Room2Projection> = ParamProjection<types.Room2, Room2Projection, P>
+
+export type Room2SortKeys = 'id';
+export type Room2Sort = OneKey<Room2SortKeys, SortDirection>;
+export type Room2RawSort = () => Sort
+
+export type Room2Update = {
+  'id'?: types.Scalars['Int']
+};
+export type Room2RawUpdate = () => UpdateFilter<Document>
+
+export type Room2Insert = {
+  id?: types.Scalars['Int'],
+};
+
+type Room2DAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Room2, 'id', 'Int', 'generator', Room2Filter, Room2RawFilter, Room2Relations, Room2Projection, Room2Sort, Room2RawSort, Room2Insert, Room2Update, Room2RawUpdate, Room2ExcludedFields, Room2RelationFields, MetadataType, OperationMetadataType, types.Scalars, 'room2'>;
+export type Room2DAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<Room2DAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class Room2DAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<Room2DAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: Room2DAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: room2Schema, 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'Int' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
@@ -592,15 +656,16 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     reservation?: Pick<Partial<ReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     role?: Pick<Partial<RoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     room?: Pick<Partial<RoomDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    room2?: Pick<Partial<Room2DAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     userRole?: Pick<Partial<UserRoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   },
   mongo: Record<'default', Db>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
-  log?: LogInput<'hotel' | 'reservation' | 'role' | 'room' | 'user' | 'userRole'>
+  log?: LogInput<'hotel' | 'reservation' | 'role' | 'room' | 'room2' | 'user' | 'userRole'>
 };
 
-type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType> | ReservationDAOGenerics<MetadataType, OperationMetadataType> | RoleDAOGenerics<MetadataType, OperationMetadataType> | RoomDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType> | UserRoleDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType> | ReservationDAOGenerics<MetadataType, OperationMetadataType> | RoleDAOGenerics<MetadataType, OperationMetadataType> | RoomDAOGenerics<MetadataType, OperationMetadataType> | Room2DAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType> | UserRoleDAOGenerics<MetadataType, OperationMetadataType>>
 
 export class DAOContext<MetadataType = never, OperationMetadataType = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
@@ -608,6 +673,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
   private _reservation: ReservationDAO<MetadataType, OperationMetadataType> | undefined;
   private _role: RoleDAO<MetadataType, OperationMetadataType> | undefined;
   private _room: RoomDAO<MetadataType, OperationMetadataType> | undefined;
+  private _room2: Room2DAO<MetadataType, OperationMetadataType> | undefined;
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   private _userRole: UserRoleDAO<MetadataType, OperationMetadataType> | undefined;
   
@@ -616,7 +682,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
-  private logger?: LogFunction<'hotel' | 'reservation' | 'role' | 'room' | 'user' | 'userRole'>
+  private logger?: LogFunction<'hotel' | 'reservation' | 'role' | 'room' | 'room2' | 'user' | 'userRole'>
   
   get hotel() {
     if(!this._hotel) {
@@ -642,6 +708,12 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
     }
     return this._room;
   }
+  get room2() {
+    if(!this._room2) {
+      this._room2 = new Room2DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room2, collection: this.mongo.default.collection('room2s'), middlewares: [...(this.overrides?.room2?.middlewares || []), ...selectMiddleware('room2', this.middlewares) as DAOMiddleware<Room2DAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room2', logger: this.logger });
+    }
+    return this._room2;
+  }
   get user() {
     if(!this._user) {
       this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongo.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
@@ -666,8 +738,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
     this.logger = logInputToLogger(params.log)
   }
   
-  public async execQuery<T>(run: (dbs: { mongo: Record<'default', Db> }, entities: { hotel: Collection<Document>; reservation: Collection<Document>; role: Collection<Document>; room: Collection<Document>; user: Collection<Document>; userRole: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongo: this.mongo }, { hotel: this.mongo.default.collection('hotels'), reservation: this.mongo.default.collection('reservations'), role: this.mongo.default.collection('roles'), room: this.mongo.default.collection('rooms'), user: this.mongo.default.collection('users'), userRole: this.mongo.default.collection('userRoles') })
+  public async execQuery<T>(run: (dbs: { mongo: Record<'default', Db> }, entities: { hotel: Collection<Document>; reservation: Collection<Document>; role: Collection<Document>; room: Collection<Document>; room2: Collection<Document>; user: Collection<Document>; userRole: Collection<Document> }) => Promise<T>): Promise<T> {
+    return run({ mongo: this.mongo }, { hotel: this.mongo.default.collection('hotels'), reservation: this.mongo.default.collection('reservations'), role: this.mongo.default.collection('roles'), room: this.mongo.default.collection('rooms'), room2: this.mongo.default.collection('room2s'), user: this.mongo.default.collection('users'), userRole: this.mongo.default.collection('userRoles') })
   }
   
   
@@ -685,6 +757,7 @@ type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
   reservation: ReservationDAOGenerics<MetadataType, OperationMetadataType>
   role: RoleDAOGenerics<MetadataType, OperationMetadataType>
   room: RoomDAOGenerics<MetadataType, OperationMetadataType>
+  room2: Room2DAOGenerics<MetadataType, OperationMetadataType>
   user: UserDAOGenerics<MetadataType, OperationMetadataType>
   userRole: UserRoleDAOGenerics<MetadataType, OperationMetadataType>
 }

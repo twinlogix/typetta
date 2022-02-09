@@ -253,6 +253,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           sorts: relationFilter?.sorts,
           relations: relationFilter?.relations,
           options: relationFilter?.options,
+          metadata: relationFilter?.metadata
         }
         if (relation.reference === 'relation') {
           const rels = await this.daoContext.dao(relation.relationDao).loadAll(
