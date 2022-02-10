@@ -13,11 +13,10 @@ type SecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
 
 export type CRUDSecurityPolicy<T extends DAOGenerics> =
   | {
-      insert?: boolean
       read?: boolean | T['projection']
+      write?: boolean
       update?: boolean
-      replace?: boolean
-      aggregate?: boolean
+      delete?: boolean
     }
   | boolean
 
