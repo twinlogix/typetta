@@ -145,7 +145,7 @@ In questo modo, però, lo sviluppatore è obbligato a replicare tutta la struttu
 
 Si noti che il parametro `user` non può essere di tipo `User`, altrimenti si obbligherebbe l'utilizzatore della funzione `elab` a fornire anche il campo `lastName` che non è invece necessario alla funzione.
 
-Dato questo problema, in Typetta abbiamo creato un tipo per ogni entità, nel caso specifo `UserParam` che permette di riscrivere la funzione precedente come segue:
+Dato questo problema, in Typetta abbiamo creato un tipo per ogni entità, nel caso specifo `UserParam`, che permette di riscrivere la funzione precedente come segue:
 
 ```typescript
 const userProjection : UserProjection = {
