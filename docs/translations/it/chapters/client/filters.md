@@ -354,7 +354,7 @@ Si noti che questo approccio permette di descrivere un filtro specifico per un d
 
 ### MongoDB
 
-Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:targte=_Blank}, la creazione di un filtro specifico consiste in una funzione che ritorna `Filter<WithId<Document>>`. 
+Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}, la creazione di un filtro specifico consiste in una funzione che ritorna `Filter<WithId<Document>>`. 
 
 Ipotizziamo per esempio di voler utilizzare l'operatore `$text` di MongoDB che è un'operatore molto specifico che, tramite un indice testuale sulla collection, è in grado di eseguire una ricerca full text complessa. Non essendo una funzionalità disponibile su altri database o disponibile ma in modalità molto diverse, non è stata fattorizzata da Typetta. Con il meccanismo di filtri specifici per il driver è tuttavia molto semplice utilizzarla:
 
@@ -371,7 +371,7 @@ await daoContext.user.findAll({
 
 ### SQL
 
-Il driver SQL, come già accennato in precedenza, è sviluppato utilizzando il celebre query builder [KnexJS](https://knexjs.org/){:targte=_Blank}. La creazione di un filtro specifico in questo caso consiste nell'invocazione di una serie di metodi sull'oggetto `Knex.QueryBuilder`.
+Il driver SQL, come già accennato in precedenza, è sviluppato utilizzando il celebre query builder [KnexJS](https://knexjs.org/){:target="_blank"}. La creazione di un filtro specifico in questo caso consiste nell'invocazione di una serie di metodi sull'oggetto `Knex.QueryBuilder`.
 
 Ipotizziamo per esempio di voler implementare anche in questo caso una ricerca full text tramite le funzionalità offerte da un database target PostgreSQL. Con il meccanismo di filtri specifici possiamo creare una ricerca come segue:
 

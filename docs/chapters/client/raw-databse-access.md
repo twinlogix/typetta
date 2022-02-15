@@ -38,7 +38,7 @@ await daoContext.user.updateOne({
 
 ### MongoDB
 
-Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:targte=_Blank}, la creazione di un oggetto di update specifico consiste in una funzione che ritorna `UpdateFilter<TSchema>`. 
+Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}, la creazione di un oggetto di update specifico consiste in una funzione che ritorna `UpdateFilter<TSchema>`. 
 
 Ipotizziamo per esempio di voler utilizzare l'operatore `$inc` di MongoDB per incrementare il valore di un campo numerico senza necessariamente leggerlo precedentemente. Con il meccanismo di changes specifiche per il driver è possibile scrivere una query come segue:
 
@@ -55,7 +55,7 @@ await daoContext.user.updateOne({
 
 ### SQL
 
-Il driver SQL, come già accennato in precedenza, è sviluppato utilizzando il celebre query builder [KnexJS](https://knexjs.org/){:targte=_Blank}. La creazione di una query di update in questo caso consiste nell'invocazione di una serie di metodi sull'oggetto `Knex.QueryBuilder`.
+Il driver SQL, come già accennato in precedenza, è sviluppato utilizzando il celebre query builder [KnexJS](https://knexjs.org/){:target="_blank"}. La creazione di una query di update in questo caso consiste nell'invocazione di una serie di metodi sull'oggetto `Knex.QueryBuilder`.
 
 Ipotizziamo per esempio di voler implementare anche in questo caso un'operazione di incremento di un campo tramite le funzionalità offerte da un database target PostgreSQL. Con il meccanismo di changes specifiche possiamo creare un update come segue:
 

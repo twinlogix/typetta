@@ -44,7 +44,7 @@ Si noti che questo approccio permette di descrivere sorts specifici per un drive
 
 ### MongoDB
 
-Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:targte=_Blank}, la creazione di sorts specifici consiste in una funzione che ritorna `Sort`. 
+Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}, la creazione di sorts specifici consiste in una funzione che ritorna `Sort`. 
 
 Ipotizziamo per esempio aver utilizzato l'operatore `$text` di MongoDB che è un'operatore molto specifico che, tramite un indice testuale sulla collection, è in grado di eseguire una ricerca full text complessa. Questo operatore di ricerca permette anche di ordinare i risultati in base ad uno score di matghing tra il risultato e il testo ricercato. Di seguito un esempio di utilizzo:
 
@@ -64,7 +64,7 @@ const users = await daoContext.user.findAll({
 
 ### SQL
 
-Il driver SQL è sviluppato utilizzando il celebre query builder [KnexJS](https://knexjs.org/){:target=_blank}. La creazione di sorts specifici in questo caso consiste nell'invocazione di una serie di metodi sull'oggetto `Knex.QueryBuilder`.
+Il driver SQL è sviluppato utilizzando il celebre query builder [KnexJS](https://knexjs.org/){:target="_blank"}. La creazione di sorts specifici in questo caso consiste nell'invocazione di una serie di metodi sull'oggetto `Knex.QueryBuilder`.
 
 Ipotizziamo per esempio di voler implementare un ordinamento di un elenco di utenti per mese di nascita (ignorando l'anno e il giorno) a partire da un campo data di nascita. Con il meccanismo di filtri specifici possiamo creare una ricerca come segue:
 

@@ -60,7 +60,6 @@ main:
         title: Type Safety
       - url: /chapters/advanced/graphql
         title: Using with GraphQL
-        todo: true
   - database-drivers:
     title: Database Drivers
     children:
