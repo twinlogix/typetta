@@ -1,77 +1,128 @@
 import { DAOGenerics } from '../../dao.types'
-import { isProjectionContained, mergeProjections } from '../../projections/projections.utils'
+import { intersectProjections, isProjectionContained, mergeProjections } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 
-type SecurityContext<Permissions extends string, SecurityDomain> = {
-  [Kp in Permissions]?: SecurityDomain
+type SecurityContext<Permissions extends string, SecurityContextPermission> = {
+  [Kp in Permissions]?: SecurityContextPermission[]
 }
 
 type SecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
-  [Key in Permissions]?: CRUDSecurityPolicy<T>
+  [Key in Permissions]?: CRUDPermission<T>
 }
 
-export type CRUDSecurityPolicy<T extends DAOGenerics> =
-  | {
-      read?: boolean | T['projection']
-      write?: boolean
-      update?: boolean
-      delete?: boolean
-    }
-  | boolean
+export const CRUD = {
+  and: function <T extends DAOGenerics>(cruds: CRUDPermission<T>[]): CRUDPermission<T> {
+    return cruds.reduce(
+      (l, r) => ({
+        delete: (l.delete ?? false) && (r.delete ?? false),
+        read: intersectProjections(l.read ?? false, r.read ?? false),
+        write: (l.write ?? false) && (r.write ?? false),
+        update: (l.update ?? false) && (r.update ?? false),
+      }),
+      this.ALLOW,
+    )
+  },
+  or: function <T extends DAOGenerics>(cruds: CRUDPermission<T>[]): CRUDPermission<T> {
+    return cruds.reduce(
+      (l, r) => ({
+        delete: (l.delete ?? false) || (r.delete ?? false),
+        read: mergeProjections(l.read ?? false, r.read ?? false),
+        write: (l.write ?? false) || (r.write ?? false),
+        update: (l.update ?? false) || (r.update ?? false),
+      }),
+      this.DENY,
+    )
+  },
+
+  ALLOW: {
+    delete: true,
+    read: true,
+    write: true,
+    update: true,
+  },
+  DENY: {
+    delete: false,
+    read: false,
+    write: false,
+    update: false,
+  },
+}
+
+export type CRUDPermission<T extends DAOGenerics> = {
+  read?: boolean | T['projection']
+  write?: boolean
+  update?: boolean
+  delete?: boolean
+}
 
 const ERROR_PREFIX = '[Role Middleware] '
-export function roleSecurityPolicy<Permissions extends string, T extends DAOGenerics, SecurityDomain extends { [K in keyof T['model']]?: T['model'][K][] }>(args: {
+export function roleSecurityPolicy<
+  Permissions extends string,
+  T extends DAOGenerics,
+  SecurityDomainKeys extends string,
+  SecurityContextPermission extends { [K in SecurityDomainKeys]?: T['model'][K] },
+  SecurityDomain extends { [K in SecurityDomainKeys]?: T['model'][K][] },
+>(args: {
   securityPolicy: SecurityPolicy<T, Permissions>
-  securityContext: (metadata: T['metadata']) => SecurityContext<Permissions, SecurityDomain>
-  securityDomains: (metadata: T['operationMetadata']) => SecurityDomain | undefined
+  securityContext: (metadata: T['metadata']) => SecurityContext<Permissions, SecurityContextPermission>
+  securityDomain: (metadata: T['operationMetadata']) => SecurityDomain | undefined
 }): DAOMiddleware<T> {
-  function getProjection(crud: CRUDSecurityPolicy<T>): T['projection'] | boolean {
-    return crud === true ? true : crud === false ? false : crud.read
+  function getRelatedSecurityContext(context: T['driverContext']): {
+    domain: SecurityContextPermission[]
+    crud: CRUDPermission<T>
+    permission: Permissions
+  }[] {
+    const securityContext = args.securityContext(context.metadata)
+    return Object.entries(args.securityPolicy).flatMap(([k, v]) => {
+      const permission = k as Permissions
+      const crud = v as CRUDPermission<T>
+      const domain: SecurityContextPermission[] | undefined = securityContext[permission]
+      if (domain) {
+        return [{ domain, crud, permission }]
+      }
+      return []
+    })
+  }
+
+  function getCrudPolicy(
+    operationSecurityDomain: SecurityDomain,
+    relatedSecurityContext: {
+      domain: SecurityContextPermission[]
+      crud: CRUDPermission<T>
+      permission: Permissions
+    }[],
+  ) {
+    const cruds = Object.entries(operationSecurityDomain).map(([k, v]) => {
+      const domainKey = k as SecurityDomainKeys
+      const domainValues = v as T['model'][SecurityDomainKeys][]
+      const cruds = domainValues.map((domainValue) => {
+        const cruds = relatedSecurityContext.flatMap((rsc) => (rsc.domain.some((atom) => atom[domainKey] === domainValue) ? [rsc.crud] : []))
+        return CRUD.or(cruds)
+      })
+      return CRUD.and(cruds)
+    })
+    const crud = CRUD.or(cruds)
+    return crud
   }
 
   return buildMiddleware({
     beforeFind: async (params, context) => {
       if (!context.metadata) return
-      const securityContext = args.securityContext(context.metadata)
-      const securityDomain = params.metadata ? args.securityDomains(params.metadata) : undefined
-      //TODO: use security domain in order to exclude some permissions
-      const policies = Object.entries(args.securityPolicy).flatMap(([k, v]) => {
-        const permission = k as Permissions
-        const crud = v as CRUDSecurityPolicy<T>
-        const projection = getProjection(crud)
-        if (securityContext[permission] && projection) {
-          const domain = securityContext[permission]
-          return [{ domain, projection, permission }]
-        }
-        return []
-      })
-      const widestProjection = policies.reduce<true | T['projection']>((proj, policy) => mergeProjections(policy.projection, proj), false)
-      const [contained, invalidFields] = isProjectionContained(widestProjection, params.projection ?? true)
+      const operationSecurityDomain = (params.metadata ? args.securityDomain(params.metadata) ?? {} : {}) as SecurityDomain
+      const relatedSecurityContext = getRelatedSecurityContext(context)
+      const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
+      const [contained, invalidFields] = isProjectionContained(crud.read ?? false, params.projection ?? true)
       if (!contained) {
         throw new Error(
           `${ERROR_PREFIX}Access to restricted fields: ${
-            policies.length === 0
+            relatedSecurityContext.length === 0
               ? `you have no permission to access fields ${JSON.stringify(invalidFields)} of ${context.daoName} entities`
-              : `permissions [${policies.map((policy) => policy.permission).join(',')}] can't access fields ${JSON.stringify(invalidFields)} of ${context.daoName} entities`
+              : `permissions [${relatedSecurityContext.map((policy) => policy.permission).join(',')}] can't access fields ${JSON.stringify(invalidFields)} of ${context.daoName} entities`
           }`,
         )
       }
-      const domains = policies.reduce<{ [K in keyof T['model']]?: T['model'][K][] }>((sum, policy) => {
-        if (policy.domain) {
-          return Object.entries(policy.domain).reduce<{ [K in keyof T['model']]?: T['model'][K][] }>((partialSum, [key, domainValues]) => {
-            const summedDomainValues = partialSum[key]
-            if (summedDomainValues) {
-              const set = new Set([...summedDomainValues, ...domainValues])
-              return { ...partialSum, [key]: [...set] }
-            } else {
-              return { ...partialSum, [key]: domainValues }
-            }
-          }, sum)
-        }
-        return sum
-      }, {})
-      const domainFilters = { $or: Object.entries(domains).map(([k, v]) => ({ [k]: { $in: v } })) }
+      const domainFilters = { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { $in: v } })) }
       return { continue: true, params: { ...params, filter: params.filter ? { $and: [params.filter, domainFilters] } : domainFilters } }
     },
   })

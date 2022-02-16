@@ -6,8 +6,10 @@ scalar Date
 enum RoleCode {
   SUPERADMIN,
   HOTEL_OWNER,
-  IS_USER
+  HOTEL_VIEWER,
+  IS_USER,
   TENANT_ADMIN,
+  NONE,
   ANALYST
 }
 
@@ -17,7 +19,9 @@ enum Permission {
   MANAGE_RESERVATION,
   READONLY_RESERVATION,
   MANAGE_HOTEL,
+  VIEW_HOTEL,
   MANAGE_USER,
+  NONE,
   ANALYST
 }
 

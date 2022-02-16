@@ -31,8 +31,10 @@ export const Permission = {
   MANAGE_RESERVATION: 'MANAGE_RESERVATION',
   MANAGE_ROOM: 'MANAGE_ROOM',
   MANAGE_USER: 'MANAGE_USER',
+  NONE: 'NONE',
   READONLY_RESERVATION: 'READONLY_RESERVATION',
-  READONLY_ROOM: 'READONLY_ROOM'
+  READONLY_ROOM: 'READONLY_ROOM',
+  VIEW_HOTEL: 'VIEW_HOTEL'
 } as const;
 
 export type Permission = typeof Permission[keyof typeof Permission];
@@ -55,7 +57,9 @@ export type Role = {
 export const RoleCode = {
   ANALYST: 'ANALYST',
   HOTEL_OWNER: 'HOTEL_OWNER',
+  HOTEL_VIEWER: 'HOTEL_VIEWER',
   IS_USER: 'IS_USER',
+  NONE: 'NONE',
   SUPERADMIN: 'SUPERADMIN',
   TENANT_ADMIN: 'TENANT_ADMIN'
 } as const;
