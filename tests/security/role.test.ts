@@ -1,5 +1,6 @@
-import { Expand, inMemoryMongoDb } from '../../src'
-import { CRUD, roleSecurityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/role.middleware'
+import { inMemoryMongoDb } from '../../src'
+import { securityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/security.middleware'
+import { CRUD } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
 import { DAOContext, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
@@ -37,8 +38,6 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
     })
   }
 
-  type MappedSecurityDomain<Mapping extends object> = { [sK in Exclude<keyof Mapping, ''>]?: Mapping[sK] }
-
   function mapSecurityContext<H extends string = '', U extends string = '', T extends string = ''>(
     permissions: SecurityContext,
     map: { hotelId?: H; userId?: U; tenantId?: T },
@@ -56,18 +55,7 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       }
     }, {})
   }
-  function mapSecurityDomain<H extends string = '', U extends string = '', T extends string = ''>(
-    domain: SecurityDomain,
-    map: { hotelId?: H; userId?: U; tenantId?: T },
-  ): MappedSecurityDomain<{ [K in H]: string[] } & { [K in U]: string[] } & { [K in T]: number[] }> {
-    const entries = Object.entries(map).flatMap(([key, value]) => {
-      if (value && domain[key as 'hotelId' | 'userId' | 'tenantId']) {
-        return [[value, domain[key as 'hotelId' | 'userId' | 'tenantId']]] as const
-      }
-      return []
-    })
-    return Object.fromEntries(entries) as MappedSecurityDomain<{ [K in H]: string[] } & { [K in U]: string[] } & { [K in T]: number[] }>
-  }
+
   return new DAOContext({
     mongo: {
       default: db,
@@ -81,9 +69,9 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
     overrides: {
       user: {
         middlewares: [
-          roleSecurityPolicy({
+          securityPolicy({
             securityContext: (metadata) => mapSecurityContext(metadata.securityContext, { userId: 'id' }),
-            securityDomain: (metadata) => mapSecurityDomain(metadata.securityDomain, { userId: 'id' }),
+            securityDomain: (metadata) => ({ id: metadata.securityDomain.userId }),
             securityPolicy: {
               MANAGE_USER: CRUD.ALLOW,
             },
@@ -92,9 +80,9 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       },
       hotel: {
         middlewares: [
-          roleSecurityPolicy({
+          securityPolicy({
             securityContext: (metadata) => mapSecurityContext(metadata.securityContext, { hotelId: 'id', tenantId: 'tenantId' }),
-            securityDomain: (metadata) => mapSecurityDomain(metadata.securityDomain, { hotelId: 'id', tenantId: 'tenantId' }),
+            securityDomain: (metadata) => ({ id: metadata.securityDomain.hotelId, tenantId: metadata.securityDomain.tenantId }),
             securityPolicy: {
               MANAGE_HOTEL: CRUD.ALLOW,
               ANALYST: { read: { totalCustomers: true } },
@@ -106,7 +94,7 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       },
       room: {
         middlewares: [
-          roleSecurityPolicy({
+          securityPolicy({
             securityContext: (metadata) => metadata.securityContext,
             securityDomain: (metadata) => metadata.securityDomain,
             securityPolicy: {
@@ -120,7 +108,7 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
       },
       reservation: {
         middlewares: [
-          roleSecurityPolicy({
+          securityPolicy({
             securityContext: (metadata) => metadata.securityContext,
             securityDomain: (metadata) => metadata.securityDomain,
             securityPolicy: {
@@ -202,8 +190,7 @@ test('crud tenant test', async () => {
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER', tenantId: 2 } })
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'NONE', hotelId: 'h3' } })
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_VIEWER', tenantId: 4 } })
-  await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'ANALYST', tenantId: 2 } })
-
+  await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'ANALYST', tenantId: 2, hotelId: 'h12' } })
 
   await unsafeDao.hotel.insertOne({ record: { name: 'AHotel 1', totalCustomers: 2, id: 'h1', tenantId: 1 } })
   await unsafeDao.hotel.insertOne({ record: { name: 'AHotel 2', totalCustomers: 2, id: 'h2', tenantId: 1 } })
@@ -214,6 +201,8 @@ test('crud tenant test', async () => {
 
   const dao = await creadeDaoWithUserRoles(user.id)
 
+  await dao.hotel.aggregate({aggregations: { asd: {operation: 'count', field: 'name'} }, by: { tenantId: true }})
+  //await dao.hotel.insertOne({ record: { name: '123', tenantId: 2, totalCustomers: 4, id: 'h12' } })
   const hotels1 = await dao.hotel.findAll({ filter: { name: { $startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
 
   const hotels2 = await dao.hotel.findAll({ projection: { totalCustomers: true } })
