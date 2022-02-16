@@ -2,11 +2,11 @@ import { DAOGenerics } from '../../dao.types'
 import { intersectProjections, mergeProjections } from '../../projections/projections.utils'
 
 export type CRUDPermission<T extends DAOGenerics> = {
-    read?: boolean | T['projection']
-    write?: boolean
-    update?: boolean
-    delete?: boolean
-  }
+  read?: boolean | T['projection']
+  write?: boolean
+  update?: boolean
+  delete?: boolean
+}
 
 export const CRUD = {
   and: function <T extends DAOGenerics>(cruds: CRUDPermission<T>[]): CRUDPermission<T> {

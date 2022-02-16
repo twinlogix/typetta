@@ -104,11 +104,8 @@ export function securityPolicy<
       }
 
       if (args.operation === 'aggregate') {
-        const asd: (T['pureSort'] | true)[] = [...Object.keys(args.params.by ?? {}), ...Object.values(args.params.aggregations).flatMap((v) => (v.field ? v.field : true))]
-        const projection = asd.reduce((proj, field) => {
-          if (proj === true || field === true) {
-            return true
-          }
+        const fields: (T['pureSort'])[] = [...Object.keys(args.params.by ?? {}), ...Object.values(args.params.aggregations).flatMap((v) => (v.field ? [v.field] : []))]
+        const projection = fields.reduce((proj, field) => {
           setTraversing(proj, field, true)
           return proj
         }, {})

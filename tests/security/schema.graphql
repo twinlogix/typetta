@@ -9,7 +9,7 @@ enum RoleCode {
   HOTEL_VIEWER,
   IS_USER,
   TENANT_ADMIN,
-  NONE,
+  ONLY_ID,
   ANALYST
 }
 
@@ -21,7 +21,7 @@ enum Permission {
   MANAGE_HOTEL,
   VIEW_HOTEL,
   MANAGE_USER,
-  NONE,
+  ONLY_ID,
   ANALYST
 }
 
