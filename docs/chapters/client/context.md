@@ -31,7 +31,7 @@ The role of the DAOContext is absolutely central because it is on it that a whol
 
 Instantiating the `DAOContext` is very simple. The only mandatory configurations are the SQL and MongoDB data sources (both if you are using both databases, or just the one you need).
 
-Note that Typetta implements two different drivers to connect to the supported databases, one is built on the [driver nativo MongoDB](https://docs.mongodb.com/drivers/node/current/){:targte="_blank"} and the other on [KnexJS](https://knexjs.org/){:target="_blank"}, one of the most consolidated NodeJS query builder libraries for SQL databases.
+Note that Typetta implements two different drivers to connect to the supported databases, one is built on the [driver nativo MongoDB](https://docs.mongodb.com/drivers/node/current/){:target="_blank"} and the other on [KnexJS](https://knexjs.org/){:target="_blank"}, one of the most consolidated NodeJS query builder libraries for SQL databases.
 
 Here is an example that shows how to instantiate a DAOContext with two data sources, one SQL and one MongoDB:
 

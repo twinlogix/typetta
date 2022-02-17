@@ -1,4 +1,4 @@
-# Middleware Architecture
+# Middlewares
 
 I middleware sono un potente strumento con cui **estendere le funzionalità** base di Typetta, aggiungendo allo strato di accesso al dato una serie di controlli e automatismi customizzati. Essi sono costituiti da una o più funzioni che vengono invocate in cascata nel ciclo di vita di un'operazione, sia nella fase precedente che in quella successiva all'interazione con la sorgente dati. 
 
@@ -192,6 +192,9 @@ I middleware permettono di creare livelli di mediazione precedenti e successivi 
              ━━━━━┓
                   ┃
                   ▼
+TYPETTA MIDDLEWARES (before function)
+                  ┃
+                  ▼
 CUSTOM MIDDLEWARE 1 (before function)
                   ┃
                   ▼
@@ -217,6 +220,9 @@ CUSTOM MIDDLEWARE 2 (after function)
                   ┃
                   ▼
 CUSTOM MIDDLEWARE 1 (after function)
+                  ┃
+                  ▼
+TYPETTA MIDDLEWARES (after function)
                   ┃
              ◀━━━━┛
                   
@@ -247,6 +253,9 @@ Esso interromperebbe la pipeline, che di fatto risulterebbe essere bloccata al s
 
 ```
              ━━━━━┓
+                  ┃
+                  ▼
+TYPETTA MIDDLEWARES (before function)
                   ┃
                   ▼
 CUSTOM MIDDLEWARE 1 (before function)
