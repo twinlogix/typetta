@@ -596,7 +596,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     userRole?: Pick<Partial<UserRoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   },
-  mongo: Record<'default', Db>,
+  mongodb: Record<'default', Db>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
   log?: LogInput<'hotel' | 'reservation' | 'role' | 'room' | 'user' | 'userRole'>,
   securityPolicy?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
@@ -614,7 +614,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _userRole: UserRoleDAO<MetadataType, OperationMetadataType> | undefined;
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides'];
-  private mongo: Record<'default', Db>;
+  private mongodb: Record<'default', Db>;
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
@@ -622,37 +622,37 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   get hotel() {
     if(!this._hotel) {
-      this._hotel = new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: this.mongo.default.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger });
+      this._hotel = new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: this.mongodb.default.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger });
     }
     return this._hotel;
   }
   get reservation() {
     if(!this._reservation) {
-      this._reservation = new ReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, collection: this.mongo.default.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger });
+      this._reservation = new ReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, collection: this.mongodb.default.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger });
     }
     return this._reservation;
   }
   get role() {
     if(!this._role) {
-      this._role = new RoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.role, collection: this.mongo.default.collection('roles'), middlewares: [...(this.overrides?.role?.middlewares || []), ...selectMiddleware('role', this.middlewares) as DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'role', logger: this.logger });
+      this._role = new RoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.role, collection: this.mongodb.default.collection('roles'), middlewares: [...(this.overrides?.role?.middlewares || []), ...selectMiddleware('role', this.middlewares) as DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'role', logger: this.logger });
     }
     return this._role;
   }
   get room() {
     if(!this._room) {
-      this._room = new RoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, collection: this.mongo.default.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger });
+      this._room = new RoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, collection: this.mongodb.default.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger });
     }
     return this._room;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongo.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
+      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongodb.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
     }
     return this._user;
   }
   get userRole() {
     if(!this._userRole) {
-      this._userRole = new UserRoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.userRole, collection: this.mongo.default.collection('userRoles'), middlewares: [...(this.overrides?.userRole?.middlewares || []), ...selectMiddleware('userRole', this.middlewares) as DAOMiddleware<UserRoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'userRole', logger: this.logger });
+      this._userRole = new UserRoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.userRole, collection: this.mongodb.default.collection('userRoles'), middlewares: [...(this.overrides?.userRole?.middlewares || []), ...selectMiddleware('userRole', this.middlewares) as DAOMiddleware<UserRoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'userRole', logger: this.logger });
     }
     return this._userRole;
   }
@@ -663,7 +663,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
       scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Date', 'Email', 'Password', 'Username', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
     })
     this.overrides = params.overrides
-    this.mongo = params.mongo
+    this.mongodb = params.mongodb
     this.middlewares = params.middlewares || []
     this.logger = logInputToLogger(params.log)
     if(params.securityPolicy && params.securityPolicy.applySecurity !== false) {
@@ -672,8 +672,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { mongo: Record<'default', Db> }, entities: { hotel: Collection<Document>; reservation: Collection<Document>; role: Collection<Document>; room: Collection<Document>; user: Collection<Document>; userRole: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongo: this.mongo }, { hotel: this.mongo.default.collection('hotels'), reservation: this.mongo.default.collection('reservations'), role: this.mongo.default.collection('roles'), room: this.mongo.default.collection('rooms'), user: this.mongo.default.collection('users'), userRole: this.mongo.default.collection('userRoles') })
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'default', Db> }, entities: { hotel: Collection<Document>; reservation: Collection<Document>; role: Collection<Document>; room: Collection<Document>; user: Collection<Document>; userRole: Collection<Document> }) => Promise<T>): Promise<T> {
+    return run({ mongodb: this.mongodb }, { hotel: this.mongodb.default.collection('hotels'), reservation: this.mongodb.default.collection('reservations'), role: this.mongodb.default.collection('roles'), room: this.mongodb.default.collection('rooms'), user: this.mongodb.default.collection('users'), userRole: this.mongodb.default.collection('userRoles') })
   }
   
   

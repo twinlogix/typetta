@@ -70,14 +70,14 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const metadata = `metadata?: MetadataType`
     const middlewares = `\nmiddlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]`
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
-    const mongoDBParams = hasMongoDBEntites ? `,\nmongo: ${mongoSourcesType}` : ''
+    const mongoDBParams = hasMongoDBEntites ? `,\nmongodb: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
     const adaptersParams = `,\nscalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, '${hasMongoDBEntites && hasSQLEntities ? 'both' : hasMongoDBEntites ? 'mongo' : 'knex'}'>`
     const loggerParams = `,\nlog?: LogInput<${daoNamesType}>`
     const securityPolicyParam = ',\nsecurityPolicy?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>'
     const dbsInputParam =
-      hasMongoDBEntites && hasSQLEntities ? `mongo: ${mongoSourcesType}; knex: ${sqlSourcesType}` : hasSQLEntities ? `knex: ${sqlSourcesType}` : hasMongoDBEntites ? `mongo: ${mongoSourcesType}` : ''
-    const dbsParam = hasMongoDBEntites && hasSQLEntities ? 'mongo: this.mongo, knex: this.knex' : hasSQLEntities ? 'knex: this.knex' : hasMongoDBEntites ? 'mongo: this.mongo' : ''
+      hasMongoDBEntites && hasSQLEntities ? `mongodb: ${mongoSourcesType}; knex: ${sqlSourcesType}` : hasSQLEntities ? `knex: ${sqlSourcesType}` : hasMongoDBEntites ? `mongodb: ${mongoSourcesType}` : ''
+    const dbsParam = hasMongoDBEntites && hasSQLEntities ? 'mongodb: this.mongodb, knex: this.knex' : hasSQLEntities ? 'knex: this.knex' : hasMongoDBEntites ? 'mongodb: this.mongodb' : ''
     const entitiesInputParam = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'mongo'
@@ -90,7 +90,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const entitiesParam = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'mongo'
-          ? [`${toFirstLower(node.name)}: this.mongo.${node.entity.source}.collection('${node.entity.collection}')`]
+          ? [`${toFirstLower(node.name)}: this.mongodb.${node.entity.source}.collection('${node.entity.collection}')`]
           : node.entity?.type === 'sql'
           ? [`${toFirstLower(node.name)}: this.knex.${node.entity.source}.table('${node.entity.table}')`]
           : []
@@ -123,7 +123,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
       })
       .join('\n')
 
-    const mongoDBFields = hasMongoDBEntites ? `\nprivate mongo: ${mongoSourcesType};` : ''
+    const mongoDBFields = hasMongoDBEntites ? `\nprivate mongodb: ${mongoSourcesType};` : ''
     const knexJsFields = hasSQLEntities ? `\nprivate knex: ${sqlSourcesType};` : ''
     const overridesDeclaration = `private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides'];${mongoDBFields}${knexJsFields}`
     const middlewareDeclaration = 'private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]'
@@ -136,7 +136,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
           node.entity?.type === 'sql'
             ? `, knex: this.knex.${node.entity.source}, tableName: '${node.entity?.table}'`
             : node.entity?.type === 'mongo'
-            ? `, collection: this.mongo.${node.entity.source}.collection('${node.entity?.collection}')`
+            ? `, collection: this.mongodb.${node.entity.source}.collection('${node.entity?.collection}')`
             : ''
         const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...selectMiddleware('${toFirstLower(
           node.name,
@@ -149,7 +149,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
       })
       .join('\n')
 
-    const mongoDBConstructor = hasMongoDBEntites ? '\nthis.mongo = params.mongo' : ''
+    const mongoDBConstructor = hasMongoDBEntites ? '\nthis.mongodb = params.mongodb' : ''
     const knexJsContsructor = hasSQLEntities ? '\nthis.knex = params.knex' : ''
     const scalarsNameList = [...Array.from(customScalarsMap.keys()), ...Object.keys(DEFAULT_SCALARS)]
     const daoConstructor =

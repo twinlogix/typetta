@@ -19,7 +19,7 @@ let mongodb: {
 }
 function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
   return new DAOContext<DaoMetadata>({
-    mongo: {
+    mongodb: {
       default: db,
     },
     metadata: {

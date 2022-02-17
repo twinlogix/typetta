@@ -39,7 +39,7 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
 
 function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {
   return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -507,7 +507,7 @@ test('Insert default', async () => {
   }
 
   const dao1 = new DAOContext({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -530,7 +530,7 @@ test('Insert default', async () => {
   expect(e1.live).toBe(true)
 
   const dao2 = new DAOContext({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -775,7 +775,7 @@ test('middleware 1', async () => {
   let operationCount = 0
   const dao2 = new DAOContext({
     log: ['error', 'warning'],
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -903,7 +903,7 @@ test('middleware 1', async () => {
 
 test('middleware 2', async () => {
   const dao2 = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -946,7 +946,7 @@ test('middleware 2', async () => {
 test('middleware options', async () => {
   const dao2 = new DAOContext<{ m1?: string; m2?: string }, { m3: string }>({
     metadata: { m1: 'test1', m2: 'no' },
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -973,7 +973,7 @@ test('middleware options', async () => {
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -1004,7 +1004,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -1028,7 +1028,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const customDao = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -1058,7 +1058,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao2 = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },

@@ -24,7 +24,7 @@ let mongodb: {
 
 function createDao(securityContext: SecurityContext | undefined, db: Db) {
   return new DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>({
-    mongo: {
+    mongodb: {
       default: db,
     },
     scalars: {
