@@ -23,6 +23,7 @@ export function securityPolicy<
   securityPolicy: SecurityPolicy<T, Permissions>
   securityContext: (metadata: T['metadata']) => SecurityContext<Permissions, SecurityContextPermission>
   securityDomain: (metadata: T['operationMetadata']) => SecurityDomain | undefined
+  defaultPolicy?: CRUDPermission<T>
 }): DAOMiddleware<T> {
   type RelatedSecurityContext = {
     domain: SecurityContextPermission[]
@@ -71,7 +72,7 @@ export function securityPolicy<
       })
       return CRUD.and(cruds)
     })
-    const crud = CRUD.or(cruds)
+    const crud = cruds.length > 0 ? CRUD.or(cruds) : input.defaultPolicy ?? CRUD.DENY
     return crud
   }
 
@@ -87,7 +88,7 @@ export function securityPolicy<
 
       if (args.operation === 'insert') {
         const cruds = relatedSecurityContext.flatMap((rsc) => (rsc.domain.some((atom) => isContained(args.params.record, atom)) ? [rsc.crud] : []))
-        const crud = CRUD.or(cruds)
+        const crud = cruds.length > 0 ? CRUD.or(cruds) : input.defaultPolicy ?? CRUD.DENY
         if (!crud.write) {
           throw new SecurityPolicyWriteError({ permissions: relatedSecurityContext.map((policy) => policy.permission) })
         }

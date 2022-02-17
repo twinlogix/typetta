@@ -92,6 +92,9 @@ function createDao(metadata: DaoMetadata | undefined, db: Db): DAOContext<DaoMet
               VIEW_HOTEL: { read: { description: true, name: true } },
               ONLY_ID: { read: { id: true } },
             },
+            defaultPolicy: {
+              read: { tenantId: true },
+            },
           }),
         ],
       },
@@ -239,7 +242,9 @@ test('crud tenant test', async () => {
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
-      expect(error.allowedProjection).toStrictEqual(false)
+      expect(error.allowedProjection).toStrictEqual({ tenantId: true })
+      expect(error.unauthorizedProjection).toStrictEqual({ id: true, name: true, totalCustomers: true })
+      expect(error.requestedProjection).toStrictEqual({ id: true, name: true, totalCustomers: true })
     } else {
       fail()
     }
@@ -303,7 +308,7 @@ test('crud tenant test', async () => {
   expect(total.v).toBe(3)
 
   try {
-    await dao.hotel.aggregate({
+    await dao.reservation.aggregate({
       aggregations: { v: { operation: 'count' } },
     })
     fail()
