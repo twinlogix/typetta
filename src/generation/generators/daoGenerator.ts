@@ -101,13 +101,13 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
     const createTableBody = Array.from(typesMap.values())
       .flatMap((node) => {
-        return node.entity?.type === 'sql' ? [`this.${toFirstLower(node.name)}.createTable(typeMap, defaultType)`] : []
+        return node.entity?.type === 'sql' ? [`this.${toFirstLower(node.name)}.createTable(args.typeMap ?? {}, args.defaultType)`] : []
       })
       .join('\n  ')
     const createTableF =
       createTableBody.length > 0
-        ? `public async createTables(typeMap: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>` +
-          `, defaultType: { singleType: string; arrayType?: string }): Promise<void> {\n` +
+        ? `public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>` +
+          `, defaultType: { singleType: string; arrayType?: string } }): Promise<void> {\n` +
           `  ${createTableBody.trimEnd()}\n}`
         : ''
 

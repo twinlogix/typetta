@@ -506,11 +506,11 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     return run({ knex: this.knex }, { post: this.knex.default.table('posts'), postType: this.knex.default.table('postTypes'), tag: this.knex.default.table('tags'), user: this.knex.default.table('users') })
   }
   
-  public async createTables(typeMap: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string }): Promise<void> {
-    this.post.createTable(typeMap, defaultType)
-    this.postType.createTable(typeMap, defaultType)
-    this.tag.createTable(typeMap, defaultType)
-    this.user.createTable(typeMap, defaultType)
+  public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string } }): Promise<void> {
+    this.post.createTable(args.typeMap ?? {}, args.defaultType)
+    this.postType.createTable(args.typeMap ?? {}, args.defaultType)
+    this.tag.createTable(args.typeMap ?? {}, args.defaultType)
+    this.user.createTable(args.typeMap ?? {}, args.defaultType)
   }
 
 }

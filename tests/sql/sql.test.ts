@@ -86,7 +86,7 @@ beforeEach(async () => {
     Int: { singleType: 'integer' },
   }
   const defaultType = { singleType: 'string' }
-  await dao.createTables(typeMap, defaultType)
+  await dao.createTables({ typeMap, defaultType })
 })
 
 afterEach(async () => {
@@ -612,9 +612,7 @@ test('Insert default', async () => {
     },
     overrides: {
       defaultFieldsEntity: {
-        middlewares: [
-          defaultValueMiddleware('creationDate', () => 1234),
-        ],
+        middlewares: [defaultValueMiddleware('creationDate', () => 1234)],
       },
     },
   })

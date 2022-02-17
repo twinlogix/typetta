@@ -529,10 +529,10 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     return run({ mongodb: this.mongodb, knex: this.knex }, { a: this.mongodb.a.collection('as'), b: this.mongodb.default.collection('bs'), c: this.mongodb.default.collection('cs'), d: this.knex.default.table('ds'), e: this.knex.default.table('es'), f: this.knex.default.table('fs') })
   }
   
-  public async createTables(typeMap: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string }): Promise<void> {
-    this.d.createTable(typeMap, defaultType)
-    this.e.createTable(typeMap, defaultType)
-    this.f.createTable(typeMap, defaultType)
+  public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string } }): Promise<void> {
+    this.d.createTable(args.typeMap ?? {}, args.defaultType)
+    this.e.createTable(args.typeMap ?? {}, args.defaultType)
+    this.f.createTable(args.typeMap ?? {}, args.defaultType)
   }
 
 }

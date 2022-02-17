@@ -1147,18 +1147,18 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     return run({ knex: this.knex }, { address: this.knex.default.table('addresses'), author: this.knex.default.table('authors'), authorBook: this.knex.default.table('authorBooks'), book: this.knex.default.table('books'), city: this.knex.default.table('citys'), defaultFieldsEntity: this.knex.default.table('defaultFieldsEntitys'), device: this.knex.default.table('devices'), dog: this.knex.default.table('dogs'), friends: this.knex.default.table('friendss'), organization: this.knex.default.table('organizations'), user: this.knex.default.table('users') })
   }
   
-  public async createTables(typeMap: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string }): Promise<void> {
-    this.address.createTable(typeMap, defaultType)
-    this.author.createTable(typeMap, defaultType)
-    this.authorBook.createTable(typeMap, defaultType)
-    this.book.createTable(typeMap, defaultType)
-    this.city.createTable(typeMap, defaultType)
-    this.defaultFieldsEntity.createTable(typeMap, defaultType)
-    this.device.createTable(typeMap, defaultType)
-    this.dog.createTable(typeMap, defaultType)
-    this.friends.createTable(typeMap, defaultType)
-    this.organization.createTable(typeMap, defaultType)
-    this.user.createTable(typeMap, defaultType)
+  public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string } }): Promise<void> {
+    this.address.createTable(args.typeMap ?? {}, args.defaultType)
+    this.author.createTable(args.typeMap ?? {}, args.defaultType)
+    this.authorBook.createTable(args.typeMap ?? {}, args.defaultType)
+    this.book.createTable(args.typeMap ?? {}, args.defaultType)
+    this.city.createTable(args.typeMap ?? {}, args.defaultType)
+    this.defaultFieldsEntity.createTable(args.typeMap ?? {}, args.defaultType)
+    this.device.createTable(args.typeMap ?? {}, args.defaultType)
+    this.dog.createTable(args.typeMap ?? {}, args.defaultType)
+    this.friends.createTable(args.typeMap ?? {}, args.defaultType)
+    this.organization.createTable(args.typeMap ?? {}, args.defaultType)
+    this.user.createTable(args.typeMap ?? {}, args.defaultType)
   }
 
 }
