@@ -81,7 +81,3 @@ type Room @entity @mongodb {
 
   tenantId: Int!
 }
-
-type Room2 @entity @mongodb {
-  id: Int! @id
-}

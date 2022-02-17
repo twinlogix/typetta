@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
 import { Knex } from 'knex';
@@ -434,7 +434,8 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
   
 }
 
-export type DAOContextParams<MetadataType, OperationMetadataType> = {
+
+export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
   metadata?: MetadataType
   middlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: { 
@@ -448,12 +449,13 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   mongo: Record<'a' | 'default', Db>,
   knex: Record<'default', Knex>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'both'>,
-  log?: LogInput<'a' | 'b' | 'c' | 'd' | 'e' | 'f'>
+  log?: LogInput<'a' | 'b' | 'c' | 'd' | 'e' | 'f'>,
+  securityPolicy?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 };
 
-type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType> | BDAOGenerics<MetadataType, OperationMetadataType> | CDAOGenerics<MetadataType, OperationMetadataType> | DDAOGenerics<MetadataType, OperationMetadataType> | EDAOGenerics<MetadataType, OperationMetadataType> | FDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _a: ADAO<MetadataType, OperationMetadataType> | undefined;
   private _b: BDAO<MetadataType, OperationMetadataType> | undefined;
@@ -462,7 +464,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
   private _e: EDAO<MetadataType, OperationMetadataType> | undefined;
   private _f: FDAO<MetadataType, OperationMetadataType> | undefined;
   
-  private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];
+  private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides'];
   private mongo: Record<'a' | 'default', Db>;
   private knex: Record<'default', Knex>;
   
@@ -507,7 +509,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
     return this._f;
   }
   
-  constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {
+  constructor(params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
     super({
       ...params,
       scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Decimal', 'IntAutoInc', 'JSON', 'MongoID', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
@@ -517,6 +519,10 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
     this.knex = params.knex
     this.middlewares = params.middlewares || []
     this.logger = logInputToLogger(params.log)
+    if(params.securityPolicy && params.securityPolicy.applySecurity !== false) {
+      const securityMiddlewares = createSecurityPolicyMiddlewares(params.securityPolicy)
+      this.middlewares = [...(params.middlewares ?? []), ...Object.entries(securityMiddlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
+    }
   }
   
   public async execQuery<T>(run: (dbs: { mongo: Record<'a' | 'default', Db>; knex: Record<'default', Knex> }, entities: { a: Collection<Document>; b: Collection<Document>; c: Collection<Document>; d: Knex.QueryBuilder<any, unknown[]>; e: Knex.QueryBuilder<any, unknown[]>; f: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
@@ -536,8 +542,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
 //------------------------------------- UTILS ------------------------------------
 //--------------------------------------------------------------------------------
 
-type DAOName = keyof DAOMiddlewareMap<never, never>
-type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
+type DAOName = keyof DAOGenericsMap<never, never>
+type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   a: ADAOGenerics<MetadataType, OperationMetadataType>
   b: BDAOGenerics<MetadataType, OperationMetadataType>
   c: CDAOGenerics<MetadataType, OperationMetadataType>
@@ -545,21 +551,22 @@ type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
   e: EDAOGenerics<MetadataType, OperationMetadataType>
   f: FDAOGenerics<MetadataType, OperationMetadataType>
 }
+type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
 type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
   | IncludeGroupMiddleware<N, MetadataType, OperationMetadataType>
   | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
 type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   include: { [K in N]: true }
-  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>
+  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
 }
 type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   exclude: { [K in N]: true }
-  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
+  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
 }
 export const groupMiddleware = {
   includes<N extends DAOName, MetadataType, OperationMetadataType>(
     include: { [K in N]: true },
-    middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>,
+    middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
   ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
     return { include, middleware }
   },
@@ -586,7 +593,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
-export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default'], [])
+export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
+  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
   return new DAOContext(newParams)
 }

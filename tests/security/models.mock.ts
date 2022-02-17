@@ -76,11 +76,6 @@ export type Room = {
   to: Scalars['Date'];
 };
 
-export type Room2 = {
-  __typename?: 'Room2';
-  id: Scalars['Int'];
-};
-
 export type User = {
   __typename?: 'User';
   email: Scalars['Email'];

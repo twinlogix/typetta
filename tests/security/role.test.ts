@@ -1,4 +1,4 @@
-import { inMemoryMongoDb, SecurityPolicyReadError } from '../../src'
+import { inMemoryMongoDb, SecurityPolicyReadError, SecurityPolicyWriteError } from '../../src'
 import { securityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/security.middleware'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
 import { DAOContext, UserRoleParam } from './dao.mock'
@@ -56,6 +56,16 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
         },
         reservation: {
           defaultPermissions: PERMISSION.DENY,
+        },
+        room: {
+          domain: {
+            hotelId: 'hotelId',
+            tenantId: 'tenantId',
+            userId: null,
+          },
+          permissions: {
+            MANAGE_ROOM: { write: true },
+          },
         },
       },
       defaultPermission: {
@@ -257,6 +267,19 @@ test('crud tenant test', async () => {
     aggregations: { v: { operation: 'count' } },
   })
   expect(total2.v).toBe(1)
+
+  try {
+    await dao.room.insertOne({ record: { description: 'room1', from: new Date(), hotelId: 'h12', tenantId: 99, to: new Date() } })
+    fail()
+  } catch (error: unknown) {
+    if (error instanceof SecurityPolicyWriteError) {
+      console.log(error)
+    } else {
+      fail()
+    }
+  }
+
+  await dao.room.insertOne({ record: { description: 'room1', from: new Date(), hotelId: 'h1', tenantId: 2, to: new Date() } })
 })
 
 afterAll(async () => {

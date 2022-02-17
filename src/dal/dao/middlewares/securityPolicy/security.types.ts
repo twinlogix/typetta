@@ -41,7 +41,12 @@ export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in s
       ? Object.fromEntries(
           Object.entries(context).flatMap(([permission, securityDomains]) => {
             const mappedSecurityDomains = (securityDomains as SecurityDomain[]).flatMap((atom) => {
-              const mappedAtom = Object.fromEntries(Object.entries(atom).flatMap(([k, v]) => ((domainMap as any)[k] !== null ? [[(domainMap as any)[k], v]] : [])))
+              const mappedAtom = Object.fromEntries(
+                Object.entries(atom).flatMap(([k, v]) => {
+                  const key = k as keyof SecurityDomain
+                  return domainMap[key] !== null ? [[domainMap[key], v]] : []
+                }),
+              )
               return Object.keys(mappedAtom).length > 0 ? [mappedAtom] : []
             })
             return mappedSecurityDomains.length > 0 ? [[permission, mappedSecurityDomains]] : []
@@ -58,7 +63,12 @@ export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in s
           if (securityDomain == undefined || !domainMap) {
             return securityDomain
           }
-          const mappedSecurityDomain = Object.fromEntries(Object.entries(securityDomain).flatMap(([k, v]) => ((domainMap as any)[k] !== null ? [[(domainMap as any)[k], v]] : [])))
+          const mappedSecurityDomain = Object.fromEntries(
+            Object.entries(securityDomain).flatMap(([k, v]) => {
+              const key = k as keyof SecurityDomain
+              return domainMap[key] !== null ? [[domainMap[key], v]] : []
+            }),
+          )
           return mappedSecurityDomain
         },
         defaultPermission,

@@ -44,4 +44,28 @@ export const PERMISSION = {
     write: false,
     update: false,
   },
+  READ_ONLY: {
+    delete: false,
+    read: true,
+    write: false,
+    update: false,
+  },
+  WRITE_ONLY: {
+    delete: false,
+    read: false,
+    write: true,
+    update: false,
+  },
+  UPDATE_ONLY: {
+    delete: false,
+    read: false,
+    write: false,
+    update: true,
+  },
+  DELETE_ONLY: {
+    delete: true,
+    read: false,
+    write: false,
+    update: false,
+  },
 }

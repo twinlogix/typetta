@@ -90,7 +90,7 @@ export function securityPolicy<
         const cruds = relatedSecurityContext.flatMap((rsc) => (rsc.domain.some((atom) => isContained(args.params.record, atom)) ? [rsc.crud] : []))
         const crud = cruds.length > 0 ? PERMISSION.or(cruds) : input.defaultPermission ?? PERMISSION.DENY
         if (!crud.write) {
-          throw new SecurityPolicyWriteError({ permissions: relatedSecurityContext.map((policy) => policy.permission) })
+          throw new SecurityPolicyWriteError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]) })
         }
         return
       }
@@ -107,8 +107,8 @@ export function securityPolicy<
             allowedProjection: crud.read ?? false,
             requestedProjection: args.params.projection ?? true,
             unauthorizedProjection: invalidFields,
-            permissions: relatedSecurityContext.map((policy) => policy.permission),
-            domains: operationSecurityDomain,
+            permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]),
+            operationDomains: operationSecurityDomain,
           })
         }
 
@@ -127,8 +127,8 @@ export function securityPolicy<
             allowedProjection: crud.read ?? false,
             requestedProjection: projection,
             unauthorizedProjection: invalidFields,
-            permissions: relatedSecurityContext.map((policy) => policy.permission),
-            domains: operationSecurityDomain,
+            permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]),
+            operationDomains: operationSecurityDomain,
           })
         }
         return { continue: true, operation: 'aggregate', params: { ...args.params, filter } }
@@ -136,21 +136,21 @@ export function securityPolicy<
 
       if (args.operation === 'update') {
         if (!crud.update) {
-          throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => policy.permission), domains: operationSecurityDomain })
+          throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomain })
         }
         return { continue: true, operation: 'update', params: { ...args.params, filter } }
       }
 
       if (args.operation === 'replace') {
         if (!crud.update) {
-          throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => policy.permission), domains: operationSecurityDomain })
+          throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomain })
         }
         return { continue: true, operation: 'replace', params: { ...args.params, filter } }
       }
 
       if (args.operation === 'delete') {
         if (!crud.delete) {
-          throw new SecurityPolicyDeleteError({ permissions: relatedSecurityContext.map((policy) => policy.permission), domains: operationSecurityDomain })
+          throw new SecurityPolicyDeleteError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomain })
         }
         return { continue: true, operation: 'delete', params: { ...args.params, filter } }
       }
