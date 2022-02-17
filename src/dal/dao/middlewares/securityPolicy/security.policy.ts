@@ -8,7 +8,7 @@ export type CRUDPermission<T extends DAOGenerics> = {
   delete?: boolean
 }
 
-export const CRUD = {
+export const PERMISSION = {
   and: function <T extends DAOGenerics>(cruds: CRUDPermission<T>[]): CRUDPermission<T> {
     return cruds.reduce(
       (l, r) => ({

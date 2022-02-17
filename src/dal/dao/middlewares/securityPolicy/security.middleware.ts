@@ -3,37 +3,37 @@ import { DAOGenerics } from '../../dao.types'
 import { isProjectionContained } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 import { SecurityPolicyDeleteError, SecurityPolicyReadError, SecurityPolicyUpdateError, SecurityPolicyWriteError } from './security.error'
-import { CRUD, CRUDPermission } from './security.policy'
+import { PERMISSION, CRUDPermission } from './security.policy'
 
-type SecurityContext<Permissions extends string, SecurityContextPermission> = {
-  [Kp in Permissions]?: SecurityContextPermission[]
+type SecurityContext<Permission extends string, SecurityContextPermission> = {
+  [Kp in Permission]?: SecurityContextPermission[]
 }
 
-type SecurityPolicy<T extends DAOGenerics, Permissions extends string> = {
-  [Key in Permissions]?: CRUDPermission<T>
+type Permissions<T extends DAOGenerics, Permission extends string> = {
+  [Key in Permission]?: CRUDPermission<T>
 }
 
 export function securityPolicy<
-  Permissions extends string,
+  Permission extends string,
   T extends DAOGenerics,
   SecurityDomainKeys extends string,
   SecurityContextPermission extends { [K in SecurityDomainKeys]?: T['model'][K] },
   SecurityDomain extends { [K in SecurityDomainKeys]?: T['model'][K][] },
 >(input: {
-  securityPolicy: SecurityPolicy<T, Permissions>
-  securityContext: (metadata: T['metadata']) => SecurityContext<Permissions, SecurityContextPermission>
-  securityDomain: (metadata: T['operationMetadata']) => SecurityDomain | undefined
-  defaultPolicy?: CRUDPermission<T>
+  permissions: Permissions<T, Permission>
+  securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
+  securityDomain: (metadata: Exclude<T['operationMetadata'], undefined | null>) => SecurityDomain | undefined
+  defaultPermission?: CRUDPermission<T>
 }): DAOMiddleware<T> {
   type RelatedSecurityContext = {
     domain: SecurityContextPermission[]
     crud: CRUDPermission<T>
-    permission: Permissions
+    permission: Permission
   }[]
   function getRelatedSecurityContext(context: T['driverContext']): RelatedSecurityContext {
     const securityContext = input.securityContext(context.metadata)
-    return Object.entries(input.securityPolicy).flatMap(([k, v]) => {
-      const permission = k as Permissions
+    return Object.entries(input.permissions).flatMap(([k, v]) => {
+      const permission = k as Permission
       const crud = v as CRUDPermission<T>
       const domain: SecurityContextPermission[] | undefined = securityContext[permission]
       if (domain) {
@@ -68,11 +68,11 @@ export function securityPolicy<
             ? [rsc.crud]
             : [],
         )
-        return CRUD.or(cruds)
+        return PERMISSION.or(cruds)
       })
-      return CRUD.and(cruds)
+      return PERMISSION.and(cruds)
     })
-    const crud = cruds.length > 0 ? CRUD.or(cruds) : input.defaultPolicy ?? CRUD.DENY
+    const crud = cruds.length > 0 ? PERMISSION.or(cruds) : input.defaultPermission ?? PERMISSION.DENY
     return crud
   }
 
@@ -88,7 +88,7 @@ export function securityPolicy<
 
       if (args.operation === 'insert') {
         const cruds = relatedSecurityContext.flatMap((rsc) => (rsc.domain.some((atom) => isContained(args.params.record, atom)) ? [rsc.crud] : []))
-        const crud = cruds.length > 0 ? CRUD.or(cruds) : input.defaultPolicy ?? CRUD.DENY
+        const crud = cruds.length > 0 ? PERMISSION.or(cruds) : input.defaultPermission ?? PERMISSION.DENY
         if (!crud.write) {
           throw new SecurityPolicyWriteError({ permissions: relatedSecurityContext.map((policy) => policy.permission) })
         }
