@@ -184,7 +184,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       objectHash(params.metadata || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.options || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.relations || null, { respectType: false, unorderedArrays: true })
-    const hasKeyF = hasKey ?? ((record, key) => getTraversing(record, filterKey as string).some((v) => v === key || (typeof v === 'object' && 'equals' in v && v.equals(key))))
+    const hasKeyF = hasKey ?? ((record, key) => getTraversing(record, filterKey as string).some((v) => v === key || (typeof v === 'object' && 'equals' in v && typeof v.equals === 'function' && v.equals(key))))
     const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { $in: values } }))
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(

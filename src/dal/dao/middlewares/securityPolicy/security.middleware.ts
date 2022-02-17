@@ -53,7 +53,16 @@ export function securityPolicy<
             if (!atomKeys.includes(domainKey)) {
               return false
             }
-            return atom[domainKey] === domainValue && atomKeys.filter((atomKey) => atomKey !== domainKey).every((atomKey) => (operationSecurityDomain[atomKey] ?? []).includes(atom[atomKey] as never))
+            const match = typeof domainValue === 'object' && 'equals' in domainValue && typeof domainValue.equals === 'function' ? domainValue.equals(atom[domainKey]) : atom[domainKey] === domainValue
+            return (
+              match &&
+              atomKeys
+                .filter((atomKey) => atomKey !== domainKey)
+                .every((atomKey) => {
+                  const domains: T['model'][SecurityDomainKeys][] = operationSecurityDomain[atomKey] ?? []
+                  return domains.some((dv) => (typeof dv === 'object' && 'equals' in dv && typeof dv.equals === 'function' ? dv.equals(atom[atomKey]) : atom[atomKey] === dv))
+                })
+            )
           })
             ? [rsc.crud]
             : [],
@@ -67,7 +76,9 @@ export function securityPolicy<
   }
 
   function isContained(container: { [key: string]: unknown }, contained: { [key: string]: unknown }): boolean {
-    return Object.entries(contained).every(([k, v]) => container[k] === v)
+    return Object.entries(contained).every(([k, v]) =>
+      v && typeof v === 'object' && 'equals' in v && typeof (v as { equals: unknown }).equals === 'function' ? (v as { equals: (i: unknown) => boolean }).equals(container[k]) : container[k] === v,
+    )
   }
 
   return {
@@ -104,7 +115,7 @@ export function securityPolicy<
       }
 
       if (args.operation === 'aggregate') {
-        const fields: (T['pureSort'])[] = [...Object.keys(args.params.by ?? {}), ...Object.values(args.params.aggregations).flatMap((v) => (v.field ? [v.field] : []))]
+        const fields: T['pureSort'][] = [...Object.keys(args.params.by ?? {}), ...Object.values(args.params.aggregations).flatMap((v) => (v.field ? [v.field] : []))]
         const projection = fields.reduce((proj, field) => {
           setTraversing(proj, field, true)
           return proj
