@@ -105,9 +105,6 @@
     "coveragePathIgnorePatterns": [
       "src/generation/",
       "tests/"
-    ],
-    "coverageReporters": [
-      "json-summary"
     ]
   },
   "homepage": "https://twinlogix.github.io/typetta/",
