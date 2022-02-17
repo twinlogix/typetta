@@ -113,7 +113,7 @@ export class TsTypettaGenerator {
       .forEach((type) => {
         const id = findID(type)
         if (!id) {
-          throw new Error(`Type ${type.name} requires an @id field being a @mongodb.`)
+          throw new Error(`Type ${type.name} requires an @id field being a @entity.`)
         }
       })
   }
