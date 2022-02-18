@@ -72,7 +72,9 @@ export function securityPolicy<
       })
       return PERMISSION.and(cruds)
     })
-    const crud = cruds.length > 0 ? PERMISSION.or(cruds) : input.defaultPermission ?? PERMISSION.DENY
+    const noDomainCrud = relatedSecurityContext.flatMap((rsc) => (Object.keys(rsc.domain).length === 0 ? [rsc.crud] : []))
+    const finalCruds = [...cruds, ...noDomainCrud, ...(input.defaultPermission ? [input.defaultPermission] : [])]
+    const crud = finalCruds.length > 0 ? PERMISSION.or(finalCruds) : PERMISSION.DENY
     return crud
   }
 

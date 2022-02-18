@@ -1,5 +1,4 @@
 import { inMemoryMongoDb, SecurityPolicyReadError, SecurityPolicyWriteError } from '../../src'
-import { securityPolicy } from '../../src/dal/dao/middlewares/securityPolicy/security.middleware'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
 import { DAOContext, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
@@ -114,15 +113,15 @@ beforeEach(async () => {
   for (const collection of collections ?? []) {
     await collection.deleteMany({})
   }
-})
-
-test('crud tenant test', async () => {
   await unsafeDao.role.insertOne({ record: { code: 'TENANT_ADMIN', permissions: ['MANAGE_ROOM', 'MANAGE_RESERVATION', 'MANAGE_HOTEL'] } })
   await unsafeDao.role.insertOne({ record: { code: 'HOTEL_OWNER', permissions: ['MANAGE_ROOM', 'MANAGE_RESERVATION', 'MANAGE_HOTEL'] } })
   await unsafeDao.role.insertOne({ record: { code: 'HOTEL_VIEWER', permissions: ['VIEW_HOTEL'] } })
   await unsafeDao.role.insertOne({ record: { code: 'ONLY_ID', permissions: ['ONLY_ID'] } })
   await unsafeDao.role.insertOne({ record: { code: 'IS_USER', permissions: ['MANAGE_USER', 'READONLY_ROOM', 'MANAGE_RESERVATION'] } })
   await unsafeDao.role.insertOne({ record: { code: 'ANALYST', permissions: ['ANALYST'] } })
+})
+
+test('security test 1', async () => {
   const user = await unsafeDao.user.insertOne({
     record: {
       id: 'u1',
@@ -148,15 +147,12 @@ test('crud tenant test', async () => {
 
   const dao = await createSecureDaoContext(user.id)
 
-  // await dao.hotel.aggregate({aggregations: { asd: {operation: 'count', field: 'name'} }, by: { tenantId: true }})
-  //await dao.hotel.insertOne({ record: { name: '123', tenantId: 2, totalCustomers: 4, id: 'h12' } })
-
   try {
     await dao.hotel.findAll({ projection: { id: true, name: true }, filter: { name: { $startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
-      expect(error.allowedProjection).toStrictEqual({ id: true })
+      expect(error.allowedProjection).toStrictEqual({ id: true, tenantId: true })
       expect(error.unauthorizedProjection).toStrictEqual({ name: true })
     } else {
       fail()
@@ -171,7 +167,7 @@ test('crud tenant test', async () => {
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
-      expect(error.allowedProjection).toStrictEqual({ id: true, description: true, name: true })
+      expect(error.allowedProjection).toStrictEqual({ id: true, description: true, name: true, tenantId: true })
       expect(error.unauthorizedProjection).toStrictEqual({ totalCustomers: true })
     } else {
       fail()
@@ -215,7 +211,7 @@ test('crud tenant test', async () => {
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
-      expect(error.allowedProjection).toStrictEqual({ id: true, description: true, name: true })
+      expect(error.allowedProjection).toStrictEqual({ id: true, description: true, name: true, tenantId: true })
       expect(error.unauthorizedProjection).toStrictEqual({ totalCustomers: true })
       expect(error.requestedProjection).toStrictEqual({ totalCustomers: true, name: true })
     } else {
@@ -234,7 +230,7 @@ test('crud tenant test', async () => {
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
-      expect(error.allowedProjection).toStrictEqual({ id: true, description: true, name: true })
+      expect(error.allowedProjection).toStrictEqual({ id: true, description: true, name: true, tenantId: true })
       expect(error.unauthorizedProjection).toStrictEqual({ totalCustomers: true })
       expect(error.requestedProjection).toStrictEqual({ totalCustomers: true })
     } else {
@@ -273,13 +269,61 @@ test('crud tenant test', async () => {
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyWriteError) {
-      console.log(error)
+      expect(error.permissions.length).toBe(1)
     } else {
       fail()
     }
   }
 
   await dao.room.insertOne({ record: { description: 'room1', from: new Date(), hotelId: 'h1', tenantId: 2, to: new Date() } })
+})
+
+test('security test 2', async () => {
+  const user = await unsafeDao.user.insertOne({
+    record: {
+      id: 'u1',
+      email: 'mario@domain.com',
+      firstName: 'Mario',
+    },
+  })
+
+  const dao = await createSecureDaoContext(user.id)
+
+  try {
+    await dao.hotel.findAll({ projection: { id: true, name: true } })
+    fail()
+  } catch (error: unknown) {
+    if (error instanceof SecurityPolicyReadError) {
+      expect(error.allowedProjection).toStrictEqual({ tenantId: true })
+      expect(error.unauthorizedProjection).toStrictEqual({ id: true, name: true })
+    } else {
+      fail()
+    }
+  }
+})
+
+test('security test 3', async () => {
+  const user = await unsafeDao.user.insertOne({
+    record: {
+      id: 'u1',
+      email: 'mario@domain.com',
+      firstName: 'Mario',
+    },
+  })
+
+  const dao = await createSecureDaoContext(user.id)
+
+  try {
+    await dao.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomain: { hotelId: ['none'] } } })
+    fail()
+  } catch (error: unknown) {
+    if (error instanceof SecurityPolicyReadError) {
+      expect(error.allowedProjection).toStrictEqual({ tenantId: true })
+      expect(error.unauthorizedProjection).toStrictEqual({ id: true, name: true })
+    } else {
+      fail()
+    }
+  }
 })
 
 afterAll(async () => {
