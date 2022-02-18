@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src';
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
@@ -496,7 +496,8 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
   
 }
 
-export type DAOContextParams<MetadataType, OperationMetadataType> = {
+
+export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
   metadata?: MetadataType
   middlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: { 
@@ -506,14 +507,15 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     tenant?: Pick<Partial<TenantDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   },
-  mongo: Record<'default', Db>,
+  mongodb: Record<'default', Db>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
-  log?: LogInput<'hotel' | 'reservation' | 'room' | 'tenant' | 'user'>
+  log?: LogInput<'hotel' | 'reservation' | 'room' | 'tenant' | 'user'>,
+  securityPolicy?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 };
 
-type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType> | ReservationDAOGenerics<MetadataType, OperationMetadataType> | RoomDAOGenerics<MetadataType, OperationMetadataType> | TenantDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _hotel: HotelDAO<MetadataType, OperationMetadataType> | undefined;
   private _reservation: ReservationDAO<MetadataType, OperationMetadataType> | undefined;
@@ -521,8 +523,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
   private _tenant: TenantDAO<MetadataType, OperationMetadataType> | undefined;
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
-  private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];
-  private mongo: Record<'default', Db>;
+  private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides'];
+  private mongodb: Record<'default', Db>;
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
@@ -530,48 +532,52 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
   
   get hotel() {
     if(!this._hotel) {
-      this._hotel = new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: this.mongo.default.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger });
+      this._hotel = new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: this.mongodb.default.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger });
     }
     return this._hotel;
   }
   get reservation() {
     if(!this._reservation) {
-      this._reservation = new ReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, collection: this.mongo.default.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger });
+      this._reservation = new ReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, collection: this.mongodb.default.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger });
     }
     return this._reservation;
   }
   get room() {
     if(!this._room) {
-      this._room = new RoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, collection: this.mongo.default.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger });
+      this._room = new RoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, collection: this.mongodb.default.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger });
     }
     return this._room;
   }
   get tenant() {
     if(!this._tenant) {
-      this._tenant = new TenantDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tenant, collection: this.mongo.default.collection('tenants'), middlewares: [...(this.overrides?.tenant?.middlewares || []), ...selectMiddleware('tenant', this.middlewares) as DAOMiddleware<TenantDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tenant', logger: this.logger });
+      this._tenant = new TenantDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tenant, collection: this.mongodb.default.collection('tenants'), middlewares: [...(this.overrides?.tenant?.middlewares || []), ...selectMiddleware('tenant', this.middlewares) as DAOMiddleware<TenantDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tenant', logger: this.logger });
     }
     return this._tenant;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongo.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
+      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongodb.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
     }
     return this._user;
   }
   
-  constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {
+  constructor(params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
     super({
       ...params,
       scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Date', 'Email', 'Password', 'TenantId', 'Username', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
     })
     this.overrides = params.overrides
-    this.mongo = params.mongo
+    this.mongodb = params.mongodb
     this.middlewares = params.middlewares || []
     this.logger = logInputToLogger(params.log)
+    if(params.securityPolicy && params.securityPolicy.applySecurity !== false) {
+      const securityMiddlewares = createSecurityPolicyMiddlewares(params.securityPolicy)
+      this.middlewares = [...(params.middlewares ?? []), ...Object.entries(securityMiddlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
+    }
   }
   
-  public async execQuery<T>(run: (dbs: { mongo: Record<'default', Db> }, entities: { hotel: Collection<Document>; reservation: Collection<Document>; room: Collection<Document>; tenant: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongo: this.mongo }, { hotel: this.mongo.default.collection('hotels'), reservation: this.mongo.default.collection('reservations'), room: this.mongo.default.collection('rooms'), tenant: this.mongo.default.collection('tenants'), user: this.mongo.default.collection('users') })
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'default', Db> }, entities: { hotel: Collection<Document>; reservation: Collection<Document>; room: Collection<Document>; tenant: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
+    return run({ mongodb: this.mongodb }, { hotel: this.mongodb.default.collection('hotels'), reservation: this.mongodb.default.collection('reservations'), room: this.mongodb.default.collection('rooms'), tenant: this.mongodb.default.collection('tenants'), user: this.mongodb.default.collection('users') })
   }
   
   
@@ -583,29 +589,30 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
 //------------------------------------- UTILS ------------------------------------
 //--------------------------------------------------------------------------------
 
-type DAOName = keyof DAOMiddlewareMap<never, never>
-type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
+type DAOName = keyof DAOGenericsMap<never, never>
+type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   hotel: HotelDAOGenerics<MetadataType, OperationMetadataType>
   reservation: ReservationDAOGenerics<MetadataType, OperationMetadataType>
   room: RoomDAOGenerics<MetadataType, OperationMetadataType>
   tenant: TenantDAOGenerics<MetadataType, OperationMetadataType>
   user: UserDAOGenerics<MetadataType, OperationMetadataType>
 }
+type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
 type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
   | IncludeGroupMiddleware<N, MetadataType, OperationMetadataType>
   | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
 type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   include: { [K in N]: true }
-  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>
+  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
 }
 type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   exclude: { [K in N]: true }
-  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
+  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
 }
 export const groupMiddleware = {
   includes<N extends DAOName, MetadataType, OperationMetadataType>(
     include: { [K in N]: true },
-    middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>,
+    middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
   ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
     return { include, middleware }
   },
@@ -632,7 +639,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
-export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default'], [])
+export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
+  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
   return new DAOContext(newParams)
 }

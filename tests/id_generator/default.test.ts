@@ -41,7 +41,7 @@ beforeEach(async () => {
   db = con.db('test')
 
   dao = await mockedDAOContext({
-    mongo: {
+    mongodb: {
       default: db,
       a: db,
     },

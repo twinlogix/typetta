@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
 import { Knex } from 'knex';
@@ -1015,7 +1015,8 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
   
 }
 
-export type DAOContextParams<MetadataType, OperationMetadataType> = {
+
+export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
   metadata?: MetadataType
   middlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: { 
@@ -1033,12 +1034,13 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
   },
   knex: Record<'default', Knex>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'knex'>,
-  log?: LogInput<'address' | 'author' | 'authorBook' | 'book' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>
+  log?: LogInput<'address' | 'author' | 'authorBook' | 'book' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>,
+  securityPolicy?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 };
 
-type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | AuthorDAOGenerics<MetadataType, OperationMetadataType> | AuthorBookDAOGenerics<MetadataType, OperationMetadataType> | BookDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | FriendsDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined;
   private _author: AuthorDAO<MetadataType, OperationMetadataType> | undefined;
@@ -1052,7 +1054,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
   private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined;
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
-  private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];
+  private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides'];
   private knex: Record<'default', Knex>;
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
@@ -1126,7 +1128,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
     return this._user;
   }
   
-  constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {
+  constructor(params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
     super({
       ...params,
       scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Coordinates', 'Decimal', 'JSON', 'Live', 'LocalizedString', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
@@ -1135,24 +1137,28 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
     this.knex = params.knex
     this.middlewares = params.middlewares || []
     this.logger = logInputToLogger(params.log)
+    if(params.securityPolicy && params.securityPolicy.applySecurity !== false) {
+      const securityMiddlewares = createSecurityPolicyMiddlewares(params.securityPolicy)
+      this.middlewares = [...(params.middlewares ?? []), ...Object.entries(securityMiddlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
+    }
   }
   
   public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex> }, entities: { address: Knex.QueryBuilder<any, unknown[]>; author: Knex.QueryBuilder<any, unknown[]>; authorBook: Knex.QueryBuilder<any, unknown[]>; book: Knex.QueryBuilder<any, unknown[]>; city: Knex.QueryBuilder<any, unknown[]>; defaultFieldsEntity: Knex.QueryBuilder<any, unknown[]>; device: Knex.QueryBuilder<any, unknown[]>; dog: Knex.QueryBuilder<any, unknown[]>; friends: Knex.QueryBuilder<any, unknown[]>; organization: Knex.QueryBuilder<any, unknown[]>; user: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
     return run({ knex: this.knex }, { address: this.knex.default.table('addresses'), author: this.knex.default.table('authors'), authorBook: this.knex.default.table('authorBooks'), book: this.knex.default.table('books'), city: this.knex.default.table('citys'), defaultFieldsEntity: this.knex.default.table('defaultFieldsEntitys'), device: this.knex.default.table('devices'), dog: this.knex.default.table('dogs'), friends: this.knex.default.table('friendss'), organization: this.knex.default.table('organizations'), user: this.knex.default.table('users') })
   }
   
-  public async createTables(typeMap: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string }): Promise<void> {
-    this.address.createTable(typeMap, defaultType)
-    this.author.createTable(typeMap, defaultType)
-    this.authorBook.createTable(typeMap, defaultType)
-    this.book.createTable(typeMap, defaultType)
-    this.city.createTable(typeMap, defaultType)
-    this.defaultFieldsEntity.createTable(typeMap, defaultType)
-    this.device.createTable(typeMap, defaultType)
-    this.dog.createTable(typeMap, defaultType)
-    this.friends.createTable(typeMap, defaultType)
-    this.organization.createTable(typeMap, defaultType)
-    this.user.createTable(typeMap, defaultType)
+  public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string } }): Promise<void> {
+    this.address.createTable(args.typeMap ?? {}, args.defaultType)
+    this.author.createTable(args.typeMap ?? {}, args.defaultType)
+    this.authorBook.createTable(args.typeMap ?? {}, args.defaultType)
+    this.book.createTable(args.typeMap ?? {}, args.defaultType)
+    this.city.createTable(args.typeMap ?? {}, args.defaultType)
+    this.defaultFieldsEntity.createTable(args.typeMap ?? {}, args.defaultType)
+    this.device.createTable(args.typeMap ?? {}, args.defaultType)
+    this.dog.createTable(args.typeMap ?? {}, args.defaultType)
+    this.friends.createTable(args.typeMap ?? {}, args.defaultType)
+    this.organization.createTable(args.typeMap ?? {}, args.defaultType)
+    this.user.createTable(args.typeMap ?? {}, args.defaultType)
   }
 
 }
@@ -1162,8 +1168,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never> ext
 //------------------------------------- UTILS ------------------------------------
 //--------------------------------------------------------------------------------
 
-type DAOName = keyof DAOMiddlewareMap<never, never>
-type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
+type DAOName = keyof DAOGenericsMap<never, never>
+type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   address: AddressDAOGenerics<MetadataType, OperationMetadataType>
   author: AuthorDAOGenerics<MetadataType, OperationMetadataType>
   authorBook: AuthorBookDAOGenerics<MetadataType, OperationMetadataType>
@@ -1176,21 +1182,22 @@ type DAOMiddlewareMap<MetadataType, OperationMetadataType> = {
   organization: OrganizationDAOGenerics<MetadataType, OperationMetadataType>
   user: UserDAOGenerics<MetadataType, OperationMetadataType>
 }
+type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
 type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
   | IncludeGroupMiddleware<N, MetadataType, OperationMetadataType>
   | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
 type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   include: { [K in N]: true }
-  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>
+  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
 }
 type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   exclude: { [K in N]: true }
-  middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
+  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
 }
 export const groupMiddleware = {
   includes<N extends DAOName, MetadataType, OperationMetadataType>(
     include: { [K in N]: true },
-    middleware: DAOMiddleware<DAOMiddlewareMap<MetadataType, OperationMetadataType>[N]>,
+    middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
   ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
     return { include, middleware }
   },
@@ -1217,7 +1224,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
-export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default'], [])
+export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
+  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
   return new DAOContext(newParams)
 }

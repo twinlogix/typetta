@@ -1,6 +1,6 @@
 # MongoDB
 
-Typetta offre un supporto completo a **MongoDB** e a tutti i database documentali compatibili. L'accesso al database è sviluppato utilizzando internamente il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:targte=_Blank}. 
+Typetta offre un supporto completo a **MongoDB** e a tutti i database documentali compatibili. L'accesso al database è sviluppato utilizzando internamente il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}. 
 
 Tutte le funzionalità di Typetta permettono l'accesso diretto al driver, garantendo massima flessibilità e una veloce adozione delle funzionalità presenti nelle versioni più recenti del database.
 

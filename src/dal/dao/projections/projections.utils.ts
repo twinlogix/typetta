@@ -1,4 +1,4 @@
-import { GenericProjection, MergeGenericProjection } from './projections.types'
+import { GenericProjection, IntersectGenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
 
 type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
@@ -36,6 +36,22 @@ export function mergeProjections<P1 extends GenericProjection, P2 extends Generi
     res[key] = mergeProjections(p1[key], p2[key])
   })
   return res as MergeGenericProjection<P1, P2>
+}
+
+export function intersectProjections<P1 extends GenericProjection, P2 extends GenericProjection>(p1: P1, p2: P2): IntersectGenericProjection<P1, P2> {
+  if (p1 === false || p2 === false) return false as IntersectGenericProjection<P1, P2>
+  if (p1 === true) return p2 as IntersectGenericProjection<P1, P2>
+  if (p2 === true) return p1 as IntersectGenericProjection<P1, P2>
+  const p1k = Object.keys(p1)
+  const p2k = Object.keys(p2)
+  const keySet = new Set([...p1k, ...p2k])
+  const res: Exclude<GenericProjection, true | false> = {}
+  keySet.forEach((key) => {
+    if (p1[key] !== undefined && p2[key] !== undefined) {
+      res[key] = intersectProjections(p1[key], p2[key])
+    }
+  })
+  return res as IntersectGenericProjection<P1, P2>
 }
 
 export function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defaults: any, context: FieldNode, type: GraphQLNamedType, schema: GraphQLSchema): ProjectionType | true {

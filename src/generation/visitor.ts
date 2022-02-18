@@ -160,7 +160,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
 
       const fieldAttribute = {
         name: field.name.value,
-        graphqlType: isEnumType(schemaType) ? 'String' : graphqlType.name.value,
+        graphqlType: graphqlType.name.value,
         type: resFieldType,
         isRequired: field.type.kind === Kind.NON_NULL_TYPE,
         isID: idDirective != null,
@@ -168,6 +168,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         isList: field.type.kind === Kind.LIST_TYPE || (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE),
         isExcluded: excludeDirective != null,
         defaultGenerationStrategy,
+        isEnum: isEnumType(schemaType),
         alias,
       }
       if (fieldAttribute.isID && !fieldAttribute.isRequired) {

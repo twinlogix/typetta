@@ -9,6 +9,8 @@ import {
   mergeProjections,
   projection,
   infoToProjection,
+  IntersectGenericProjection,
+  intersectProjections,
 } from '../src'
 import { UserProjection } from './mongodb/dao.mock'
 import { ApolloServer } from 'apollo-server'
@@ -375,6 +377,62 @@ test('mergeProgections test', () => {
   const m21 = merge({ b: { b: true }, a: { b: true } }, { a: { a: false }, b: true }, { b: true, a: { a: false, b: true } })
   typeAssert<typeof m21>()
   const m22 = merge({ b: { b: true } }, { b: { a: true } }, { b: { a: true, b: true } })
+  typeAssert<typeof m22>()
+})
+
+test('intersectProgections test', () => {
+  function intersect<P1 extends GenericProjection, P2 extends GenericProjection, E extends GenericProjection>(p1: P1, p2: P2, expected: E): Test<IntersectGenericProjection<P1, P2>, E> {
+    const m1 = intersectProjections(p1, p2)
+    expect(m1).toStrictEqual(expected)
+    const m2 = intersectProjections(p2, p1)
+    expect(m2).toStrictEqual(expected)
+    expect(m1).toStrictEqual(m2)
+    return 'pass' as Test<IntersectGenericProjection<P1, P2>, E>
+  }
+
+  const m1 = intersect(true, true, true)
+  typeAssert<typeof m1>()
+  const m2 = intersect(false, true, false)
+  typeAssert<typeof m2>()
+  const m3 = intersect(true, false, false)
+  typeAssert<typeof m3>()
+  const m4 = intersect(false, false, false)
+  typeAssert<typeof m4>()
+  const m5 = intersect(false, { a: true }, false)
+  typeAssert<typeof m5>()
+  const m6 = intersect({ a: true }, false, false)
+  typeAssert<typeof m6>()
+  const m7 = intersect(true, { a: true }, { a: true })
+  typeAssert<typeof m7>()
+  const m8 = intersect({ a: true }, true, { a: true })
+  typeAssert<typeof m8>()
+  const m9 = intersect({ a: true }, {}, {})
+  typeAssert<typeof m9>()
+  const m10 = intersect({}, { a: true }, {})
+  typeAssert<typeof m10>()
+  const m11 = intersect({ a: true }, { a: true }, { a: true })
+  typeAssert<typeof m11>()
+  const m12 = intersect({ a: false }, { a: true }, { a: false })
+  typeAssert<typeof m12>()
+  const m13 = intersect({ a: true }, { a: { a: true } }, { a: { a: true } })
+  typeAssert<typeof m13>()
+  const m14 = intersect({ a: true }, { a: { a: false } }, { a: { a:  false } })
+  typeAssert<typeof m14>()
+  const m15 = intersect({ a: false }, { a: { a: true } }, { a: false })
+  typeAssert<typeof m15>()
+  const m16 = intersect({ b: true }, { a: true }, { })
+  typeAssert<typeof m16>()
+  const m17 = intersect({ b: true }, { a: { a: true } }, {  })
+  typeAssert<typeof m17>()
+  const m18 = intersect({ b: true }, { a: { a: false } }, { })
+  typeAssert<typeof m18>()
+  const m19 = intersect({ b: true }, { a: { a: false }, b: true }, { b: true })
+  typeAssert<typeof m19>()
+  const m20 = intersect({ b: { b: true } }, { a: { a: false }, b: true }, { b: { b: true } })
+  typeAssert<typeof m20>()
+  const m21 = intersect({ b: { b: true }, a: { b: true } }, { a: { a: false }, b: true }, {b: { b: true }, a: { } })
+  typeAssert<typeof m21>()
+  const m22 = intersect({ b: { b: true } }, { b: { a: true } }, { b: { } })
   typeAssert<typeof m22>()
 })
 
