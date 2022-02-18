@@ -82,7 +82,7 @@ async function createSecureDaoContext(userId: string): Promise<SecureDAOContext>
   }
   function createSecurityContext(roles: UserRoleParam<{ role: { permissions: true }; hotelId: true; userId: true; tenantId: true }>[]): SecurityContext {
     return Object.values(Permission).reduce((permissions, key) => {
-      const permission = roles.flatMap((v) => {
+      const domains = roles.flatMap((v) => {
         if (v.role.permissions.includes(key as Permission)) {
           return {
             ...(v.hotelId ? { hotelId: v.hotelId } : {}),
@@ -92,8 +92,8 @@ async function createSecureDaoContext(userId: string): Promise<SecureDAOContext>
         }
         return []
       })
-      if (Object.keys(permission).length > 0) {
-        return { ...permissions, [key]: permission }
+      if (domains.length > 0) {
+        return { ...permissions, [key]: domains.some((v) => Object.keys(v).length === 0) ? true : domains }
       } else {
         return permissions
       }
@@ -103,12 +103,9 @@ async function createSecureDaoContext(userId: string): Promise<SecureDAOContext>
   return createDao(securityContext, mongodb.db)
 }
 
-beforeAll(async () => {
+beforeEach(async () => {
   mongodb = await inMemoryMongoDb()
   unsafeDao = createDao(undefined, mongodb.db)
-})
-
-beforeEach(async () => {
   const collections = await mongodb.db.collections()
   for (const collection of collections ?? []) {
     await collection.deleteMany({})
@@ -326,7 +323,24 @@ test('security test 3', async () => {
   }
 })
 
-afterAll(async () => {
+test('security test 4', async () => {
+  const user = await unsafeDao.user.insertOne({
+    record: {
+      id: 'u1',
+      email: 'mario@domain.com',
+      firstName: 'Mario',
+    },
+  })
+
+  await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER' } })
+
+  const dao = await createSecureDaoContext(user.id)
+
+  await dao.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomain: { hotelId: ['h1'] } } })
+  await dao.hotel.findAll({ projection: { id: true, name: true } })
+})
+
+afterEach(async () => {
   if (mongodb.connection) {
     await mongodb.connection.close()
     await mongodb.replSet.stop()

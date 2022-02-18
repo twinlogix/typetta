@@ -17,7 +17,7 @@ export function securityPolicy<
   Permission extends string,
   T extends DAOGenerics,
   SecurityDomainKeys extends string,
-  SecurityContextPermission extends { [K in SecurityDomainKeys]?: T['model'][K] },
+  SecurityContextPermission extends { [K in SecurityDomainKeys]?: T['model'][K] | true },
   SecurityDomain extends { [K in SecurityDomainKeys]?: T['model'][K][] },
 >(input: {
   permissions: Permissions<T, Permission>
@@ -26,7 +26,7 @@ export function securityPolicy<
   defaultPermission?: CRUDPermission<T>
 }): DAOMiddleware<T> {
   type RelatedSecurityContext = {
-    domain: SecurityContextPermission[]
+    domain: SecurityContextPermission[] | true
     crud: CRUDPermission<T>
     permission: Permission
   }[]
@@ -35,7 +35,7 @@ export function securityPolicy<
     return Object.entries(input.permissions).flatMap(([k, v]) => {
       const permission = k as Permission
       const crud = v as CRUDPermission<T>
-      const domain: SecurityContextPermission[] | undefined = securityContext[permission]
+      const domain: SecurityContextPermission[] | undefined | true = securityContext[permission]
       if (domain) {
         return [{ domain, crud, permission }]
       }
@@ -44,11 +44,13 @@ export function securityPolicy<
   }
 
   function getCrudPolicy(operationSecurityDomain: SecurityDomain, relatedSecurityContext: RelatedSecurityContext) {
-    const cruds = Object.entries(operationSecurityDomain).map(([k, v]) => {
+    const noDomainCrud = relatedSecurityContext.flatMap((rsc) => (rsc.domain === true ? [rsc.crud] : []))
+    const withDomainCrud = Object.entries(operationSecurityDomain).map(([k, v]) => {
       const domainKey = k as SecurityDomainKeys
       const domainValues = v as T['model'][SecurityDomainKeys][]
       const cruds = domainValues.map((domainValue) => {
         const cruds = relatedSecurityContext.flatMap((rsc) =>
+          rsc.domain === true ||
           rsc.domain.some((atom) => {
             const atomKeys = Object.keys(atom) as SecurityDomainKeys[]
             if (!atomKeys.includes(domainKey)) {
@@ -72,8 +74,7 @@ export function securityPolicy<
       })
       return PERMISSION.and(cruds)
     })
-    const noDomainCrud = relatedSecurityContext.flatMap((rsc) => (Object.keys(rsc.domain).length === 0 ? [rsc.crud] : []))
-    const finalCruds = [...cruds, ...noDomainCrud, ...(input.defaultPermission ? [input.defaultPermission] : [])]
+    const finalCruds = [...withDomainCrud, ...noDomainCrud, ...(input.defaultPermission ? [input.defaultPermission] : [])]
     const crud = finalCruds.length > 0 ? PERMISSION.or(finalCruds) : PERMISSION.DENY
     return crud
   }
@@ -89,7 +90,7 @@ export function securityPolicy<
       const relatedSecurityContext = getRelatedSecurityContext(context)
 
       if (args.operation === 'insert') {
-        const cruds = relatedSecurityContext.flatMap((rsc) => (rsc.domain.some((atom) => isContained(args.params.record, atom)) ? [rsc.crud] : []))
+        const cruds = relatedSecurityContext.flatMap((rsc) => (rsc.domain === true || rsc.domain.some((atom) => isContained(args.params.record, atom)) ? [rsc.crud] : []))
         const crud = cruds.length > 0 ? PERMISSION.or(cruds) : input.defaultPermission ?? PERMISSION.DENY
         if (!crud.write) {
           throw new SecurityPolicyWriteError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]) })
@@ -100,8 +101,8 @@ export function securityPolicy<
       const operationSecurityDomain = (args.params.metadata ? input.securityDomain(args.params.metadata) ?? {} : {}) as SecurityDomain
       const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
 
-      const domainFilters = { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { $in: v } })) }
-      const filter = 'filter' in args.params ? { $and: [args.params.filter, domainFilters] } : domainFilters
+      const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { $in: v } })) } : null
+      const filter = 'filter' in args.params && domainFilters ? { $and: [args.params.filter, domainFilters] } : domainFilters ? domainFilters : 'filter' in args.params ? args.params.filter : undefined
       if (args.operation === 'find') {
         const [contained, invalidFields] = isProjectionContained(crud.read ?? false, args.params.projection ?? true)
         if (!contained) {

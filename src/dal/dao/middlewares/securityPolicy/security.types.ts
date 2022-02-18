@@ -4,7 +4,7 @@ import { CRUDPermission } from './security.policy'
 export type DAOSecurityContext<SecurityDomain extends object, Permissions extends string> =
   | {
       permissions: {
-        [Kp in Permissions]?: SecurityDomain[]
+        [Kp in Permissions]?: SecurityDomain[] | true
       }
     }
   | Permissions[]
