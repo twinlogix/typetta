@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -8,12 +8,13 @@
     "coverage": "jest --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
     "test": "jest --detectOpenHandles --no-cache --forceExit",
     "lint": "eslint . --quiet --ext .js,.jsx,.ts,.tsx",
-    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant",
+    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run generate-security",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",
     "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
     "generate-multitenant": "graphql-codegen --config tests/multitenant/codegen.yml",
+    "generate-security": "graphql-codegen --config tests/security/codegen.yml",
     "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts",
     "release": "release-it"
   },
@@ -104,9 +105,6 @@
     "coveragePathIgnorePatterns": [
       "src/generation/",
       "tests/"
-    ],
-    "coverageReporters": [
-      "json-summary"
     ]
   },
   "homepage": "https://twinlogix.github.io/typetta/",

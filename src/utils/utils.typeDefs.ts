@@ -13,6 +13,7 @@ export const typeDefs = gql`
   directive @${Directives.RELATION_ENTITY_REF}(entity: String!, refThis: RefPointer, refOther: RefPointer) on FIELD_DEFINITION
   directive @${Directives.EXCLUDE} on OBJECT | FIELD_DEFINITION
   directive @${Directives.ALIAS}(value: String!) on FIELD_DEFINITION
+  directive @${Directives.DEFAULT}(from: String) on FIELD_DEFINITION
   directive @${Directives.QUANTITY_SCALAR} on SCALAR
   directive @${Directives.STRING_SCALAR} on SCALAR
 `

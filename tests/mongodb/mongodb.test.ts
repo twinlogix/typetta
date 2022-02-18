@@ -1,9 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextEncoder = require('util').TextEncoder
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextDecoder = require('util').TextDecoder
-
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, User } from './models.mock'
@@ -44,7 +39,7 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
 
 function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {
   return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -102,6 +97,16 @@ test('simple findOne', async () => {
   expect(user).toBeDefined()
   expect(user!.firstName).toBe('FirstName')
   expect(user!.lastName).toBe('LastName')
+})
+
+test('simple findOne multiple filter', async () => {
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '1', live: true } })
+
+  const users = await dao.user.findAll({ filter: { $and: [{ lastName: '2' }, () => ({ name: '2' })] } })
+  expect(users.length).toBe(1)
+  expect(users[0].lastName).toBe('2')
 })
 
 // ------------------------------------------------------------------------
@@ -493,6 +498,67 @@ test('insert validation fails', async () => {
   }
 })
 
+test('Insert default', async () => {
+  try {
+    await dao.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    fail()
+  } catch (error: unknown) {
+    expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
+  }
+
+  const dao1 = new DAOContext({
+    mongodb: {
+      default: db,
+      __mock: db,
+    },
+    scalars: {
+      ...scalars,
+      Live: {
+        generate: () => true,
+      },
+    },
+  })
+
+  try {
+    await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    fail()
+  } catch (error: unknown) {
+    expect(((error as Error).message as string).startsWith('Fields creationDate should have been generated from a middleware but it is undefined')).toBe(true)
+  }
+
+  const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
+  expect(e1.live).toBe(true)
+
+  const dao2 = new DAOContext({
+    mongodb: {
+      default: db,
+      __mock: db,
+    },
+    scalars: {
+      ...scalars,
+      Live: {
+        generate: () => true,
+      },
+    },
+    overrides: {
+      defaultFieldsEntity: {
+        middlewares: [
+          defaultValueMiddleware('creationDate', () => 1234),
+        ],
+      },
+    },
+  })
+
+  const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
+  expect(e2.live).toBe(true)
+  expect(e2.creationDate).toBe(1234)
+  expect(e2.opt1).toBe(undefined)  
+  expect(e2.opt2).toBe(true)  
+
+  const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
+  expect(e3.opt1).toBe(undefined)  
+})
+
 test('update validation fails', async () => {
   await dao.user.insertOne({
     record: {
@@ -707,9 +773,9 @@ test('insert and retrieve localized string field', async () => {
 // ------------------------------------------------------------------------
 test('middleware 1', async () => {
   let operationCount = 0
-  const dao2 = new DAOContext<any>({
+  const dao2 = new DAOContext({
     log: ['error', 'warning'],
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -741,7 +807,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'update') {
-                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -751,7 +817,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'delete') {
-                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -761,7 +827,7 @@ test('middleware 1', async () => {
               }
 
               if (args.operation === 'replace') {
-                if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1') {
+                if (typeof args.params.filter !== 'function' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1') {
                   return {
                     continue: true,
                     operation: args.operation,
@@ -787,7 +853,7 @@ test('middleware 1', async () => {
                   operation: 'find',
                   params: args.params,
                   records: args.records.map((record) => {
-                    if (typeof args.params.filter !== 'function' && args.params.filter?.id === 'u1' && record.firstName) {
+                    if (typeof args.params.filter === 'object' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1' && record.firstName) {
                       return { ...record, firstName: record.firstName + ' OK' }
                     }
                     return record
@@ -837,7 +903,7 @@ test('middleware 1', async () => {
 
 test('middleware 2', async () => {
   const dao2 = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -880,7 +946,7 @@ test('middleware 2', async () => {
 test('middleware options', async () => {
   const dao2 = new DAOContext<{ m1?: string; m2?: string }, { m3: string }>({
     metadata: { m1: 'test1', m2: 'no' },
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -907,7 +973,7 @@ test('middleware options', async () => {
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -938,7 +1004,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
   const customDao = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -962,7 +1028,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
   const customDao = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -992,7 +1058,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
   const dao2 = new DAOContext<any>({
-    mongo: {
+    mongodb: {
       default: db,
       __mock: db,
     },
@@ -1101,7 +1167,7 @@ test('Simple transaction 2', async () => {
   await dao.user.deleteOne({ filter: { id: '123' } })
   try {
     await session.commitTransaction()
-    expect(1).toBe(0)
+    fail()
   } catch (error: any) {
     expect(error.ok).toBe(0)
   }
@@ -1222,6 +1288,26 @@ test('Raw update', async () => {
   await dao.user.updateOne({ filter: { id: user.id }, changes: () => ({ $push: { amounts: dao.adapters.mongo.Decimal.modelToDB(new BigNumber(2)) } as any }) })
   const user2 = await dao.user.findOne()
   expect(user2?.amounts?.length).toBe(2)
+})
+
+test('Raw find', async () => {
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '1', live: true } })
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
+  const users = await dao.user.findAll({
+    filter: { $or: [{ $and: [() => ({ name: '1' }), () => ({ lastName: '1' })] }, { $and: [() => ({ name: '2' }), () => ({ lastName: '2' })] }] },
+    sorts: [{ firstName: 'asc' }],
+  })
+  expect(users.length).toBe(2)
+  expect(users[0].firstName).toBe('1')
+  expect(users[1].firstName).toBe('2')
+  const users1 = await dao.user.findAll({
+    filter: { $or: [() => ({ name: '1', lastName: '1' }), { $and: [() => ({ name: '2' }), () => ({ lastName: '2' })] }] },
+    sorts: [{ firstName: 'asc' }],
+  })
+  expect(users1.length).toBe(2)
+  expect(users1[0].firstName).toBe('1')
+  expect(users1[1].firstName).toBe('2')
 })
 
 test('Inner ref required', async () => {

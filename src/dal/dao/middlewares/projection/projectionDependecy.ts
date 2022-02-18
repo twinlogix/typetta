@@ -3,10 +3,7 @@ import { AnyProjection, GenericProjection } from '../../projections/projections.
 import { isProjectionIntersected, mergeProjections } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 
-export function projectionDependency<T extends DAOGenerics, P1 extends AnyProjection<T['projection']>, P2 extends AnyProjection<T['projection']>>(options: {
-  fieldsProjection: P2
-  requiredProjection: P1
-}): DAOMiddleware<T> {
+export function projectionDependency<T extends DAOGenerics>(options: { fieldsProjection: AnyProjection<T['projection']>; requiredProjection: AnyProjection<T['projection']> }): DAOMiddleware<T> {
   return {
     before: async (args) => {
       if (args.operation === 'find') {
@@ -16,7 +13,7 @@ export function projectionDependency<T extends DAOGenerics, P1 extends AnyProjec
             continue: true,
             params: {
               ...args.params,
-              projection: mergeProjections((args.params.projection || true) as GenericProjection, options.requiredProjection as GenericProjection) as T['projection'],
+              projection: mergeProjections((args.params.projection ?? true) as GenericProjection, options.requiredProjection as GenericProjection) as T['projection'],
             },
           }
         }

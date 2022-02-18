@@ -18,15 +18,15 @@ import {
 } from './dao.types'
 import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
+import { buildMiddleware } from './middlewares/utils/builder'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
-import { getProjection, projection } from './projections/projections.utils'
+import { getProjection, infoToProjection } from './projections/projections.utils'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
-import { GraphQLResolveInfo } from 'graphql'
+import { getNamedType, GraphQLResolveInfo } from 'graphql'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
-import { isArray } from 'util'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idField: T['idKey']
@@ -43,21 +43,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected name: T['name']
   private logger?: LogFunction<T['name']>
 
-  protected constructor({
-    idField,
-    idScalar,
-    idGeneration,
-    idGenerator,
-    daoContext,
-    name,
-    logger,
-    pageSize = 50,
-    relations = [],
-    middlewares = [],
-    schema,
-    metadata,
-    driverContext: driverOptions,
-  }: DAOParams<T>) {
+  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, name, logger, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.idField = idField
     this.idGenerator = idGenerator
@@ -70,6 +56,35 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     if (this.idGeneration === 'generator' && !this.idGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
     }
+    Object.entries(schema)
+      .flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v.scalar] as const] : []))
+      .forEach(([key, scalar]) => {
+        if (!daoContext.adapters[this._driver()][scalar].generate) {
+          throw new Error(`Generator for scalar ${scalar} is needed for generate default fields ${key}. Define one in DAOContext or in DAOParams.`)
+        }
+      })
+    const defaultMiddleware = buildMiddleware<T>({
+      beforeInsert: async (params, context) => {
+        const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v] as const] : []))
+        const record = fieldsToGenerate.reduce((record, [key, schema]) => {
+          const generator = this.daoContext.adapters[context.daoDriver][schema.scalar].generate
+          if (record[key] == null && generator) {
+            return {
+              ...record,
+              [key]: generator(),
+            }
+          }
+          return record
+        }, params.record)
+        const fieldsToHave = Object.entries(schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'middleware' ? [[k, v] as const] : []))
+        fieldsToHave.forEach(([key, schema]) => {
+          if (schema.required && record[key] == null) {
+            throw new Error(`Fields ${key} should have been generated from a middleware but it is ${record[key]}`)
+          }
+        })
+        return { continue: true, params: { ...params, record } }
+      },
+    })
     this.middlewares = [
       {
         before: async (args, context) => {
@@ -93,9 +108,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         },
       },
       ...middlewares,
+      ...(Object.values(schema).some((v) => v.defaultGenerationStrategy) ? [defaultMiddleware] : []),
     ]
     this.metadata = metadata
-    this.driverContext = driverOptions
+    this.driverContext = driverContext
     this.schema = schema
   }
 
@@ -144,7 +160,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
     return this.logOperation('aggregate', params, async () => {
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'aggregate', params, args })
-      const result = beforeResults.continue ? await this._aggregate(params, args) : beforeResults.result
+      const result = beforeResults.continue ? await this._aggregate(beforeResults.params, beforeResults.args) : beforeResults.result
       const afterResults = await this.executeAfterMiddlewares(
         { operation: 'aggregate', params: beforeResults.params, args: beforeResults.args, result: result as AggregateResults<T, AggregateParams<T>> },
         beforeResults.middlewareIndex,
@@ -168,7 +184,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       objectHash(params.metadata || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.options || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.relations || null, { respectType: false, unorderedArrays: true })
-    const hasKeyF = hasKey ?? ((record, key) => getTraversing(record, filterKey as string).some((v) => v === key || (typeof v === 'object' && 'equals' in v && v.equals(key))))
+    const hasKeyF = hasKey ?? ((record, key) => getTraversing(record, filterKey as string).some((v) => v === key || (typeof v === 'object' && 'equals' in v && typeof v.equals === 'function' && v.equals(key))))
     const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { $in: values } }))
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
@@ -184,7 +200,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       )
       this.dataLoaders.set(hash, newDataLoader)
     }
-    const dataLoader = this.dataLoaders.get(hash)!
+    const dataLoader = this.dataLoaders.get(hash)
+    if (!dataLoader) {
+      return []
+    }
     const results = await dataLoader.loadMany(filterValues)
     return results.flatMap((r) => {
       if (r instanceof Error) {
@@ -234,6 +253,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           sorts: relationFilter?.sorts,
           relations: relationFilter?.relations,
           options: relationFilter?.options,
+          metadata: relationFilter?.metadata
         }
         if (relation.reference === 'relation') {
           const rels = await this.daoContext.dao(relation.relationDao).loadAll(
@@ -267,7 +287,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return records
   }
 
-  private setResult(record: PartialDeep<T['model']>, relation: DAORelation, results: ModelProjection<any, T['projection']>[]) {
+  private setResult(record: PartialDeep<T['model']>, relation: DAORelation, results: ModelProjection<DAOGenerics, T['projection']>[]) {
     if (relation.type === '1-n') {
       setTraversing(record, relation.field, results)
     } else {
@@ -354,7 +374,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private createMiddlewareContext(): MiddlewareContext<T> {
-    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata: this.metadata }
+    return { schema: this.schema, idField: this.idField, driver: this.driverContext, metadata: this.metadata, logger: this.logger, daoName: this.name, daoDriver: this._driver() }
   }
 
   private async executeBeforeMiddlewares<I extends MiddlewareInput<T>>(input: I): Promise<SelectBeforeMiddlewareOutputType<T, I> & { middlewareIndex?: number }> {
@@ -405,9 +425,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   private infoToProjection<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P>): FindParams<T, P> {
     if (params.projection && typeof params.projection === 'object' && (typeof params.projection.path === 'object' || typeof params.projection.schema === 'object')) {
+      const info = params.projection as GraphQLResolveInfo
       return {
         ...params,
-        projection: projection().fromInfo(params.projection as GraphQLResolveInfo) as P,
+        projection: infoToProjection(info, undefined, info.fieldNodes[0], getNamedType(info.returnType), info.schema) as P,
       }
     }
     return params
@@ -468,4 +489,5 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _replaceOne(params: ReplaceParams<T>): Promise<void>
   protected abstract _deleteOne(params: DeleteParams<T>): Promise<void>
   protected abstract _deleteAll(params: DeleteParams<T>): Promise<void>
+  protected abstract _driver(): 'mongo' | 'knex'
 }

@@ -1,0 +1,83 @@
+scalar Password
+scalar Email
+scalar Username
+scalar Date
+
+enum RoleCode {
+  SUPERADMIN,
+  HOTEL_OWNER,
+  HOTEL_VIEWER,
+  IS_USER,
+  TENANT_ADMIN,
+  ONLY_ID,
+  ANALYST
+}
+
+enum Permission {
+  MANAGE_ROOM,
+  READONLY_ROOM,
+  MANAGE_RESERVATION,
+  READONLY_RESERVATION,
+  MANAGE_HOTEL,
+  VIEW_HOTEL,
+  MANAGE_USER,
+  ONLY_ID,
+  ANALYST
+}
+
+
+type Role @entity @mongodb {
+  code: RoleCode! @id(from: "user")
+  permissions: [Permission]!
+}
+
+type UserRole @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  refUserId: ID!
+  roleCode: RoleCode!
+  role: Role! @innerRef(refFrom: "roleCode", refTo: "code")
+
+  hotelId: ID
+  userId: ID
+  tenantId: Int
+}
+
+type User @entity @mongodb {
+  id: ID! @id
+  email: Email!
+  firstName: String
+  lastName: String
+  reservations: [Reservation]! @foreignRef
+  totalPayments: Int
+  roles: [UserRole!]! @foreignRef(refFrom: "refUserId")
+}
+
+type Hotel @entity @mongodb {
+  id: ID! @id
+  name: String!
+  description: String
+  totalCustomers: Int!
+
+  tenantId: Int!
+}
+
+type Reservation @entity @mongodb {
+  id: ID! @id
+  userId: ID!
+  roomId: ID!
+  room: Room @innerRef
+  hotelId: ID!
+
+  tenantId: Int!
+}
+
+type Room @entity @mongodb {
+  id: ID! @id
+  from: Date!
+  to: Date!
+  hotelId: ID!
+  hotel: Hotel! @innerRef
+  description: String!
+
+  tenantId: Int!
+}

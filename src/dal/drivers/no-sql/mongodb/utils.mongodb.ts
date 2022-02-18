@@ -12,10 +12,11 @@ import { DefaultModelScalars, identityAdapter } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document, SortDirection } from 'mongodb'
+import { DAOGenerics } from '../../../dao/dao.types'
 
-export function adaptProjection<ProjectionType extends object, ScalarsType>(projection: AnyProjection<ProjectionType>, schema: Schema<ScalarsType>): AnyProjection<ProjectionType> {
+export function adaptProjection<ProjectionType extends object, ScalarsType>(projection: AnyProjection<ProjectionType>, schema: Schema<ScalarsType>, defaultTrue?: true): AnyProjection<ProjectionType> {
   if (projection === true || projection === undefined) {
-    return undefined
+    return defaultTrue
   }
   return Object.entries(projection).reduce<object>((result, [k, v]) => {
     if (k in schema) {
@@ -29,7 +30,7 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
       }
       return {
         ...result,
-        [name]: adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded),
+        [name]: adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded, true),
       }
     }
     return result
@@ -38,7 +39,7 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
 
 export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {
   const c = name.split('.')
-  const k = c.shift()!
+  const k = c.shift() ?? name
   const schemaField = schema[k]
   const n = (schemaField && schemaField.alias) || k
   if (c.length === 0) {
@@ -48,11 +49,14 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   }
 }
 
-export function adaptFilter<FilterType extends AbstractFilter, ScalarsType extends DefaultModelScalars>(
-  filter: FilterType,
+export function adaptFilter<ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
+  filter: T['filter'],
   schema: Schema<ScalarsType>,
   adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
 ): Filter<Document> {
+  if(typeof filter === 'function') {
+    return filter()
+  }
   return Object.entries(filter).reduce<Filter<Document>>((result, [k, v]) => {
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
@@ -122,7 +126,7 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
 
 export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
   return Object.entries(update).reduce((p, [k, v]) => {
-    if(v === undefined) {
+    if (v === undefined) {
       return p
     }
     const schemaField = getSchemaFieldTraversing(k, schema)
@@ -141,8 +145,8 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
 export function adaptSorts<SortType, ScalarsType>(sort: SortType[], schema: Schema<ScalarsType>): [string, SortDirection][] {
   return sort.flatMap((s) => {
     return Object.entries(s).map(([k, v]) => {
-      if(k === '$textScore') {
-        return ['score', { $meta: "textScore" }] as [string, SortDirection]
+      if (k === '$textScore') {
+        return ['score', { $meta: 'textScore' }] as [string, SortDirection]
       }
       return [modelNameToDbName(k, schema), v] as [string, SortDirection]
     })

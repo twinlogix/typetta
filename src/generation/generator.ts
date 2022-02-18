@@ -1,4 +1,4 @@
-import { IdGenerationStrategy } from '..'
+import { DefaultGenerationStrategy, IdGenerationStrategy } from '..'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
@@ -27,6 +27,8 @@ export type TsTypettaGeneratorField = {
   idGenerationStrategy?: IdGenerationStrategy
   isList: boolean
   isExcluded: boolean
+  isEnum: boolean
+  defaultGenerationStrategy?: DefaultGenerationStrategy
   alias?: string
 }
 
@@ -68,6 +70,9 @@ export class TsTypettaGenerator {
       })
       .reduce((a, c) => [...a, ...c], [])
 
+    if(!Array.from(typesMap.values()).some(v => v.entity?.type)) {
+      throw new Error("At least one entity is required for code generation. (@entity)")
+    }
     const definitions = [...typesMap.values()].flatMap((node) => {
       const definition = this._generators
         .map((generator) => generator.generateDefinition(node, typesMap, customScalarsMap))
@@ -108,7 +113,7 @@ export class TsTypettaGenerator {
       .forEach((type) => {
         const id = findID(type)
         if (!id) {
-          throw new Error(`Type ${type.name} requires an @id field being a @mongodb.`)
+          throw new Error(`Type ${type.name} requires an @id field being a @entity.`)
         }
       })
   }

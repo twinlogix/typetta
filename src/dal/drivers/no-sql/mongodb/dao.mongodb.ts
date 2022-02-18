@@ -8,6 +8,7 @@ import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
 import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
 import { Collection, Document, WithId, Filter, FindOptions, OptionalId, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
+import { filterUndefiend } from '../../../../utils/utils'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
   private collection: Collection
@@ -34,9 +35,6 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildFilter(filter?: T['filter']): Filter<Document> {
-    if (typeof filter === 'function') {
-      return filter()
-    }
     return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongo) : {}
   }
 
@@ -174,13 +172,16 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     return this.runQuery('insertOne', async () => {
-      const record = this.modelToDb(params.record)
+      const record = this.modelToDb(filterUndefiend(params.record))
       const options = params.options ?? {}
       return [
         async () => {
           const result = await this.collection.insertOne(record, options)
           const inserted = await this.collection.findOne({ _id: result.insertedId }, options)
-          return this.dbToModel(inserted!) as Omit<T['model'], T['insertExcludedFields']>
+          if(!inserted) {
+            throw new Error(`One just inserted document with id ${result.insertedId.toHexString()} was not retrieved correctly.`)
+          }
+          return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
         },
         () => `collection.insertOne(${JSON.stringify(record)})`,
       ]
@@ -256,5 +257,9 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   private mongoLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }) {
     this.log(this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
+  }
+
+  protected _driver(): 'mongo' | 'knex' {
+    return 'mongo'
   }
 }

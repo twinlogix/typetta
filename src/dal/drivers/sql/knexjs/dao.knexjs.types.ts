@@ -22,37 +22,37 @@ export type KnexJsDAOGenerics<
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
   NameType extends string = any,
-> = Omit<
-  DAOGenerics<
-    ModelType,
-    IDKey,
-    IDScalar,
-    IdGeneration,
-    PureFilterType,
-    RawFilterType,
-    RelationsType,
-    ProjectionType,
-    PureSortType,
-    RawSortType,
-    InsertType,
-    PureUpdateType,
-    RawUpdateType,
-    ExcludedFields,
-    RelationsFields,
-    MetadataType,
-    OperationMetadataType,
-    any,
-    ScalarsType,
-    { trx?: Knex.Transaction },
-    { trx?: Knex.Transaction },
-    { trx?: Knex.Transaction },
-    { trx?: Knex.Transaction },
-    { trx?: Knex.Transaction },
-    { trx?: Knex.Transaction },
-    NameType
-  >,
-  'driverContext'
-> & { driverContext: { knex: Knex } }
+> = DAOGenerics<
+  ModelType,
+  IDKey,
+  IDScalar,
+  IdGeneration,
+  PureFilterType,
+  RawFilterType,
+  RelationsType,
+  ProjectionType,
+  PureSortType,
+  RawSortType,
+  InsertType,
+  PureUpdateType,
+  RawUpdateType,
+  ExcludedFields,
+  RelationsFields,
+  MetadataType,
+  OperationMetadataType,
+  {
+    tableName: string
+    knex: Knex<any, unknown[]>
+  },
+  ScalarsType,
+  { trx?: Knex.Transaction },
+  { trx?: Knex.Transaction },
+  { trx?: Knex.Transaction },
+  { trx?: Knex.Transaction },
+  { trx?: Knex.Transaction },
+  { trx?: Knex.Transaction },
+  NameType
+>
 
 export type KnexJsDAOParams<T extends KnexJsDAOGenerics> = Omit<DAOParams<T>, 'driverContext'> & {
   tableName: string

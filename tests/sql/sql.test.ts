@@ -1,5 +1,6 @@
-import { Coordinates, LocalizedString } from '../../src'
+import { buildMiddleware, Coordinates, defaultValueMiddleware, knexJsAdapters, LocalizedString, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { DAOContext } from './dao.mock'
+import { Scalars } from './models.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -30,6 +31,41 @@ const config: Knex.Config = {
   },
 }
 
+const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'knex'> = {
+  LocalizedString: {
+    dbToModel: (o: unknown) => JSON.parse(o as string),
+    modelToDB: (o: LocalizedString) => JSON.stringify(o),
+  },
+  Coordinates: {
+    dbToModel: (o: unknown) => JSON.parse(o as string),
+    modelToDB: (o: Coordinates) => JSON.stringify(o),
+  },
+  Decimal: {
+    dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
+    modelToDB: (o: BigNumber) => o,
+  },
+  JSON: {
+    dbToModel: (o: unknown) => JSON.parse(o as string),
+    modelToDB: (o: any) => JSON.stringify(o),
+  },
+  Password: {
+    dbToModel: (o: unknown) => o as string,
+    modelToDB: (o: string) => sha256(o),
+  },
+  ID: {
+    generate: () => uuidv4(),
+  },
+  String: {
+    dbToModel: (o: any) => (typeof o === 'string' ? o : o.toString()),
+    modelToDB: (o: string) => o,
+  },
+  Live: {
+    dbToModel: (o: unknown) => (o ? true : false),
+    modelToDB: (o: boolean) => (o ? 1 : 0),
+    generate: () => false,
+  },
+}
+
 beforeAll(async () => {
   return
 })
@@ -41,35 +77,7 @@ beforeEach(async () => {
     knex: {
       default: knexInstance,
     },
-    scalars: {
-      LocalizedString: {
-        dbToModel: (o: unknown) => JSON.parse(o as string),
-        modelToDB: (o: LocalizedString) => JSON.stringify(o),
-      },
-      Coordinates: {
-        dbToModel: (o: unknown) => JSON.parse(o as string),
-        modelToDB: (o: Coordinates) => JSON.stringify(o),
-      },
-      Decimal: {
-        dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
-        modelToDB: (o: BigNumber) => o,
-      },
-      JSON: {
-        dbToModel: (o: unknown) => JSON.parse(o as string),
-        modelToDB: (o: any) => JSON.stringify(o),
-      },
-      Password: {
-        dbToModel: (o: unknown) => o as string,
-        modelToDB: (o: string) => sha256(o),
-      },
-      ID: {
-        generate: () => uuidv4(),
-      },
-      String: {
-        dbToModel: (o: any) => (typeof o === 'string' ? o : o.toString()),
-        modelToDB: (o: string) => o,
-      },
-    },
+    scalars,
   })
   const typeMap = {
     Decimal: { singleType: 'decimal' },
@@ -78,13 +86,7 @@ beforeEach(async () => {
     Int: { singleType: 'integer' },
   }
   const defaultType = { singleType: 'string' }
-  await dao.device.createTable(typeMap, defaultType)
-  await dao.user.createTable(typeMap, defaultType)
-  await dao.friends.createTable(typeMap, defaultType)
-  await dao.dog.createTable(typeMap, defaultType)
-  await dao.city.createTable(typeMap, defaultType)
-  await dao.organization.createTable(typeMap, defaultType)
-  await dao.address.createTable(typeMap, defaultType)
+  await dao.createTables({ typeMap, defaultType })
 })
 
 afterEach(async () => {
@@ -198,6 +200,16 @@ test('simple findAll', async () => {
   expect(users.length).toBe(1)
   expect(users[0].firstName).toBe('FirstName')
   expect(users[0].lastName).toBe('LastName')
+})
+
+test('simple findOne multiple filter', async () => {
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '1', live: true } })
+
+  const users = await dao.user.findAll({ filter: { $and: [{ lastName: '2' }, (qb) => qb.where('name', '=', '2')] } })
+  expect(users.length).toBe(1)
+  expect(users[0].lastName).toBe('2')
 })
 
 test('simple findAll with custom where', async () => {
@@ -544,6 +556,77 @@ test('insert generic test 1', async () => {
   expect(all[0].credentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
 })
 
+test('Insert default', async () => {
+  const dao0 = new DAOContext({
+    knex: {
+      default: knexInstance,
+    },
+    scalars: {
+      ...scalars,
+      Live: {},
+    },
+  })
+
+  try {
+    await dao0.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    fail()
+  } catch (error: unknown) {
+    expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
+  }
+
+  const dao1 = new DAOContext({
+    knex: {
+      default: knexInstance,
+    },
+    scalars: {
+      ...scalars,
+      Live: {
+        generate: () => true,
+        dbToModel: (o: unknown) => (o ? true : false),
+        modelToDB: (o: boolean) => (o ? 1 : 0),
+      },
+    },
+  })
+
+  try {
+    await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    fail()
+  } catch (error: unknown) {
+    expect(((error as Error).message as string).startsWith('Fields creationDate should have been generated from a middleware but it is undefined')).toBe(true)
+  }
+
+  const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
+  expect(e1.live).toBe(true)
+
+  const dao2 = new DAOContext({
+    knex: {
+      default: knexInstance,
+    },
+    scalars: {
+      ...scalars,
+      Live: {
+        generate: () => true,
+        dbToModel: (o: unknown) => (o ? true : false),
+        modelToDB: (o: boolean) => (o ? 1 : 0),
+      },
+    },
+    overrides: {
+      defaultFieldsEntity: {
+        middlewares: [defaultValueMiddleware('creationDate', () => 1234)],
+      },
+    },
+  })
+
+  const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
+  expect(e2.live).toBe(true)
+  expect(e2.creationDate).toBe(1234)
+  expect(e2.opt1).toBe(null)
+  expect(e2.opt2).toBe(true)
+
+  const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
+  expect(e3.opt1).toBe(null)
+})
+
 test('simple update', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
 
@@ -658,4 +741,24 @@ test('Raw update', async () => {
   await dao.user.updateAll({ filter: { id: user.id }, changes: (qb) => qb.update({ name: 'FirstName2' }) })
   const user2 = await dao.user.findOne()
   expect(user2?.firstName).toBe('FirstName2')
+})
+
+test('Raw find', async () => {
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '1', live: true } })
+  await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
+  await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
+  const users = await dao.user.findAll({
+    filter: { $or: [{ $and: [(qb) => qb.where('name', '=', '1'), (qb) => qb.where('surname', '=', '1')] }, { $and: [(qb) => qb.where('name', '=', '2'), (qb) => qb.where('surname', '=', '2')] }] },
+    sorts: [{ firstName: 'asc' }],
+  })
+  expect(users.length).toBe(2)
+  expect(users[0].firstName).toBe('1')
+  expect(users[1].firstName).toBe('2')
+  const users1 = await dao.user.findAll({
+    filter: { $or: [(qb) => qb.where('name', '=', '1').and.where('surname', '=', '1'), { $and: [(qb) => qb.where('name', '=', '2'), (qb) => qb.where('surname', '=', '2')] }] },
+    sorts: [{ firstName: 'asc' }],
+  })
+  expect(users1.length).toBe(2)
+  expect(users1[0].firstName).toBe('1')
+  expect(users1[1].firstName).toBe('2')
 })

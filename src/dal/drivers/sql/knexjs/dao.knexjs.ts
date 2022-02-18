@@ -19,6 +19,7 @@ import {
 } from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
+import { filterUndefiend } from '../../../../utils/utils'
 
 type AbstractFilter = {
   [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators
@@ -29,7 +30,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private knex: Knex<any, unknown[]>
 
   protected constructor({ tableName, knex, idGenerator, ...params }: KnexJsDAOParams<T>) {
-    super({ ...params, driverContext: { knex }, idGenerator: idGenerator ?? params.daoContext.adapters.knex[params.idScalar]?.generate })
+    super({ ...params, driverContext: { tableName, knex }, idGenerator: idGenerator ?? params.daoContext.adapters.knex[params.idScalar]?.generate })
     this.tableName = tableName
     this.knex = knex
   }
@@ -57,9 +58,6 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    if (typeof filter === 'function') {
-      return filter(qb || this.qb())
-    }
     return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knex) : qb || this.qb()
   }
 
@@ -194,14 +192,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return this.runQuery(
       'insertOne',
       () => {
-        const record = this.modelToDb(params.record as PartialDeep<T['model']>)
+        const record = this.modelToDb(filterUndefiend<PartialDeep<T['model']>>(params.record))
         const query = this.qb().insert(record, '*')
         return this.buildTransaction(params.options, query)
       },
       async (records) => {
         const inserted = records[0]
         if (typeof inserted === 'number') {
-          const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] || inserted } as T['filter'], options: params.options, limit: 1 })
+          const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] ?? inserted } as T['filter'], options: params.options, limit: 1 })
           return insertedRetrieved[0] as Omit<T['model'], T['insertExcludedFields']>
         }
         return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
@@ -298,5 +296,9 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
 
   private knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }) {
     this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
+  }
+
+  protected _driver(): 'mongo' | 'knex' {
+    return 'mongo'
   }
 }

@@ -1,5 +1,6 @@
 import { AggregatePostProcessing } from '../../../..'
 import { getSchemaFieldTraversing, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
+import { AggregateParams, DAOGenerics } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
 import { Schema } from '../../../dao/schemas/schemas.types'
@@ -16,7 +17,7 @@ export type AbstractSort = { [key: string]: SortDirection }
 
 export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {
   const c = name.split('.')
-  const k = c.shift()!
+  const k = c.shift() ?? name
   const schemaField = schema[k]
   const n = (schemaField && schemaField.alias) || k
   if (c.length === 0) {
@@ -26,12 +27,15 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   }
 }
 
-export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars>(
+export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
-  filter: AbstractFilter,
+  filter: T['filter'],
   schema: Schema<ScalarsType>,
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>,
 ): Knex.QueryBuilder<TRecord, TResult> {
+  if(typeof filter === 'function') {
+    return filter(builder)
+  }
   Object.entries(filter).forEach(([k, v]) => {
     const schemaField = getSchemaFieldTraversing(k, schema)
     if (schemaField) {
@@ -81,15 +85,21 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
       }
     } else if (k === '$or') {
       builder.orWhere((qb) => {
-        (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
+        for (const f of v as AbstractFilter[]) {
+          buildWhereConditions(qb.or, f, schema, adapters)
+        }
       })
     } else if (k === '$and') {
       builder.andWhere((qb) => {
-        (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb, f, schema, adapters))
+        for (const f of v as AbstractFilter[]) {
+          buildWhereConditions(qb, f, schema, adapters)
+        }
       })
     } else if (k === '$nor') {
       builder.not.orWhere((qb) => {
-        (v as AbstractFilter[]).forEach((f) => buildWhereConditions(qb.or, f, schema, adapters))
+        for (const f of v as AbstractFilter[]) {
+          buildWhereConditions(qb.or, f, schema, adapters)
+        }
       })
     } else if (k === '$not') {
       builder.whereNot((qb) => {
@@ -102,8 +112,11 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   return builder
 }
 
-export function buildHavingConditions<TRecord, TResult>(builder: Knex.QueryBuilder<TRecord, TResult>, having: AggregatePostProcessing<any, any>['having']): Knex.QueryBuilder<TRecord, TResult> {
-  Object.entries(having!).forEach(([k, v]) => {
+export function buildHavingConditions<TRecord, TResult>(
+  builder: Knex.QueryBuilder<TRecord, TResult>,
+  having: Exclude<AggregatePostProcessing<DAOGenerics, AggregateParams<DAOGenerics>>['having'], undefined>,
+): Knex.QueryBuilder<TRecord, TResult> {
+  Object.entries(having).forEach(([k, v]) => {
     if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
       Object.entries(v).forEach(([fk, fv]) => {
         // prettier-ignore
@@ -264,7 +277,7 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>
 }): object {
   return Object.entries(update).reduce((p, [k, v]) => {
-    if(v === undefined) return p
+    if (v === undefined) return p
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {

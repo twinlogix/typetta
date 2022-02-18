@@ -1,5 +1,7 @@
-import { DAOGenerics, DeleteParams, FindParams, InsertParams, MiddlewareContext, ReplaceParams, UpdateParams } from '../../dao.types'
+import { AggregateParams, AggregatePostProcessing, DAOGenerics, DeleteParams, FindParams, InsertParams, MiddlewareContext, ReplaceParams, UpdateParams } from '../../dao.types'
 import {
+  AggregateMiddlewareInput,
+  AggregateMiddlewareOutput,
   Continue,
   DAOMiddleware,
   DeleteMiddlewareInput,
@@ -46,6 +48,16 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
     context: MiddlewareContext<T>,
   ) => Promise<(Omit<DeleteMiddlewareInput<T>, 'operation'> & Continue<true>) | (Omit<DeleteMiddlewareOutput<T>, 'operation'> & Continue<false>) | void>
   afterDelete?: (params: DeleteParams<T>, context: MiddlewareContext<T>) => Promise<(Omit<DeleteMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
+  beforeAggregate?: (
+    params: AggregateParams<T>,
+    args: AggregatePostProcessing<T, AggregateParams<T>> | undefined,
+    context: MiddlewareContext<T>,
+  ) => Promise<(Omit<AggregateMiddlewareInput<T>, 'operation'> & Continue<true>) | (Omit<AggregateMiddlewareOutput<T>, 'operation'> & Continue<false>) | void>
+  afterAggregate?: (
+    params: AggregateParams<T>,
+    args: AggregatePostProcessing<T, AggregateParams<T>> | undefined,
+    context: MiddlewareContext<T>,
+  ) => Promise<(Omit<AggregateMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
 }
 
 export function buildMiddleware<T extends DAOGenerics>(m: DAOSplitedMiddleware<T>): DAOMiddleware<T> {
@@ -91,6 +103,14 @@ export function buildMiddleware<T extends DAOGenerics>(m: DAOSplitedMiddleware<T
             ...result,
           }
         }
+      } else if (m.beforeAggregate && args.operation === 'aggregate') {
+        const result = await m.beforeAggregate(args.params, args.args, context)
+        if (result) {
+          return {
+            operation: 'aggregate',
+            ...result,
+          }
+        }
       }
     },
     after: async (args, context) => {
@@ -131,6 +151,14 @@ export function buildMiddleware<T extends DAOGenerics>(m: DAOSplitedMiddleware<T
         if (result) {
           return {
             operation: 'delete',
+            ...result,
+          }
+        }
+      } else if (m.afterAggregate && args.operation === 'aggregate') {
+        const result = await m.afterAggregate(args.params, args.args, context)
+        if (result) {
+          return {
+            operation: 'aggregate',
             ...result,
           }
         }

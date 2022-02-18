@@ -9,13 +9,18 @@ type UsernamePasswordCredentials {
   password: Password!
 }
 
+type Tenant @entity @mongodb {
+  id: Int! @id(from: "user")
+  info: String!
+}
+
 type Hotel @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   name: String!
   description: String
   
   deletionDate: Date
-  tenantId: TenantId!
+  tenantId: TenantId! @default
 }
 
 type User @entity @mongodb {
@@ -27,7 +32,7 @@ type User @entity @mongodb {
   reservations: [Reservation]! @foreignRef
 
   deletionDate: Date
-  tenantId: TenantId
+  tenantId: TenantId! @default
 }
 
 type Reservation @entity @mongodb {
@@ -37,7 +42,7 @@ type Reservation @entity @mongodb {
   room: Room @innerRef
 
   deletionDate: Date
-  tenantId: TenantId
+  tenantId: TenantId! @default
 }
 
 type Room @entity @mongodb {
@@ -47,5 +52,5 @@ type Room @entity @mongodb {
   size: String!
 
   deletionDate: Date
-  tenantId: TenantId
+  tenantId: TenantId! @default
 }

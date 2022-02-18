@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src';
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
@@ -20,7 +20,7 @@ export const addressSchema: Schema<types.Scalars> = {
 type AddressFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields>;
+export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields | AddressRawFilter>
 export type AddressRawFilter = () => Filter<Document>
 
 export type AddressRelations = {
@@ -36,7 +36,8 @@ export type AddressRelations = {
 export type AddressProjection = {
   cities?: CityProjection | boolean,
   id?: boolean,
-};
+}
+export type AddressParam<P extends AddressProjection> = ParamProjection<types.Address, AddressProjection, P>
 
 export type AddressSortKeys = 'id';
 export type AddressSort = OneKey<AddressSortKeys, SortDirection>;
@@ -102,12 +103,10 @@ type CityFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
-export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields>;
+export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields | CityRawFilter>
 export type CityRawFilter = () => Filter<Document>
 
-export type CityRelations = {
-
-}
+export type CityRelations = Record<never, string>
 
 export type CityProjection = {
   addressId?: boolean,
@@ -115,7 +114,8 @@ export type CityProjection = {
   computedName?: boolean,
   id?: boolean,
   name?: boolean,
-};
+}
+export type CityParam<P extends CityProjection> = ParamProjection<types.City, CityProjection, P>
 
 export type CitySortKeys = 'addressId' | 'id' | 'name';
 export type CitySort = OneKey<CitySortKeys, SortDirection>;
@@ -159,6 +159,112 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 
 
 //--------------------------------------------------------------------------------
+//----------------------------- DEFAULTFIELDSENTITY ------------------------------
+//--------------------------------------------------------------------------------
+
+export type DefaultFieldsEntityExcludedFields = never
+export type DefaultFieldsEntityRelationFields = never
+
+export const defaultFieldsEntitySchema: Schema<types.Scalars> = {
+  'creationDate': {
+    scalar: 'Int', 
+    required: true, 
+    defaultGenerationStrategy: 'middleware'
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true
+  },
+  'live': {
+    scalar: 'Live', 
+    required: true, 
+    defaultGenerationStrategy: 'generator'
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  },
+  'opt1': {
+    scalar: 'Live', 
+    defaultGenerationStrategy: 'middleware'
+  },
+  'opt2': {
+    scalar: 'Live', 
+    defaultGenerationStrategy: 'generator'
+  }
+};
+
+type DefaultFieldsEntityFilterFields = {
+  'creationDate'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'live'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'opt1'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators,
+  'opt2'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators
+};
+export type DefaultFieldsEntityFilter = DefaultFieldsEntityFilterFields & LogicalOperators<DefaultFieldsEntityFilterFields | DefaultFieldsEntityRawFilter>
+export type DefaultFieldsEntityRawFilter = () => Filter<Document>
+
+export type DefaultFieldsEntityRelations = Record<never, string>
+
+export type DefaultFieldsEntityProjection = {
+  creationDate?: boolean,
+  id?: boolean,
+  live?: boolean,
+  name?: boolean,
+  opt1?: boolean,
+  opt2?: boolean,
+}
+export type DefaultFieldsEntityParam<P extends DefaultFieldsEntityProjection> = ParamProjection<types.DefaultFieldsEntity, DefaultFieldsEntityProjection, P>
+
+export type DefaultFieldsEntitySortKeys = 'creationDate' | 'id' | 'live' | 'name' | 'opt1' | 'opt2';
+export type DefaultFieldsEntitySort = OneKey<DefaultFieldsEntitySortKeys, SortDirection>;
+export type DefaultFieldsEntityRawSort = () => Sort
+
+export type DefaultFieldsEntityUpdate = {
+  'creationDate'?: types.Scalars['Int'],
+  'id'?: types.Scalars['ID'],
+  'live'?: types.Scalars['Live'],
+  'name'?: types.Scalars['String'],
+  'opt1'?: types.Scalars['Live'] | null,
+  'opt2'?: types.Scalars['Live'] | null
+};
+export type DefaultFieldsEntityRawUpdate = () => UpdateFilter<Document>
+
+export type DefaultFieldsEntityInsert = {
+  creationDate?: types.Scalars['Int'],
+  id: types.Scalars['ID'],
+  live?: types.Scalars['Live'],
+  name: types.Scalars['String'],
+  opt1?: types.Scalars['Live'],
+  opt2?: types.Scalars['Live'],
+};
+
+type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', 'user', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity'>;
+export type DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: defaultFieldsEntitySchema, 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'user', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------ DEVICE ------------------------------------
 //--------------------------------------------------------------------------------
 
@@ -184,19 +290,18 @@ type DeviceFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields>;
+export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields | DeviceRawFilter>
 export type DeviceRawFilter = () => Filter<Document>
 
-export type DeviceRelations = {
-
-}
+export type DeviceRelations = Record<never, string>
 
 export type DeviceProjection = {
   id?: boolean,
   name?: boolean,
   user?: UserProjection | boolean,
   userId?: boolean,
-};
+}
+export type DeviceParam<P extends DeviceProjection> = ParamProjection<types.Device, DeviceProjection, P>
 
 export type DeviceSortKeys = 'id' | 'name' | 'userId';
 export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>;
@@ -266,19 +371,18 @@ type DogFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'ownerId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields>;
+export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields | DogRawFilter>
 export type DogRawFilter = () => Filter<Document>
 
-export type DogRelations = {
-
-}
+export type DogRelations = Record<never, string>
 
 export type DogProjection = {
   id?: boolean,
   name?: boolean,
   owner?: UserProjection | boolean,
   ownerId?: boolean,
-};
+}
+export type DogParam<P extends DogProjection> = ParamProjection<types.Dog, DogProjection, P>
 
 export type DogSortKeys = 'id' | 'name' | 'ownerId';
 export type DogSort = OneKey<DogSortKeys, SortDirection>;
@@ -349,19 +453,18 @@ type MockedEntityFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 };
-export type MockedEntityFilter = MockedEntityFilterFields & LogicalOperators<MockedEntityFilterFields>;
+export type MockedEntityFilter = MockedEntityFilterFields & LogicalOperators<MockedEntityFilterFields | MockedEntityRawFilter>
 export type MockedEntityRawFilter = () => Filter<Document>
 
-export type MockedEntityRelations = {
-
-}
+export type MockedEntityRelations = Record<never, string>
 
 export type MockedEntityProjection = {
   id?: boolean,
   name?: boolean,
   user?: UserProjection | boolean,
   userId?: boolean,
-};
+}
+export type MockedEntityParam<P extends MockedEntityProjection> = ParamProjection<types.MockedEntity, MockedEntityProjection, P>
 
 export type MockedEntitySortKeys = 'id' | 'name' | 'userId';
 export type MockedEntitySort = OneKey<MockedEntitySortKeys, SortDirection>;
@@ -438,12 +541,10 @@ type OrganizationFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'vatNumber'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
-export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields>;
+export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields | OrganizationRawFilter>
 export type OrganizationRawFilter = () => Filter<Document>
 
-export type OrganizationRelations = {
-
-}
+export type OrganizationRelations = Record<never, string>
 
 export type OrganizationProjection = {
   address?: {
@@ -454,7 +555,8 @@ export type OrganizationProjection = {
   id?: boolean,
   name?: boolean,
   vatNumber?: boolean,
-};
+}
+export type OrganizationParam<P extends OrganizationProjection> = ParamProjection<types.Organization, OrganizationProjection, P>
 
 export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber';
 export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>;
@@ -555,12 +657,10 @@ type PostFilterFields = {
   'title'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'views'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 };
-export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields>;
+export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields | PostRawFilter>
 export type PostRawFilter = () => Filter<Document>
 
-export type PostRelations = {
-
-}
+export type PostRelations = Record<never, string>
 
 export type PostProjection = {
   author?: UserProjection | boolean,
@@ -574,7 +674,8 @@ export type PostProjection = {
   } | boolean,
   title?: boolean,
   views?: boolean,
-};
+}
+export type PostParam<P extends PostProjection> = ParamProjection<types.Post, PostProjection, P>
 
 export type PostSortKeys = 'authorId' | 'body' | 'clicks' | 'id' | 'metadata.region' | 'metadata.visible' | 'title' | 'views';
 export type PostSort = OneKey<PostSortKeys, SortDirection>;
@@ -700,7 +801,7 @@ type UserFilterFields = {
   'usernamePasswordCredentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators,
   'usernamePasswordCredentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 };
-export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields>;
+export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields | UserRawFilter>
 export type UserRawFilter = () => Filter<Document>
 
 export type UserRelations = {
@@ -736,7 +837,8 @@ export type UserProjection = {
     password?: boolean,
     username?: boolean,
   } | boolean,
-};
+}
+export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'amount' | 'amounts' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username';
 export type UserSort = OneKey<UserSortKeys, SortDirection>;
@@ -794,12 +896,14 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
   
 }
 
-export type DAOContextParams<MetadataType, OperationMetadataType> = {
+
+export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
   metadata?: MetadataType
-  middlewares?: DAOContextMiddleware<MetadataType, OperationMetadataType>[]
+  middlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: { 
     address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     city?: Pick<Partial<CityDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    defaultFieldsEntity?: Pick<Partial<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     dog?: Pick<Partial<DogDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     mockedEntity?: Pick<Partial<MockedEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
@@ -807,17 +911,19 @@ export type DAOContextParams<MetadataType, OperationMetadataType> = {
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
-  mongo: Record<'default' | '__mock', Db>,
+  mongodb: Record<'default' | '__mock', Db>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
-  log?: LogInput<'address' | 'city' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>
+  log?: LogInput<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
+  securityPolicy?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 };
 
-type DAOContextMiddleware<MetadataType = any, OperationMetadataType = any> = DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType> | CityDAOGenerics<MetadataType, OperationMetadataType> | DeviceDAOGenerics<MetadataType, OperationMetadataType> | DogDAOGenerics<MetadataType, OperationMetadataType> | MockedEntityDAOGenerics<MetadataType, OperationMetadataType> | OrganizationDAOGenerics<MetadataType, OperationMetadataType> | PostDAOGenerics<MetadataType, OperationMetadataType> | UserDAOGenerics<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = any, OperationMetadataType = any> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined;
   private _city: CityDAO<MetadataType, OperationMetadataType> | undefined;
+  private _defaultFieldsEntity: DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> | undefined;
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined;
   private _dog: DogDAO<MetadataType, OperationMetadataType> | undefined;
   private _mockedEntity: MockedEntityDAO<MetadataType, OperationMetadataType> | undefined;
@@ -825,82 +931,151 @@ export class DAOContext<MetadataType = any, OperationMetadataType = any> extends
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined;
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined;
   
-  private overrides: DAOContextParams<MetadataType, OperationMetadataType>['overrides'];
-  private mongo: Record<'default' | '__mock', Db>;
+  private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides'];
+  private mongodb: Record<'default' | '__mock', Db>;
   
-  private middlewares: DAOContextMiddleware<MetadataType, OperationMetadataType>[]
+  private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
-  private logger?: LogFunction<'address' | 'city' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>
+  private logger?: LogFunction<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>
   
   get address() {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, collection: this.mongo.default.collection('addresses'), middlewares: [...(this.overrides?.address?.middlewares || []), ...this.middlewares as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger });
+      this._address = new AddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, collection: this.mongodb.default.collection('addresses'), middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger });
     }
     return this._address;
   }
   get city() {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.city, collection: this.mongo.default.collection('citys'), middlewares: [...(this.overrides?.city?.middlewares || []), ...this.middlewares as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger });
+      this._city = new CityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.city, collection: this.mongodb.default.collection('citys'), middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger });
     }
     return this._city;
   }
+  get defaultFieldsEntity() {
+    if(!this._defaultFieldsEntity) {
+      this._defaultFieldsEntity = new DefaultFieldsEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, collection: this.mongodb.default.collection('defaultFieldsEntitys'), middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger });
+    }
+    return this._defaultFieldsEntity;
+  }
   get device() {
     if(!this._device) {
-      this._device = new DeviceDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.device, collection: this.mongo.default.collection('devices'), middlewares: [...(this.overrides?.device?.middlewares || []), ...this.middlewares as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger });
+      this._device = new DeviceDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.device, collection: this.mongodb.default.collection('devices'), middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger });
     }
     return this._device;
   }
   get dog() {
     if(!this._dog) {
-      this._dog = new DogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, collection: this.mongo.default.collection('dogs'), middlewares: [...(this.overrides?.dog?.middlewares || []), ...this.middlewares as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger });
+      this._dog = new DogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, collection: this.mongodb.default.collection('dogs'), middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger });
     }
     return this._dog;
   }
   get mockedEntity() {
     if(!this._mockedEntity) {
-      this._mockedEntity = new MockedEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.mockedEntity, collection: this.mongo.__mock.collection('mockedEntitys'), middlewares: [...(this.overrides?.mockedEntity?.middlewares || []), ...this.middlewares as DAOMiddleware<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'mockedEntity', logger: this.logger });
+      this._mockedEntity = new MockedEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.mockedEntity, collection: this.mongodb.__mock.collection('mockedEntitys'), middlewares: [...(this.overrides?.mockedEntity?.middlewares || []), ...selectMiddleware('mockedEntity', this.middlewares) as DAOMiddleware<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'mockedEntity', logger: this.logger });
     }
     return this._mockedEntity;
   }
   get organization() {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.organization, collection: this.mongo.default.collection('organizations'), middlewares: [...(this.overrides?.organization?.middlewares || []), ...this.middlewares as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger });
+      this._organization = new OrganizationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.organization, collection: this.mongodb.default.collection('organizations'), middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger });
     }
     return this._organization;
   }
   get post() {
     if(!this._post) {
-      this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, collection: this.mongo.default.collection('posts'), middlewares: [...(this.overrides?.post?.middlewares || []), ...this.middlewares as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger });
+      this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, collection: this.mongodb.default.collection('posts'), middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger });
     }
     return this._post;
   }
   get user() {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongo.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...this.middlewares as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
+      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongodb.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
     }
     return this._user;
   }
   
-  constructor(params: DAOContextParams<MetadataType, OperationMetadataType>) {
+  constructor(params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
     super({
       ...params,
-      scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Coordinates', 'Decimal', 'JSON', 'LocalizedString', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
+      scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Coordinates', 'Decimal', 'JSON', 'Live', 'LocalizedString', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
     })
     this.overrides = params.overrides
-    this.mongo = params.mongo
+    this.mongodb = params.mongodb
     this.middlewares = params.middlewares || []
     this.logger = logInputToLogger(params.log)
+    if(params.securityPolicy && params.securityPolicy.applySecurity !== false) {
+      const securityMiddlewares = createSecurityPolicyMiddlewares(params.securityPolicy)
+      this.middlewares = [...(params.middlewares ?? []), ...Object.entries(securityMiddlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
+    }
   }
   
-  public async execQuery<T>(run: (dbs: { mongo: Record<'default' | '__mock', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; mockedEntity: Collection<Document>; organization: Collection<Document>; post: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongo: this.mongo }, { address: this.mongo.default.collection('addresses'), city: this.mongo.default.collection('citys'), device: this.mongo.default.collection('devices'), dog: this.mongo.default.collection('dogs'), mockedEntity: this.mongo.__mock.collection('mockedEntitys'), organization: this.mongo.default.collection('organizations'), post: this.mongo.default.collection('posts'), user: this.mongo.default.collection('users') })
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'default' | '__mock', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; defaultFieldsEntity: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; mockedEntity: Collection<Document>; organization: Collection<Document>; post: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
+    return run({ mongodb: this.mongodb }, { address: this.mongodb.default.collection('addresses'), city: this.mongodb.default.collection('citys'), defaultFieldsEntity: this.mongodb.default.collection('defaultFieldsEntitys'), device: this.mongodb.default.collection('devices'), dog: this.mongodb.default.collection('dogs'), mockedEntity: this.mongodb.__mock.collection('mockedEntitys'), organization: this.mongodb.default.collection('organizations'), post: this.mongodb.default.collection('posts'), user: this.mongodb.default.collection('users') })
   }
   
   
 
 }
 
-export async function mockedDAOContext<MetadataType = any, OperationMetadataType = any>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType>>(params, ['default','__mock'], [])
+
+//--------------------------------------------------------------------------------
+//------------------------------------- UTILS ------------------------------------
+//--------------------------------------------------------------------------------
+
+type DAOName = keyof DAOGenericsMap<never, never>
+type DAOGenericsMap<MetadataType, OperationMetadataType> = {
+  address: AddressDAOGenerics<MetadataType, OperationMetadataType>
+  city: CityDAOGenerics<MetadataType, OperationMetadataType>
+  defaultFieldsEntity: DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>
+  device: DeviceDAOGenerics<MetadataType, OperationMetadataType>
+  dog: DogDAOGenerics<MetadataType, OperationMetadataType>
+  mockedEntity: MockedEntityDAOGenerics<MetadataType, OperationMetadataType>
+  organization: OrganizationDAOGenerics<MetadataType, OperationMetadataType>
+  post: PostDAOGenerics<MetadataType, OperationMetadataType>
+  user: UserDAOGenerics<MetadataType, OperationMetadataType>
+}
+type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
+type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
+  | IncludeGroupMiddleware<N, MetadataType, OperationMetadataType>
+  | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
+type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
+  include: { [K in N]: true }
+  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
+}
+type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
+  exclude: { [K in N]: true }
+  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
+}
+export const groupMiddleware = {
+  includes<N extends DAOName, MetadataType, OperationMetadataType>(
+    include: { [K in N]: true },
+    middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
+  ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
+    return { include, middleware }
+  },
+  excludes<N extends DAOName, MetadataType, OperationMetadataType>(
+    exclude: { [K in N]: true },
+    middleware: ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>['middleware'],
+  ): ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
+    return { exclude, middleware }
+  },
+}
+function selectMiddleware<MetadataType, OperationMetadataType>(
+  name: DAOName,
+  middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<DAOName, MetadataType, OperationMetadataType>)[],
+): DAOContextMiddleware<MetadataType, OperationMetadataType>[] {
+  return middlewares.flatMap((m) =>
+    'include' in m
+      ? Object.keys(m.include).includes(name)
+        ? [m.middleware]
+        : []
+      : 'exclude' in m
+      ? !Object.keys(m.exclude).includes(name)
+        ? [m.middleware as DAOContextMiddleware<MetadataType, OperationMetadataType>]
+        : []
+      : [m],
+  )
+}
+export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
+  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
   return new DAOContext(newParams)
 }

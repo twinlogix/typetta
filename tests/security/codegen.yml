@@ -1,19 +1,21 @@
 overwrite: true
-schema: 'tests/mongodb/schema.graphql'
+schema: 'tests/security/schema.graphql'
 documents: null
 generates:
-  tests/mongodb/models.mock.ts:
+  tests/security/models.mock.ts:
     plugins:
       - 'typescript'
     config:
+      enumsAsConst: true
       namingConvention: keep
       scalars:
+        ID: string
         Date: Date
         Decimal: bignumber.js#BigNumber
-        Coordinates: ../../src#Coordinates
-        LocalizedString: ../../src#LocalizedString
-        Live: boolean
-  tests/mongodb/dao.mock.ts:
+        Email: string
+        Password: string
+        Username: string
+  tests/security/dao.mock.ts:
     config:
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock

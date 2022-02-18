@@ -1,67 +1,9 @@
-import { DefaultModelScalars } from '../../../drivers/drivers.types'
-import { DAOGenerics, IdGenerationStrategy, MiddlewareContext } from '../../dao.types'
-import { projection } from '../../projections/projections.utils'
+import { DAOGenerics, MiddlewareContext } from '../../dao.types'
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 
-export type MultiTenantDAOGenerics<
-  ModelType extends object = any,
-  IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
-  IDScalar extends keyof ScalarsType = any,
-  IdGeneration extends IdGenerationStrategy = any,
-  PureFilterType = any,
-  RawFilterType = any,
-  RelationsType = any,
-  ProjectionType extends object = any,
-  PureSortType = any,
-  RawSortType = any,
-  InsertType extends object = any,
-  PureUpdateType = any,
-  RawUpdateType = any,
-  ExcludedFields extends keyof ModelType = any,
-  RelationsFields extends keyof ModelType = any,
-  MetadataType extends object = any,
-  OperationMetadataType = any,
-  DriverContextType = any,
-  ScalarsType extends DefaultModelScalars = any,
-  DriverFilterOptions = any,
-  DriverFindOptions = any,
-  DriverInsertOptions = any,
-  DriverUpdateOptions = any,
-  DriverReplaceOptions = any,
-  DriverDeleteOptions = any,
-  NameType extends string = any,
-> = DAOGenerics<
-  ModelType,
-  IDKey,
-  IDScalar,
-  IdGeneration,
-  PureFilterType,
-  RawFilterType,
-  RelationsType,
-  ProjectionType,
-  PureSortType,
-  RawSortType,
-  InsertType,
-  PureUpdateType,
-  RawUpdateType,
-  ExcludedFields,
-  RelationsFields,
-  MetadataType,
-  OperationMetadataType,
-  DriverContextType,
-  ScalarsType,
-  DriverFilterOptions,
-  DriverFindOptions,
-  DriverInsertOptions,
-  DriverUpdateOptions,
-  DriverReplaceOptions,
-  DriverDeleteOptions,
-  NameType
->
-
 const ERROR_PREFIX = '[Tenant Middleware] '
-export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdKey extends keyof T['model'] & keyof T['metadata']>(args: {
+export function tenantSecurityPolicy<T extends DAOGenerics, TenantIdKey extends keyof T['model'] & keyof T['metadata']>(args: {
   tenantKey: TenantIdKey
   rawOperations?: 'forbidden' | 'warning' | 'allowed'
 }): DAOMiddleware<T> {
@@ -78,20 +20,10 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
     if (!filter) {
       return { [key]: tenantId }
     }
-    if (typeof filter === 'function') {
-      if (rawOpPolicy === 'forbidden') {
-        throw new Error(`${ERROR_PREFIX}Raw filter is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
-      }
-      if (rawOpPolicy === 'warning') {
-        // TODO: log warning
-      }
-      return filter
-    } else {
-      if (filter[key] && filter[key] !== tenantId) {
-        throw new Error(`${ERROR_PREFIX}Invalid tenant ID in find. Current selected tenant ID is ${tenantId}, but received ${filter[key]} instead.`)
-      }
-      return { $and: [{ [key]: tenantId }, filter] }
+    if (typeof filter === 'object' && filter[key] && filter[key] !== tenantId) {
+      throw new Error(`${ERROR_PREFIX}Invalid tenant ID in find. Current selected tenant ID is ${tenantId}, but received ${filter[key]} instead.`)
     }
+    return { $and: [{ [key]: tenantId }, filter] }
   }
   return buildMiddleware<T>({
     beforeInsert: async (params, context) => {
@@ -101,7 +33,7 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
         return { continue: true, params: { ...params, record: { ...params.record, [key]: tenantId } } }
       }
       if (params.record[key] !== tenantId) {
-        throw new Error(`${ERROR_PREFIX}[Tenant middleware]: Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[key]} instead.`)
+        throw new Error(`${ERROR_PREFIX}Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[key]} instead.`)
       }
     },
     beforeFind: async (params, context) => {
@@ -115,10 +47,15 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
       const filter = elabFilter(params.filter, tenantId)
       if (typeof params.changes === 'function') {
         if (rawOpPolicy === 'forbidden') {
-          throw new Error(`${ERROR_PREFIX}Raw filter is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
+          throw new Error(`${ERROR_PREFIX}Raw changes is disabled. To enable it set "rawOperation: 'warning'" in 'tenantSecurityPolicy' middleware params.`)
         }
-        if (rawOpPolicy === 'warning') {
-          // TODO: log warning
+        if (rawOpPolicy === 'warning' && context.logger) {
+          context.logger({
+            date: new Date(),
+            level: 'warning',
+            dao: context.daoName,
+            raw: `A raw update will be executed while using tenantSecurityPolicy middleware. Unsafe operations could occur.`,
+          })
         }
         return { continue: true, params: { ...params, filter } }
       } else {
@@ -141,6 +78,11 @@ export function tenantSecurityPolicy<T extends MultiTenantDAOGenerics, TenantIdK
       const tenantId = getTenantId(context)
       if (!tenantId) return
       return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) } }
+    },
+    beforeAggregate: async (params, args, context) => {
+      const tenantId = getTenantId(context)
+      if (!tenantId) return
+      return { continue: true, params: { ...params, filter: elabFilter(params.filter, tenantId) }, args }
     },
   })
 }

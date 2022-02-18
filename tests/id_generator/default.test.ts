@@ -1,8 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextEncoder = require('util').TextEncoder
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-global.TextDecoder = require('util').TextDecoder
-
 import { computedField } from '../../src'
 import { DAOContext, mockedDAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
@@ -46,7 +41,7 @@ beforeEach(async () => {
   db = con.db('test')
 
   dao = await mockedDAOContext({
-    mongo: {
+    mongodb: {
       default: db,
       a: db,
     },
