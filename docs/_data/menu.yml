@@ -53,9 +53,8 @@ main:
         title: Computed Fields
       - url: /chapters/advanced/multi-tenancy
         title: Multi Tenancy
-      - url: /chapters/advanced/security-policies
-        title: Security Policies
-        todo: true
+      - url: /chapters/advanced/security
+        title: Security
       - url: /chapters/advanced/type-safety
         title: Type Safety
       - url: /chapters/advanced/graphql

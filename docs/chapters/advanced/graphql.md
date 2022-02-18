@@ -9,6 +9,7 @@ In quanto ORM completamente tipato in grado di supportare proiezioni e filtri co
     - [Un modello unico](#un-modello-unico)
     - [Comodo, conciso ed espressivo](#comodo-conciso-ed-espressivo)
     - [Accesso al dato ottimizzato](#accesso-al-dato-ottimizzato)
+    - [Sicurezza](#sicurezza)
   - [Anatomia di un Resolver](#anatomia-di-un-resolver)
   - [Typetta nell'implementazione dei resolvers](#typetta-nellimplementazione-dei-resolvers)
   
@@ -27,6 +28,8 @@ Typetta condivide molti dei principali concetti con GraphQL e permette quindi di
 ### Accesso al dato ottimizzato
 Un problema tipico nel caricamento dei dati in un back-end GraphQL è dovuto alle performance di N+1 query. Grazie all'utilizzo della tecnologia di [DataLoader](https://github.com/graphql/dataloader){:target="_blank"} esso viene risolto automaticamente da Typetta e non costituisce una criticità.
 
+### Sicurezza
+Uno degli aspetti più critici nello sviluppo di un backend GraphQL è la creazione di uno strato di sicurezza che regolamenti l'accesso ai dati a prescindere da dove inizia la navigazione del grafo. Per fare questo la definizione delle politiche di sicurezza devono necessariamente essere accoppiate al modello dati. Typetta offre la possibilità di definire un livello di [sicurezza](./security.md) direttamente dal `DAOContext` in maniera molto semplice ed espressiva.
 ## Anatomia di un Resolver
 
 Un resolver è una funzione che si occupa di popolare i dati di ogni singolo campo di una richiesta GraphQL. Esso rappresenta l'implementazione delle operazioni GraphQL nell'applicativo di back-end.
