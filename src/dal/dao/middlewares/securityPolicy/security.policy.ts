@@ -3,7 +3,7 @@ import { intersectProjections, mergeProjections } from '../../projections/projec
 
 export type CRUDPermission<T extends DAOGenerics> = {
   read?: boolean | T['projection']
-  write?: boolean
+  create?: boolean
   update?: boolean
   delete?: boolean
 }
@@ -14,7 +14,7 @@ export const PERMISSION = {
       (l, r) => ({
         delete: (l.delete ?? false) && (r.delete ?? false),
         read: intersectProjections(l.read ?? false, r.read ?? false),
-        write: (l.write ?? false) && (r.write ?? false),
+        create: (l.create ?? false) && (r.create ?? false),
         update: (l.update ?? false) && (r.update ?? false),
       }),
       this.ALLOW,
@@ -25,7 +25,7 @@ export const PERMISSION = {
       (l, r) => ({
         delete: (l.delete ?? false) || (r.delete ?? false),
         read: mergeProjections(l.read ?? false, r.read ?? false),
-        write: (l.write ?? false) || (r.write ?? false),
+        create: (l.create ?? false) || (r.create ?? false),
         update: (l.update ?? false) || (r.update ?? false),
       }),
       this.DENY,
@@ -35,37 +35,37 @@ export const PERMISSION = {
   ALLOW: {
     delete: true,
     read: true,
-    write: true,
+    create: true,
     update: true,
   },
   DENY: {
     delete: false,
     read: false,
-    write: false,
+    create: false,
     update: false,
   },
   READ_ONLY: {
     delete: false,
     read: true,
-    write: false,
+    create: false,
     update: false,
   },
-  WRITE_ONLY: {
+  CREATE_ONLY: {
     delete: false,
     read: false,
-    write: true,
+    create: true,
     update: false,
   },
   UPDATE_ONLY: {
     delete: false,
     read: false,
-    write: false,
+    create: false,
     update: true,
   },
   DELETE_ONLY: {
     delete: true,
     read: false,
-    write: false,
+    create: false,
     update: false,
   },
 }

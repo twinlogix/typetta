@@ -31,7 +31,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
         generate: () => uuidv4(),
       },
     },
-    securityPolicy: {
+    security: {
       applySecurity: securityContext != null,
       context: {
         permissions: securityContext ?? {},
@@ -63,7 +63,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
             userId: null,
           },
           permissions: {
-            MANAGE_ROOM: { write: true },
+            MANAGE_ROOM: { create: true },
           },
         },
       },

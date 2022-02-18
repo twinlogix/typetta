@@ -22,8 +22,8 @@ export type DAOSecurityPolicy<T extends DAOGenerics, Permissions extends string,
 
 export type DAOContextSecurtyPolicy<DAOGenericsMap extends { [K in string]: DAOGenerics }, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
   applySecurity?: boolean
-  context: DAOSecurityContext<SecurityDomain, Permissions>
-  policies: {
+  context?: DAOSecurityContext<SecurityDomain, Permissions>
+  policies?: {
     [K in keyof DAOGenericsMap]?: DAOSecurityPolicy<DAOGenericsMap[K], Permissions, SecurityDomain>
   }
   defaultPermission?: CRUDPermission<DAOGenericsMap[keyof DAOGenericsMap]>
