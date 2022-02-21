@@ -1,4 +1,4 @@
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware, softDelete, audit } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware, softDelete, audit, selectMiddleware } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
 import { Scalars, State, User } from './models.mock'
@@ -1415,6 +1415,44 @@ test('Audit middlewares', async () => {
   expect(hotels3.length).toBe(2)
   expect(hotels3[0].audit.deletedOn).toBe(3)
   expect(hotels3[0].audit.modifiedBy).toBe('userId3')
+
+  await dao2.hotel.insertOne({ record: { name: 'H3' } })
+  await dao2.hotel.replaceOne({ replace: { name: 'H4' }, filter: { name: 'H3' } })
+  const h4 = await dao2.hotel.aggregate({ by: { 'audit.modifiedBy': true }, aggregations: { c: { operation: 'count' } } })
+  expect(h4[0]['audit.modifiedBy']).toBe('userId1')
+})
+
+test('Audit middlewares', async () => {
+  const dao2 = new DAOContext<never, { opts: 1 | 2 }>({
+    mongodb: {
+      default: db,
+      __mock: db,
+    },
+    scalars,
+    overrides: {
+      city: {
+        middlewares: [
+          selectMiddleware((args) => {
+            if (args.params.metadata?.opts === 1) {
+              return computedField({
+                fieldsProjection: { computedName: true },
+                requiredProjection: { name: true },
+                compute: async (city) => ({ computedName: `Computed: ${city.name}` }),
+              })
+            }
+          }),
+        ],
+      },
+    },
+  })
+
+  await dao2.city.insertOne({ record: { id: 'cesena', name: 'Cesena', addressId: 'address1' } })
+
+  const cesena1 = await dao2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true }, metadata: { opts: 1 } })
+  const cesena2 = await dao2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true } })
+
+  expect(cesena1?.computedName).toBe('Computed: Cesena')
+  expect(cesena2?.computedName).toBe(undefined)
 })
 
 // ------------------------------------------------------------------------
