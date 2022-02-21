@@ -73,7 +73,7 @@
     "mongodb-memory-server": "8.2.0"
   },
   "peerDependencies": {
-    "knex": "1.0.2",
+    "knex": "1.0.3",
     "mongodb": "4.3.1"
   },
   "resolutions": {
