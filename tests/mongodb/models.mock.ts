@@ -27,6 +27,16 @@ export type Address = {
   id: Scalars['ID'];
 };
 
+export type Auditable = {
+  __typename?: 'Auditable';
+  createdBy: Scalars['String'];
+  createdOn: Scalars['Int'];
+  deletedOn?: Maybe<Scalars['Int']>;
+  modifiedBy: Scalars['String'];
+  modifiedOn: Scalars['Int'];
+  state: State;
+};
+
 export type City = {
   __typename?: 'City';
   addressId: Scalars['ID'];
@@ -60,6 +70,13 @@ export type Dog = {
   name: Scalars['String'];
   owner?: Maybe<User>;
   ownerId: Scalars['ID'];
+};
+
+export type Hotel = {
+  __typename?: 'Hotel';
+  audit: Auditable;
+  id: Scalars['ID'];
+  name: Scalars['String'];
 };
 
 export type MockedEntity = {
@@ -96,6 +113,13 @@ export type PostMetadata = {
   region: Scalars['String'];
   visible: Scalars['Boolean'];
 };
+
+export enum State {
+  ACTIVE = 'ACTIVE',
+  DELETED = 'DELETED',
+  DRAFT = 'DRAFT',
+  INACTIVE = 'INACTIVE'
+}
 
 export type User = {
   __typename?: 'User';
