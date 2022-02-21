@@ -92,3 +92,25 @@ type DefaultFieldsEntity @entity @mongodb {
   opt1: Live @default(from: "middleware")
   opt2: Live @default(from: "generator")
 }
+
+enum State {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  DELETED
+}
+
+type Auditable {
+  createdOn: Int!
+  modifiedOn: Int!
+  createdBy: String!
+  modifiedBy: String!
+  deletedOn: Int
+  state: State!
+}
+
+type Hotel @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  name: String!
+  audit: Auditable! @default(from: "middleware")
+}

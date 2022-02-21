@@ -1,7 +1,7 @@
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware, softDelete, audit } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserProjection } from './dao.mock'
-import { Scalars, User } from './models.mock'
+import { Scalars, State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128 } from 'mongodb'
@@ -542,9 +542,7 @@ test('Insert default', async () => {
     },
     overrides: {
       defaultFieldsEntity: {
-        middlewares: [
-          defaultValueMiddleware('creationDate', () => 1234),
-        ],
+        middlewares: [defaultValueMiddleware('creationDate', () => 1234)],
       },
     },
   })
@@ -552,11 +550,11 @@ test('Insert default', async () => {
   const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
   expect(e2.live).toBe(true)
   expect(e2.creationDate).toBe(1234)
-  expect(e2.opt1).toBe(undefined)  
-  expect(e2.opt2).toBe(true)  
+  expect(e2.opt1).toBe(undefined)
+  expect(e2.opt2).toBe(true)
 
   const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
-  expect(e3.opt1).toBe(undefined)  
+  expect(e3.opt1).toBe(undefined)
 })
 
 test('update validation fails', async () => {
@@ -848,6 +846,9 @@ test('middleware 1', async () => {
                 }
               }
               if (args.operation === 'find') {
+                if (context.specificOperation === 'exists') {
+                  return
+                }
                 return {
                   continue: true,
                   operation: 'find',
@@ -1339,6 +1340,81 @@ test('Mock entity', async () => {
   await dao.mockedEntity.insertOne({ record: { name: 'name', userId: user.id } })
   const mocked = await dao.mockedEntity.findAll({ projection: { user: true } })
   expect(mocked[0].user.firstName).toBe('FirstName')
+})
+
+test('Soft delete middleware', async () => {
+  const dao2 = new DAOContext({
+    mongodb: {
+      default: db,
+      __mock: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [softDelete(() => ({ changes: { live: false }, filter: { live: true } }))],
+      },
+    },
+  })
+
+  await dao2.user.insertOne({ record: { live: true, firstName: 'Mario' } })
+  await dao2.user.insertOne({ record: { live: true, firstName: 'Luigi' } })
+
+  const users = await dao2.user.findAll()
+  expect(users.length).toBe(2)
+
+  await dao2.user.deleteOne({ filter: { firstName: 'Mario' } })
+
+  const deletedUser = await dao.user.findAll({ filter: { live: false } })
+  expect(deletedUser.length).toBe(1)
+  expect(deletedUser[0].firstName).toBe('Mario')
+
+  const liveUsers = await dao2.user.findAll({ filter: { firstName: { $in: ['Mario', 'Luigi'] } } })
+  expect(liveUsers.length).toBe(1)
+  expect(liveUsers[0].firstName).toBe('Luigi')
+})
+
+test('Audit middlewares', async () => {
+  const dao2 = new DAOContext({
+    mongodb: {
+      default: db,
+      __mock: db,
+    },
+    scalars,
+    overrides: {
+      hotel: {
+        middlewares: [
+          softDelete(() => ({ changes: { 'audit.deletedOn': 3, 'audit.state': State.DELETED, 'audit.modifiedBy': 'userId3' }, filter: { 'audit.state': { $ne: State.DELETED } } })),
+          audit(() => ({
+            changes: { 'audit.modifiedOn': 2, 'audit.modifiedBy': 'userId2' },
+            insert: { audit: { createdBy: 'userId1', createdOn: 1, modifiedBy: 'userId1', modifiedOn: 1, state: State.ACTIVE } },
+          })),
+        ],
+      },
+    },
+  })
+
+  await dao2.hotel.insertOne({ record: { name: 'h1' } })
+  await dao2.hotel.insertOne({ record: { name: 'H2' } })
+
+  const hotels = await dao2.hotel.findAll()
+  expect(hotels.length).toBe(2)
+  expect(hotels[0].audit.createdBy).toBe('userId1')
+  expect(hotels[0].audit.createdOn).toBe(1)
+  expect(hotels[0].audit.modifiedOn).toBe(1)
+
+  await dao2.hotel.updateOne({ filter: { name: 'h1' }, changes: { name: 'H1' } })
+  const h1 = await dao2.hotel.findOne({ filter: { name: 'H1' } })
+  expect(h1?.audit.modifiedOn).toBe(2)
+  expect(h1?.audit.modifiedBy).toBe('userId2')
+
+  await dao2.hotel.deleteAll({ filter: { name: { $in: ['H1', 'H2'] } } })
+  const hotels2 = await dao2.hotel.findAll()
+  expect(hotels2.length).toBe(0)
+
+  const hotels3 = await dao.hotel.findAll()
+  expect(hotels3.length).toBe(2)
+  expect(hotels3[0].audit.deletedOn).toBe(3)
+  expect(hotels3[0].audit.modifiedBy).toBe('userId3')
 })
 
 // ------------------------------------------------------------------------

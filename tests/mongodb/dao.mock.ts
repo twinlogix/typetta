@@ -426,6 +426,129 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------ HOTEL -------------------------------------
+//--------------------------------------------------------------------------------
+
+export type HotelExcludedFields = never
+export type HotelRelationFields = never
+
+export const hotelSchema: Schema<types.Scalars> = {
+  'audit': {
+    embedded: {
+      'createdBy': {
+        scalar: 'String', 
+        required: true
+      },
+      'createdOn': {
+        scalar: 'Int', 
+        required: true
+      },
+      'deletedOn': {
+        scalar: 'Int'
+      },
+      'modifiedBy': {
+        scalar: 'String', 
+        required: true
+      },
+      'modifiedOn': {
+        scalar: 'Int', 
+        required: true
+      },
+      'state': {
+        scalar: 'String', 
+        required: true
+      }
+    }, 
+    required: true, 
+    defaultGenerationStrategy: 'middleware'
+  },
+  'id': {
+    scalar: 'ID', 
+    required: true, 
+    alias: '_id'
+  },
+  'name': {
+    scalar: 'String', 
+    required: true
+  }
+};
+
+type HotelFilterFields = {
+  'audit.createdBy'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'audit.createdOn'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'audit.deletedOn'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'audit.modifiedBy'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'audit.modifiedOn'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'audit.state'?: types.State | null | EqualityOperators<types.State> | ElementOperators | StringOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
+};
+export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields | HotelRawFilter>
+export type HotelRawFilter = () => Filter<Document>
+
+export type HotelRelations = Record<never, string>
+
+export type HotelProjection = {
+  audit?: {
+    createdBy?: boolean,
+    createdOn?: boolean,
+    deletedOn?: boolean,
+    modifiedBy?: boolean,
+    modifiedOn?: boolean,
+    state?: boolean,
+  } | boolean,
+  id?: boolean,
+  name?: boolean,
+}
+export type HotelParam<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
+
+export type HotelSortKeys = 'audit.createdBy' | 'audit.createdOn' | 'audit.deletedOn' | 'audit.modifiedBy' | 'audit.modifiedOn' | 'audit.state' | 'id' | 'name';
+export type HotelSort = OneKey<HotelSortKeys, SortDirection>;
+export type HotelRawSort = () => Sort
+
+export type HotelUpdate = {
+  'audit'?: types.Auditable,
+  'audit.createdBy'?: types.Scalars['String'],
+  'audit.createdOn'?: types.Scalars['Int'],
+  'audit.deletedOn'?: types.Scalars['Int'] | null,
+  'audit.modifiedBy'?: types.Scalars['String'],
+  'audit.modifiedOn'?: types.Scalars['Int'],
+  'audit.state'?: types.State,
+  'id'?: types.Scalars['ID'],
+  'name'?: types.Scalars['String']
+};
+export type HotelRawUpdate = () => UpdateFilter<Document>
+
+export type HotelInsert = {
+  audit?: types.Auditable,
+  name: types.Scalars['String'],
+};
+
+type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', 'db', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel'>;
+export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  public constructor(params: HotelDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: hotelSchema, 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    });
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //--------------------------------- MOCKEDENTITY ---------------------------------
 //--------------------------------------------------------------------------------
 
@@ -906,6 +1029,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     defaultFieldsEntity?: Pick<Partial<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     dog?: Pick<Partial<DogDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    hotel?: Pick<Partial<HotelDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     mockedEntity?: Pick<Partial<MockedEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
@@ -913,7 +1037,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
   },
   mongodb: Record<'default' | '__mock', Db>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
-  log?: LogInput<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
+  log?: LogInput<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
   security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 };
 
@@ -926,6 +1050,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _defaultFieldsEntity: DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> | undefined;
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined;
   private _dog: DogDAO<MetadataType, OperationMetadataType> | undefined;
+  private _hotel: HotelDAO<MetadataType, OperationMetadataType> | undefined;
   private _mockedEntity: MockedEntityDAO<MetadataType, OperationMetadataType> | undefined;
   private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined;
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined;
@@ -936,7 +1061,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
-  private logger?: LogFunction<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'mockedEntity' | 'organization' | 'post' | 'user'>
+  private logger?: LogFunction<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>
   
   get address() {
     if(!this._address) {
@@ -967,6 +1092,12 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
       this._dog = new DogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, collection: this.mongodb.default.collection('dogs'), middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger });
     }
     return this._dog;
+  }
+  get hotel() {
+    if(!this._hotel) {
+      this._hotel = new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: this.mongodb.default.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger });
+    }
+    return this._hotel;
   }
   get mockedEntity() {
     if(!this._mockedEntity) {
@@ -1009,8 +1140,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { mongodb: Record<'default' | '__mock', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; defaultFieldsEntity: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; mockedEntity: Collection<Document>; organization: Collection<Document>; post: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongodb: this.mongodb }, { address: this.mongodb.default.collection('addresses'), city: this.mongodb.default.collection('citys'), defaultFieldsEntity: this.mongodb.default.collection('defaultFieldsEntitys'), device: this.mongodb.default.collection('devices'), dog: this.mongodb.default.collection('dogs'), mockedEntity: this.mongodb.__mock.collection('mockedEntitys'), organization: this.mongodb.default.collection('organizations'), post: this.mongodb.default.collection('posts'), user: this.mongodb.default.collection('users') })
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'default' | '__mock', Db> }, entities: { address: Collection<Document>; city: Collection<Document>; defaultFieldsEntity: Collection<Document>; device: Collection<Document>; dog: Collection<Document>; hotel: Collection<Document>; mockedEntity: Collection<Document>; organization: Collection<Document>; post: Collection<Document>; user: Collection<Document> }) => Promise<T>): Promise<T> {
+    return run({ mongodb: this.mongodb }, { address: this.mongodb.default.collection('addresses'), city: this.mongodb.default.collection('citys'), defaultFieldsEntity: this.mongodb.default.collection('defaultFieldsEntitys'), device: this.mongodb.default.collection('devices'), dog: this.mongodb.default.collection('dogs'), hotel: this.mongodb.default.collection('hotels'), mockedEntity: this.mongodb.__mock.collection('mockedEntitys'), organization: this.mongodb.default.collection('organizations'), post: this.mongodb.default.collection('posts'), user: this.mongodb.default.collection('users') })
   }
   
   
@@ -1029,6 +1160,7 @@ type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   defaultFieldsEntity: DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>
   device: DeviceDAOGenerics<MetadataType, OperationMetadataType>
   dog: DogDAOGenerics<MetadataType, OperationMetadataType>
+  hotel: HotelDAOGenerics<MetadataType, OperationMetadataType>
   mockedEntity: MockedEntityDAOGenerics<MetadataType, OperationMetadataType>
   organization: OrganizationDAOGenerics<MetadataType, OperationMetadataType>
   post: PostDAOGenerics<MetadataType, OperationMetadataType>

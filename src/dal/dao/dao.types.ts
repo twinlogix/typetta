@@ -103,7 +103,9 @@ export type MiddlewareContext<T extends DAOGenerics> = {
   idField: T['idKey']
   driver: T['driverContext']
   metadata?: T['metadata']
+  specificOperation: 'findAll' | 'findOne' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'replaceAll' | 'deleteOne' | 'deleteAll' | 'aggregate' | 'count' | 'exists' | 'findPage'
   logger?: LogFunction<T['name']>
+  dao: DAO<T>
 }
 
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
