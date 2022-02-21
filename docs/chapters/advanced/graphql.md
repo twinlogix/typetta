@@ -30,6 +30,7 @@ Un problema tipico nel caricamento dei dati in un back-end GraphQL è dovuto all
 
 ### Sicurezza
 Uno degli aspetti più critici nello sviluppo di un backend GraphQL è la creazione di uno strato di sicurezza che regolamenti l'accesso ai dati a prescindere da dove inizia la navigazione del grafo. Per fare questo la definizione delle politiche di sicurezza devono necessariamente essere accoppiate al modello dati. Typetta offre la possibilità di definire un livello di [sicurezza](./security.md) direttamente dal `DAOContext` in maniera molto semplice ed espressiva.
+
 ## Anatomia di un Resolver
 
 Un resolver è una funzione che si occupa di popolare i dati di ogni singolo campo di una richiesta GraphQL. Esso rappresenta l'implementazione delle operazioni GraphQL nell'applicativo di back-end.
