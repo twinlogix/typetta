@@ -75,3 +75,5 @@ type RecursiveKeyOfHandleValue<TValue, Text extends string, D extends number> = 
   : TValue extends object
   ? Text | `${Text}${RecursiveKeyOfInner<TValue, D>}`
   : Text
+
+export type OmitIfKnown<T, K extends keyof T> = [K] extends [any] ? any : Omit<T, K>

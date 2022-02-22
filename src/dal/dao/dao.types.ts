@@ -6,6 +6,7 @@ import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { GraphQLResolveInfo } from 'graphql'
+import { OmitIfKnown } from '../../utils/utils.types'
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
@@ -128,7 +129,7 @@ export interface DAO<T extends DAOGenerics> {
 
 export type DAOGenerics<
   ModelType extends object = any,
-  IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
+  IDKey extends keyof OmitIfKnown<ModelType, ExcludedFields> = any,
   IDScalar extends keyof ScalarsType = any,
   IdGeneration extends IdGenerationStrategy = any,
   PureFilterType = any,
