@@ -1,4 +1,5 @@
 import { transformObject } from '../../../../generation/utils'
+import { filterUndefiend, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { LogArgs } from '../../../dao/log/log.types'
@@ -8,7 +9,6 @@ import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
 import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
 import { Collection, Document, WithId, Filter, FindOptions, OptionalId, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
-import { filterUndefiend } from '../../../../utils/utils'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
   private collection: Collection
@@ -96,22 +96,24 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
         throw new Error("'by' params must contains at least one key.")
       }
       const groupKeys: { [key: string]: string } = {}
-      const byKeys = Object.keys(params.by || {})
+      const byKeys = Object.keys(params.by ?? {})
       const groupId = params.by
-        ? byKeys.reduce<object>((p, k) => {
+        ? mapObject(params.by, (p) => {
+            const k = p[0].toString()
             const mappedName = k.split('.').join('_')
             if (mappedName !== k) {
               groupKeys[k] = mappedName
             }
-            return { ...p, [mappedName]: `$${modelNameToDbName(k, this.schema)}` }
-          }, {})
+            return [[mappedName, `$${modelNameToDbName(k, this.schema)}`]]
+          })
         : {}
-      const aggregation = Object.entries(params.aggregations).reduce<object>((p, [k, v]) => {
+
+      const aggregation = mapObject(params.aggregations, ([k, v]) => {
         if (v.operation === 'count' && v.field) {
           throw new Error('field value is not supported with aggregate count operation (MongoDB)')
         }
-        return { ...p, [k]: v.operation === 'count' ? { [`$${v.operation}`]: {} } : { [`$${v.operation}`]: `$${modelNameToDbName(v.field as string, this.schema)}` } }
-      }, {})
+        return [[k, v.operation === 'count' ? { [`$${v.operation}`]: {} } : { [`$${v.operation}`]: `$${modelNameToDbName(v.field as string, this.schema)}` }]]
+      })
 
       const sort = args?.sorts
         ? [
@@ -155,12 +157,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
             return mappedResults as AggregateResults<T, A>
           } else {
             if (mappedResults.length === 0) {
-              return Object.keys(params.aggregations).reduce((p, k) => {
-                return {
-                  ...p,
-                  [k]: params.aggregations[k].operation === 'count' ? 0 : null,
-                }
-              }, {}) as AggregateResults<T, A>
+              return mapObject(params.aggregations, ([k, v]) => [[k, v.operation === 'count' ? 0 : null]]) as AggregateResults<T, A>
             }
             return mappedResults[0] as AggregateResults<T, A>
           }
@@ -178,7 +175,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
         async () => {
           const result = await this.collection.insertOne(record, options)
           const inserted = await this.collection.findOne({ _id: result.insertedId }, options)
-          if(!inserted) {
+          if (!inserted) {
             throw new Error(`One just inserted document with id ${result.insertedId.toHexString()} was not retrieved correctly.`)
           }
           return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>

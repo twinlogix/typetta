@@ -341,8 +341,6 @@ test('security test 4', async () => {
 })
 
 afterEach(async () => {
-  if (mongodb.connection) {
-    await mongodb.connection.close()
-    await mongodb.replSet.stop()
-  }
+  await mongodb.connection.close()
+  await mongodb.replSet.stop()
 })

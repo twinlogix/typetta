@@ -1,5 +1,6 @@
 import { LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
+import { filterUndefiend, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators } from '../../../dao/filters/filters.types'
@@ -19,7 +20,6 @@ import {
 } from './utils.knexjs'
 import { Knex } from 'knex'
 import { PartialDeep } from 'type-fest'
-import { filterUndefiend } from '../../../../utils/utils'
 
 type AbstractFilter = {
   [key: string]: any | null | EqualityOperators<any> | QuantityOperators<any> | ElementOperators
@@ -175,12 +175,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
           return results as AggregateResults<T, A>
         } else {
           if (results.length === 0) {
-            return Object.keys(params.aggregations).reduce((p, k) => {
-              return {
-                ...p,
-                [k]: params.aggregations[k].operation === 'count' ? 0 : null,
-              }
-            }, {}) as AggregateResults<T, A>
+            return mapObject(params.aggregations, ([k, v]) => [[k, v.operation === 'count' ? 0 : null]]) as AggregateResults<T, A>
           }
           return results[0] as AggregateResults<T, A>
         }

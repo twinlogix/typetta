@@ -228,3 +228,7 @@ export async function createMockedDAOContext<T extends object>(params: MockDAOCo
 export function filterUndefiend<T extends object>(obj: T): T {
   return Object.fromEntries(Object.entries(obj).filter((v) => v[1] !== undefined)) as T
 }
+
+export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [string, T[keyof T]]) => [string, unknown][]): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(obj).flatMap(([k, v]) => f([k, v as T[keyof T]])))
+}

@@ -16,7 +16,7 @@ export function findNode(code: string, typesMap: Map<string, TsTypettaGeneratorN
 
 export function getID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField {
   const field = node.fields.find((field) => field.isID)
-  if(!field) {
+  if (!field) {
     throw new Error(`Id field in node ${node.name} not found!`)
   }
   return field
@@ -24,7 +24,7 @@ export function getID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField {
 
 export function getNode(code: string, typesMap: Map<string, TsTypettaGeneratorNode>): TsTypettaGeneratorNode {
   const node = typesMap.get(code)
-  if(!node) {
+  if (!node) {
     throw new Error(`Node with code ${code} not found!`)
   }
   return node
@@ -68,9 +68,11 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
 ): To {
   const result: any = {}
   const keySet = new Set(Object.keys(object))
+  const isModelToDB = direction === 'modelToDB'
+  const isDbToModel = !isModelToDB
   for (const [fieldName, schemaField] of Object.entries(schema)) {
-    const sourceName = schemaField.alias && direction === 'dbToModel' ? schemaField.alias : fieldName
-    const destName = schemaField.alias && direction === 'modelToDB' ? schemaField.alias : fieldName
+    const sourceName = schemaField.alias && isDbToModel ? schemaField.alias : fieldName
+    const destName = schemaField.alias && isModelToDB ? schemaField.alias : fieldName
     if (sourceName in object) {
       const value = object[sourceName]
       keySet.delete(sourceName)
@@ -79,10 +81,11 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
       } else {
         if ('scalar' in schemaField) {
           const adapter = adapters[schemaField.scalar] ?? identityAdapter
+          const validator = adapter.validate
           const mapper =
-            direction === 'modelToDB' && adapter.validate
+            validator && isModelToDB
               ? (data: ModelScalars[keyof ModelScalars]) => {
-                  const validation = adapter.validate!(data)
+                  const validation = validator(data)
                   if (validation === true) {
                     return adapter.modelToDB(data)
                   }
