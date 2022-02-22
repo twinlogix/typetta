@@ -3,9 +3,12 @@
 La gestione della **multi tenancy** è un problema estremamente comune nei moderni sistemi cloud e consiste nel servire più utenti (tenant) con un'unica architettura software quindi, per quanto riguarda Typetta, un un'unico strato di accesso al dato.
 
 Ci sono tre approcci alla gestione della multi tenancy:
-- *Database separati*: la base dati di ogni tenant è su un database dedicato a lui.
-- *Schema separati*: la base dati di ogni tenant sono su schema diversi di un unico database.
-- *Partizionamento*: tutti i tenant sono su un unico database e un unico schema partizionato grazie ad un campo detto discriminatore.
+
+- **Database separati**: la base dati di ogni tenant è su un database dedicato a lui.
+
+- **Schema separati**: la base dati di ogni tenant sono su schema diversi di un unico database.
+
+- **Partizionamento**: tutti i tenant sono su un unico database e un unico schema partizionato grazie ad un campo detto discriminatore.
 
 ## Partizionamento
 

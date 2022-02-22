@@ -1,8 +1,7 @@
 # Security
 
-Il concetto di sicurezza nell'accesso al dato può essere inteso a diversi livelli. In questo caso parliamo di sicurezza come un'insieme di regole che, a partire dall'identità per la quale si interroga il dato, sono in grado di stabilire se l'operazione richiesta è ammessa o vietata.
+Il concetto di **sicurezza dei dati** può essere inteso a diversi livelli. In Typetta parliamo di sicurezza come un'insieme di regole che, a partire dall'identità per la quale si interrogano le sorgenti dati, sono in grado di stabilire se le operazioni richieste sono ammesse o vietate.
 
-- [Security](#security)
   - [Typetta, GraphQL e Sicurezza](#typetta-graphql-e-sicurezza)
   - [Definizioni e Concetti](#definizioni-e-concetti)
     - [Esempio pratico](#esempio-pratico)
@@ -15,11 +14,11 @@ Il concetto di sicurezza nell'accesso al dato può essere inteso a diversi livel
   - [Note implementative](#note-implementative)
   
 ## Typetta, GraphQL e Sicurezza
-Implementare politiche di sicurezza all'interno dello strato di accesso al dato è un'opportunità utile allo sviluppo di qualsiasi back-end, che diventa quasi una necessità per chi cerca di implementare back-end GraphQL.
+Implementare **politiche di sicurezza** all'interno dello strato di accesso al dato è un'opportunità utile allo sviluppo di qualsiasi back-end, che diventa quasi una necessità per chi cerca di implementare back-end GraphQL.
 
 In GraphQL, infatti, ogni query permette all'utente di richiedere una porzione del grafo, generalmente senza restrizioni di profondità. Se la risoluzione delle entità connesse e relative relazioni è gestita da una libreria, così come avviene in Typetta e nella maggior parte dei moderni ORM, allora è in questo processo che occorre definire le politiche di sicurezza. Farlo a livello di singolo resolver risulterebbe estremamente complesso, ripetitivo, poco monutenibile e poco performante.
 
-Typetta offre quindi la possibilità di definire un livello di sicurezza direttamente all'interno del `DAOContext` e lo fa come sempre in maniera completamente type-safe.
+Typetta offre quindi la possibilità di definire un livello di sicurezza direttamente all'interno del `DAOContext` e lo fa come sempre in maniera completamente **type-safe**.
 
 ## Definizioni e Concetti
 
@@ -38,7 +37,7 @@ Parlando di sicurezza, in Typetta ci riferiamo ai sequenti concetti:
 - **Security Policy**: è l'insieme delle regole che determina l'autorizzazione o il divieto ad accedere ad una specifica `resource` a seconda dell'insieme di `permissions` a disposizione dell'`identity` per cui è richiesto l'accesso.
 
 ### Esempio pratico
-Di seguito un modello dati di esempio e la relativa mappatura di tutti i concetti precedentemente definiti:
+Di seguito un modello dati d'esempio che mostra tutti i concetti defini precedentemente:
 ```typescript
 type User {
   id: ID!
@@ -64,9 +63,9 @@ type Post {
 }
 ```
 
-Dato il modello di cui sopra, possiamo dire che ogni utente di tipo `User` è un'`identity` del sistema e i post sono le `resources` da mettere in sicurezza. Abbiamo poi due `permissions`, `VIEW_POSTS` e `MANAGE_POSTS`, che possono essere assegnate ad ogni utente e che possono far riferimento a qualsiasi post o ai post creati dall'utente stesso.
+Dato il modello di cui sopra, possiamo dire che ogni utente di tipo `User` è un'`identity` del sistema e i suoi post sono le `resources` da mettere in sicurezza. Abbiamo poi due `permissions`, `VIEW_POSTS` e `MANAGE_POSTS`, che possono essere assegnate agli utenti e identificano le operazioni che questi possono eseguire.
 
-Ipotizziamo ora di avere due utenti a sistema, definiti dalle seguenti due istanze di `User`:
+Ipotizziamo ora di avere due utenti all'interno del sistema, definiti dalle seguenti due istanze di `User`:
 ```typescript
 const mattia : User = {
   id: '1',
@@ -83,11 +82,11 @@ const edoardo : User = {
 }
 ```
 
-Questa configurazione indica che l'utente `Mattia` ha il permesso di vedere e gestire tutti i post del sistema, in quanto la sue permissions non hanno alcuna restrizione, mentre l'utente `Edoardo` può vedere tutti i post del sistema ma può gestire solo quelli prodotti da lui stesso.
+Questa configurazione indica che l'utente `Mattia` ha il permesso di leggere e gestire tutti i post del sistema, in quanto la sue permissions non hanno alcuna restrizione, mentre l'utente `Edoardo` può leggere tutti i post del sistema ma può gestire solo quelli prodotti da lui stesso.
 
-In questo esempio vediamo il concetto di `security domain` applicato alla permission `MANAGE_POSTS` dell'utente `Edoardo`. Essa è assegnata ad un solo gruppo di risorse: "tutti i post dell'utente con id pari a 2".
+In questo esempio è mostrato implicitamente il concetto di `security domain` applicato alla permission `MANAGE_POSTS` dell'utente `Edoardo`. Essa è infatti assegnata ad un solo gruppo di risorse: "tutti i post dell'utente con id pari a 2".
 
-Possiamo quindi immaginare, per ognuno dei due utenti, un relativo `security context`: 
+Possiamo quindi immaginare, per ognuno dei due utenti, il relativo `security context`: 
 ```typescript
 const mattiaSecurityContext = {
   userId: '1',
@@ -104,7 +103,7 @@ const edoardoSecurityContext = {
   }
 }
 ```
-Come si può vedere, il `security context` non è altro che un estratto delle informazioni riguardanti l'`identity` utili a determinare se essa può o meno accedere alle `resources`. Nel caso specifico ogni permission è collegata ad uno specifico `security domain` oppure al valore `true`, che indica tutte le risorse senza restrizioni di dominio.
+Il `security context` non è altro che un estratto delle informazioni riguardanti l'`identity`, utili a determinare se essa può o meno accedere alle `resources`. Nel caso specifico ogni permission è collegata ad un `security domain` oppure al valore `true`, che indica tutte le risorse senza restrizioni di dominio.
 
 L'ultima componente dello strato di sicurezza è la `security policy`. La risorsa che si vuole mettere in sicurezza è l'entità `Post`, perciò ocorre definire una `security policy` per questa entità che contenga l'insieme delle regole che determinano l'autorizzazione o il divieto di accesso ad essa.
 
@@ -129,7 +128,7 @@ const postSecurityPolicy = {
 ```
 
 In questo modo abbiamo definito che:
-- tutti gli utenti con la permission `MANAGE_POSTS` possono effettuare ogni operazione CRUD su entità del loro `security domain`.
+- tutti gli utenti con la permission `MANAGE_POSTS` possono effettuare tutte le operazioni CRUD su entità del loro `security domain`.
 - tutti gli utenti con la permission `VIEW_POSTS` possono effettuare solamente la lettura su entità del loro `security domain`.
 
 ## Come abilitare la sicurezza?
@@ -265,7 +264,7 @@ const daoContext = new DAOContext({
 )
 ```
 
-Si noti che il `security context` in questo caso non è solamente un array di `permissions`, ma una mappa in cui per ogni permission è possibile restringere il dominio di applicazione. La specifica `'MANAGE_POSTS': [{ userId: 2}]` è da intendersi come: l'`identity` corrente ha la `permission` `MENAGE_POSTS` per tutte le `resources` che hanno il campo `userId = 2`. Il valore `true`, invece, indica che la specifica `permission` non ha alcuna restrizione di dominio.
+Si noti che il `security context` in questo caso non è solamente un array di `permissions`, ma una mappa in cui per ogni `permission` è possibile restringere il dominio di applicazione. La specifica `'MANAGE_POSTS': [{ userId: 2}]` è da intendersi come: l'`identity` corrente ha la `permission` `MENAGE_POSTS` per tutte le `resources` che hanno il campo `userId = 2`. Il valore `true`, invece, indica che la specifica `permission` non ha alcuna restrizione di dominio.
 
 Data questa configurazione, quindi, il sistema autorizzerà l'utente ad effettuare qualsiasi operazione sui suoi post, mentre la sola operazione di lettura su tutti gli altri.
 
@@ -372,6 +371,7 @@ const posts = dao.post.findAll({
 });
 ```
 Questa richiesta non genera alcun errore e, al contrario, ritorna tutti i post dell'utente 2 e di questi post tutti i campi in quanto ammessi dalla `permission` `VIEW_POSTS`.
+
 ## Note implementative
 Lo strato di sicurezza di Typetta è completamente implementato attraverso il meccanismo dei [middlewares](../client/middlewares.md), di cui rappresenta un ottimo esempio. 
 
