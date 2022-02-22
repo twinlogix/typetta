@@ -47,14 +47,20 @@ main:
   - advanced:
     title: Advanced Topics
     children:
+      - url: /chapters/advanced/security
+        title: Security
+      - url: /chapters/advanced/multi-tenancy
+        title: Multi Tenancy
+      - url: /chapters/advanced/soft-delete
+        title: Soft Delete
+        todo: true
+      - url: /chapters/advanced/audit
+        title: Audit
+        todo: true
       - url: /chapters/advanced/projection-dependency
         title: Projection Dependency
       - url: /chapters/advanced/computed-fields
         title: Computed Fields
-      - url: /chapters/advanced/multi-tenancy
-        title: Multi Tenancy
-      - url: /chapters/advanced/security
-        title: Security
       - url: /chapters/advanced/type-safety
         title: Type Safety
       - url: /chapters/advanced/graphql
