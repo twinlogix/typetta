@@ -1,10 +1,11 @@
 import { DAOGenerics, DAOParams, IdGenerationStrategy } from '../../../dao/dao.types'
 import { DefaultModelScalars } from '../../drivers.types'
 import { Collection, CountOptions, DeleteOptions, FindOptions, InsertOneOptions, ReplaceOptions, UpdateOptions } from 'mongodb'
+import { OmitIfKnown } from '../../../../utils/utils.types'
 
 export type MongoDBDAOGenerics<
   ModelType extends object = any,
-  IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
+  IDKey extends keyof OmitIfKnown<ModelType, ExcludedFields> = any,
   IDScalar extends keyof ScalarsType = any,
   IdGeneration extends IdGenerationStrategy = any,
   PureFilterType = any,
