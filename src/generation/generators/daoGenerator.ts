@@ -43,7 +43,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       const dao = this._generateDAO(node, typesMap)
       return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
-      return ''
+      const daoProjection = this._generateDAOProjection(node, typesMap)
+      const daoSchema = this._generateDAOSchema(node, typesMap)
+      return [daoSchema, daoProjection].join('\n\n')
     }
   }
 
@@ -76,7 +78,13 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const loggerParams = `,\nlog?: LogInput<${daoNamesType}>`
     const securityPolicyParam = ',\nsecurity?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>'
     const dbsInputParam =
-      hasMongoDBEntites && hasSQLEntities ? `mongodb: ${mongoSourcesType}; knex: ${sqlSourcesType}` : hasSQLEntities ? `knex: ${sqlSourcesType}` : hasMongoDBEntites ? `mongodb: ${mongoSourcesType}` : ''
+      hasMongoDBEntites && hasSQLEntities
+        ? `mongodb: ${mongoSourcesType}; knex: ${sqlSourcesType}`
+        : hasSQLEntities
+        ? `knex: ${sqlSourcesType}`
+        : hasMongoDBEntites
+        ? `mongodb: ${mongoSourcesType}`
+        : ''
     const dbsParam = hasMongoDBEntites && hasSQLEntities ? 'mongodb: this.mongodb, knex: this.knex' : hasSQLEntities ? 'knex: this.knex' : hasMongoDBEntites ? 'mongodb: this.mongodb' : ''
     const entitiesInputParam = Array.from(typesMap.values())
       .flatMap((node) => {
@@ -260,7 +268,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
 
   public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'))
-    const daoSchema = `export const ${toFirstLower(node.name)}Schema: Schema<types.Scalars> = {\n` + daoSchemaBody + `\n};`
+    const daoSchema = `export function ${toFirstLower(node.name)}Schema(): Schema<types.Scalars> {\n  return {\n` + daoSchemaBody + `\n  }\n};`
     return daoSchema
   }
 
@@ -272,17 +280,9 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
           field.defaultGenerationStrategy ? `, \ndefaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : ''
         }`
         if (field.type.kind === 'scalar') {
-          // return [`'${field.name}': { scalar: '${field.graphqlType}'}${decorators}`]
-          const scalar = `{\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`)}\n}`
-          return [`'${field.name}': ${scalar}`]
+          return [`  '${field.name}': {\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`, 2)}\n  }`]
         } else if (field.type.kind === 'embedded') {
-          if(typesMap.get(field.graphqlType)?.entity) {
-            console.warn(`On '${node.name}.${field.name}': '${field.graphqlType}' is being used as embedded while it is also an entity.`)
-          }
-          const embeddedType = getNode(field.type.embed, typesMap)
-          const embeddedFields = indentMultiline(this._generateDAOSchemaFields(embeddedType, typesMap, path + field.name + '.').join(',\n'))
-          const embedded = `{\n${indentMultiline(`embedded: {\n${embeddedFields}\n}${decorators}`)}\n}`
-          return [`'${field.name}': ${embedded}`]
+          return [`  '${field.name}': { embedded: ${toFirstLower(field.graphqlType)}Schema() }`]
         }
         return []
       })
@@ -506,7 +506,9 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
     const relations = `relations: overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
     const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'}'`
     const idScalar = `idScalar: '${idField.isEnum ? 'String' : idField.graphqlType}'`
-    const constructorBody = `super({ ${indentMultiline(`\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema, \n${relations}, \n${idGenerator}, \n${idScalar}`)} \n});`
+    const constructorBody = `super({ ${indentMultiline(
+      `\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema(), \n${relations}, \n${idGenerator}, \n${idScalar}`,
+    )} \n});`
     return `public constructor(params: ${node.name}DAOParams<MetadataType, OperationMetadataType>){\n` + indentMultiline(constructorBody) + '\n}'
   }
 

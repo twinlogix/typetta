@@ -4,55 +4,65 @@ import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src
 import { Knex } from 'knex';
 
 //--------------------------------------------------------------------------------
+//--------------------------------- CREDENTIALS ----------------------------------
+//--------------------------------------------------------------------------------
+
+export function credentialsSchema(): Schema<types.Scalars> {
+  return {
+    'password': {
+      scalar: 'Password'
+    },
+    'username': {
+      scalar: 'String'
+    }
+  }
+};
+
+export type CredentialsProjection = {
+  password?: boolean,
+  username?: boolean,
+}
+export type CredentialsParam<P extends CredentialsProjection> = ParamProjection<types.Credentials, CredentialsProjection, P>
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------- POST -------------------------------------
 //--------------------------------------------------------------------------------
 
 export type PostExcludedFields = never
 export type PostRelationFields = 'author' | 'tags'
 
-export const postSchema: Schema<types.Scalars> = {
-  'authorId': {
-    scalar: 'ID', 
-    required: true, 
-    alias: 'aId'
-  },
-  'body': {
-    scalar: 'String'
-  },
-  'clicks': {
-    scalar: 'Int'
-  },
-  'createdAt': {
-    scalar: 'DateTime', 
-    required: true
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'metadata': {
-    embedded: {
-      'region': {
-        scalar: 'String', 
-        required: true
-      },
-      'typeId': {
-        scalar: 'ID', 
-        required: true
-      },
-      'visible': {
-        scalar: 'Boolean', 
-        required: true
-      }
+export function postSchema(): Schema<types.Scalars> {
+  return {
+    'authorId': {
+      scalar: 'ID', 
+      required: true, 
+      alias: 'aId'
+    },
+    'body': {
+      scalar: 'String'
+    },
+    'clicks': {
+      scalar: 'Int'
+    },
+    'createdAt': {
+      scalar: 'DateTime', 
+      required: true
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'metadata': { embedded: postMetadataSchema() },
+    'title': {
+      scalar: 'String', 
+      required: true
+    },
+    'views': {
+      scalar: 'Int', 
+      required: true
     }
-  },
-  'title': {
-    scalar: 'String', 
-    required: true
-  },
-  'views': {
-    scalar: 'Int', 
-    required: true
   }
 };
 
@@ -139,7 +149,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
     super({   
       ...params, 
       idField: 'id', 
-      schema: postSchema, 
+      schema: postSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user', required: false },
@@ -157,20 +167,53 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 
 
 //--------------------------------------------------------------------------------
+//--------------------------------- POSTMETADATA ---------------------------------
+//--------------------------------------------------------------------------------
+
+export function postMetadataSchema(): Schema<types.Scalars> {
+  return {
+    'region': {
+      scalar: 'String', 
+      required: true
+    },
+    'typeId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'visible': {
+      scalar: 'Boolean', 
+      required: true
+    }
+  }
+};
+
+export type PostMetadataProjection = {
+  region?: boolean,
+  type?: PostTypeProjection | boolean,
+  typeId?: boolean,
+  visible?: boolean,
+}
+export type PostMetadataParam<P extends PostMetadataProjection> = ParamProjection<types.PostMetadata, PostMetadataProjection, P>
+
+
+
+//--------------------------------------------------------------------------------
 //----------------------------------- POSTTYPE -----------------------------------
 //--------------------------------------------------------------------------------
 
 export type PostTypeExcludedFields = never
 export type PostTypeRelationFields = never
 
-export const postTypeSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
+export function postTypeSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    }
   }
 };
 
@@ -213,7 +256,7 @@ export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractKn
     super({   
       ...params, 
       idField: 'id', 
-      schema: postTypeSchema, 
+      schema: postTypeSchema(), 
       relations: overrideRelations(
         [
           
@@ -235,17 +278,19 @@ export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractKn
 export type TagExcludedFields = never
 export type TagRelationFields = never
 
-export const tagSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String'
-  },
-  'postId': {
-    scalar: 'ID', 
-    required: true
+export function tagSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String'
+    },
+    'postId': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -292,7 +337,7 @@ export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
     super({   
       ...params, 
       idField: 'id', 
-      schema: tagSchema, 
+      schema: tagSchema(), 
       relations: overrideRelations(
         [
           
@@ -314,34 +359,26 @@ export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
 export type UserExcludedFields = 'averageViewsPerPost' | 'totalPostsViews'
 export type UserRelationFields = 'posts'
 
-export const userSchema: Schema<types.Scalars> = {
-  'createdAt': {
-    scalar: 'DateTime', 
-    required: true
-  },
-  'credentials': {
-    embedded: {
-      'password': {
-        scalar: 'Password'
-      },
-      'username': {
-        scalar: 'String'
-      }
-    }, 
-    required: true
-  },
-  'email': {
-    scalar: 'String'
-  },
-  'firstName': {
-    scalar: 'String'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'lastName': {
-    scalar: 'String'
+export function userSchema(): Schema<types.Scalars> {
+  return {
+    'createdAt': {
+      scalar: 'DateTime', 
+      required: true
+    },
+    'credentials': { embedded: credentialsSchema() },
+    'email': {
+      scalar: 'String'
+    },
+    'firstName': {
+      scalar: 'String'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'lastName': {
+      scalar: 'String'
+    }
   }
 };
 
@@ -417,7 +454,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
     super({   
       ...params, 
       idField: 'id', 
-      schema: userSchema, 
+      schema: userSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'posts', refFrom: 'authorId', refTo: 'id', dao: 'post', required: false }

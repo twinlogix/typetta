@@ -10,10 +10,12 @@ import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
 export type AddressExcludedFields = never
 export type AddressRelationFields = 'cities'
 
-export const addressSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
+export function addressSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -61,7 +63,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
     super({   
       ...params, 
       idField: 'id', 
-      schema: addressSchema, 
+      schema: addressSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
@@ -77,24 +79,70 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
 
 
 //--------------------------------------------------------------------------------
+//---------------------------------- AUDITABLE -----------------------------------
+//--------------------------------------------------------------------------------
+
+export function auditableSchema(): Schema<types.Scalars> {
+  return {
+    'createdBy': {
+      scalar: 'String', 
+      required: true
+    },
+    'createdOn': {
+      scalar: 'Int', 
+      required: true
+    },
+    'deletedOn': {
+      scalar: 'Int'
+    },
+    'modifiedBy': {
+      scalar: 'String', 
+      required: true
+    },
+    'modifiedOn': {
+      scalar: 'Int', 
+      required: true
+    },
+    'state': {
+      scalar: 'String', 
+      required: true
+    }
+  }
+};
+
+export type AuditableProjection = {
+  createdBy?: boolean,
+  createdOn?: boolean,
+  deletedOn?: boolean,
+  modifiedBy?: boolean,
+  modifiedOn?: boolean,
+  state?: boolean,
+}
+export type AuditableParam<P extends AuditableProjection> = ParamProjection<types.Auditable, AuditableProjection, P>
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------- CITY -------------------------------------
 //--------------------------------------------------------------------------------
 
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
 export type CityRelationFields = never
 
-export const citySchema: Schema<types.Scalars> = {
-  'addressId': {
-    scalar: 'ID', 
-    required: true
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
+export function citySchema(): Schema<types.Scalars> {
+  return {
+    'addressId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    }
   }
 };
 
@@ -143,7 +191,7 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
     super({   
       ...params, 
       idField: 'id', 
-      schema: citySchema, 
+      schema: citySchema(), 
       relations: overrideRelations(
         [
           
@@ -165,32 +213,34 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 export type DefaultFieldsEntityExcludedFields = never
 export type DefaultFieldsEntityRelationFields = never
 
-export const defaultFieldsEntitySchema: Schema<types.Scalars> = {
-  'creationDate': {
-    scalar: 'Int', 
-    required: true, 
-    defaultGenerationStrategy: 'middleware'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'live': {
-    scalar: 'Live', 
-    required: true, 
-    defaultGenerationStrategy: 'generator'
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'opt1': {
-    scalar: 'Live', 
-    defaultGenerationStrategy: 'middleware'
-  },
-  'opt2': {
-    scalar: 'Live', 
-    defaultGenerationStrategy: 'generator'
+export function defaultFieldsEntitySchema(): Schema<types.Scalars> {
+  return {
+    'creationDate': {
+      scalar: 'Int', 
+      required: true, 
+      defaultGenerationStrategy: 'middleware'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'live': {
+      scalar: 'Live', 
+      required: true, 
+      defaultGenerationStrategy: 'generator'
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'opt1': {
+      scalar: 'Live', 
+      defaultGenerationStrategy: 'middleware'
+    },
+    'opt2': {
+      scalar: 'Live', 
+      defaultGenerationStrategy: 'generator'
+    }
   }
 };
 
@@ -249,7 +299,7 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
     super({   
       ...params, 
       idField: 'id', 
-      schema: defaultFieldsEntitySchema, 
+      schema: defaultFieldsEntitySchema(), 
       relations: overrideRelations(
         [
           
@@ -271,17 +321,19 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
 export type DeviceExcludedFields = never
 export type DeviceRelationFields = 'user'
 
-export const deviceSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'userId': {
-    scalar: 'ID'
+export function deviceSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'userId': {
+      scalar: 'ID'
+    }
   }
 };
 
@@ -329,7 +381,7 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMong
     super({   
       ...params, 
       idField: 'id', 
-      schema: deviceSchema, 
+      schema: deviceSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
@@ -351,18 +403,20 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMong
 export type DogExcludedFields = never
 export type DogRelationFields = 'owner'
 
-export const dogSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'ownerId': {
-    scalar: 'ID', 
-    required: true
+export function dogSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'ownerId': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -410,7 +464,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
     super({   
       ...params, 
       idField: 'id', 
-      schema: dogSchema, 
+      schema: dogSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
@@ -432,44 +486,18 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
 export type HotelExcludedFields = never
 export type HotelRelationFields = never
 
-export const hotelSchema: Schema<types.Scalars> = {
-  'audit': {
-    embedded: {
-      'createdBy': {
-        scalar: 'String', 
-        required: true
-      },
-      'createdOn': {
-        scalar: 'Int', 
-        required: true
-      },
-      'deletedOn': {
-        scalar: 'Int'
-      },
-      'modifiedBy': {
-        scalar: 'String', 
-        required: true
-      },
-      'modifiedOn': {
-        scalar: 'Int', 
-        required: true
-      },
-      'state': {
-        scalar: 'String', 
-        required: true
-      }
-    }, 
-    required: true, 
-    defaultGenerationStrategy: 'middleware'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true, 
-    alias: '_id'
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
+export function hotelSchema(): Schema<types.Scalars> {
+  return {
+    'audit': { embedded: auditableSchema() },
+    'id': {
+      scalar: 'ID', 
+      required: true, 
+      alias: '_id'
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    }
   }
 };
 
@@ -533,7 +561,7 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
     super({   
       ...params, 
       idField: 'id', 
-      schema: hotelSchema, 
+      schema: hotelSchema(), 
       relations: overrideRelations(
         [
           
@@ -555,19 +583,21 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
 export type MockedEntityExcludedFields = never
 export type MockedEntityRelationFields = 'user'
 
-export const mockedEntitySchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true, 
-    alias: '_id'
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'userId': {
-    scalar: 'ID', 
-    required: true
+export function mockedEntitySchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true, 
+      alias: '_id'
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'userId': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -614,7 +644,7 @@ export class MockedEntityDAO<MetadataType, OperationMetadataType> extends Abstra
     super({   
       ...params, 
       idField: 'id', 
-      schema: mockedEntitySchema, 
+      schema: mockedEntitySchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: true }
@@ -636,25 +666,20 @@ export class MockedEntityDAO<MetadataType, OperationMetadataType> extends Abstra
 export type OrganizationExcludedFields = 'computedName'
 export type OrganizationRelationFields = never
 
-export const organizationSchema: Schema<types.Scalars> = {
-  'address': {
-    embedded: {
-      'id': {
-        scalar: 'ID', 
-        required: true
-      }
+export function organizationSchema(): Schema<types.Scalars> {
+  return {
+    'address': { embedded: addressSchema() },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'vatNumber': {
+      scalar: 'String'
     }
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'vatNumber': {
-    scalar: 'String'
   }
 };
 
@@ -710,7 +735,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
     super({   
       ...params, 
       idField: 'id', 
-      schema: organizationSchema, 
+      schema: organizationSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
@@ -732,41 +757,32 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
 export type PostExcludedFields = never
 export type PostRelationFields = 'author'
 
-export const postSchema: Schema<types.Scalars> = {
-  'authorId': {
-    scalar: 'ID', 
-    required: true, 
-    alias: 'aId'
-  },
-  'body': {
-    scalar: 'String'
-  },
-  'clicks': {
-    scalar: 'Int'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'metadata': {
-    embedded: {
-      'region': {
-        scalar: 'String', 
-        required: true
-      },
-      'visible': {
-        scalar: 'Boolean', 
-        required: true
-      }
+export function postSchema(): Schema<types.Scalars> {
+  return {
+    'authorId': {
+      scalar: 'ID', 
+      required: true, 
+      alias: 'aId'
+    },
+    'body': {
+      scalar: 'String'
+    },
+    'clicks': {
+      scalar: 'Int'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'metadata': { embedded: postMetadataSchema() },
+    'title': {
+      scalar: 'String', 
+      required: true
+    },
+    'views': {
+      scalar: 'Int', 
+      required: true
     }
-  },
-  'title': {
-    scalar: 'String', 
-    required: true
-  },
-  'views': {
-    scalar: 'Int', 
-    required: true
   }
 };
 
@@ -836,7 +852,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
     super({   
       ...params, 
       idField: 'id', 
-      schema: postSchema, 
+      schema: postSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user', required: true }
@@ -852,62 +868,75 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 
 
 //--------------------------------------------------------------------------------
+//--------------------------------- POSTMETADATA ---------------------------------
+//--------------------------------------------------------------------------------
+
+export function postMetadataSchema(): Schema<types.Scalars> {
+  return {
+    'region': {
+      scalar: 'String', 
+      required: true
+    },
+    'visible': {
+      scalar: 'Boolean', 
+      required: true
+    }
+  }
+};
+
+export type PostMetadataProjection = {
+  region?: boolean,
+  visible?: boolean,
+}
+export type PostMetadataParam<P extends PostMetadataProjection> = ParamProjection<types.PostMetadata, PostMetadataProjection, P>
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------- USER -------------------------------------
 //--------------------------------------------------------------------------------
 
 export type UserExcludedFields = never
 export type UserRelationFields = 'dogs' | 'friends'
 
-export const userSchema: Schema<types.Scalars> = {
-  'amount': {
-    scalar: 'Decimal'
-  },
-  'amounts': {
-    scalar: 'Decimal', 
-    array: true, 
-    alias: 'amounts'
-  },
-  'firstName': {
-    scalar: 'String', 
-    alias: 'name'
-  },
-  'friendsId': {
-    scalar: 'ID', 
-    array: true, 
-    alias: 'fIds'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true, 
-    alias: 'ID'
-  },
-  'lastName': {
-    scalar: 'String'
-  },
-  'live': {
-    scalar: 'Boolean', 
-    required: true
-  },
-  'localization': {
-    scalar: 'Coordinates'
-  },
-  'title': {
-    scalar: 'LocalizedString'
-  },
-  'usernamePasswordCredentials': {
-    embedded: {
-      'password': {
-        scalar: 'Password', 
-        required: true, 
-        alias: 'pwd'
-      },
-      'username': {
-        scalar: 'String', 
-        required: true, 
-        alias: 'user'
-      }
-    }, 
-    alias: 'cred'
+export function userSchema(): Schema<types.Scalars> {
+  return {
+    'amount': {
+      scalar: 'Decimal'
+    },
+    'amounts': {
+      scalar: 'Decimal', 
+      array: true, 
+      alias: 'amounts'
+    },
+    'firstName': {
+      scalar: 'String', 
+      alias: 'name'
+    },
+    'friendsId': {
+      scalar: 'ID', 
+      array: true, 
+      alias: 'fIds'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true, 
+      alias: 'ID'
+    },
+    'lastName': {
+      scalar: 'String'
+    },
+    'live': {
+      scalar: 'Boolean', 
+      required: true
+    },
+    'localization': {
+      scalar: 'Coordinates'
+    },
+    'title': {
+      scalar: 'LocalizedString'
+    },
+    'usernamePasswordCredentials': { embedded: usernamePasswordCredentialsSchema() }
   }
 };
 
@@ -1005,7 +1034,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
     super({   
       ...params, 
       idField: 'id', 
-      schema: userSchema, 
+      schema: userSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
@@ -1018,6 +1047,33 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
   }
   
 }
+
+
+
+//--------------------------------------------------------------------------------
+//------------------------- USERNAMEPASSWORDCREDENTIALS --------------------------
+//--------------------------------------------------------------------------------
+
+export function usernamePasswordCredentialsSchema(): Schema<types.Scalars> {
+  return {
+    'password': {
+      scalar: 'Password', 
+      required: true, 
+      alias: 'pwd'
+    },
+    'username': {
+      scalar: 'String', 
+      required: true, 
+      alias: 'user'
+    }
+  }
+};
+
+export type UsernamePasswordCredentialsProjection = {
+  password?: boolean,
+  username?: boolean,
+}
+export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
 
 
 export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {

@@ -10,25 +10,27 @@ import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
 export type HotelExcludedFields = never
 export type HotelRelationFields = never
 
-export const hotelSchema: Schema<types.Scalars> = {
-  'description': {
-    scalar: 'String'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'tenantId': {
-    scalar: 'Int', 
-    required: true
-  },
-  'totalCustomers': {
-    scalar: 'Int', 
-    required: true
+export function hotelSchema(): Schema<types.Scalars> {
+  return {
+    'description': {
+      scalar: 'String'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'tenantId': {
+      scalar: 'Int', 
+      required: true
+    },
+    'totalCustomers': {
+      scalar: 'Int', 
+      required: true
+    }
   }
 };
 
@@ -83,7 +85,7 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
     super({   
       ...params, 
       idField: 'id', 
-      schema: hotelSchema, 
+      schema: hotelSchema(), 
       relations: overrideRelations(
         [
           
@@ -105,26 +107,28 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
 export type ReservationExcludedFields = never
 export type ReservationRelationFields = 'room'
 
-export const reservationSchema: Schema<types.Scalars> = {
-  'hotelId': {
-    scalar: 'ID', 
-    required: true
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'roomId': {
-    scalar: 'ID', 
-    required: true
-  },
-  'tenantId': {
-    scalar: 'Int', 
-    required: true
-  },
-  'userId': {
-    scalar: 'ID', 
-    required: true
+export function reservationSchema(): Schema<types.Scalars> {
+  return {
+    'hotelId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'roomId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'tenantId': {
+      scalar: 'Int', 
+      required: true
+    },
+    'userId': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -180,7 +184,7 @@ export class ReservationDAO<MetadataType, OperationMetadataType> extends Abstrac
     super({   
       ...params, 
       idField: 'id', 
-      schema: reservationSchema, 
+      schema: reservationSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'room', refFrom: 'roomId', refTo: 'id', dao: 'room', required: false }
@@ -202,15 +206,17 @@ export class ReservationDAO<MetadataType, OperationMetadataType> extends Abstrac
 export type RoleExcludedFields = never
 export type RoleRelationFields = never
 
-export const roleSchema: Schema<types.Scalars> = {
-  'code': {
-    scalar: 'String', 
-    required: true
-  },
-  'permissions': {
-    scalar: 'String', 
-    required: true, 
-    array: true
+export function roleSchema(): Schema<types.Scalars> {
+  return {
+    'code': {
+      scalar: 'String', 
+      required: true
+    },
+    'permissions': {
+      scalar: 'String', 
+      required: true, 
+      array: true
+    }
   }
 };
 
@@ -253,7 +259,7 @@ export class RoleDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
     super({   
       ...params, 
       idField: 'code', 
-      schema: roleSchema, 
+      schema: roleSchema(), 
       relations: overrideRelations(
         [
           
@@ -275,30 +281,32 @@ export class RoleDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 export type RoomExcludedFields = never
 export type RoomRelationFields = 'hotel'
 
-export const roomSchema: Schema<types.Scalars> = {
-  'description': {
-    scalar: 'String', 
-    required: true
-  },
-  'from': {
-    scalar: 'Date', 
-    required: true
-  },
-  'hotelId': {
-    scalar: 'ID', 
-    required: true
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'tenantId': {
-    scalar: 'Int', 
-    required: true
-  },
-  'to': {
-    scalar: 'Date', 
-    required: true
+export function roomSchema(): Schema<types.Scalars> {
+  return {
+    'description': {
+      scalar: 'String', 
+      required: true
+    },
+    'from': {
+      scalar: 'Date', 
+      required: true
+    },
+    'hotelId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'tenantId': {
+      scalar: 'Int', 
+      required: true
+    },
+    'to': {
+      scalar: 'Date', 
+      required: true
+    }
   }
 };
 
@@ -358,7 +366,7 @@ export class RoomDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
     super({   
       ...params, 
       idField: 'id', 
-      schema: roomSchema, 
+      schema: roomSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'hotel', refFrom: 'hotelId', refTo: 'id', dao: 'hotel', required: true }
@@ -380,23 +388,25 @@ export class RoomDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 export type UserExcludedFields = never
 export type UserRelationFields = 'reservations' | 'roles'
 
-export const userSchema: Schema<types.Scalars> = {
-  'email': {
-    scalar: 'Email', 
-    required: true
-  },
-  'firstName': {
-    scalar: 'String'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'lastName': {
-    scalar: 'String'
-  },
-  'totalPayments': {
-    scalar: 'Int'
+export function userSchema(): Schema<types.Scalars> {
+  return {
+    'email': {
+      scalar: 'Email', 
+      required: true
+    },
+    'firstName': {
+      scalar: 'String'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'lastName': {
+      scalar: 'String'
+    },
+    'totalPayments': {
+      scalar: 'Int'
+    }
   }
 };
 
@@ -468,7 +478,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
     super({   
       ...params, 
       idField: 'id', 
-      schema: userSchema, 
+      schema: userSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'reservations', refFrom: 'userId', refTo: 'id', dao: 'reservation', required: true },
@@ -491,28 +501,30 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
 export type UserRoleExcludedFields = never
 export type UserRoleRelationFields = 'role'
 
-export const userRoleSchema: Schema<types.Scalars> = {
-  'hotelId': {
-    scalar: 'ID'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true, 
-    alias: '_id'
-  },
-  'refUserId': {
-    scalar: 'ID', 
-    required: true
-  },
-  'roleCode': {
-    scalar: 'String', 
-    required: true
-  },
-  'tenantId': {
-    scalar: 'Int'
-  },
-  'userId': {
-    scalar: 'ID'
+export function userRoleSchema(): Schema<types.Scalars> {
+  return {
+    'hotelId': {
+      scalar: 'ID'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true, 
+      alias: '_id'
+    },
+    'refUserId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'roleCode': {
+      scalar: 'String', 
+      required: true
+    },
+    'tenantId': {
+      scalar: 'Int'
+    },
+    'userId': {
+      scalar: 'ID'
+    }
   }
 };
 
@@ -571,7 +583,7 @@ export class UserRoleDAO<MetadataType, OperationMetadataType> extends AbstractMo
     super({   
       ...params, 
       idField: 'id', 
-      schema: userRoleSchema, 
+      schema: userRoleSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'role', refFrom: 'roleCode', refTo: 'code', dao: 'role', required: true }

@@ -10,10 +10,12 @@ import { Knex } from 'knex';
 export type AddressExcludedFields = never
 export type AddressRelationFields = 'cities'
 
-export const addressSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
+export function addressSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -61,7 +63,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKne
     super({   
       ...params, 
       idField: 'id', 
-      schema: addressSchema, 
+      schema: addressSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
@@ -77,16 +79,38 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKne
 
 
 //--------------------------------------------------------------------------------
+//----------------------------------- ANOTHER ------------------------------------
+//--------------------------------------------------------------------------------
+
+export function anotherSchema(): Schema<types.Scalars> {
+  return {
+    'test': {
+      scalar: 'String', 
+      alias: 't'
+    }
+  }
+};
+
+export type AnotherProjection = {
+  test?: boolean,
+}
+export type AnotherParam<P extends AnotherProjection> = ParamProjection<types.Another, AnotherProjection, P>
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------ AUTHOR ------------------------------------
 //--------------------------------------------------------------------------------
 
 export type AuthorExcludedFields = never
 export type AuthorRelationFields = 'books'
 
-export const authorSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
+export function authorSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -134,7 +158,7 @@ export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnex
     super({   
       ...params, 
       idField: 'id', 
-      schema: authorSchema, 
+      schema: authorSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'relation', field: 'books', relationDao: 'authorBook', entityDao: 'book', refThis: { refFrom: 'authorId', refTo: 'id' }, refOther: { refFrom: 'bookId', refTo: 'id' }, required: false }
@@ -156,18 +180,20 @@ export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnex
 export type AuthorBookExcludedFields = never
 export type AuthorBookRelationFields = never
 
-export const authorBookSchema: Schema<types.Scalars> = {
-  'authorId': {
-    scalar: 'ID', 
-    required: true
-  },
-  'bookId': {
-    scalar: 'ID', 
-    required: true
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
+export function authorBookSchema(): Schema<types.Scalars> {
+  return {
+    'authorId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'bookId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -214,7 +240,7 @@ export class AuthorBookDAO<MetadataType, OperationMetadataType> extends Abstract
     super({   
       ...params, 
       idField: 'id', 
-      schema: authorBookSchema, 
+      schema: authorBookSchema(), 
       relations: overrideRelations(
         [
           
@@ -236,10 +262,12 @@ export class AuthorBookDAO<MetadataType, OperationMetadataType> extends Abstract
 export type BookExcludedFields = never
 export type BookRelationFields = 'authors'
 
-export const bookSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
+export function bookSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -287,7 +315,7 @@ export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
     super({   
       ...params, 
       idField: 'id', 
-      schema: bookSchema, 
+      schema: bookSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'relation', field: 'authors', relationDao: 'authorBook', entityDao: 'author', refThis: { refFrom: 'bookId', refTo: 'id' }, refOther: { refFrom: 'authorId', refTo: 'id' }, required: false }
@@ -309,18 +337,20 @@ export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
 export type CityRelationFields = never
 
-export const citySchema: Schema<types.Scalars> = {
-  'addressId': {
-    scalar: 'ID', 
-    required: true
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
+export function citySchema(): Schema<types.Scalars> {
+  return {
+    'addressId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    }
   }
 };
 
@@ -369,7 +399,7 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
     super({   
       ...params, 
       idField: 'id', 
-      schema: citySchema, 
+      schema: citySchema(), 
       relations: overrideRelations(
         [
           
@@ -391,32 +421,34 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 export type DefaultFieldsEntityExcludedFields = never
 export type DefaultFieldsEntityRelationFields = never
 
-export const defaultFieldsEntitySchema: Schema<types.Scalars> = {
-  'creationDate': {
-    scalar: 'Int', 
-    required: true, 
-    defaultGenerationStrategy: 'middleware'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'live': {
-    scalar: 'Live', 
-    required: true, 
-    defaultGenerationStrategy: 'generator'
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'opt1': {
-    scalar: 'Live', 
-    defaultGenerationStrategy: 'middleware'
-  },
-  'opt2': {
-    scalar: 'Live', 
-    defaultGenerationStrategy: 'generator'
+export function defaultFieldsEntitySchema(): Schema<types.Scalars> {
+  return {
+    'creationDate': {
+      scalar: 'Int', 
+      required: true, 
+      defaultGenerationStrategy: 'middleware'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'live': {
+      scalar: 'Live', 
+      required: true, 
+      defaultGenerationStrategy: 'generator'
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'opt1': {
+      scalar: 'Live', 
+      defaultGenerationStrategy: 'middleware'
+    },
+    'opt2': {
+      scalar: 'Live', 
+      defaultGenerationStrategy: 'generator'
+    }
   }
 };
 
@@ -475,7 +507,7 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
     super({   
       ...params, 
       idField: 'id', 
-      schema: defaultFieldsEntitySchema, 
+      schema: defaultFieldsEntitySchema(), 
       relations: overrideRelations(
         [
           
@@ -497,17 +529,19 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
 export type DeviceExcludedFields = never
 export type DeviceRelationFields = 'user'
 
-export const deviceSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'userId': {
-    scalar: 'ID'
+export function deviceSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'userId': {
+      scalar: 'ID'
+    }
   }
 };
 
@@ -555,7 +589,7 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnex
     super({   
       ...params, 
       idField: 'id', 
-      schema: deviceSchema, 
+      schema: deviceSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
@@ -577,18 +611,20 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnex
 export type DogExcludedFields = never
 export type DogRelationFields = 'owner'
 
-export const dogSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'ownerId': {
-    scalar: 'ID', 
-    required: true
+export function dogSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'ownerId': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -636,7 +672,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
     super({   
       ...params, 
       idField: 'id', 
-      schema: dogSchema, 
+      schema: dogSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
@@ -658,18 +694,20 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
 export type FriendsExcludedFields = never
 export type FriendsRelationFields = never
 
-export const friendsSchema: Schema<types.Scalars> = {
-  'from': {
-    scalar: 'ID', 
-    required: true
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'to': {
-    scalar: 'ID', 
-    required: true
+export function friendsSchema(): Schema<types.Scalars> {
+  return {
+    'from': {
+      scalar: 'ID', 
+      required: true
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'to': {
+      scalar: 'ID', 
+      required: true
+    }
   }
 };
 
@@ -716,7 +754,7 @@ export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKne
     super({   
       ...params, 
       idField: 'id', 
-      schema: friendsSchema, 
+      schema: friendsSchema(), 
       relations: overrideRelations(
         [
           
@@ -738,25 +776,20 @@ export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKne
 export type OrganizationExcludedFields = 'computedName'
 export type OrganizationRelationFields = never
 
-export const organizationSchema: Schema<types.Scalars> = {
-  'address': {
-    embedded: {
-      'id': {
-        scalar: 'ID', 
-        required: true
-      }
+export function organizationSchema(): Schema<types.Scalars> {
+  return {
+    'address': { embedded: addressSchema() },
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'name': {
+      scalar: 'String', 
+      required: true
+    },
+    'vatNumber': {
+      scalar: 'String'
     }
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'name': {
-    scalar: 'String', 
-    required: true
-  },
-  'vatNumber': {
-    scalar: 'String'
   }
 };
 
@@ -812,7 +845,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
     super({   
       ...params, 
       idField: 'id', 
-      schema: organizationSchema, 
+      schema: organizationSchema(), 
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
@@ -834,68 +867,47 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
 export type UserExcludedFields = never
 export type UserRelationFields = 'bestFriend' | 'dogs' | 'friends'
 
-export const userSchema: Schema<types.Scalars> = {
-  'amount': {
-    scalar: 'Decimal', 
-    alias: 'value'
-  },
-  'amounts': {
-    scalar: 'Decimal', 
-    array: true, 
-    alias: 'values'
-  },
-  'bestFriendId': {
-    scalar: 'ID'
-  },
-  'credentials': {
-    embedded: {
-      'another': {
-        embedded: {
-          'test': {
-            scalar: 'String', 
-            alias: 't'
-          }
-        }, 
-        alias: 'a'
-      },
-      'password': {
-        scalar: 'Password', 
-        required: true, 
-        alias: 'pass'
-      },
-      'username': {
-        scalar: 'String', 
-        required: true, 
-        alias: 'user'
-      }
-    }, 
-    alias: 'cred'
-  },
-  'firstName': {
-    scalar: 'String', 
-    alias: 'name'
-  },
-  'id': {
-    scalar: 'ID', 
-    required: true, 
-    alias: 'ID'
-  },
-  'lastName': {
-    scalar: 'String', 
-    alias: 'surname'
-  },
-  'live': {
-    scalar: 'Boolean', 
-    required: true, 
-    alias: 'active'
-  },
-  'localization': {
-    scalar: 'Coordinates', 
-    alias: 'l'
-  },
-  'title': {
-    scalar: 'LocalizedString', 
-    alias: 't'
+export function userSchema(): Schema<types.Scalars> {
+  return {
+    'amount': {
+      scalar: 'Decimal', 
+      alias: 'value'
+    },
+    'amounts': {
+      scalar: 'Decimal', 
+      array: true, 
+      alias: 'values'
+    },
+    'bestFriendId': {
+      scalar: 'ID'
+    },
+    'credentials': { embedded: usernamePasswordCredentialsSchema() },
+    'firstName': {
+      scalar: 'String', 
+      alias: 'name'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true, 
+      alias: 'ID'
+    },
+    'lastName': {
+      scalar: 'String', 
+      alias: 'surname'
+    },
+    'live': {
+      scalar: 'Boolean', 
+      required: true, 
+      alias: 'active'
+    },
+    'localization': {
+      scalar: 'Coordinates', 
+      alias: 'l'
+    },
+    'title': {
+      scalar: 'LocalizedString', 
+      alias: 't'
+    }
   }
 };
 
@@ -1000,7 +1012,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
     super({   
       ...params, 
       idField: 'id', 
-      schema: userSchema, 
+      schema: userSchema(), 
       relations: overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'bestFriend', refFrom: 'bestFriendId', refTo: 'id', dao: 'user', required: false },
@@ -1014,6 +1026,37 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
   }
   
 }
+
+
+
+//--------------------------------------------------------------------------------
+//------------------------- USERNAMEPASSWORDCREDENTIALS --------------------------
+//--------------------------------------------------------------------------------
+
+export function usernamePasswordCredentialsSchema(): Schema<types.Scalars> {
+  return {
+    'another': { embedded: anotherSchema() },
+    'password': {
+      scalar: 'Password', 
+      required: true, 
+      alias: 'pass'
+    },
+    'username': {
+      scalar: 'String', 
+      required: true, 
+      alias: 'user'
+    }
+  }
+};
+
+export type UsernamePasswordCredentialsProjection = {
+  another?: {
+    test?: boolean,
+  } | boolean,
+  password?: boolean,
+  username?: boolean,
+}
+export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
 
 
 export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {

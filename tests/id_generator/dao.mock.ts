@@ -12,15 +12,17 @@ import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
 export type AExcludedFields = never
 export type ARelationFields = never
 
-export const aSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'MongoID', 
-    required: true, 
-    alias: '_id'
-  },
-  'value': {
-    scalar: 'Int', 
-    required: true
+export function aSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'MongoID', 
+      required: true, 
+      alias: '_id'
+    },
+    'value': {
+      scalar: 'Int', 
+      required: true
+    }
   }
 };
 
@@ -62,7 +64,7 @@ export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
     super({   
       ...params, 
       idField: 'id', 
-      schema: aSchema, 
+      schema: aSchema(), 
       relations: overrideRelations(
         [
           
@@ -84,14 +86,16 @@ export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 export type BExcludedFields = never
 export type BRelationFields = never
 
-export const bSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'value': {
-    scalar: 'Int', 
-    required: true
+export function bSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'value': {
+      scalar: 'Int', 
+      required: true
+    }
   }
 };
 
@@ -134,7 +138,7 @@ export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
     super({   
       ...params, 
       idField: 'id', 
-      schema: bSchema, 
+      schema: bSchema(), 
       relations: overrideRelations(
         [
           
@@ -156,14 +160,16 @@ export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 export type CExcludedFields = never
 export type CRelationFields = never
 
-export const cSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'value': {
-    scalar: 'Int', 
-    required: true
+export function cSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'value': {
+      scalar: 'Int', 
+      required: true
+    }
   }
 };
 
@@ -206,7 +212,7 @@ export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
     super({   
       ...params, 
       idField: 'id', 
-      schema: cSchema, 
+      schema: cSchema(), 
       relations: overrideRelations(
         [
           
@@ -228,14 +234,16 @@ export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
 export type DExcludedFields = never
 export type DRelationFields = never
 
-export const dSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'IntAutoInc', 
-    required: true
-  },
-  'value': {
-    scalar: 'Int', 
-    required: true
+export function dSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'IntAutoInc', 
+      required: true
+    },
+    'value': {
+      scalar: 'Int', 
+      required: true
+    }
   }
 };
 
@@ -277,7 +285,7 @@ export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
     super({   
       ...params, 
       idField: 'id', 
-      schema: dSchema, 
+      schema: dSchema(), 
       relations: overrideRelations(
         [
           
@@ -299,14 +307,16 @@ export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
 export type EExcludedFields = never
 export type ERelationFields = never
 
-export const eSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'value': {
-    scalar: 'Int', 
-    required: true
+export function eSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'value': {
+      scalar: 'Int', 
+      required: true
+    }
   }
 };
 
@@ -349,7 +359,7 @@ export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
     super({   
       ...params, 
       idField: 'id', 
-      schema: eSchema, 
+      schema: eSchema(), 
       relations: overrideRelations(
         [
           
@@ -371,14 +381,16 @@ export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
 export type FExcludedFields = never
 export type FRelationFields = never
 
-export const fSchema: Schema<types.Scalars> = {
-  'id': {
-    scalar: 'ID', 
-    required: true
-  },
-  'value': {
-    scalar: 'Int', 
-    required: true
+export function fSchema(): Schema<types.Scalars> {
+  return {
+    'id': {
+      scalar: 'ID', 
+      required: true
+    },
+    'value': {
+      scalar: 'Int', 
+      required: true
+    }
   }
 };
 
@@ -421,7 +433,7 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
     super({   
       ...params, 
       idField: 'id', 
-      schema: fSchema, 
+      schema: fSchema(), 
       relations: overrideRelations(
         [
           
