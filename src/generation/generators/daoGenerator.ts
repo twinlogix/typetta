@@ -276,6 +276,9 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
           const scalar = `{\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`)}\n}`
           return [`'${field.name}': ${scalar}`]
         } else if (field.type.kind === 'embedded') {
+          if(typesMap.get(field.graphqlType)?.entity) {
+            console.warn(`On '${node.name}.${field.name}': '${field.graphqlType}' is being used as embedded while it is also an entity.`)
+          }
           const embeddedType = getNode(field.type.embed, typesMap)
           const embeddedFields = indentMultiline(this._generateDAOSchemaFields(embeddedType, typesMap, path + field.name + '.').join(',\n'))
           const embedded = `{\n${indentMultiline(`embedded: {\n${embeddedFields}\n}${decorators}`)}\n}`
