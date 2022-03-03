@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections } from '../../src';
 import * as types from './models.mock';
 import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src';
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
@@ -80,6 +80,14 @@ type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<
 export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends HotelProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends HotelProjection, P2 extends HotelProjection>(p1: P1, p2: P2): SelectProjection<HotelProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<HotelProjection, P1, P2>
+  }
   
   public constructor(params: HotelDAOParams<MetadataType, OperationMetadataType>){
     super({   
@@ -180,6 +188,14 @@ export type ReservationDAOParams<MetadataType, OperationMetadataType> = Omit<Mon
 
 export class ReservationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ReservationDAOGenerics<MetadataType, OperationMetadataType>> {
   
+  
+  public static projection<P extends ReservationProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends ReservationProjection, P2 extends ReservationProjection>(p1: P1, p2: P2): SelectProjection<ReservationProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<ReservationProjection, P1, P2>
+  }
+  
   public constructor(params: ReservationDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
@@ -279,6 +295,14 @@ export type RoomDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAO
 
 export class RoomDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {
   
+  
+  public static projection<P extends RoomProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends RoomProjection, P2 extends RoomProjection>(p1: P1, p2: P2): SelectProjection<RoomProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<RoomProjection, P1, P2>
+  }
+  
   public constructor(params: RoomDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
@@ -352,6 +376,14 @@ type TenantDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics
 export type TenantDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<TenantDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class TenantDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<TenantDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends TenantProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends TenantProjection, P2 extends TenantProjection>(p1: P1, p2: P2): SelectProjection<TenantProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<TenantProjection, P1, P2>
+  }
   
   public constructor(params: TenantDAOParams<MetadataType, OperationMetadataType>){
     super({   
@@ -476,6 +508,14 @@ type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<t
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends UserProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): SelectProjection<UserProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<UserProjection, P1, P2>
+  }
   
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>){
     super({   

@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares } from '../../src';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections } from '../../src';
 import * as types from './models.mock';
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
 import { Knex } from 'knex';
@@ -58,6 +58,14 @@ type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics
 export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends AddressProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): SelectProjection<AddressProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AddressProjection, P1, P2>
+  }
   
   public constructor(params: AddressDAOParams<MetadataType, OperationMetadataType>){
     super({   
@@ -154,6 +162,14 @@ export type AuthorDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDA
 
 export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {
   
+  
+  public static projection<P extends AuthorProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AuthorProjection, P2 extends AuthorProjection>(p1: P1, p2: P2): SelectProjection<AuthorProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AuthorProjection, P1, P2>
+  }
+  
   public constructor(params: AuthorDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
@@ -236,6 +252,14 @@ export type AuthorBookDAOParams<MetadataType, OperationMetadataType> = Omit<Knex
 
 export class AuthorBookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {
   
+  
+  public static projection<P extends AuthorBookProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AuthorBookProjection, P2 extends AuthorBookProjection>(p1: P1, p2: P2): SelectProjection<AuthorBookProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AuthorBookProjection, P1, P2>
+  }
+  
   public constructor(params: AuthorBookDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
@@ -310,6 +334,14 @@ type BookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<ty
 export type BookDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<BookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends BookProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends BookProjection, P2 extends BookProjection>(p1: P1, p2: P2): SelectProjection<BookProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<BookProjection, P1, P2>
+  }
   
   public constructor(params: BookDAOParams<MetadataType, OperationMetadataType>){
     super({   
@@ -394,6 +426,14 @@ type CityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<ty
 export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends CityProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): SelectProjection<CityProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<CityProjection, P1, P2>
+  }
   
   public constructor(params: CityDAOParams<MetadataType, OperationMetadataType>){
     super({   
@@ -503,6 +543,14 @@ export type DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = 
 
 export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
   
+  
+  public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DefaultFieldsEntityProjection, P1, P2>
+  }
+  
   public constructor(params: DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
@@ -584,6 +632,14 @@ type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<
 export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends DeviceProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): SelectProjection<DeviceProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DeviceProjection, P1, P2>
+  }
   
   public constructor(params: DeviceDAOParams<MetadataType, OperationMetadataType>){
     super({   
@@ -668,6 +724,14 @@ export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOPa
 
 export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
   
+  
+  public static projection<P extends DogProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): SelectProjection<DogProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DogProjection, P1, P2>
+  }
+  
   public constructor(params: DogDAOParams<MetadataType, OperationMetadataType>){
     super({   
       ...params, 
@@ -749,6 +813,14 @@ type FriendsDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics
 export type FriendsDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FriendsDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends FriendsProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends FriendsProjection, P2 extends FriendsProjection>(p1: P1, p2: P2): SelectProjection<FriendsProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<FriendsProjection, P1, P2>
+  }
   
   public constructor(params: FriendsDAOParams<MetadataType, OperationMetadataType>){
     super({   
@@ -840,6 +912,14 @@ type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGen
 export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends OrganizationProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): SelectProjection<OrganizationProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<OrganizationProjection, P1, P2>
+  }
   
   public constructor(params: OrganizationDAOParams<MetadataType, OperationMetadataType>){
     super({   
@@ -1007,6 +1087,14 @@ type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<ty
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends UserProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): SelectProjection<UserProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<UserProjection, P1, P2>
+  }
   
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>){
     super({   

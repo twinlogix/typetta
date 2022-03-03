@@ -29,6 +29,11 @@ import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
+
+  public build<P extends T['projection']>(p: P): P {
+    return p
+  }
+  
   protected idField: T['idKey']
   protected idGeneration: T['idGeneration']
   protected daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
