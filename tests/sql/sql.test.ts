@@ -620,11 +620,11 @@ test('Insert default', async () => {
   const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
   expect(e2.live).toBe(true)
   expect(e2.creationDate).toBe(1234)
-  expect(e2.opt1).toBe(null)
+  expect(e2.opt1).toBe(undefined)
   expect(e2.opt2).toBe(true)
 
   const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
-  expect(e3.opt1).toBe(null)
+  expect(e3.opt1).toBe(undefined)
 })
 
 test('simple update', async () => {

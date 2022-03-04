@@ -67,7 +67,6 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
   schema: Schema<ModelScalars>,
 ): To {
   const result: any = {}
-  const keySet = new Set(Object.keys(object))
   const isModelToDB = direction === 'modelToDB'
   const isDbToModel = !isModelToDB
   for (const [fieldName, schemaField] of Object.entries(schema)) {
@@ -75,7 +74,6 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
     const destName = schemaField.alias && isModelToDB ? schemaField.alias : fieldName
     if (sourceName in object) {
       const value = object[sourceName]
-      keySet.delete(sourceName)
       if (!schemaField.required && (value === null || value === undefined)) {
         result[destName] = value
       } else {
@@ -106,10 +104,6 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
         }
       }
     }
-  }
-  for (const key of keySet.values()) {
-    // copy remaining unknown key
-    result[key] = object[key]
   }
   return result
 }

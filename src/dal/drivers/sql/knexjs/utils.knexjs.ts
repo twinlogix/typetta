@@ -222,16 +222,17 @@ export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, 
   function unflat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
     const res = Object.entries(schemaFiled.embedded).reduce(
       ([record, oldToDelete], [k, subSchemaField]) => {
-        const name = concatEmbeddedNames(prefix, subSchemaField.alias || k)
+        const name = concatEmbeddedNames(prefix, subSchemaField.alias ?? k)
+        const subName = subSchemaField.alias ?? k
         if ('embedded' in subSchemaField) {
           const [obj, newToDelete] = unflat(name, subSchemaField, value, oldToDelete)
           if (newToDelete.length > 0) {
-            return [{ ...(record || {}), [k]: obj }, newToDelete] as [object, string[]]
+            return [{ ...(record ?? {}), [subName]: obj }, newToDelete] as [object, string[]]
           } else {
             return [record, oldToDelete] as [object | undefined, string[]]
           }
         } else if (name in value) {
-          return [{ ...(record || {}), [k]: value[name] }, [...oldToDelete, name]] as [object, string[]]
+          return [{ ...(record ?? {}), [subName]: value[name] }, [...oldToDelete, name]] as [object, string[]]
         }
         return [record, oldToDelete] as [object | undefined, string[]]
       },
@@ -241,7 +242,14 @@ export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, 
   }
   return Object.entries(schema).reduce((result, [k, schemaFiled]) => {
     if ('embedded' in schemaFiled) {
-      const [obj, toDelete] = unflat(schemaFiled.alias || k, schemaFiled, object)
+      const [obj, toDelete] = unflat(schemaFiled.alias ?? k, schemaFiled, object)
+      //if every key of embedded is null the emedded was not inserted
+      if(toDelete.every(k => object[k] === null) && !schemaFiled.required) {
+        for (const key of toDelete) {
+          delete result[key]
+        }
+        return result
+      }
       if (obj) {
         const res = { ...result, [k]: obj }
         for (const key of toDelete) {
