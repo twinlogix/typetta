@@ -14,6 +14,7 @@
     <img src="https://github.com/twinlogix/typetta/actions/workflows/build-and-test.yml/badge.svg" />    
     <a href="https://www.codacy.com/gh/twinlogix/typetta/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=twinlogix/typetta&amp;utm_campaign=Badge_Grade" target="_blank"><img src="https://app.codacy.com/project/badge/Grade/3c49f8a206cf4deeb41b289d151434f7"/></a>
     <img src="https://raw.githubusercontent.com/twinlogix/typetta/master/coverage/badge.svg" />
+    <a href="https://discord.com/channels/949666776030003220" target="_blank"><img src="https://img.shields.io/discord/949666776030003220?label=discord"/></a> 
   </div>
   <br/>
   <br/>
