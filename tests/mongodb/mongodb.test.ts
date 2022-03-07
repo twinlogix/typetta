@@ -1,10 +1,22 @@
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware, softDelete, audit, selectMiddleware, projection, buildProjection } from '../../src'
+import {
+  computedField,
+  projectionDependency,
+  buildMiddleware,
+  UserInputDriverDataTypeAdapterMap,
+  inMemoryMongoDb,
+  defaultValueMiddleware,
+  softDelete,
+  audit,
+  selectMiddleware,
+  projection,
+  buildProjection,
+} from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserDAO, UserProjection } from './dao.mock'
 import { Scalars, State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
-import { MongoClient, Db, Decimal128 } from 'mongodb'
+import { MongoClient, Db, Decimal128, ObjectId } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
@@ -20,6 +32,12 @@ let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
 const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
   ID: {
     generate: () => uuidv4(),
+    dbToModel: (id: unknown) => {
+      if (id instanceof ObjectId) {
+        return id.toString()
+      }
+      return id as string
+    },
   },
   Password: {
     dbToModel: (o: unknown) => o as string,
@@ -836,12 +854,12 @@ test('middleware 1', async () => {
             },
             after: async (args, context) => {
               if (args.operation === 'insert') {
-                if (args.params.record?.id === 'u1' && args.record.firstName) {
+                if (args.params.record?.id === 'u1' && args.insertedRecord.firstName) {
                   return {
                     continue: true,
                     operation: 'insert',
                     params: args.params,
-                    record: { ...args.record, firstName: args.record.firstName + ' OK' },
+                    insertedRecord: { ...args.insertedRecord, firstName: args.insertedRecord.firstName + ' OK' },
                   }
                 }
               }
@@ -1453,6 +1471,39 @@ test('Audit middlewares', async () => {
 
   expect(cesena1?.computedName).toBe('Computed: Cesena')
   expect(cesena2?.computedName).toBe(undefined)
+})
+
+test('Inserted record middleware', async () => {
+  let i = 0
+  const customDao = new DAOContext<any>({
+    mongodb: {
+      default: db,
+      __mock: db,
+    },
+    scalars,
+    overrides: {
+      hotel: {
+        middlewares: [
+          buildMiddleware({
+            afterInsert: async (args, insertedRecord) => {
+              i++
+              expect(insertedRecord.id.length).toBe(24)
+            },
+          }),
+          {
+            after: async (args) => {
+              if (args.operation === 'insert') {
+                i++
+                expect(args.insertedRecord.id.length).toBe(24)
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  await customDao.hotel.insertOne({ record: { name: 'Hotel' } })
+  expect(i).toBe(2)
 })
 
 // ------------------------------------------------------------------------

@@ -328,9 +328,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     return this.logOperation('insertOne', params, async () => {
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params }, 'insertOne')
-      const record = beforeResults.continue ? await this._insertOne(beforeResults.params) : beforeResults.record
-      const afterResults = await this.executeAfterMiddlewares({ operation: 'insert', params: beforeResults.params, record }, beforeResults.middlewareIndex, 'insertOne')
-      return afterResults.record
+      const insertedRecord = beforeResults.continue ? await this._insertOne(beforeResults.params) : beforeResults.insertedRecord
+      const afterResults = await this.executeAfterMiddlewares({ operation: 'insert', params: beforeResults.params, insertedRecord }, beforeResults.middlewareIndex, 'insertOne')
+      return afterResults.insertedRecord
     })
   }
 
