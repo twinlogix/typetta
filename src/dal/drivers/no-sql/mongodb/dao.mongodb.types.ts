@@ -1,7 +1,8 @@
+import { OmitIfKnown } from '../../../../utils/utils.types'
 import { DAOGenerics, DAOParams, IdGenerationStrategy } from '../../../dao/dao.types'
+import { AbstractDAOContext } from '../../../daoContext/daoContext'
 import { DefaultModelScalars } from '../../drivers.types'
 import { Collection, CountOptions, DeleteOptions, FindOptions, InsertOneOptions, ReplaceOptions, UpdateOptions } from 'mongodb'
-import { OmitIfKnown } from '../../../../utils/utils.types'
 
 export type MongoDBDAOGenerics<
   ModelType extends object = any,
@@ -23,6 +24,7 @@ export type MongoDBDAOGenerics<
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
   NameType extends string = any,
+  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = any,
 > = DAOGenerics<
   ModelType,
   IDKey,
@@ -49,7 +51,8 @@ export type MongoDBDAOGenerics<
   UpdateOptions,
   ReplaceOptions,
   DeleteOptions,
-  NameType
+  NameType,
+  DAOContext
 >
 
 export type MongoDBDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverContext'> & {

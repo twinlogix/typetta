@@ -153,7 +153,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
           node.name,
         )}${daoImplementationInit}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger });`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)};`
-        return `get ${toFirstLower(node.name)}() {\n${indentMultiline(daoGet)}\n}`
+        return `get ${toFirstLower(node.name)}() : ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(daoGet)}\n}`
       })
       .join('\n')
 
@@ -483,7 +483,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
       node.name
     }Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${node.name}RawUpdate, ${node.name}ExcludedFields, ${
       node.name
-    }RelationFields, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(node.name)}'>;`
+    }RelationFields, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(node.name)}', DAOContext<MetadataType, OperationMetadataType>>;`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
@@ -509,7 +509,8 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
     const constructorBody = `super({ ${indentMultiline(
       `\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema(), \n${relations}, \n${idGenerator}, \n${idScalar}`,
     )} \n});`
-    return `
+    return (
+      `
 public static projection<P extends ${node.name}Projection>(p: P) {
   return p
 }
@@ -517,7 +518,10 @@ public static mergeProjection<P1 extends ${node.name}Projection, P2 extends ${no
   return mergeProjections(p1, p2) as SelectProjection<${node.name}Projection, P1, P2>
 }
 
-public constructor(params: ${node.name}DAOParams<MetadataType, OperationMetadataType>){\n` + indentMultiline(constructorBody) + '\n}'
+public constructor(params: ${node.name}DAOParams<MetadataType, OperationMetadataType>){\n` +
+      indentMultiline(constructorBody) +
+      '\n}'
+    )
   }
 
   private _generateRelations(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path = ''): string[] {

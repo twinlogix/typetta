@@ -1,4 +1,5 @@
 import { DefaultModelScalars, EqualityOperators, Expand, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
+import { OmitIfKnown } from '../../utils/utils.types'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { LogFunction } from './log/log.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
@@ -6,7 +7,6 @@ import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { GraphQLResolveInfo } from 'graphql'
-import { OmitIfKnown } from '../../utils/utils.types'
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
@@ -107,6 +107,7 @@ export type MiddlewareContext<T extends DAOGenerics> = {
   specificOperation: 'findAll' | 'findOne' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'replaceAll' | 'deleteOne' | 'deleteAll' | 'aggregate' | 'count' | 'exists' | 'findPage'
   logger?: LogFunction<T['name']>
   dao: DAO<T>
+  daoContext: T['daoContext']
 }
 
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
@@ -154,6 +155,7 @@ export type DAOGenerics<
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
   NameType extends string = any,
+  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = any,
 > = {
   model: ModelType
   idKey: IDKey
@@ -179,6 +181,7 @@ export type DAOGenerics<
   driverContext: DriverContextType
   scalars: ScalarsType
   name: NameType
+  daoContext: DAOContext
 
   driverFilterOptions: DriverFilterOptions
   driverFindOptions: DriverFindOptions

@@ -1,5 +1,4 @@
 import { deepCopy, getTraversing, reversed, setTraversing } from '../../utils/utils'
-import { AbstractDAOContext } from '../daoContext/daoContext'
 import {
   MiddlewareContext,
   DAO,
@@ -29,14 +28,13 @@ import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
-
   public build<P extends T['projection']>(p: P): P {
     return p
   }
-  
+
   protected idField: T['idKey']
   protected idGeneration: T['idGeneration']
-  protected daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
+  protected daoContext: T['daoContext']
   protected relations: DAORelation[]
   protected middlewares: DAOMiddleware<T>[]
   protected pageSize: number
@@ -278,7 +276,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             const results = await this.daoContext.dao(relation.entityDao).loadAllOrFindAll(
               params,
               relation.refOther.refTo,
-              rels.filter((r) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0]).flatMap((r) => getTraversing(r, relation.refOther.refFrom)),
+              rels
+                .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
+                .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom)),
             )
             this.setResult(record, relation, results)
           }
@@ -394,7 +394,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       daoName: this.name,
       daoDriver: this._driver(),
       specificOperation: operation,
-      dao: this
+      dao: this,
+      daoContext: this.daoContext,
     }
   }
 

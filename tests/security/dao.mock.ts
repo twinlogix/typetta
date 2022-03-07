@@ -76,7 +76,7 @@ export type HotelInsert = {
   totalCustomers: types.Scalars['Int'],
 };
 
-type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', 'generator', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel'>;
+type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', 'generator', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel', DAOContext<MetadataType, OperationMetadataType>>;
 export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -183,7 +183,7 @@ export type ReservationInsert = {
   userId: types.Scalars['ID'],
 };
 
-type ReservationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Reservation, 'id', 'ID', 'generator', ReservationFilter, ReservationRawFilter, ReservationRelations, ReservationProjection, ReservationSort, ReservationRawSort, ReservationInsert, ReservationUpdate, ReservationRawUpdate, ReservationExcludedFields, ReservationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'reservation'>;
+type ReservationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Reservation, 'id', 'ID', 'generator', ReservationFilter, ReservationRawFilter, ReservationRelations, ReservationProjection, ReservationSort, ReservationRawSort, ReservationInsert, ReservationUpdate, ReservationRawUpdate, ReservationExcludedFields, ReservationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'reservation', DAOContext<MetadataType, OperationMetadataType>>;
 export type ReservationDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<ReservationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class ReservationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ReservationDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -266,7 +266,7 @@ export type RoleInsert = {
   permissions: types.Permission[],
 };
 
-type RoleDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Role, 'code', 'String', 'user', RoleFilter, RoleRawFilter, RoleRelations, RoleProjection, RoleSort, RoleRawSort, RoleInsert, RoleUpdate, RoleRawUpdate, RoleExcludedFields, RoleRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'role'>;
+type RoleDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Role, 'code', 'String', 'user', RoleFilter, RoleRawFilter, RoleRelations, RoleProjection, RoleSort, RoleRawSort, RoleInsert, RoleUpdate, RoleRawUpdate, RoleExcludedFields, RoleRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'role', DAOContext<MetadataType, OperationMetadataType>>;
 export type RoleDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<RoleDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class RoleDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<RoleDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -381,7 +381,7 @@ export type RoomInsert = {
   to: types.Scalars['Date'],
 };
 
-type RoomDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Room, 'id', 'ID', 'generator', RoomFilter, RoomRawFilter, RoomRelations, RoomProjection, RoomSort, RoomRawSort, RoomInsert, RoomUpdate, RoomRawUpdate, RoomExcludedFields, RoomRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'room'>;
+type RoomDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Room, 'id', 'ID', 'generator', RoomFilter, RoomRawFilter, RoomRelations, RoomProjection, RoomSort, RoomRawSort, RoomInsert, RoomUpdate, RoomRawUpdate, RoomExcludedFields, RoomRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'room', DAOContext<MetadataType, OperationMetadataType>>;
 export type RoomDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<RoomDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class RoomDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -501,7 +501,7 @@ export type UserInsert = {
   totalPayments?: types.Scalars['Int'],
 };
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user'>;
+type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>;
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -614,7 +614,7 @@ export type UserRoleInsert = {
   userId?: types.Scalars['ID'],
 };
 
-type UserRoleDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.UserRole, 'id', 'ID', 'db', UserRoleFilter, UserRoleRawFilter, UserRoleRelations, UserRoleProjection, UserRoleSort, UserRoleRawSort, UserRoleInsert, UserRoleUpdate, UserRoleRawUpdate, UserRoleExcludedFields, UserRoleRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'userRole'>;
+type UserRoleDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.UserRole, 'id', 'ID', 'db', UserRoleFilter, UserRoleRawFilter, UserRoleRelations, UserRoleProjection, UserRoleSort, UserRoleRawSort, UserRoleInsert, UserRoleUpdate, UserRoleRawUpdate, UserRoleExcludedFields, UserRoleRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'userRole', DAOContext<MetadataType, OperationMetadataType>>;
 export type UserRoleDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<UserRoleDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class UserRoleDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserRoleDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -680,37 +680,37 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   private logger?: LogFunction<'hotel' | 'reservation' | 'role' | 'room' | 'user' | 'userRole'>
   
-  get hotel() {
+  get hotel() : HotelDAO<MetadataType, OperationMetadataType> {
     if(!this._hotel) {
       this._hotel = new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: this.mongodb.default.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger });
     }
     return this._hotel;
   }
-  get reservation() {
+  get reservation() : ReservationDAO<MetadataType, OperationMetadataType> {
     if(!this._reservation) {
       this._reservation = new ReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, collection: this.mongodb.default.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger });
     }
     return this._reservation;
   }
-  get role() {
+  get role() : RoleDAO<MetadataType, OperationMetadataType> {
     if(!this._role) {
       this._role = new RoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.role, collection: this.mongodb.default.collection('roles'), middlewares: [...(this.overrides?.role?.middlewares || []), ...selectMiddleware('role', this.middlewares) as DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'role', logger: this.logger });
     }
     return this._role;
   }
-  get room() {
+  get room() : RoomDAO<MetadataType, OperationMetadataType> {
     if(!this._room) {
       this._room = new RoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, collection: this.mongodb.default.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger });
     }
     return this._room;
   }
-  get user() {
+  get user() : UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
       this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongodb.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger });
     }
     return this._user;
   }
-  get userRole() {
+  get userRole() : UserRoleDAO<MetadataType, OperationMetadataType> {
     if(!this._userRole) {
       this._userRole = new UserRoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.userRole, collection: this.mongodb.default.collection('userRoles'), middlewares: [...(this.overrides?.userRole?.middlewares || []), ...selectMiddleware('userRole', this.middlewares) as DAOMiddleware<UserRoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'userRole', logger: this.logger });
     }
