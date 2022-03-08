@@ -1,9 +1,9 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections } from '../../src';
-import * as types from './models.mock';
-import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src';
-import { Knex } from 'knex';
-import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src';
-import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb';
+import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, GeospathialOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections } from '../../src'
+import * as types from './models.mock'
+import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src'
+import { Knex } from 'knex'
+import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src'
+import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb'
 
 //--------------------------------------------------------------------------------
 //-------------------------------------- A ---------------------------------------
@@ -24,12 +24,12 @@ export function aSchema(): Schema<types.Scalars> {
       required: true
     }
   }
-};
+}
 
 type AFilterFields = {
   'id'?: types.Scalars['MongoID'] | null | EqualityOperators<types.Scalars['MongoID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
-};
+}
 export type AFilter = AFilterFields & LogicalOperators<AFilterFields | ARawFilter>
 export type ARawFilter = () => Filter<Document>
 
@@ -41,21 +41,21 @@ export type AProjection = {
 }
 export type AParam<P extends AProjection> = ParamProjection<types.A, AProjection, P>
 
-export type ASortKeys = 'id' | 'value';
-export type ASort = OneKey<ASortKeys, SortDirection>;
+export type ASortKeys = 'id' | 'value'
+export type ASort = OneKey<ASortKeys, SortDirection>
 export type ARawSort = () => Sort
 
 export type AUpdate = {
   'id'?: types.Scalars['MongoID'],
   'value'?: types.Scalars['Int']
-};
+}
 export type ARawUpdate = () => UpdateFilter<Document>
 
 export type AInsert = {
   value: types.Scalars['Int'],
-};
+}
 
-type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, ARawFilter, ARelations, AProjection, ASort, ARawSort, AInsert, AUpdate, ARawUpdate, AExcludedFields, ARelationFields, MetadataType, OperationMetadataType, types.Scalars, 'a', DAOContext<MetadataType, OperationMetadataType>>;
+type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, ARawFilter, ARelations, AProjection, ASort, ARawSort, AInsert, AUpdate, ARawUpdate, AExcludedFields, ARelationFields, MetadataType, OperationMetadataType, types.Scalars, 'a', DAOContext<MetadataType, OperationMetadataType>>
 export type ADAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<ADAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
@@ -80,7 +80,7 @@ export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ), 
       idGeneration: 'db', 
       idScalar: 'MongoID' 
-    });
+    })
   }
   
 }
@@ -105,12 +105,12 @@ export function bSchema(): Schema<types.Scalars> {
       required: true
     }
   }
-};
+}
 
 type BFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
-};
+}
 export type BFilter = BFilterFields & LogicalOperators<BFilterFields | BRawFilter>
 export type BRawFilter = () => Filter<Document>
 
@@ -122,22 +122,22 @@ export type BProjection = {
 }
 export type BParam<P extends BProjection> = ParamProjection<types.B, BProjection, P>
 
-export type BSortKeys = 'id' | 'value';
-export type BSort = OneKey<BSortKeys, SortDirection>;
+export type BSortKeys = 'id' | 'value'
+export type BSort = OneKey<BSortKeys, SortDirection>
 export type BRawSort = () => Sort
 
 export type BUpdate = {
   'id'?: types.Scalars['ID'],
   'value'?: types.Scalars['Int']
-};
+}
 export type BRawUpdate = () => UpdateFilter<Document>
 
 export type BInsert = {
   id?: types.Scalars['ID'],
   value: types.Scalars['Int'],
-};
+}
 
-type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BRawFilter, BRelations, BProjection, BSort, BRawSort, BInsert, BUpdate, BRawUpdate, BExcludedFields, BRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'b', DAOContext<MetadataType, OperationMetadataType>>;
+type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BRawFilter, BRelations, BProjection, BSort, BRawSort, BInsert, BUpdate, BRawUpdate, BExcludedFields, BRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'b', DAOContext<MetadataType, OperationMetadataType>>
 export type BDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -162,7 +162,7 @@ export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ), 
       idGeneration: 'generator', 
       idScalar: 'ID' 
-    });
+    })
   }
   
 }
@@ -187,12 +187,12 @@ export function cSchema(): Schema<types.Scalars> {
       required: true
     }
   }
-};
+}
 
 type CFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
-};
+}
 export type CFilter = CFilterFields & LogicalOperators<CFilterFields | CRawFilter>
 export type CRawFilter = () => Filter<Document>
 
@@ -204,22 +204,22 @@ export type CProjection = {
 }
 export type CParam<P extends CProjection> = ParamProjection<types.C, CProjection, P>
 
-export type CSortKeys = 'id' | 'value';
-export type CSort = OneKey<CSortKeys, SortDirection>;
+export type CSortKeys = 'id' | 'value'
+export type CSort = OneKey<CSortKeys, SortDirection>
 export type CRawSort = () => Sort
 
 export type CUpdate = {
   'id'?: types.Scalars['ID'],
   'value'?: types.Scalars['Int']
-};
+}
 export type CRawUpdate = () => UpdateFilter<Document>
 
 export type CInsert = {
   id: types.Scalars['ID'],
   value: types.Scalars['Int'],
-};
+}
 
-type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CRawFilter, CRelations, CProjection, CSort, CRawSort, CInsert, CUpdate, CRawUpdate, CExcludedFields, CRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'c', DAOContext<MetadataType, OperationMetadataType>>;
+type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CRawFilter, CRelations, CProjection, CSort, CRawSort, CInsert, CUpdate, CRawUpdate, CExcludedFields, CRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'c', DAOContext<MetadataType, OperationMetadataType>>
 export type CDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<CDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -244,7 +244,7 @@ export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       ), 
       idGeneration: 'user', 
       idScalar: 'ID' 
-    });
+    })
   }
   
 }
@@ -269,12 +269,12 @@ export function dSchema(): Schema<types.Scalars> {
       required: true
     }
   }
-};
+}
 
 type DFilterFields = {
   'id'?: types.Scalars['IntAutoInc'] | null | EqualityOperators<types.Scalars['IntAutoInc']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
-};
+}
 export type DFilter = DFilterFields & LogicalOperators<DFilterFields | DRawFilter>
 export type DRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -286,21 +286,21 @@ export type DProjection = {
 }
 export type DParam<P extends DProjection> = ParamProjection<types.D, DProjection, P>
 
-export type DSortKeys = 'id' | 'value';
-export type DSort = OneKey<DSortKeys, SortDirection>;
+export type DSortKeys = 'id' | 'value'
+export type DSort = OneKey<DSortKeys, SortDirection>
 export type DRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DUpdate = {
   'id'?: types.Scalars['IntAutoInc'],
   'value'?: types.Scalars['Int']
-};
+}
 export type DRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DInsert = {
   value: types.Scalars['Int'],
-};
+}
 
-type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DRawFilter, DRelations, DProjection, DSort, DRawSort, DInsert, DUpdate, DRawUpdate, DExcludedFields, DRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'd', DAOContext<MetadataType, OperationMetadataType>>;
+type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DRawFilter, DRelations, DProjection, DSort, DRawSort, DInsert, DUpdate, DRawUpdate, DExcludedFields, DRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'd', DAOContext<MetadataType, OperationMetadataType>>
 export type DDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -325,7 +325,7 @@ export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ), 
       idGeneration: 'db', 
       idScalar: 'IntAutoInc' 
-    });
+    })
   }
   
 }
@@ -350,12 +350,12 @@ export function eSchema(): Schema<types.Scalars> {
       required: true
     }
   }
-};
+}
 
 type EFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
-};
+}
 export type EFilter = EFilterFields & LogicalOperators<EFilterFields | ERawFilter>
 export type ERawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -367,22 +367,22 @@ export type EProjection = {
 }
 export type EParam<P extends EProjection> = ParamProjection<types.E, EProjection, P>
 
-export type ESortKeys = 'id' | 'value';
-export type ESort = OneKey<ESortKeys, SortDirection>;
+export type ESortKeys = 'id' | 'value'
+export type ESort = OneKey<ESortKeys, SortDirection>
 export type ERawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type EUpdate = {
   'id'?: types.Scalars['ID'],
   'value'?: types.Scalars['Int']
-};
+}
 export type ERawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type EInsert = {
   id?: types.Scalars['ID'],
   value: types.Scalars['Int'],
-};
+}
 
-type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, ERawFilter, ERelations, EProjection, ESort, ERawSort, EInsert, EUpdate, ERawUpdate, EExcludedFields, ERelationFields, MetadataType, OperationMetadataType, types.Scalars, 'e', DAOContext<MetadataType, OperationMetadataType>>;
+type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, ERawFilter, ERelations, EProjection, ESort, ERawSort, EInsert, EUpdate, ERawUpdate, EExcludedFields, ERelationFields, MetadataType, OperationMetadataType, types.Scalars, 'e', DAOContext<MetadataType, OperationMetadataType>>
 export type EDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -407,7 +407,7 @@ export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ), 
       idGeneration: 'generator', 
       idScalar: 'ID' 
-    });
+    })
   }
   
 }
@@ -432,12 +432,12 @@ export function fSchema(): Schema<types.Scalars> {
       required: true
     }
   }
-};
+}
 
 type FFilterFields = {
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
-};
+}
 export type FFilter = FFilterFields & LogicalOperators<FFilterFields | FRawFilter>
 export type FRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -449,22 +449,22 @@ export type FProjection = {
 }
 export type FParam<P extends FProjection> = ParamProjection<types.F, FProjection, P>
 
-export type FSortKeys = 'id' | 'value';
-export type FSort = OneKey<FSortKeys, SortDirection>;
+export type FSortKeys = 'id' | 'value'
+export type FSort = OneKey<FSortKeys, SortDirection>
 export type FRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FUpdate = {
   'id'?: types.Scalars['ID'],
   'value'?: types.Scalars['Int']
-};
+}
 export type FRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FInsert = {
   id: types.Scalars['ID'],
   value: types.Scalars['Int'],
-};
+}
 
-type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FRawFilter, FRelations, FProjection, FSort, FRawSort, FInsert, FUpdate, FRawUpdate, FExcludedFields, FRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'f', DAOContext<MetadataType, OperationMetadataType>>;
+type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FRawFilter, FRelations, FProjection, FSort, FRawSort, FInsert, FUpdate, FRawUpdate, FExcludedFields, FRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'f', DAOContext<MetadataType, OperationMetadataType>>
 export type FDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -489,7 +489,7 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       ), 
       idGeneration: 'user', 
       idScalar: 'ID' 
-    });
+    })
   }
   
 }
@@ -511,22 +511,22 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'both'>,
   log?: LogInput<'a' | 'b' | 'c' | 'd' | 'e' | 'f'>,
   security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
-};
+}
 
 type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
 export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
-  private _a: ADAO<MetadataType, OperationMetadataType> | undefined;
-  private _b: BDAO<MetadataType, OperationMetadataType> | undefined;
-  private _c: CDAO<MetadataType, OperationMetadataType> | undefined;
-  private _d: DDAO<MetadataType, OperationMetadataType> | undefined;
-  private _e: EDAO<MetadataType, OperationMetadataType> | undefined;
-  private _f: FDAO<MetadataType, OperationMetadataType> | undefined;
+  private _a: ADAO<MetadataType, OperationMetadataType> | undefined
+  private _b: BDAO<MetadataType, OperationMetadataType> | undefined
+  private _c: CDAO<MetadataType, OperationMetadataType> | undefined
+  private _d: DDAO<MetadataType, OperationMetadataType> | undefined
+  private _e: EDAO<MetadataType, OperationMetadataType> | undefined
+  private _f: FDAO<MetadataType, OperationMetadataType> | undefined
   
-  private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides'];
-  private mongodb: Record<'a' | 'default', Db>;
-  private knex: Record<'default', Knex>;
+  private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
+  private mongodb: Record<'a' | 'default', Db>
+  private knex: Record<'default', Knex>
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
@@ -534,39 +534,39 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   get a() : ADAO<MetadataType, OperationMetadataType> {
     if(!this._a) {
-      this._a = new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: this.mongodb.a.collection('as'), middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger });
+      this._a = new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: this.mongodb.a.collection('as'), middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger })
     }
-    return this._a;
+    return this._a
   }
   get b() : BDAO<MetadataType, OperationMetadataType> {
     if(!this._b) {
-      this._b = new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: this.mongodb.default.collection('bs'), middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger });
+      this._b = new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: this.mongodb.default.collection('bs'), middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger })
     }
-    return this._b;
+    return this._b
   }
   get c() : CDAO<MetadataType, OperationMetadataType> {
     if(!this._c) {
-      this._c = new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: this.mongodb.default.collection('cs'), middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger });
+      this._c = new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: this.mongodb.default.collection('cs'), middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger })
     }
-    return this._c;
+    return this._c
   }
   get d() : DDAO<MetadataType, OperationMetadataType> {
     if(!this._d) {
-      this._d = new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: this.knex.default, tableName: 'ds', middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger });
+      this._d = new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: this.knex.default, tableName: 'ds', middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger })
     }
-    return this._d;
+    return this._d
   }
   get e() : EDAO<MetadataType, OperationMetadataType> {
     if(!this._e) {
-      this._e = new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: this.knex.default, tableName: 'es', middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger });
+      this._e = new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: this.knex.default, tableName: 'es', middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger })
     }
-    return this._e;
+    return this._e
   }
   get f() : FDAO<MetadataType, OperationMetadataType> {
     if(!this._f) {
-      this._f = new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: this.knex.default, tableName: 'fs', middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger });
+      this._f = new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: this.knex.default, tableName: 'fs', middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger })
     }
-    return this._f;
+    return this._f
   }
   
   constructor(params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
@@ -586,11 +586,11 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { mongodb: Record<'a' | 'default', Db>; knex: Record<'default', Knex> }, entities: { a: Collection<Document>; b: Collection<Document>; c: Collection<Document>; d: Knex.QueryBuilder<any, unknown[]>; e: Knex.QueryBuilder<any, unknown[]>; f: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'a' | 'default', Db>, knex: Record<'default', Knex> }, entities: { a: Collection<Document>, b: Collection<Document>, c: Collection<Document>, d: Knex.QueryBuilder<any, unknown[]>, e: Knex.QueryBuilder<any, unknown[]>, f: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
     return run({ mongodb: this.mongodb, knex: this.knex }, { a: this.mongodb.a.collection('as'), b: this.mongodb.default.collection('bs'), c: this.mongodb.default.collection('cs'), d: this.knex.default.table('ds'), e: this.knex.default.table('es'), f: this.knex.default.table('fs') })
   }
   
-  public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string } }): Promise<void> {
+  public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string, arrayType?: string }>>, defaultType: { singleType: string, arrayType?: string } }): Promise<void> {
     this.d.createTable(args.typeMap ?? {}, args.defaultType)
     this.e.createTable(args.typeMap ?? {}, args.defaultType)
     this.f.createTable(args.typeMap ?? {}, args.defaultType)
