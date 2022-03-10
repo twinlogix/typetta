@@ -1,8 +1,8 @@
 export type LogicalOperators<FilterType> = {
-  $and?: (LogicalOperators<FilterType> |  FilterType)[]
-  $not?: LogicalOperators<FilterType> | FilterType
-  $nor?: (LogicalOperators<FilterType> |  FilterType)[]
-  $or?: (LogicalOperators<FilterType> |  FilterType)[]
+  $and?: (LogicalOperators<FilterType> &  FilterType)[]
+  $not?: LogicalOperators<FilterType> & FilterType
+  $nor?: (LogicalOperators<FilterType> &  FilterType)[]
+  $or?: (LogicalOperators<FilterType> &  FilterType)[]
 }
 
 export declare type EqualityOperators<FieldType> = {
@@ -33,24 +33,3 @@ export type StringOperators =
   | {
       $endsWith: string
     }
-
-export type GeospathialOperators = {
-  // $geoIntersect
-  // $geoWithin
-  $near?: {
-    $geometry: {
-      type: 'Point'
-      coordinates: number[]
-    }
-    $maxDistance?: number
-    $minDistance: number
-  }
-  $nearSphere?: {
-    $geometry: {
-      type: 'Point'
-      coordinates: number[]
-    }
-    $maxDistance?: number
-    $minDistance: number
-  }
-}

@@ -872,7 +872,7 @@ test('middleware 1', async () => {
                   operation: 'find',
                   params: args.params,
                   records: args.records.map((record) => {
-                    if (typeof args.params.filter === 'object' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1' && record.firstName) {
+                    if (typeof args.params.filter === 'object' && args.params.filter?.id === 'u1' && record.firstName) {
                       return { ...record, firstName: record.firstName + ' OK' }
                     }
                     return record
@@ -1206,7 +1206,7 @@ test('Aggregate test', async () => {
       },
     })
   }
-
+dao.post.findAll({ filter: {$and:[{}]}})
   const aggregation1 = await dao.post.aggregate(
     {
       by: {
