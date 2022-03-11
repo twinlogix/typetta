@@ -35,8 +35,8 @@ function compare(l: unknown, r: unknown): number {
   if (typeof l === 'symbol' && typeof r === 'symbol') {
     return l === r ? 0 : Number.NaN
   }
-  if (l && typeof l === 'object' && typeof (l as any).equals === 'function') {
-    return (l as any).equals(r) ? 0 : Number.NaN
+  if (l && typeof l === 'object' && typeof (l as { equals: unknown }).equals === 'function') {
+    return (l as { equals: (v: unknown) => unknown }).equals(r) ? 0 : Number.NaN
   }
   return l === r ? 0 : Number.NaN
 }

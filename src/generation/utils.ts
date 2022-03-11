@@ -34,7 +34,7 @@ export function getNode(code: string, typesMap: Map<string, TsTypettaGeneratorNo
 // id -> id
 // entity.id -> entity.id
 // entity.../id -> id
-export function resolveParentPath(fieldPath: string) {
+export function resolveParentPath(fieldPath: string): string {
   const c: (string | null)[] = fieldPath.split('../').join('__PARENT__').split('.')
   for (let i = 1; i < c.length; i++) {
     const value = c[i]
@@ -45,7 +45,7 @@ export function resolveParentPath(fieldPath: string) {
   return c.flatMap((v) => (v === null ? [] : [v.split('__PARENT__').join('')])).join('.')
 }
 
-export function removeParentPath(fieldPath: string) {
+export function removeParentPath(fieldPath: string): string {
   return fieldPath.split('../').join('')
 }
 
