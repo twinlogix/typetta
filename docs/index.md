@@ -46,7 +46,7 @@ Below is a brief description of what makes Typetta awesome:
 - Auditing.
 - Multi-tenancy partitioning.
 - Soft-delete.
-- A strong security framework.
+- Strong security framework.
 
 ## Why Typetta?
 
