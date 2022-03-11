@@ -107,7 +107,8 @@
       "tests/"
     ],
     "coverageReporters": [
-      "json-summary"
+      "json-summary",
+      "lcov"
     ]
   },
   "homepage": "https://twinlogix.github.io/typetta/",

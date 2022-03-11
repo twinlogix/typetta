@@ -27,6 +27,13 @@ export type Address = {
   id: Scalars['ID'];
 };
 
+export type Audit = {
+  __typename?: 'Audit';
+  changes?: Maybe<Scalars['String']>;
+  entityId: Scalars['ID'];
+  id: Scalars['ID'];
+};
+
 export type Auditable = {
   __typename?: 'Auditable';
   createdBy: Scalars['String'];
@@ -35,6 +42,7 @@ export type Auditable = {
   modifiedBy: Scalars['String'];
   modifiedOn: Scalars['Int'];
   state: State;
+  versions: Array<Maybe<Audit>>;
 };
 
 export type City = {

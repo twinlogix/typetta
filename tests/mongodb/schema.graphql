@@ -107,10 +107,17 @@ type Auditable {
   modifiedBy: String!
   deletedOn: Int
   state: State!
+  versions: [Audit]! @foreignRef(refFrom: "entityId", refTo: "../id")
 }
 
 type Hotel @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   name: String!
   audit: Auditable! @default(from: "middleware")
+}
+
+type Audit @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  entityId: ID!
+  changes: String
 }

@@ -872,7 +872,7 @@ test('middleware 1', async () => {
                   operation: 'find',
                   params: args.params,
                   records: args.records.map((record) => {
-                    if (typeof args.params.filter === 'object' && !Array.isArray(args.params.filter) && args.params.filter?.id === 'u1' && record.firstName) {
+                    if (typeof args.params.filter === 'object' && args.params.filter?.id === 'u1' && record.firstName) {
                       return { ...record, firstName: record.firstName + ' OK' }
                     }
                     return record
@@ -1206,7 +1206,7 @@ test('Aggregate test', async () => {
       },
     })
   }
-
+  dao.post.findAll({ filter: { $and: [{}] } })
   const aggregation1 = await dao.post.aggregate(
     {
       by: {
@@ -1411,8 +1411,9 @@ test('Audit middlewares', async () => {
     },
   })
 
-  await dao2.hotel.insertOne({ record: { name: 'h1' } })
+  const { id } = await dao2.hotel.insertOne({ record: { name: 'h1' } })
   await dao2.hotel.insertOne({ record: { name: 'H2' } })
+  await dao2.audit.insertOne({ record: { entityId: id, changes: 'NONE' } })
 
   const hotels = await dao2.hotel.findAll()
   expect(hotels.length).toBe(2)
@@ -1421,9 +1422,10 @@ test('Audit middlewares', async () => {
   expect(hotels[0].audit.modifiedOn).toBe(1)
 
   await dao2.hotel.updateOne({ filter: { name: 'h1' }, changes: { name: 'H1' } })
-  const h1 = await dao2.hotel.findOne({ filter: { name: 'H1' } })
+  const h1 = await dao2.hotel.findOne({ filter: { name: 'H1' }, projection: { audit: { modifiedBy: true, modifiedOn: true, versions: true }} })
   expect(h1?.audit.modifiedOn).toBe(2)
   expect(h1?.audit.modifiedBy).toBe('userId2')
+  expect(h1?.audit.versions[0]?.changes).toBe("NONE")
 
   await dao2.hotel.deleteAll({ filter: { name: { $in: ['H1', 'H2'] } } })
   const hotels2 = await dao2.hotel.findAll()
