@@ -1,21 +1,21 @@
 # Scalars
 
-- [Basic Scalars](#basic-scalars) 
-- [Additional Scalars](#additional-scalars) 
-  - [TypeScript mapping](#typescript-mapping) 
-  - [Scalar Adapter](#scalar-adapter) 
-  - [Validation](#validation) 
+  - [Basic Scalars](#basic-scalars)
+  - [Additional Scalars](#additional-scalars)
+    - [TypeScript mapping](#typescript-mapping)
+    - [Scalar Adapter](#scalar-adapter)
+    - [Validation](#validation)
 
 ## Basic Scalars
 
 The GraphQL specification comes with a set of basic scalar types to draw from when modeling an entity. This set consists of:
 - **Int**: a signed 32‐bit integer number.
 - **Float**: a signed, double precision, floating point number.
-- **String**: a UTF‐8 characters sequence.
+- **String**: a UTF‐8 character sequence.
 - **Boolean**: a true/false value.
 - **ID**: a unique identifier.
 
-These scalars can be used for modeling an entity as in the following example:
+These scalars can be used for modelling an entity as in the following example:
 ```typescript
 type User {
   id: ID!
@@ -34,7 +34,7 @@ scalar Timestamp
 scalar DateTime
 ```
 
-Every time a new scalar is defined, the system must be configured so that it knows how it must be represented as a TypeScript type and how it must be serialized and deserialized on each driver (SQL, MongoDB and any other additional ones).
+Every time a new scalar is defined, the system must be configured so that it knows how it must be represented as a TypeScript type and how it must be serialised and deserialised on each driver (SQL, MongoDB and any other additional ones).
 
 The extensibility mechanism given by the additional scalars allows the user to increase the expressiveness of the application domain model and to create validation rules for a more accurate and strict data model design.
 
@@ -54,9 +54,9 @@ generates:
         DateTime: Date
   [...]
 ```
-The key represents to the additional scalar name as it is defined in the GraphQL schema, while the value is the corresponding TypeScript type.
+The key represents the additional scalar name as it is defined in the GraphQL schema, while the value is the corresponding TypeScript type.
 
-You can also create additional scalars that do not have a counterpart in a primitive TypeScript type, but rather to a type or a class from your own or a third-party library.
+You can also create additional scalars that do not have a counterpart in a primitive TypeScript type, but rather in a type or a class from your own or a third-party library.
 
 Below is an example of a Decimal scalar mapped to the BigNumber type of the library [bignumber.js](https://mikemcl.github.io/bignumber.js/){:target="_blank"}:
 
@@ -74,17 +74,17 @@ generates:
 
 ### Scalar Adapter
 
-Additional scalars need a second specification that defines how Typetva must deal with them, a so-called *adapter*.
+Additional scalars need a second specification that defines how Typetta must deal with them, a so-called *adapter*.
 
 A ``Scalar Adapter`` is an object that contains all the details about how the system should behave with the specific scalar regarding:
-- Database serialization
-- Database deserialization
+- Database serialisation
+- Database deserialisation
 - Validation
 - Auto-generation
 
 Scalar adapters must be configured at the DAOContext level and are shared by all DAOs.
 
-Following an example of a Scalar Adapter for the Decimal scalar already described above. The TypeScript type this scalar is mapped to is BigNumber, while the data type to which it must be serialized on MongoDB is Decimal128.
+Below is an example of a Scalar Adapter for the Decimal scalar already described above. The TypeScript type this scalar is mapped to is BigNumber, while the data type to which it must be serialised on MongoDB is Decimal128.
 
 ```typescript
 const decimalAdapter = {
@@ -93,7 +93,7 @@ const decimalAdapter = {
 };
 ```
 
-If you are using different data sources, as an example you have both a MongoDB and a SQL databse, you can specify two different adapters for the same scalar.In the following additional example the Decimal type is also stored in a SQL database ad a string:
+If you are using different data sources, for example if you have both a MongoDB and a SQL databse, you can specify two different adapters for the same scalar. In the following additional example the Decimal type is also stored in a SQL database as a string:
 ```typescript
 const decimalAdapter = {
   mongo: {

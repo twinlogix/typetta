@@ -1,12 +1,12 @@
 # MongoDB
 
-Typetta offre un supporto completo a **MongoDB** e a tutti i database documentali compatibili. L'accesso al database è sviluppato utilizzando internamente il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}. 
+Typetta offers full support for **MongoDB** and all compatible document databases. Access to the database is developed using the [official MongoDB Node Driver](https://docs.mongodb.com/drivers/node/current/){:target="_blank"} internally.
 
-Tutte le funzionalità di Typetta permettono l'accesso diretto al driver, garantendo massima flessibilità e una veloce adozione delle funzionalità presenti nelle versioni più recenti del database.
+All the features of Typetta allow direct access to the driver, ensuring maximum flexibility and fast adoption of the features present in the latest versions of the database.
 
-## Creazione della connessione
+## How to connect
 
-In accordo con la documentazione ufficiale, la connessione add un'istanza di MongoDB o a un replica set utilizzando il driver Node JS può essere implementata come segue:
+In line with official documentation, connecting to an instance of MongoDB or to a replica set using the Node JS driver can be implemented as follows:
 
 ```typescript
 import { MongoClient } from "mongodb";
@@ -25,13 +25,13 @@ async function run() {
 run().catch(console.dir);
 ```
 
-Si noti che è il driver ad occuparsi del connection pooling, quindi ogni processo Node JS deve generalmente effettuare una sola ``connect`` e prendere un solo riferimento al ``db`` che può poi riutilizzare in ogni chiamata o procedura. Non è quindi consigliabile effettuare ``connect`` ripetute.
+Note that it is the driver that deals with the connection pooling, that is, each JS Node process usually has to make only one ``connection`` and take only one reference from the ``db`` that can then be reused in each call or procedure. Therefore, it is not recommended to make repeated ``connections``.
 
-## Creazione del DAOContext
+## Creation of the DAOContext
 
-Contrariamente alla connessione, il ``DAOContext`` può essere istanziato più volte e con parametri diversi. E' ad esempio consigliabile istanziare un ``DAOContext`` per ogni contesto chiamante (ogni chiamata REST o GraphQL ad esempio).
+Unlike connection, the ``DAOContext`` can be instantiated multiple times and with different parameters. For example, it is advisable to create a ``DAOContext`` for each calling context (for example, each REST or GraphQL call).
 
-Il ``DAOContext`` richiede in input un riferimento al database MongoDB a cui dovrà accedere per fornire l'accesso alle varie entità del modello dati. Di seguito un esempio di configurazione:
+The ``DAOContext`` requires as input a reference to the MongoDB database to be accessed to provide access to the various entities of the data model. Here is an example configuration:
 
 ```typescript
 const daoContext = new DAOContext({
@@ -41,7 +41,7 @@ const daoContext = new DAOContext({
 })
 ```
 
-E infine un esempio completo:
+And finally a complete example:
 
 ```typescript
 import { MongoClient } from "mongodb";

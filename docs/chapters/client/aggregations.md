@@ -1,30 +1,30 @@
-# Aggregazioni
+# Aggregations
 
-Typetta supporta la lettura di dati aggregati e/o gruppati attraverso una specifica API di nome [aggregate](/typedoc/classes/AbstractDAO.html#aggregate){:target="_blank"}.
+Typetta supports the reading of aggregated and/or grouped data through a specific API named [aggregate](/typedoc/classes/AbstractDAO.html#aggregate){:target="_blank"}.
 
-  - [Campi aggregati](#campi-aggregati)
+  - [Aggregate fields](#aggregate-fields)
   - [Count](#count)
-  - [Raggruppamenti](#raggruppamenti)
-  - [Filtri e ordinamenti](#filtri-e-ordinamenti)
+  - [Groups](#groups)
+  - [Filters and sorts](#filters-and-sorts)
 
-## Campi aggregati
+## Aggregate fields
 
-Al fine di definire dei campi aggregati, il cui valore è frutto dell'applicazione di un operatore su tutti i record raggruppati, l'API `aggregate` accetta uno specifico parametro `aggregations`. Tramite questo parametro l'utente può specificare una mappa le cui chiavi sono i nomi dei nuovi campi aggregati che verranno ritornati nel risultato e i cui valori sono le definizioni di come questi campi devono essere calcolati.
+In order to define aggregate fields, whose value is the result of applying an operator on all grouped records, the `aggregate` API accepts a specific `aggregations` parameter. Using this parameter, the user can specify a map whose keys are the names of the new aggregate fields that will be returned in the result and whose values are the definitions of how these fields are to be calculated.
 
-Ipotizziamo per esempio di voler leggere il numero totale di utenti e la loro età media:
+Let's assume, for example, that you want to read the total number of users and their average age:
 
 ```typescript
 const res = await dao.user.aggregate(
   {
-    aggregations: { 
-      userCount: { field: 'id', operation: 'count' }, 
-      averageAge: { field: 'age', operation: 'avg' } 
+    aggregations: {
+      userCount: { field: 'id', operation: 'count' },
+      averageAge: { field: 'age', operation: 'avg' }
     },
   }
 )
 ```
 
-Il risultato di questa operazione sarà del tipo:
+The result of this operation will be of the following type:
 
 ```typescript
 {
@@ -33,30 +33,30 @@ Il risultato di questa operazione sarà del tipo:
 }
 ```
 
-Si noti che nell'esempio `userCount` e `averageAge` sono due chiavi definite dall'utente e la cui logica di calcolo dipende dal parametro `operation`. Le `aggregations` possono riguardare solamente campi di tipo numerico e le relative `operation` possono assumere i seguenti valori:
-- `count`: conta il numero di occorrenze
-- `sum`: effettua la somma di tutti i valori
-- `avg`: effettua la media di tutti i valori
-- `min`: trova il minimo tra tutti i valori
-- `max`: trova il massimo tra tutti i valori
+Note that, in the example, `userCount` and `averageAge` are two user-defined keys whose calculation logic depends on the `operation` parameter. `Aggregations` can only concern numeric fields and their `operations` can take the following values:
+- `count`: count the number of occurrences
+- `sum`: performs the sum of all the values
+- `avg`: averages all values
+- `min`: find the minimum of all values
+- `max`: find the maximum of all the values
 
 ## Count
 
-A differenza di tutti gli altri operatori, che devono necessariamente essere specificati su `aggregations` di uno specifico campo, l'operatore `count` può essere applicato in maniera globale, per calcolare il numero totale di risultati. 
+Unlike all other operators, which must necessarily be specified on `aggregations` of a specific field, the `count` operator can be applied globally to calculate the total number of results.
 
-Di seguito un esempio di interrogazione del numero totale di utenti:
+Here is an example of querying the total number of users:
 
 ```typescript
 const res = await dao.user.aggregate(
   {
-    aggregations: { 
+    aggregations: {
       userCount: { operation: 'count' }
     }
   }
 )
 ```
 
-Il cui risultato sarà:
+The result will be:
 
 ```typescript
 {
@@ -64,11 +64,11 @@ Il cui risultato sarà:
 }
 ```
 
-## Raggruppamenti
+## Groups
 
-L'API `aggregate` permette all'utente di raggruppare i record per il valore di uno o più campi e di calcolare le aggregazioni su ognuno dei gruppi trovati. per fare questo l'API mette a disposizione il parametro `by` tarmite il quale è possibile specificare una sorta di proiezione dei campi che devono costituire la chiave dei vari gruppi.
+The `aggregate` API allows the user to group the records for the value of one or more fields and to calculate the aggregations on each of the groups found. To do this, the API provides the `by` parameter through which it is possible to specify a sort of projection of the fields that must form the key of the various groups.
 
-Nel seguente esempio una aggregate in cui gli utenti vengono raggruppati per sesso e per ogni gruppo si calcola l'età media:
+The following is an example of an aggregate in which users are grouped by gender and for each group the average age is calculated:
 
 ```typescript
 const res = await dao.user.aggregate(
@@ -76,22 +76,22 @@ const res = await dao.user.aggregate(
     by: {
       gender: true
     },
-    aggregations: { 
-      averageAge: { field: 'age', operation: 'avg' } 
+    aggregations: {
+      averageAge: { field: 'age', operation: 'avg' }
     }
   }
 )
 ```
 
-Come visto in precedenza, i raggruppamenti sono opzionali e se nessun valore viene passato al parametro `by` l'API effettua un unico raggruppamento contenente tutti i record.
+As seen above, groupings are optional, and if no value is set to the `by` parameter, the API performs a single grouping containing all records.
 
-## Filtri e ordinamenti
+## Filters and sorts
 
-L'API di aggregazione può ricevere, opzionalmente, un parametro `filter` esattamente come tutte le altre API di lettura. Tale filtro limita l'applicazione delle logiche di aggregazione e raggruppamento ad un sottoinsieme dei record determinato dalle condizioni definite.
+The aggregate API can optionally receive a `filter` parameter exactly like all other read APIs. This filter limits the application of aggregation and grouping logics to a subset of the records determined by the conditions defined.
 
-Oltre a questa possibilità, così come avviene tipicamente sui principali database SQL, Typetta mette a disposizione la possibilità di filtrare e ordinare anche per i campi frutto di raggruppamento o aggregazione. Questo secondo step di elaborazione può essere definito tramite un secondo parametro dell'API `aggregate`.
+In addition to this possibility, as typically happens on the main SQL databases, Typetta also provides the possibility to filter and sort for the fields resulting from grouping or aggregation. This second processing step can be defined by a second `aggregate` API parameter.
 
-Di seguito un esempio di interrogazione di tutti gli utenti, raggruppati per città di residenza, la cui età media è maggiore o ugual di 18 anni, ordinati per età media:
+Below is an example of a query of all users, grouped by city of residence, whose average age is greater than or equal to 18 years, sorted by average age:
 
 ```typescript
 const res = await dao.user.aggregate(
@@ -99,8 +99,8 @@ const res = await dao.user.aggregate(
     by: {
       'address.city': true
     },
-    aggregations: { 
-      averageAge: { field: 'age', operation: 'avg' } 
+    aggregations: {
+      averageAge: { field: 'age', operation: 'avg' }
     }
   }, {
     having: { averageAge: { $gte: 18 } },

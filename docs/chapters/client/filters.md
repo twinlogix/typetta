@@ -1,62 +1,64 @@
-# Filtri
+# Filters
 
-Typetta permette di filtrare i record per ognuno dei campi del modello e supporta vari operatori in maniera completamente trasparente rispetto al database che si utilizza. 
+Typetta allows you to filter the records for each of the fields in the model and supports various operators in a completely transparent way compared to the database you are using.
 
-La seguende operazione `findAll` ha un filtro che permette di trovare tutti gli utenti che:
-- Hanno come nome `Mattia`
-- Abitano a `Rome` o `Milan`
-- Sono nati in una data che non comprende tutto l'anno `2020`
+The following `findAll` operation has a filter that allows you to find all users who:
+- Have the name `Mattia`
+- Live in `Rome` or `Milan`
+- Were born on a date that does not include the whole year `2020`
 
 ```typescript
 await daoContext.user.findAll({
   filter: {
     firstName: "Mattia",
     "address.city": { $in: [ "Milan", "Rome" ]},
-    birthDate: { 
-      $or: { 
-        $lt: new Date("2020-01-01T00:00:00"), 
-        $gte: new Date("2021-01-01T00:00:00") 
-      } 
+    birthDate: {
+      $or: {
+        $lt: new Date("2020-01-01T00:00:00"),
+        $gte: new Date("2021-01-01T00:00:00")
+      }
     }
   }
 })
 ```
 
-  - [Operatori di uguaglianza](#operatori-di-uguaglianza)
+Typetta supports various operators and filters in order to give you a powerful data access layer.
+
+  - [Equality operators](#equality-operators)
     - [$eq](#eq)
     - [$ne](#ne)
     - [$in](#in)
     - [$nin](#nin)
-  - [Operatori di comparazione](#operatori-di-comparazione)
+  - [Comparison operators](#comparison-operators)
     - [$lt](#lt)
     - [$lte](#lte)
     - [$gt](#gt)
     - [$gte](#gte)
-  - [Operatori logici](#operatori-logici)
+  - [Logical operators](#logical-operators)
     - [$and](#and)
     - [$or](#or)
     - [$nor](#nor)
     - [$not](#not)
-    - [Combinazione di operatori logici](#combinazione-di-operatori-logici)
-  - [Operatori per stringhe](#operatori-per-stringhe)
+    - [Combination of logical operators](#combination-of-logical-operators)
+  - [Operators for strings](#operators-for-strings)
     - [$contains](#contains)
     - [$startsWith](#startswith)
     - [$endsWith](#endswith)
-  - [Altri operatori](#altri-operatori)
+  - [Other operators](#other-operators)
     - [$exist](#exist)
-  - [Filtri avanzati, dipendenti dal driver](#filtri-avanzati-dipendenti-dal-driver)
+  - [Advanced, driver-dependent filters](#advanced-driver-dependent-filters)
     - [MongoDB](#mongodb)
     - [SQL](#sql)
 
-## Operatori di uguaglianza
+## Equality operators
 
-Di seguito l'elenco degli operatori che permettorno di controllare l'uguaglianza di un campo con uno o più valori:
+Below is a list of operators that allow you to check the equality of a field with one or more values:
 
 ### $eq
 
-L'operatore `$eq` controlla che il valore sia uguale a quello fornito.
+The `$eq` operator checks that the value is the same as the value provided.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -65,7 +67,7 @@ await daoContext.user.findAll({
 })
 ```
 
-L'operatore `$eq` può anche essere omesso, per cui la query di cui sopra è equivalente alla seguente:
+The `$eq` operator can also be omitted, so the above query is equivalent to the following:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -76,9 +78,9 @@ await daoContext.user.findAll({
 
 ### $ne
 
-L'operatore `$ne` controlla che il valore sia diverso da quello fornito, è complementare al precedene operatore `$eq`.
+The `$ne` operator checks that the value is different from the one provided; it is complementary to the previous `$eq` operator.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -89,9 +91,9 @@ await daoContext.user.findAll({
 
 ### $in
 
-L'operatore `$in` controlla che il valore sia contenuto all'interno di un insieme di valori forniti.
+The `$in` operator checks that the value is contained within a given set of values.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -102,9 +104,9 @@ await daoContext.user.findAll({
 
 ### $nin
 
-L'operatore `$nin` controlla che il valore non sia contenuto all'interno di un insieme di valori forniti.
+The `$nin` operator checks that the value is not contained within a given set of values.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -113,15 +115,15 @@ await daoContext.user.findAll({
 })
 ```
 
-## Operatori di comparazione
+## Comparison operators
 
-Di seguito l'elenco degli operatori che permettorno di comparare un campo con uno o più valori:
+Below is the list of operators that allow you to compare a field with one or more values:
 
 ### $lt
 
-L'operatore `$lt` controlla che il valore sia strettamente minore di un valore fornito.
+The `$lt` operator checks that the value is strictly less than a given value.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -132,9 +134,9 @@ await daoContext.user.findAll({
 
 ### $lte
 
-L'operatore `$lte` controlla che il valore sia minore o uguale a un valore fornito.
+The `$lte` operator checks that the value is less than or equal to a given value.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -145,9 +147,9 @@ await daoContext.user.findAll({
 
 ### $gt
 
-L'operatore `$gt` controlla che il valore sia strettamente maggiore di un valore fornito.
+The `$gt` operator checks that the value is strictly greater than a given value.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -158,9 +160,9 @@ await daoContext.user.findAll({
 
 ### $gte
 
-L'operatore `$gte` controlla che il valore sia maggiore o uguale a un valore fornito.
+The `$gte` operator checks that the value is greater than or equal to a given value.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -169,15 +171,15 @@ await daoContext.user.findAll({
 })
 ```
 
-## Operatori logici
+## Logical operators
 
-E' possibile combinare le condizioni costruite con gli operatori precedenti attraverso i più classici operatori logici di seguito elencati:
+It is possible to combine the conditions built with the previous operators using the most traditional logical operators listed below:
 
 ### $and
 
-L'operatore `$and` è verificato se tutte le condizioni passate sono verificate.
+The `$and` operator is verified if all the set conditions are true.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -191,9 +193,9 @@ await daoContext.user.findAll({
 
 ### $or
 
-L'operatore `$or` è verificato se almeno una delle condizioni passate è verificata.
+The `$or` operator is verified if at least one of the set conditions is true.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -207,9 +209,9 @@ await daoContext.user.findAll({
 
 ### $nor
 
-L'operatore `$nor` è verificato se nessuna delle condizioni passate è verificata.
+The `$nor` operator is verified if none of the set conditions are true.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -223,9 +225,9 @@ await daoContext.user.findAll({
 
 ### $not
 
-L'operatore `$not` è verificato se la condizione passata non è verificata.
+The `$not` operator is verified if the set condition is not true.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -234,20 +236,20 @@ await daoContext.user.findAll({
 })
 ```
 
-### Combinazione di operatori logici
+### Combination of logical operators
 
-Gli operatori logici di cui sopra possono essere combinati a piacimento per creare condizioni complesse. Di seguito un esempio che mostra una query di ricerca di utenti il cui indirizzo è in Italia, oppure che vivono all'estero e il cui cognome è `Minotti` o `Barbieri`:
+The above logical operators can be combined however you like to create complex conditions. Below is an example that shows a search query of users whose address is in Italy, or who live abroad and whose surname is `Minotti` or `Barbieri`:
 
 ```typescript
 await daoContext.user.findAll({
   filter: {
     $or: [
-      { 
-        "address.country": "Italy" 
+      {
+        "address.country": "Italy"
       },
-      { 
+      {
         $and: [
-          { 
+          {
             $not: { "address.country":  "Italy" }
           },
           {
@@ -260,13 +262,13 @@ await daoContext.user.findAll({
 })
 ```
 
-## Operatori per stringhe
+## Operators for strings
 
-I seguenti operatori sono disponibili sono per i campi di tipo `String` e permetto di creare delle condizioni, anche complesse, su campi testuali.
+The following operators are available for `String` fields and allow you to create conditions - even complex ones - on text fields.
 
 ### $contains
 
-L'operatore `$contains` permette di controllare se il valore contiene al suo interno una stringa fornita. Di seguito alcuni esempi esplicativi:
+The `$contains` operator allows you to check whether the value contains a supplied string within it. Some examples are listed below:
 
 ```
 "oggi fa caldo" contiene "oggi fa caldo" => sì
@@ -279,7 +281,7 @@ L'operatore `$contains` permette di controllare se il valore contiene al suo int
 "oggi fa caldo" contiene "facaldo" => no
 ```
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -291,9 +293,9 @@ await daoContext.user.findAll({
 
 ### $startsWith
 
-L'operatore `$startsWith` permette di controllare se il valore contiene inizia con una stringa fornita:
+The `$startsWith` operator allows you to check whether the value starts with a supplied string:
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -302,11 +304,11 @@ await daoContext.user.findAll({
 })
 ```
 
-### $endsWith 
+### $endsWith
 
-L'operatore `$endsWith` permette di controllare se il valore contiene termina con una stringa fornita:
+The `$endsWith` operator allows you to check whether the value ends with a supplied string:
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -315,15 +317,15 @@ await daoContext.user.findAll({
 })
 ```
 
-## Altri operatori
+## Other operators
 
-Di seguito l'elenco degli ulteriori operatori messi a disposizione da Typetta:
+Below is the list of additional operators made available by Typetta:
 
 ### $exist
 
-L'operatore `$exist` controlla che il campo sia o meno valorizzato su database, a seconda del valore true / false fornito.
+The `$exist` operator checks whether or not the field has a value in the database, depending on the true / false value provided.
 
-Esempio:
+For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -332,13 +334,13 @@ await daoContext.user.findAll({
 })
 ```
 
-## Filtri avanzati, dipendenti dal driver
+## Advanced, driver-dependent filters
 
-Typetta, come molti altri ORM, offre la possibilità di [accedere direttamente alle funzionalità del database](raw-databse-access.md) al fine di garantire la massima flessibilità all'utente. Per quanto riguarda i filtri, questo si traduce nella possibilità di creare condizioni completamente dipendenti dal driver sottostante.
+Typetta, like many other ORMs, offers the ability [to directly access database features](raw-databse-access) in order to provide maximum flexibility to the user. As for the filters, this allows you to create conditions that are completely dependent on the underlying driver.
 
-Tutte le API che ricevono il parametro `filter` accettano sia un tipo di dato generato da Typetta con le regole e gli operatori descritti precedentemente, che una funzione che permette di esprimere il filtro utilizzando riferimenti, sintassi e potenzialità di SQL o MongoDB.
+All APIs that receive the `filter` parameter accept both a type of data generated by Typetta with the rules and operators described above, and a function that allows the filter to be expressed using SQL or MongoDB references, syntax and potential.
 
-In pseudo-codice questa possibilità è esemplificata di seguito:
+This possibility is exemplified in pseudo-code below:
 ```typescript
 await daoContext.user.findAll({
   projection: {
@@ -350,13 +352,13 @@ await daoContext.user.findAll({
 })
 ```
 
-Si noti che questo approccio permette di descrivere un filtro specifico per un driver, mantenendo però l'utilizzo di tutte le altre funzionalità, nello specifico il meccanismo di proiezioni, la risoluzione delle relazioni ed il typing dei risultati.
+Note that this approach allows you to describe a specific filter for a driver, while maintaining the use of all other features, specifically the mechanism of projections, the resolution of relationships and the typing of results.
 
 ### MongoDB
 
-Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}, la creazione di un filtro specifico consiste in una funzione che ritorna `Filter<TSchema>`. 
+Since the MongoDB driver is developed through the [official MongoDB Node Driver](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}, creating a specific filter consists of a function returned by `Filter<TSchema>`.
 
-Ipotizziamo per esempio di voler utilizzare l'operatore `$text` di MongoDB che è un'operatore molto specifico che, tramite un indice testuale sulla collection, è in grado di eseguire una ricerca full text complessa. Non essendo una funzionalità disponibile su altri database o disponibile ma in modalità molto diverse, non è stata fattorizzata da Typetta. Con il meccanismo di filtri specifici per il driver è tuttavia molto semplice utilizzarla:
+Let's assume, for example, that we want to use the `$text` operator of MongoDB, which is a very specific operator that, through a textual index of the collection, is able to perform a complex full text search. Since this feature is not available on other databases or available but in very different modes, it was not factored by Typetta. However, with the driver-specific filter mechanism, it is very easy to use:
 
 ```typescript
 await daoContext.user.findAll({
@@ -371,9 +373,9 @@ await daoContext.user.findAll({
 
 ### SQL
 
-Il driver SQL, come già accennato in precedenza, è sviluppato utilizzando il celebre query builder [KnexJS](https://knexjs.org/){:target="_blank"}. La creazione di un filtro specifico in questo caso consiste nell'invocazione di una serie di metodi sull'oggetto `Knex.QueryBuilder`.
+The SQL driver, as mentioned above, is developed using the popular [KnexJS](https://knexjs.org/){: target="_blank"} query builder. In this case, creating a specific filter involves invoking a set of methods on the `Knex.QueryBuilder` object.
 
-Ipotizziamo per esempio di voler implementare anche in questo caso una ricerca full text tramite le funzionalità offerte da un database target PostgreSQL. Con il meccanismo di filtri specifici possiamo creare una ricerca come segue:
+Let's assume, for example, that in this case we again want to implement a full text search using the features offered by a PostgreSQL target database. Using the specific filter mechanism, we can create a search as follows:
 
 ```typescript
 await daoContext.user.findAll({

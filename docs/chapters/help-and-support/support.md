@@ -1,7 +1,7 @@
 # Support
 
 ## Found a bug or want to propose a new feature?
-If you found a bug, issue, or you just want to propose a new feature, create an issue on the [GitHub repository](https://github.com/twinlogix/typetta/issues).
+If you found a bug, issue, or just want to propose a new feature, create an issue on the [GitHub repository](https://github.com/twinlogix/typetta/issues).
 
 ## Have a question?
 If you have a question, you can ask it on StackOverflow or other community support channels. You can also create a discussion on the [GitHub repository](https://github.com/twinlogix/typetta/discussions).

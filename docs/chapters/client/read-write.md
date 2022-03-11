@@ -1,10 +1,10 @@
-# Lettura e Scrittura
+# Read and Write
 
-Il componente fondamentale per eseguire operazioni di lettura o scrittura sulle entità di modello è il `DAO`. Esiste un DAO per ogni entità ed il suo riferimento si può ottenere semplicemente dal `DAOContext`, come descritto nella sezion della guida riguardante [il contesto](dao-context.md).
+The fundamental component for performing read or write operations on model entities is `DAO`. There is a DAO for each entity and its reference can be obtained simply from the `DAOContext`, as described in the [context](dao-context) section of the guide.
 
-Ogni DAO, indipendentemente da quale sia la sua sorgente dati, sia essa SQL o MongoDB, offre le principali funzionalità di lettura e manipolazione delle entità e delle loro relazioni. 
+Each DAO, regardless of its data source, whether SQL or MongoDB, offers the main features of reading and manipulating entities and their relationships.
 
-Di seguito un elenco di queste operazioni:
+Below is a list of these operations:
 
   - [Insert One](#insert-one)
   - [Find One](#find-one)
@@ -16,9 +16,9 @@ Di seguito un elenco di queste operazioni:
   - [Delete One](#delete-one)
   - [Delete All](#delete-all)
 
-## Schema applicativo di esempio
+## Sample application diagram
 
-Nelle successive sezioni verranno mostrate le principali operazioni che ogni DAO mette a disposizione per leggere e manipolare i dati relativi ad una o più entità di modello. Tutti gli esempi che verranno mostrati faranno riferimento al seguente modello applicativo:
+In the following sections, the main operations that each DAO makes available to read and manipulate the data related to one or more model entities will be shown. All the examples that will be shown will refer to the following application model:
 
 ```typescript
 type User @entity @mongodb {
@@ -47,9 +47,9 @@ type Address {
 
 ## Insert One
 
-L'API [insertOne](/typedoc/classes/AbstractDAO.html#insertOne){:target="_blank"} permette di inserire un record. L'API richiede tutti i campi obbligatori dell'entità interessata ad esclusione dell'ID se questo è auto-generato.
+The [insertOne](/typedoc/classes/AbstractDAO.html#insertOne){:target="_blank"} API allows you to insert a record. The API requests all required fields of the affected entity except for the ID if it is self-generated.
 
-Di seguito un esempio di creazione di un utente:
+Here is an example of creating a user:
 
 ```typescript
 const user = await daoContext.user.insertOne({
@@ -65,13 +65,13 @@ const user = await daoContext.user.insertOne({
 })
 ```
 
-L'oggetto ritornato rappresenta uno User e, nel caso di ID auto-generato, contiene anche l'id creato dal sistema o dal database, a seconda dell'opzione scelta.
+The returned object represents a User and, in the case of a self-generated ID, also contains the id created by the system or database, depending on the option chosen.
 
 ## Find One
 
-L'API [findOne](/typedoc/classes/AbstractDAO.html#findOne){:target="_blank"} permette di ricercare un record filtrando per uno o più dei suoi campi.
+The [findOne](/typedoc/classes/AbstractDAO.html#findOne){:target="_blank"} API allows you to search for a record by filtering one or more of its fields.
 
-Di seguito un esempio di ricerca di un utente filtrando per nome:
+Below is an example of a user search by filtering by name:
 
 ```typescript
 const user = await daoContext.user.findOne({
@@ -81,13 +81,13 @@ const user = await daoContext.user.findOne({
   },
 })
 ```
-Nel caso la query identifichi più di un record viene ritornato solo il primo con l'ordinamento specificato, oppure con l'ordinamento standard del database.
+If the query identifies more than one record, only the first record is returned with the specified sort order, or the standard sort order of the database.
 
 ## Find All
 
-L'API [findAll](/typedoc/classes/AbstractDAO.html#findAll){:target="_blank"} permette di ricercare tutti i record filtrando per uno o più dei loro campi.
+The [findAll](/typedoc/classes/AbstractDAO.html#findAll){:target="_blank"} API allows you to search for all records by filtering one or more of their fields.
 
-Di seguito un esempio di ricerca di utenti filtrando per città:
+Below is an example of user search filtering by city:
 
 ```typescript
 const users = await daoContext.user.findAll({
@@ -95,24 +95,24 @@ const users = await daoContext.user.findAll({
     "address.city": "Milan"
   },
   sorts: [
-    { 
-      lastName: SortDirection.DESC 
+    {
+      lastName: SortDirection.DESC
     }
   ]
 })
 ```
 
-Il ritorno di questa query è un array di utenti che vivono a Milano, ordinati per cognome in ordine alfabetico.
+The return of this query is an array of users living in Milan, sorted by last name in alphabetical order.
 
 ## Find Page
 
-L'API [findPage](/typedoc/classes/AbstractDAO.html#findPage){:target="_blank"} permette di ricercare tutti i record filtrando per uno o più dei loro campi e ritorna una pagina di risultati e il loro numero totale. 
+The [findPage](/typedoc/classes/AbstractDAO.html#findPage){:target="_blank"} API allows you to search all records, filtering by one or more of their fields and returns a page of results and their total number.
 
-Questa API differisce dalla precedente `findAll` non per la possibilità di richiedere una pagina di risultati, cosa possibile anche con la `findAll`, ma per il valore di ritorno che contiene l'elenco dei record della pagina ed il conteggio totale dei record che rispondo alla query passata.
+This API differs from the previous `findAll` not because of the ability to request a results page, which is also possible with the `findAll`, but because of the return value that contains the list of records on the page and the total count of records that answer the query sent.
 
-Il parametro `skip` identifica quanti record saltare, quindi se si vuole iniziare dal primo deve essere settato a 0 oppure omesso; il parametro `limit` identifica invece la dimensione della pagina, ossia il numero massimo di record tornati.
+The `skip` parameter identifies how many records to skip, so if you want to start from the first one it must be set to 0 or omitted; the `limit` parameter identifies the size of the page, that is, the maximum number of records returned.
 
-Di seguito un esempio di ricerca di una pagina di utenti filtrando per città:
+Below is an example of a search for a page of users, filtering by city:
 
 ```typescript
 const users = await daoContext.user.findAll({
@@ -122,14 +122,14 @@ const users = await daoContext.user.findAll({
     "address.city": "Milan"
   },
   sorts: [
-    { 
-      lastName: SortDirection.DESC 
+    {
+      lastName: SortDirection.DESC
     }
   ]
 })
 ```
 
-Il ritorno di questa query è il seguente oggetto:
+The return of this query is the following object:
 
 ```typescript
 {
@@ -151,9 +151,9 @@ Il ritorno di questa query è il seguente oggetto:
 
 ## Update One
 
-L'API [updateOne](/typedoc/classes/AbstractDAO.html#updateOne){:target="_blank"} permette aggiornare uno o più campi di un record identificato tramite un apposito filtro. Questa API aggiorna al massimo un record, il primo trovato dal filtro nel caso più di uno corrisponda ai criteri di ricerca.
+The [updateOne](/typedoc/classes/AbstractDAO.html#updateOne){:target="_blank"} API allows you to update one or more fields of a record identified by a specific filter. This API updates a maximum of one record, the first one found by the filter if more than one matches the search criteria.
 
-Di seguito un esempio di aggiornamento dell'indirizzo di un utente:
+Here is an example of updating a user's address:
 
 ```typescript
 await daoContext.user.updateOne({
@@ -170,7 +170,7 @@ await daoContext.user.updateOne({
 })
 ```
 
-Si noti che per entità composte come è il caso dell'utente e dell'indirizzo, l'API permette sia di aggiornare l'intera entità embedded che solamente uno dei suoi campi. Se si vuole per esempio modificare solamente il campo `street` di un utente lasciando invariato il resto dell'indirizzo si può eseguire il seguente codice:
+Note that for composite entities such as the user and address, the API allows both updating the entire embedded entity and only one of its fields. For example, if you want to change only the `street` field of a user leaving the rest of the address unchanged, you can execute the following code:
 
 ```typescript
 await daoContext.user.updateOne({
@@ -185,9 +185,9 @@ await daoContext.user.updateOne({
 
 ## Update All
 
-L'API [updateAll](/typedoc/classes/AbstractDAO.html#updateAll){:target="_blank"} permette aggiornare uno o più campi di un insieme di record identificati tramite un apposito filtro. Il funzionamento è del tutto simile alla precedente API `updateOne` ma esteso a tutti i record che soddisfano il filtro passato come parametro.
+The [updateAllAPI](/typedoc/classes/AbstractDAO.html#updateAll){:target="_blank"} allows you to update one or more fields of a set of records identified by a specific filter. The behaviour is very similar to the previous `updateOne` API but extended to all records that satisfy the filter set as a parameter.
 
-Di seguito un esempio di aggiornamento di tutti gli utenti che hanno per nome `mattia`, modificando il nome in `Mattia` con la lettera maiuscola:
+Below is an example of updating all users whose name is `mattia`, changing the name to `Mattia` with a capital letter:
 
 ```typescript
 await daoContext.user.updateAll({
@@ -200,7 +200,7 @@ await daoContext.user.updateAll({
 })
 ```
 
-Si noti che è possibile aggiornare tutti i record presenti passando esplicitamente un filtro vuoto, come nel seguente esempio in cui si aggiorna il nome di tutti gli utenti:
+Note that you can update all the records present by explicitly setting a blank filter, as in the following example where you update the names of all users:
 
 ```typescript
 await daoContext.user.updateAll({
@@ -213,9 +213,9 @@ await daoContext.user.updateAll({
 
 ## Replace One
 
-L'API [replaceOne](/typedoc/classes/AbstractDAO.html#replaceOne){:target="_blank"} permette di sostituire un record identificato tramite un apposito filtro con uno completamente nuovo. In quanto sostituzione, il vecchio recond viene completamente perso e quello sostitutivo può differire completamente dal precedente.
+The [replaceOne](/typedoc/classes/AbstractDAO.html#replaceOne){:target="_blank"} API allows you to replace a record identified by a specific filter with a completely new one. As it has been replaced, the old record is completely lost and the replacement may differ completely from the previous one.
 
-Di seguito un esempio di sostituzione di un utente:
+Here is an example of replacing a user:
 
 ```typescript
 await daoContext.user.replaceOne({
@@ -236,9 +236,9 @@ await daoContext.user.replaceOne({
 
 ## Delete One
 
-L'API [deleteOne](/typedoc/classes/AbstractDAO.html#deleteOne){:target="_blank"} permette di eliminare un record identificato tramite un apposito filtro. Questa API elimina al massimo un record, il primo trovato dal filtro nel caso più di uno corrisponda ai criteri di ricerca.
+The [deleteOne](/typedoc/classes/AbstractDAO.html#deleteOne){:target="_blank"} API allows you to delete an identified record using a specific filter. This API updates a maximum of one record, the first one found by the filter if more than one matches the search criteria.
 
-Di seguito un esempio di eliminazione di un utente:
+Here is an example of deleting a user:
 
 ```typescript
 await daoContext.user.deleteOne({
@@ -250,9 +250,9 @@ await daoContext.user.deleteOne({
 
 ## Delete All
 
-L'API [deleteAll](/typedoc/classes/AbstractDAO.html#deleteAll){:target="_blank"} permette eliminare un insieme di record identificati tramite un apposito filtro. Il funzionamento è del tutto simile alla precedente API `deleteOne` ma esteso a tutti i record che soddisfano il filtro passato come parametro.
+The [deleteAll](/typedoc/classes/AbstractDAO.html#deleteAll){:target="_blank"} API allows you to delete a set of records identified by a specific filter. The behaviour is very similar to the previous `deleteOne` API but extended to all records that satisfy the filter set as a parameter.
 
-Di seguito un esempio di eliminazione di tutti gli utenti che hanno per nome `Mattia`:
+Here is an example of deleting all users named `Mattia`:
 
 ```typescript
 await daoContext.user.deleteAll({
@@ -262,7 +262,7 @@ await daoContext.user.deleteAll({
 })
 ```
 
-Si noti che è possibile eliminare tutti i record presenti passando esplicitamente un filtro vuoto, come nel seguente esempio in cui si eliminano tutti gli utenti:
+Note that you can update all the records present by explicitly setting a blank filter, as in the following example where you update the names of all users:
 
 ```typescript
 await daoContext.user.deleteAll({

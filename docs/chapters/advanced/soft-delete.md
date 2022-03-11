@@ -1,23 +1,23 @@
-# Soft-delete
+# Soft-Delete
 
-In molti sistemi l'**eliminazione** dei dati, da requisito, non deve essere fisica ma **logica**. Questo significa che ogni entità deve avere un campo che ne identifica lo stato eliminato/non eliminato e che l'operazione di delete agisce su questo campo piuttosto che eliminare il record dalla sorgente dati. Di conseguenza ogni operazione di lettura deve filtrare tutti i record eliminati in maniera automatica.
+In many systems, the **deletion** of data, as a requirement, must not be physical but **logical**. This means that each entity must have a field that identifies its deleted/undeleted status and that the delete operation acts on this field rather than deleting the record from the data source. As a result, each read operation must filter all deleted records automatically.
 
-Il meccanismo sopra descritto viene comunemente chiamato **soft delete** ed è utilizzato per:
+The mechanism described above is commonly called **soft-delete** and is used to:
 
-- Mantenere i dati per un certo periodo di tempo anche dopo la loro eliminazione da parte dell'utente.
+- Keep the data for a certain period of time even after their deletion by the user.
 
-- Costruire una funzionalità di "cestino" e permettere all'utente di ripristinare dati precedentemente eliminati.
+- Build a "Trash" feature and allow the user to restore previously deleted data.
 
 
 ## Middleware
 
-Typetta offre allo sviluppatore un middleware che facilita enormemente l'implementazione del meccanismo di soft delete. Esso richiede solamente la specifica di una funzione che ritorna un oggetto con due campi:
+Typetta offers the developer middleware that makes implementing the soft-delete mechanism much easier. All you have to do is specify a function that returns an object with two fields:
 
-- `changes`: le modifiche da applicare al record al posto dell'eliminazione fisica.
-  
-- `filter`: il filtro da applicare in tutte le letture per escludere i record eliminati.
+- `changes`: changes to be applied to the record instead of physical deletion.
 
-Prendiamo ad esempio il seguente modello dati:
+- `filter`: the filter to be applied to all readings to exclude deleted records.
+
+Take, for example, the following data model:
 
 ```typescript
 type User {
@@ -29,15 +29,15 @@ type User {
 }
 ```
 
-E' possibile implementare il comportamento di soft delete per l'entità `User` utilizzando questo middleware come segue:
+You can implement soft-delete behaviour for the `User` entity using this middleware as follows:
 ```typescript
 const daoContext = new DAOContext({
   overrides: {
     user: {
       middlewares: [
-        softDelete(() => ({ 
-          changes: { live: false, deletedOne: new Date() }, 
-          filter: { live: true } 
+        softDelete(() => ({
+          changes: { live: false, deletedOne: new Date() },
+          filter: { live: true }
         })),
       ]
     }
