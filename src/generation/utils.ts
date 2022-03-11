@@ -30,18 +30,54 @@ export function getNode(code: string, typesMap: Map<string, TsTypettaGeneratorNo
   return node
 }
 
-export function findField(node: TsTypettaGeneratorNode, fieldPath: string, typesMap: Map<string, TsTypettaGeneratorNode>): TsTypettaGeneratorField | undefined {
+// example:
+// id -> id
+// entity.id -> entity.id
+// entity.../id -> id
+export function resolveParentPath(fieldPath: string) {
+  const c: (string | null)[] = fieldPath.split('../').join('__PARENT__').split('.')
+  for (let i = 1; i < c.length; i++) {
+    const value = c[i]
+    if (value && value.includes('__PARENT__')) {
+      c[i - 1] = null
+    }
+  }
+  return c.flatMap((v) => (v === null ? [] : [v.split('__PARENT__').join('')])).join('.')
+}
+
+export function removeParentPath(fieldPath: string) {
+  return fieldPath.split('../').join('')
+}
+
+export function findField(
+  node: TsTypettaGeneratorNode,
+  fieldPath: string,
+  typesMap: Map<string, TsTypettaGeneratorNode>,
+  parents: TsTypettaGeneratorNode[],
+): { field?: TsTypettaGeneratorField; root: TsTypettaGeneratorNode } {
+  let parentIndex = -1
+  while (fieldPath.startsWith('../')) {
+    fieldPath = fieldPath.substring(3)
+    parentIndex++
+  }
+  if (parentIndex >= parents.length) {
+    return { root: node }
+  }
+  if (parentIndex != -1) {
+    node = parents[parentIndex]
+  }
+
   const fieldPathSplitted = fieldPath.split('.')
   if (fieldPathSplitted.length === 1) {
-    return node.fields.find((f) => f.name === fieldPathSplitted[0])
+    return { field: node.fields.find((f) => f.name === fieldPathSplitted[0]), root: node }
   } else {
     const key = fieldPathSplitted.shift()
     const tmpField = node.fields.find((f) => f.name === key)
     if (tmpField && tmpField.type.kind === 'embedded') {
       const embeddedType = findNode(tmpField.type.embed, typesMap)
-      return embeddedType && findField(embeddedType, fieldPathSplitted.join('.'), typesMap)
+      return { field: embeddedType && findField(embeddedType, fieldPathSplitted.join('.'), typesMap, []).field, root: node }
     }
-    return tmpField
+    return { field: tmpField, root: node }
   }
 }
 

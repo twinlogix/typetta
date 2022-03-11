@@ -1,6 +1,6 @@
 import { DAORelation } from '../../dal/dao/relations/relations.types'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
-import { getID, getNode, indentMultiline, toFirstLower } from '../utils'
+import { getID, getNode, indentMultiline, resolveParentPath, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
 import { DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 
@@ -536,33 +536,40 @@ public constructor(params: ${node.name}DAOParams<MetadataType, OperationMetadata
     const type: DAORelation['type'] = field.isList ? '1-n' : '1-1'
     if (field.type.kind === 'innerRef') {
       const linkedType = getNode(field.type.innerRef, typesMap)
-      const linkedTypeIdField = getID(linkedType)
       const reference: DAORelation['reference'] = 'inner'
       const refField = path + field.name
       const refFrom = field.type.refFrom ? field.type.refFrom : path + field.name + 'Id'
-      const refTo = field.type.refTo ? field.type.refTo : linkedTypeIdField.name
+      const refTo = field.type.refTo ? field.type.refTo : getID(linkedType).name
       const dao = toFirstLower(field.type.innerRef)
-      return [`{ type: '${type}', reference: '${reference}', field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}', required: ${field.isRequired} }`]
+      return [
+        `{ type: '${type}', reference: '${reference}', field: '${refField}', refFrom: '${resolveParentPath(refFrom)}', refTo: '${resolveParentPath(refTo)}', dao: '${dao}', required: ${
+          field.isRequired
+        } }`,
+      ]
     } else if (field.type.kind === 'foreignRef') {
-      const idField = getID(node)
       const reference: DAORelation['reference'] = 'foreign'
       const refField = path + field.name
       const refFrom = field.type.refFrom ?? `${toFirstLower(node.name)}Id`
-      const refTo = path + (field.type.refTo ? field.type.refTo : idField.name)
+      const refTo = path + (field.type.refTo ? field.type.refTo : getID(node).name)
       const dao = toFirstLower(field.type.foreignRef)
-      return [`{ type: '${type}', reference: '${reference}', field: '${refField}', refFrom: '${refFrom}', refTo: '${refTo}', dao: '${dao}', required: ${field.isRequired} }`]
+      return [
+        `{ type: '${type}', reference: '${reference}', field: '${refField}', refFrom: '${resolveParentPath(refFrom)}', refTo: '${resolveParentPath(refTo)}', dao: '${dao}', required: ${
+          field.isRequired
+        } }`,
+      ]
     } else if (field.type.kind === 'relationEntityRef') {
-      const idField = getID(node)
       const reference: DAORelation['reference'] = 'relation'
       const refField = path + field.name
       const refThisRefFrom = field.type.refThis?.refFrom ?? toFirstLower(field.type.sourceRef) + 'Id'
-      const refThisRefTo = field.type.refThis?.refTo ?? idField.name
+      const refThisRefTo = field.type.refThis?.refTo ?? getID(node).name
       const refOtherRefFrom = field.type.refOther?.refFrom ?? toFirstLower(field.type.destRef) + 'Id'
-      const refOtherRefTo = field.type.refOther?.refTo ?? idField.name
+      const refOtherRefTo = field.type.refOther?.refTo ?? getID(node).name
       const relationDao = toFirstLower(field.type.entity)
       const entityDao = toFirstLower(field.type.destRef)
       return [
-        `{ type: '${type}', reference: '${reference}', field: '${refField}', relationDao: '${relationDao}', entityDao: '${entityDao}', refThis: { refFrom: '${refThisRefFrom}', refTo: '${refThisRefTo}' }, refOther: { refFrom: '${refOtherRefFrom}', refTo: '${refOtherRefTo}' }, required: ${field.isRequired} }`,
+        `{ type: '${type}', reference: '${reference}', field: '${refField}', relationDao: '${relationDao}', entityDao: '${entityDao}', refThis: { refFrom: '${resolveParentPath(
+          refThisRefFrom,
+        )}', refTo: '${resolveParentPath(refThisRefTo)}' }, refOther: { refFrom: '${resolveParentPath(refOtherRefFrom)}', refTo: '${resolveParentPath(refOtherRefTo)}' }, required: ${field.isRequired} }`,
       ]
     } else if (field.type.kind === 'embedded') {
       const embeddedType = getNode(field.type.embed, typesMap)

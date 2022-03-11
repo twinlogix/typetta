@@ -87,6 +87,95 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
 
 
 //--------------------------------------------------------------------------------
+//------------------------------------ AUDIT -------------------------------------
+//--------------------------------------------------------------------------------
+
+export type AuditExcludedFields = never
+export type AuditRelationFields = never
+
+export function auditSchema(): Schema<types.Scalars> {
+  return {
+    'changes': {
+      scalar: 'String'
+    },
+    'entityId': {
+      scalar: 'ID', 
+      required: true
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true, 
+      alias: '_id'
+    }
+  }
+}
+
+type AuditFilterFields = {
+  'changes'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'entityId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+}
+export type AuditFilter = AuditFilterFields & LogicalOperators<AuditFilterFields | AuditRawFilter>
+export type AuditRawFilter = () => Filter<Document>
+
+export type AuditRelations = Record<never, string>
+
+export type AuditProjection = {
+  changes?: boolean,
+  entityId?: boolean,
+  id?: boolean,
+}
+export type AuditParam<P extends AuditProjection> = ParamProjection<types.Audit, AuditProjection, P>
+
+export type AuditSortKeys = 'changes' | 'entityId' | 'id'
+export type AuditSort = OneKey<AuditSortKeys, SortDirection>
+export type AuditRawSort = () => Sort
+
+export type AuditUpdate = {
+  'changes'?: types.Scalars['String'] | null,
+  'entityId'?: types.Scalars['ID'],
+  'id'?: types.Scalars['ID']
+}
+export type AuditRawUpdate = () => UpdateFilter<Document>
+
+export type AuditInsert = {
+  changes?: types.Scalars['String'],
+  entityId: types.Scalars['ID'],
+}
+
+type AuditDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Audit, 'id', 'ID', 'db', AuditFilter, AuditRawFilter, AuditRelations, AuditProjection, AuditSort, AuditRawSort, AuditInsert, AuditUpdate, AuditRawUpdate, AuditExcludedFields, AuditRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'audit', DAOContext<MetadataType, OperationMetadataType>>
+export type AuditDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<AuditDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class AuditDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {
+  
+  
+  public static projection<P extends AuditProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AuditProjection, P2 extends AuditProjection>(p1: P1, p2: P2): SelectProjection<AuditProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AuditProjection, P1, P2>
+  }
+  
+  public constructor(params: AuditDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: auditSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  
+}
+
+
+
+//--------------------------------------------------------------------------------
 //---------------------------------- AUDITABLE -----------------------------------
 //--------------------------------------------------------------------------------
 
@@ -125,6 +214,7 @@ export type AuditableProjection = {
   modifiedBy?: boolean,
   modifiedOn?: boolean,
   state?: boolean,
+  versions?: AuditProjection | boolean,
 }
 export type AuditableParam<P extends AuditableProjection> = ParamProjection<types.Auditable, AuditableProjection, P>
 
@@ -564,6 +654,7 @@ export type HotelProjection = {
     modifiedBy?: boolean,
     modifiedOn?: boolean,
     state?: boolean,
+    versions?: AuditProjection | boolean,
   } | boolean,
   id?: boolean,
   name?: boolean,
@@ -612,7 +703,7 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
       schema: hotelSchema(), 
       relations: overrideRelations(
         [
-          
+          { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true }
         ]
       ), 
       idGeneration: 'db', 
@@ -1161,6 +1252,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
   middlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: { 
     address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    audit?: Pick<Partial<AuditDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     city?: Pick<Partial<CityDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     defaultFieldsEntity?: Pick<Partial<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
@@ -1173,7 +1265,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
   },
   mongodb: Record<'default' | '__mock', Db>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
-  log?: LogInput<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
+  log?: LogInput<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
   security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 
@@ -1182,6 +1274,7 @@ type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> =
 export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
 
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined
+  private _audit: AuditDAO<MetadataType, OperationMetadataType> | undefined
   private _city: CityDAO<MetadataType, OperationMetadataType> | undefined
   private _defaultFieldsEntity: DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> | undefined
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined
@@ -1197,13 +1290,19 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
-  private logger?: LogFunction<'address' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>
+  private logger?: LogFunction<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>
   
   get address() : AddressDAO<MetadataType, OperationMetadataType> {
     if(!this._address) {
       this._address = new AddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, collection: this.mongodb.default.collection('addresses'), middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger })
     }
     return this._address
+  }
+  get audit() : AuditDAO<MetadataType, OperationMetadataType> {
+    if(!this._audit) {
+      this._audit = new AuditDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.audit, collection: this.mongodb.default.collection('audits'), middlewares: [...(this.overrides?.audit?.middlewares || []), ...selectMiddleware('audit', this.middlewares) as DAOMiddleware<AuditDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'audit', logger: this.logger })
+    }
+    return this._audit
   }
   get city() : CityDAO<MetadataType, OperationMetadataType> {
     if(!this._city) {
@@ -1276,8 +1375,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { mongodb: Record<'default' | '__mock', Db> }, entities: { address: Collection<Document>, city: Collection<Document>, defaultFieldsEntity: Collection<Document>, device: Collection<Document>, dog: Collection<Document>, hotel: Collection<Document>, mockedEntity: Collection<Document>, organization: Collection<Document>, post: Collection<Document>, user: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongodb: this.mongodb }, { address: this.mongodb.default.collection('addresses'), city: this.mongodb.default.collection('citys'), defaultFieldsEntity: this.mongodb.default.collection('defaultFieldsEntitys'), device: this.mongodb.default.collection('devices'), dog: this.mongodb.default.collection('dogs'), hotel: this.mongodb.default.collection('hotels'), mockedEntity: this.mongodb.__mock.collection('mockedEntitys'), organization: this.mongodb.default.collection('organizations'), post: this.mongodb.default.collection('posts'), user: this.mongodb.default.collection('users') })
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'default' | '__mock', Db> }, entities: { address: Collection<Document>, audit: Collection<Document>, city: Collection<Document>, defaultFieldsEntity: Collection<Document>, device: Collection<Document>, dog: Collection<Document>, hotel: Collection<Document>, mockedEntity: Collection<Document>, organization: Collection<Document>, post: Collection<Document>, user: Collection<Document> }) => Promise<T>): Promise<T> {
+    return run({ mongodb: this.mongodb }, { address: this.mongodb.default.collection('addresses'), audit: this.mongodb.default.collection('audits'), city: this.mongodb.default.collection('citys'), defaultFieldsEntity: this.mongodb.default.collection('defaultFieldsEntitys'), device: this.mongodb.default.collection('devices'), dog: this.mongodb.default.collection('dogs'), hotel: this.mongodb.default.collection('hotels'), mockedEntity: this.mongodb.__mock.collection('mockedEntitys'), organization: this.mongodb.default.collection('organizations'), post: this.mongodb.default.collection('posts'), user: this.mongodb.default.collection('users') })
   }
   
   
@@ -1292,6 +1391,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   address: AddressDAOGenerics<MetadataType, OperationMetadataType>
+  audit: AuditDAOGenerics<MetadataType, OperationMetadataType>
   city: CityDAOGenerics<MetadataType, OperationMetadataType>
   defaultFieldsEntity: DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>
   device: DeviceDAOGenerics<MetadataType, OperationMetadataType>
