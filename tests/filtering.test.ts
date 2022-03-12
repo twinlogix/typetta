@@ -1,6 +1,6 @@
-import { filterEntity } from '../src'
+import { filterEntity, mock } from '../src'
 
-test('filter test', async () => {
+test('filter test basic operators', async () => {
   const entity = {
     name: 'Luis',
     age: 30,
@@ -10,15 +10,13 @@ test('filter test', async () => {
     array: [1, 2, 3],
     image: null,
     flagT: true,
-    flagF: false
+    flagF: false,
   }
-  
 
   //Other
   expect(filterEntity(entity, { flagT: { $gt: 1 } })).toBe(false)
   expect(filterEntity(entity, { flagT: { $lt: 1 } })).toBe(false)
   expect(filterEntity(entity, { flagT: { $lte: 1 } })).toBe(false)
-
   expect(filterEntity(entity, undefined)).toBe(true)
 
   // EqualityOperators
@@ -121,7 +119,71 @@ test('filter test', async () => {
   expect(filterEntity(entity, { name: { $endsWith: 'uis' } })).toBe(true)
   expect(filterEntity(entity, { name: { $endsWith: 'uiS' } })).toBe(false)
   expect(filterEntity(entity, { name: { $endsWith: 'Lui' } })).toBe(false)
+})
 
+test('filter test custom types', async () => {
+  const entity = {
+    date: new Date(2022, 1, 1),
+  }
 
-  
+  mock.compare = (l, r) => {
+    if (l instanceof Date && r instanceof Date) {
+      return l.getTime() - r.getTime()
+    }
+  }
+
+  expect(filterEntity(entity, { date: new Date(2022, 1, 1) })).toBe(true)
+  expect(filterEntity(entity, { date: new Date(2022, 1, 2) })).toBe(false)
+  expect(filterEntity(entity, { date: { $gt: new Date(2021, 1, 2) } })).toBe(true)
+  expect(filterEntity(entity, { date: { $gt: new Date(2022, 1, 2) } })).toBe(false)
+})
+
+test('filter test logic operators', async () => {
+  const entity = {
+    value: 1,
+  }
+
+  expect(filterEntity(entity, { $and: [{ value: 1 }, { value: 2 }] })).toBe(false)
+  expect(filterEntity(entity, { $and: [{ value: 1 }, { value: 1 }] })).toBe(true)
+  expect(filterEntity(entity, { $or: [{ value: 1 }, { value: 2 }] })).toBe(true)
+  expect(filterEntity(entity, { $or: [{ value: 2 }, { value: 2 }] })).toBe(false)
+
+  expect(filterEntity(entity, { $nor: [{ value: 2 }, { value: 3 }] })).toBe(true)
+  expect(filterEntity(entity, { $nor: [{ value: 2 }, { value: 1 }] })).toBe(false)
+  expect(filterEntity(entity, { $nor: [{ value: 1 }, { value: 1 }] })).toBe(false)
+
+  expect(filterEntity(entity, { $and: [{ $or: [{ value: 1 }, { value: 2 }] }, { $or: [{ value: 1 }, { value: 1 }] }] })).toBe(true)
+
+  expect(filterEntity(entity, { $and: [] })).toBe(true)
+  expect(filterEntity(entity, { $or: [] })).toBe(false)
+  expect(filterEntity(entity, { $nor: [] })).toBe(true)
+})
+
+test('filter test others', async () => {
+  class MyClass {
+    private value: number
+    constructor(value: number) {
+      this.value = value
+    }
+    public equals(other: unknown) {
+      return other instanceof MyClass && other.value === this.value
+    }
+  }
+  class MyClass2 {
+    private value: number
+    constructor(value: number) {
+      this.value = value
+    }
+  }
+  const entity = {
+    value: new MyClass(1),
+    value2: new MyClass2(1),
+  }
+
+  expect(filterEntity(entity, { value: new MyClass(1) })).toBe(true)
+  expect(filterEntity(entity, { value: new MyClass(2) })).toBe(false)
+  expect(filterEntity(entity, { value: { $lt: new MyClass(2) } })).toBe(false)
+  expect(filterEntity(entity, { value: 1 })).toBe(false)
+  expect(filterEntity(entity, { value2: 1 })).toBe(false)
+  expect(filterEntity(entity, { value2: entity.value2 })).toBe(true)
 })

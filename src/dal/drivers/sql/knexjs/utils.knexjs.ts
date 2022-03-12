@@ -101,10 +101,6 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
           buildWhereConditions(qb.or, f, schema, adapters)
         }
       })
-    } else if (k === '$not') {
-      builder.whereNot((qb) => {
-        buildWhereConditions(qb, v as AbstractFilter, schema, adapters)
-      })
     } else {
       // throw new Error(`${k} is not a scalar in the schema. (Filtering on embedded types is not supported.)`)
     }
