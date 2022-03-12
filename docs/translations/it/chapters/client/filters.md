@@ -36,7 +36,6 @@ await daoContext.user.findAll({
     - [$and](#and)
     - [$or](#or)
     - [$nor](#nor)
-    - [$not](#not)
     - [Combinazione di operatori logici](#combinazione-di-operatori-logici)
   - [Operatori per stringhe](#operatori-per-stringhe)
     - [$contains](#contains)
@@ -221,19 +220,6 @@ await daoContext.user.findAll({
 })
 ```
 
-### $not
-
-L'operatore `$not` è verificato se la condizione passata non è verificata.
-
-Esempio:
-```typescript
-await daoContext.user.findAll({
-  filter: {
-    $not: { firstName: "Mattia" }
-  }
-})
-```
-
 ### Combinazione di operatori logici
 
 Gli operatori logici di cui sopra possono essere combinati a piacimento per creare condizioni complesse. Di seguito un esempio che mostra una query di ricerca di utenti il cui indirizzo è in Italia, oppure che vivono all'estero e il cui cognome è `Minotti` o `Barbieri`:
@@ -248,7 +234,7 @@ await daoContext.user.findAll({
       { 
         $and: [
           { 
-            $not: { "address.country":  "Italy" }
+            $nor: [{ "address.country":  "Italy" }]
           },
           {
             lastName: { $in: ["Minotti", "Barbieri"]}

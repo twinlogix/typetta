@@ -1,6 +1,5 @@
 export type LogicalOperators<FilterType> = {
   $and?: (LogicalOperators<FilterType> &  FilterType)[]
-  $not?: LogicalOperators<FilterType> & FilterType
   $nor?: (LogicalOperators<FilterType> &  FilterType)[]
   $or?: (LogicalOperators<FilterType> &  FilterType)[]
 }

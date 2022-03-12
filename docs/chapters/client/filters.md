@@ -38,7 +38,6 @@ Typetta supports various operators and filters in order to give you a powerful d
     - [$and](#and)
     - [$or](#or)
     - [$nor](#nor)
-    - [$not](#not)
     - [Combination of logical operators](#combination-of-logical-operators)
   - [Operators for strings](#operators-for-strings)
     - [$contains](#contains)
@@ -223,19 +222,6 @@ await daoContext.user.findAll({
 })
 ```
 
-### $not
-
-The `$not` operator is verified if the set condition is not true.
-
-For example:
-```typescript
-await daoContext.user.findAll({
-  filter: {
-    $not: { firstName: "Mattia" }
-  }
-})
-```
-
 ### Combination of logical operators
 
 The above logical operators can be combined however you like to create complex conditions. Below is an example that shows a search query of users whose address is in Italy, or who live abroad and whose surname is `Minotti` or `Barbieri`:
@@ -250,7 +236,7 @@ await daoContext.user.findAll({
       {
         $and: [
           {
-            $not: { "address.country":  "Italy" }
+            $nor: [{ "address.country":  "Italy" }]
           },
           {
             lastName: { $in: ["Minotti", "Barbieri"]}
