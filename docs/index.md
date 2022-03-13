@@ -2,7 +2,7 @@
 
 Typetta is an **open-source ORM** written in TypeScript that aims to allow seamless access to data in a typed fashion to all **main SQL databases** (MySQL, PostgreSQL, Microsoft SQL Server, SQLLite3, CockroachDB, MariaDB, Oracle e Amazon Redshift) and also to the NoSQL database **MongoDB**.
 
-Typetta is pluggable into any typeScript backend (including serverless applications and microservices) but in terms of gain we totally suggest using it in all **GraphQL** backends, because... we simply love GraphQL.
+Typetta is pluggable into any TypeScript backend (including serverless applications and microservices) but in terms of gain we totally suggest using it in all **GraphQL** backends, because... we simply love GraphQL.
 
   - [How do I use Typetta?](#how-do-i-use-typetta)
   - [Main Functionalities](#main-functionalities)
@@ -46,7 +46,6 @@ Below is a brief description of what makes Typetta awesome:
 - Auditing.
 - Multi-tenancy partitioning.
 - Soft-delete.
-- Strong security framework.
 
 ## Why Typetta?
 
