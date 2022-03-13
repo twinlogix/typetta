@@ -73,6 +73,15 @@ export function* reversed<T>(array: T[]): Iterable<T> {
   }
 }
 
+export function iteratorLength(iterator: Iterable<unknown>): number {
+  let count = 0
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for (const _v of iterator) {
+    count++
+  }
+  return count
+}
+
 export const MONGODB_LOGIC_QUERY_PREFIXS = new Set(['$or', '$and', '$nor'])
 export const MONGODB_SINGLE_VALUE_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne'])
 export const MONGODB_ARRAY_VALUE_QUERY_PREFIXS = new Set(['$in', '$nin', '$all'])

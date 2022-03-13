@@ -1,10 +1,23 @@
-import { LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS } from '..'
-import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../dal/dao/filters/filters.types'
+import { GenericProjection, LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
+import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../../dao/filters/filters.types'
+import { PartialDeep } from 'type-fest'
 
 type AbstractFilterFields = {
   [K in string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators
 }
 type Filter<FilterFields extends AbstractFilterFields> = LogicalOperators<FilterFields> & FilterFields
+
+function getByPath(object: unknown, path: string): unknown {
+  const [key, ...tail] = path.split('.')
+  if (object && typeof object === 'object') {
+    const value = (object as { [K in string]: unknown })[key]
+    if (tail.length > 0) {
+      return getByPath(value, tail.join('.'))
+    }
+    return value
+  }
+  return undefined
+}
 
 export const mock: { compare?: (l: unknown, r: unknown) => number | void | null | undefined } = {
   compare: undefined,
@@ -112,14 +125,16 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
   )
 }
 
-function getByPath(object: unknown, path: string): unknown {
-  const [key, ...tail] = path.split('.')
-  if (object && typeof object === 'object') {
-    const value = (object as { [K in string]: unknown })[key]
-    if (tail.length > 0) {
-      return getByPath(value, tail.join('.'))
-    }
-    return value
+export function sort<T>(entities: T[], sorts: { [K in keyof T]?: SortDirection }[], index = sorts.length - 1): T[] {
+  if (index < 0) {
+    return entities
   }
-  return undefined
+  const [sortKey, sortDirection] = Object.entries(sorts[index])[0] as [string, SortDirection]
+  const sortM = sortDirection === 'asc' ? 1 : -1
+  const sorted = entities.sort((a, b) => compare(getByPath(a, sortKey), getByPath(b, sortKey)) * sortM)
+  return sort(sorted, sorts, index - 1)
+}
+
+export function project<T>(entities: T[], projection: GenericProjection): PartialDeep<T>[] {
+  return entities as PartialDeep<T>[] // TODO
 }

@@ -1,3 +1,5 @@
+import { DriverType } from "../dao.types"
+
 export type LogLevel = 'warning' | 'error' | 'query' | 'debug'
 export type LogArgs<DAOName extends string> = {
   raw: string
@@ -5,7 +7,7 @@ export type LogArgs<DAOName extends string> = {
   level: LogLevel
   operation?: 'count' | 'findAll' | 'findPage' | 'exists' | 'aggregate' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'deleteOne' | 'deleteAll'
   dao?: DAOName
-  driver?: 'mongo' | 'knex'
+  driver?: DriverType
   query?: string
   duration?: number
   error?: unknown

@@ -14,6 +14,7 @@ import {
   AggregateResults,
   AggregatePostProcessing,
   FindOneParams,
+  DriverType,
 } from './dao.types'
 import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
@@ -33,6 +34,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   protected idField: T['idKey']
+  protected idScalar: T['idScalar']
   protected idGeneration: T['idGeneration']
   protected daoContext: T['daoContext']
   protected relations: DAORelation[]
@@ -49,6 +51,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, name, logger, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.idField = idField
+    this.idScalar = idScalar
     this.idGenerator = idGenerator
     this.daoContext = daoContext
     this.pageSize = pageSize
@@ -320,7 +323,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   ): Promise<ModelProjection<T, P>[]> {
     const values = Array.isArray(filterValues) ? filterValues : [filterValues]
     if (params.skip != null || params.limit != null || params.filter != null) {
-      return this.findAll({ ...params, filter: { $and: [{ [filterKey]: { $in: values } }, params.filter ?? {}] } })
+      return this.findAll({ ...params, filter: params.filter ? { $and: [{ [filterKey]: { $in: values } }, params.filter] } : { [filterKey]: { $in: values } } })
     }
     return await this.loadAll(params, filterKey, values)
   }
@@ -518,5 +521,5 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _replaceOne(params: ReplaceParams<T>): Promise<void>
   protected abstract _deleteOne(params: DeleteParams<T>): Promise<void>
   protected abstract _deleteAll(params: DeleteParams<T>): Promise<void>
-  protected abstract _driver(): 'mongo' | 'knex'
+  protected abstract _driver(): DriverType
 }
