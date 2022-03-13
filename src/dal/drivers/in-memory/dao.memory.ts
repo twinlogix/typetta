@@ -1,23 +1,24 @@
-import { AbstractDAO, AnyProjection, DAOGenerics, DAOParams, filterEntity, GenericProjection, iteratorLength, LogArgs, project, Schema, sort } from '../../..'
+import { AbstractDAO, AnyProjection, filterEntity, GenericProjection, iteratorLength, LogArgs, project, Schema, sort } from '../../..'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
+import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
 import { PartialDeep } from 'type-fest'
-import uuid from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 
-export class AbstractInMemoryDAO<T extends DAOGenerics> extends AbstractDAO<T> {
+export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
   private idIndex: Map<T['model'][T['idKey']], number>
   private memory: (T['model'] | null)[]
 
-  protected constructor({ idGenerator, ...params }: DAOParams<T>) {
-    super({ ...params, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate })
+  protected constructor({ idGenerator, ...params }: InMemoryDAOParams<T>) {
+    super({ ...params, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate, driverContext: {} })
     this.memory = [null, null]
     this.idIndex = new Map()
   }
 
   protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
-    const unorderedResults = Array.from(this.entities(params.filter)).map((v) => v.record)
+    const unorderedResults = [...this.entities(params.filter)].map((v) => v.record)
     const results = params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults
     const projectedResults = params.projection ? project(results, params.projection as GenericProjection) : results
-    return projectedResults.splice(params.skip ?? 0, params.limit)
+    return projectedResults.splice(params.skip ?? 0, params.limit ?? this.memory.length)
   }
 
   protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
@@ -56,11 +57,7 @@ export class AbstractInMemoryDAO<T extends DAOGenerics> extends AbstractDAO<T> {
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     const record = this.recursiveSpreadCopy(params.record, this.schema)
     if (this.idGeneration === 'db') {
-      if (this.idScalar === 'String') {
-        record[this.idField] = uuid.v4()
-      } else {
-        throw new Error(`In-memory dao can only autogenerate IDs for scalar 'String'`)
-      }
+      record[this.idField] = uuidv4()
     }
     for (let i = 0; i < this.memory.length; i++) {
       if (this.memory[i] === null) {
@@ -111,32 +108,37 @@ export class AbstractInMemoryDAO<T extends DAOGenerics> extends AbstractDAO<T> {
   }
 
   private getIndexes(filter: T['filter']): number[] | null {
-    if (filter && Object.keys(filter).includes(this.idField)) {
+    if (filter) {
       const idFilter = filter[this.idField]
-      const filterKeys = Object.keys(idFilter)
-      if (typeof idFilter === 'object' && filterKeys.includes('$in')) {
-        return (idFilter['$in'] as T['model'][T['idKey']][]).map((id) => this.idIndex.get(id)).flatMap((i) => (i === undefined ? [] : [i]))
-      } else if (typeof idFilter === 'object' && filterKeys.includes('$eq')) {
-        const index = this.idIndex.get(idFilter['$eq'])
-        if (index !== undefined) {
-          return [index]
+      const filterKeys = Object.keys(filter)
+      const idFilterKeys = Object.keys(idFilter)
+      if (typeof idFilter === 'object' && filterKeys.includes('$and')) {
+        const indexes = (filter['$and'] as T['filter'][]).map((f) => this.getIndexes(f)).flatMap((i) => (i === null ? [] : [new Set(i)]))
+        if (indexes.length !== 0) {
+          // instead of returned should be intersected with results from below
+          return [...indexes.reduce((p, i) => new Set([...p].filter((x) => i.has(x))))] //intersection
         }
-        return []
-      } else if (typeof idFilter === 'object' && filterKeys.includes('$and')) {
-        const indexes = (idFilter['$and'] as T['filter'][]).map((f) => this.getIndexes(f)).flatMap((i) => (i === null ? [] : [new Set(i)]))
-        if (indexes.length === 0) {
-          return null
+      }
+
+      if (filterKeys.includes(this.idField)) {
+        if (typeof idFilter === 'object' && idFilterKeys.includes('$in')) {
+          const indexes = (idFilter['$in'] as T['model'][T['idKey']][]).map((id) => this.idIndex.get(id)).flatMap((i) => (i === undefined ? [] : [i]))
+          return [...new Set(indexes)]
+        } else if (typeof idFilter === 'object' && idFilterKeys.includes('$eq')) {
+          const index = this.idIndex.get(idFilter['$eq'])
+          if (index !== undefined) {
+            return [index]
+          }
+          return []
+        } else if (typeof idFilter !== 'object' || idFilterKeys.every((k) => !k.startsWith('$'))) {
+          const index = this.idIndex.get(idFilter)
+          if (index !== undefined) {
+            return [index]
+          }
+          return []
         }
-        return [...indexes.reduce((p, i) => new Set([...p].filter((x) => i.has(x))))] //intersection
-      } else if (typeof idFilter !== 'object' || filterKeys.every((k) => !k.startsWith('$'))) {
-        const index = this.idIndex.get(idFilter)
-        if (index !== undefined) {
-          return [index]
-        }
-        return []
       }
     }
-
     return null
   }
   private *entities(filter: T['filter'] = undefined): Iterable<{ record: T['model']; index: number }> {
@@ -147,6 +149,7 @@ export class AbstractInMemoryDAO<T extends DAOGenerics> extends AbstractDAO<T> {
           yield { record: this.memory[index], index }
         }
       }
+      return
     }
     for (let i = 0; i < this.memory.length; i++) {
       if (this.memory[i] !== null && filterEntity(this.memory[i], filter)) {

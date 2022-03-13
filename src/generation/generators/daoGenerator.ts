@@ -20,7 +20,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     ]
 
     const commonImports = [
-      `import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections } from '${
+      `import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '${
         this._config.typettaImport || '@twinlogix/typetta'
       }'`,
       `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}'`,
@@ -475,8 +475,9 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
 
   public _generateDAOParams(node: TsTypettaGeneratorNode): string {
     const idField = getID(node)
-    const dbDAOGenerics = node.entity?.type === 'sql' ? 'KnexJsDAOGenerics' : node.entity?.type === 'mongo' ? 'MongoDBDAOGenerics' : 'DAOGenerics'
-    const dbDAOParams = node.entity?.type === 'sql' ? 'KnexJsDAOParams' : node.entity?.type === 'mongo' ? 'MongoDBDAOParams' : 'DAOParams'
+    const dbDAOGenerics =
+      node.entity?.type === 'sql' ? 'KnexJsDAOGenerics' : node.entity?.type === 'mongo' ? 'MongoDBDAOGenerics' : node.entity?.type === 'memory' ? 'InMemoryDAOGenerics' : 'DAOGenerics'
+    const dbDAOParams = node.entity?.type === 'sql' ? 'KnexJsDAOParams' : node.entity?.type === 'mongo' ? 'MongoDBDAOParams' : node.entity?.type === 'memory' ? 'InMemoryDAOParams' : 'DAOParams'
     const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${
       idField.isEnum ? 'String' : idField.graphqlType
     }', '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'}', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${
@@ -495,7 +496,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
   // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAO(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoName = node.entity?.type === 'sql' ? 'AbstractKnexJsDAO' : node.entity?.type === 'mongo' ? 'AbstractMongoDBDAO' : 'AbstractDAO'
+    const daoName = node.entity?.type === 'sql' ? 'AbstractKnexJsDAO' : node.entity?.type === 'mongo' ? 'AbstractMongoDBDAO' : node.entity?.type === 'memory' ? 'AbstractInMemoryDAO' : 'AbstractDAO'
     const daoBody = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap) + '\n')
     return `export class ${node.name}DAO<MetadataType, OperationMetadataType> extends ${daoName}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>> {\n` + daoBody + '\n}'
   }
@@ -569,7 +570,9 @@ public constructor(params: ${node.name}DAOParams<MetadataType, OperationMetadata
       return [
         `{ type: '${type}', reference: '${reference}', field: '${refField}', relationDao: '${relationDao}', entityDao: '${entityDao}', refThis: { refFrom: '${resolveParentPath(
           refThisRefFrom,
-        )}', refTo: '${resolveParentPath(refThisRefTo)}' }, refOther: { refFrom: '${resolveParentPath(refOtherRefFrom)}', refTo: '${resolveParentPath(refOtherRefTo)}' }, required: ${field.isRequired} }`,
+        )}', refTo: '${resolveParentPath(refThisRefTo)}' }, refOther: { refFrom: '${resolveParentPath(refOtherRefFrom)}', refTo: '${resolveParentPath(refOtherRefTo)}' }, required: ${
+          field.isRequired
+        } }`,
       ]
     } else if (field.type.kind === 'embedded') {
       const embeddedType = getNode(field.type.embed, typesMap)
