@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "1.2.8",
+  "version": "1.2.10",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -63,7 +63,7 @@
     "@graphql-codegen/plugin-helpers": "2.4.0",
     "@graphql-codegen/schema-ast": "2.4.1",
     "@graphql-codegen/typescript": "2.4.2",
-    "@graphql-codegen/visitor-plugin-common": "2.6.0",
+    "@graphql-codegen/visitor-plugin-common": "2.7.1",
     "dataloader": "2.0.0",
     "graphql": "15.8.0",
     "graphql-tag": "2.12.6",
@@ -107,7 +107,8 @@
       "tests/"
     ],
     "coverageReporters": [
-      "json-summary"
+      "json-summary",
+      "lcov"
     ]
   },
   "homepage": "https://twinlogix.github.io/typetta/",
