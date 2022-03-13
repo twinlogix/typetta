@@ -111,7 +111,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     if (filter) {
       const idFilter = filter[this.idField]
       const filterKeys = Object.keys(filter)
-      const idFilterKeys = Object.keys(idFilter)
+      const idFilterKeys = Object.keys(idFilter ?? {})
       if (typeof idFilter === 'object' && filterKeys.includes('$and')) {
         const indexes = (filter['$and'] as T['filter'][]).map((f) => this.getIndexes(f)).flatMap((i) => (i === null ? [] : [new Set(i)]))
         if (indexes.length !== 0) {

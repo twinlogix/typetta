@@ -1,0 +1,26 @@
+overwrite: true
+schema: 'tests/in-memory/schema.graphql'
+documents: null
+generates:
+  tests/in-memory/models.mock.ts:
+    plugins:
+      - 'typescript'
+    config:
+      namingConvention: keep
+      scalars:
+        DateTime: Date
+        Decimal: bignumber.js#BigNumber
+        Coordinates: ../../src#Coordinates
+        LocalizedString: ../../src#LocalizedString
+        JSON: any
+        Password: string
+  tests/in-memory/dao.mock.ts:
+    config:
+      skipTypename: true
+      schemaImport: './schema.graphql'
+      tsTypesImport: ./models.mock
+      typettaImport: ../../src
+      namingConvention: keep
+      defaultIdGenerationStrategy: 'generator'
+    plugins:
+      - lib/generation/index.js
