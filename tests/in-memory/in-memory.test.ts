@@ -79,17 +79,47 @@ test('Demo', async () => {
 })
 
 test('benchmark', async () => {
-  const n = 20000
+  const n = 50000
   const startInsert = new Date()
   for (let i = 0; i < n; i++) {
     await dao.postType.insertOne({ record: { id: i.toString(), name: i.toString() } })
   }
-  console.log(`Insert avg ms: ${((new Date().getTime() - startInsert.getTime()) / n).toFixed(1)}`)
+  console.log(`Insert avg ms: ${((new Date().getTime() - startInsert.getTime()) / n).toFixed(3)}`)
+  expect((new Date().getTime() - startInsert.getTime()) / n).toBeLessThan(1)
 
   const readInsert = new Date()
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 10000; i++) {
     const ids = [(Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0)]
     await dao.postType.findAll({ filter: { id: { $in: ids } } })
   }
-  console.log(`Read avg ms: ${((new Date().getTime() - readInsert.getTime()) / 1000).toFixed(1)}`)
+  console.log(`Read avg ms: ${((new Date().getTime() - readInsert.getTime()) / 10000).toFixed(3)}`)
+  expect((new Date().getTime() - readInsert.getTime()) / 10000).toBeLessThan(1)
+
+  const read2Insert = new Date()
+  for (let i = 0; i < 2; i++) {
+    const ids = [(Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0)]
+    await dao.postType.findAll({ filter: { name: { $in: ids } } })
+  }
+  console.log(`Read avg (no index) ms: ${((new Date().getTime() - read2Insert.getTime()) / 2).toFixed(3)}`)
+  expect(100 - (new Date().getTime() - read2Insert.getTime()) / 2).toBeLessThan(0)
+
+  const deleteInsert = new Date()
+  for (let i = 0; i < 10000; i++) {
+    const ids = [(Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0)]
+    await dao.postType.deleteAll({ filter: { id: { $in: ids } } })
+  }
+  console.log(`Delete avg ms: ${((new Date().getTime() - deleteInsert.getTime()) / 10000).toFixed(3)}`)
+  expect((new Date().getTime() - deleteInsert.getTime()) / 10000).toBeLessThan(1)
+
+  for (let i = 0; i < 20000; i++) {
+    await dao.postType.insertOne({ record: { id: 'n' + i.toString(), name: i.toString() } })
+  }
+
+  for (let i = 0; i < 10000; i++) {
+    const id = (Math.random() * (n - 1)).toFixed(0)
+    const res = await dao.postType.findOne({ filter: { id } })
+    if (res) {
+      expect(res?.name).toBe(id.toString())
+    }
+  }
 })

@@ -6,11 +6,13 @@ import { v4 as uuidv4 } from 'uuid'
 
 export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
   private idIndex: Map<T['model'][T['idKey']], number>
+  private emptyIndexes: number[]
   private memory: (T['model'] | null)[]
 
   protected constructor({ idGenerator, ...params }: InMemoryDAOParams<T>) {
     super({ ...params, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate, driverContext: {} })
-    this.memory = [null, null]
+    this.memory = []
+    this.emptyIndexes = [0]
     this.idIndex = new Map()
   }
 
@@ -59,15 +61,19 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     if (this.idGeneration === 'db') {
       record[this.idField] = uuidv4()
     }
-    for (let i = 0; i < this.memory.length; i++) {
-      if (this.memory[i] === null) {
-        this.idIndex.set(record[this.idField], i)
-        this.memory[i] = record
-        return record
-      }
+    const index = this.emptyIndexes.pop()
+    if (index != null) {
+      this.idIndex.set(record[this.idField], index)
+      this.memory[index] = record
+    } else {
+      const index = this.memory.length
+      const sizeIncrement = this.memory.length > 512 ? 1024 : this.memory.length * 2
+      this.emptyIndexes = this.allocMemory(sizeIncrement - 1)
+        .map((v, i) => this.memory.length + 1 + i)
+        .reverse()
+      this.idIndex.set(record[this.idField], index)
+      this.memory[index] = record
     }
-    this.idIndex.set(record[this.idField], this.memory.length)
-    this.memory.push(record)
     return record
   }
 
@@ -92,6 +98,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     for (const { record, index } of this.entities(params.filter)) {
       this.memory[index] = null
       this.idIndex.delete(record[this.idField])
+      this.emptyIndexes.push(index)
       break
     }
   }
@@ -100,6 +107,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     for (const { record, index } of this.entities(params.filter)) {
       this.memory[index] = null
       this.idIndex.delete(record[this.idField])
+      this.emptyIndexes.push(index)
     }
   }
 
@@ -156,5 +164,9 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
         yield { record: this.memory[i], index: i }
       }
     }
+  }
+
+  private allocMemory(n: number): (T['model'] | null)[] {
+    return Array(n).fill(null)
   }
 }
