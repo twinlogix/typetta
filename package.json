@@ -16,7 +16,7 @@
     "generate-multitenant": "graphql-codegen --config tests/multitenant/codegen.yml",
     "generate-security": "graphql-codegen --config tests/security/codegen.yml",
     "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts",
-    "release": "release-it"
+    "release": "npm run build && release-it"
   },
   "repository": {
     "type": "git",
