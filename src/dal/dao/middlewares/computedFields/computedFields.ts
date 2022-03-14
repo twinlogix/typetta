@@ -22,6 +22,8 @@ export function computedField<T extends DAOGenerics, P1 extends AnyProjection<T[
             isProjectionIntersected(args.params.projection ? (args.params.projection as GenericProjection) : true, options.fieldsProjection ? (options.fieldsProjection as GenericProjection) : true)
           ) {
             computedRecords.push(deepMerge(record, await options.compute(record as ModelProjection<T, P1>, args.params)))
+          } else {
+            computedRecords.push(record)
           }
         }
         return {
