@@ -5,7 +5,7 @@ import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
 
 export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
-  private idIndex: Map<T['model'][T['idKey']], number>
+  private idIndex: Map<T['idType'], number>
   private emptyIndexes: number[]
   private memory: (T['model'] | null)[]
 
@@ -130,7 +130,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
       if (filterKeys.includes(this.idField)) {
         if (typeof idFilter === 'object' && idFilterKeys.includes('$in')) {
-          const indexes = (idFilter['$in'] as T['model'][T['idKey']][]).map((id) => this.idIndex.get(id)).flatMap((i) => (i === undefined ? [] : [i]))
+          const indexes = (idFilter['$in'] as T['idType'][]).map((id) => this.idIndex.get(id)).flatMap((i) => (i === undefined ? [] : [i]))
           return [...new Set(indexes)]
         } else if (typeof idFilter === 'object' && idFilterKeys.includes('$eq')) {
           const index = this.idIndex.get(idFilter['$eq'])

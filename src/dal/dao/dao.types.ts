@@ -162,6 +162,7 @@ export type DAOGenerics<
   model: ModelType
   idKey: IDKey
   idScalar: IDScalar
+  idType: ModelType[IDKey]
   idGeneration: IdGeneration
   pureFilter: PureFilterType
   rawFilter: RawFilterType
