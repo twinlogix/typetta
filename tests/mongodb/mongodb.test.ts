@@ -922,7 +922,7 @@ test('middleware 1', async () => {
 })
 
 test('middleware 2', async () => {
-  const dao2 = new DAOContext<any>({
+  const dao2 = new DAOContext({
     mongodb: {
       default: db,
       __mock: db,
@@ -992,7 +992,7 @@ test('middleware options', async () => {
 // ------------------------- COMPUTED FIELDS ------------------------------
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
-  const customDao = new DAOContext<any>({
+  const customDao = new DAOContext({
     mongodb: {
       default: db,
       __mock: db,
@@ -1023,7 +1023,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 })
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
-  const customDao = new DAOContext<any>({
+  const customDao = new DAOContext({
     mongodb: {
       default: db,
       __mock: db,
@@ -1047,7 +1047,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 })
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
-  const customDao = new DAOContext<any>({
+  const customDao = new DAOContext({
     mongodb: {
       default: db,
       __mock: db,
@@ -1074,10 +1074,16 @@ test('computed fields (two dependencies - same level - two calculated)', async (
   const torino = await customDao.city.findOne({ filter: { id: 'torino' }, projection: { computedName: true, computedAddressName: true } })
   expect(torino?.computedAddressName).toBe('Torino_address1')
   expect(torino?.computedName).toBe('Computed: Torino')
+  const torino2 = await customDao.city.findOne({ filter: { id: 'torino' }, projection: { computedAddressName: true } })
+  const torino3 = await customDao.city.findOne({ filter: { id: 'torino' }, projection: { computedName: true } })
+  expect(torino2?.computedAddressName).toBe('Torino_address1')
+  expect(torino3?.computedName).toBe('Computed: Torino')
+  expect(Object.keys(torino2 ?? {}).includes('computedName')).toBe(false)
+  expect(Object.keys(torino3 ?? {}).includes('computedAddressName')).toBe(false)
 })
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
-  const dao2 = new DAOContext<any>({
+  const dao2 = new DAOContext({
     mongodb: {
       default: db,
       __mock: db,
@@ -1106,7 +1112,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 })
 
 /*test('computed fields (one dependency - deep level - one calculated)', async () => {
-  const dao2 = new DAOContext<any>({
+  const dao2 = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
@@ -1127,7 +1133,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 })
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
-  const dao2 = new DAOContext<any>({
+  const dao2 = new DAOContext({
     idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
@@ -1478,7 +1484,7 @@ test('Audit middlewares', async () => {
 
 test('Inserted record middleware', async () => {
   let i = 0
-  const customDao = new DAOContext<any>({
+  const customDao = new DAOContext({
     mongodb: {
       default: db,
       __mock: db,
