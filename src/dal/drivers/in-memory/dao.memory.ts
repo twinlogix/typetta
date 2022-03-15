@@ -1,4 +1,4 @@
-import { AbstractDAO, AnyProjection, filterEntity, GenericProjection, iteratorLength, LogArgs, project, Schema, sort } from '../../..'
+import { AbstractDAO, AnyProjection, filterEntity, iteratorLength, iteratorLimit, LogArgs, Schema, setTraversing, sort } from '../../..'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
 import { PartialDeep } from 'type-fest'
@@ -17,10 +17,10 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   }
 
   protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
-    const unorderedResults = [...this.entities(params.filter)].map((v) => v.record)
-    const results = params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults
-    const projectedResults = params.projection ? project(results, params.projection as GenericProjection) : results
-    return projectedResults.splice(params.skip ?? 0, params.limit ?? this.memory.length)
+    const resultIterator = iteratorLimit(this.entities(params.filter), params.skip ?? 0, params.limit ?? this.memory.length)
+    const unorderedResults = [...resultIterator].map((v) => v.record)
+    return params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults
+    // projection are ignored since there is no performance advance
   }
 
   protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
@@ -46,10 +46,10 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     throw new Error('Not implemented')
   }
 
-  private recursiveSpreadCopy<O extends { [K in string]: unknown }>(record: O, schema: Schema<T['scalars']>): O {
+  private recursiveSpreadCopy<O extends { [K in string]: unknown }>(record: O, schema: Schema<T['scalars']> = this.schema): O {
     const copy: { [K in string]: unknown } = { ...record }
     Object.entries(schema).forEach(([name, schemaField]) => {
-      if ('embedded' in schemaField) {
+      if ('embedded' in schemaField && copy[name]) {
         copy[name] = this.recursiveSpreadCopy(copy[name] as { [K in string]: unknown }, schemaField.embedded)
       }
     })
@@ -57,7 +57,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   }
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
-    const record = this.recursiveSpreadCopy(params.record, this.schema)
+    const record = this.recursiveSpreadCopy(params.record)
     if (this.idGeneration === 'db') {
       record[this.idField] = uuidv4()
     }
@@ -78,11 +78,20 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
-    throw new Error('Not implemented')
+    for (const { record, index } of this.entities(params.filter)) {
+      const copy = this.recursiveSpreadCopy(record)
+      Object.entries(params.changes).forEach(([k, v]) => setTraversing(copy, k, v))
+      this.memory[index] = copy
+      return
+    }
   }
 
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
-    throw new Error('Not implemented')
+    for (const { record, index } of this.entities(params.filter)) {
+      const copy = this.recursiveSpreadCopy(record)
+      Object.entries(params.changes).forEach(([k, v]) => setTraversing(copy, k, v))
+      this.memory[index] = copy
+    }
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
