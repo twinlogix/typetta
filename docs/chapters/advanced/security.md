@@ -22,7 +22,7 @@ Typetta therefore offers the possibility of defining a security level directly w
 
 ## Definitions and Concepts
 
-Speaking of safety, at Typetta we refer to the following concepts:
+Speaking of security, at Typetta we refer to the following concepts:
 
 - **Identity**: this is the subject for whom access to the data is requested; it can be a physical or logical user of the system, a third-party application, a subsystem, a super-admin, etc.
 
