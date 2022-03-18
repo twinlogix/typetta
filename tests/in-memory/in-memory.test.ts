@@ -76,7 +76,7 @@ test('Demo', async () => {
   expect((pippo?.posts || [])[1].title).toBe('Title 1')
 })
 
-test('benchmark', async () => {
+/*test('benchmark', async () => {
   const n = 50000
   const startInsert = new Date()
   for (let i = 0; i < n; i++) {
@@ -126,4 +126,4 @@ test('benchmark', async () => {
       expect(res?.name).toBe(id.toString())
     }
   }
-})
+})*/
