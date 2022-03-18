@@ -142,7 +142,7 @@ const user = await daoContext.user.findOne({
   relations: {
     posts: {
       filter: {
-        content: { $contains: "friend" }
+        content: { contains: "friend" }
       },
       relations: {
         categories: {

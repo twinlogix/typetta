@@ -103,7 +103,7 @@ const res = await dao.user.aggregate(
       averageAge: { field: 'age', operation: 'avg' }
     }
   }, {
-    having: { averageAge: { $gte: 18 } },
+    having: { averageAge: { gte: 18 } },
     sorts: [{ averageAge: 'asc' }]
   }
 )
