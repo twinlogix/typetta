@@ -723,6 +723,7 @@ test('Text filter test', async () => {
   const found1 = (await dao.organization.findAll({ filter: { name: { $contains: 'soft' } } })).map((o) => o.name)
   const found3 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'Mic' } } })).map((o) => o.name)
   const found5 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'ft' } } })).map((o) => o.name)
+  const found7 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'Mic', $endsWith: 'oft' } } })).map((o) => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes('Microsoft')).toBe(true)
@@ -734,6 +735,8 @@ test('Text filter test', async () => {
   expect(found5.includes('Microsoft')).toBe(true)
   expect(found5.includes('Macrosoft')).toBe(true)
   expect(found5.includes('Lolft')).toBe(true)
+  expect(found7.length).toBe(1)
+  expect(found7.includes('Microsoft')).toBe(true)
 })
 
 test('Raw update', async () => {
