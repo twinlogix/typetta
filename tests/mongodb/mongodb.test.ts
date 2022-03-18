@@ -1,16 +1,4 @@
-import {
-  computedField,
-  projectionDependency,
-  buildMiddleware,
-  UserInputDriverDataTypeAdapterMap,
-  inMemoryMongoDb,
-  defaultValueMiddleware,
-  softDelete,
-  audit,
-  selectMiddleware,
-  projection,
-  buildProjection,
-} from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware, softDelete, audit, selectMiddleware } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserDAO, UserProjection } from './dao.mock'
 import { Scalars, State, User } from './models.mock'
@@ -31,16 +19,13 @@ type DAOContextType = DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
 let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
 const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
   ID: {
-    generate: () => new ObjectId().toHexString(),
+    generate: () => uuidv4(),
     dbToModel: (id: unknown) => {
       if (id instanceof ObjectId) {
         return id.toString()
       }
       return id as string
     },
-    modelToDB: (id: string) => {
-      return new ObjectId(id)
-    }
   },
   Password: {
     dbToModel: (o: unknown) => o as string,
