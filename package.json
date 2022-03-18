@@ -46,7 +46,7 @@
     "@typescript-eslint/eslint-plugin": "5.11.0",
     "@typescript-eslint/parser": "5.11.0",
     "@vscode/sqlite3": "5.0.7",
-    "apollo-server": "3.6.3",
+    "apollo-server": "3.6.4",
     "apollo-server-testing": "2.25.3",
     "bignumber.js": "9.0.2",
     "eslint": "7.32.0",
