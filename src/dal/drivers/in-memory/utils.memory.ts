@@ -134,7 +134,3 @@ export function sort<T>(entities: T[], sorts: { [K in keyof T]?: SortDirection }
   const sorted = entities.sort((a, b) => compare(getByPath(a, sortKey), getByPath(b, sortKey)) * sortM)
   return sort(sorted, sorts, index - 1)
 }
-
-export function project<T>(entities: T[], projection: GenericProjection): PartialDeep<T>[] {
-  return entities as PartialDeep<T>[] // TODO
-}

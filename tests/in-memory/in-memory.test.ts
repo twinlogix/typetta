@@ -103,6 +103,12 @@ test('benchmark', async () => {
   console.log(`Read avg (no index) ms: ${((new Date().getTime() - read2Insert.getTime()) / 2).toFixed(3)}`)
   expect(100 - (new Date().getTime() - read2Insert.getTime()) / 2).toBeLessThan(0)
 
+  const read3Insert = new Date()
+  for (let i = 0; i < 20; i++) {
+    await dao.postType.findAll({ skip: Math.floor((Math.random() * (n / 2))), limit: Math.floor((Math.random() * (n / 2))) })
+  }
+  console.log(`Read avg (no filter, start & limit) ms: ${((new Date().getTime() - read3Insert.getTime()) / 2).toFixed(3)}`)
+
   const deleteInsert = new Date()
   for (let i = 0; i < 10000; i++) {
     const ids = [(Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0)]
