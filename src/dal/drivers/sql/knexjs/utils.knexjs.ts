@@ -54,18 +54,18 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             const avs = () => (fv as any[]).map((fve) => adapter.modelToDB(fve) as any)
             // prettier-ignore
             switch (fk) {
-              case '$exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
-              case '$eq': builder.where(columnName, av()); break
-              case '$gte': builder.where(columnName, '>=', av()); break
-              case '$gt': builder.where(columnName, '>', av()); break
-              case '$lte': builder.where(columnName, '<=', av()); break
-              case '$lt': builder.where(columnName, '<', av()); break
-              case '$ne': builder.not.where(columnName, av()); break
-              case '$in': builder.whereIn(columnName, avs()); break
-              case '$nin': builder.not.whereIn(columnName, avs()); break
-              case '$contains': builder.where(columnName, 'like', `%${fv}%`); break
-              case '$startsWith': builder.where(columnName, 'like', `${fv}%`); break
-              case '$endsWith': builder.where(columnName, 'like', `%${fv}`); break
+              case 'exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
+              case 'eq': builder.where(columnName, av()); break
+              case 'gte': builder.where(columnName, '>=', av()); break
+              case 'gt': builder.where(columnName, '>', av()); break
+              case 'lte': builder.where(columnName, '<=', av()); break
+              case 'lt': builder.where(columnName, '<', av()); break
+              case 'ne': builder.not.where(columnName, av()); break
+              case 'in': builder.whereIn(columnName, avs()); break
+              case 'nin': builder.not.whereIn(columnName, avs()); break
+              case 'contains': builder.where(columnName, 'like', `%${fv}%`); break
+              case 'startsWith': builder.where(columnName, 'like', `${fv}%`); break
+              case 'endsWith': builder.where(columnName, 'like', `%${fv}`); break
               default: throw new Error(`${fk} query is not supported on sql entity.`)
             }
           })
@@ -117,15 +117,15 @@ export function buildHavingConditions<TRecord, TResult>(
       Object.entries(v).forEach(([fk, fv]) => {
         // prettier-ignore
         switch (fk) {
-          case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
-          case '$eq': builder.having(k, '=', fv as number); break
-          case '$gte': builder.having(k, '>=', fv as number); break
-          case '$gt': builder.having(k, '>', fv as number); break
-          case '$lte': builder.having(k, '<=', fv as number); break
-          case '$lt': builder.having(k, '<', fv as number); break
-          case '$ne': builder.not.having(k, '=', fv as number); break
-          case '$in': builder.havingIn(k, fv as number[]); break
-          case '$nin': builder.havingNotIn(k, fv as number[]); break
+          case 'exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
+          case 'eq': builder.having(k, '=', fv as number); break
+          case 'gte': builder.having(k, '>=', fv as number); break
+          case 'gt': builder.having(k, '>', fv as number); break
+          case 'lte': builder.having(k, '<=', fv as number); break
+          case 'lt': builder.having(k, '<', fv as number); break
+          case 'ne': builder.not.having(k, '=', fv as number); break
+          case 'in': builder.havingIn(k, fv as number[]); break
+          case 'nin': builder.havingNotIn(k, fv as number[]); break
           default: throw new Error(`${fk} query is not supported on sql entity.`)
         }
       })

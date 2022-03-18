@@ -82,31 +82,31 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
       const filter = value as Record<string, unknown>
       const mappedFilter = mapObject(filter, ([fk, fv]) => {
         if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
-          return [[fk, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
+          return [[`$${fk}`, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
-          return [[fk, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
+          return [[`$${fk}`, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
         }
-        if (fk === '$contains' || fk === '$startsWith' || fk === '$endsWith') {
+        if (fk === 'contains' || fk === 'startsWith' || fk === 'endsWith') {
           return []
         }
         return [[fk, fv]]
       })
       const stringFilter =
-        '$contains' in filter && '$startsWith' in filter && '$endsWith' in filter
-          ? { $regex: new RegExp(`(^${filter.$startsWith}).*(?<=${filter.$contains}).*(?<=${filter.$endsWith}$)`) }
-          : '$startsWith' in filter && '$endsWith' in filter
-          ? { $regex: new RegExp(`(^${filter.$startsWith}).*(?<=${filter.$endsWith}$)`) }
-          : '$contains' in filter && '$startsWith' in filter
-          ? { $regex: new RegExp(`(^${filter.$startsWith}).*(?<=${filter.$contains})`) }
-          : '$contains' in filter && '$endsWith' in filter
-          ? { $regex: new RegExp(`(${filter.$contains}).*(?<=${filter.$endsWith}$)`) }
-          : '$contains' in filter
-          ? { $regex: filter.$contains }
-          : '$startsWith' in filter
-          ? { $regex: new RegExp(`^${filter.$startsWith}`) }
-          : '$endsWith' in filter
-          ? { $regex: new RegExp(`${filter.$endsWith}$`) }
+        'contains' in filter && 'startsWith' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains}).*(?<=${filter.endsWith}$)`) }
+          : 'startsWith' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.endsWith}$)`) }
+          : 'contains' in filter && 'startsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains})`) }
+          : 'contains' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(${filter.contains}).*(?<=${filter.endsWith}$)`) }
+          : 'contains' in filter
+          ? { $regex: filter.contains }
+          : 'startsWith' in filter
+          ? { $regex: new RegExp(`^${filter.startsWith}`) }
+          : 'endsWith' in filter
+          ? { $regex: new RegExp(`${filter.endsWith}$`) }
           : {}
       return { ...mappedFilter, ...stringFilter }
     } else {

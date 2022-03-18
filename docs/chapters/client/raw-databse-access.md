@@ -40,7 +40,7 @@ await daoContext.user.updateOne({
 
 Since the MongoDB driver is developed through the [official MongoDB Node Driver](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}, creating a specific update object consists of a function returned by `UpdateFilter<TSchema>`.
 
-Let's assume, for example, that you want to use the `$inc` operator of MongoDB to increase the value of a numeric field without necessarily reading it beforehand. With the driver-specific changes mechanism, you can write a query as follows:
+Let's assume, for example, that you want to use the `inc` operator of MongoDB to increase the value of a numeric field without necessarily reading it beforehand. With the driver-specific changes mechanism, you can write a query as follows:
 
 ```typescript
 await daoContext.user.updateOne({
@@ -48,7 +48,7 @@ await daoContext.user.updateOne({
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
   changes: () => {
-    $inc: { ordersCount: 1 }
+    inc: { ordersCount: 1 }
   }
 })
 ```

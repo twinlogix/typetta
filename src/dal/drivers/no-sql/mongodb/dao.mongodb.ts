@@ -131,7 +131,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
           ]
         : []
       const filter = params.filter ? [{ $match: this.buildFilter(params.filter) }] : []
-      const having = args?.having ? [{ $match: args.having }] : []
+      const having = args?.having ? [{ $match: mapObject(args.having, ([k, v]) => (typeof v === 'object' ? [[k, mapObject(v, ([fk, fv]) => [[`$${fk}`, fv]])]] : [[k, v]])) }] : []
       const skip = params.skip != null ? [{ $skip: params.skip }] : []
       const limit = params.limit != null ? [{ $limit: params.limit }] : []
       const options = params.options ?? {}

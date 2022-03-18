@@ -197,7 +197,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       objectHash(params.relations || null, { respectType: false, unorderedArrays: true })
     const hasKeyF =
       hasKey ?? ((record, key) => getTraversing(record, filterKey as string).some((v) => v === key || (typeof v === 'object' && 'equals' in v && typeof v.equals === 'function' && v.equals(key))))
-    const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { $in: values } }))
+    const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { in: values } }))
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
         async (keys) => {
@@ -323,7 +323,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   ): Promise<ModelProjection<T, P>[]> {
     const values = Array.isArray(filterValues) ? filterValues : [filterValues]
     if (params.skip != null || params.limit != null || params.filter != null) {
-      return this.findAll({ ...params, filter: params.filter ? { $and: [{ [filterKey]: { $in: values } }, params.filter] } : { [filterKey]: { $in: values } } })
+      return this.findAll({ ...params, filter: params.filter ? { $and: [{ [filterKey]: { in: values } }, params.filter] } : { [filterKey]: { in: values } } })
     }
     return await this.loadAll(params, filterKey, values)
   }

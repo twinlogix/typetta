@@ -184,15 +184,15 @@ test('hasIdFilter test', () => {
   expect(hasIdFilter(filter2, 'id1')).toBe(false)
   expect(hasIdFilter(filter2, null)).toBe(false)
 
-  const filter3 = { id: { $in: ['id1'] } }
+  const filter3 = { id: { in: ['id1'] } }
   expect(hasIdFilter(filter3, 'id1')).toBe(true)
   expect(hasIdFilter(filter3, 'id2')).toBe(false)
 
-  const filter4 = { id: { $in: ['id1', 'id2'] } }
+  const filter4 = { id: { in: ['id1', 'id2'] } }
   expect(hasIdFilter(filter4, 'id1')).toBe(false)
   expect(hasIdFilter(filter4, 'id2')).toBe(false)
 
-  const filter5 = { id: { $in: [] } }
+  const filter5 = { id: { in: [] } }
   expect(hasIdFilter(filter5, 'id1')).toBe(false)
   expect(hasIdFilter(filter5, null)).toBe(false)
 
@@ -200,7 +200,7 @@ test('hasIdFilter test', () => {
   expect(hasIdFilter(filter6, 'id1')).toBe(false)
   expect(hasIdFilter(filter6, null)).toBe(false)
 
-  const filter7 = { id: { $eq: 'id1' } }
+  const filter7 = { id: { eq: 'id1' } }
   expect(hasIdFilter(filter7, 'id1')).toBe(true)
   expect(hasIdFilter(filter7, 'id2')).toBe(false)
 })

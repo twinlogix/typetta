@@ -41,7 +41,7 @@ test('Demo', async () => {
 
   const pippo = await dao.user.findOne({
     filter: {
-      createdAt: { $lte: new Date() },
+      createdAt: { lte: new Date() },
       'credentials.username': 'Pippo',
     },
     projection: {
@@ -58,7 +58,7 @@ test('Demo', async () => {
     },
     relations: {
       posts: {
-        filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
+        filter: { title: { in: ['Title 1', 'Title 2', 'Title 3'] } },
         limit: 2,
         skip: 1,
         sorts: [{ title: 'desc' }],
@@ -88,7 +88,7 @@ test('Demo', async () => {
   const readInsert = new Date()
   for (let i = 0; i < 10000; i++) {
     const ids = [(Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0)]
-    await dao.postType.findAll({ filter: { id: { $in: ids } } })
+    await dao.postType.findAll({ filter: { id: { in: ids } } })
   }
   console.log(`Read avg ms: ${((new Date().getTime() - readInsert.getTime()) / 10000).toFixed(3)}`)
   expect((new Date().getTime() - readInsert.getTime()) / 10000).toBeLessThan(1)
@@ -96,7 +96,7 @@ test('Demo', async () => {
   const read2Insert = new Date()
   for (let i = 0; i < 2; i++) {
     const ids = [(Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0)]
-    await dao.postType.findAll({ filter: { name: { $in: ids } } })
+    await dao.postType.findAll({ filter: { name: { in: ids } } })
   }
   console.log(`Read avg (no index) ms: ${((new Date().getTime() - read2Insert.getTime()) / 2).toFixed(3)}`)
   expect(100 - (new Date().getTime() - read2Insert.getTime()) / 2).toBeLessThan(0)
@@ -110,7 +110,7 @@ test('Demo', async () => {
   const deleteInsert = new Date()
   for (let i = 0; i < 10000; i++) {
     const ids = [(Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0), (Math.random() * (n - 1)).toFixed(0)]
-    await dao.postType.deleteAll({ filter: { id: { $in: ids } } })
+    await dao.postType.deleteAll({ filter: { id: { in: ids } } })
   }
   console.log(`Delete avg ms: ${((new Date().getTime() - deleteInsert.getTime()) / 10000).toFixed(3)}`)
   expect((new Date().getTime() - deleteInsert.getTime()) / 10000).toBeLessThan(1)

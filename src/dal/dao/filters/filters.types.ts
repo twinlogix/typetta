@@ -5,25 +5,25 @@ export type LogicalOperators<FilterType> = {
 }
 
 export declare type EqualityOperators<FieldType> = {
-  $eq?: FieldType
-  $in?: FieldType[]
-  $ne?: FieldType
-  $nin?: FieldType[]
+  eq?: FieldType
+  in?: FieldType[]
+  ne?: FieldType
+  nin?: FieldType[]
 }
 
 export declare type QuantityOperators<FieldType> = {
-  $gt?: FieldType
-  $gte?: FieldType
-  $lt?: FieldType
-  $lte?: FieldType
+  gt?: FieldType
+  gte?: FieldType
+  lt?: FieldType
+  lte?: FieldType
 }
 
 export type ElementOperators = {
-  $exists?: boolean
+  exists?: boolean
 }
 
 export type StringOperators = {
-  $contains?: string
-  $startsWith?: string
-  $endsWith?: string
+  contains?: string
+  startsWith?: string
+  endsWith?: string
 }
