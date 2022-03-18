@@ -1,7 +1,5 @@
-import { computedField, mock } from '../../src'
+import { mock } from '../../src'
 import { DAOContext } from './dao.mock'
-import BigNumber from 'bignumber.js'
-import sha256 from 'sha256'
 
 jest.setTimeout(20000)
 

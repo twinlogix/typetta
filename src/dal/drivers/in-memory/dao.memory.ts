@@ -1,4 +1,4 @@
-import { AbstractDAO, AnyProjection, filterEntity, iteratorLength, iteratorLimit, LogArgs, Schema, setTraversing, sort } from '../../..'
+import { AbstractDAO, AnyProjection, filterEntity, iteratorLength, LogArgs, Schema, setTraversing, sort } from '../../..'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
 import { PartialDeep } from 'type-fest'
@@ -17,9 +17,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   }
 
   protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
-    const resultIterator = iteratorLimit(this.entities(params.filter), params.skip ?? 0, params.limit ?? this.memory.length)
-    const unorderedResults = [...resultIterator].map((v) => v.record)
-    return params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults
+    const unorderedResults = [...this.entities(params.filter)].map((v) => v.record)
+    return (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
     // projection are ignored since there is no performance advance
   }
 

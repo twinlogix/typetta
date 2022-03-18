@@ -82,26 +82,6 @@ export function iteratorLength(iterator: Iterable<unknown>): number {
   return count
 }
 
-export function* iteratorLimit<T>(iterator: Iterable<T>, skip: number, limit: number): Iterable<T> {
-  if (skip < 0 || !Number.isInteger(skip)) {
-    throw new Error('Invalid argument: skip')
-  }
-  if (limit < 0 || !Number.isInteger(limit)) {
-    throw new Error('Invalid argument: limit')
-  }
-  for (const v of iterator) {
-    if (skip > 0) {
-      skip--
-      continue
-    }
-    if (limit === 0) {
-      return
-    }
-    limit--
-    yield v
-  }
-}
-
 export const MONGODB_LOGIC_QUERY_PREFIXS = new Set(['$or', '$and', '$nor'])
 export const MONGODB_SINGLE_VALUE_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne'])
 export const MONGODB_ARRAY_VALUE_QUERY_PREFIXS = new Set(['$in', '$nin', '$all'])
