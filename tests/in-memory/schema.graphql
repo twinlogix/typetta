@@ -1,0 +1,52 @@
+scalar Decimal @quantitative
+scalar Password @textual
+scalar DateTime @quantitative
+scalar JSON
+
+type Credentials {
+  username: String
+  password: Password
+}
+
+type User @entity @memory {
+  id: ID! @id(from: "db")
+  credentials: Credentials!
+  createdAt: DateTime!
+  firstName: String
+  lastName: String
+  email: String
+  totalPostsViews: Int @exclude
+  averageViewsPerPost: Float @exclude
+  posts: [Post!] @foreignRef(refFrom: "authorId")
+}
+
+type Post @entity @memory {
+  id: ID! @id(from: "db")
+  createdAt: DateTime!
+  title: String!
+  body: String
+  views: Int!
+  clicks: Int
+  authorId: ID! @alias(value: "aId")
+  author: User @innerRef
+  metadata: PostMetadata
+  tags: [Tag!] @foreignRef
+}
+
+type Tag @entity @memory {
+  id: ID! @id(from: "db")
+  postId: ID!
+  name: String
+}
+
+type PostMetadata {
+  typeId: ID!
+  type: PostType @innerRef
+  region: String!
+  visible: Boolean!
+}
+
+type PostType @entity @memory {
+  id: ID! @id(from: "user")
+  name: String!
+}

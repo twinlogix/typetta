@@ -301,7 +301,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 
-  protected _driver(): 'mongo' | 'knex' {
+  protected _driver(): Exclude<LogArgs<string>['driver'], undefined> {
     return 'mongo'
   }
 }

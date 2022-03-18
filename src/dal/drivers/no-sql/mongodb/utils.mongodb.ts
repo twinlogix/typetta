@@ -56,7 +56,8 @@ export function adaptFilter<ScalarsType extends DefaultModelScalars, T extends D
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField) {
-      return [[columnName, adaptToSchema(v, adapters, schemaField)]]
+      const adapted = adaptToSchema(v, adapters, schemaField)
+      return [[columnName, adapted]]
     } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
       return [[columnName, (v as AbstractFilter[]).map((f) => adaptFilter(f, schema, adapters))]]
     } else {
@@ -78,24 +79,36 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
       throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
     } else if (typeof value === 'object' && value !== null && Object.keys(value).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
       // mongodb query
-      return mapObject(value as Record<string, unknown>, ([fk, fv]) => {
+      const filter = value as Record<string, unknown>
+      const mappedFilter = mapObject(filter, ([fk, fv]) => {
         if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
-          return [[fk, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
+          return [[`$${fk}`, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
-          return [[fk, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
+          return [[`$${fk}`, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
         }
-        if (fk === '$contains') {
-          return [['$regex', fv]]
-        }
-        if (fk === '$startsWith') {
-          return [['$regex', new RegExp(`^${fv}`)]]
-        }
-        if (fk === '$endsWith') {
-          return [['$regex', new RegExp(`${fv}$`)]]
+        if (fk === 'contains' || fk === 'startsWith' || fk === 'endsWith') {
+          return []
         }
         return [[fk, fv]]
       })
+      const stringFilter =
+        'contains' in filter && 'startsWith' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains}).*(?<=${filter.endsWith}$)`) }
+          : 'startsWith' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.endsWith}$)`) }
+          : 'contains' in filter && 'startsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains})`) }
+          : 'contains' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(${filter.contains}).*(?<=${filter.endsWith}$)`) }
+          : 'contains' in filter
+          ? { $regex: filter.contains }
+          : 'startsWith' in filter
+          ? { $regex: new RegExp(`^${filter.startsWith}`) }
+          : 'endsWith' in filter
+          ? { $regex: new RegExp(`${filter.endsWith}$`) }
+          : {}
+      return { ...mappedFilter, ...stringFilter }
     } else {
       // plain value
       if (value === null) {

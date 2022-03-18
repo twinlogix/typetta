@@ -1,7 +1,5 @@
 import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, LocalizedString, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
 import * as types from './models.mock'
-import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src'
-import { Knex } from 'knex'
 
 //--------------------------------------------------------------------------------
 //--------------------------------- CREDENTIALS ----------------------------------
@@ -79,7 +77,7 @@ type PostFilterFields = {
   'views'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
 }
 export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields | PostRawFilter>
-export type PostRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type PostRawFilter = never
 
 export type PostRelations = {
   tags?: {
@@ -112,7 +110,7 @@ export type PostParam<P extends PostProjection> = ParamProjection<types.Post, Po
 
 export type PostSortKeys = 'authorId' | 'body' | 'clicks' | 'createdAt' | 'id' | 'metadata.region' | 'metadata.typeId' | 'metadata.visible' | 'title' | 'views'
 export type PostSort = OneKey<PostSortKeys, SortDirection>
-export type PostRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type PostRawSort = never
 
 export type PostUpdate = {
   'authorId'?: types.Scalars['ID'],
@@ -127,23 +125,22 @@ export type PostUpdate = {
   'title'?: types.Scalars['String'],
   'views'?: types.Scalars['Int']
 }
-export type PostRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type PostRawUpdate = never
 
 export type PostInsert = {
   authorId: types.Scalars['ID'],
   body?: types.Scalars['String'],
   clicks?: types.Scalars['Int'],
   createdAt: types.Scalars['DateTime'],
-  id?: types.Scalars['ID'],
   metadata?: types.PostMetadata,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
 
-type PostDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post', DAOContext<MetadataType, OperationMetadataType>>
-export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type PostDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Post, 'id', 'ID', 'db', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post', DAOContext<MetadataType, OperationMetadataType>>
+export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
+export class PostDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
   
   
   public static projection<P extends PostProjection>(p: P) {
@@ -165,7 +162,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
           { type: '1-n', reference: 'foreign', field: 'tags', refFrom: 'postId', refTo: 'id', dao: 'tag', required: false }
         ]
       ), 
-      idGeneration: 'generator', 
+      idGeneration: 'db', 
       idScalar: 'ID' 
     })
   }
@@ -230,7 +227,7 @@ type PostTypeFilterFields = {
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 }
 export type PostTypeFilter = PostTypeFilterFields & LogicalOperators<PostTypeFilterFields | PostTypeRawFilter>
-export type PostTypeRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type PostTypeRawFilter = never
 
 export type PostTypeRelations = Record<never, string>
 
@@ -242,23 +239,23 @@ export type PostTypeParam<P extends PostTypeProjection> = ParamProjection<types.
 
 export type PostTypeSortKeys = 'id' | 'name'
 export type PostTypeSort = OneKey<PostTypeSortKeys, SortDirection>
-export type PostTypeRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type PostTypeRawSort = never
 
 export type PostTypeUpdate = {
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String']
 }
-export type PostTypeRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type PostTypeRawUpdate = never
 
 export type PostTypeInsert = {
   id: types.Scalars['ID'],
   name: types.Scalars['String'],
 }
 
-type PostTypeDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.PostType, 'id', 'ID', 'user', PostTypeFilter, PostTypeRawFilter, PostTypeRelations, PostTypeProjection, PostTypeSort, PostTypeRawSort, PostTypeInsert, PostTypeUpdate, PostTypeRawUpdate, PostTypeExcludedFields, PostTypeRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'postType', DAOContext<MetadataType, OperationMetadataType>>
-export type PostTypeDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type PostTypeDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.PostType, 'id', 'ID', 'user', PostTypeFilter, PostTypeRawFilter, PostTypeRelations, PostTypeProjection, PostTypeSort, PostTypeRawSort, PostTypeInsert, PostTypeUpdate, PostTypeRawUpdate, PostTypeExcludedFields, PostTypeRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'postType', DAOContext<MetadataType, OperationMetadataType>>
+export type PostTypeDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<PostTypeDAOGenerics<MetadataType, OperationMetadataType>> {
+export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostTypeDAOGenerics<MetadataType, OperationMetadataType>> {
   
   
   public static projection<P extends PostTypeProjection>(p: P) {
@@ -316,7 +313,7 @@ type TagFilterFields = {
   'postId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
 }
 export type TagFilter = TagFilterFields & LogicalOperators<TagFilterFields | TagRawFilter>
-export type TagRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type TagRawFilter = never
 
 export type TagRelations = Record<never, string>
 
@@ -329,25 +326,24 @@ export type TagParam<P extends TagProjection> = ParamProjection<types.Tag, TagPr
 
 export type TagSortKeys = 'id' | 'name' | 'postId'
 export type TagSort = OneKey<TagSortKeys, SortDirection>
-export type TagRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type TagRawSort = never
 
 export type TagUpdate = {
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'] | null,
   'postId'?: types.Scalars['ID']
 }
-export type TagRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type TagRawUpdate = never
 
 export type TagInsert = {
-  id?: types.Scalars['ID'],
   name?: types.Scalars['String'],
   postId: types.Scalars['ID'],
 }
 
-type TagDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Tag, 'id', 'ID', 'generator', TagFilter, TagRawFilter, TagRelations, TagProjection, TagSort, TagRawSort, TagInsert, TagUpdate, TagRawUpdate, TagExcludedFields, TagRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'tag', DAOContext<MetadataType, OperationMetadataType>>
-export type TagDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<TagDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type TagDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Tag, 'id', 'ID', 'db', TagFilter, TagRawFilter, TagRelations, TagProjection, TagSort, TagRawSort, TagInsert, TagUpdate, TagRawUpdate, TagExcludedFields, TagRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'tag', DAOContext<MetadataType, OperationMetadataType>>
+export type TagDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<TagDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<TagDAOGenerics<MetadataType, OperationMetadataType>> {
+export class TagDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<TagDAOGenerics<MetadataType, OperationMetadataType>> {
   
   
   public static projection<P extends TagProjection>(p: P) {
@@ -367,7 +363,7 @@ export class TagDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
           
         ]
       ), 
-      idGeneration: 'generator', 
+      idGeneration: 'db', 
       idScalar: 'ID' 
     })
   }
@@ -416,7 +412,7 @@ type UserFilterFields = {
   'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 }
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields | UserRawFilter>
-export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type UserRawFilter = never
 
 export type UserRelations = {
   posts?: {
@@ -446,7 +442,7 @@ export type UserParam<P extends UserProjection> = ParamProjection<types.User, Us
 
 export type UserSortKeys = 'createdAt' | 'credentials.password' | 'credentials.username' | 'email' | 'firstName' | 'id' | 'lastName'
 export type UserSort = OneKey<UserSortKeys, SortDirection>
-export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type UserRawSort = never
 
 export type UserUpdate = {
   'createdAt'?: types.Scalars['DateTime'],
@@ -458,21 +454,20 @@ export type UserUpdate = {
   'id'?: types.Scalars['ID'],
   'lastName'?: types.Scalars['String'] | null
 }
-export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+export type UserRawUpdate = never
 
 export type UserInsert = {
   createdAt: types.Scalars['DateTime'],
   credentials: types.Credentials,
   email?: types.Scalars['String'],
   firstName?: types.Scalars['String'],
-  id?: types.Scalars['ID'],
   lastName?: types.Scalars['String'],
 }
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
-export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type UserDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.User, 'id', 'ID', 'db', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
+export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
+export class UserDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
   
   
   public static projection<P extends UserProjection>(p: P) {
@@ -492,7 +487,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
           { type: '1-n', reference: 'foreign', field: 'posts', refFrom: 'authorId', refTo: 'id', dao: 'post', required: false }
         ]
       ), 
-      idGeneration: 'generator', 
+      idGeneration: 'db', 
       idScalar: 'ID' 
     })
   }
@@ -504,12 +499,11 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
   metadata?: MetadataType
   middlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: { 
-    post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     postType?: Pick<Partial<PostTypeDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
-    tag?: Pick<Partial<TagDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
-    user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    tag?: Pick<Partial<TagDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
+    user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   },
-  knex: Record<'default', Knex>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'knex'>,
   log?: LogInput<'post' | 'postType' | 'tag' | 'user'>,
   security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
@@ -525,7 +519,6 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
-  private knex: Record<'default', Knex>
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
@@ -533,25 +526,25 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   get post() : PostDAO<MetadataType, OperationMetadataType> {
     if(!this._post) {
-      this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, knex: this.knex.default, tableName: 'posts', middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger })
+      this._post = new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger })
     }
     return this._post
   }
   get postType() : PostTypeDAO<MetadataType, OperationMetadataType> {
     if(!this._postType) {
-      this._postType = new PostTypeDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.postType, knex: this.knex.default, tableName: 'postTypes', middlewares: [...(this.overrides?.postType?.middlewares || []), ...selectMiddleware('postType', this.middlewares) as DAOMiddleware<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'postType', logger: this.logger })
+      this._postType = new PostTypeDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.postType, middlewares: [...(this.overrides?.postType?.middlewares || []), ...selectMiddleware('postType', this.middlewares) as DAOMiddleware<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'postType', logger: this.logger })
     }
     return this._postType
   }
   get tag() : TagDAO<MetadataType, OperationMetadataType> {
     if(!this._tag) {
-      this._tag = new TagDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tag, knex: this.knex.default, tableName: 'tags', middlewares: [...(this.overrides?.tag?.middlewares || []), ...selectMiddleware('tag', this.middlewares) as DAOMiddleware<TagDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tag', logger: this.logger })
+      this._tag = new TagDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tag, middlewares: [...(this.overrides?.tag?.middlewares || []), ...selectMiddleware('tag', this.middlewares) as DAOMiddleware<TagDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tag', logger: this.logger })
     }
     return this._tag
   }
   get user() : UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, knex: this.knex.default, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
+      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
     }
     return this._user
   }
@@ -562,7 +555,6 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
       scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['DateTime', 'Decimal', 'JSON', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
     })
     this.overrides = params.overrides
-    this.knex = params.knex
     this.middlewares = params.middlewares || []
     this.logger = logInputToLogger(params.log)
     if(params.security && params.security.applySecurity !== false) {
@@ -572,16 +564,11 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex> }, entities: { post: Knex.QueryBuilder<any, unknown[]>, postType: Knex.QueryBuilder<any, unknown[]>, tag: Knex.QueryBuilder<any, unknown[]>, user: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
-    return run({ knex: this.knex }, { post: this.knex.default.table('posts'), postType: this.knex.default.table('postTypes'), tag: this.knex.default.table('tags'), user: this.knex.default.table('users') })
+  public async execQuery<T>(run: (dbs: {  }, entities: {  }) => Promise<T>): Promise<T> {
+    return run({  }, {  })
   }
   
-  public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string, arrayType?: string }>>, defaultType: { singleType: string, arrayType?: string } }): Promise<void> {
-    this.post.createTable(args.typeMap ?? {}, args.defaultType)
-    this.postType.createTable(args.typeMap ?? {}, args.defaultType)
-    this.tag.createTable(args.typeMap ?? {}, args.defaultType)
-    this.user.createTable(args.typeMap ?? {}, args.defaultType)
-  }
+  
 
 }
 
