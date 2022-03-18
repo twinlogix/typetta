@@ -91,6 +91,9 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
         if (MONGODB_STRING_QUERY_PREFIX.has(fk)) {
           return []
         }
+        if (fk === 'exists') {
+          return [[`$${fk}`, fv]]
+        }
         return [[fk, fv]]
       })
       const stringFilter =

@@ -31,13 +31,16 @@ type DAOContextType = DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
 let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
 const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
   ID: {
-    generate: () => uuidv4(),
+    generate: () => new ObjectId().toHexString(),
     dbToModel: (id: unknown) => {
       if (id instanceof ObjectId) {
         return id.toString()
       }
       return id as string
     },
+    modelToDB: (id: string) => {
+      return new ObjectId(id)
+    }
   },
   Password: {
     dbToModel: (o: unknown) => o as string,
