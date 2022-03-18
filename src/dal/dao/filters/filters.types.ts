@@ -1,7 +1,7 @@
 export type LogicalOperators<FilterType> = {
-  $and?: (LogicalOperators<FilterType> &  FilterType)[]
-  $nor?: (LogicalOperators<FilterType> &  FilterType)[]
-  $or?: (LogicalOperators<FilterType> &  FilterType)[]
+  $and?: (LogicalOperators<FilterType> & FilterType)[]
+  $nor?: (LogicalOperators<FilterType> & FilterType)[]
+  $or?: (LogicalOperators<FilterType> & FilterType)[]
 }
 
 export declare type EqualityOperators<FieldType> = {
@@ -22,13 +22,8 @@ export type ElementOperators = {
   $exists?: boolean
 }
 
-export type StringOperators =
-  | {
-      $contains: string
-    }
-  | {
-      $startsWith: string
-    }
-  | {
-      $endsWith: string
-    }
+export type StringOperators = {
+  $contains?: string
+  $startsWith?: string
+  $endsWith?: string
+}

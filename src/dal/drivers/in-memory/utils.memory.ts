@@ -110,13 +110,13 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
           if (typeof value !== 'string') {
             return false
           }
-          if ('$contains' in so) {
+          if ('$contains' in so && so.$contains) {
             return value.includes(so.$contains)
           }
-          if ('$startsWith' in so) {
+          if ('$startsWith' in so && so.$startsWith) {
             return value.startsWith(so.$startsWith)
           }
-          if ('$endsWith' in so) {
+          if ('$endsWith' in so && so.$endsWith) {
             return value.endsWith(so.$endsWith)
           }
         }
