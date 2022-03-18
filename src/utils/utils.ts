@@ -25,10 +25,10 @@ export function hasFieldFilter<
       conditions[fieldName] &&
       (conditions[fieldName] === id ||
         (typeof conditions[fieldName] === 'object' &&
-          (conditions[fieldName] as EqualityOperators<FieldType>).$in &&
-          (conditions[fieldName] as EqualityOperators<FieldType>).$in!.length === 1 &&
-          (conditions[fieldName] as EqualityOperators<FieldType>).$in![0] === id) ||
-        (typeof conditions[fieldName] === 'object' && (conditions[fieldName] as EqualityOperators<FieldType>).$eq && (conditions[fieldName] as EqualityOperators<FieldType>).$eq! === id))) ||
+          (conditions[fieldName] as EqualityOperators<FieldType>).in &&
+          (conditions[fieldName] as EqualityOperators<FieldType>).in!.length === 1 &&
+          (conditions[fieldName] as EqualityOperators<FieldType>).in![0] === id) ||
+        (typeof conditions[fieldName] === 'object' && (conditions[fieldName] as EqualityOperators<FieldType>).eq && (conditions[fieldName] as EqualityOperators<FieldType>).eq! === id))) ||
     false
   )
 }
@@ -83,9 +83,9 @@ export function iteratorLength(iterator: Iterable<unknown>): number {
 }
 
 export const MONGODB_LOGIC_QUERY_PREFIXS = new Set(['$or', '$and', '$nor'])
-export const MONGODB_SINGLE_VALUE_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne'])
-export const MONGODB_ARRAY_VALUE_QUERY_PREFIXS = new Set(['$in', '$nin', '$all'])
-export const MONGODB_QUERY_PREFIXS = new Set(['$eq', '$gte', '$gt', '$lte', '$lt', '$ne', '$in', '$nin', '$all', '$size', '$near', '$nearSphere', '$contains', '$startsWith', '$endsWith'])
+export const MONGODB_SINGLE_VALUE_QUERY_PREFIXS = new Set(['eq', 'gte', 'gt', 'lte', 'lt', 'ne'])
+export const MONGODB_ARRAY_VALUE_QUERY_PREFIXS = new Set(['in', 'nin', 'all'])
+export const MONGODB_QUERY_PREFIXS = new Set(['eq', 'gte', 'gt', 'lte', 'lt', 'ne', 'in', 'nin', 'all', 'size', 'near', 'nearSphere', 'contains', 'startsWith', 'endsWith'])
 
 export function setTraversing(object: any, path: string, value: any) {
   if (typeof object === 'object') {

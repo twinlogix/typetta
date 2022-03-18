@@ -137,11 +137,11 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       }
 
       if (filterKeys.includes(this.idField)) {
-        if (typeof idFilter === 'object' && idFilterKeys.includes('$in')) {
-          const indexes = (idFilter['$in'] as T['idType'][]).map((id) => this.idIndex.get(id)).flatMap((i) => (i === undefined ? [] : [i]))
+        if (typeof idFilter === 'object' && idFilterKeys.includes('in')) {
+          const indexes = (idFilter['in'] as T['idType'][]).map((id) => this.idIndex.get(id)).flatMap((i) => (i === undefined ? [] : [i]))
           return [...new Set(indexes)]
-        } else if (typeof idFilter === 'object' && idFilterKeys.includes('$eq')) {
-          const index = this.idIndex.get(idFilter['$eq'])
+        } else if (typeof idFilter === 'object' && idFilterKeys.includes('eq')) {
+          const index = this.idIndex.get(idFilter['eq'])
           if (index !== undefined) {
             return [index]
           }

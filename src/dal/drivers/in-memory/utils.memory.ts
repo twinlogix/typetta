@@ -85,39 +85,39 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
       .filter((p) => !MONGODB_LOGIC_QUERY_PREFIXS.has(p[0]))
       .every(([key, f]) => {
         const value = getByPath(entity, key)
-        if (f && typeof f === 'object' && ('$eq' in f || '$in' in f || '$ne' in f || '$nin' in f)) {
+        if (f && typeof f === 'object' && ('eq' in f || 'in' in f || 'ne' in f || 'nin' in f)) {
           const eo = f as EqualityOperators<unknown>
-          const eqResult = eo.$eq != null ? equals(value, eo.$eq) : true
-          const neResult = eo.$ne != null ? !equals(value, eo.$ne) : true
-          const inResult = eo.$in ? eo.$in.some((v) => equals(value, v)) : true
-          const ninResult = eo.$nin ? eo.$nin.every((v) => !equals(value, v)) : true
+          const eqResult = eo.eq != null ? equals(value, eo.eq) : true
+          const neResult = eo.ne != null ? !equals(value, eo.ne) : true
+          const inResult = eo.in ? eo.in.some((v) => equals(value, v)) : true
+          const ninResult = eo.nin ? eo.nin.every((v) => !equals(value, v)) : true
           return eqResult && neResult && inResult && ninResult
         }
-        if (f && typeof f === 'object' && ('$gte' in f || '$gt' in f || '$lte' in f || '$lt' in f)) {
+        if (f && typeof f === 'object' && ('gte' in f || 'gt' in f || 'lte' in f || 'lt' in f)) {
           const qo = f as QuantityOperators<unknown>
-          const gteResult = qo.$gte != null ? compare(value, qo.$gte) >= 0 : true
-          const gtResult = qo.$gt != null ? compare(value, qo.$gt) > 0 : true
-          const lteResult = qo.$lte != null ? compare(value, qo.$lte) <= 0 : true
-          const ltResult = qo.$lt != null ? compare(value, qo.$lt) < 0 : true
+          const gteResult = qo.gte != null ? compare(value, qo.gte) >= 0 : true
+          const gtResult = qo.gt != null ? compare(value, qo.gt) > 0 : true
+          const lteResult = qo.lte != null ? compare(value, qo.lte) <= 0 : true
+          const ltResult = qo.lt != null ? compare(value, qo.lt) < 0 : true
           return gteResult && gtResult && lteResult && ltResult
         }
-        if (f && typeof f === 'object' && '$exists' in f) {
+        if (f && typeof f === 'object' && 'exists' in f) {
           const eo = f as ElementOperators
-          return eo.$exists === true ? value !== undefined : value === undefined
+          return eo.exists === true ? value !== undefined : value === undefined
         }
-        if (f && typeof f === 'object' && ('$contains' in f || '$startsWith' in f || '$endsWith' in f)) {
+        if (f && typeof f === 'object' && ('contains' in f || 'startsWith' in f || 'endsWith' in f)) {
           const so = f as StringOperators
           if (typeof value !== 'string') {
             return false
           }
-          if ('$contains' in so && so.$contains) {
-            return value.includes(so.$contains)
+          if ('contains' in so && so.contains) {
+            return value.includes(so.contains)
           }
-          if ('$startsWith' in so && so.$startsWith) {
-            return value.startsWith(so.$startsWith)
+          if ('startsWith' in so && so.startsWith) {
+            return value.startsWith(so.startsWith)
           }
-          if ('$endsWith' in so && so.$endsWith) {
-            return value.endsWith(so.$endsWith)
+          if ('endsWith' in so && so.endsWith) {
+            return value.endsWith(so.endsWith)
           }
         }
         return equals(value, f)

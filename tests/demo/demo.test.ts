@@ -133,7 +133,7 @@ test('Demo', async () => {
 
   const pippo = await dao.user.findOne({
     filter: {
-      createdAt: { $lte: new Date() },
+      createdAt: { lte: new Date() },
       'credentials.username': 'Pippo',
     },
     projection: {
@@ -150,7 +150,7 @@ test('Demo', async () => {
     },
     relations: {
       posts: {
-        filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
+        filter: { title: { in: ['Title 1', 'Title 2', 'Title 3'] } },
         limit: 2,
         skip: 1,
         sorts: (qb) => qb.orderBy('title', 'desc'),
@@ -196,11 +196,11 @@ test('Aggregate test', async () => {
         'metadata.region': true,
       },
       aggregations: { count: { field: 'authorId', operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
-      filter: { 'metadata.visible': true, views: { $gt: 0 } },
+      filter: { 'metadata.visible': true, views: { gt: 0 } },
       skip: 1,
       limit: 2,
     },
-    { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { $lt: 150 } } },
+    { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { lt: 150 } } },
   )
   expect(aggregation1.length).toBe(2)
   // expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
