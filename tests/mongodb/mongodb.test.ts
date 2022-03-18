@@ -106,6 +106,11 @@ test('simple findAll', async () => {
   expect(users.length).toBe(1)
   expect(users[0].firstName).toBe('FirstName')
   expect(users[0].lastName).toBe('LastName')
+
+  const users2 = await dao.user.findAll({ filter: { id: { exists: true } } })
+  expect(users2.length).toBe(1)
+  expect(users2[0].firstName).toBe('FirstName')
+  expect(users2[0].lastName).toBe('LastName')
 })
 
 test('simple findOne', async () => {
@@ -116,7 +121,6 @@ test('simple findOne', async () => {
   expect(user!.firstName).toBe('FirstName')
   expect(user!.lastName).toBe('LastName')
 })
-
 
 test('simple findOne multiple filter', async () => {
   await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
@@ -1446,10 +1450,10 @@ test('Audit middlewares', async () => {
   expect(hotels[0].audit.modifiedOn).toBe(1)
 
   await dao2.hotel.updateOne({ filter: { name: 'h1' }, changes: { name: 'H1' } })
-  const h1 = await dao2.hotel.findOne({ filter: { name: 'H1' }, projection: { audit: { modifiedBy: true, modifiedOn: true, versions: true }} })
+  const h1 = await dao2.hotel.findOne({ filter: { name: 'H1' }, projection: { audit: { modifiedBy: true, modifiedOn: true, versions: true } } })
   expect(h1?.audit.modifiedOn).toBe(2)
   expect(h1?.audit.modifiedBy).toBe('userId2')
-  expect(h1?.audit.versions[0]?.changes).toBe("NONE")
+  expect(h1?.audit.versions[0]?.changes).toBe('NONE')
 
   await dao2.hotel.deleteAll({ filter: { name: { in: ['H1', 'H2'] } } })
   const hotels2 = await dao2.hotel.findAll()

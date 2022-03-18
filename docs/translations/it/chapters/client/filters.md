@@ -42,7 +42,7 @@ await daoContext.user.findAll({
     - [startsWith](#startswith)
     - [endsWith](#endswith)
   - [Altri operatori](#altri-operatori)
-    - [$exist](#exist)
+    - [exists](#exist)
   - [Filtri avanzati, dipendenti dal driver](#filtri-avanzati-dipendenti-dal-driver)
     - [MongoDB](#mongodb)
     - [SQL](#sql)
@@ -305,15 +305,15 @@ await daoContext.user.findAll({
 
 Di seguito l'elenco degli ulteriori operatori messi a disposizione da Typetta:
 
-### $exist
+### exists
 
-L'operatore `$exist` controlla che il campo sia o meno valorizzato su database, a seconda del valore true / false fornito.
+L'operatore `exists` controlla che il campo sia o meno valorizzato su database, a seconda del valore true / false fornito.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    name: { $exist: true }
+    name: { exists: true }
   }
 })
 ```

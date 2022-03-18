@@ -44,7 +44,7 @@ Typetta supports various operators and filters in order to give you a powerful d
     - [startsWith](#startswith)
     - [endsWith](#endswith)
   - [Other operators](#other-operators)
-    - [$exist](#exist)
+    - [exists](#exist)
   - [Advanced, driver-dependent filters](#advanced-driver-dependent-filters)
     - [MongoDB](#mongodb)
     - [SQL](#sql)
@@ -309,15 +309,15 @@ await daoContext.user.findAll({
 
 Below is the list of additional operators made available by Typetta:
 
-### $exist
+### exists
 
-The `$exist` operator checks whether or not the field has a value in the database, depending on the true / false value provided.
+The `exists` operator checks whether or not the field has a value in the database, depending on the true / false value provided.
 
 For example:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    name: { $exist: true }
+    name: { exists: true }
   }
 })
 ```
