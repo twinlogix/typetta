@@ -6,6 +6,7 @@ import {
   MONGODB_LOGIC_QUERY_PREFIXS,
   MONGODB_QUERY_PREFIXS,
   MONGODB_SINGLE_VALUE_QUERY_PREFIXS,
+  MONGODB_STRING_QUERY_PREFIX,
 } from '../../../../utils/utils'
 import { DAOGenerics } from '../../../dao/dao.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
@@ -87,8 +88,11 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
           return [[`$${fk}`, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
         }
-        if (fk === 'contains' || fk === 'startsWith' || fk === 'endsWith') {
+        if (MONGODB_STRING_QUERY_PREFIX.has(fk)) {
           return []
+        }
+        if (fk === 'exists') {
+          return [[`$${fk}`, fv]]
         }
         return [[fk, fv]]
       })
