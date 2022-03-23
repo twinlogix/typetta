@@ -39,6 +39,10 @@ test('Demo', async () => {
     await dao.tag.insertOne({ record: { postId: post.id, name: 'Fitness' } })
   }
 
+  
+  const u = await dao.user.findOne({ projection: {lastName:true, firstName: true}})
+
+
   const pippo = await dao.user.findOne({
     filter: {
       createdAt: { lte: new Date() },

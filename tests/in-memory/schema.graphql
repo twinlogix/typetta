@@ -18,6 +18,8 @@ type User @entity @memory {
   totalPostsViews: Int @exclude
   averageViewsPerPost: Float @exclude
   posts: [Post!] @foreignRef(refFrom: "authorId")
+
+  multipleCredentials: [Credentials]
 }
 
 type Post @entity @memory {

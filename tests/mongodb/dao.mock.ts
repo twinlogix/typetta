@@ -618,7 +618,7 @@ export type HotelRelationFields = never
 
 export function hotelSchema(): Schema<types.Scalars> {
   return {
-    'audit': { embedded: auditableSchema() },
+    'audit': { embedded: auditableSchema(), required: true, defaultGenerationStrategy: 'middleware' },
     'id': {
       scalar: 'ID', 
       required: true, 
@@ -1072,6 +1072,7 @@ export function userSchema(): Schema<types.Scalars> {
       array: true, 
       alias: 'amounts'
     },
+    'credentials': { embedded: usernamePasswordCredentialsSchema(), array: true },
     'firstName': {
       scalar: 'String', 
       alias: 'name'
@@ -1099,13 +1100,15 @@ export function userSchema(): Schema<types.Scalars> {
     'title': {
       scalar: 'LocalizedString'
     },
-    'usernamePasswordCredentials': { embedded: usernamePasswordCredentialsSchema() }
+    'usernamePasswordCredentials': { embedded: usernamePasswordCredentialsSchema(), alias: 'cred' }
   }
 }
 
 type UserFilterFields = {
   'amount'?: types.Scalars['Decimal'] | null | EqualityOperators<types.Scalars['Decimal']> | ElementOperators,
   'amounts'?: types.Scalars['Decimal'][] | null | EqualityOperators<types.Scalars['Decimal'][]> | ElementOperators,
+  'credentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators,
+  'credentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'friendsId'?: types.Scalars['ID'][] | null | EqualityOperators<types.Scalars['ID'][]> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
@@ -1139,6 +1142,10 @@ export type UserRelations = {
 export type UserProjection = {
   amount?: boolean,
   amounts?: boolean,
+  credentials?: {
+    password?: boolean,
+    username?: boolean,
+  } | boolean,
   dogs?: DogProjection | boolean,
   firstName?: boolean,
   friends?: UserProjection | boolean,
@@ -1155,13 +1162,14 @@ export type UserProjection = {
 }
 export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
-export type UserSortKeys = 'amount' | 'amounts' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username'
+export type UserSortKeys = 'amount' | 'amounts' | 'credentials.password' | 'credentials.username' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username'
 export type UserSort = OneKey<UserSortKeys, SortDirection>
 export type UserRawSort = () => Sort
 
 export type UserUpdate = {
   'amount'?: types.Scalars['Decimal'] | null,
   'amounts'?: types.Scalars['Decimal'][] | null,
+  'credentials'?: types.UsernamePasswordCredentials[] | null,
   'firstName'?: types.Scalars['String'] | null,
   'friendsId'?: types.Scalars['ID'][] | null,
   'id'?: types.Scalars['ID'],
@@ -1178,6 +1186,7 @@ export type UserRawUpdate = () => UpdateFilter<Document>
 export type UserInsert = {
   amount?: types.Scalars['Decimal'],
   amounts?: types.Scalars['Decimal'][],
+  credentials?: types.UsernamePasswordCredentials[],
   firstName?: types.Scalars['String'],
   friendsId?: types.Scalars['ID'][],
   id?: types.Scalars['ID'],

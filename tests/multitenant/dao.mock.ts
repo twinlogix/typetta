@@ -413,7 +413,7 @@ export type UserRelationFields = 'reservations'
 
 export function userSchema(): Schema<types.Scalars> {
   return {
-    'credentials': { embedded: usernamePasswordCredentialsSchema() },
+    'credentials': { embedded: usernamePasswordCredentialsSchema(), alias: 'cred' },
     'deletionDate': {
       scalar: 'Date'
     },

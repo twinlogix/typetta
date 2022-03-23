@@ -282,7 +282,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         if (field.type.kind === 'scalar') {
           return [`  '${field.name}': {\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`, 2)}\n  }`]
         } else if (field.type.kind === 'embedded') {
-          return [`  '${field.name}': { embedded: ${toFirstLower(field.graphqlType)}Schema() }`]
+          return [`  '${field.name}': { embedded: ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
         }
         return []
       })
@@ -433,7 +433,11 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
           const fieldType = field.isList ? `types.${embeddedType.name}[]` : `types.${embeddedType.name}`
-          return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, path + field.name + '.')]
+          if (field.isList) {
+            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
+          } else {
+            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, path + field.name + '.')]
+          }
         }
         return []
       })

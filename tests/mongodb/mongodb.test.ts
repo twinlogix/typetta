@@ -677,6 +677,35 @@ test('update with undefined', async () => {
   expect(user3?.live).toBe(true)
 })
 
+test('update array embedded', async () => {
+  const user = await dao.user.insertOne({
+    record: {
+      id: 'u1',
+      firstName: 'FirstName',
+      lastName: 'LastName',
+      live: true,
+      credentials: [
+        { password: 'asd1', username: 'asd1' },
+        { password: 'asd2', username: 'asd2' },
+      ],
+    },
+  })
+  expect((user.credentials ?? [])[0]?.username).toBe('asd1')
+  expect((user.credentials ?? [])[1]?.username).toBe('asd2')
+  await dao.user.updateOne({
+    filter: { id: user.id },
+    changes: {
+      credentials: [
+        { password: 'asd3', username: 'asd3' },
+        { password: 'asd4', username: 'asd4' },
+      ],
+    },
+  })
+  const user2 = await dao.user.findOne({ filter: { id: user.id } })
+  expect((user2?.credentials ?? [])[0]?.username).toBe('asd3')
+  expect((user2?.credentials ?? [])[1]?.username).toBe('asd4')
+})
+
 // ------------------------------------------------------------------------
 // ------------------------------ REPLACE ---------------------------------
 // ------------------------------------------------------------------------
@@ -1520,7 +1549,7 @@ test('Inserted record middleware', async () => {
       },
     },
   })
-  await customDao.hotel.insertOne({ record: { name: 'Hotel' } })
+  await customDao.hotel.insertOne({ record: { name: 'Hotel', audit: { createdBy: '', createdOn: 0, modifiedBy: '', modifiedOn: 0, state: State.ACTIVE, versions: [] } } })
   expect(i).toBe(2)
 })
 

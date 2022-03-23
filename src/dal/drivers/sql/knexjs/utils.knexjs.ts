@@ -247,7 +247,7 @@ export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, 
         return result
       }
       if (obj) {
-        const res = { ...result, [k]: obj }
+        const res = { ...result, [schemaFiled.alias ?? k]: obj }
         for (const key of toDelete) {
           delete res[key]
         }

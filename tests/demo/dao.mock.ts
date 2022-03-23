@@ -389,7 +389,7 @@ export function userSchema(): Schema<types.Scalars> {
       scalar: 'DateTime', 
       required: true
     },
-    'credentials': { embedded: credentialsSchema() },
+    'credentials': { embedded: credentialsSchema(), required: true },
     'email': {
       scalar: 'String'
     },

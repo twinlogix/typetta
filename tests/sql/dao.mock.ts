@@ -961,7 +961,7 @@ export function userSchema(): Schema<types.Scalars> {
     'bestFriendId': {
       scalar: 'ID'
     },
-    'credentials': { embedded: usernamePasswordCredentialsSchema() },
+    'credentials': { embedded: usernamePasswordCredentialsSchema(), alias: 'cred' },
     'firstName': {
       scalar: 'String', 
       alias: 'name'
@@ -1123,7 +1123,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
 
 export function usernamePasswordCredentialsSchema(): Schema<types.Scalars> {
   return {
-    'another': { embedded: anotherSchema() },
+    'another': { embedded: anotherSchema(), alias: 'a' },
     'password': {
       scalar: 'Password', 
       required: true, 
