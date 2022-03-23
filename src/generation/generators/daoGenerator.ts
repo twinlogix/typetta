@@ -428,15 +428,16 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         const fieldName = path + field.name
         if (field.type.kind === 'scalar') {
           const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
-          const fieldType = field.isList ? `${baseType}[]` : baseType
+          const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${baseType})` : baseType}[]` : baseType
           return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
         } else if (field.type.kind === 'embedded') {
-          const embeddedType = getNode(field.type.embed, typesMap)
-          const fieldType = field.isList ? `types.${embeddedType.name}[]` : `types.${embeddedType.name}`
+          const embeddedTypeNode = getNode(field.type.embed, typesMap)
+          const embeddedType = `types.${embeddedTypeNode.name}`
+          const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}[]` : embeddedType
           if (field.isList) {
             return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
           } else {
-            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, path + field.name + '.')]
+            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
           }
         }
         return []
@@ -463,10 +464,11 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired && !field.defaultGenerationStrategy)
         if (field.type.kind === 'scalar') {
           const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
-          return [`${field.name}${required ? '' : '?'}: ${baseType}${field.isList ? '[]' : ''},`]
+          return [`${field.name}${required ? ':' : '?: null |'} ${field.isList && !field.isListElementRequired ? `(null | ${baseType})` : baseType}${field.isList ? '[]' : ''},`]
         }
         if (field.type.kind === 'embedded') {
-          return [`${field.name}${required ? '' : '?'}: types.${field.type.embed}${field.isList ? '[]' : ''},`]
+          const embeddedType = `types.${field.type.embed}`
+          return [`${field.name}${required ? ':' : '?: null |'} ${field.isList && !field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}${field.isList ? '[]' : ''},`]
         }
         return []
       })

@@ -166,6 +166,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         isID: idDirective != null,
         idGenerationStrategy,
         isList: field.type.kind === Kind.LIST_TYPE || (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE),
+        isListElementRequired: field.type.kind === Kind.LIST_TYPE && field.type.type.kind === Kind.NON_NULL_TYPE,
         isExcluded: excludeDirective != null,
         defaultGenerationStrategy,
         isEnum: isEnumType(schemaType),

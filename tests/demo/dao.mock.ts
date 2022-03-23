@@ -131,11 +131,11 @@ export type PostRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 
 export type PostInsert = {
   authorId: types.Scalars['ID'],
-  body?: types.Scalars['String'],
-  clicks?: types.Scalars['Int'],
+  body?: null | types.Scalars['String'],
+  clicks?: null | types.Scalars['Int'],
   createdAt: types.Scalars['DateTime'],
-  id?: types.Scalars['ID'],
-  metadata?: types.PostMetadata,
+  id?: null | types.Scalars['ID'],
+  metadata?: null | types.PostMetadata,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
@@ -339,8 +339,8 @@ export type TagUpdate = {
 export type TagRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type TagInsert = {
-  id?: types.Scalars['ID'],
-  name?: types.Scalars['String'],
+  id?: null | types.Scalars['ID'],
+  name?: null | types.Scalars['String'],
   postId: types.Scalars['ID'],
 }
 
@@ -463,10 +463,10 @@ export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 export type UserInsert = {
   createdAt: types.Scalars['DateTime'],
   credentials: types.Credentials,
-  email?: types.Scalars['String'],
-  firstName?: types.Scalars['String'],
-  id?: types.Scalars['ID'],
-  lastName?: types.Scalars['String'],
+  email?: null | types.Scalars['String'],
+  firstName?: null | types.Scalars['String'],
+  id?: null | types.Scalars['ID'],
+  lastName?: null | types.Scalars['String'],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>

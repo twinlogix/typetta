@@ -26,6 +26,7 @@ export type TsTypettaGeneratorField = {
   isID: boolean
   idGenerationStrategy?: IdGenerationStrategy
   isList: boolean
+  isListElementRequired: boolean
   isExcluded: boolean
   isEnum: boolean
   defaultGenerationStrategy?: DefaultGenerationStrategy

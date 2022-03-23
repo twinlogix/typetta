@@ -51,7 +51,7 @@ export type AddressUpdate = {
 export type AddressRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AddressInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
 }
 
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address', DAOContext<MetadataType, OperationMetadataType>>
@@ -154,7 +154,7 @@ export type AuthorUpdate = {
 export type AuthorRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AuthorInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
 }
 
 type AuthorDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Author, 'id', 'ID', 'generator', AuthorFilter, AuthorRawFilter, AuthorRelations, AuthorProjection, AuthorSort, AuthorRawSort, AuthorInsert, AuthorUpdate, AuthorRawUpdate, AuthorExcludedFields, AuthorRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'author', DAOContext<MetadataType, OperationMetadataType>>
@@ -244,7 +244,7 @@ export type AuthorBookRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex
 export type AuthorBookInsert = {
   authorId: types.Scalars['ID'],
   bookId: types.Scalars['ID'],
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
 }
 
 type AuthorBookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.AuthorBook, 'id', 'ID', 'generator', AuthorBookFilter, AuthorBookRawFilter, AuthorBookRelations, AuthorBookProjection, AuthorBookSort, AuthorBookRawSort, AuthorBookInsert, AuthorBookUpdate, AuthorBookRawUpdate, AuthorBookExcludedFields, AuthorBookRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'authorBook', DAOContext<MetadataType, OperationMetadataType>>
@@ -327,7 +327,7 @@ export type BookUpdate = {
 export type BookRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type BookInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
 }
 
 type BookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Book, 'id', 'ID', 'generator', BookFilter, BookRawFilter, BookRelations, BookProjection, BookSort, BookRawSort, BookInsert, BookUpdate, BookRawUpdate, BookExcludedFields, BookRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'book', DAOContext<MetadataType, OperationMetadataType>>
@@ -418,7 +418,7 @@ export type CityRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 
 export type CityInsert = {
   addressId: types.Scalars['ID'],
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
 }
 
@@ -530,12 +530,12 @@ export type DefaultFieldsEntityUpdate = {
 export type DefaultFieldsEntityRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DefaultFieldsEntityInsert = {
-  creationDate?: types.Scalars['Int'],
+  creationDate?: null | types.Scalars['Int'],
   id: types.Scalars['ID'],
-  live?: types.Scalars['Live'],
+  live?: null | types.Scalars['Live'],
   name: types.Scalars['String'],
-  opt1?: types.Scalars['Live'],
-  opt2?: types.Scalars['Live'],
+  opt1?: null | types.Scalars['Live'],
+  opt2?: null | types.Scalars['Live'],
 }
 
 type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', 'user', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity', DAOContext<MetadataType, OperationMetadataType>>
@@ -623,9 +623,9 @@ export type DeviceUpdate = {
 export type DeviceRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DeviceInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
-  userId?: types.Scalars['ID'],
+  userId?: null | types.Scalars['ID'],
 }
 
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device', DAOContext<MetadataType, OperationMetadataType>>
@@ -714,7 +714,7 @@ export type DogUpdate = {
 export type DogRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DogInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
   ownerId: types.Scalars['ID'],
 }
@@ -805,7 +805,7 @@ export type FriendsRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.Qu
 
 export type FriendsInsert = {
   from: types.Scalars['ID'],
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   to: types.Scalars['ID'],
 }
 
@@ -902,10 +902,10 @@ export type OrganizationUpdate = {
 export type OrganizationRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type OrganizationInsert = {
-  address?: types.Address,
-  id?: types.Scalars['ID'],
+  address?: null | types.Address,
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
-  vatNumber?: types.Scalars['String'],
+  vatNumber?: null | types.Scalars['String'],
 }
 
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization', DAOContext<MetadataType, OperationMetadataType>>
@@ -1071,16 +1071,16 @@ export type UserUpdate = {
 export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type UserInsert = {
-  amount?: types.Scalars['Decimal'],
-  amounts?: types.Scalars['Decimal'][],
-  bestFriendId?: types.Scalars['ID'],
-  credentials?: types.UsernamePasswordCredentials,
-  firstName?: types.Scalars['String'],
-  id?: types.Scalars['ID'],
-  lastName?: types.Scalars['String'],
+  amount?: null | types.Scalars['Decimal'],
+  amounts?: null | types.Scalars['Decimal'][],
+  bestFriendId?: null | types.Scalars['ID'],
+  credentials?: null | types.UsernamePasswordCredentials,
+  firstName?: null | types.Scalars['String'],
+  id?: null | types.Scalars['ID'],
+  lastName?: null | types.Scalars['String'],
   live: types.Scalars['Boolean'],
-  localization?: types.Scalars['Coordinates'],
-  title?: types.Scalars['LocalizedString'],
+  localization?: null | types.Scalars['Coordinates'],
+  title?: null | types.Scalars['LocalizedString'],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>

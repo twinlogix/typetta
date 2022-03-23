@@ -51,7 +51,7 @@ export type AddressUpdate = {
 export type AddressRawUpdate = () => UpdateFilter<Document>
 
 export type AddressInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
 }
 
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address', DAOContext<MetadataType, OperationMetadataType>>
@@ -139,7 +139,7 @@ export type AuditUpdate = {
 export type AuditRawUpdate = () => UpdateFilter<Document>
 
 export type AuditInsert = {
-  changes?: types.Scalars['String'],
+  changes?: null | types.Scalars['String'],
   entityId: types.Scalars['ID'],
 }
 
@@ -276,7 +276,7 @@ export type CityRawUpdate = () => UpdateFilter<Document>
 
 export type CityInsert = {
   addressId: types.Scalars['ID'],
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
 }
 
@@ -388,12 +388,12 @@ export type DefaultFieldsEntityUpdate = {
 export type DefaultFieldsEntityRawUpdate = () => UpdateFilter<Document>
 
 export type DefaultFieldsEntityInsert = {
-  creationDate?: types.Scalars['Int'],
+  creationDate?: null | types.Scalars['Int'],
   id: types.Scalars['ID'],
-  live?: types.Scalars['Live'],
+  live?: null | types.Scalars['Live'],
   name: types.Scalars['String'],
-  opt1?: types.Scalars['Live'],
-  opt2?: types.Scalars['Live'],
+  opt1?: null | types.Scalars['Live'],
+  opt2?: null | types.Scalars['Live'],
 }
 
 type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', 'user', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity', DAOContext<MetadataType, OperationMetadataType>>
@@ -481,9 +481,9 @@ export type DeviceUpdate = {
 export type DeviceRawUpdate = () => UpdateFilter<Document>
 
 export type DeviceInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
-  userId?: types.Scalars['ID'],
+  userId?: null | types.Scalars['ID'],
 }
 
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device', DAOContext<MetadataType, OperationMetadataType>>
@@ -572,7 +572,7 @@ export type DogUpdate = {
 export type DogRawUpdate = () => UpdateFilter<Document>
 
 export type DogInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
   ownerId: types.Scalars['ID'],
 }
@@ -679,7 +679,7 @@ export type HotelUpdate = {
 export type HotelRawUpdate = () => UpdateFilter<Document>
 
 export type HotelInsert = {
-  audit?: types.Auditable,
+  audit?: null | types.Auditable,
   name: types.Scalars['String'],
 }
 
@@ -867,10 +867,10 @@ export type OrganizationUpdate = {
 export type OrganizationRawUpdate = () => UpdateFilter<Document>
 
 export type OrganizationInsert = {
-  address?: types.Address,
-  id?: types.Scalars['ID'],
+  address?: null | types.Address,
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
-  vatNumber?: types.Scalars['String'],
+  vatNumber?: null | types.Scalars['String'],
 }
 
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization', DAOContext<MetadataType, OperationMetadataType>>
@@ -990,10 +990,10 @@ export type PostRawUpdate = () => UpdateFilter<Document>
 
 export type PostInsert = {
   authorId: types.Scalars['ID'],
-  body?: types.Scalars['String'],
-  clicks?: types.Scalars['Int'],
-  id?: types.Scalars['ID'],
-  metadata?: types.PostMetadata,
+  body?: null | types.Scalars['String'],
+  clicks?: null | types.Scalars['Int'],
+  id?: null | types.Scalars['ID'],
+  metadata?: null | types.PostMetadata,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
@@ -1169,7 +1169,7 @@ export type UserRawSort = () => Sort
 export type UserUpdate = {
   'amount'?: types.Scalars['Decimal'] | null,
   'amounts'?: types.Scalars['Decimal'][] | null,
-  'credentials'?: types.UsernamePasswordCredentials[] | null,
+  'credentials'?: (null | types.UsernamePasswordCredentials)[] | null,
   'firstName'?: types.Scalars['String'] | null,
   'friendsId'?: types.Scalars['ID'][] | null,
   'id'?: types.Scalars['ID'],
@@ -1184,17 +1184,17 @@ export type UserUpdate = {
 export type UserRawUpdate = () => UpdateFilter<Document>
 
 export type UserInsert = {
-  amount?: types.Scalars['Decimal'],
-  amounts?: types.Scalars['Decimal'][],
-  credentials?: types.UsernamePasswordCredentials[],
-  firstName?: types.Scalars['String'],
-  friendsId?: types.Scalars['ID'][],
-  id?: types.Scalars['ID'],
-  lastName?: types.Scalars['String'],
+  amount?: null | types.Scalars['Decimal'],
+  amounts?: null | types.Scalars['Decimal'][],
+  credentials?: null | (null | types.UsernamePasswordCredentials)[],
+  firstName?: null | types.Scalars['String'],
+  friendsId?: null | types.Scalars['ID'][],
+  id?: null | types.Scalars['ID'],
+  lastName?: null | types.Scalars['String'],
   live: types.Scalars['Boolean'],
-  localization?: types.Scalars['Coordinates'],
-  title?: types.Scalars['LocalizedString'],
-  usernamePasswordCredentials?: types.UsernamePasswordCredentials,
+  localization?: null | types.Scalars['Coordinates'],
+  title?: null | types.Scalars['LocalizedString'],
+  usernamePasswordCredentials?: null | types.UsernamePasswordCredentials,
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>

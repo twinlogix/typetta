@@ -133,7 +133,7 @@ export type BUpdate = {
 export type BRawUpdate = () => UpdateFilter<Document>
 
 export type BInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   value: types.Scalars['Int'],
 }
 
@@ -378,7 +378,7 @@ export type EUpdate = {
 export type ERawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type EInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   value: types.Scalars['Int'],
 }
 

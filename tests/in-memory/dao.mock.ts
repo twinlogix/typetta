@@ -129,10 +129,10 @@ export type PostRawUpdate = never
 
 export type PostInsert = {
   authorId: types.Scalars['ID'],
-  body?: types.Scalars['String'],
-  clicks?: types.Scalars['Int'],
+  body?: null | types.Scalars['String'],
+  clicks?: null | types.Scalars['Int'],
   createdAt: types.Scalars['DateTime'],
-  metadata?: types.PostMetadata,
+  metadata?: null | types.PostMetadata,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
@@ -336,7 +336,7 @@ export type TagUpdate = {
 export type TagRawUpdate = never
 
 export type TagInsert = {
-  name?: types.Scalars['String'],
+  name?: null | types.Scalars['String'],
   postId: types.Scalars['ID'],
 }
 
@@ -460,17 +460,17 @@ export type UserUpdate = {
   'firstName'?: types.Scalars['String'] | null,
   'id'?: types.Scalars['ID'],
   'lastName'?: types.Scalars['String'] | null,
-  'multipleCredentials'?: types.Credentials[] | null
+  'multipleCredentials'?: (null | types.Credentials)[] | null
 }
 export type UserRawUpdate = never
 
 export type UserInsert = {
   createdAt: types.Scalars['DateTime'],
   credentials: types.Credentials,
-  email?: types.Scalars['String'],
-  firstName?: types.Scalars['String'],
-  lastName?: types.Scalars['String'],
-  multipleCredentials?: types.Credentials[],
+  email?: null | types.Scalars['String'],
+  firstName?: null | types.Scalars['String'],
+  lastName?: null | types.Scalars['String'],
+  multipleCredentials?: null | (null | types.Credentials)[],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.User, 'id', 'ID', 'db', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>

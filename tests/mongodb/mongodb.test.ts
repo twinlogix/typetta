@@ -704,6 +704,25 @@ test('update array embedded', async () => {
   const user2 = await dao.user.findOne({ filter: { id: user.id } })
   expect((user2?.credentials ?? [])[0]?.username).toBe('asd3')
   expect((user2?.credentials ?? [])[1]?.username).toBe('asd4')
+
+  const user3 = await dao.user.insertOne({
+    record: {
+      id: 'u1',
+      firstName: 'FirstName',
+      lastName: 'LastName',
+      live: true,
+      credentials: [null, { password: 'asd1', username: 'asd1' }],
+    },
+  })
+  expect((user3?.credentials ?? [])[0]).toBe(null)
+  expect((user3?.credentials ?? [])[1]?.username).toBe('asd1')
+
+  await dao.user.updateOne({ filter: { id: user3.id }, changes: { credentials: [null, { password: 'asd2', username: 'asd2' }, null] } })
+
+  const user4 = await dao.user.findOne({ filter: { id: user3.id } })
+  expect((user4?.credentials ?? [])[0]).toBe(null)
+  expect((user4?.credentials ?? [])[1]?.username).toBe('asd2')
+  expect((user4?.credentials ?? [])[2]).toBe(null)
 })
 
 // ------------------------------------------------------------------------

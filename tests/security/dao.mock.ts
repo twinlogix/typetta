@@ -69,8 +69,8 @@ export type HotelUpdate = {
 export type HotelRawUpdate = () => UpdateFilter<Document>
 
 export type HotelInsert = {
-  description?: types.Scalars['String'],
-  id?: types.Scalars['ID'],
+  description?: null | types.Scalars['String'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
   tenantId: types.Scalars['Int'],
   totalCustomers: types.Scalars['Int'],
@@ -177,7 +177,7 @@ export type ReservationRawUpdate = () => UpdateFilter<Document>
 
 export type ReservationInsert = {
   hotelId: types.Scalars['ID'],
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   roomId: types.Scalars['ID'],
   tenantId: types.Scalars['Int'],
   userId: types.Scalars['ID'],
@@ -257,13 +257,13 @@ export type RoleRawSort = () => Sort
 
 export type RoleUpdate = {
   'code'?: types.RoleCode,
-  'permissions'?: types.Permission[]
+  'permissions'?: (null | types.Permission)[]
 }
 export type RoleRawUpdate = () => UpdateFilter<Document>
 
 export type RoleInsert = {
   code: types.RoleCode,
-  permissions: types.Permission[],
+  permissions: (null | types.Permission)[],
 }
 
 type RoleDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Role, 'code', 'String', 'user', RoleFilter, RoleRawFilter, RoleRelations, RoleProjection, RoleSort, RoleRawSort, RoleInsert, RoleUpdate, RoleRawUpdate, RoleExcludedFields, RoleRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'role', DAOContext<MetadataType, OperationMetadataType>>
@@ -376,7 +376,7 @@ export type RoomInsert = {
   description: types.Scalars['String'],
   from: types.Scalars['Date'],
   hotelId: types.Scalars['ID'],
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   tenantId: types.Scalars['Int'],
   to: types.Scalars['Date'],
 }
@@ -495,10 +495,10 @@ export type UserRawUpdate = () => UpdateFilter<Document>
 
 export type UserInsert = {
   email: types.Scalars['Email'],
-  firstName?: types.Scalars['String'],
-  id?: types.Scalars['ID'],
-  lastName?: types.Scalars['String'],
-  totalPayments?: types.Scalars['Int'],
+  firstName?: null | types.Scalars['String'],
+  id?: null | types.Scalars['ID'],
+  lastName?: null | types.Scalars['String'],
+  totalPayments?: null | types.Scalars['Int'],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
@@ -607,11 +607,11 @@ export type UserRoleUpdate = {
 export type UserRoleRawUpdate = () => UpdateFilter<Document>
 
 export type UserRoleInsert = {
-  hotelId?: types.Scalars['ID'],
+  hotelId?: null | types.Scalars['ID'],
   refUserId: types.Scalars['ID'],
   roleCode: types.RoleCode,
-  tenantId?: types.Scalars['Int'],
-  userId?: types.Scalars['ID'],
+  tenantId?: null | types.Scalars['Int'],
+  userId?: null | types.Scalars['ID'],
 }
 
 type UserRoleDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.UserRole, 'id', 'ID', 'db', UserRoleFilter, UserRoleRawFilter, UserRoleRelations, UserRoleProjection, UserRoleSort, UserRoleRawSort, UserRoleInsert, UserRoleUpdate, UserRoleRawUpdate, UserRoleExcludedFields, UserRoleRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'userRole', DAOContext<MetadataType, OperationMetadataType>>

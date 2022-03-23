@@ -139,9 +139,9 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField) {
       if (schemaField.array) {
-        return [[columnName, (v as unknown[]).map((ve) => adaptUpdate(ve, schemaField.embedded, adapters))]]
+        return [[columnName, (v as unknown[]).map((ve) => ve === null ? null : adaptUpdate(ve, schemaField.embedded, adapters))]]
       }
-      return [[columnName, adaptUpdate(v, schemaField.embedded, adapters)]]
+      return [[columnName, v === null ? null : adaptUpdate(v, schemaField.embedded, adapters)]]
     } else {
       return []
     }
