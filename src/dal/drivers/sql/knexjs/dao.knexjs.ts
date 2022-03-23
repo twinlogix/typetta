@@ -46,10 +46,10 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private dbToModel(object: any): PartialDeep<T['model']> {
     const unflatted = unflatEmbdeddedFields(this.schema, object)
     //Remove null fields
-    for(const key of Object.keys(this.schema)) {
+    for (const key of Object.keys(this.schema)) {
       const schemaField = this.schema[key]
       const value = unflatted[schemaField.alias ?? key]
-      if(!schemaField.required && value === null) {
+      if (!schemaField.required && value === null) {
         delete unflatted[schemaField.alias ?? key]
       }
     }
