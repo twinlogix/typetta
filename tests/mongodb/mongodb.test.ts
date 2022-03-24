@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, inMemoryMongoDb, defaultValueMiddleware, softDelete, audit, selectMiddleware } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserDAO, UserProjection } from './dao.mock'
@@ -123,22 +126,6 @@ test('simple findOne multiple filter', async () => {
 // ------------------------------------------------------------------------
 // -------------------------- ASSOCIATIONS --------------------------------
 // ------------------------------------------------------------------------
-test('findOne innerRef association without projection', async () => {
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
-
-  const dog = await dao.dog.findOne({})
-  // expect(dog!.owner).toBeUndefined()
-})
-
-test('findOne foreignRef association without projection', async () => {
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
-
-  const users = await dao.user.findAll({})
-  // expect(users[0].dogs).toBeUndefined()
-})
-
 test('findOne simple inner association', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
@@ -182,7 +169,7 @@ test('findOne simple foreignRef association 2', async () => {
 
 test('findOne self innerRef association', async () => {
   const user1 = await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName1', live: true } })
-  const user2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName2', friendsId: [user1.id], live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName2', friendsId: [user1.id], live: true } })
 
   const foundUser = await dao.user.findOne({ filter: { firstName: 'FirstName2' }, projection: { friends: { firstName: true } } })
   expect(foundUser!.friends).toBeDefined()
@@ -768,7 +755,7 @@ test('insert and retrieve geojson field', async () => {
 // --------------------------- DECIMAL FIELD ------------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve decimal field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { id: 'ID1', firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
+  await dao.user.insertOne({ record: { id: 'ID1', firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
 
   /*const user1 = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amount: true } })
   expect(user1).toBeDefined()
@@ -842,7 +829,7 @@ test('middleware 1', async () => {
         middlewares: [
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
           {
-            before: async (args, context) => {
+            before: async (args) => {
               if (args.operation === 'insert') {
                 if (args.params.record.id === 'u1' && args.params.record.firstName === 'Mario') {
                   throw new Error('is Mario')
@@ -945,9 +932,9 @@ test('middleware 1', async () => {
   const lastName = (await dao2.user.findOne({ filter: { id: 'u1' } }))?.lastName
   expect(lastName).toBe('Bros')
 
-  const asd1 = await dao2.user.findAll({})
+  await dao2.user.findAll({})
   await dao2.user.deleteOne({ filter: { id: 'u1' } })
-  const asd2 = await dao2.user.findAll({})
+  await dao2.user.findAll({})
   expect(await dao2.user.exists({ filter: { id: 'u1' } })).toBe(true)
 
   await dao2.user.insertOne({ record: { id: 'u2', firstName: 'Mario', live: true } })
@@ -988,10 +975,10 @@ test('middleware 2', async () => {
             },
           }),
           {
-            before: async (args, context) => {
+            before: async () => {
               throw new Error('Should not be called')
             },
-            after: async (args, context) => {
+            after: async () => {
               throw new Error('Should not be called')
             },
           },

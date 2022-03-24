@@ -191,8 +191,11 @@ export class TsTypettaGenerator {
             }
           } else if (field.type.kind === 'relationEntityRef') {
             const refType = findNode(field.type.entity, typesMap)
-            const sourceRefType = findNode(field.type.sourceRef, typesMap)!
-            const destRefType = findNode(field.type.destRef, typesMap)!
+            const sourceRefType = findNode(field.type.sourceRef, typesMap)
+            const destRefType = findNode(field.type.destRef, typesMap)
+            if (!sourceRefType || !destRefType) {
+              throw new Error('Unreachable')
+            }
             if (!refType) {
               throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.entity} that cannot be resolved.`)
             }

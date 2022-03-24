@@ -128,18 +128,18 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
 }
 
 export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
-  return mapObject(update as any, ([k, v]) => {
+  return mapObject(update as unknown as Record<string, ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][]>, ([k, v]) => {
     if (v === undefined) {
       return []
     }
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
-      const adapter = adapters[schemaField.scalar] ?? identityAdapter
+      const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField) {
       if (schemaField.array) {
-        return [[columnName, (v as unknown[]).map((ve) => ve === null ? null : adaptUpdate(ve, schemaField.embedded, adapters))]]
+        return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.embedded, adapters)))]]
       }
       return [[columnName, v === null ? null : adaptUpdate(v, schemaField.embedded, adapters)]]
     } else {

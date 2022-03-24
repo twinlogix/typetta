@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DefaultModelScalars, EqualityOperators, Expand, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
 import { OmitIfKnown } from '../../utils/utils.types'
 import { AbstractDAOContext } from '../daoContext/daoContext'

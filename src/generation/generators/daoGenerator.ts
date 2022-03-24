@@ -272,7 +272,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
     return daoSchema
   }
 
-  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path = ''): string[] {
+  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
     return node.fields
       .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {

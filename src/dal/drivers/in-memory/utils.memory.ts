@@ -1,6 +1,5 @@
-import { GenericProjection, LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
+import { LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
 import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../../dao/filters/filters.types'
-import { PartialDeep } from 'type-fest'
 
 type AbstractFilterFields = {
   [K in string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators

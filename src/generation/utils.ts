@@ -117,7 +117,7 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
         result[destName] = value
       } else {
         if ('scalar' in schemaField) {
-          const adapter = adapters[schemaField.scalar] ?? identityAdapter
+          const adapter = adapters[schemaField.scalar] ?? identityAdapter()
           const validator = adapter.validate
           const mapper =
             validator && isModelToDB

@@ -39,10 +39,10 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
     return {
       ...map,
       [scalarName]: {
-        modelToDB: adapter.knex?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter.modelToDB,
-        dbToModel: adapter.knex?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter.dbToModel,
-        validate: adapter.knex?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter?.validate,
-        generate: adapter.knex?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter?.generate,
+        modelToDB: adapter.knex?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter().modelToDB,
+        dbToModel: adapter.knex?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter().dbToModel,
+        validate: adapter.knex?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter()?.validate,
+        generate: adapter.knex?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter()?.generate,
       },
     } as KnexJSDataTypeAdapterMap<ModelScalars>
   }, knexJsAdapters as KnexJSDataTypeAdapterMap<ModelScalars>)
@@ -52,10 +52,10 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
     return {
       ...map,
       [scalarName]: {
-        modelToDB: adapter.mongo?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter.modelToDB,
-        dbToModel: adapter.mongo?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter.dbToModel,
-        validate: adapter.mongo?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter?.validate,
-        generate: adapter.mongo?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter?.generate,
+        modelToDB: adapter.mongo?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter().modelToDB,
+        dbToModel: adapter.mongo?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter().dbToModel,
+        validate: adapter.mongo?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter()?.validate,
+        generate: adapter.mongo?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter()?.generate,
       },
     } as MongoDBDataTypeAdapterMap<ModelScalars>
   }, mongoDbAdapters as MongoDBDataTypeAdapterMap<ModelScalars>)
@@ -65,10 +65,10 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
     return {
       ...map,
       [scalarName]: {
-        modelToDB: adapter.memory?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter.modelToDB,
-        dbToModel: adapter.memory?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter.dbToModel,
-        validate: adapter.memory?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter?.validate,
-        generate: adapter.memory?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter?.generate,
+        modelToDB: adapter.memory?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter().modelToDB,
+        dbToModel: adapter.memory?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter().dbToModel,
+        validate: adapter.memory?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter()?.validate,
+        generate: adapter.memory?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter()?.generate,
       },
     } as InMemoryDataTypeAdapterMap<ModelScalars>
   }, inMemoryAdapters as InMemoryDataTypeAdapterMap<ModelScalars>)

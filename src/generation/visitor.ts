@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { IdGenerationStrategy } from '..'
 import { DefaultGenerationStrategy } from '../dal/dao/dao.types'
 import { TypeScriptTypettaPluginConfig } from './config'
@@ -61,7 +62,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       return null
     }
 
-    const foundDirective = node.directives.find((d) => (d.name as any) === directiveName || (d.name.value && d.name.value === directiveName))
+    const foundDirective = node.directives.find((d) => d.name.value && d.name.value === directiveName)
 
     if (!foundDirective) {
       return null

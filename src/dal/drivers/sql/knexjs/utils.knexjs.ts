@@ -285,7 +285,7 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
-      const adapter = adapters[schemaField.scalar] ?? identityAdapter
+      const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField) {
       const adapted = adaptUpdate({ update: v, schema: schemaField.embedded, adapters })

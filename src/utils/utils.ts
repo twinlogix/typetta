@@ -1,5 +1,4 @@
 import { MockDAOContextParams } from '..'
-import { QuantityOperators, EqualityOperators, ElementOperators } from '../dal/dao/filters/filters.types'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
@@ -11,34 +10,15 @@ export type OneKey<K extends string | number | symbol, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
 }[K]
 
-export function hasIdFilter<IDType, Filter extends { id?: IDType | null | QuantityOperators<IDType> | EqualityOperators<IDType> | ElementOperators }>(conditions: Filter, id: IDType | null): boolean {
-  return hasFieldFilter<IDType, 'id', Filter>(conditions, 'id', id)
-}
-
-export function hasFieldFilter<
-  FieldType,
-  FieldName extends string,
-  Filter extends { [P in FieldName]?: FieldType | null | QuantityOperators<FieldType> | EqualityOperators<FieldType> | ElementOperators },
->(conditions: Filter, fieldName: FieldName, id: FieldType | null): boolean {
-  return (
-    (id &&
-      conditions[fieldName] &&
-      (conditions[fieldName] === id ||
-        (typeof conditions[fieldName] === 'object' &&
-          (conditions[fieldName] as EqualityOperators<FieldType>).in &&
-          (conditions[fieldName] as EqualityOperators<FieldType>).in!.length === 1 &&
-          (conditions[fieldName] as EqualityOperators<FieldType>).in![0] === id) ||
-        (typeof conditions[fieldName] === 'object' && (conditions[fieldName] as EqualityOperators<FieldType>).eq && (conditions[fieldName] as EqualityOperators<FieldType>).eq! === id))) ||
-    false
-  )
-}
-
 export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
   const c = key.split('.')
   if (c.length === 1) {
     return c[0] in schema ? schema[c[0]] : null
   } else {
-    const k = c.shift()!
+    const k = c.shift()
+    if (!k) {
+      throw new Error('Unreachable')
+    }
     const schemaField = schema[k]
     return schemaField && 'embedded' in schemaField ? getSchemaFieldTraversing(c.join('.'), schemaField.embedded) : null
   }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterUndefiend, mapObject } from '../../../../utils/utils'

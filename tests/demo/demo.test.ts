@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField } from '../../src'
 import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
@@ -6,8 +7,8 @@ import sha256 from 'sha256'
 
 jest.setTimeout(20000)
 
-let knexInstance: Knex<any, unknown[]>
-let dao: DAOContext<any>
+let knexInstance: Knex<{ [K in string]: unknown }, unknown[]>
+let dao: DAOContext
 
 const config: Knex.Config = {
   client: 'sqlite3',
@@ -77,7 +78,7 @@ beforeEach(async () => {
       },
       JSON: {
         dbToModel: (o: unknown) => JSON.parse(o as string),
-        modelToDB: (o: any) => JSON.stringify(o),
+        modelToDB: (o: unknown) => JSON.stringify(o),
       },
       Password: {
         dbToModel: (o: unknown) => o as string,
