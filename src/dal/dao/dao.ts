@@ -322,10 +322,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     filterValues: T['filter'][K] | T['filter'][K][],
   ): Promise<ModelProjection<T, P>[]> {
     const values = Array.isArray(filterValues) ? filterValues : [filterValues]
-    if (params.skip != null || params.limit != null || params.filter != null) {
+   // if (params.skip != null || params.limit != null || params.filter != null) {
       return this.findAll({ ...params, filter: params.filter ? { $and: [{ [filterKey]: { in: values } }, params.filter] } : { [filterKey]: { in: values } } })
-    }
-    return await this.loadAll(params, filterKey, values)
+    //}
+    //return await this.loadAll(params, filterKey, values)
   }
 
   async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {

@@ -713,7 +713,7 @@ test('update array embedded', async () => {
 })
 
 test('insert embedded with inner refs', async () => {
-  await dao.user.insertOne({
+  const iuser = await dao.user.insertOne({
     record: {
       id: '123',
       firstName: 'FirstName',
@@ -729,7 +729,7 @@ test('insert embedded with inner refs', async () => {
   const user1 = await dao.user.findOne({ projection: { embeddedPost: { author: { firstName: true } } } })
   expect(user1?.embeddedPost?.author.firstName).toBe('FirstName')
   await dao.user.updateOne({
-    filter: {},
+    filter: { id: iuser.id },
     changes: {
       firstName: 'FirstName2',
       embeddedPost: {
@@ -740,7 +740,7 @@ test('insert embedded with inner refs', async () => {
       },
     },
   })
-  const user2 = await dao.user.findOne({ projection: { embeddedPost: { author: { firstName: true } } } })
+  const user2 = await dao.user.findOne({ projection: { firstName: true, embeddedPost: { author: { firstName: true } } } })
   expect(user2?.embeddedPost?.author.firstName).toBe('FirstName2')
 })
 
