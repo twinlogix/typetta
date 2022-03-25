@@ -675,7 +675,7 @@ export type HotelSort = OneKey<HotelSortKeys, SortDirection>
 export type HotelRawSort = () => Sort
 
 export type HotelUpdate = {
-  'audit'?: types.Auditable,
+  'audit'?: AuditableInsert,
   'audit.createdBy'?: types.Scalars['String'],
   'audit.createdOn'?: types.Scalars['Int'],
   'audit.deletedOn'?: types.Scalars['Int'] | null,
@@ -867,7 +867,7 @@ export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>
 export type OrganizationRawSort = () => Sort
 
 export type OrganizationUpdate = {
-  'address'?: types.Address | null,
+  'address'?: AddressInsert | null,
   'address.id'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'],
@@ -989,7 +989,7 @@ export type PostUpdate = {
   'body'?: types.Scalars['String'] | null,
   'clicks'?: types.Scalars['Int'] | null,
   'id'?: types.Scalars['ID'],
-  'metadata'?: types.PostMetadata | null,
+  'metadata'?: PostMetadataInsert | null,
   'metadata.region'?: types.Scalars['String'],
   'metadata.visible'?: types.Scalars['Boolean'],
   'title'?: types.Scalars['String'],
@@ -1205,13 +1205,13 @@ export type UserRawSort = () => Sort
 export type UserUpdate = {
   'amount'?: types.Scalars['Decimal'] | null,
   'amounts'?: types.Scalars['Decimal'][] | null,
-  'credentials'?: (null | types.UsernamePasswordCredentials)[] | null,
-  'embeddedPost'?: types.Post | null,
+  'credentials'?: (null | UsernamePasswordCredentialsInsert)[] | null,
+  'embeddedPost'?: PostInsert | null,
   'embeddedPost.authorId'?: types.Scalars['ID'],
   'embeddedPost.body'?: types.Scalars['String'] | null,
   'embeddedPost.clicks'?: types.Scalars['Int'] | null,
   'embeddedPost.id'?: types.Scalars['ID'],
-  'embeddedPost.metadata'?: types.PostMetadata | null,
+  'embeddedPost.metadata'?: PostMetadataInsert | null,
   'embeddedPost.metadata.region'?: types.Scalars['String'],
   'embeddedPost.metadata.visible'?: types.Scalars['Boolean'],
   'embeddedPost.title'?: types.Scalars['String'],
@@ -1223,7 +1223,7 @@ export type UserUpdate = {
   'live'?: types.Scalars['Boolean'],
   'localization'?: types.Scalars['Coordinates'] | null,
   'title'?: types.Scalars['LocalizedString'] | null,
-  'usernamePasswordCredentials'?: types.UsernamePasswordCredentials | null,
+  'usernamePasswordCredentials'?: UsernamePasswordCredentialsInsert | null,
   'usernamePasswordCredentials.password'?: types.Scalars['Password'],
   'usernamePasswordCredentials.username'?: types.Scalars['String']
 }

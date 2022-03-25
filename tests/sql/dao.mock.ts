@@ -897,7 +897,7 @@ export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>
 export type OrganizationRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type OrganizationUpdate = {
-  'address'?: types.Address | null,
+  'address'?: AddressInsert | null,
   'address.id'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'],
@@ -1060,8 +1060,8 @@ export type UserUpdate = {
   'amount'?: types.Scalars['Decimal'] | null,
   'amounts'?: types.Scalars['Decimal'][] | null,
   'bestFriendId'?: types.Scalars['ID'] | null,
-  'credentials'?: types.UsernamePasswordCredentials | null,
-  'credentials.another'?: types.Another | null,
+  'credentials'?: UsernamePasswordCredentialsInsert | null,
+  'credentials.another'?: AnotherInsert | null,
   'credentials.another.test'?: types.Scalars['String'] | null,
   'credentials.password'?: types.Scalars['Password'],
   'credentials.username'?: types.Scalars['String'],

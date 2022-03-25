@@ -125,7 +125,7 @@ export type PostUpdate = {
   'clicks'?: types.Scalars['Int'] | null,
   'createdAt'?: types.Scalars['DateTime'],
   'id'?: types.Scalars['ID'],
-  'metadata'?: types.PostMetadata | null,
+  'metadata'?: PostMetadataInsert | null,
   'metadata.region'?: types.Scalars['String'],
   'metadata.typeId'?: types.Scalars['ID'],
   'metadata.visible'?: types.Scalars['Boolean'],
@@ -461,7 +461,7 @@ export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBu
 
 export type UserUpdate = {
   'createdAt'?: types.Scalars['DateTime'],
-  'credentials'?: types.Credentials,
+  'credentials'?: CredentialsInsert,
   'credentials.password'?: types.Scalars['Password'] | null,
   'credentials.username'?: types.Scalars['String'] | null,
   'email'?: types.Scalars['String'] | null,

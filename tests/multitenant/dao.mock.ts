@@ -483,7 +483,7 @@ export type UserSort = OneKey<UserSortKeys, SortDirection>
 export type UserRawSort = () => Sort
 
 export type UserUpdate = {
-  'credentials'?: types.UsernamePasswordCredentials | null,
+  'credentials'?: UsernamePasswordCredentialsInsert | null,
   'credentials.password'?: types.Scalars['Password'],
   'credentials.username'?: types.Scalars['Username'],
   'deletionDate'?: types.Scalars['Date'] | null,

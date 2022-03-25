@@ -123,7 +123,7 @@ export type PostUpdate = {
   'clicks'?: types.Scalars['Int'] | null,
   'createdAt'?: types.Scalars['DateTime'],
   'id'?: types.Scalars['ID'],
-  'metadata'?: types.PostMetadata | null,
+  'metadata'?: PostMetadataInsert | null,
   'metadata.region'?: types.Scalars['String'],
   'metadata.typeId'?: types.Scalars['ID'],
   'metadata.visible'?: types.Scalars['Boolean'],
@@ -464,14 +464,14 @@ export type UserRawSort = never
 
 export type UserUpdate = {
   'createdAt'?: types.Scalars['DateTime'],
-  'credentials'?: types.Credentials,
+  'credentials'?: CredentialsInsert,
   'credentials.password'?: types.Scalars['Password'] | null,
   'credentials.username'?: types.Scalars['String'] | null,
   'email'?: types.Scalars['String'] | null,
   'firstName'?: types.Scalars['String'] | null,
   'id'?: types.Scalars['ID'],
   'lastName'?: types.Scalars['String'] | null,
-  'multipleCredentials'?: (null | types.Credentials)[] | null
+  'multipleCredentials'?: (null | CredentialsInsert)[] | null
 }
 export type UserRawUpdate = never
 

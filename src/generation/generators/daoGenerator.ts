@@ -433,7 +433,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
           return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
         } else if (field.type.kind === 'embedded') {
           const embeddedTypeNode = getNode(field.type.embed, typesMap)
-          const embeddedType = `types.${embeddedTypeNode.name}`
+          const embeddedType = `${embeddedTypeNode.name}Insert`
           const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}[]` : embeddedType
           if (field.isList) {
             return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]

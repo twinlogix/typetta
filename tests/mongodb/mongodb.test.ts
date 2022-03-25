@@ -728,6 +728,20 @@ test('insert embedded with inner refs', async () => {
   })
   const user1 = await dao.user.findOne({ projection: { embeddedPost: { author: { firstName: true } } } })
   expect(user1?.embeddedPost?.author.firstName).toBe('FirstName')
+  await dao.user.updateOne({
+    filter: {},
+    changes: {
+      firstName: 'FirstName2',
+      embeddedPost: {
+        authorId: '123',
+        id: '1234',
+        title: 'title',
+        views: 1,
+      },
+    },
+  })
+  const user2 = await dao.user.findOne({ projection: { embeddedPost: { author: { firstName: true } } } })
+  expect(user2?.embeddedPost?.author.firstName).toBe('FirstName2')
 })
 
 // ------------------------------------------------------------------------
