@@ -104,6 +104,10 @@ export type AnotherProjection = {
 }
 export type AnotherParam<P extends AnotherProjection> = ParamProjection<types.Another, AnotherProjection, P>
 
+export type AnotherInsert = {
+  test?: null | types.Scalars['String'],
+}
+
 
 
 //--------------------------------------------------------------------------------
@@ -902,7 +906,7 @@ export type OrganizationUpdate = {
 export type OrganizationRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type OrganizationInsert = {
-  address?: null | types.Address,
+  address?: null | AddressInsert,
   id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
   vatNumber?: null | types.Scalars['String'],
@@ -1074,7 +1078,7 @@ export type UserInsert = {
   amount?: null | types.Scalars['Decimal'],
   amounts?: null | types.Scalars['Decimal'][],
   bestFriendId?: null | types.Scalars['ID'],
-  credentials?: null | types.UsernamePasswordCredentials,
+  credentials?: null | UsernamePasswordCredentialsInsert,
   firstName?: null | types.Scalars['String'],
   id?: null | types.Scalars['ID'],
   lastName?: null | types.Scalars['String'],
@@ -1145,6 +1149,12 @@ export type UsernamePasswordCredentialsProjection = {
   username?: boolean,
 }
 export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
+
+export type UsernamePasswordCredentialsInsert = {
+  another?: null | AnotherInsert,
+  password: types.Scalars['Password'],
+  username: types.Scalars['String'],
+}
 
 
 export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {

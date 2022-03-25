@@ -24,6 +24,11 @@ export type CredentialsProjection = {
 }
 export type CredentialsParam<P extends CredentialsProjection> = ParamProjection<types.Credentials, CredentialsProjection, P>
 
+export type CredentialsInsert = {
+  password?: null | types.Scalars['Password'],
+  username?: null | types.Scalars['String'],
+}
+
 
 
 //--------------------------------------------------------------------------------
@@ -135,7 +140,7 @@ export type PostInsert = {
   clicks?: null | types.Scalars['Int'],
   createdAt: types.Scalars['DateTime'],
   id?: null | types.Scalars['ID'],
-  metadata?: null | types.PostMetadata,
+  metadata?: null | PostMetadataInsert,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
@@ -202,6 +207,12 @@ export type PostMetadataProjection = {
   visible?: boolean,
 }
 export type PostMetadataParam<P extends PostMetadataProjection> = ParamProjection<types.PostMetadata, PostMetadataProjection, P>
+
+export type PostMetadataInsert = {
+  region: types.Scalars['String'],
+  typeId: types.Scalars['ID'],
+  visible: types.Scalars['Boolean'],
+}
 
 
 
@@ -462,7 +473,7 @@ export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 
 export type UserInsert = {
   createdAt: types.Scalars['DateTime'],
-  credentials: types.Credentials,
+  credentials: CredentialsInsert,
   email?: null | types.Scalars['String'],
   firstName?: null | types.Scalars['String'],
   id?: null | types.Scalars['ID'],

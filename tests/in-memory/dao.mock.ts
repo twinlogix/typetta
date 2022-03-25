@@ -22,6 +22,11 @@ export type CredentialsProjection = {
 }
 export type CredentialsParam<P extends CredentialsProjection> = ParamProjection<types.Credentials, CredentialsProjection, P>
 
+export type CredentialsInsert = {
+  password?: null | types.Scalars['Password'],
+  username?: null | types.Scalars['String'],
+}
+
 
 
 //--------------------------------------------------------------------------------
@@ -132,7 +137,7 @@ export type PostInsert = {
   body?: null | types.Scalars['String'],
   clicks?: null | types.Scalars['Int'],
   createdAt: types.Scalars['DateTime'],
-  metadata?: null | types.PostMetadata,
+  metadata?: null | PostMetadataInsert,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
@@ -199,6 +204,12 @@ export type PostMetadataProjection = {
   visible?: boolean,
 }
 export type PostMetadataParam<P extends PostMetadataProjection> = ParamProjection<types.PostMetadata, PostMetadataProjection, P>
+
+export type PostMetadataInsert = {
+  region: types.Scalars['String'],
+  typeId: types.Scalars['ID'],
+  visible: types.Scalars['Boolean'],
+}
 
 
 
@@ -466,11 +477,11 @@ export type UserRawUpdate = never
 
 export type UserInsert = {
   createdAt: types.Scalars['DateTime'],
-  credentials: types.Credentials,
+  credentials: CredentialsInsert,
   email?: null | types.Scalars['String'],
   firstName?: null | types.Scalars['String'],
   lastName?: null | types.Scalars['String'],
-  multipleCredentials?: null | (null | types.Credentials)[],
+  multipleCredentials?: null | (null | CredentialsInsert)[],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.User, 'id', 'ID', 'db', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>

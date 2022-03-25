@@ -712,6 +712,24 @@ test('update array embedded', async () => {
   expect((user4?.credentials ?? [])[2]).toBe(null)
 })
 
+test('insert embedded with inner refs', async () => {
+  await dao.user.insertOne({
+    record: {
+      id: '123',
+      firstName: 'FirstName',
+      embeddedPost: {
+        authorId: '123',
+        id: '1234',
+        title: 'title',
+        views: 1,
+      },
+      live: true,
+    },
+  })
+  const user1 = await dao.user.findOne({ projection: { embeddedPost: { author: { firstName: true } } } })
+  expect(user1?.embeddedPost?.author.firstName).toBe('FirstName')
+})
+
 // ------------------------------------------------------------------------
 // ------------------------------ REPLACE ---------------------------------
 // ------------------------------------------------------------------------
@@ -1555,7 +1573,7 @@ test('Inserted record middleware', async () => {
       },
     },
   })
-  await customDao.hotel.insertOne({ record: { name: 'Hotel', audit: { createdBy: '', createdOn: 0, modifiedBy: '', modifiedOn: 0, state: State.ACTIVE, versions: [] } } })
+  await customDao.hotel.insertOne({ record: { name: 'Hotel', audit: { createdBy: '', createdOn: 0, modifiedBy: '', modifiedOn: 0, state: State.ACTIVE } } })
   expect(i).toBe(2)
 })
 

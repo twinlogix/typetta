@@ -496,7 +496,7 @@ export type UserUpdate = {
 export type UserRawUpdate = () => UpdateFilter<Document>
 
 export type UserInsert = {
-  credentials?: null | types.UsernamePasswordCredentials,
+  credentials?: null | UsernamePasswordCredentialsInsert,
   deletionDate?: null | types.Scalars['Date'],
   email: types.Scalars['Email'],
   firstName?: null | types.Scalars['String'],
@@ -558,6 +558,11 @@ export type UsernamePasswordCredentialsProjection = {
   username?: boolean,
 }
 export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
+
+export type UsernamePasswordCredentialsInsert = {
+  password: types.Scalars['Password'],
+  username: types.Scalars['Username'],
+}
 
 
 export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {

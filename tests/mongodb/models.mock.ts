@@ -135,6 +135,7 @@ export type User = {
   amounts?: Maybe<Array<Scalars['Decimal']>>;
   credentials?: Maybe<Array<Maybe<UsernamePasswordCredentials>>>;
   dogs?: Maybe<Array<Dog>>;
+  embeddedPost?: Maybe<Post>;
   firstName?: Maybe<Scalars['String']>;
   friends?: Maybe<Array<User>>;
   friendsId?: Maybe<Array<Scalars['ID']>>;

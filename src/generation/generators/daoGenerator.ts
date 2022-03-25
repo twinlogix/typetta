@@ -45,7 +45,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     } else {
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSchema = this._generateDAOSchema(node, typesMap)
-      return [daoSchema, daoProjection].join('\n\n')
+      const daoInsert = this._generateDAOInsert(node)
+      return [daoSchema, daoProjection, daoInsert].join('\n\n')
     }
   }
 
@@ -467,7 +468,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
           return [`${field.name}${required ? ':' : '?: null |'} ${field.isList && !field.isListElementRequired ? `(null | ${baseType})` : baseType}${field.isList ? '[]' : ''},`]
         }
         if (field.type.kind === 'embedded') {
-          const embeddedType = `types.${field.type.embed}`
+          const embeddedType = `${field.type.embed}Insert`
           return [`${field.name}${required ? ':' : '?: null |'} ${field.isList && !field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}${field.isList ? '[]' : ''},`]
         }
         return []
