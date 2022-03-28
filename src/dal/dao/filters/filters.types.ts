@@ -6,9 +6,9 @@ export type LogicalOperators<FilterType> = {
 
 export declare type EqualityOperators<FieldType> = {
   eq?: FieldType | null
-  in?: (FieldType | null)[]
+  in?: FieldType[] | null
   ne?: FieldType | null
-  nin?: (FieldType | null)[]
+  nin?: FieldType[] | null
 }
 
 export declare type QuantityOperators<FieldType> = {
