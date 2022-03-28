@@ -5,17 +5,17 @@ export type LogicalOperators<FilterType> = {
 }
 
 export declare type EqualityOperators<FieldType> = {
-  eq?: FieldType
-  in?: FieldType[]
-  ne?: FieldType
-  nin?: FieldType[]
+  eq?: FieldType | null
+  in?: (FieldType | null)[]
+  ne?: FieldType | null
+  nin?: (FieldType | null)[]
 }
 
 export declare type QuantityOperators<FieldType> = {
-  gt?: FieldType
-  gte?: FieldType
-  lt?: FieldType
-  lte?: FieldType
+  gt?: FieldType | null
+  gte?: FieldType | null
+  lt?: FieldType | null
+  lte?: FieldType | null
 }
 
 export type ElementOperators = {
