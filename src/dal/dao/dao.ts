@@ -1,3 +1,4 @@
+import { equals } from '../../dal/drivers/in-memory/utils.memory'
 import { deepCopy, getTraversing, reversed, setTraversing } from '../../utils/utils'
 import {
   MiddlewareContext,
@@ -27,6 +28,7 @@ import DataLoader from 'dataloader'
 import { getNamedType, GraphQLResolveInfo } from 'graphql'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
+import { v4 as uuidv4 } from 'uuid'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   public build<P extends T['projection']>(p: P): P {
@@ -41,6 +43,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected middlewares: DAOMiddleware<T>[]
   protected pageSize: number
   protected dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>
+  protected dataLoaderRefs: Map<string, string[]>
   protected metadata?: T['metadata']
   protected driverContext: T['driverContext']
   protected schema: Schema<T['scalars']>
@@ -50,6 +53,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, name, logger, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
+    this.dataLoaderRefs = new Map<string, string[]>()
     this.idField = idField
     this.idScalar = idScalar
     this.idGenerator = idGenerator
@@ -123,10 +127,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<ModelProjection<T, P>[]> {
     return this.logOperation('findAll', params, async () => {
-      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) }, 'findAll')
+      const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findAll')
       const records = beforeResults.continue ? await this._findAll(beforeResults.params) : beforeResults.records
-      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
+      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId)
       const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex, 'findAll')
+      if (isRootOperation) {
+        this.clearDataLoader(operationId)
+      }
       return afterResults.records as ModelProjection<T, P>[]
     })
   }
@@ -138,10 +146,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   async findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<{ totalCount: number; records: ModelProjection<T, P>[] }> {
     return this.logOperation('findPage', params, async () => {
-      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection(params) }, 'findPage')
+      const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findPage')
       const { totalCount, records } = beforeResults.continue ? await this._findPage(beforeResults.params) : { records: beforeResults.records, totalCount: beforeResults.totalCount ?? 0 }
-      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations)
+      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId)
       const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex, 'findPage')
+      if (isRootOperation) {
+        this.clearDataLoader(operationId)
+      }
       return {
         totalCount: afterResults.totalCount ?? 0,
         records: afterResults.records as ModelProjection<T, P>[],
@@ -184,10 +196,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     params: Omit<FindParams<T, P>, 'start' | 'limit' | 'filter'>,
     filterKey: K,
     filterValues: T['filter'][K][],
-    hasKey?: (record: ModelProjection<T, P>, key: T['filter'][K]) => boolean,
     buildFilter?: (filterKey: K, filterValues: readonly T['filter'][K][]) => T['filter'],
   ): Promise<ModelProjection<T, P>[]> {
     const hash =
+      (params.operationId ?? '') +
       filterKey +
       '-' +
       objectHash(params.projection || null, { respectType: false, unorderedArrays: true }) +
@@ -195,8 +207,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       objectHash(params.metadata || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.options || null, { respectType: false, unorderedArrays: true }) +
       objectHash(params.relations || null, { respectType: false, unorderedArrays: true })
-    const hasKeyF =
-      hasKey ?? ((record, key) => getTraversing(record, filterKey as string).some((v) => v === key || (typeof v === 'object' && 'equals' in v && typeof v.equals === 'function' && v.equals(key))))
+    const hasKeyF = (record: ModelProjection<T, P>, key: T['filter'][K]) => getTraversing(record, filterKey as string).some((v) => equals(v, key))
     const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { in: values } }))
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
@@ -211,6 +222,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         },
       )
       this.dataLoaders.set(hash, newDataLoader)
+      const hashs = this.dataLoaderRefs.get(params.operationId ?? '')
+      if (hashs) {
+        this.dataLoaderRefs.set(params.operationId ?? '', [...hashs, hash])
+      } else {
+        this.dataLoaderRefs.set(params.operationId ?? '', [hash])
+      }
     }
     const dataLoader = this.dataLoaders.get(hash)
     if (!dataLoader) {
@@ -223,6 +240,26 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       }
       return r
     }) as ModelProjection<T, P>[]
+  }
+
+  private clearDataLoader(operationId: string): void {
+    const hashs = this.dataLoaderRefs.get(operationId)
+    for (const hash of hashs ?? []) {
+      this.dataLoaderRefs.delete(operationId)
+      const dt = this.dataLoaders.get(hash)
+      if (dt) {
+        dt.clearAll()
+        this.dataLoaders.delete(hash)
+      }
+      for (const relation of this.relations) {
+        if (relation.reference === 'relation') {
+          this.daoContext.dao(relation.entityDao).clearDataLoader(operationId)
+          this.daoContext.dao(relation.relationDao).clearDataLoader(operationId)
+        } else {
+          this.daoContext.dao(relation.dao).clearDataLoader(operationId)
+        }
+      }
+    }
   }
 
   private addNeededProjectionForRelations<P extends AnyProjection<T['projection']>>(proj?: P): P | undefined {
@@ -248,7 +285,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return dbProjections
   }
 
-  private async resolveRelations(records: PartialDeep<T['model']>[], projections?: AnyProjection<T['projection']>, relations?: T['relations']): Promise<PartialDeep<T['model']>[]> {
+  private async resolveRelations(
+    records: PartialDeep<T['model']>[],
+    projections?: AnyProjection<T['projection']>,
+    relations?: T['relations'],
+    operationId?: string,
+  ): Promise<PartialDeep<T['model']>[]> {
     if (projections === undefined || projections === true) {
       return records
     }
@@ -266,6 +308,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           relations: relationFilter?.relations,
           options: relationFilter?.options,
           metadata: relationFilter?.metadata,
+          operationId,
         }
         if (relation.reference === 'relation') {
           const rels = await this.daoContext.dao(relation.relationDao).loadAll(
@@ -276,7 +319,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             records.flatMap((r) => getTraversing(r, relation.refThis.refTo)),
           )
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.entityDao).loadAllOrFindAll(
+            const results = await this.daoContext.dao(relation.entityDao).findAllWithBatching(
               params,
               relation.refOther.refTo,
               rels
@@ -287,12 +330,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.reference === 'inner') {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).loadAllOrFindAll(params, relation.refTo, getTraversing(record, relation.refFrom))
+            const results = await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refTo, getTraversing(record, relation.refFrom))
             this.setResult(record, relation, results)
           }
         } else if (relation.reference === 'foreign') {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).loadAllOrFindAll(params, relation.refFrom, getTraversing(record, relation.refTo))
+            const results = await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refFrom, getTraversing(record, relation.refTo))
             this.setResult(record, relation, results)
           }
         }
@@ -316,16 +359,16 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
   }
 
-  private async loadAllOrFindAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
+  private async findAllWithBatching<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
     params: FindParams<T, P>,
     filterKey: K,
     filterValues: T['filter'][K] | T['filter'][K][],
   ): Promise<ModelProjection<T, P>[]> {
     const values = Array.isArray(filterValues) ? filterValues : [filterValues]
-   // if (params.skip != null || params.limit != null || params.filter != null) {
+    if (params.skip != null || params.limit != null || params.filter != null) {
       return this.findAll({ ...params, filter: params.filter ? { $and: [{ [filterKey]: { in: values } }, params.filter] } : { [filterKey]: { in: values } } })
-    //}
-    //return await this.loadAll(params, filterKey, values)
+    }
+    return await this.loadAll(params, filterKey, values)
   }
 
   async insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {

@@ -1,5 +1,6 @@
 import { LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
 import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../../dao/filters/filters.types'
+import { ObjectId } from 'mongodb'
 
 type AbstractFilterFields = {
   [K in string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators
@@ -23,6 +24,7 @@ export const mock: { compare?: (l: unknown, r: unknown) => number | void | null 
 }
 
 function compare(l: unknown, r: unknown): number {
+  // TODO: can improve perfomance by using map of typeof
   if (Array.isArray(l)) {
     return compare(l.length, r)
   }
@@ -50,7 +52,10 @@ function compare(l: unknown, r: unknown): number {
   return l === r ? 0 : Number.NaN
 }
 
-function equals(l: unknown, r: unknown): boolean {
+export function equals(l: unknown, r: unknown): boolean {
+  if (l instanceof ObjectId && r instanceof ObjectId) {
+    return l.equals(r)
+  }
   if (Array.isArray(l) && Array.isArray(r)) {
     return l.length === r.length && l.every((v, i) => equals(v, r[i]))
   }
