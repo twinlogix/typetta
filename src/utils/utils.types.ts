@@ -31,10 +31,6 @@ export type KeyOfTypeStrict<T extends object, V> = {
 
 export type OmitUndefinedAndNeverKeys<T> = T extends object ? Pick<T, KeyOfType<T, undefined>> : never
 
-export type LocalizedString = {
-  [key: string]: string
-}
-
 export type Coordinates = {
   latitude: number
   longitude: number

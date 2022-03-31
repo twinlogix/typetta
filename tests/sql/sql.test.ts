@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Coordinates, defaultValueMiddleware, LocalizedString, UserInputDriverDataTypeAdapterMap } from '../../src'
+import { Coordinates, defaultValueMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
 import { v4 as uuidv4 } from 'uuid'
+import { LocalizedString } from '../types'
 
 jest.setTimeout(20000)
 
