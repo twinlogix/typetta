@@ -77,7 +77,12 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     const groupKeys = Object.keys(params.by ?? {})
     const groups = groupBy(
       records.map((r) => {
-        const group = Object.fromEntries(groupKeys.map((k) => [k, getByPath(r.record, k)] as [string, unknown]))
+        const group = Object.fromEntries(
+          groupKeys.map((k) => {
+            const v = getByPath(r.record, k)
+            return [k, v == null ? null : v] as [string, unknown]
+          }),
+        )
         return {
           groupHash: JSON.stringify(group),
           group,
