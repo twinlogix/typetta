@@ -21,6 +21,7 @@ export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<Fil
   options?: T['driverFindOptions']
   skip?: number
   sorts?: T['sort']
+  operationId?: string
 }
 
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
@@ -158,7 +159,7 @@ export type DAOGenerics<
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
   NameType extends string = any,
-  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = any,
+  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = AbstractDAOContext<ScalarsType, MetadataType>,
 > = {
   model: ModelType
   idKey: IDKey
