@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
-import { filterUndefiend, mapObject } from '../../../../utils/utils'
+import { filterNullFields, filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators } from '../../../dao/filters/filters.types'
@@ -196,7 +196,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return this.runQuery(
       'insertOne',
       () => {
-        const record = this.modelToDb(filterUndefiend<PartialDeep<T['model']>>(params.record))
+        const r = filterNullFields<PartialDeep<T['model']>>(filterUndefiendFields<PartialDeep<T['model']>>(params.record))
+        const record = this.modelToDb(r)
         const query = this.qb().insert(record, '*')
         return this.buildTransaction(params.options, query)
       },

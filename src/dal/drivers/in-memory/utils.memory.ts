@@ -7,7 +7,7 @@ type AbstractFilterFields = {
 }
 type Filter<FilterFields extends AbstractFilterFields> = LogicalOperators<FilterFields> & FilterFields
 
-function getByPath(object: unknown, path: string): unknown {
+export function getByPath(object: unknown, path: string): unknown {
   const [key, ...tail] = path.split('.')
   if (object && typeof object === 'object') {
     const value = (object as { [K in string]: unknown })[key]
@@ -23,13 +23,16 @@ export const mock: { compare?: (l: unknown, r: unknown) => number | void | null 
   compare: undefined,
 }
 
-function compare(l: unknown, r: unknown): number {
+export function compare(l: unknown, r: unknown): number {
   // TODO: can improve perfomance by using map of typeof
   if (Array.isArray(l)) {
     return compare(l.length, r)
   }
   if (Array.isArray(r)) {
     return Number.NaN
+  }
+  if (l instanceof ObjectId && r instanceof ObjectId) {
+    return l.equals(r) ? 0 : l.toHexString().localeCompare(r.toHexString())
   }
   if (mock.compare) {
     const result = mock.compare(l, r)

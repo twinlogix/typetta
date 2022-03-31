@@ -31,16 +31,22 @@ export type KeyOfTypeStrict<T extends object, V> = {
 
 export type OmitUndefinedAndNeverKeys<T> = T extends object ? Pick<T, KeyOfType<T, undefined>> : never
 
-export type LocalizedString = {
-  [key: string]: string
-}
-
 export type Coordinates = {
   latitude: number
   longitude: number
 }
 
-export type TypeTraversal<T, Path extends string> = Path extends keyof T ? T[Path] : Path extends `${infer R}.${infer F}` ? (R extends keyof T ? TypeTraversal<T[R], F> : never) : never
+export type TypeTraversal<T, Path extends string> = T extends null
+  ? null
+  : T extends undefined
+  ? undefined
+  : Path extends keyof T
+  ? T[Path]
+  : Path extends `${infer R}.${infer F}`
+  ? R extends keyof T
+    ? TypeTraversal<T[R], F>
+    : never
+  : never
 
 type MongoMockDAOContextParams<T> = T extends Record<'mongo', object>
   ? Omit<T, 'mongo'> & {

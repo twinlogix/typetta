@@ -76,6 +76,91 @@ test('Demo', async () => {
   expect((pippo?.posts || [])[1].title).toBe('Title 1')
 })
 
+test('Aggregate test', async () => {
+  const type1 = await dao.postType.insertOne({ record: { name: 'type1', id: '1' } })
+  for (let i = 0; i < 100; i++) {
+    await dao.post.insertOne({
+      record: {
+        authorId: `user_${Math.floor(i / 10)}`,
+        createdAt: new Date(),
+        title: 'Title ' + i,
+        views: i,
+        metadata: {
+          region: i % 2 === 0 ? 'it' : 'en',
+          visible: i % 2 === 0 || i === 99,
+          typeId: type1.id,
+        },
+      },
+    })
+  }
+
+  const p = await dao.post.findOne({ projection: { metadata: { type: { name: true } } } })
+  expect(p?.metadata?.type?.name).toBe('type1')
+
+  const aggregation1 = await dao.post.aggregate(
+    {
+      by: {
+        authorId: true,
+        'metadata.region': true,
+      },
+      aggregations: { count: { field: 'authorId', operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
+      filter: { 'metadata.visible': true, views: { gt: 0 } },
+      skip: 1,
+      limit: 2,
+    },
+    { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { lt: 150 } } },
+  )
+  expect(aggregation1.length).toBe(2)
+  // expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
+  expect(aggregation1[0]).toEqual({ count: 5, totalAuthorViews: 70, authorId: 'user_1', 'metadata.region': 'it' })
+  expect(aggregation1[1]).toEqual({ count: 1, totalAuthorViews: 99, authorId: 'user_9', 'metadata.region': 'en' })
+  // expect(aggregation1[3]).toEqual({ count: 5, totalAuthorViews: 120, authorId: 'user_2', 'metadata.region': 'it' })
+  const aggregation2 = await dao.post.aggregate({
+    aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' }, avgAuthorViews: { field: 'views', operation: 'avg' } },
+  })
+  expect(aggregation2.avgAuthorViews).toBe(49.5)
+  expect(aggregation2.avgAuthorViews).toBe((aggregation2.totalAuthorViews ?? 0) / aggregation2.count)
+
+  const aggregation3 = await dao.post.aggregate({
+    aggregations: { max: { field: 'views', operation: 'max' }, min: { field: 'views', operation: 'min' } },
+  })
+  expect(aggregation3.max).toBe(99)
+  expect(aggregation3.min).toBe(0)
+
+  const aggregation4 = await dao.user.aggregate({ aggregations: { max: { operation: 'max', field: 'email' }, count: { operation: 'count' } } })
+  expect(aggregation4.max).toBe(null)
+  expect(aggregation4.count).toBe(0)
+
+  const aggregation5 = await dao.post.aggregate({
+    by: { authorId: true },
+    aggregations: {
+      max: { operation: 'max', field: 'clicks' },
+      avg: { operation: 'avg', field: 'clicks' },
+      sum: { operation: 'sum', field: 'clicks' },
+      count: { operation: 'count', field: 'clicks' },
+      count2: { operation: 'count', field: 'views' },
+      count3: { operation: 'count' },
+    },
+  })
+  expect(aggregation5[0].max).toBe(null)
+  expect(aggregation5[0].avg).toBe(null)
+  expect(aggregation5[0].sum).toBe(null)
+  expect(aggregation5[0].count).toBe(0)
+  expect(aggregation5[0].count2).toBe(10)
+  expect(aggregation5[0].count3).toBe(10)
+
+  const aggregation6 = await dao.post.aggregate({
+    by: {
+      id: true,
+    },
+    aggregations: { count: { field: 'id', operation: 'count' } },
+  })
+  for (const a of aggregation6) {
+    expect(a.count).toBe(1)
+  }
+})
+
+
 /*test('benchmark', async () => {
   const n = 50000
   const startInsert = new Date()
@@ -127,3 +212,55 @@ test('Demo', async () => {
     }
   }
 })*/
+
+
+test('Aggregate test 2', async () => {
+  const type1 = await dao.postType.insertOne({ record: { name: 'type1', id: '1' } })
+  for (let i = 0; i < 100; i++) {
+    await dao.post.insertOne({
+      record: {
+        authorId: `user_${Math.floor(i / 10)}`,
+        title: 'Title ' + i,
+        views: i,
+        createdAt: new Date(),
+        metadata:
+          i % 4 === 0
+            ? null
+            : i % 4 === 1
+            ? undefined
+            : {
+                region: i % 4 === 2 ? 'it' : 'en',
+                visible: i % 2 === 0 || i === 99,
+                typeId: type1.id,
+              },
+      },
+    })
+  }
+  const aggregation1 = await dao.post.aggregate(
+    {
+      by: {
+        'metadata.region': true,
+      },
+      aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
+    },
+    { sorts: [{ 'metadata.region': 'desc' }, { totalAuthorViews: 'desc' }] },
+  )
+  expect(aggregation1.length).toBe(3)
+  expect(aggregation1.find((a) => a['metadata.region'] == null)?.count).toBe(50)
+  expect(aggregation1.find((a) => a['metadata.region'] === 'it')?.count).toBe(25)
+  expect(aggregation1.find((a) => a['metadata.region'] === 'en')?.count).toBe(25)
+
+  const aggregation2 = await dao.post.aggregate(
+    {
+      by: {
+        'metadata.region': true,
+      },
+      aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
+      filter: { 'metadata.visible': true, views: { gt: 0 } },
+    },
+    { sorts: [{ 'metadata.region': 'desc' }, { totalAuthorViews: 'desc' }] },
+  )
+  expect(aggregation2.length).toBe(2)
+  expect(aggregation2.find((a) => a['metadata.region'] === 'it')?.count).toBe(25)
+  expect(aggregation2.find((a) => a['metadata.region'] === 'en')?.count).toBe(1)
+})

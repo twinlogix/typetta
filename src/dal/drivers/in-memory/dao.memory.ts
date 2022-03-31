@@ -1,6 +1,7 @@
 import { AbstractDAO, AnyProjection, filterEntity, iteratorLength, LogArgs, Schema, setTraversing, sort } from '../../..'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
+import { compare, getByPath } from './utils.memory'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -41,8 +42,89 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     return iteratorLength(this.entities(params.filter))
   }
 
-  protected _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
-    throw new Error('Not implemented')
+  protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
+    const groupBy = <O, K extends string>(list: O[], getKey: (item: O) => K) =>
+      list.reduce((previous, currentItem) => {
+        const group = getKey(currentItem)
+        if (!previous[group]) previous[group] = []
+        previous[group].push(currentItem)
+        return previous
+      }, {} as Record<K, O[]>)
+
+    const records = [...this.entities(params.filter)]
+
+    if (records.length === 0 && !params.by) {
+      return Object.entries(params.aggregations).reduce((p, [k, aggregation]) => {
+        if (aggregation.operation === 'count') {
+          return { ...p, [k]: 0 }
+        }
+        if (aggregation.operation === 'sum') {
+          return { ...p, [k]: null }
+        }
+        if (aggregation.operation === 'avg') {
+          return { ...p, [k]: null }
+        }
+        if (aggregation.operation === 'max') {
+          return { ...p, [k]: null }
+        }
+        if (aggregation.operation === 'min') {
+          return { ...p, [k]: null }
+        }
+        return p
+      }, {}) as AggregateResults<T, A>
+    }
+
+    const groupKeys = Object.keys(params.by ?? {})
+    const groups = groupBy(
+      records.map((r) => {
+        const group = Object.fromEntries(
+          groupKeys.map((k) => {
+            const v = getByPath(r.record, k)
+            return [k, v == null ? null : v] as [string, unknown]
+          }),
+        )
+        return {
+          groupHash: JSON.stringify(group),
+          group,
+          record: r.record,
+        }
+      }),
+      (v) => v.groupHash,
+    )
+
+    const unorderedResults = Object.entries(groups).map(([, group]) => {
+      const records = group.map((e) => e.record)
+
+      return Object.entries(params.aggregations).reduce((p, [k, aggregation]) => {
+        function wrap() {
+          if (aggregation.operation === 'count') {
+            return { ...p, [k]: records.map((v) => (aggregation.field ? getByPath(v, aggregation.field as string) : v)).filter((v) => v != null).length }
+          }
+          if (aggregation.operation === 'sum') {
+            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + c, 0) }
+          }
+          if (aggregation.operation === 'avg') {
+            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + c, 0) / records.length }
+          }
+          if (aggregation.operation === 'max') {
+            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string)).reduce((p, c) => (compare(p, c) > 0 ? p : c), records[0]) }
+          }
+          if (aggregation.operation === 'min') {
+            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string)).reduce((p, c) => (compare(p, c) < 0 ? p : c), records[0]) }
+          }
+          return p
+        }
+        const res = wrap()
+        if (res[k] === undefined || Number.isNaN(res[k])) {
+          res[k] = null
+        }
+        return res
+      }, group[0].group)
+    })
+
+    const sorted = args?.sorts ? sort(unorderedResults, args.sorts) : unorderedResults
+    const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
+    return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 
   private recursiveSpreadCopy<O extends { [K in string]: unknown }>(record: O, schema: Schema<T['scalars']> = this.schema): O {
