@@ -244,8 +244,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   private clearDataLoader(operationId: string): void {
     const hashs = this.dataLoaderRefs.get(operationId)
+    this.dataLoaderRefs.delete(operationId)
     for (const hash of hashs ?? []) {
-      this.dataLoaderRefs.delete(operationId)
       const dt = this.dataLoaders.get(hash)
       if (dt) {
         dt.clearAll()
