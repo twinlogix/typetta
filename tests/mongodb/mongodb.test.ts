@@ -168,13 +168,18 @@ test('findOne simple foreignRef association 2', async () => {
 })
 
 test('findOne self innerRef association', async () => {
-  const user1 = await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName1', live: true } })
-  await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName2', friendsId: [user1.id], live: true } })
+  for(let i = 0; i < 100; i ++) {
+    await dao.user.insertOne({ record: { id: `u_${i}`, firstName: `FirstName${i}`, lastName: `LastName${i}`, live: true } })
+  }
+  await dao.user.insertOne({ record: { firstName: 'FirstName100', lastName: 'LastName100', friendsId: ['u_0', ...Array.from(Array(100).keys()).map(i => `u_${i}`)], live: true } })
 
-  const foundUser = await dao.user.findOne({ filter: { firstName: 'FirstName2' }, projection: { friends: { firstName: true } } })
+  const foundUser = await dao.user.findOne({ filter: { firstName: 'FirstName100' }, projection: { friends: { firstName: true } } })
   expect(foundUser!.friends).toBeDefined()
-  expect(foundUser!.friends!.length).toBe(1)
-  expect(foundUser!.friends![0].firstName!).toBe('FirstName1')
+  expect(foundUser!.friends!.length).toBe(101)
+  expect(foundUser!.friends![0].firstName!).toBe('FirstName0')
+  expect(foundUser!.friends![1].firstName!).toBe('FirstName0')
+  expect(foundUser!.friends![2].firstName!).toBe('FirstName1')
+  expect(foundUser!.friends![100].firstName!).toBe('FirstName99')
 })
 
 test('findOne foreignRef without from and to fields in projection', async () => {
