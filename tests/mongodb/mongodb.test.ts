@@ -1272,7 +1272,6 @@ test('Aggregate test', async () => {
       },
     })
   }
-  dao.post.findAll({ filter: { $and: [{}] } })
   const aggregation1 = await dao.post.aggregate(
     {
       by: {
@@ -1331,6 +1330,54 @@ test('Aggregate test', async () => {
   for (const a of aggregation6) {
     expect(a.count).toBe(1)
   }
+})
+
+test('Aggregate test 2', async () => {
+  for (let i = 0; i < 100; i++) {
+    await dao.post.insertOne({
+      record: {
+        authorId: `user_${Math.floor(i / 10)}`,
+        title: 'Title ' + i,
+        views: i,
+        metadata:
+          i % 4 === 0
+            ? null
+            : i % 4 === 1
+            ? undefined
+            : {
+                region: i % 4 === 2 ? 'it' : 'en',
+                visible: i % 2 === 0 || i === 99,
+              },
+      },
+    })
+  }
+  const aggregation1 = await dao.post.aggregate(
+    {
+      by: {
+        'metadata.region': true,
+      },
+      aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
+    },
+    { sorts: [{ 'metadata.region': 'desc' }, { totalAuthorViews: 'desc' }] },
+  )
+  expect(aggregation1.length).toBe(3)
+  expect(aggregation1.find((a) => a['metadata.region'] == null)?.count).toBe(50)
+  expect(aggregation1.find((a) => a['metadata.region'] === 'it')?.count).toBe(25)
+  expect(aggregation1.find((a) => a['metadata.region'] === 'en')?.count).toBe(25)
+
+  const aggregation2 = await dao.post.aggregate(
+    {
+      by: {
+        'metadata.region': true,
+      },
+      aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
+      filter: { 'metadata.visible': true, views: { gt: 0 } },
+    },
+    { sorts: [{ 'metadata.region': 'desc' }, { totalAuthorViews: 'desc' }] },
+  )
+  expect(aggregation2.length).toBe(2)
+  expect(aggregation2.find((a) => a['metadata.region'] === 'it')?.count).toBe(25)
+  expect(aggregation2.find((a) => a['metadata.region'] === 'en')?.count).toBe(1)
 })
 
 test('Text filter test', async () => {

@@ -1,5 +1,5 @@
 import { transformObject } from '../../../../generation/utils'
-import { filterUndefiend, mapObject } from '../../../../utils/utils'
+import { filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { LogArgs } from '../../../dao/log/log.types'
@@ -170,7 +170,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     return this.runQuery('insertOne', async () => {
-      const record = this.modelToDb(filterUndefiend(params.record))
+      const record = this.modelToDb(filterUndefiendFields(params.record))
       const options = params.options ?? {}
       return [
         async () => {

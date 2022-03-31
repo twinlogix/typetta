@@ -215,8 +215,12 @@ export async function createMockedDAOContext<T extends object>(params: MockDAOCo
   return { ...params, mongo, knex } as T
 }
 
-export function filterUndefiend<T extends object>(obj: T): T {
-  return Object.fromEntries(Object.entries(obj).filter((v) => v[1] !== undefined)) as T
+export function filterUndefiendFields<T extends Record<string, unknown>>(obj: T): T {
+  return mapObject(obj, ([k, v]) => (v === undefined ? [] : [[k, v]])) as T
+}
+
+export function filterNullFields<T extends Record<string, unknown>>(obj: T): T {
+  return mapObject(obj, ([k, v]) => (v === null ? [] : [[k, v]])) as T
 }
 
 export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [string, T[keyof T]]) => [string, unknown][]): Record<string, unknown> {
