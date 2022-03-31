@@ -118,8 +118,8 @@ test('Aggregate test', async () => {
   const aggregation2 = await dao.post.aggregate({
     aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' }, avgAuthorViews: { field: 'views', operation: 'avg' } },
   })
-  expect(aggregation2.avgAuthorViews!).toBe(49.5)
-  expect(aggregation2.avgAuthorViews!).toBe(aggregation2.totalAuthorViews! / aggregation2.count!)
+  expect(aggregation2.avgAuthorViews).toBe(49.5)
+  expect(aggregation2.avgAuthorViews).toBe((aggregation2.totalAuthorViews ?? 0) / aggregation2.count)
 
   const aggregation3 = await dao.post.aggregate({
     aggregations: { max: { field: 'views', operation: 'max' }, min: { field: 'views', operation: 'min' } },
