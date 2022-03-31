@@ -51,6 +51,8 @@ type User @entity @mongodb {
   friendsId: [ID!] @alias(value: "fIds")
   friends: [User!] @innerRef
   dogs: [Dog!] @foreignRef(refFrom: "ownerId")
+  credentials: [UsernamePasswordCredentials]
+  embeddedPost: Post
 }
 
 type Dog @entity @mongodb {

@@ -24,6 +24,11 @@ export type CredentialsProjection = {
 }
 export type CredentialsParam<P extends CredentialsProjection> = ParamProjection<types.Credentials, CredentialsProjection, P>
 
+export type CredentialsInsert = {
+  password?: null | types.Scalars['Password'],
+  username?: null | types.Scalars['String'],
+}
+
 
 
 //--------------------------------------------------------------------------------
@@ -120,7 +125,7 @@ export type PostUpdate = {
   'clicks'?: types.Scalars['Int'] | null,
   'createdAt'?: types.Scalars['DateTime'],
   'id'?: types.Scalars['ID'],
-  'metadata'?: types.PostMetadata | null,
+  'metadata'?: PostMetadataInsert | null,
   'metadata.region'?: types.Scalars['String'],
   'metadata.typeId'?: types.Scalars['ID'],
   'metadata.visible'?: types.Scalars['Boolean'],
@@ -131,11 +136,11 @@ export type PostRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 
 export type PostInsert = {
   authorId: types.Scalars['ID'],
-  body?: types.Scalars['String'],
-  clicks?: types.Scalars['Int'],
+  body?: null | types.Scalars['String'],
+  clicks?: null | types.Scalars['Int'],
   createdAt: types.Scalars['DateTime'],
-  id?: types.Scalars['ID'],
-  metadata?: types.PostMetadata,
+  id?: null | types.Scalars['ID'],
+  metadata?: null | PostMetadataInsert,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
@@ -202,6 +207,12 @@ export type PostMetadataProjection = {
   visible?: boolean,
 }
 export type PostMetadataParam<P extends PostMetadataProjection> = ParamProjection<types.PostMetadata, PostMetadataProjection, P>
+
+export type PostMetadataInsert = {
+  region: types.Scalars['String'],
+  typeId: types.Scalars['ID'],
+  visible: types.Scalars['Boolean'],
+}
 
 
 
@@ -339,8 +350,8 @@ export type TagUpdate = {
 export type TagRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type TagInsert = {
-  id?: types.Scalars['ID'],
-  name?: types.Scalars['String'],
+  id?: null | types.Scalars['ID'],
+  name?: null | types.Scalars['String'],
   postId: types.Scalars['ID'],
 }
 
@@ -389,7 +400,7 @@ export function userSchema(): Schema<types.Scalars> {
       scalar: 'DateTime', 
       required: true
     },
-    'credentials': { embedded: credentialsSchema() },
+    'credentials': { embedded: credentialsSchema(), required: true },
     'email': {
       scalar: 'String'
     },
@@ -450,7 +461,7 @@ export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBu
 
 export type UserUpdate = {
   'createdAt'?: types.Scalars['DateTime'],
-  'credentials'?: types.Credentials,
+  'credentials'?: CredentialsInsert,
   'credentials.password'?: types.Scalars['Password'] | null,
   'credentials.username'?: types.Scalars['String'] | null,
   'email'?: types.Scalars['String'] | null,
@@ -462,11 +473,11 @@ export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.Query
 
 export type UserInsert = {
   createdAt: types.Scalars['DateTime'],
-  credentials: types.Credentials,
-  email?: types.Scalars['String'],
-  firstName?: types.Scalars['String'],
-  id?: types.Scalars['ID'],
-  lastName?: types.Scalars['String'],
+  credentials: CredentialsInsert,
+  email?: null | types.Scalars['String'],
+  firstName?: null | types.Scalars['String'],
+  id?: null | types.Scalars['ID'],
+  lastName?: null | types.Scalars['String'],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>

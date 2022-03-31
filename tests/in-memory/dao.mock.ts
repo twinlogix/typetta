@@ -22,6 +22,11 @@ export type CredentialsProjection = {
 }
 export type CredentialsParam<P extends CredentialsProjection> = ParamProjection<types.Credentials, CredentialsProjection, P>
 
+export type CredentialsInsert = {
+  password?: null | types.Scalars['Password'],
+  username?: null | types.Scalars['String'],
+}
+
 
 
 //--------------------------------------------------------------------------------
@@ -118,7 +123,7 @@ export type PostUpdate = {
   'clicks'?: types.Scalars['Int'] | null,
   'createdAt'?: types.Scalars['DateTime'],
   'id'?: types.Scalars['ID'],
-  'metadata'?: types.PostMetadata | null,
+  'metadata'?: PostMetadataInsert | null,
   'metadata.region'?: types.Scalars['String'],
   'metadata.typeId'?: types.Scalars['ID'],
   'metadata.visible'?: types.Scalars['Boolean'],
@@ -129,10 +134,10 @@ export type PostRawUpdate = never
 
 export type PostInsert = {
   authorId: types.Scalars['ID'],
-  body?: types.Scalars['String'],
-  clicks?: types.Scalars['Int'],
+  body?: null | types.Scalars['String'],
+  clicks?: null | types.Scalars['Int'],
   createdAt: types.Scalars['DateTime'],
-  metadata?: types.PostMetadata,
+  metadata?: null | PostMetadataInsert,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
@@ -199,6 +204,12 @@ export type PostMetadataProjection = {
   visible?: boolean,
 }
 export type PostMetadataParam<P extends PostMetadataProjection> = ParamProjection<types.PostMetadata, PostMetadataProjection, P>
+
+export type PostMetadataInsert = {
+  region: types.Scalars['String'],
+  typeId: types.Scalars['ID'],
+  visible: types.Scalars['Boolean'],
+}
 
 
 
@@ -336,7 +347,7 @@ export type TagUpdate = {
 export type TagRawUpdate = never
 
 export type TagInsert = {
-  name?: types.Scalars['String'],
+  name?: null | types.Scalars['String'],
   postId: types.Scalars['ID'],
 }
 
@@ -385,7 +396,7 @@ export function userSchema(): Schema<types.Scalars> {
       scalar: 'DateTime', 
       required: true
     },
-    'credentials': { embedded: credentialsSchema() },
+    'credentials': { embedded: credentialsSchema(), required: true },
     'email': {
       scalar: 'String'
     },
@@ -398,7 +409,8 @@ export function userSchema(): Schema<types.Scalars> {
     },
     'lastName': {
       scalar: 'String'
-    }
+    },
+    'multipleCredentials': { embedded: credentialsSchema(), array: true }
   }
 }
 
@@ -409,7 +421,9 @@ type UserFilterFields = {
   'email'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
+  'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'multipleCredentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators | StringOperators,
+  'multipleCredentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
 }
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields | UserRawFilter>
 export type UserRawFilter = never
@@ -435,33 +449,39 @@ export type UserProjection = {
   firstName?: boolean,
   id?: boolean,
   lastName?: boolean,
+  multipleCredentials?: {
+    password?: boolean,
+    username?: boolean,
+  } | boolean,
   posts?: PostProjection | boolean,
   totalPostsViews?: boolean,
 }
 export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
-export type UserSortKeys = 'createdAt' | 'credentials.password' | 'credentials.username' | 'email' | 'firstName' | 'id' | 'lastName'
+export type UserSortKeys = 'createdAt' | 'credentials.password' | 'credentials.username' | 'email' | 'firstName' | 'id' | 'lastName' | 'multipleCredentials.password' | 'multipleCredentials.username'
 export type UserSort = OneKey<UserSortKeys, SortDirection>
 export type UserRawSort = never
 
 export type UserUpdate = {
   'createdAt'?: types.Scalars['DateTime'],
-  'credentials'?: types.Credentials,
+  'credentials'?: CredentialsInsert,
   'credentials.password'?: types.Scalars['Password'] | null,
   'credentials.username'?: types.Scalars['String'] | null,
   'email'?: types.Scalars['String'] | null,
   'firstName'?: types.Scalars['String'] | null,
   'id'?: types.Scalars['ID'],
-  'lastName'?: types.Scalars['String'] | null
+  'lastName'?: types.Scalars['String'] | null,
+  'multipleCredentials'?: (null | CredentialsInsert)[] | null
 }
 export type UserRawUpdate = never
 
 export type UserInsert = {
   createdAt: types.Scalars['DateTime'],
-  credentials: types.Credentials,
-  email?: types.Scalars['String'],
-  firstName?: types.Scalars['String'],
-  lastName?: types.Scalars['String'],
+  credentials: CredentialsInsert,
+  email?: null | types.Scalars['String'],
+  firstName?: null | types.Scalars['String'],
+  lastName?: null | types.Scalars['String'],
+  multipleCredentials?: null | (null | CredentialsInsert)[],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.User, 'id', 'ID', 'db', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>

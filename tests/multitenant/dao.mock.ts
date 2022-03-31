@@ -70,10 +70,10 @@ export type HotelUpdate = {
 export type HotelRawUpdate = () => UpdateFilter<Document>
 
 export type HotelInsert = {
-  deletionDate?: types.Scalars['Date'],
-  description?: types.Scalars['String'],
+  deletionDate?: null | types.Scalars['Date'],
+  description?: null | types.Scalars['String'],
   name: types.Scalars['String'],
-  tenantId?: types.Scalars['TenantId'],
+  tenantId?: null | types.Scalars['TenantId'],
 }
 
 type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', 'db', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel', DAOContext<MetadataType, OperationMetadataType>>
@@ -177,9 +177,9 @@ export type ReservationUpdate = {
 export type ReservationRawUpdate = () => UpdateFilter<Document>
 
 export type ReservationInsert = {
-  deletionDate?: types.Scalars['Date'],
+  deletionDate?: null | types.Scalars['Date'],
   roomId: types.Scalars['ID'],
-  tenantId?: types.Scalars['TenantId'],
+  tenantId?: null | types.Scalars['TenantId'],
   userId: types.Scalars['ID'],
 }
 
@@ -284,10 +284,10 @@ export type RoomUpdate = {
 export type RoomRawUpdate = () => UpdateFilter<Document>
 
 export type RoomInsert = {
-  deletionDate?: types.Scalars['Date'],
+  deletionDate?: null | types.Scalars['Date'],
   hotelId: types.Scalars['ID'],
   size: types.Scalars['String'],
-  tenantId?: types.Scalars['TenantId'],
+  tenantId?: null | types.Scalars['TenantId'],
 }
 
 type RoomDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Room, 'id', 'ID', 'db', RoomFilter, RoomRawFilter, RoomRelations, RoomProjection, RoomSort, RoomRawSort, RoomInsert, RoomUpdate, RoomRawUpdate, RoomExcludedFields, RoomRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'room', DAOContext<MetadataType, OperationMetadataType>>
@@ -413,7 +413,7 @@ export type UserRelationFields = 'reservations'
 
 export function userSchema(): Schema<types.Scalars> {
   return {
-    'credentials': { embedded: usernamePasswordCredentialsSchema() },
+    'credentials': { embedded: usernamePasswordCredentialsSchema(), alias: 'cred' },
     'deletionDate': {
       scalar: 'Date'
     },
@@ -483,7 +483,7 @@ export type UserSort = OneKey<UserSortKeys, SortDirection>
 export type UserRawSort = () => Sort
 
 export type UserUpdate = {
-  'credentials'?: types.UsernamePasswordCredentials | null,
+  'credentials'?: UsernamePasswordCredentialsInsert | null,
   'credentials.password'?: types.Scalars['Password'],
   'credentials.username'?: types.Scalars['Username'],
   'deletionDate'?: types.Scalars['Date'] | null,
@@ -496,12 +496,12 @@ export type UserUpdate = {
 export type UserRawUpdate = () => UpdateFilter<Document>
 
 export type UserInsert = {
-  credentials?: types.UsernamePasswordCredentials,
-  deletionDate?: types.Scalars['Date'],
+  credentials?: null | UsernamePasswordCredentialsInsert,
+  deletionDate?: null | types.Scalars['Date'],
   email: types.Scalars['Email'],
-  firstName?: types.Scalars['String'],
-  lastName?: types.Scalars['String'],
-  tenantId?: types.Scalars['TenantId'],
+  firstName?: null | types.Scalars['String'],
+  lastName?: null | types.Scalars['String'],
+  tenantId?: null | types.Scalars['TenantId'],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'db', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
@@ -558,6 +558,11 @@ export type UsernamePasswordCredentialsProjection = {
   username?: boolean,
 }
 export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
+
+export type UsernamePasswordCredentialsInsert = {
+  password: types.Scalars['Password'],
+  username: types.Scalars['Username'],
+}
 
 
 export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { OmitIfKnown } from '../../../../utils/utils.types'
 import { DAOGenerics, DAOParams, IdGenerationStrategy } from '../../../dao/dao.types'
 import { AbstractDAOContext } from '../../../daoContext/daoContext'

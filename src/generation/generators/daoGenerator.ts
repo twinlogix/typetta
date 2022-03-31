@@ -45,7 +45,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     } else {
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSchema = this._generateDAOSchema(node, typesMap)
-      return [daoSchema, daoProjection].join('\n\n')
+      const daoInsert = this._generateDAOInsert(node)
+      return [daoSchema, daoProjection, daoInsert].join('\n\n')
     }
   }
 
@@ -272,7 +273,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
     return daoSchema
   }
 
-  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path = ''): string[] {
+  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
     return node.fields
       .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {
@@ -282,7 +283,7 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         if (field.type.kind === 'scalar') {
           return [`  '${field.name}': {\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`, 2)}\n  }`]
         } else if (field.type.kind === 'embedded') {
-          return [`  '${field.name}': { embedded: ${toFirstLower(field.graphqlType)}Schema() }`]
+          return [`  '${field.name}': { embedded: ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
         }
         return []
       })
@@ -428,12 +429,17 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         const fieldName = path + field.name
         if (field.type.kind === 'scalar') {
           const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
-          const fieldType = field.isList ? `${baseType}[]` : baseType
+          const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${baseType})` : baseType}[]` : baseType
           return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
         } else if (field.type.kind === 'embedded') {
-          const embeddedType = getNode(field.type.embed, typesMap)
-          const fieldType = field.isList ? `types.${embeddedType.name}[]` : `types.${embeddedType.name}`
-          return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedType, typesMap, path + field.name + '.')]
+          const embeddedTypeNode = getNode(field.type.embed, typesMap)
+          const embeddedType = `${embeddedTypeNode.name}Insert`
+          const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}[]` : embeddedType
+          if (field.isList) {
+            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
+          } else {
+            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
+          }
         }
         return []
       })
@@ -459,10 +465,11 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
         const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired && !field.defaultGenerationStrategy)
         if (field.type.kind === 'scalar') {
           const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
-          return [`${field.name}${required ? '' : '?'}: ${baseType}${field.isList ? '[]' : ''},`]
+          return [`${field.name}${required ? ':' : '?: null |'} ${field.isList && !field.isListElementRequired ? `(null | ${baseType})` : baseType}${field.isList ? '[]' : ''},`]
         }
         if (field.type.kind === 'embedded') {
-          return [`${field.name}${required ? '' : '?'}: types.${field.type.embed}${field.isList ? '[]' : ''},`]
+          const embeddedType = `${field.type.embed}Insert`
+          return [`${field.name}${required ? ':' : '?: null |'} ${field.isList && !field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}${field.isList ? '[]' : ''},`]
         }
         return []
       })

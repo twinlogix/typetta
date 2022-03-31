@@ -6,6 +6,7 @@ import {
   MONGODB_LOGIC_QUERY_PREFIXS,
   MONGODB_QUERY_PREFIXS,
   MONGODB_SINGLE_VALUE_QUERY_PREFIXS,
+  MONGODB_STRING_QUERY_PREFIX,
 } from '../../../../utils/utils'
 import { DAOGenerics } from '../../../dao/dao.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
@@ -87,8 +88,11 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
           return [[`$${fk}`, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
         }
-        if (fk === 'contains' || fk === 'startsWith' || fk === 'endsWith') {
+        if (MONGODB_STRING_QUERY_PREFIX.has(fk)) {
           return []
+        }
+        if (fk === 'exists') {
+          return [[`$${fk}`, fv]]
         }
         return [[fk, fv]]
       })
@@ -124,17 +128,20 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
 }
 
 export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
-  return mapObject(update as any, ([k, v]) => {
+  return mapObject(update as unknown as Record<string, ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][]>, ([k, v]) => {
     if (v === undefined) {
       return []
     }
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
-      const adapter = adapters[schemaField.scalar] ?? identityAdapter
+      const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField) {
-      return [[columnName, adaptUpdate(v, schemaField.embedded, adapters)]]
+      if (schemaField.array) {
+        return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.embedded, adapters)))]]
+      }
+      return [[columnName, v === null ? null : adaptUpdate(v, schemaField.embedded, adapters)]]
     } else {
       return []
     }

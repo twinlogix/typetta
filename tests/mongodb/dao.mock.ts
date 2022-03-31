@@ -51,7 +51,7 @@ export type AddressUpdate = {
 export type AddressRawUpdate = () => UpdateFilter<Document>
 
 export type AddressInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
 }
 
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address', DAOContext<MetadataType, OperationMetadataType>>
@@ -139,7 +139,7 @@ export type AuditUpdate = {
 export type AuditRawUpdate = () => UpdateFilter<Document>
 
 export type AuditInsert = {
-  changes?: types.Scalars['String'],
+  changes?: null | types.Scalars['String'],
   entityId: types.Scalars['ID'],
 }
 
@@ -218,6 +218,15 @@ export type AuditableProjection = {
 }
 export type AuditableParam<P extends AuditableProjection> = ParamProjection<types.Auditable, AuditableProjection, P>
 
+export type AuditableInsert = {
+  createdBy: types.Scalars['String'],
+  createdOn: types.Scalars['Int'],
+  deletedOn?: null | types.Scalars['Int'],
+  modifiedBy: types.Scalars['String'],
+  modifiedOn: types.Scalars['Int'],
+  state: types.State,
+}
+
 
 
 //--------------------------------------------------------------------------------
@@ -276,7 +285,7 @@ export type CityRawUpdate = () => UpdateFilter<Document>
 
 export type CityInsert = {
   addressId: types.Scalars['ID'],
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
 }
 
@@ -388,12 +397,12 @@ export type DefaultFieldsEntityUpdate = {
 export type DefaultFieldsEntityRawUpdate = () => UpdateFilter<Document>
 
 export type DefaultFieldsEntityInsert = {
-  creationDate?: types.Scalars['Int'],
+  creationDate?: null | types.Scalars['Int'],
   id: types.Scalars['ID'],
-  live?: types.Scalars['Live'],
+  live?: null | types.Scalars['Live'],
   name: types.Scalars['String'],
-  opt1?: types.Scalars['Live'],
-  opt2?: types.Scalars['Live'],
+  opt1?: null | types.Scalars['Live'],
+  opt2?: null | types.Scalars['Live'],
 }
 
 type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', 'user', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity', DAOContext<MetadataType, OperationMetadataType>>
@@ -481,9 +490,9 @@ export type DeviceUpdate = {
 export type DeviceRawUpdate = () => UpdateFilter<Document>
 
 export type DeviceInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
-  userId?: types.Scalars['ID'],
+  userId?: null | types.Scalars['ID'],
 }
 
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device', DAOContext<MetadataType, OperationMetadataType>>
@@ -572,7 +581,7 @@ export type DogUpdate = {
 export type DogRawUpdate = () => UpdateFilter<Document>
 
 export type DogInsert = {
-  id?: types.Scalars['ID'],
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
   ownerId: types.Scalars['ID'],
 }
@@ -618,7 +627,7 @@ export type HotelRelationFields = never
 
 export function hotelSchema(): Schema<types.Scalars> {
   return {
-    'audit': { embedded: auditableSchema() },
+    'audit': { embedded: auditableSchema(), required: true, defaultGenerationStrategy: 'middleware' },
     'id': {
       scalar: 'ID', 
       required: true, 
@@ -666,7 +675,7 @@ export type HotelSort = OneKey<HotelSortKeys, SortDirection>
 export type HotelRawSort = () => Sort
 
 export type HotelUpdate = {
-  'audit'?: types.Auditable,
+  'audit'?: AuditableInsert,
   'audit.createdBy'?: types.Scalars['String'],
   'audit.createdOn'?: types.Scalars['Int'],
   'audit.deletedOn'?: types.Scalars['Int'] | null,
@@ -679,7 +688,7 @@ export type HotelUpdate = {
 export type HotelRawUpdate = () => UpdateFilter<Document>
 
 export type HotelInsert = {
-  audit?: types.Auditable,
+  audit?: null | AuditableInsert,
   name: types.Scalars['String'],
 }
 
@@ -858,7 +867,7 @@ export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>
 export type OrganizationRawSort = () => Sort
 
 export type OrganizationUpdate = {
-  'address'?: types.Address | null,
+  'address'?: AddressInsert | null,
   'address.id'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'],
@@ -867,10 +876,10 @@ export type OrganizationUpdate = {
 export type OrganizationRawUpdate = () => UpdateFilter<Document>
 
 export type OrganizationInsert = {
-  address?: types.Address,
-  id?: types.Scalars['ID'],
+  address?: null | AddressInsert,
+  id?: null | types.Scalars['ID'],
   name: types.Scalars['String'],
-  vatNumber?: types.Scalars['String'],
+  vatNumber?: null | types.Scalars['String'],
 }
 
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization', DAOContext<MetadataType, OperationMetadataType>>
@@ -980,7 +989,7 @@ export type PostUpdate = {
   'body'?: types.Scalars['String'] | null,
   'clicks'?: types.Scalars['Int'] | null,
   'id'?: types.Scalars['ID'],
-  'metadata'?: types.PostMetadata | null,
+  'metadata'?: PostMetadataInsert | null,
   'metadata.region'?: types.Scalars['String'],
   'metadata.visible'?: types.Scalars['Boolean'],
   'title'?: types.Scalars['String'],
@@ -990,10 +999,10 @@ export type PostRawUpdate = () => UpdateFilter<Document>
 
 export type PostInsert = {
   authorId: types.Scalars['ID'],
-  body?: types.Scalars['String'],
-  clicks?: types.Scalars['Int'],
-  id?: types.Scalars['ID'],
-  metadata?: types.PostMetadata,
+  body?: null | types.Scalars['String'],
+  clicks?: null | types.Scalars['Int'],
+  id?: null | types.Scalars['ID'],
+  metadata?: null | PostMetadataInsert,
   title: types.Scalars['String'],
   views: types.Scalars['Int'],
 }
@@ -1053,6 +1062,11 @@ export type PostMetadataProjection = {
 }
 export type PostMetadataParam<P extends PostMetadataProjection> = ParamProjection<types.PostMetadata, PostMetadataProjection, P>
 
+export type PostMetadataInsert = {
+  region: types.Scalars['String'],
+  visible: types.Scalars['Boolean'],
+}
+
 
 
 //--------------------------------------------------------------------------------
@@ -1072,6 +1086,8 @@ export function userSchema(): Schema<types.Scalars> {
       array: true, 
       alias: 'amounts'
     },
+    'credentials': { embedded: usernamePasswordCredentialsSchema(), array: true },
+    'embeddedPost': { embedded: postSchema() },
     'firstName': {
       scalar: 'String', 
       alias: 'name'
@@ -1099,13 +1115,23 @@ export function userSchema(): Schema<types.Scalars> {
     'title': {
       scalar: 'LocalizedString'
     },
-    'usernamePasswordCredentials': { embedded: usernamePasswordCredentialsSchema() }
+    'usernamePasswordCredentials': { embedded: usernamePasswordCredentialsSchema(), alias: 'cred' }
   }
 }
 
 type UserFilterFields = {
   'amount'?: types.Scalars['Decimal'] | null | EqualityOperators<types.Scalars['Decimal']> | ElementOperators,
   'amounts'?: types.Scalars['Decimal'][] | null | EqualityOperators<types.Scalars['Decimal'][]> | ElementOperators,
+  'credentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators,
+  'credentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'embeddedPost.authorId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'embeddedPost.body'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'embeddedPost.clicks'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'embeddedPost.id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'embeddedPost.metadata.region'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'embeddedPost.metadata.visible'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
+  'embeddedPost.title'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'embeddedPost.views'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'friendsId'?: types.Scalars['ID'][] | null | EqualityOperators<types.Scalars['ID'][]> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
@@ -1139,7 +1165,24 @@ export type UserRelations = {
 export type UserProjection = {
   amount?: boolean,
   amounts?: boolean,
+  credentials?: {
+    password?: boolean,
+    username?: boolean,
+  } | boolean,
   dogs?: DogProjection | boolean,
+  embeddedPost?: {
+    author?: UserProjection | boolean,
+    authorId?: boolean,
+    body?: boolean,
+    clicks?: boolean,
+    id?: boolean,
+    metadata?: {
+      region?: boolean,
+      visible?: boolean,
+    } | boolean,
+    title?: boolean,
+    views?: boolean,
+  } | boolean,
   firstName?: boolean,
   friends?: UserProjection | boolean,
   friendsId?: boolean,
@@ -1155,13 +1198,24 @@ export type UserProjection = {
 }
 export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
-export type UserSortKeys = 'amount' | 'amounts' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username'
+export type UserSortKeys = 'amount' | 'amounts' | 'credentials.password' | 'credentials.username' | 'embeddedPost.authorId' | 'embeddedPost.body' | 'embeddedPost.clicks' | 'embeddedPost.id' | 'embeddedPost.metadata.region' | 'embeddedPost.metadata.visible' | 'embeddedPost.title' | 'embeddedPost.views' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username'
 export type UserSort = OneKey<UserSortKeys, SortDirection>
 export type UserRawSort = () => Sort
 
 export type UserUpdate = {
   'amount'?: types.Scalars['Decimal'] | null,
   'amounts'?: types.Scalars['Decimal'][] | null,
+  'credentials'?: (null | UsernamePasswordCredentialsInsert)[] | null,
+  'embeddedPost'?: PostInsert | null,
+  'embeddedPost.authorId'?: types.Scalars['ID'],
+  'embeddedPost.body'?: types.Scalars['String'] | null,
+  'embeddedPost.clicks'?: types.Scalars['Int'] | null,
+  'embeddedPost.id'?: types.Scalars['ID'],
+  'embeddedPost.metadata'?: PostMetadataInsert | null,
+  'embeddedPost.metadata.region'?: types.Scalars['String'],
+  'embeddedPost.metadata.visible'?: types.Scalars['Boolean'],
+  'embeddedPost.title'?: types.Scalars['String'],
+  'embeddedPost.views'?: types.Scalars['Int'],
   'firstName'?: types.Scalars['String'] | null,
   'friendsId'?: types.Scalars['ID'][] | null,
   'id'?: types.Scalars['ID'],
@@ -1169,23 +1223,25 @@ export type UserUpdate = {
   'live'?: types.Scalars['Boolean'],
   'localization'?: types.Scalars['Coordinates'] | null,
   'title'?: types.Scalars['LocalizedString'] | null,
-  'usernamePasswordCredentials'?: types.UsernamePasswordCredentials | null,
+  'usernamePasswordCredentials'?: UsernamePasswordCredentialsInsert | null,
   'usernamePasswordCredentials.password'?: types.Scalars['Password'],
   'usernamePasswordCredentials.username'?: types.Scalars['String']
 }
 export type UserRawUpdate = () => UpdateFilter<Document>
 
 export type UserInsert = {
-  amount?: types.Scalars['Decimal'],
-  amounts?: types.Scalars['Decimal'][],
-  firstName?: types.Scalars['String'],
-  friendsId?: types.Scalars['ID'][],
-  id?: types.Scalars['ID'],
-  lastName?: types.Scalars['String'],
+  amount?: null | types.Scalars['Decimal'],
+  amounts?: null | types.Scalars['Decimal'][],
+  credentials?: null | (null | UsernamePasswordCredentialsInsert)[],
+  embeddedPost?: null | PostInsert,
+  firstName?: null | types.Scalars['String'],
+  friendsId?: null | types.Scalars['ID'][],
+  id?: null | types.Scalars['ID'],
+  lastName?: null | types.Scalars['String'],
   live: types.Scalars['Boolean'],
-  localization?: types.Scalars['Coordinates'],
-  title?: types.Scalars['LocalizedString'],
-  usernamePasswordCredentials?: types.UsernamePasswordCredentials,
+  localization?: null | types.Scalars['Coordinates'],
+  title?: null | types.Scalars['LocalizedString'],
+  usernamePasswordCredentials?: null | UsernamePasswordCredentialsInsert,
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
@@ -1209,6 +1265,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       relations: overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
+          { type: '1-1', reference: 'inner', field: 'embeddedPost.author', refFrom: 'embeddedPost.authorId', refTo: 'id', dao: 'user', required: true },
           { type: '1-n', reference: 'inner', field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user', required: false }
         ]
       ), 
@@ -1245,6 +1302,11 @@ export type UsernamePasswordCredentialsProjection = {
   username?: boolean,
 }
 export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
+
+export type UsernamePasswordCredentialsInsert = {
+  password: types.Scalars['Password'],
+  username: types.Scalars['String'],
+}
 
 
 export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {

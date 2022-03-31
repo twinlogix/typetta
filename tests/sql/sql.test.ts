@@ -1,4 +1,5 @@
-import { buildMiddleware, Coordinates, defaultValueMiddleware, knexJsAdapters, LocalizedString, UserInputDriverDataTypeAdapterMap } from '../../src'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Coordinates, defaultValueMiddleware, LocalizedString, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
 import BigNumber from 'bignumber.js'
@@ -41,12 +42,13 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'knex'> = {
     modelToDB: (o: Coordinates) => JSON.stringify(o),
   },
   Decimal: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
     modelToDB: (o: BigNumber) => o,
   },
   JSON: {
     dbToModel: (o: unknown) => JSON.parse(o as string),
-    modelToDB: (o: any) => JSON.stringify(o),
+    modelToDB: (o: unknown) => JSON.stringify(o),
   },
   Password: {
     dbToModel: (o: unknown) => o as string,
@@ -56,7 +58,7 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'knex'> = {
     generate: () => uuidv4(),
   },
   String: {
-    dbToModel: (o: any) => (typeof o === 'string' ? o : o.toString()),
+    dbToModel: (o: unknown) => (typeof o === 'string' ? o : JSON.stringify(o)),
     modelToDB: (o: string) => o,
   },
   Live: {
@@ -228,22 +230,6 @@ test('simple findOne', async () => {
   expect(user).toBeDefined()
   expect(user!.firstName).toBe('FirstName')
   expect(user!.lastName).toBe('LastName')
-})
-
-test('findOne innerRef association without projection', async () => {
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
-
-  const dog = await dao.dog.findOne({})
-  // expect(dog!.owner).toBeUndefined()
-})
-
-test('findOne foreignRef association without projection', async () => {
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
-
-  const users = await dao.user.findAll({})
-  // expect(users[0].dogs).toBeUndefined()
 })
 
 test('findOne simple inner association', async () => {

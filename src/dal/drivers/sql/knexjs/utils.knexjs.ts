@@ -240,14 +240,14 @@ export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, 
     if ('embedded' in schemaFiled) {
       const [obj, toDelete] = unflat(schemaFiled.alias ?? k, schemaFiled, object)
       //if every key of embedded is null the emedded was not inserted
-      if(toDelete.every(k => object[k] === null) && !schemaFiled.required) {
+      if (toDelete.every((k) => object[k] === null) && !schemaFiled.required) {
         for (const key of toDelete) {
           delete result[key]
         }
         return result
       }
       if (obj) {
-        const res = { ...result, [k]: obj }
+        const res = { ...result, [schemaFiled.alias ?? k]: obj }
         for (const key of toDelete) {
           delete res[key]
         }
@@ -280,12 +280,12 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
   schema: Schema<ScalarsType>
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>
 }): object {
-  return mapObject(update as any, ([k,v]) => {
+  return mapObject(update as any, ([k, v]) => {
     if (v === undefined) return []
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
-      const adapter = adapters[schemaField.scalar] ?? identityAdapter
+      const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField) {
       const adapted = adaptUpdate({ update: v, schema: schemaField.embedded, adapters })

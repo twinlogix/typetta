@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AbstractDAOContext, DAOGenerics, DAOParams, IdGenerationStrategy, OmitIfKnown } from '../../..'
 import { DefaultModelScalars } from '../drivers.types'
 

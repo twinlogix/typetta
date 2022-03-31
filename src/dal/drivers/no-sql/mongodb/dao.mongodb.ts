@@ -49,7 +49,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     if (typeof update === 'function') {
       return update()
     }
-    return { $set: adaptUpdate(update, this.schema, this.daoContext.adapters.mongo) }
+    const set = adaptUpdate(update, this.schema, this.daoContext.adapters.mongo)
+    return { $set: set }
   }
 
   protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
