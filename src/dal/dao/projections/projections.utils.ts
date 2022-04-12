@@ -274,9 +274,9 @@ function tail(array: string[]): string[] {
   }
 }
 
-export function isEmptyProjection(p: PartialDeep<GenericProjection> | null | undefined): boolean {
-  if (p == null || p === true || p === false) {
+export function isEmptyProjection(p: PartialDeep<GenericProjection> | undefined): boolean {
+  if (p === undefined || p === true || p === false) {
     return false
   }
-  return Object.values(p).filter((v) => !isEmptyProjection(v)).length === 0
+  return Object.values(p).filter((v) => v !== undefined && !isEmptyProjection(v)).length === 0
 }

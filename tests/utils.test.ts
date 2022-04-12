@@ -10,6 +10,7 @@ import {
   infoToProjection,
   IntersectGenericProjection,
   intersectProjections,
+  isEmptyProjection,
 } from '../src'
 import { UserProjection } from './mongodb/dao.mock'
 import { ApolloServer } from 'apollo-server'
@@ -385,23 +386,23 @@ test('intersectProgections test', () => {
   typeAssert<typeof m12>()
   const m13 = intersect({ a: true }, { a: { a: true } }, { a: { a: true } })
   typeAssert<typeof m13>()
-  const m14 = intersect({ a: true }, { a: { a: false } }, { a: { a:  false } })
+  const m14 = intersect({ a: true }, { a: { a: false } }, { a: { a: false } })
   typeAssert<typeof m14>()
   const m15 = intersect({ a: false }, { a: { a: true } }, { a: false })
   typeAssert<typeof m15>()
-  const m16 = intersect({ b: true }, { a: true }, { })
+  const m16 = intersect({ b: true }, { a: true }, {})
   typeAssert<typeof m16>()
-  const m17 = intersect({ b: true }, { a: { a: true } }, {  })
+  const m17 = intersect({ b: true }, { a: { a: true } }, {})
   typeAssert<typeof m17>()
-  const m18 = intersect({ b: true }, { a: { a: false } }, { })
+  const m18 = intersect({ b: true }, { a: { a: false } }, {})
   typeAssert<typeof m18>()
   const m19 = intersect({ b: true }, { a: { a: false }, b: true }, { b: true })
   typeAssert<typeof m19>()
   const m20 = intersect({ b: { b: true } }, { a: { a: false }, b: true }, { b: { b: true } })
   typeAssert<typeof m20>()
-  const m21 = intersect({ b: { b: true }, a: { b: true } }, { a: { a: false }, b: true }, {b: { b: true }, a: { } })
+  const m21 = intersect({ b: { b: true }, a: { b: true } }, { a: { a: false }, b: true }, { b: { b: true }, a: {} })
   typeAssert<typeof m21>()
-  const m22 = intersect({ b: { b: true } }, { b: { a: true } }, { b: { } })
+  const m22 = intersect({ b: { b: true } }, { b: { a: true } }, { b: {} })
   typeAssert<typeof m22>()
 })
 
@@ -502,4 +503,17 @@ test('selectProjection', () => {
   typeAssert<Test<typeof m1, AProj>>()
   typeAssert<Test<typeof m2, AProj>>()
   typeAssert<Test<typeof m3, { a: true }>>()
+})
+
+test('is empty projection', () => {
+  expect(isEmptyProjection({})).toBe(true)
+  expect(isEmptyProjection(undefined)).toBe(false)
+  expect(isEmptyProjection(true)).toBe(false)
+  expect(isEmptyProjection(false)).toBe(false)
+  expect(isEmptyProjection({ name: true })).toBe(false)
+  expect(isEmptyProjection({ name: {} })).toBe(true)
+  expect(isEmptyProjection({ name: {}, value: {} })).toBe(true)
+  expect(isEmptyProjection({ name: true, value: {} })).toBe(false)
+  expect(isEmptyProjection({ name: undefined, value: {} })).toBe(true)
+  expect(isEmptyProjection({ name: false, value: {} })).toBe(false)
 })

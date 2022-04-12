@@ -109,6 +109,8 @@ test('simple findAll', async () => {
   expect(Object.keys(users4[0]).length).toBe(1)
   const users5 = await dao.user.findAll({ projection: { credentials: { } } })
   expect(Object.keys(users5[0]).length).toBe(1)
+  const users6 = await dao.user.findAll({ projection: { credentials: undefined } })
+  expect(Object.keys(users6[0]).length).toBe(1)
 })
 
 test('simple findOne', async () => {
