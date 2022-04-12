@@ -27,6 +27,9 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
       if ('scalar' in schemaField) {
         return [[name, v]]
       }
+      if (typeof v === 'object' && Object.keys(v ?? {}).length === 0) {
+        return []
+      }
       return [[name, adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded, true)]]
     }
     return []
