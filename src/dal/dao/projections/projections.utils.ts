@@ -278,6 +278,5 @@ export function isEmptyProjection(p: PartialDeep<GenericProjection> | null | und
   if (p == null || p === true || p === false) {
     return false
   }
-  const e = Object.values(p).filter((v) => !isEmptyProjection(v))
-  return e.length === 0
+  return Object.values(p).filter((v) => !isEmptyProjection(v)).length === 0
 }
