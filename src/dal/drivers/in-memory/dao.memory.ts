@@ -1,9 +1,10 @@
-import { AbstractDAO, AnyProjection, filterEntity, iteratorLength, LogArgs, Schema, setTraversing, sort } from '../../..'
+import { AbstractDAO, AnyProjection, filterEntity, iteratorLength, LogArgs, MONGODB_QUERY_PREFIXS, setTraversing, sort } from '../../..'
+import { transformObject } from '../../../generation/utils'
+import { deepMerge } from '../../../utils/utils'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
 import { compare, getByPath } from './utils.memory'
 import { PartialDeep } from 'type-fest'
-import { v4 as uuidv4 } from 'uuid'
 
 export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
   private idIndex: Map<T['idType'], number>
@@ -101,7 +102,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
             return { ...p, [k]: records.map((v) => (aggregation.field ? getByPath(v, aggregation.field as string) : v)).filter((v) => v != null).length }
           }
           if (aggregation.operation === 'sum') {
-            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + c, 0) }
+            const asd = records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + (c ?? 0), 0)
+            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + (c ?? 0), 0) }
           }
           if (aggregation.operation === 'avg') {
             return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + c, 0) / records.length }
@@ -122,62 +124,54 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       }, group[0].group)
     })
 
-    const sorted = args?.sorts ? sort(unorderedResults, args.sorts) : unorderedResults
+    const filteredResult = args?.having ? unorderedResults.filter(r => filterEntity(r, args.having)) : unorderedResults
+    const sorted = args?.sorts ? sort(filteredResult, args.sorts) : filteredResult
     const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 
-  private recursiveSpreadCopy<O extends { [K in string]: unknown }>(record: O, schema: Schema<T['scalars']> = this.schema): O {
-    const copy: { [K in string]: unknown } = { ...record }
-    Object.entries(schema).forEach(([name, schemaField]) => {
-      if ('embedded' in schemaField && copy[name]) {
-        copy[name] = this.recursiveSpreadCopy(copy[name] as { [K in string]: unknown }, schemaField.embedded)
-      }
-    })
-    return copy as O
-  }
-
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
-    const record = this.recursiveSpreadCopy(params.record)
-    if (this.idGeneration === 'db') {
-      record[this.idField] = uuidv4()
-    }
+    const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', params.record, this.schema) as T['insert']
+    const id = t[this.schema[this.idField].alias ?? this.idField]
     const index = this.emptyIndexes.pop()
     if (index != null) {
-      this.idIndex.set(record[this.idField], index)
-      this.memory[index] = record
+      this.idIndex.set(id, index)
+      this.memory[index] = t
     } else {
       const index = this.memory.length
       const sizeIncrement = this.memory.length > 512 ? 1024 : this.memory.length * 2
       this.emptyIndexes = this.allocMemory(sizeIncrement - 1)
         .map((v, i) => this.memory.length + 1 + i)
         .reverse()
-      this.idIndex.set(record[this.idField], index)
-      this.memory[index] = record
+      this.idIndex.set(id, index)
+      this.memory[index] = t
     }
-    return record
+    return transformObject(this.daoContext.adapters.memory, 'dbToModel', t, this.schema)
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(params.filter)) {
-      const copy = this.recursiveSpreadCopy(record)
-      Object.entries(params.changes).forEach(([k, v]) => setTraversing(copy, k, v))
-      this.memory[index] = copy
+    const changesObject = {}
+    Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
+    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema) as object
+    for (const { record, index } of this.entities(params.filter, false)) {
+      this.memory[index] = deepMerge(record, changes)
       return
     }
   }
 
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(params.filter)) {
-      const copy = this.recursiveSpreadCopy(record)
-      Object.entries(params.changes).forEach(([k, v]) => setTraversing(copy, k, v))
-      this.memory[index] = copy
+    const changesObject = {}
+    Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
+    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema) as object
+    for (const { record, index } of this.entities(params.filter, false)) {
+      this.memory[index] = deepMerge(record, changes)
     }
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
     for (const { record, index } of this.entities(filterEntity)) {
-      this.memory[index] = this.recursiveSpreadCopy(params.replace, this.schema)
+      const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', params.replace, this.schema)
+      this.memory[index] = t
       this.idIndex.delete(record[this.idField])
       this.idIndex.set(params.replace[this.idField], index)
       break
@@ -228,7 +222,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
             return [index]
           }
           return []
-        } else if (typeof idFilter !== 'object' || idFilterKeys.every((k) => !k.startsWith('$'))) {
+        } else if (typeof idFilter !== 'object' || idFilterKeys.every((k) => !MONGODB_QUERY_PREFIXS.has(k))) {
           const index = this.idIndex.get(idFilter)
           if (index !== undefined) {
             return [index]
@@ -239,19 +233,27 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
     return null
   }
-  private *entities(filter: T['filter'] = undefined): Iterable<{ record: T['model']; index: number }> {
+  private *entities(filter: T['filter'] = undefined, transform = true): Iterable<{ record: T['model']; index: number }> {
     const indexes = this.getIndexes(filter)
     if (indexes) {
       for (const index of indexes) {
-        if (this.memory[index] !== null && filterEntity(this.memory[index], filter)) {
-          yield { record: this.memory[index], index }
+        const record = this.memory[index]
+        if (record !== null) {
+          const t = transformObject(this.daoContext.adapters.memory, 'dbToModel', record, this.schema)
+          if (filterEntity(t, filter)) {
+            yield { record: transform ? t : record, index }
+          }
         }
       }
       return
     }
     for (let i = 0; i < this.memory.length; i++) {
-      if (this.memory[i] !== null && filterEntity(this.memory[i], filter)) {
-        yield { record: this.memory[i], index: i }
+      const record = this.memory[i]
+      if (record !== null) {
+        const t = transformObject(this.daoContext.adapters.memory, 'dbToModel', record, this.schema)
+        if (filterEntity(t, filter)) {
+          yield { record: transform ? t : record, index: i }
+        }
       }
     }
   }

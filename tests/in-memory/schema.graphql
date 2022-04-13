@@ -1,54 +1,130 @@
-scalar Decimal @quantitative
-scalar Password @textual
-scalar DateTime @quantitative
+scalar Coordinates @geopoint
+scalar LocalizedString
+scalar Decimal
+scalar Password
 scalar JSON
+scalar Live
 
-type Credentials {
-  username: String
-  password: Password
+type PostType @entity @memory {
+  id: ID! @id(from: "user")
+  name: String!
+}
+
+type Device @entity @memory {
+  id: ID! @id
+  name: String!
+  userId: ID
+  user: User @innerRef
+}
+
+type UsernamePasswordCredentials {
+  username: String! @alias(value: "user")
+  password: Password! @alias(value: "pwd")
+}
+
+type City @entity @memory {
+  id: ID! @id
+  name: String!
+  addressId: ID!
+  computedName: String @exclude
+  computedAddressName: String @exclude
+}
+
+type Address @entity @memory {
+  id: ID! @id
+  cities: [City!] @foreignRef
+}
+
+type Organization @entity @memory {
+  id: ID! @id
+  name: String!
+  vatNumber: String
+  address: Address
+  computedName: String @exclude
 }
 
 type User @entity @memory {
-  id: ID! @id(from: "db")
-  credentials: Credentials!
-  createdAt: DateTime!
-  firstName: String
+  id: ID! @id @alias(value: "ID")
+  usernamePasswordCredentials: UsernamePasswordCredentials @alias(value: "cred")
+  firstName: String @alias(value: "name")
   lastName: String
-  email: String
-  totalPostsViews: Int @exclude
-  averageViewsPerPost: Float @exclude
-  posts: [Post!] @foreignRef(refFrom: "authorId")
+  live: Boolean!
+  localization: Coordinates
+  title: LocalizedString
+  amounts: [Decimal!] @alias(value: "amounts")
+  amount: Decimal
+  friendsId: [ID!] @alias(value: "fIds")
+  friends: [User!] @innerRef
+  dogs: [Dog!] @foreignRef(refFrom: "ownerId")
+  credentials: [UsernamePasswordCredentials]
+  embeddedPost: Post
+}
 
-  multipleCredentials: [Credentials]
+type Dog @entity @memory {
+  id: ID! @id
+  name: String!
+  ownerId: ID!
+  owner: User @innerRef
 }
 
 type Post @entity @memory {
-  id: ID! @id(from: "db")
-  createdAt: DateTime!
+  id: ID! @id
   title: String!
   body: String
   views: Int!
   clicks: Int
   authorId: ID! @alias(value: "aId")
-  author: User @innerRef
+  author: User! @innerRef
   metadata: PostMetadata
-  tags: [Tag!] @foreignRef
-}
-
-type Tag @entity @memory {
-  id: ID! @id(from: "db")
-  postId: ID!
-  name: String
 }
 
 type PostMetadata {
-  typeId: ID!
-  type: PostType @innerRef
   region: String!
   visible: Boolean!
 }
 
-type PostType @entity @memory {
+type MockedEntity @entity @memory {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  name: String!
+  userId: ID!
+  user: User! @innerRef
+}
+
+type DefaultFieldsEntity @entity @memory {
   id: ID! @id(from: "user")
   name: String!
+  live: Live! @default(from: "generator")
+  creationDate: Int! @default
+
+  opt1: Live @default(from: "middleware")
+  opt2: Live @default(from: "generator")
+}
+
+enum State {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  DELETED
+}
+
+type Auditable {
+  createdOn: Int!
+  modifiedOn: Int!
+  createdBy: String!
+  modifiedBy: String!
+  deletedOn: Int
+  state: State!
+  versions: [Audit]! @foreignRef(refFrom: "entityId", refTo: "../id")
+}
+
+type Hotel @entity @memory {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  name: String!
+  audit: Auditable! @default(from: "middleware")
+}
+
+type Audit @entity @memory {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  entityId: ID!
+  changes: String
 }
