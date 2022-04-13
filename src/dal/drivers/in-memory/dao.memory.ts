@@ -102,7 +102,6 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
             return { ...p, [k]: records.map((v) => (aggregation.field ? getByPath(v, aggregation.field as string) : v)).filter((v) => v != null).length }
           }
           if (aggregation.operation === 'sum') {
-            const asd = records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + (c ?? 0), 0)
             return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + (c ?? 0), 0) }
           }
           if (aggregation.operation === 'avg') {
@@ -152,7 +151,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
     const changesObject = {}
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
-    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema) as object
+    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
       this.memory[index] = deepMerge(record, changes)
       return
@@ -162,7 +161,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
     const changesObject = {}
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
-    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema) as object
+    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
       this.memory[index] = deepMerge(record, changes)
     }
