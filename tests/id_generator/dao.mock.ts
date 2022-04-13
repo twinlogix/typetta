@@ -1,8 +1,8 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
+import { DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
 import * as types from './models.mock'
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src'
 import { Knex } from 'knex'
-import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src'
+import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src'
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb'
 
 //--------------------------------------------------------------------------------
@@ -57,9 +57,9 @@ export type AInsert = {
 
 type ADAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.A, 'id', 'MongoID', 'db', AFilter, ARawFilter, ARelations, AProjection, ASort, ARawSort, AInsert, AUpdate, ARawUpdate, AExcludedFields, ARelationFields, MetadataType, OperationMetadataType, types.Scalars, 'a', DAOContext<MetadataType, OperationMetadataType>>
 export type ADAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<ADAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryADAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<ADAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AProjection>(p: P) {
     return p
@@ -82,8 +82,32 @@ export class ADAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       idScalar: 'MongoID' 
     })
   }
+  }
+
+export class InMemoryADAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends AProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AProjection, P2 extends AProjection>(p1: P1, p2: P2): SelectProjection<AProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryADAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: aSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'MongoID' 
+    })
+  }
+  }
 
 
 
@@ -139,9 +163,9 @@ export type BInsert = {
 
 type BDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.B, 'id', 'ID', 'generator', BFilter, BRawFilter, BRelations, BProjection, BSort, BRawSort, BInsert, BUpdate, BRawUpdate, BExcludedFields, BRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'b', DAOContext<MetadataType, OperationMetadataType>>
 export type BDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryBDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends BProjection>(p: P) {
     return p
@@ -164,8 +188,32 @@ export class BDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryBDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends BProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends BProjection, P2 extends BProjection>(p1: P1, p2: P2): SelectProjection<BProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<BProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryBDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: bSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -221,9 +269,9 @@ export type CInsert = {
 
 type CDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.C, 'id', 'ID', 'user', CFilter, CRawFilter, CRelations, CProjection, CSort, CRawSort, CInsert, CUpdate, CRawUpdate, CExcludedFields, CRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'c', DAOContext<MetadataType, OperationMetadataType>>
 export type CDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<CDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryCDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<CDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends CProjection>(p: P) {
     return p
@@ -246,8 +294,32 @@ export class CDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDA
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryCDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends CProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends CProjection, P2 extends CProjection>(p1: P1, p2: P2): SelectProjection<CProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<CProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryCDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: cSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'user', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -302,9 +374,9 @@ export type DInsert = {
 
 type DDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.D, 'id', 'IntAutoInc', 'db', DFilter, DRawFilter, DRelations, DProjection, DSort, DRawSort, DInsert, DUpdate, DRawUpdate, DExcludedFields, DRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'd', DAOContext<MetadataType, OperationMetadataType>>
 export type DDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DProjection>(p: P) {
     return p
@@ -327,8 +399,32 @@ export class DDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       idScalar: 'IntAutoInc' 
     })
   }
+  }
+
+export class InMemoryDDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends DProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DProjection, P2 extends DProjection>(p1: P1, p2: P2): SelectProjection<DProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryDDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: dSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'IntAutoInc' 
+    })
+  }
+  }
 
 
 
@@ -384,9 +480,9 @@ export type EInsert = {
 
 type EDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.E, 'id', 'ID', 'generator', EFilter, ERawFilter, ERelations, EProjection, ESort, ERawSort, EInsert, EUpdate, ERawUpdate, EExcludedFields, ERelationFields, MetadataType, OperationMetadataType, types.Scalars, 'e', DAOContext<MetadataType, OperationMetadataType>>
 export type EDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryEDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends EProjection>(p: P) {
     return p
@@ -409,8 +505,32 @@ export class EDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryEDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends EProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends EProjection, P2 extends EProjection>(p1: P1, p2: P2): SelectProjection<EProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<EProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryEDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: eSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -466,9 +586,9 @@ export type FInsert = {
 
 type FDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.F, 'id', 'ID', 'user', FFilter, FRawFilter, FRelations, FProjection, FSort, FRawSort, FInsert, FUpdate, FRawUpdate, FExcludedFields, FRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'f', DAOContext<MetadataType, OperationMetadataType>>
 export type FDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryFDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<FDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends FProjection>(p: P) {
     return p
@@ -491,8 +611,32 @@ export class FDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryFDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends FProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends FProjection, P2 extends FProjection>(p1: P1, p2: P2): SelectProjection<FProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<FProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryFDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: fSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'user', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
@@ -506,8 +650,8 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     e?: Pick<Partial<EDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     f?: Pick<Partial<FDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   },
-  mongodb: Record<'a' | 'default', Db>,
-  knex: Record<'default', Knex>,
+  mongodb: Record<'a' | 'default', Db | 'mock'>,
+  knex: Record<'default', Knex | 'mock'>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'both'>,
   log?: LogInput<'a' | 'b' | 'c' | 'd' | 'e' | 'f'>,
   security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
@@ -525,8 +669,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _f: FDAO<MetadataType, OperationMetadataType> | undefined
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
-  private mongodb: Record<'a' | 'default', Db>
-  private knex: Record<'default', Knex>
+  private mongodb: Record<'a' | 'default', Db | 'mock'>
+  private knex: Record<'default', Knex | 'mock'>
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
@@ -534,37 +678,43 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   get a() : ADAO<MetadataType, OperationMetadataType> {
     if(!this._a) {
-      this._a = new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: this.mongodb.a.collection('as'), middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger })
+      const db = this.mongodb.a
+      this._a = db === 'mock' ? (new InMemoryADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger }) as unknown as ADAO<MetadataType, OperationMetadataType>) : new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: db.collection('as'), middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger })
     }
     return this._a
   }
   get b() : BDAO<MetadataType, OperationMetadataType> {
     if(!this._b) {
-      this._b = new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: this.mongodb.default.collection('bs'), middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger })
+      const db = this.mongodb.default
+      this._b = db === 'mock' ? (new InMemoryBDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger }) as unknown as BDAO<MetadataType, OperationMetadataType>) : new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: db.collection('bs'), middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger })
     }
     return this._b
   }
   get c() : CDAO<MetadataType, OperationMetadataType> {
     if(!this._c) {
-      this._c = new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: this.mongodb.default.collection('cs'), middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger })
+      const db = this.mongodb.default
+      this._c = db === 'mock' ? (new InMemoryCDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger }) as unknown as CDAO<MetadataType, OperationMetadataType>) : new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: db.collection('cs'), middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger })
     }
     return this._c
   }
   get d() : DDAO<MetadataType, OperationMetadataType> {
     if(!this._d) {
-      this._d = new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: this.knex.default, tableName: 'ds', middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger })
+      const db = this.knex.default
+      this._d = db === 'mock' ? (new InMemoryDDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger }) as unknown as DDAO<MetadataType, OperationMetadataType>) : new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: db, tableName: 'ds', middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger })
     }
     return this._d
   }
   get e() : EDAO<MetadataType, OperationMetadataType> {
     if(!this._e) {
-      this._e = new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: this.knex.default, tableName: 'es', middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger })
+      const db = this.knex.default
+      this._e = db === 'mock' ? (new InMemoryEDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger }) as unknown as EDAO<MetadataType, OperationMetadataType>) : new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: db, tableName: 'es', middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger })
     }
     return this._e
   }
   get f() : FDAO<MetadataType, OperationMetadataType> {
     if(!this._f) {
-      this._f = new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: this.knex.default, tableName: 'fs', middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger })
+      const db = this.knex.default
+      this._f = db === 'mock' ? (new InMemoryFDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger }) as unknown as FDAO<MetadataType, OperationMetadataType>) : new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: db, tableName: 'fs', middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger })
     }
     return this._f
   }
@@ -586,8 +736,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { mongodb: Record<'a' | 'default', Db>, knex: Record<'default', Knex> }, entities: { a: Collection<Document>, b: Collection<Document>, c: Collection<Document>, d: Knex.QueryBuilder<any, unknown[]>, e: Knex.QueryBuilder<any, unknown[]>, f: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
-    return run({ mongodb: this.mongodb, knex: this.knex }, { a: this.mongodb.a.collection('as'), b: this.mongodb.default.collection('bs'), c: this.mongodb.default.collection('cs'), d: this.knex.default.table('ds'), e: this.knex.default.table('es'), f: this.knex.default.table('fs') })
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'a' | 'default', Db | 'mock'>, knex: Record<'default', Knex | 'mock'> }, entities: { a: Collection<Document> | null, b: Collection<Document> | null, c: Collection<Document> | null, d: Knex.QueryBuilder<any, unknown[]> | null, e: Knex.QueryBuilder<any, unknown[]> | null, f: Knex.QueryBuilder<any, unknown[]> | null }) => Promise<T>): Promise<T> {
+    return run({ mongodb: this.mongodb, knex: this.knex }, { a: this.mongodb.a === 'mock' ? null : this.mongodb.a.collection('as'), b: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('bs'), c: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('cs'), d: this.knex.default === 'mock' ? null : this.knex.default.table('ds'), e: this.knex.default === 'mock' ? null : this.knex.default.table('es'), f: this.knex.default === 'mock' ? null : this.knex.default.table('fs') })
   }
   
   public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string, arrayType?: string }>>, defaultType: { singleType: string, arrayType?: string } }): Promise<void> {
@@ -653,8 +803,4 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         : []
       : [m],
   )
-}
-export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
-  return new DAOContext(newParams)
 }

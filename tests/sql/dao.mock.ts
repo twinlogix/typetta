@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
+import { DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
 import * as types from './models.mock'
 import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '../../src'
 import { Knex } from 'knex'
@@ -56,9 +56,9 @@ export type AddressInsert = {
 
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address', DAOContext<MetadataType, OperationMetadataType>>
 export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AddressProjection>(p: P) {
     return p
@@ -81,8 +81,32 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractKne
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends AddressProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): SelectProjection<AddressProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AddressProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryAddressDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: addressSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -163,9 +187,9 @@ export type AuthorInsert = {
 
 type AuthorDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Author, 'id', 'ID', 'generator', AuthorFilter, AuthorRawFilter, AuthorRelations, AuthorProjection, AuthorSort, AuthorRawSort, AuthorInsert, AuthorUpdate, AuthorRawUpdate, AuthorExcludedFields, AuthorRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'author', DAOContext<MetadataType, OperationMetadataType>>
 export type AuthorDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AuthorDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryAuthorDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AuthorDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AuthorProjection>(p: P) {
     return p
@@ -188,8 +212,32 @@ export class AuthorDAO<MetadataType, OperationMetadataType> extends AbstractKnex
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryAuthorDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends AuthorProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AuthorProjection, P2 extends AuthorProjection>(p1: P1, p2: P2): SelectProjection<AuthorProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AuthorProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryAuthorDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: authorSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'relation', field: 'books', relationDao: 'authorBook', entityDao: 'book', refThis: { refFrom: 'authorId', refTo: 'id' }, refOther: { refFrom: 'bookId', refTo: 'id' }, required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -253,9 +301,9 @@ export type AuthorBookInsert = {
 
 type AuthorBookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.AuthorBook, 'id', 'ID', 'generator', AuthorBookFilter, AuthorBookRawFilter, AuthorBookRelations, AuthorBookProjection, AuthorBookSort, AuthorBookRawSort, AuthorBookInsert, AuthorBookUpdate, AuthorBookRawUpdate, AuthorBookExcludedFields, AuthorBookRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'authorBook', DAOContext<MetadataType, OperationMetadataType>>
 export type AuthorBookDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryAuthorBookDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class AuthorBookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class AuthorBookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AuthorBookProjection>(p: P) {
     return p
@@ -278,8 +326,32 @@ export class AuthorBookDAO<MetadataType, OperationMetadataType> extends Abstract
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryAuthorBookDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends AuthorBookProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AuthorBookProjection, P2 extends AuthorBookProjection>(p1: P1, p2: P2): SelectProjection<AuthorBookProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AuthorBookProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryAuthorBookDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: authorBookSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -336,9 +408,9 @@ export type BookInsert = {
 
 type BookDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Book, 'id', 'ID', 'generator', BookFilter, BookRawFilter, BookRelations, BookProjection, BookSort, BookRawSort, BookInsert, BookUpdate, BookRawUpdate, BookExcludedFields, BookRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'book', DAOContext<MetadataType, OperationMetadataType>>
 export type BookDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<BookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryBookDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<BookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends BookProjection>(p: P) {
     return p
@@ -361,8 +433,32 @@ export class BookDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryBookDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends BookProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends BookProjection, P2 extends BookProjection>(p1: P1, p2: P2): SelectProjection<BookProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<BookProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryBookDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: bookSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'relation', field: 'authors', relationDao: 'authorBook', entityDao: 'author', refThis: { refFrom: 'bookId', refTo: 'id' }, refOther: { refFrom: 'authorId', refTo: 'id' }, required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -428,9 +524,9 @@ export type CityInsert = {
 
 type CityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, CityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'city', DAOContext<MetadataType, OperationMetadataType>>
 export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends CityProjection>(p: P) {
     return p
@@ -453,8 +549,32 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends CityProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): SelectProjection<CityProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<CityProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryCityDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: citySchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -544,9 +664,9 @@ export type DefaultFieldsEntityInsert = {
 
 type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', 'user', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity', DAOContext<MetadataType, OperationMetadataType>>
 export type DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
     return p
@@ -569,8 +689,32 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DefaultFieldsEntityProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: defaultFieldsEntitySchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'user', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -634,9 +778,9 @@ export type DeviceInsert = {
 
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device', DAOContext<MetadataType, OperationMetadataType>>
 export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DeviceProjection>(p: P) {
     return p
@@ -659,8 +803,32 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractKnex
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends DeviceProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): SelectProjection<DeviceProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DeviceProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryDeviceDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: deviceSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -725,9 +893,9 @@ export type DogInsert = {
 
 type DogDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, DogRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'dog', DAOContext<MetadataType, OperationMetadataType>>
 export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DogProjection>(p: P) {
     return p
@@ -750,8 +918,32 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsD
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends DogProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): SelectProjection<DogProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DogProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryDogDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: dogSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -815,9 +1007,9 @@ export type FriendsInsert = {
 
 type FriendsDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Friends, 'id', 'ID', 'generator', FriendsFilter, FriendsRawFilter, FriendsRelations, FriendsProjection, FriendsSort, FriendsRawSort, FriendsInsert, FriendsUpdate, FriendsRawUpdate, FriendsExcludedFields, FriendsRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'friends', DAOContext<MetadataType, OperationMetadataType>>
 export type FriendsDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<FriendsDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryFriendsDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<FriendsDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends FriendsProjection>(p: P) {
     return p
@@ -840,8 +1032,32 @@ export class FriendsDAO<MetadataType, OperationMetadataType> extends AbstractKne
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryFriendsDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends FriendsProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends FriendsProjection, P2 extends FriendsProjection>(p1: P1, p2: P2): SelectProjection<FriendsProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<FriendsProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryFriendsDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: friendsSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -914,9 +1130,9 @@ export type OrganizationInsert = {
 
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization', DAOContext<MetadataType, OperationMetadataType>>
 export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends OrganizationProjection>(p: P) {
     return p
@@ -939,8 +1155,32 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends OrganizationProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): SelectProjection<OrganizationProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<OrganizationProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: organizationSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -1089,9 +1329,9 @@ export type UserInsert = {
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<KnexJsDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends UserProjection>(p: P) {
     return p
@@ -1116,8 +1356,34 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractKnexJs
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends UserProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): SelectProjection<UserProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<UserProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: userSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'bestFriend', refFrom: 'bestFriendId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
+          { type: '1-n', reference: 'relation', field: 'friends', relationDao: 'friends', entityDao: 'user', refThis: { refFrom: 'from', refTo: 'id' }, refOther: { refFrom: 'to', refTo: 'id' }, required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -1173,7 +1439,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
-  knex: Record<'default', Knex>,
+  knex: Record<'default', Knex | 'mock'>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'knex'>,
   log?: LogInput<'address' | 'author' | 'authorBook' | 'book' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>,
   security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
@@ -1196,7 +1462,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
-  private knex: Record<'default', Knex>
+  private knex: Record<'default', Knex | 'mock'>
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
@@ -1204,67 +1470,78 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   get address() : AddressDAO<MetadataType, OperationMetadataType> {
     if(!this._address) {
-      this._address = new AddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, knex: this.knex.default, tableName: 'addresses', middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger })
+      const db = this.knex.default
+      this._address = db === 'mock' ? (new InMemoryAddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger }) as unknown as AddressDAO<MetadataType, OperationMetadataType>) : new AddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, knex: db, tableName: 'addresses', middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger })
     }
     return this._address
   }
   get author() : AuthorDAO<MetadataType, OperationMetadataType> {
     if(!this._author) {
-      this._author = new AuthorDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.author, knex: this.knex.default, tableName: 'authors', middlewares: [...(this.overrides?.author?.middlewares || []), ...selectMiddleware('author', this.middlewares) as DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'author', logger: this.logger })
+      const db = this.knex.default
+      this._author = db === 'mock' ? (new InMemoryAuthorDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.author, middlewares: [...(this.overrides?.author?.middlewares || []), ...selectMiddleware('author', this.middlewares) as DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'author', logger: this.logger }) as unknown as AuthorDAO<MetadataType, OperationMetadataType>) : new AuthorDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.author, knex: db, tableName: 'authors', middlewares: [...(this.overrides?.author?.middlewares || []), ...selectMiddleware('author', this.middlewares) as DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'author', logger: this.logger })
     }
     return this._author
   }
   get authorBook() : AuthorBookDAO<MetadataType, OperationMetadataType> {
     if(!this._authorBook) {
-      this._authorBook = new AuthorBookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.authorBook, knex: this.knex.default, tableName: 'authorBooks', middlewares: [...(this.overrides?.authorBook?.middlewares || []), ...selectMiddleware('authorBook', this.middlewares) as DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'authorBook', logger: this.logger })
+      const db = this.knex.default
+      this._authorBook = db === 'mock' ? (new InMemoryAuthorBookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.authorBook, middlewares: [...(this.overrides?.authorBook?.middlewares || []), ...selectMiddleware('authorBook', this.middlewares) as DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'authorBook', logger: this.logger }) as unknown as AuthorBookDAO<MetadataType, OperationMetadataType>) : new AuthorBookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.authorBook, knex: db, tableName: 'authorBooks', middlewares: [...(this.overrides?.authorBook?.middlewares || []), ...selectMiddleware('authorBook', this.middlewares) as DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'authorBook', logger: this.logger })
     }
     return this._authorBook
   }
   get book() : BookDAO<MetadataType, OperationMetadataType> {
     if(!this._book) {
-      this._book = new BookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.book, knex: this.knex.default, tableName: 'books', middlewares: [...(this.overrides?.book?.middlewares || []), ...selectMiddleware('book', this.middlewares) as DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'book', logger: this.logger })
+      const db = this.knex.default
+      this._book = db === 'mock' ? (new InMemoryBookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.book, middlewares: [...(this.overrides?.book?.middlewares || []), ...selectMiddleware('book', this.middlewares) as DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'book', logger: this.logger }) as unknown as BookDAO<MetadataType, OperationMetadataType>) : new BookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.book, knex: db, tableName: 'books', middlewares: [...(this.overrides?.book?.middlewares || []), ...selectMiddleware('book', this.middlewares) as DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'book', logger: this.logger })
     }
     return this._book
   }
   get city() : CityDAO<MetadataType, OperationMetadataType> {
     if(!this._city) {
-      this._city = new CityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.city, knex: this.knex.default, tableName: 'citys', middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger })
+      const db = this.knex.default
+      this._city = db === 'mock' ? (new InMemoryCityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.city, middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger }) as unknown as CityDAO<MetadataType, OperationMetadataType>) : new CityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.city, knex: db, tableName: 'citys', middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger })
     }
     return this._city
   }
   get defaultFieldsEntity() : DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> {
     if(!this._defaultFieldsEntity) {
-      this._defaultFieldsEntity = new DefaultFieldsEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, knex: this.knex.default, tableName: 'defaultFieldsEntitys', middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger })
+      const db = this.knex.default
+      this._defaultFieldsEntity = db === 'mock' ? (new InMemoryDefaultFieldsEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>) : new DefaultFieldsEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, knex: db, tableName: 'defaultFieldsEntitys', middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger })
     }
     return this._defaultFieldsEntity
   }
   get device() : DeviceDAO<MetadataType, OperationMetadataType> {
     if(!this._device) {
-      this._device = new DeviceDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.device, knex: this.knex.default, tableName: 'devices', middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger })
+      const db = this.knex.default
+      this._device = db === 'mock' ? (new InMemoryDeviceDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.device, middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>) : new DeviceDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.device, knex: db, tableName: 'devices', middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger })
     }
     return this._device
   }
   get dog() : DogDAO<MetadataType, OperationMetadataType> {
     if(!this._dog) {
-      this._dog = new DogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, knex: this.knex.default, tableName: 'dogs', middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger })
+      const db = this.knex.default
+      this._dog = db === 'mock' ? (new InMemoryDogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger }) as unknown as DogDAO<MetadataType, OperationMetadataType>) : new DogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, knex: db, tableName: 'dogs', middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger })
     }
     return this._dog
   }
   get friends() : FriendsDAO<MetadataType, OperationMetadataType> {
     if(!this._friends) {
-      this._friends = new FriendsDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.friends, knex: this.knex.default, tableName: 'friendss', middlewares: [...(this.overrides?.friends?.middlewares || []), ...selectMiddleware('friends', this.middlewares) as DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'friends', logger: this.logger })
+      const db = this.knex.default
+      this._friends = db === 'mock' ? (new InMemoryFriendsDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.friends, middlewares: [...(this.overrides?.friends?.middlewares || []), ...selectMiddleware('friends', this.middlewares) as DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'friends', logger: this.logger }) as unknown as FriendsDAO<MetadataType, OperationMetadataType>) : new FriendsDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.friends, knex: db, tableName: 'friendss', middlewares: [...(this.overrides?.friends?.middlewares || []), ...selectMiddleware('friends', this.middlewares) as DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'friends', logger: this.logger })
     }
     return this._friends
   }
   get organization() : OrganizationDAO<MetadataType, OperationMetadataType> {
     if(!this._organization) {
-      this._organization = new OrganizationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.organization, knex: this.knex.default, tableName: 'organizations', middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger })
+      const db = this.knex.default
+      this._organization = db === 'mock' ? (new InMemoryOrganizationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.organization, middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>) : new OrganizationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.organization, knex: db, tableName: 'organizations', middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger })
     }
     return this._organization
   }
   get user() : UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, knex: this.knex.default, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
+      const db = this.knex.default
+      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, knex: db, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
     }
     return this._user
   }
@@ -1285,8 +1562,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex> }, entities: { address: Knex.QueryBuilder<any, unknown[]>, author: Knex.QueryBuilder<any, unknown[]>, authorBook: Knex.QueryBuilder<any, unknown[]>, book: Knex.QueryBuilder<any, unknown[]>, city: Knex.QueryBuilder<any, unknown[]>, defaultFieldsEntity: Knex.QueryBuilder<any, unknown[]>, device: Knex.QueryBuilder<any, unknown[]>, dog: Knex.QueryBuilder<any, unknown[]>, friends: Knex.QueryBuilder<any, unknown[]>, organization: Knex.QueryBuilder<any, unknown[]>, user: Knex.QueryBuilder<any, unknown[]> }) => Promise<T>): Promise<T> {
-    return run({ knex: this.knex }, { address: this.knex.default.table('addresses'), author: this.knex.default.table('authors'), authorBook: this.knex.default.table('authorBooks'), book: this.knex.default.table('books'), city: this.knex.default.table('citys'), defaultFieldsEntity: this.knex.default.table('defaultFieldsEntitys'), device: this.knex.default.table('devices'), dog: this.knex.default.table('dogs'), friends: this.knex.default.table('friendss'), organization: this.knex.default.table('organizations'), user: this.knex.default.table('users') })
+  public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex | 'mock'> }, entities: { address: Knex.QueryBuilder<any, unknown[]> | null, author: Knex.QueryBuilder<any, unknown[]> | null, authorBook: Knex.QueryBuilder<any, unknown[]> | null, book: Knex.QueryBuilder<any, unknown[]> | null, city: Knex.QueryBuilder<any, unknown[]> | null, defaultFieldsEntity: Knex.QueryBuilder<any, unknown[]> | null, device: Knex.QueryBuilder<any, unknown[]> | null, dog: Knex.QueryBuilder<any, unknown[]> | null, friends: Knex.QueryBuilder<any, unknown[]> | null, organization: Knex.QueryBuilder<any, unknown[]> | null, user: Knex.QueryBuilder<any, unknown[]> | null }) => Promise<T>): Promise<T> {
+    return run({ knex: this.knex }, { address: this.knex.default === 'mock' ? null : this.knex.default.table('addresses'), author: this.knex.default === 'mock' ? null : this.knex.default.table('authors'), authorBook: this.knex.default === 'mock' ? null : this.knex.default.table('authorBooks'), book: this.knex.default === 'mock' ? null : this.knex.default.table('books'), city: this.knex.default === 'mock' ? null : this.knex.default.table('citys'), defaultFieldsEntity: this.knex.default === 'mock' ? null : this.knex.default.table('defaultFieldsEntitys'), device: this.knex.default === 'mock' ? null : this.knex.default.table('devices'), dog: this.knex.default === 'mock' ? null : this.knex.default.table('dogs'), friends: this.knex.default === 'mock' ? null : this.knex.default.table('friendss'), organization: this.knex.default === 'mock' ? null : this.knex.default.table('organizations'), user: this.knex.default === 'mock' ? null : this.knex.default.table('users') })
   }
   
   public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string, arrayType?: string }>>, defaultType: { singleType: string, arrayType?: string } }): Promise<void> {
@@ -1365,8 +1642,4 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         : []
       : [m],
   )
-}
-export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
-  return new DAOContext(newParams)
 }

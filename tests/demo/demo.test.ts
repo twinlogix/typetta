@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { computedField } from '../../src'
+import { computedField, inMemoryKnexConfig } from '../../src'
 import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
@@ -10,30 +10,10 @@ jest.setTimeout(20000)
 let knexInstance: Knex<{ [K in string]: unknown }, unknown[]>
 let dao: DAOContext
 
-const config: Knex.Config = {
-  client: 'sqlite3',
-  connection: ':memory:',
-  useNullAsDefault: true,
-  log: {
-    warn: () => {
-      return
-    },
-    debug: () => {
-      return
-    },
-    error: () => {
-      return
-    },
-    deprecate: () => {
-      return
-    },
-  },
-}
-
 let idCounter = 0
 
 beforeEach(async () => {
-  knexInstance = knex(config)
+  knexInstance = knex(inMemoryKnexConfig())
   dao = new DAOContext({
     overrides: {
       user: {

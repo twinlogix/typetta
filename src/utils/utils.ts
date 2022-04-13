@@ -1,4 +1,3 @@
-import { MockDAOContextParams } from '..'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
@@ -167,8 +166,8 @@ export async function inMemoryMongoDb(): Promise<{ replSet: MongoMemoryReplSet; 
   return { replSet, connection, db }
 }
 
-export function inMemorySqlite(): Knex<any, unknown> {
-  return knex({
+export function inMemoryKnexConfig(): Knex.Config {
+  return {
     client: 'sqlite3',
     connection: ':memory:',
     useNullAsDefault: true,
@@ -186,33 +185,11 @@ export function inMemorySqlite(): Knex<any, unknown> {
         return
       },
     },
-  })
+  }
 }
 
-export async function createMockedDAOContext<T extends object>(params: MockDAOContextParams<T>, mongoSources: string[], knexSources: string[]): Promise<T> {
-  const beforeMongo = { ...Object.fromEntries(mongoSources.map((v) => [v, 'mock'])), ...((params as any).mongo ?? {}) }
-  const mongo = Object.fromEntries(
-    await Promise.all(
-      Object.entries(beforeMongo).map(async ([k, v]) => {
-        if (typeof v === 'string') {
-          return [k, (await inMemoryMongoDb()).db]
-        }
-        return [k, v]
-      }),
-    ),
-  )
-  const beforeKnex = { ...Object.fromEntries(knexSources.map((v) => [v, 'mock'])), ...((params as any).knex ?? {}) }
-  const knex = Object.fromEntries(
-    await Promise.all(
-      Object.entries(beforeKnex).map(async ([k, v]) => {
-        if (typeof v === 'string') {
-          return [k, inMemorySqlite()]
-        }
-        return [k, v]
-      }),
-    ),
-  )
-  return { ...params, mongo, knex } as T
+export function inMemorySqlite(): Knex<any, unknown> {
+  return knex(inMemoryKnexConfig())
 }
 
 export function filterUndefiendFields<T extends Record<string, unknown>>(obj: T): T {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField } from '../../src'
-import { DAOContext, mockedDAOContext } from './dao.mock'
+import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
@@ -41,7 +41,7 @@ beforeEach(async () => {
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
 
-  dao = await mockedDAOContext({
+  dao = new DAOContext({
     mongodb: {
       default: db,
       a: db,

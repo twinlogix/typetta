@@ -43,12 +43,12 @@ export type InMemoryDAOGenerics<
   OperationMetadataType,
   Record<never, never>,
   ScalarsType,
-  never,
-  never,
-  never,
-  never,
-  never,
-  never,
+  unknown,
+  unknown,
+  unknown,
+  unknown,
+  unknown,
+  unknown,
   NameType,
   DAOContext
 >

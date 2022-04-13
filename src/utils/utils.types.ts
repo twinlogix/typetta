@@ -48,22 +48,6 @@ export type TypeTraversal<T, Path extends string> = T extends null
     : never
   : never
 
-type MongoMockDAOContextParams<T> = T extends Record<'mongo', object>
-  ? Omit<T, 'mongo'> & {
-      mongo?: {
-        [K in keyof T['mongo']]?: T['mongo'][K] | 'mock'
-      }
-    }
-  : T
-type KnexMockDAOContextParams<T> = T extends Record<'knex', object>
-  ? Omit<T, 'knex'> & {
-      knex?: {
-        [K in keyof T['knex']]?: T['knex'][K] | 'mock'
-      }
-    }
-  : T
-export type MockDAOContextParams<T> = MongoMockDAOContextParams<KnexMockDAOContextParams<T>>
-
 type Prev = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...0[]]
 
 export type RecursiveKeyOf<TObj extends object, DepthLimit extends number = 3> = {

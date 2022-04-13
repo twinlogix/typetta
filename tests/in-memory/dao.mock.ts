@@ -1,4 +1,4 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
+import { DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
 import * as types from './models.mock'
 
 //--------------------------------------------------------------------------------
@@ -54,9 +54,9 @@ export type AddressInsert = {
 
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Address, 'id', 'ID', 'generator', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address', DAOContext<MetadataType, OperationMetadataType>>
 export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AddressProjection>(p: P) {
     return p
@@ -79,8 +79,32 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractInM
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends AddressProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): SelectProjection<AddressProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AddressProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryAddressDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: addressSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -143,9 +167,9 @@ export type AuditInsert = {
 
 type AuditDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Audit, 'id', 'ID', 'db', AuditFilter, AuditRawFilter, AuditRelations, AuditProjection, AuditSort, AuditRawSort, AuditInsert, AuditUpdate, AuditRawUpdate, AuditExcludedFields, AuditRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'audit', DAOContext<MetadataType, OperationMetadataType>>
 export type AuditDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AuditDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryAuditDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AuditDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class AuditDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class AuditDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AuditProjection>(p: P) {
     return p
@@ -168,8 +192,32 @@ export class AuditDAO<MetadataType, OperationMetadataType> extends AbstractInMem
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends AuditProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends AuditProjection, P2 extends AuditProjection>(p1: P1, p2: P2): SelectProjection<AuditProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<AuditProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryAuditDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: auditSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -289,9 +337,9 @@ export type CityInsert = {
 
 type CityDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.City, 'id', 'ID', 'generator', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, CityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'city', DAOContext<MetadataType, OperationMetadataType>>
 export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class CityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class CityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends CityProjection>(p: P) {
     return p
@@ -314,8 +362,32 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractInMemo
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends CityProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): SelectProjection<CityProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<CityProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryCityDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: citySchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -405,9 +477,9 @@ export type DefaultFieldsEntityInsert = {
 
 type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', 'user', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity', DAOContext<MetadataType, OperationMetadataType>>
 export type DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
     return p
@@ -430,8 +502,32 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DefaultFieldsEntityProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: defaultFieldsEntitySchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'user', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -495,9 +591,9 @@ export type DeviceInsert = {
 
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Device, 'id', 'ID', 'generator', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device', DAOContext<MetadataType, OperationMetadataType>>
 export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DeviceProjection>(p: P) {
     return p
@@ -520,8 +616,32 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractInMe
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends DeviceProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): SelectProjection<DeviceProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DeviceProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryDeviceDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: deviceSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -586,9 +706,9 @@ export type DogInsert = {
 
 type DogDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Dog, 'id', 'ID', 'generator', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, DogRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'dog', DAOContext<MetadataType, OperationMetadataType>>
 export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DogDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class DogDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DogProjection>(p: P) {
     return p
@@ -611,8 +731,32 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractInMemor
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends DogProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): SelectProjection<DogProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DogProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryDogDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: dogSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -692,9 +836,9 @@ export type HotelInsert = {
 
 type HotelDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Hotel, 'id', 'ID', 'db', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel', DAOContext<MetadataType, OperationMetadataType>>
 export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends HotelProjection>(p: P) {
     return p
@@ -717,8 +861,32 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractInMem
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends HotelProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends HotelProjection, P2 extends HotelProjection>(p1: P1, p2: P2): SelectProjection<HotelProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<HotelProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryHotelDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: hotelSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true }
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -783,9 +951,9 @@ export type MockedEntityInsert = {
 
 type MockedEntityDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.MockedEntity, 'id', 'ID', 'db', MockedEntityFilter, MockedEntityRawFilter, MockedEntityRelations, MockedEntityProjection, MockedEntitySort, MockedEntityRawSort, MockedEntityInsert, MockedEntityUpdate, MockedEntityRawUpdate, MockedEntityExcludedFields, MockedEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'mockedEntity', DAOContext<MetadataType, OperationMetadataType>>
 export type MockedEntityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class MockedEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class MockedEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends MockedEntityProjection>(p: P) {
     return p
@@ -808,8 +976,32 @@ export class MockedEntityDAO<MetadataType, OperationMetadataType> extends Abstra
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends MockedEntityProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends MockedEntityProjection, P2 extends MockedEntityProjection>(p1: P1, p2: P2): SelectProjection<MockedEntityProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<MockedEntityProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: mockedEntitySchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: true }
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -882,9 +1074,9 @@ export type OrganizationInsert = {
 
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Organization, 'id', 'ID', 'generator', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization', DAOContext<MetadataType, OperationMetadataType>>
 export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends OrganizationProjection>(p: P) {
     return p
@@ -907,8 +1099,32 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends OrganizationProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): SelectProjection<OrganizationProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<OrganizationProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: organizationSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -1007,9 +1223,9 @@ export type PostInsert = {
 
 type PostDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.Post, 'id', 'ID', 'generator', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post', DAOContext<MetadataType, OperationMetadataType>>
 export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class PostDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class PostDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends PostProjection>(p: P) {
     return p
@@ -1032,8 +1248,32 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractInMemo
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends PostProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends PostProjection, P2 extends PostProjection>(p1: P1, p2: P2): SelectProjection<PostProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<PostProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryPostDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: postSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user', required: true }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -1119,9 +1359,9 @@ export type PostTypeInsert = {
 
 type PostTypeDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.PostType, 'id', 'ID', 'user', PostTypeFilter, PostTypeRawFilter, PostTypeRelations, PostTypeProjection, PostTypeSort, PostTypeRawSort, PostTypeInsert, PostTypeUpdate, PostTypeRawUpdate, PostTypeExcludedFields, PostTypeRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'postType', DAOContext<MetadataType, OperationMetadataType>>
 export type PostTypeDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryPostTypeDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostTypeDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostTypeDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends PostTypeProjection>(p: P) {
     return p
@@ -1144,8 +1384,32 @@ export class PostTypeDAO<MetadataType, OperationMetadataType> extends AbstractIn
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryPostTypeDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostTypeDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends PostTypeProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends PostTypeProjection, P2 extends PostTypeProjection>(p1: P1, p2: P2): SelectProjection<PostTypeProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<PostTypeProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryPostTypeDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: postTypeSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'user', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -1326,9 +1590,9 @@ export type UserInsert = {
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.User, 'id', 'ID', 'generator', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class UserDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class UserDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends UserProjection>(p: P) {
     return p
@@ -1353,8 +1617,34 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractInMemo
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends UserProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): SelectProjection<UserProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<UserProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: userSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
+          { type: '1-1', reference: 'inner', field: 'embeddedPost.author', refFrom: 'embeddedPost.authorId', refTo: 'id', dao: 'user', required: true },
+          { type: '1-n', reference: 'inner', field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user', required: false }
+        ]
+      ), 
+      idGeneration: 'generator', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -1591,8 +1881,4 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         : []
       : [m],
   )
-}
-export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
-  return new DAOContext(newParams)
 }

@@ -15,12 +15,12 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const knexImports = [`import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}'`, "import { Knex } from 'knex'"]
 
     const mongodbImports = [
-      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '${this._config.typettaImport || '@twinlogix/typetta'}'`,
+      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}'`,
       "import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb'",
     ]
 
     const commonImports = [
-      `import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '${
+      `import { DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '${
         this._config.typettaImport || '@twinlogix/typetta'
       }'`,
       `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}'`,
@@ -55,8 +55,8 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'mongo' ? [type.entity.source] : [])))]
     const hasMongoDBEntites = mongoSources.length > 0
     const hasSQLEntities = sqlSources.length > 0
-    const sqlSourcesType = `Record<${sqlSources.map((v) => `'${v}'`).join(' | ')}, Knex>`
-    const mongoSourcesType = `Record<${mongoSources.map((v) => `'${v}'`).join(' | ')}, Db>`
+    const sqlSourcesType = `Record<${sqlSources.map((v) => `'${v}'`).join(' | ')}, Knex | 'mock'>`
+    const mongoSourcesType = `Record<${mongoSources.map((v) => `'${v}'`).join(' | ')}, Db | 'mock'>`
     const daoNamesType = Array.from(typesMap.values())
       .filter((node) => node.entity)
       .map((node) => `'${toFirstLower(node.name)}'`)
@@ -90,18 +90,18 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const entitiesInputParam = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'mongo'
-          ? [`${toFirstLower(node.name)}: Collection<Document>`]
+          ? [`${toFirstLower(node.name)}: Collection<Document> | null`]
           : node.entity?.type === 'sql'
-          ? [`${toFirstLower(node.name)}: Knex.QueryBuilder<any, unknown[]>`]
+          ? [`${toFirstLower(node.name)}: Knex.QueryBuilder<any, unknown[]> | null`]
           : []
       })
       .join(', ')
     const entitiesParam = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'mongo'
-          ? [`${toFirstLower(node.name)}: this.mongodb.${node.entity.source}.collection('${node.entity.collection}')`]
+          ? [`${toFirstLower(node.name)}: this.mongodb.${node.entity.source} === 'mock' ? null : this.mongodb.${node.entity.source}.collection('${node.entity.collection}')`]
           : node.entity?.type === 'sql'
-          ? [`${toFirstLower(node.name)}: this.knex.${node.entity.source}.table('${node.entity.table}')`]
+          ? [`${toFirstLower(node.name)}: this.knex.${node.entity.source} === 'mock' ? null : this.knex.${node.entity.source}.table('${node.entity.table}')`]
           : []
       })
       .join(', ')
@@ -142,17 +142,21 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
       .filter((node) => node.entity)
       .map((node) => {
         const daoImplementationInit =
-          node.entity?.type === 'sql'
-            ? `, knex: this.knex.${node.entity.source}, tableName: '${node.entity?.table}'`
-            : node.entity?.type === 'mongo'
-            ? `, collection: this.mongodb.${node.entity.source}.collection('${node.entity?.collection}')`
-            : ''
+          node.entity?.type === 'sql' ? `, knex: db, tableName: '${node.entity?.table}'` : node.entity?.type === 'mongo' ? `, collection: db.collection('${node.entity?.collection}')` : ''
         const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...selectMiddleware('${toFirstLower(
           node.name,
         )}', this.middlewares) as DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
-        const daoInit = `this._${toFirstLower(node.name)} = new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
+        const normalDaoInstance = `new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
         )}${daoImplementationInit}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger })`
+        const daoInit =
+          node.entity?.type === 'memory'
+            ? `this._${toFirstLower(node.name)} = ${normalDaoInstance}`
+            : `${
+                node.entity?.type === 'mongo' ? `const db = this.mongodb.${node.entity.source}` : node.entity?.type === 'sql' ? `const db = this.knex.${node.entity.source}` : ''
+              }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
+                node.name,
+              )}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}`
         return `get ${toFirstLower(node.name)}() : ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(daoGet)}\n}`
       })
@@ -238,10 +242,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
-export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
-  return new DAOContext(newParams)
-}`
+`
     return [[daoContextParamsExport, daoContextMiddleware, daoExport, utilsCode].join('\n\n')]
   }
 
@@ -495,7 +496,10 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
-    return [daoGenerics, daoParams].join('\n')
+    const inMemoryDaoParams = `export type InMemory${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
+      node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
+    }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
+    return [daoGenerics, daoParams, inMemoryDaoParams].join('\n')
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -504,11 +508,15 @@ export async function mockedDAOContext<MetadataType = never, OperationMetadataTy
 
   public _generateDAO(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoName = node.entity?.type === 'sql' ? 'AbstractKnexJsDAO' : node.entity?.type === 'mongo' ? 'AbstractMongoDBDAO' : node.entity?.type === 'memory' ? 'AbstractInMemoryDAO' : 'AbstractDAO'
-    const daoBody = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap) + '\n')
-    return `export class ${node.name}DAO<MetadataType, OperationMetadataType> extends ${daoName}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>> {\n` + daoBody + '\n}'
+    const daoBody = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap, `${node.name}DAOParams`) + '\n')
+    const daoBodyInMemory = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap, `InMemory${node.name}DAOParams`) + '\n')
+    return [
+      `export class ${node.name}DAO<MetadataType, OperationMetadataType> extends ${daoName}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>> {${daoBody}}`,
+      `export class InMemory${node.name}DAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<${node.name}DAOGenerics<MetadataType, OperationMetadataType>> {${daoBodyInMemory}}`,
+    ].join('\n\n')
   }
 
-  private _generateConstructorMethod(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+  private _generateConstructorMethod(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, daoParams: string): string {
     const idField = getID(node)
     const generatedRelations = `[\n${indentMultiline(this._generateRelations(node, typesMap).join(',\n'))}\n]`
     const relations = `relations: overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
@@ -526,7 +534,7 @@ public static mergeProjection<P1 extends ${node.name}Projection, P2 extends ${no
   return mergeProjections(p1, p2) as SelectProjection<${node.name}Projection, P1, P2>
 }
 
-public constructor(params: ${node.name}DAOParams<MetadataType, OperationMetadataType>){\n` +
+public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n` +
       indentMultiline(constructorBody) +
       '\n}'
     )

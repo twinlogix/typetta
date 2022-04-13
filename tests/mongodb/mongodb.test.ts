@@ -50,7 +50,6 @@ function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType 
   return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
     mongodb: {
       default: db,
-      __mock: db,
     },
     metadata: {
       conn: connection,
@@ -521,7 +520,6 @@ test('Insert default', async () => {
   const dao1 = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars: {
       ...scalars,
@@ -544,7 +542,6 @@ test('Insert default', async () => {
   const dao2 = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars: {
       ...scalars,
@@ -867,7 +864,6 @@ test('middleware 1', async () => {
     log: ['error', 'warning'],
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -998,7 +994,6 @@ test('middleware 2', async () => {
   const dao2 = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1041,7 +1036,6 @@ test('middleware options', async () => {
     metadata: { m1: 'test1', m2: 'no' },
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1068,7 +1062,6 @@ test('computed fields (one dependency - same level - one calculated)', async () 
   const customDao = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1099,7 +1092,6 @@ test('computed fields (two dependencies - same level - one calculated)', async (
   const customDao = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1123,7 +1115,6 @@ test('computed fields (two dependencies - same level - two calculated)', async (
   const customDao = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1159,7 +1150,6 @@ test('computed fields (one dependency - same level - one calculated - multiple m
   const dao2 = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1410,7 +1400,7 @@ test('Text filter test', async () => {
   const found7 = (await dao.organization.findAll({ filter: { name: { startsWith: 'Mic', endsWith: 'oft' } } })).map((o) => o.name)
 
   await dao.execQuery(async (dbs, entities) => {
-    await entities.organization.createIndex({ name: 'text' }, { name: 'nameIndex' })
+    await entities.organization?.createIndex({ name: 'text' }, { name: 'nameIndex' })
   })
   const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => [['score', { $meta: 'textScore' }]] })).map((o) => o.name)
 
@@ -1508,7 +1498,6 @@ test('Soft delete middleware', async () => {
   const dao2 = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1539,7 +1528,6 @@ test('Audit middlewares', async () => {
   const dao2 = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1590,7 +1578,6 @@ test('Audit middlewares', async () => {
   const dao2 = new DAOContext<never, { opts: 1 | 2 }>({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
@@ -1624,7 +1611,6 @@ test('Inserted record middleware', async () => {
   const customDao = new DAOContext({
     mongodb: {
       default: db,
-      __mock: db,
     },
     scalars,
     overrides: {
