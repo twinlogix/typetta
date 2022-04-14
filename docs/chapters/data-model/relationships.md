@@ -1,8 +1,8 @@
-# Relations
+# Relationships
 
-A relation is a connection between two entities of the data model. This connection allows the user to load entites starting from a root and selecting a projection of an entire graph, making data loading a faster and easier activity.
+A relationship is a connection between two entities of the data model. This connection allows the user to load entities starting from a root and select a projection of an entire graph, making data loading faster and easier.
 
-In Typetta relations between entities are defined by adding **references** between one entity and another.
+In Typetta, relationships between entities are defined by adding **references** between one entity and another.
 
   - [References between Entities](#references-between-entities)
     - [InnerRef](#innerref)
@@ -11,12 +11,12 @@ In Typetta relations between entities are defined by adding **references** betwe
   - [Cardinality](#cardinality)
     - [1-1 relation](#1-1-relation)
     - [1-n relation](#1-n-relation)
-    - [n-m relation](#n-m-relation)
-  - [Recursive Relations](#recursive-relations)
+    - [n-m relationship](#n-m-relationship)
+  - [Recursive Relationships](#recursive-relationships)
 
 ## References between Entities
 
-In Typetta a relation is defined by creating a reference from a field and to the counterpart on each connected entity. It is possible, if desired, to also create mono-directional connections from one entity to another without having the inverse connection.
+In Typetta, a relationship is defined by creating a reference from a field to the counterpart on each connected entity. It is possible, if desired, to also create mono-directional connections from one entity to another without having the inverse connection.
 
 To define a reference to another entity, Typetta provides three different directives: `@innerRef`, `@foreignRef` and `@relationEntityRef`.
 
@@ -40,11 +40,11 @@ type Post @entity @mongodb {
 }
 ```
 
-In this case, the `user` field of the `Post` entity is a virtual field that isn't stored directly in the data source inside the `Post` entity, but is subsequently populated by loading the user referenced by the adjacent `userId` field.
+In this case, the `user` field of the `Post` entity is a virtual field that is not stored directly in the data source inside the `Post` entity, but is subsequently populated by loading the user referenced by the adjacent `userId` field.
 
-It is called `@innerRef` because the reference to the connected entities is inside the entity containing the relation. By convention, this reference (in the example the `userId` field) must have the exact same name as the relation field with the suffix `Id`. Again by convention, the connected entity field that is referenced is the field annotated as `@id`. So in this case `Post.userId` refers to `User.id`.
+It is called `@innerRef` because the reference to the connected entities is inside the entity containing the relationship. By convention, this reference (in the example the `userId` field) must have the exact same name as the relation field with the suffix `Id`. Again by convention, the connected entity field that is referenced is the field annotated as `@id`. So, in this case, `Post.userId` refers to `User.id`.
 
-Both of these configurations can still be modified and made explicit by the user to have more flexibility, see the more complex example below:
+Both of these configurations can still be modified and made explicit by the user to have more flexibility; see the more complex example below:
 
 ```typescript
 type User @entity @mongodb {
@@ -64,7 +64,7 @@ type Post @entity @mongodb {
 
 ### ForeignRef
 
-`@foreignRef` identifies a complementary connection to the previous `@innerRef` and gets this name because the reference to the connected entities is the connected entities themselves and not in the entity containing the relation. Let's take as an example the previous model that we are going to enrich with a reference between the user and his posts:
+`@foreignRef` identifies a complementary connection to the previous `@innerRef` and is so named because the reference to the connected entities is the connected entities themselves and not in the entity containing the relationship. Let's take as an example the previous model that we are going to enrich with a reference between the user and their posts:
 
 ```typescript
 type User @entity @mongodb {
@@ -82,11 +82,11 @@ type Post @entity @mongodb {
 }
 ```
 
-Also in this case the `posts` field of the `User` entity is a virtual field that isn't stored on the data source structure that represent the User entity, but is subsequently populated, on request, from another data source structure (another table or collection).
+Again in this case the `posts` field of the `User` entity is a virtual field that is not stored on the data source structure that represents the User entity, but is subsequently populated, on request, from another data source structure (another table or collection).
 
-In this case, contrary to what was the case with `@innerRef`, it is always necessary to specify a `refFrom` parameter that identifies the connected entity field referencing the target entity identifier. In the example we have that `Post.userId` refers to `User.id`.
+Here, unlike the case of `@innerRef`, it is always necessary to specify a `refFrom` parameter that identifies the connected entity field referencing the target entity identifier. In the example, `Post.userId` refers to `User.id`.
 
-There is also the possibility to specify the `refTo` parameter to handle more complex cases, as demostated in the following example:
+It is also possible to specify the `refTo` parameter to handle more complex cases, as demonstrated in the following example:
 
 ```typescript
 type User @entity @mongodb {
@@ -105,9 +105,9 @@ type Post @entity @mongodb {
 }
 ```
 
-### RelationEntityRef 
+### RelationEntityRef
 
-Relations with cardinality n-m are tipically designed using a third entity that connects both other entities referencing them by id. Let's assume a data model like the following:
+Relationships with cardinality n-m are typically designed using a third entity that connects both other entities referencing them by id. Let's assume a data model like the following:
 
 ```typescript
 type Post @entity @mongodb {
@@ -130,7 +130,7 @@ type PostCategory @entity @mongodb {
 
 Each post can have multiple categories and each category can have multiple posts. It would have been possible to create a `@foreignRef` between Post and PostCategory and a further `@innerRef` between PostCategory and Category, but doing so forced the data model to make explicit the presence of a purely connection structure (a MongoDB collection or SQL table) linked to the representation of the data on the database.
 
-Thanks to the reference `@relationEntityRef` the relation `Post.categories` turns out to be much clearer and more transparent for the user. Note that this directive, like the previous ones, is based on a convention that fields within the connecting entity must have the same name as the connected entities, with a lowercase initial, followed by `Id`.
+Thanks to the reference `@relationEntityRef`, the relationship `Post.categories` is much clearer and more transparent for the user. Note that this directive, like the previous ones, is based on a convention that fields within the connecting entity must have the same name as the connected entities, with a lower initial case, followed by `Id`.
 
 As in the previous cases, however, each single reference can be made explicit:
 
@@ -153,7 +153,7 @@ type PostCategory @entity @mongodb {
 }
 ```
 
-Nell'esempio di cui sopra, come si può intuire, `PostCategory.idOfAPost` fa riferimento a `Post.id`, mentre `PostCategory.idOfACategory` fa riferimento a `Category.id`.
+In the above example, as you can guess, `PostCategory.idOfAPost` refers to `Post.id`, while `PostCategory.idOfACategory` refers to `Category.id`.
 
 In the above example, as you can guess, `PostCategory.idOfAPost` refers to `Post.id`, while `PostCategory.idOfACategory` refers to `Category.id`.
 
@@ -163,14 +163,14 @@ Using references as described in the previous sections, Typetta allows you to ma
 
 ### 1-1 relation
 
-Following is an example of a 1-1 relation between a user and their profile:
+Below is an example of a 1-1 relation between a user and their profile:
 
 ```typescript
 type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
-  profile: Profile @foreignRef(refFrom: "userId") 
+  profile: Profile @foreignRef(refFrom: "userId")
 }
 
 type Profile @entity @mongodb {
@@ -183,7 +183,7 @@ type Profile @entity @mongodb {
 
 ### 1-n relation
 
-Below is an example of a 1-n relation between a user and his posts:
+Below is an example of a 1-n relationship between a user and their posts:
 
 ```typescript
 type User @entity @mongodb {
@@ -201,9 +201,9 @@ type Post @entity @mongodb {
 }
 ```
 
-### n-m relation
+### n-m relationship
 
-Finally an example of an n-m relation between posts and categories:
+Lastly, an example of an n-m relationship between posts and categories:
 
 ```typescript
 type Post @entity @mongodb {
@@ -224,9 +224,9 @@ type PostCategory @entity @mongodb {
 }
 ```
 
-## Recursive Relations
+## Recursive Relationships
 
-A relation can also connect an entity with itself and can be of any cardinality. Recursive relations are handled in the same way as other relations, through the `@innerRef`,` @foreignReg` and `@relationEntityRef` directives.
+A relationship can also connect an entity with itself and can be of any cardinality. Recursive relationships are handled in the same way as other relationships, through the `@innerRef`,` @foreignReg` and `@relationEntityRef` directives.
 
 Here is an example of a recursive relationship with cardinality 1-1:
 

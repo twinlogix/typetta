@@ -11,11 +11,11 @@ La seguende operazione `findAll` ha un filtro che permette di trovare tutti gli 
 await daoContext.user.findAll({
   filter: {
     firstName: "Mattia",
-    "address.city": { $in: [ "Milan", "Rome" ]},
+    "address.city": { in: [ "Milan", "Rome" ]},
     birthDate: { 
       $or: { 
-        $lt: new Date("2020-01-01T00:00:00"), 
-        $gte: new Date("2021-01-01T00:00:00") 
+        lt: new Date("2020-01-01T00:00:00"), 
+        gte: new Date("2021-01-01T00:00:00") 
       } 
     }
   }
@@ -23,27 +23,26 @@ await daoContext.user.findAll({
 ```
 
   - [Operatori di uguaglianza](#operatori-di-uguaglianza)
-    - [$eq](#eq)
-    - [$ne](#ne)
-    - [$in](#in)
-    - [$nin](#nin)
+    - [eq](#eq)
+    - [ne](#ne)
+    - [in](#in)
+    - [nin](#nin)
   - [Operatori di comparazione](#operatori-di-comparazione)
-    - [$lt](#lt)
-    - [$lte](#lte)
-    - [$gt](#gt)
-    - [$gte](#gte)
+    - [lt](#lt)
+    - [lte](#lte)
+    - [gt](#gt)
+    - [gte](#gte)
   - [Operatori logici](#operatori-logici)
     - [$and](#and)
     - [$or](#or)
     - [$nor](#nor)
-    - [$not](#not)
     - [Combinazione di operatori logici](#combinazione-di-operatori-logici)
   - [Operatori per stringhe](#operatori-per-stringhe)
-    - [$contains](#contains)
-    - [$startsWith](#startswith)
-    - [$endsWith](#endswith)
+    - [contains](#contains)
+    - [startsWith](#startswith)
+    - [endsWith](#endswith)
   - [Altri operatori](#altri-operatori)
-    - [$exist](#exist)
+    - [exists](#exist)
   - [Filtri avanzati, dipendenti dal driver](#filtri-avanzati-dipendenti-dal-driver)
     - [MongoDB](#mongodb)
     - [SQL](#sql)
@@ -52,20 +51,20 @@ await daoContext.user.findAll({
 
 Di seguito l'elenco degli operatori che permettorno di controllare l'uguaglianza di un campo con uno o più valori:
 
-### $eq
+### eq
 
-L'operatore `$eq` controlla che il valore sia uguale a quello fornito.
+L'operatore `eq` controlla che il valore sia uguale a quello fornito.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    firstName: { $eq: "Mattia" }
+    firstName: { eq: "Mattia" }
   }
 })
 ```
 
-L'operatore `$eq` può anche essere omesso, per cui la query di cui sopra è equivalente alla seguente:
+L'operatore `eq` può anche essere omesso, per cui la query di cui sopra è equivalente alla seguente:
 ```typescript
 await daoContext.user.findAll({
   filter: {
@@ -74,41 +73,41 @@ await daoContext.user.findAll({
 })
 ```
 
-### $ne
+### ne
 
-L'operatore `$ne` controlla che il valore sia diverso da quello fornito, è complementare al precedene operatore `$eq`.
+L'operatore `ne` controlla che il valore sia diverso da quello fornito, è complementare al precedene operatore `eq`.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    firstName: { $ne: "Mattia" }
+    firstName: { ne: "Mattia" }
   }
 })
 ```
 
-### $in
+### in
 
-L'operatore `$in` controlla che il valore sia contenuto all'interno di un insieme di valori forniti.
+L'operatore `in` controlla che il valore sia contenuto all'interno di un insieme di valori forniti.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    firstName: { $in: ["Mattia", "Michele", "Stefano"] }
+    firstName: { in: ["Mattia", "Michele", "Stefano"] }
   }
 })
 ```
 
-### $nin
+### nin
 
-L'operatore `$nin` controlla che il valore non sia contenuto all'interno di un insieme di valori forniti.
+L'operatore `nin` controlla che il valore non sia contenuto all'interno di un insieme di valori forniti.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    firstName: { $nin: ["Piero", "Paolo", "Romeo"] }
+    firstName: { nin: ["Piero", "Paolo", "Romeo"] }
   }
 })
 ```
@@ -117,54 +116,54 @@ await daoContext.user.findAll({
 
 Di seguito l'elenco degli operatori che permettorno di comparare un campo con uno o più valori:
 
-### $lt
+### lt
 
-L'operatore `$lt` controlla che il valore sia strettamente minore di un valore fornito.
+L'operatore `lt` controlla che il valore sia strettamente minore di un valore fornito.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    numberOfFriends: { $lt: 100 }
+    numberOfFriends: { lt: 100 }
   }
 })
 ```
 
-### $lte
+### lte
 
-L'operatore `$lte` controlla che il valore sia minore o uguale a un valore fornito.
+L'operatore `lte` controlla che il valore sia minore o uguale a un valore fornito.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    numberOfFriends: { $lte: 100 }
+    numberOfFriends: { lte: 100 }
   }
 })
 ```
 
-### $gt
+### gt
 
-L'operatore `$gt` controlla che il valore sia strettamente maggiore di un valore fornito.
+L'operatore `gt` controlla che il valore sia strettamente maggiore di un valore fornito.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    numberOfFriends: { $gt: 100 }
+    numberOfFriends: { gt: 100 }
   }
 })
 ```
 
-### $gte
+### gte
 
-L'operatore `$gte` controlla che il valore sia maggiore o uguale a un valore fornito.
+L'operatore `gte` controlla che il valore sia maggiore o uguale a un valore fornito.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    numberOfFriends: { $gte: 100 }
+    numberOfFriends: { gte: 100 }
   }
 })
 ```
@@ -221,19 +220,6 @@ await daoContext.user.findAll({
 })
 ```
 
-### $not
-
-L'operatore `$not` è verificato se la condizione passata non è verificata.
-
-Esempio:
-```typescript
-await daoContext.user.findAll({
-  filter: {
-    $not: { firstName: "Mattia" }
-  }
-})
-```
-
 ### Combinazione di operatori logici
 
 Gli operatori logici di cui sopra possono essere combinati a piacimento per creare condizioni complesse. Di seguito un esempio che mostra una query di ricerca di utenti il cui indirizzo è in Italia, oppure che vivono all'estero e il cui cognome è `Minotti` o `Barbieri`:
@@ -248,10 +234,10 @@ await daoContext.user.findAll({
       { 
         $and: [
           { 
-            $not: { "address.country":  "Italy" }
+            $nor: [{ "address.country":  "Italy" }]
           },
           {
-            lastName: { $in: ["Minotti", "Barbieri"]}
+            lastName: { in: ["Minotti", "Barbieri"]}
           }
         ]
       }
@@ -264,9 +250,9 @@ await daoContext.user.findAll({
 
 I seguenti operatori sono disponibili sono per i campi di tipo `String` e permetto di creare delle condizioni, anche complesse, su campi testuali.
 
-### $contains
+### contains
 
-L'operatore `$contains` permette di controllare se il valore contiene al suo interno una stringa fornita. Di seguito alcuni esempi esplicativi:
+L'operatore `contains` permette di controllare se il valore contiene al suo interno una stringa fornita. Di seguito alcuni esempi esplicativi:
 
 ```
 "oggi fa caldo" contiene "oggi fa caldo" => sì
@@ -283,28 +269,28 @@ Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    { 'address.street': { $contains: "Piave" }
+    { 'address.street': { contains: "Piave" }
   }
 })
 ```
 
 
-### $startsWith
+### startsWith
 
-L'operatore `$startsWith` permette di controllare se il valore contiene inizia con una stringa fornita:
+L'operatore `startsWith` permette di controllare se il valore contiene inizia con una stringa fornita:
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    { 'address.street': { $startsWith: "Via" }
+    { 'address.street': { startsWith: "Via" }
   }
 })
 ```
 
-### $endsWith 
+### endsWith 
 
-L'operatore `$endsWith` permette di controllare se il valore contiene termina con una stringa fornita:
+L'operatore `endsWith` permette di controllare se il valore contiene termina con una stringa fornita:
 
 Esempio:
 ```typescript
@@ -319,15 +305,15 @@ await daoContext.user.findAll({
 
 Di seguito l'elenco degli ulteriori operatori messi a disposizione da Typetta:
 
-### $exist
+### exists
 
-L'operatore `$exist` controlla che il campo sia o meno valorizzato su database, a seconda del valore true / false fornito.
+L'operatore `exists` controlla che il campo sia o meno valorizzato su database, a seconda del valore true / false fornito.
 
 Esempio:
 ```typescript
 await daoContext.user.findAll({
   filter: {
-    name: { $exist: true }
+    name: { exists: true }
   }
 })
 ```

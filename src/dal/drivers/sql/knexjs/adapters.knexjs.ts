@@ -10,11 +10,11 @@ export type DefaultKnexJsScalars = {
 export type KnexJSDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = DataTypeAdapterMap<ModelScalars, DefaultKnexJsScalars>
 
 export const knexJsAdapters: KnexJSDataTypeAdapterMap<DefaultModelScalars> = {
-  String: identityAdapter,
+  String: identityAdapter(),
   Boolean: {
     dbToModel: (o: number) => (o ? true : false),
     modelToDB: (o: boolean) => (o ? 1 : 0),
   },
-  Int: identityAdapter,
-  Float: identityAdapter,
+  Int: identityAdapter(),
+  Float: identityAdapter(),
 }

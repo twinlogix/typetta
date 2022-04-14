@@ -1,10 +1,12 @@
-import { buildMiddleware, Coordinates, defaultValueMiddleware, knexJsAdapters, LocalizedString, UserInputDriverDataTypeAdapterMap } from '../../src'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Coordinates, defaultValueMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { DAOContext } from './dao.mock'
 import { Scalars } from './models.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
 import { v4 as uuidv4 } from 'uuid'
+import { LocalizedString } from '../types'
 
 jest.setTimeout(20000)
 
@@ -41,12 +43,13 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'knex'> = {
     modelToDB: (o: Coordinates) => JSON.stringify(o),
   },
   Decimal: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
     modelToDB: (o: BigNumber) => o,
   },
   JSON: {
     dbToModel: (o: unknown) => JSON.parse(o as string),
-    modelToDB: (o: any) => JSON.stringify(o),
+    modelToDB: (o: unknown) => JSON.stringify(o),
   },
   Password: {
     dbToModel: (o: unknown) => o as string,
@@ -56,7 +59,7 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'knex'> = {
     generate: () => uuidv4(),
   },
   String: {
-    dbToModel: (o: any) => (typeof o === 'string' ? o : o.toString()),
+    dbToModel: (o: unknown) => (typeof o === 'string' ? o : JSON.stringify(o)),
     modelToDB: (o: string) => o,
   },
   Live: {
@@ -194,12 +197,24 @@ test('empty find', async () => {
 })
 
 test('simple findAll', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, credentials: { username: 'user', password: '123456' } } })
 
   const users = await dao.user.findAll({})
   expect(users.length).toBe(1)
   expect(users[0].firstName).toBe('FirstName')
   expect(users[0].lastName).toBe('LastName')
+
+  const users2 = await dao.user.findAll({ filter: { id: { exists: true } } })
+  expect(users2.length).toBe(1)
+  expect(users2[0].firstName).toBe('FirstName')
+  expect(users2[0].lastName).toBe('LastName')
+
+  const users3 = await dao.user.findAll({ projection: { credentials: { }, firstName: true } })
+  expect(users3[0].credentials).toBe(undefined)
+  const users4 = await dao.user.findAll({ projection: {  } })
+  expect(Object.keys(users4[0]).length).toBe(1)
+  const users5 = await dao.user.findAll({ projection: { credentials: { } } })
+  expect(Object.keys(users5[0]).length).toBe(1)
 })
 
 test('simple findOne multiple filter', async () => {
@@ -228,22 +243,6 @@ test('simple findOne', async () => {
   expect(user).toBeDefined()
   expect(user!.firstName).toBe('FirstName')
   expect(user!.lastName).toBe('LastName')
-})
-
-test('findOne innerRef association without projection', async () => {
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
-
-  const dog = await dao.dog.findOne({})
-  // expect(dog!.owner).toBeUndefined()
-})
-
-test('findOne foreignRef association without projection', async () => {
-  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
-  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
-
-  const users = await dao.user.findAll({})
-  // expect(users[0].dogs).toBeUndefined()
 })
 
 test('findOne simple inner association', async () => {
@@ -406,20 +405,20 @@ test('find with simple filter', async () => {
   expect(response3.records[0].firstName).toBe('1')
 })
 
-test('find with $in filter', async () => {
+test('find with in filter', async () => {
   for (let i = 0; i < 10; i++) {
     await dao.user.insertOne({ record: { firstName: '' + i, lastName: '' + (9 - i), live: true } })
   }
-  const response1 = await dao.user.findAll({ filter: { firstName: { $in: ['1'] } } })
+  const response1 = await dao.user.findAll({ filter: { firstName: { in: ['1'] } } })
   expect(response1.length).toBe(1)
   expect(response1[0].firstName).toBe('1')
-  const response2 = await dao.user.findAll({ filter: { firstName: { $in: ['1', '2'] } } })
+  const response2 = await dao.user.findAll({ filter: { firstName: { in: ['1', '2'] } } })
   expect(response2.length).toBe(2)
-  const response3 = await dao.user.findAll({ filter: { firstName: { $in: ['1', 'a'] } } })
+  const response3 = await dao.user.findAll({ filter: { firstName: { in: ['1', 'a'] } } })
   expect(response3.length).toBe(1)
-  const response4 = await dao.user.findAll({ filter: { firstName: { $in: [] } } })
+  const response4 = await dao.user.findAll({ filter: { firstName: { in: [] } } })
   expect(response4.length).toBe(0)
-  const response5 = await dao.user.findAll({ filter: { firstName: { $in: ['a'] } } })
+  const response5 = await dao.user.findAll({ filter: { firstName: { in: ['a'] } } })
   expect(response5.length).toBe(0)
 })
 
@@ -620,11 +619,11 @@ test('Insert default', async () => {
   const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
   expect(e2.live).toBe(true)
   expect(e2.creationDate).toBe(1234)
-  expect(e2.opt1).toBe(null)
+  expect(e2.opt1).toBe(undefined)
   expect(e2.opt2).toBe(true)
 
   const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
-  expect(e3.opt1).toBe(null)
+  expect(e3.opt1).toBe(undefined)
 })
 
 test('simple update', async () => {
@@ -720,9 +719,10 @@ test('Text filter test', async () => {
   await dao.organization.insertOne({ record: { name: 'Micdonalds' } })
   await dao.organization.insertOne({ record: { name: 'Lolft' } })
 
-  const found1 = (await dao.organization.findAll({ filter: { name: { $contains: 'soft' } } })).map((o) => o.name)
-  const found3 = (await dao.organization.findAll({ filter: { name: { $startsWith: 'Mic' } } })).map((o) => o.name)
-  const found5 = (await dao.organization.findAll({ filter: { name: { $endsWith: 'ft' } } })).map((o) => o.name)
+  const found1 = (await dao.organization.findAll({ filter: { name: { contains: 'soft' } } })).map((o) => o.name)
+  const found3 = (await dao.organization.findAll({ filter: { name: { startsWith: 'Mic' } } })).map((o) => o.name)
+  const found5 = (await dao.organization.findAll({ filter: { name: { endsWith: 'ft' } } })).map((o) => o.name)
+  const found7 = (await dao.organization.findAll({ filter: { name: { startsWith: 'Mic', endsWith: 'oft' } } })).map((o) => o.name)
 
   expect(found1.length).toBe(2)
   expect(found1.includes('Microsoft')).toBe(true)
@@ -734,6 +734,8 @@ test('Text filter test', async () => {
   expect(found5.includes('Microsoft')).toBe(true)
   expect(found5.includes('Macrosoft')).toBe(true)
   expect(found5.includes('Lolft')).toBe(true)
+  expect(found7.length).toBe(1)
+  expect(found7.includes('Microsoft')).toBe(true)
 })
 
 test('Raw update', async () => {

@@ -1,7 +1,8 @@
 import { GenericProjection, IntersectGenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
+import { PartialDeep } from 'type-fest'
 
-type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
+export type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
   ? ProjectionType
   : ProjectionType extends P2
   ? ProjectionType
@@ -12,12 +13,20 @@ export function mergeGenericProjection<P1 extends GenericProjection, P2 extends 
 }
 export interface ProjectionBuilderInterface<ProjectionType extends GenericProjection> {
   merge<P1 extends ProjectionType, P2 extends ProjectionType>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2>
+  build<P extends ProjectionType>(p: P): P
+}
+
+export function buildProjection<ProjectionType extends GenericProjection, P extends ProjectionType>(p: P): P {
+  return p
 }
 
 export function projection<ProjectionType extends GenericProjection>(): ProjectionBuilderInterface<ProjectionType> {
   return new (class implements ProjectionBuilderInterface<ProjectionType> {
     merge<P1 extends ProjectionType, P2 extends ProjectionType>(p1: P1, p2: P2): SelectProjection<ProjectionType, P1, P2> {
       return mergeProjections(p1 as GenericProjection, p2 as GenericProjection) as SelectProjection<ProjectionType, P1, P2>
+    }
+    build<P extends ProjectionType>(p: P): P {
+      return p
     }
   })()
 }
@@ -263,4 +272,11 @@ function tail(array: string[]): string[] {
   } else {
     return []
   }
+}
+
+export function isEmptyProjection(p: PartialDeep<GenericProjection> | undefined): boolean {
+  if (p === undefined || p === true || p === false) {
+    return false
+  }
+  return Object.values(p).filter((v) => v !== undefined && !isEmptyProjection(v)).length === 0
 }

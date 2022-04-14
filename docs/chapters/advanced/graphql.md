@@ -1,41 +1,41 @@
-# Using with GraphQL
+# Working with GraphQL
 
-GraphQL è un linguaggio che permette di definire ed interrogare un API ed il suo modello dati. Esporre un'API tramite un endpoint GraphQL permette di sviluppare client in grado di effettuare interrogazioni **efficienti**, **espressive** e **tipate**. Questo grande risultato viene però ad un prezzo: la complessità di creare un back-end in grado di soddisfare questo tipo di richieste e di recuperare i dati dalle verie sorgenti. Typetta entra in gioco in questo punto ed è in grado di semplificare il lavoro dello sviluppatore.
+GraphQL is a language that allows you to define and query an API and its data model. Exposing an API through a GraphQL endpoint allows you to develop clients that can perform **efficient**, **expressive** and **typed** queries. However, this great result comes at a price: the complexity of creating a back-end capable of satisfying these types of requests and recovering data from the various sources. Typetta comes into play here and is able to simplify the developer's work.
 
-In quanto ORM completamente tipato in grado di supportare proiezioni e filtri complessi, Typetta più essere utilizzato nello sviluppo dei resolver GraphQL di qualunque libreria di back-end, come ad esempio Apollo Server, NestJS o Express.
+As a fully-typed ORM capable of supporting complex projections and filters, Typetta can be used more in the development of GraphQL resolvers of any back-end library, such as Apollo Server, NestJS, or Express.
 
-  - [Perchè utilizzare Typetta con GraphQL?](#perchè-utilizzare-typetta-con-graphql)
+  - [Why use Typetta with GraphQL?](#why-use-typetta-with-graphql)
     - [End-to-end type safety](#end-to-end-type-safety)
-    - [Un modello unico](#un-modello-unico)
-    - [Comodo, conciso ed espressivo](#comodo-conciso-ed-espressivo)
-    - [Accesso al dato ottimizzato](#accesso-al-dato-ottimizzato)
-    - [Sicurezza](#sicurezza)
-  - [Anatomia di un Resolver](#anatomia-di-un-resolver)
-  - [Typetta nell'implementazione dei resolvers](#typetta-nellimplementazione-dei-resolvers)
-  
-## Perchè utilizzare Typetta con GraphQL?
-Typetta nasce da un'esperienza pluriennare di sviluppo di back-end GraphQL e di conseguenza trova nel connubio con questa tecnologia la sua massima utilità.
+    - [A unique model](#a-unique-model)
+    - [Convenient, concise and expressive](#convenient-concise-and-expressive)
+    - [Optimised data access](#optimised-data-access)
+    - [Safety](#safety)
+  - [Anatomy of a Resolver](#anatomy-of-a-resolver)
+  - [Typetta in the implementation of resolvers](#typetta-in-the-implementation-of-resolvers)
+
+## Why use Typetta with GraphQL?
+Typetta was born from many years of experience in the development of GraphQL back-ends and consequently it is most useful in combination with this technology.
 
 ### End-to-end type safety
-Utilizzando entrambe le tecnologie è possibile creare uno stack completamente type safe, a partire dal database fino al front-end. Questo aumenta la produttività del sistema riducendo gli errori e facilando la manutenzione.
+Using both technologies, it is possible to create a completely type-safe stack, from the database to the front end. This increases system productivity by reducing errors and facilitating maintenance.
 
-### Un modello unico
-Typetta prevede la definizione di un modello dati direttamente in linguaggio GraphQL. Contrariamente alla maggior parte degli altri ORM, si può quindi condividere il modello dati con il modello dell'API e velocizzare lo sviluppo del back-end, permettendo allo sviluppatore di decidere se e quando suddividere i due livelli e investire tempo nella traduzione da uno all'altro.
+### A unique model
+Typetta allows for the definition of a data model directly in GraphQL language. Unlike most other ORMs, you can then share the data model with the API model and speed up back-end development, allowing the developer to decide whether and when to split the two tiers and invest time in translation from one to the other.
 
-### Comodo, conciso ed espressivo
-Typetta condivide molti dei principali concetti con GraphQL e permette quindi di implementare resolver in maniera chiara, concisa e veloce, aumentando la produttività dello sviluppatore.
+### Convenient, concise and expressive
+Typetta shares many of the key concepts with GraphQL and therefore allows you to implement resolvers in a clear, concise and fast way, increasing the developer's productivity.
 
-### Accesso al dato ottimizzato
-Un problema tipico nel caricamento dei dati in un back-end GraphQL è dovuto alle performance di N+1 query. Grazie all'utilizzo della tecnologia di [DataLoader](https://github.com/graphql/dataloader){:target="_blank"} esso viene risolto automaticamente da Typetta e non costituisce una criticità.
+### Optimised data access
+A typical problem in loading data into a GraphQL backend is due to the performance of N+1 queries. Thanks to the use of [DataLoader](https://github.com/graphql/dataloader){:target="_blank"} technology, this is automatically resolved by Typetta and is not a critical issue.
 
-### Sicurezza
-Uno degli aspetti più critici nello sviluppo di un backend GraphQL è la creazione di uno strato di sicurezza che regolamenti l'accesso ai dati a prescindere da dove inizia la navigazione del grafo. Per fare questo la definizione delle politiche di sicurezza devono necessariamente essere accoppiate al modello dati. Typetta offre la possibilità di definire un livello di [sicurezza](./security.md) direttamente dal `DAOContext` in maniera molto semplice ed espressiva.
+### Safety
+One of the most critical aspects in developing a GraphQL backend is creating a security layer that regulates data access no matter where graph navigation begins. To do this, the definition of security policies must necessarily be coupled to the data model. Typetta offers the possibility to define a [security](./security.md) level directly from the `DAOContext` in a very simple and meaningful way.
 
-## Anatomia di un Resolver
+## Anatomy of a Resolver
 
-Un resolver è una funzione che si occupa di popolare i dati di ogni singolo campo di una richiesta GraphQL. Esso rappresenta l'implementazione delle operazioni GraphQL nell'applicativo di back-end.
+A resolver is a function that populates the data of each individual field of a GraphQL request. It represents the implementation of GraphQL operations in the back-end application.
 
-Ipotizziamo un endpoint GraphQL con il seguente schema:
+Let's assume a GraphQL endpoint with the following schema:
 
 ```typescript
 type User {
@@ -56,7 +56,7 @@ type Query {
 }
 ```
 
-Il resolver della query `users` si presenta come di seguito:
+The resolver of the `user` query is as follows:
 
 ```typescript
 export const resolvers = {
@@ -69,9 +69,9 @@ export const resolvers = {
 }
 ```
 
-L'operazione di caricamento degli utenti, per garantire efficienza e correttezza, deve caricare dalla sorgente dati tutti e soli i campi richiesti analizzando il contenuto del parametro `info` che contiene lo schema AST della richiesta.
+To ensure efficiency and correctness, the user loading operation must load from the source of all the data and only the required fields by analysing the content of the `info` parameter contained in the AST schema of the request.
 
-Siccome il tipo `User` contiene a sua volta un campo `posts: [Post!]`, occorre specificare un ulteriore resolver in grado di caricare tutti i post di ogni utente:
+Since the `User` type also contains a `posts field: [Post!]`, you must specify an additional resolver capable of loading all the posts of each user:
 
 ```typescript
 export const resolvers = {
@@ -90,20 +90,20 @@ export const resolvers = {
 }
 ```
 
-L'implementazione delle due funzioni di cui sopra è il requisito minimo per implementare correttamente la logica di risoluzione della query GraphQL `users`. Si noti che tale implementazione presenta alcune possibili difficoltà:
+The implementation of the two functions above is the minimum requirement to correctly implement the GraphQL `user` query resolution logic. Note that this implementation entails some possible difficulties:
 
-- In entrambi i resolver occorre interpretare il campo `info` per determinare esattamente i campi richiesti.
-  
-- Nel resolver `posts` occorre caricare tutti i post il cui userId è uguale all'id dell'utente, presente nel parametro `parent.id`.
-  
-- Nel caso l'utente selezioni il campo `posts` occorre asscurarsi di caricare comunque il campo `id` dell'utente necessario alla risoluzione della relazione.
-  
-- Il resolver `posts` viene invocato per ogni risultato del resolver `users`, il che può generale un elevano numero di interrogazioni alla sorgente dati.
+- In both resolvers, the `info` field must be interpreted to precisely determine the required fields.
+
+- In the `posts` resolver, you must load all posts whose userId is equal to the user's id, which is present in the `parent.id` parameter.
+
+- If the user selects the `posts` field, it is still necessary to make sure to load the `id` field of the user necessary for the resolution of the relationship.
+
+- The `posts` resolver is invoked for each `user` resolver result, which can generally result in a high number of queries to the data source.
 
 
-## Typetta nell'implementazione dei resolvers
+## Typetta in the implementation of resolvers
 
-Utilizzando Typetta l'implementazione dei precedenti resolvers risulta estremamente semplice, come mostrato nel seguente esempio:
+Using Typetta, the implementation of the aforementioned resolvers is extremely simple, as shown in the following example:
 
 ```typescript
 export const resolvers = {
@@ -115,13 +115,13 @@ export const resolvers = {
 }
 ```
 
-Il codice è estremamente semplice e conciso in quanto è Typetta a prendersi carico delle complessità descritte precedentemente. In particolare:
+The code is extremely simple and concise as Typetta takes care of the complexities described above. In particular:
 
-- La `projection` viene automaticamente desunta dal parametro `info`, compresa la parte relativa alle entità connesse e i campi necessari per risolvere tutte le relazioni.
-  
-- Le entità connesse vengono caricate automaticamente, non è quindi necessario implementare tutti i relativi resolvers (nello specifico `User.posts`).
-  
-- Il caricamento delle entità connesse è effettuato in maniera efficiente, utilizzando i dataloader ed è quindi immune all'N+1 problem.
+- The `projection` is automatically derived from the `info` parameter, including the part regarding connected entities and the fields needed to resolve all relationships.
+
+- Connected entities are loaded automatically, so it is not necessary to implement all their resolvers (specifically `User.posts`).
+
+- The loading of the connected entities is carried out efficiently, using the dataloaders and is therefore immune to the N+1 problem.
 
 
 

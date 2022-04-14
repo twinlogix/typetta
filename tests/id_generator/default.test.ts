@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField } from '../../src'
 import { DAOContext, mockedDAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
@@ -28,7 +29,7 @@ const config: Knex.Config = {
   },
 }
 
-let knexInstance: Knex<any, unknown[]>
+let knexInstance: Knex<{ [K in string]: unknown }, unknown[]>
 let con: MongoClient
 let mongoServer: MongoMemoryServer
 let db: Db
@@ -64,6 +65,7 @@ beforeEach(async () => {
           modelToDB: (o: BigNumber) => Decimal128.fromString(o.toString()),
         },
         knex: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
           modelToDB: (o: BigNumber) => o,
         },
@@ -76,7 +78,7 @@ beforeEach(async () => {
       JSON: {
         knex: {
           dbToModel: (o: unknown) => JSON.parse(o as string),
-          modelToDB: (o: any) => JSON.stringify(o),
+          modelToDB: (o: unknown) => JSON.stringify(o),
         },
       },
     },

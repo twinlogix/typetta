@@ -1,21 +1,18 @@
 # Middlewares
 
-I middleware sono un potente strumento con cui **estendere le funzionalità** base di Typetta, aggiungendo allo strato di accesso al dato una serie di controlli e automatismi customizzati. Essi sono costituiti da una o più funzioni che vengono invocate in cascata nel ciclo di vita di un'operazione, sia nella fase precedente che in quella successiva all'interazione con la sorgente dati. 
+Middleware is a powerful tool with which **to extend the basic features** of Typetta, adding a series of customised checks and automatisms to the data access layer. They consist of one or more functions that are invoked as a cascade in the life cycle of an operation, both in the phase before and after the interaction with the data source.
 
-Queste funzioni ricevono tutti i parametri in input all'operazione e ne possono cambiare il valore, così da modificarne o estenderne il comportamento o.
+These functions receive all the parameters as input to the operation and can change their value, so as to modify or extend their behaviour.
 
-  - [Definizione di un Middleware](#definizione-di-un-middleware)
-  - [Applicazione di un Middleware](#applicazione-di-un-middleware)
-    - [Middleware per uno specifico DAO](#middleware-per-uno-specifico-dao)
-    - [Middleware per più DAO](#middleware-per-più-dao)
-    - [Middleware per tutto il DAOContext](#middleware-per-tutto-il-daocontext)
-  - [Modifica di input e output](#modifica-di-input-e-output)
-  - [Pipeline di esecuzione](#pipeline-di-esecuzione)
-  - [Interruzione flusso di esecuzione](#interruzione-flusso-di-esecuzione)
+  - [Defining a Middleware](#defining-a-middleware)
+  - [Applying a Middleware](#applying-a-middleware)
+  - [Editing inputs and outputs](#editing-inputs-and-outputs)
+  - [Execution pipeline](#execution-pipeline)
+  - [Execution flow interruption](#execution-flow-interruption)
 
-## Definizione di un Middleware
+## Defining a Middleware
 
-Di seguito un semplice middleware di log che stampa le varie fasi di esecuzione di ogni operazione del DAO di un utente:
+Below is a simple log middleware that prints the various steps of executing each operation of a user's DAO:
 
 ```typescript
 const middleware = {
@@ -28,13 +25,13 @@ const middleware = {
 }
 ```
 
-Si noti che ogni middleware è costituito da due funzioni, una invocata prima dell'esecuzione di ogni operazione (`findOne`, `findAll`, `insertOne`, ecc.) ed una invocata dopo ogni esecuzione. Entrambe le funzioni ricevono due parametri: il primo contiene tutte le informazioni a disposizione sull'operazione in corso, il secondo è un oggetto di contesto grazie al quale si può accedere direttamente al driver e ai metadati del DAO.
+Note that each middleware consists of two functions, one invoked before the execution of each operation (`findOne`, `findAll`, `insertOne`, etc.) and one invoked after each execution. Both functions receive two parameters: the first contains all the available information about the operation in progress; the second is a context object thanks to which you can directly access the driver and the metadata of the DAO.
 
-La struttura del primo parametro (`args` nell'esempio, è la seguente: 
+The structure of the first parameter (`args` in the example) is as follows:
 ```typescript
 {
   // operazione corrente
-  operation: 'find' | 'insert' | 'update' | 'replace' | 'delete' | 'aggregate', 
+  operation: 'find' | 'insert' | 'update' | 'replace' | 'delete' | 'aggregate',
   // dipendente dall'operazione, contiene tutti gli input come filtri, proiezioni, ordinamenti, changes, ecc.
   params: { ... },
   // argomenti di input aggiuntivi, solo per l'operazione 'aggregate'
@@ -48,7 +45,7 @@ La struttura del primo parametro (`args` nell'esempio, è la seguente:
 }
 ```
 
-Questo parametro è strettamente tipato e dipendente dal campo ``operation``. Per accedere ad esempio al filtro passato ad un'operazione ``find`` possiamo scrivere il seguente middleware:
+This parameter is strictly typed and dependent on the ``operation`` field. For example, to access the filter set to a ``find`` operation we can write the following middleware:
 
 ```typescript
 const middleware = {
@@ -61,11 +58,11 @@ const middleware = {
 }
 ```
 
-Il secondo parametro (``context`` nell'esempio) contiene invece i seguenti campi:
+By contrast, the second parameter (``context`` in the example) contains the following fields:
 ```typescript
 {
   // riferimento al driver MongoDB o all'oggeto knexjs
-  driver: ..., 
+  driver: ...,
   // oggetto contentene metadati passati al DAOContext o allo specifico DAO
   metadata: {...},
   // oggetto generato che descrive la struttura dell'entità
@@ -75,16 +72,16 @@ Il secondo parametro (``context`` nell'esempio) contiene invece i seguenti campi
 }
 ```
 
-## Applicazione di un Middleware
+## Applying a Middleware
 
-Ogni middleware può essere applicato a tre diversi livelli all'interno di un ``DAOContext``:
-  - [Middleware per uno specifico DAO](#middleware-per-uno-specifico-dao)
-  - [Middleware per più DAO](#middleware-per-più-dao)
-  - [Middleware per tutto il DAOContext](#middleware-per-tutto-il-daocontext)
+Each middleware can be applied to three different levels within a ``DAOContext``:
+  - [Middleware for a specific DAO](#middleware-for-a-specific-dao)
+  - [Middleware for several DAOs](#middleware-for-several-daos)
+  - [Middleware for the whole DAOContext](#middleware-for-the-whole-daocontext)
 
-### Middleware per uno specifico DAO
+### Middleware for a specific DAO
 
-E' possibile assegnare un middleware ad un singolo DAO attraverso il campo ``overrides`` del costruttore di ogni ``DAOContext``:
+It is possible to assign a middleware to a single DAO through the ``overrides`` field of the constructor of each ``DAOContext``:
 ```typescript
 const daoContext = new DAOContext({
   overrides: {
@@ -97,11 +94,11 @@ const daoContext = new DAOContext({
 })
 ```
 
-Si noti che un middleware creato per una sola entità potrà usufruire del type narrowing di TypeScript, perciò i parametri delle funzioni `before` e `after` conterranno filtri, proiezioni, ordinamenti, record della specifica entità. Questo facilita molto la scrittura e la manutenzione della logica applicativa del singolo middleware.
+Note that a middleware created for a single entity can make use of TypeScript type narrowing, so the parameters of the `before` and `after` functions will contain filters, projections, sorts and records of the specific entity. This makes it very easy to write and maintain the application logic of the individual middleware.
 
-### Middleware per più DAO
+### Middleware for several DAOs
 
-Può accadere che si renda necessario creare un middleware che deve essere applicato ad un sottoinsieme delle entità di un ``DAOContext``. Per farlo è possibile definire un override per ognuna di queste entità, come visto in precedenza, ma ciò può risultare prolisso e scarsamente manutenibile. Typetta offre una funzione di utilità con cui è possibile definire un middleware per un gruppo specifico di entità:
+You may need to create middleware that must be applied to a subset of the entities in a ``DAOContext``. To do this, it is possible to define an override for each of these entities, as seen above, but this can be lengthy and difficult to maintain. Typetta provides a utility function with which you can define a middleware for a specific group of entities:
 
 ```typescript
 const daoContext = new DAOContext({
@@ -118,7 +115,7 @@ const daoContext = new DAOContext({
 })
 ```
 
-Allo stesso modo, è possibile anche definire un middleware per un gruppo di entità utilizzando una logica di esclusione:
+Similarly, you can also define a middleware for a group of identities using a logic of exclusion:
 
 ```typescript
 const daoContext = new DAOContext({
@@ -134,11 +131,11 @@ const daoContext = new DAOContext({
 })
 ```
 
-Anche in questo caso TypeScript effettua type narrowing in maniera perfetta e permette l'utilizzo all'interno del middleware dei tipi frutto dell'intersezione tra i tipi di tutte le entità. Nell'esempio di cui sopra, se tutte le entità selezionate hanno un campo ``id`` il middleware può accedere a quel campo.
+Again in this case TypeScript performs type narrowing perfectly and allows the use within the middleware of the types resulting from the intersection between the types of all entities. In the above example, if all selected entities have an ``id`` field, the middleware can access that field.
 
-### Middleware per tutto il DAOContext
+### Middleware for the whole DAOContext
 
-E' infine possibile creare un middleware comune a tutto il ``DAOContext`` che viene quindi eseguito per ogni operazione di ogni ``DAO``. Per farlo è sufficiente configurare il middleware come segue:
+Lastly, you can create a middleware that is common to the whole ``DAOContext`` and then run it for each operation of each ``DAO``. To do this, simply configure the middleware as follows:
 ```typescript
 const daoContext = new DAOContext({
   middlewares: [
@@ -147,9 +144,9 @@ const daoContext = new DAOContext({
 })
 ```
 
-## Modifica di input e output
+## Editing inputs and outputs
 
-Un middleware può modificare gli input ricevuti ritornandone in output una copia alterata. Questo può essere molto utile per creare funzionalità che alternao o forzano alcuni comportamenti del DAO. E' possibile, ad esempio, creare un middleware che forza il valore di un filtro ad un determinato valore indipendentemente da quanto definito dall'utilizzatore.
+A middleware can edit the received inputs, returning a modified copy as output. This can be very useful for creating features that alternate or force certain DAO behaviours. For example, you can create middleware that forces the value of a filter to a certain value regardless of what the user defines.
 
 ```typescript
 const daoContext = new DAOContext({
@@ -177,16 +174,16 @@ const daoContext = new DAOContext({
 })
 ```
 
-Nell'esempio precedente il middleware, che si applica solamente alle operazioni di ``find``, lascia inalterati tutti gli input dell'utente ad eccezione del filtro che viene messo in and con un filtro fisso per id.
+In the above example, the middleware, which applies only to ``find`` operations, leaves all user inputs unchanged except for the filter that is implemented and with a fixed filter for id.
 
-Si noti la presenza di un campo booleano aggiuntivo ``continue`` obbligatorio. Passando ``true`` il middleware al suo completamento lascia l'esecuzione al middleware successivo o all'esecuzione dell'operazione se non sono presenti altri middleware. Passando invece ``false`` il middlewre interrompe la catena di esecuzione, quindi nessun altro middleware successivo verrà eseguito. Se si tratta di una funzione ``before`` neanche l'operazione verrà eseguita.
+Note that there is a mandatory additional ``continue`` boolean field. If the middleware has the value of ``true`` at its completion, this lets the next middleware run or the operation run if no other middleware is present. If it has the value of ``false``, the middleware breaks the execution chain, so no other subsequent middleware will run. If it is a ``before`` function, the operation will not be performed either.
 
-Nel caso si ritorni ``continue: false`` il tipo di ritorno non dovrà contenere solamente tutti i parametri di input dell'operazione ma i relativi output, in quanto il middleware si va a sostituire alla normale esecuzione dell'operazione.
+If ``continuous: false`` is returned, the return type must not only contain all the input parameters of the operation but the relative outputs, as the middleware replaces the normal execution of the operation.
 
 
-## Pipeline di esecuzione
+## Execution pipeline
 
-I middleware permettono di creare livelli di mediazione precedenti e successivi all'esecuzione di un'operazione. Questi livelli vengono eseguiti in un ordine ben preciso che può essere riassunto come segue:
+Middleware allows you to create mediation levels before and after the execution of an operation. These levels are executed in a very precise order which can be summarised as follows:
 
 ```
              ━━━━━┓
@@ -225,18 +222,18 @@ CUSTOM MIDDLEWARE 1 (after function)
 TYPETTA MIDDLEWARES (after function)
                   ┃
              ◀━━━━┛
-                  
+
 ```
 
-L'ordine dei middleware custom, quelli cioè definiti dall'utente, è determinato dall'ordine dell'array con cui essi vengono configuari sul ``DAO`` o sul ``DAOContext``. Ogni middleware, utilizzando la funzione `before`, può modificare gli input dell'operazione e con la funzione `after` può modificare i suoi output. Sia input che output vengono passati al livello successivo fino all'ultimo livello in cui si ritornano i risultati al chiamante.
+The order of the custom middleware, that is, those defined by the user, is determined by the order of the array with which they are configured on the ``DAO`` or ``DAOContext``. Using the `before` function, each middleware can edit the inputs of the operation and, with the `after` function, it can edit the outputs. Both input and output are passed to the next level until the last level at which point the results are returned to the caller.
 
-Nello schemo si possono vedere alcuni middleware interni a Typetta. Il sistema infatti sfrutta internamente questo meccanismo per implementare alcune funzionalità base già preconfigurate.
+In the diagram you can see some middleware within Typetta. Indeed, the system uses this mechanism internally to implement some basic features that are already preconfigured.
 
-## Interruzione flusso di esecuzione
+## Execution flow interruption
 
-Ogni middleware, sia nella fase `before` che in quella `after` può decidere di interrompere la pipeline di esecuzione e terminare l'operazione fornendo degli output. Per fare questo, come visto nell'esempio precedente, occorre importare un campo ``continue: false`` nell'oggeto di ritorno. 
+In both the `before` and `after` phases, each middleware can decide to stop the execution pipeline and end the operation, providing outputs. To do this, as seen in the previous example, you need to import a ``continue: false`` field into the return object.
 
-Se ipotizziamo quindi che il middleware custom 2 dell'esempio precedene fosse implementato come segue:
+Therefore, if we assume that the custom middleware 2 of the preceding example was implemented as follows:
 
 ```typescript
 const middlewareCustom2 = {
@@ -249,7 +246,7 @@ const middlewareCustom2 = {
 }
 ```
 
-Esso interromperebbe la pipeline, che di fatto risulterebbe essere bloccata al secondo step:
+It would interrupt the pipeline, which would be blocked at the second step:
 
 ```
              ━━━━━┓

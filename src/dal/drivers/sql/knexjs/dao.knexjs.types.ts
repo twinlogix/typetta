@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { OmitIfKnown } from '../../../../utils/utils.types'
 import { DAOGenerics, DAOParams, IdGenerationStrategy } from '../../../dao/dao.types'
+import { AbstractDAOContext } from '../../../daoContext/daoContext'
 import { DefaultModelScalars } from '../../drivers.types'
 import { Knex } from 'knex'
-import { OmitIfKnown } from '../../../../utils/utils.types'
 
 export type KnexJsDAOGenerics<
   ModelType extends object = any,
@@ -23,6 +25,7 @@ export type KnexJsDAOGenerics<
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
   NameType extends string = any,
+  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = any,
 > = DAOGenerics<
   ModelType,
   IDKey,
@@ -52,7 +55,8 @@ export type KnexJsDAOGenerics<
   { trx?: Knex.Transaction },
   { trx?: Knex.Transaction },
   { trx?: Knex.Transaction },
-  NameType
+  NameType,
+  DAOContext
 >
 
 export type KnexJsDAOParams<T extends KnexJsDAOGenerics> = Omit<DAOParams<T>, 'driverContext'> & {

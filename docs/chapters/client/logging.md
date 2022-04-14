@@ -1,14 +1,14 @@
 # Logging
 
-La possibilità di avere un accurato sistema di log è una funzionalità molto importante per una libreria che gestisce lo strato di accesso al dato. Grazie ai log è possibile approfondire eventuali problemi di correttezza nella costruzione delle query inviata alla sorgente dati o di performance.
+The possibility of having an accurate logging system is a very important feature for a library that manages the data access layer. Thanks to the logs, it is possible to investigate any correctness issues in the construction of the queries sent to the data source or regarding performance.
 
   - [How to enable Logs](#how-to-enable-logs)
   - [Log long-running queries](#log-long-running-queries)
   - [Custom logger](#custom-logger)
- 
+
 ## How to enable Logs
 
-E' possibile abilitare la funzionalità di log semplicemente passando il parametro ``log: true`` alla creazione del ``DAOContext``. 
+You can enable logging simply by setting the ``log: true`` parameter when creating the ``DAOContext``.
 
 ```typescript
 new DAOContext({
@@ -16,9 +16,9 @@ new DAOContext({
 })
 ```
 
-In alternativa, è possibile specificare quali livelli di log devono essere abilitati tra quelli previsti dal sistema: ``debug``, ``query``, ``warning`` ed ``error``. Si noti che il livello ``query`` è quello in cui vengono loggate le query SQL e MongoDB che vengono eseguite sui rispettivi database.
+Alternatively, you can specify which log levels should be enabled among those provided by the system: ``debug``, ``query``, ``warning`` and ``error``. Note that the ``query`` level is the level at which the SQL and MongoDB queries that run on the respective databases are logged.
 
-Per specificare esplicitamente i livelli abilitati occorre passare un array al parametro ``log``:
+To explicitly specify the enabled levels, you must set an array in the ``log`` parameter:
 
 ```typescript
 new DAOContext({
@@ -26,21 +26,21 @@ new DAOContext({
 })
 ```
 
-I log prodotti dal sistema hanno la seguente forma:
+The logs produced by the system have the following form:
 ```
 [2022-01-30T14:44:40.120Z] (dao: user, op: findAll, driver: mongo): collection.find({}) [3 ms]
 ```
-Nell'esempio vediamo il log di una query in cui è presente:
-- la data si emissione del log
-- il DAO che ha emesso il log
-- l'operazione a cui è connesso il log
-- il driver utilizzato dal DAO per connettersi al data source
-- la query completa, nel formato dello specifico database
-- il tempo di esecuzione
+In this example, we see the log of a query containing:
+- the date the log was issued
+- the DAO that issued the log
+- the operation to which the log is connected
+- the driver used by the DAO to connect to the data source
+- the full query, in the format of the specific database
+- running time
 
 ## Log long-running queries
 
-Se ci sono problmi di performance o semplicemente c'è la necessità di effettuare un'analisi sui tempi di accesso al dato, è possibile abilitare il log di tutte le operazioni che impiegano troppo tempo ad essere eseguite attraverso il parametro ``maxQueryExecutionTime``. Configurando quindi il ``DAOContext`` come segue:
+If there are performance problems or there is simply the need to perform an analysis on the data access times, it is possible to enable the logging of all operations that take too long to be performed through the ``maxQueryExecutionTime`` parameter. Then configuring the ``DAOContext`` as follows:
 
 ```typescript
 new DAOContext({
@@ -48,24 +48,24 @@ new DAOContext({
 })
 ```
 
-Verranno loggate tutte le operazioni che impiegano più di 2 secondi ad essere eseguite.
+All operations that take more than 2 seconds to be performed will be logged.
 
 ## Custom logger
 
-Typetta fornisce un logger di default che scrive log di quattro diversi livelli direttamente sulla console. Se si vuole customizzare la destinazione dei log, ad esempio inviandoli ad un servizio di terze parti, oppure si vuole semplicemente cambiare il formato aggiungendo o eliminando informazioni rispetto al default, è possibile creare un logger customizzato.
+Typetta provides a default logger that writes logs of four different levels directly on the console. If you want to customise the destination of the logs, for example by sending them to a third-party service, or simply want to change the format by adding or deleting information with respect to the default, you can create a custom logger.
 
-Un logger customizzato consiste in una funzione che l'utente può scrivere e passare al parametro log e che viene invocata ad ogni evento e per ogni livello di log. Questa funzione riceve i seguenti parametri:
-- ``raw``: la stringa prodotta dal logger di default, utile nel caso non si vogli manipolare ma semplicemente inviare ad una destinazione diversa
-- ``date``: la data del log
-- ``level``: il livello del log, tra ``debug``, ``query``, ``warning`` ed ``error``.
-- ``operation``: il nome dell'operazione che ha generato il log, se disponibile
-- ``dao``: il nome del dao la cui operazione ha generato il log, se disponibile
-- ``driver``: il tipo di driver che l'operazione utilizza, tra `mongo` e `knex`
-- ``query``: la query inviata al database, se si tratta di un log di livello ``query``
-- ``duration``: la durata dell'operazione, se disponibile
-- ``error``: l'oggetto di errore, se si tratt di un log di livello ``error``
+A custom logger is a function that the user can write and set to the log parameter and that is invoked at each event and for each log level. This function receives the following parameters:
+- ``raw``: the string produced by the default logger, useful in case you do not want to manipulate it, but simply send it to a different destination
+- ``date``: the date of the log
+- ``level``: the level of the log, among ``debug``, ``query``, ``warning`` and ``error``.
+- ``operation``: the name of the operation that generated the log, if available
+- ``dao``: the name of the dao whose operation generated the log, if available
+- ``driver``: the type of driver that the operation uses, either `mongo` or `knex`
+- ``query``: the query sent to the database, if it is a ``query`` level log
+- ``duration``: the duration of the operation, if available
+- ``error``: the subject of the error, if it is an ``error`` level log
 
-Di seguito un esempio di logger customizzato:
+Here is an example of a custom logger:
 
 ```typescript
 new DAOContext({

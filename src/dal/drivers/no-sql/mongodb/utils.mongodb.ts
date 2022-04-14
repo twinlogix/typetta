@@ -6,6 +6,7 @@ import {
   MONGODB_LOGIC_QUERY_PREFIXS,
   MONGODB_QUERY_PREFIXS,
   MONGODB_SINGLE_VALUE_QUERY_PREFIXS,
+  MONGODB_STRING_QUERY_PREFIX,
 } from '../../../../utils/utils'
 import { DAOGenerics } from '../../../dao/dao.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
@@ -25,6 +26,9 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
       const name = schemaField.alias ?? k
       if ('scalar' in schemaField) {
         return [[name, v]]
+      }
+      if (typeof v === 'object' && Object.keys(v ?? {}).length === 0) {
+        return []
       }
       return [[name, adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded, true)]]
     }
@@ -56,7 +60,8 @@ export function adaptFilter<ScalarsType extends DefaultModelScalars, T extends D
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField) {
-      return [[columnName, adaptToSchema(v, adapters, schemaField)]]
+      const adapted = adaptToSchema(v, adapters, schemaField)
+      return [[columnName, adapted]]
     } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
       return [[columnName, (v as AbstractFilter[]).map((f) => adaptFilter(f, schema, adapters))]]
     } else {
@@ -78,24 +83,39 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
       throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
     } else if (typeof value === 'object' && value !== null && Object.keys(value).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
       // mongodb query
-      return mapObject(value as Record<string, unknown>, ([fk, fv]) => {
+      const filter = value as Record<string, unknown>
+      const mappedFilter = mapObject(filter, ([fk, fv]) => {
         if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
-          return [[fk, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
+          return [[`$${fk}`, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
-          return [[fk, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
+          return [[`$${fk}`, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
         }
-        if (fk === '$contains') {
-          return [['$regex', fv]]
+        if (MONGODB_STRING_QUERY_PREFIX.has(fk)) {
+          return []
         }
-        if (fk === '$startsWith') {
-          return [['$regex', new RegExp(`^${fv}`)]]
-        }
-        if (fk === '$endsWith') {
-          return [['$regex', new RegExp(`${fv}$`)]]
+        if (fk === 'exists') {
+          return [[`$${fk}`, fv]]
         }
         return [[fk, fv]]
       })
+      const stringFilter =
+        'contains' in filter && 'startsWith' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains}).*(?<=${filter.endsWith}$)`) }
+          : 'startsWith' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.endsWith}$)`) }
+          : 'contains' in filter && 'startsWith' in filter
+          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains})`) }
+          : 'contains' in filter && 'endsWith' in filter
+          ? { $regex: new RegExp(`(${filter.contains}).*(?<=${filter.endsWith}$)`) }
+          : 'contains' in filter
+          ? { $regex: filter.contains }
+          : 'startsWith' in filter
+          ? { $regex: new RegExp(`^${filter.startsWith}`) }
+          : 'endsWith' in filter
+          ? { $regex: new RegExp(`${filter.endsWith}$`) }
+          : {}
+      return { ...mappedFilter, ...stringFilter }
     } else {
       // plain value
       if (value === null) {
@@ -111,17 +131,20 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
 }
 
 export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
-  return mapObject(update as any, ([k, v]) => {
+  return mapObject(update as unknown as Record<string, ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][]>, ([k, v]) => {
     if (v === undefined) {
       return []
     }
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
-      const adapter = adapters[schemaField.scalar] ?? identityAdapter
+      const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField) {
-      return [[columnName, adaptUpdate(v, schemaField.embedded, adapters)]]
+      if (schemaField.array) {
+        return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.embedded, adapters)))]]
+      }
+      return [[columnName, v === null ? null : adaptUpdate(v, schemaField.embedded, adapters)]]
     } else {
       return []
     }

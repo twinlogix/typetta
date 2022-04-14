@@ -1,6 +1,6 @@
 import { Coordinates } from '../../src';
 import { BigNumber } from 'bignumber.js';
-import { LocalizedString } from '../../src';
+import { LocalizedString } from '../types';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -27,6 +27,13 @@ export type Address = {
   id: Scalars['ID'];
 };
 
+export type Audit = {
+  __typename?: 'Audit';
+  changes?: Maybe<Scalars['String']>;
+  entityId: Scalars['ID'];
+  id: Scalars['ID'];
+};
+
 export type Auditable = {
   __typename?: 'Auditable';
   createdBy: Scalars['String'];
@@ -35,6 +42,7 @@ export type Auditable = {
   modifiedBy: Scalars['String'];
   modifiedOn: Scalars['Int'];
   state: State;
+  versions: Array<Maybe<Audit>>;
 };
 
 export type City = {
@@ -125,7 +133,9 @@ export type User = {
   __typename?: 'User';
   amount?: Maybe<Scalars['Decimal']>;
   amounts?: Maybe<Array<Scalars['Decimal']>>;
+  credentials?: Maybe<Array<Maybe<UsernamePasswordCredentials>>>;
   dogs?: Maybe<Array<Dog>>;
+  embeddedPost?: Maybe<Post>;
   firstName?: Maybe<Scalars['String']>;
   friends?: Maybe<Array<User>>;
   friendsId?: Maybe<Array<Scalars['ID']>>;
