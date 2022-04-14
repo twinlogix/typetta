@@ -3,7 +3,6 @@ import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
 import knex, { Knex } from 'knex'
 import { Db, MongoClient } from 'mongodb'
-import { MongoMemoryReplSet } from 'mongodb-memory-server'
 
 export type OneKey<K extends string | number | symbol, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
@@ -157,13 +156,6 @@ export function deepMerge(weak: any, strong: any): any {
     }
   })
   return result
-}
-
-export async function inMemoryMongoDb(): Promise<{ replSet: MongoMemoryReplSet; connection: MongoClient; db: Db }> {
-  const replSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } })
-  const connection = await MongoClient.connect(replSet.getUri(), {})
-  const db = connection.db('__mock')
-  return { replSet, connection, db }
 }
 
 export function inMemoryKnexConfig(): Knex.Config {

@@ -4,8 +4,8 @@ import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
-import { MongoMemoryServer } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
+import { MongoMemoryServer } from 'mongodb-memory-server'
 
 jest.setTimeout(20000)
 
@@ -114,9 +114,9 @@ test('Test mongo', async () => {
   const cr = await dao.c.findOne({ filter: { id: c.id } })
 
   expect(b.id.startsWith('entity_b')).toBe(true)
-  expect(ar!.value).toBe(10)
-  expect(br!.value).toBe(20)
-  expect(cr!.value).toBe(30)
+  expect(ar?.value).toBe(10)
+  expect(br?.value).toBe(20)
+  expect(cr?.value).toBe(30)
 })
 
 test('Test sql', async () => {
@@ -132,11 +132,11 @@ test('Test sql', async () => {
   const d2 = await dao.d.insertOne({ record: { value: 11 } }) // id generated from db
   const d2r = await dao.d.findOne({ filter: { id: d2.id } })
 
-  expect(dr!.value).toBe(10)
-  expect(d2r!.value).toBe(110)
-  expect(d2r!.id).toBe(2)
-  expect(er!.value).toBe(20)
-  expect(fr!.value).toBe(30)
+  expect(dr?.value).toBe(10)
+  expect(d2r?.value).toBe(110)
+  expect(d2r?.id).toBe(2)
+  expect(er?.value).toBe(20)
+  expect(fr?.value).toBe(30)
 })
 
 afterAll(async () => {
