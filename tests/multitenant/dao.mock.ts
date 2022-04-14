@@ -1,6 +1,6 @@
-import { MockDAOContextParams, createMockedDAOContext, DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
+import { DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
 import * as types from './models.mock'
-import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO, inMemoryMongoDb } from '../../src'
+import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src'
 import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb'
 
 //--------------------------------------------------------------------------------
@@ -78,9 +78,9 @@ export type HotelInsert = {
 
 type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', 'db', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel', DAOContext<MetadataType, OperationMetadataType>>
 export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends HotelProjection>(p: P) {
     return p
@@ -103,8 +103,32 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends HotelProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends HotelProjection, P2 extends HotelProjection>(p1: P1, p2: P2): SelectProjection<HotelProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<HotelProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryHotelDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: hotelSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -185,9 +209,9 @@ export type ReservationInsert = {
 
 type ReservationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Reservation, 'id', 'ID', 'db', ReservationFilter, ReservationRawFilter, ReservationRelations, ReservationProjection, ReservationSort, ReservationRawSort, ReservationInsert, ReservationUpdate, ReservationRawUpdate, ReservationExcludedFields, ReservationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'reservation', DAOContext<MetadataType, OperationMetadataType>>
 export type ReservationDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<ReservationDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryReservationDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<ReservationDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class ReservationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ReservationDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class ReservationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<ReservationDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends ReservationProjection>(p: P) {
     return p
@@ -210,8 +234,32 @@ export class ReservationDAO<MetadataType, OperationMetadataType> extends Abstrac
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryReservationDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<ReservationDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends ReservationProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends ReservationProjection, P2 extends ReservationProjection>(p1: P1, p2: P2): SelectProjection<ReservationProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<ReservationProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryReservationDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: reservationSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'room', refFrom: 'roomId', refTo: 'id', dao: 'room', required: false }
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -292,9 +340,9 @@ export type RoomInsert = {
 
 type RoomDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Room, 'id', 'ID', 'db', RoomFilter, RoomRawFilter, RoomRelations, RoomProjection, RoomSort, RoomRawSort, RoomInsert, RoomUpdate, RoomRawUpdate, RoomExcludedFields, RoomRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'room', DAOContext<MetadataType, OperationMetadataType>>
 export type RoomDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<RoomDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryRoomDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<RoomDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class RoomDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class RoomDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends RoomProjection>(p: P) {
     return p
@@ -317,8 +365,32 @@ export class RoomDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryRoomDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends RoomProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends RoomProjection, P2 extends RoomProjection>(p1: P1, p2: P2): SelectProjection<RoomProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<RoomProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryRoomDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: roomSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-1', reference: 'inner', field: 'hotel', refFrom: 'hotelId', refTo: 'id', dao: 'hotel', required: true }
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -374,9 +446,9 @@ export type TenantInsert = {
 
 type TenantDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Tenant, 'id', 'Int', 'user', TenantFilter, TenantRawFilter, TenantRelations, TenantProjection, TenantSort, TenantRawSort, TenantInsert, TenantUpdate, TenantRawUpdate, TenantExcludedFields, TenantRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'tenant', DAOContext<MetadataType, OperationMetadataType>>
 export type TenantDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<TenantDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryTenantDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<TenantDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class TenantDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<TenantDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class TenantDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<TenantDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends TenantProjection>(p: P) {
     return p
@@ -399,8 +471,32 @@ export class TenantDAO<MetadataType, OperationMetadataType> extends AbstractMong
       idScalar: 'Int' 
     })
   }
+  }
+
+export class InMemoryTenantDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<TenantDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends TenantProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends TenantProjection, P2 extends TenantProjection>(p1: P1, p2: P2): SelectProjection<TenantProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<TenantProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryTenantDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: tenantSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'user', 
+      idScalar: 'Int' 
+    })
+  }
+  }
 
 
 
@@ -506,9 +602,9 @@ export type UserInsert = {
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', 'db', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
-  
+export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends UserProjection>(p: P) {
     return p
@@ -531,8 +627,32 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       idScalar: 'ID' 
     })
   }
+  }
+
+export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
   
-}
+  public static projection<P extends UserProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): SelectProjection<UserProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<UserProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: userSchema(), 
+      relations: overrideRelations(
+        [
+          { type: '1-n', reference: 'foreign', field: 'reservations', refFrom: 'userId', refTo: 'id', dao: 'reservation', required: true }
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
 
 
 
@@ -575,7 +695,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     tenant?: Pick<Partial<TenantDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   },
-  mongodb: Record<'default', Db>,
+  mongodb: Record<'default', Db | 'mock'>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
   log?: LogInput<'hotel' | 'reservation' | 'room' | 'tenant' | 'user'>,
   security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
@@ -592,7 +712,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
-  private mongodb: Record<'default', Db>
+  private mongodb: Record<'default', Db | 'mock'>
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
@@ -600,31 +720,36 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   get hotel() : HotelDAO<MetadataType, OperationMetadataType> {
     if(!this._hotel) {
-      this._hotel = new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: this.mongodb.default.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger })
+      const db = this.mongodb.default
+      this._hotel = db === 'mock' ? (new InMemoryHotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger }) as unknown as HotelDAO<MetadataType, OperationMetadataType>) : new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: db.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger })
     }
     return this._hotel
   }
   get reservation() : ReservationDAO<MetadataType, OperationMetadataType> {
     if(!this._reservation) {
-      this._reservation = new ReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, collection: this.mongodb.default.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger })
+      const db = this.mongodb.default
+      this._reservation = db === 'mock' ? (new InMemoryReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger }) as unknown as ReservationDAO<MetadataType, OperationMetadataType>) : new ReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, collection: db.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger })
     }
     return this._reservation
   }
   get room() : RoomDAO<MetadataType, OperationMetadataType> {
     if(!this._room) {
-      this._room = new RoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, collection: this.mongodb.default.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger })
+      const db = this.mongodb.default
+      this._room = db === 'mock' ? (new InMemoryRoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger }) as unknown as RoomDAO<MetadataType, OperationMetadataType>) : new RoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, collection: db.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger })
     }
     return this._room
   }
   get tenant() : TenantDAO<MetadataType, OperationMetadataType> {
     if(!this._tenant) {
-      this._tenant = new TenantDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tenant, collection: this.mongodb.default.collection('tenants'), middlewares: [...(this.overrides?.tenant?.middlewares || []), ...selectMiddleware('tenant', this.middlewares) as DAOMiddleware<TenantDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tenant', logger: this.logger })
+      const db = this.mongodb.default
+      this._tenant = db === 'mock' ? (new InMemoryTenantDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tenant, middlewares: [...(this.overrides?.tenant?.middlewares || []), ...selectMiddleware('tenant', this.middlewares) as DAOMiddleware<TenantDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tenant', logger: this.logger }) as unknown as TenantDAO<MetadataType, OperationMetadataType>) : new TenantDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tenant, collection: db.collection('tenants'), middlewares: [...(this.overrides?.tenant?.middlewares || []), ...selectMiddleware('tenant', this.middlewares) as DAOMiddleware<TenantDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tenant', logger: this.logger })
     }
     return this._tenant
   }
   get user() : UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: this.mongodb.default.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
+      const db = this.mongodb.default
+      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: db.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
     }
     return this._user
   }
@@ -645,8 +770,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { mongodb: Record<'default', Db> }, entities: { hotel: Collection<Document>, reservation: Collection<Document>, room: Collection<Document>, tenant: Collection<Document>, user: Collection<Document> }) => Promise<T>): Promise<T> {
-    return run({ mongodb: this.mongodb }, { hotel: this.mongodb.default.collection('hotels'), reservation: this.mongodb.default.collection('reservations'), room: this.mongodb.default.collection('rooms'), tenant: this.mongodb.default.collection('tenants'), user: this.mongodb.default.collection('users') })
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'default', Db | 'mock'> }, entities: { hotel: Collection<Document> | null, reservation: Collection<Document> | null, room: Collection<Document> | null, tenant: Collection<Document> | null, user: Collection<Document> | null }) => Promise<T>): Promise<T> {
+    return run({ mongodb: this.mongodb }, { hotel: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('hotels'), reservation: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('reservations'), room: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('rooms'), tenant: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('tenants'), user: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('users') })
   }
   
   
@@ -707,8 +832,4 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         : []
       : [m],
   )
-}
-export async function mockedDAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never>(params: MockDAOContextParams<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>) {
-  const newParams = await createMockedDAOContext<DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>>(params, ['default'], [])
-  return new DAOContext(newParams)
 }

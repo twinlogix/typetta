@@ -25,7 +25,7 @@ export type MongoDBDAOGenerics<
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
   NameType extends string = any,
-  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = any,
+  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = AbstractDAOContext<ScalarsType, MetadataType>,
 > = DAOGenerics<
   ModelType,
   IDKey,

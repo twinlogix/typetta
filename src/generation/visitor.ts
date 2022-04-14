@@ -205,6 +205,9 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     if ((mongoEntityDirective || sqlEntityDirective || memoryEntityDirective) && !entityEntityDirective) {
       throw new Error(`Directives @${Directives.MONGO} and @${Directives.SQL} and @${Directives.MEMORY} must be defined with @${Directives.ENTITY}.`)
     }
+    if(entityEntityDirective && !mongoEntityDirective && !sqlEntityDirective && !memoryEntityDirective) {
+      throw new Error(`Directives @${Directives.ENTITY} need to specify a driver: @${Directives.MONGO} and @${Directives.SQL} and @${Directives.MEMORY}.`)
+    }
 
     return {
       type: 'type',
@@ -215,8 +218,6 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         ? { type: 'sql', table, source: knexSource }
         : memoryEntityDirective
         ? { type: 'memory' }
-        : entityEntityDirective
-        ? { type: 'mongo', collection: toFirstLower(plainName) + 's', source: '__mock' }
         : undefined,
       fields,
     }

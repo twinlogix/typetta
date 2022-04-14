@@ -1,10 +1,11 @@
-import { inMemoryMongoDb, SecurityPolicyReadError } from '../../src'
+import { SecurityPolicyReadError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
 import { DAOContext, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
+import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 
