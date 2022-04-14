@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AbstractDAOContext, DAOGenerics, DAOParams, IdGenerationStrategy, OmitIfKnown } from '../../..'
+import { AbstractDAOContext, DAOGenerics, DAOParams, OmitIfKnown } from '../../..'
 import { DefaultModelScalars } from '../drivers.types'
 
 export type InMemoryDAOGenerics<
   ModelType extends object = any,
   IDKey extends keyof OmitIfKnown<ModelType, ExcludedFields> = any,
   IDScalar extends keyof ScalarsType = any,
-  IdGeneration extends IdGenerationStrategy = any,
   PureFilterType = any,
   RawFilterType = any,
   RelationsType = any,
@@ -27,7 +26,6 @@ export type InMemoryDAOGenerics<
   ModelType,
   IDKey,
   IDScalar,
-  IdGeneration,
   PureFilterType,
   RawFilterType,
   RelationsType,

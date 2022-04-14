@@ -1,6 +1,7 @@
 import { Coordinates } from '../../src';
 import { BigNumber } from 'bignumber.js';
 import { LocalizedString } from '../types';
+import { ObjectId } from 'mongodb';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -18,6 +19,7 @@ export type Scalars = {
   JSON: any;
   Live: boolean;
   LocalizedString: LocalizedString;
+  MongoID: ObjectId;
   Password: any;
 };
 
@@ -89,7 +91,7 @@ export type Hotel = {
 
 export type MockedEntity = {
   __typename?: 'MockedEntity';
-  id: Scalars['ID'];
+  id: Scalars['MongoID'];
   name: Scalars['String'];
   user: User;
   userId: Scalars['ID'];

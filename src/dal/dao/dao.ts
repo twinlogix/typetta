@@ -16,6 +16,7 @@ import {
   AggregatePostProcessing,
   FindOneParams,
   DriverType,
+  IdGenerationStrategy,
 } from './dao.types'
 import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
@@ -37,7 +38,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   protected idField: T['idKey']
   protected idScalar: T['idScalar']
-  protected idGeneration: T['idGeneration']
+  protected idGeneration: IdGenerationStrategy
   protected daoContext: T['daoContext']
   protected relations: DAORelation[]
   protected middlewares: DAOMiddleware<T>[]
