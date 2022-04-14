@@ -648,6 +648,31 @@ test('simple delete', async () => {
   expect(user2).toBeNull()
 })
 
+test('simple delete', async () => {
+  await dao.user.insertOne({ record: { firstName: 'FirstName', live: false } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName', live: false } })
+
+  const users1 = await dao.user.findAll()
+  expect(users1.length).toBe(3)
+
+  await dao.user.deleteAll({ filter: { live: false } })
+
+  const users2 = await dao.user.findAll()
+  expect(users2.length).toBe(1)
+
+  const u1 = await dao.user.insertOne({ record: { firstName: 'FirstName', live: false } })
+  const u2 = await dao.user.insertOne({ record: { firstName: 'FirstName', live: false } })
+
+  const users3 = await dao.user.findAll()
+  expect(users3.length).toBe(3)
+
+  await dao.user.deleteAll({ filter: { id: { in: [u1.id, u2.id] } } })
+
+  const users4 = await dao.user.findAll()
+  expect(users4.length).toBe(1)
+})
+
 // ------------------------------------------------------------------------
 // --------------------------- GEOJSON FIELD ------------------------------
 // ------------------------------------------------------------------------
