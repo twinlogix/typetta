@@ -378,8 +378,8 @@ test('insert validation fails', async () => {
       },
     })
     fail()
-  } catch (error: any) {
-    expect(error.message).toBe('Password must be 3 character or more.')
+  } catch (error: unknown) {
+    expect((error as Error).message).toBe('Password must be 3 character or more.')
   }
 })
 
@@ -448,8 +448,8 @@ test('update validation fails', async () => {
       changes: { 'usernamePasswordCredentials.password': 'p' },
     })
     fail()
-  } catch (error: any) {
-    expect(error.message).toBe('Password must be 3 character or more.')
+  } catch (error: unknown) {
+    expect((error as Error).message).toBe('Password must be 3 character or more.')
   }
 })
 
@@ -475,8 +475,8 @@ test('replace validation fails', async () => {
       },
     })
     fail()
-  } catch (error: any) {
-    expect(error.message).toBe('Password must be 3 character or more.')
+  } catch (error: unknown) {
+    expect((error as Error).message).toBe('Password must be 3 character or more.')
   }
 })
 
@@ -887,8 +887,8 @@ test('Inner ref required', async () => {
   try {
     await dao.post.findOne({ filter: { id: post0.id }, projection: { author: true } })
     fail()
-  } catch (error: any) {
-    expect((error.message as string).startsWith('dao: post'))
+  } catch (error: unknown) {
+    expect(((error as Error).message as string).startsWith('dao: post'))
   }
 })
 
