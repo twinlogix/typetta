@@ -1,6 +1,7 @@
-import { LogArgs } from '../../../..'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { isEmptyProjection, LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
-import { filterUndefiend, mapObject } from '../../../../utils/utils'
+import { filterNullFields, filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators } from '../../../dao/filters/filters.types'
@@ -45,6 +46,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
 
   private dbToModel(object: any): PartialDeep<T['model']> {
     const unflatted = unflatEmbdeddedFields(this.schema, object)
+    //Remove null fields
+    for (const key of Object.keys(this.schema)) {
+      const schemaField = this.schema[key]
+      const value = unflatted[schemaField.alias ?? key]
+      if (!schemaField.required && value === null) {
+        delete unflatted[schemaField.alias ?? key]
+      }
+    }
     return transformObject(this.daoContext.adapters.knex, 'dbToModel', unflatted, this.schema)
   }
 
@@ -94,7 +103,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         if (params.limit === 0) {
           return { skipReason: 'Limit is 0. Skip.' }
         }
-        const select = this.buildSelect(params.projection)
+        const select = isEmptyProjection(params.projection) ? this.qb().select([this.schema[this.idField].alias ?? this.idField]) : this.buildSelect(params.projection)
         const where = this.buildWhere(params.filter, select)
         const sort = this.buildSort(params.sorts, where)
         return this.buildTransaction(params.options, sort)
@@ -187,7 +196,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return this.runQuery(
       'insertOne',
       () => {
-        const record = this.modelToDb(filterUndefiend<PartialDeep<T['model']>>(params.record))
+        const r = filterNullFields<PartialDeep<T['model']>>(filterUndefiendFields<PartialDeep<T['model']>>(params.record))
+        const record = this.modelToDb(r)
         const query = this.qb().insert(record, '*')
         return this.buildTransaction(params.options, query)
       },
@@ -293,7 +303,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 
-  protected _driver(): 'mongo' | 'knex' {
+  protected _driver(): Exclude<LogArgs<string>['driver'], undefined> {
     return 'mongo'
   }
 }

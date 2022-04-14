@@ -16,7 +16,9 @@ export type DataTypeAdapter<ModelType, DBType> = {
   generate?: () => ModelType
 }
 
-export const identityAdapter: DataTypeAdapter<any, any> = {
-  dbToModel: (o: unknown) => o,
-  modelToDB: (o: unknown) => o,
+export function identityAdapter<T>(): DataTypeAdapter<T, T> {
+  return {
+    dbToModel: (o: T) => o,
+    modelToDB: (o: T) => o,
+  }
 }

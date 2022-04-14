@@ -1,7 +1,7 @@
 # Roadmap
 
-Il core team di **Typetta** lavora al consolidamento e all'evoluzione del prodotto con una scaletta di priorità dettata principalmente dalle richieste degli utilizzatori. La nostra roadmap è viene utilizzata sia internamente che esternamente come riferimento per le nuove funzionalità, ma può essere soggetta a modifiche sia per motivi tecnici che strategici.
+**Typetta's** core team works on the consolidation and evolution of the product with a priority ladder mainly dictated by user requests. Our roadmap is used both internally and externally as a reference for new features, but may be subject to change for both technical and strategic reasons.
 
-Se pensi che ci sia una funzionalità o un fix urgenti, che debbano essere considerati il prima possibile, ti inviatiamo a creare un issue o ad aprire una discussione sul [repository GitHub](https://github.com/twinlogix/typetta) di Typetta.
+If you think there is an urgent feature or fix, which should be considered as soon as possible, we invite you to create an issue or open a discussion onTypetta's [GitHub repository](https://github.com/twinlogix/typetta).
 
-Il modo migliore per consultare la nostra roadmap è consultare le [milestone sul repository GitHub](https://github.com/twinlogix/typetta/milestones) e gli issues ad esse collegati.
+The best way to consult our roadmap is to consult the [milestones on the GitHub repository](https://github.com/twinlogix/typetta/milestones) and the issues connected to them.

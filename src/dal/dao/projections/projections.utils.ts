@@ -1,5 +1,6 @@
 import { GenericProjection, IntersectGenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
+import { PartialDeep } from 'type-fest'
 
 export type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
   ? ProjectionType
@@ -271,4 +272,11 @@ function tail(array: string[]): string[] {
   } else {
     return []
   }
+}
+
+export function isEmptyProjection(p: PartialDeep<GenericProjection> | undefined): boolean {
+  if (p === undefined || p === true || p === false) {
+    return false
+  }
+  return Object.values(p).filter((v) => v !== undefined && !isEmptyProjection(v)).length === 0
 }

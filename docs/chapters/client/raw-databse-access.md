@@ -1,33 +1,33 @@
-# Accesso diretto al database
+# Direct access to the database
 
-La filosofia di Typetta è quella di **uniformare**, **semplificare** e **tipizzare** tutto ciò che può essere comune tra le varie sorgenti dati e al tempo stesso non togliere alcuna possibilità all'utente nell'utilizzo delle **funzioni avanzate** dei sottostanti database. 
+Typetta's philosophy is to **standardise**, **simplify** and **typify** everything that can be shared among the various data sources and at the same time not take away any possibility from the user in the use of the **advanced features** of the underlying databases.
 
-Se un utente necessità di una particolare funzionalità fornita solo da uno dei driver supportati, con la sua sintassi specifica, deve poterlo fare senza dover rinunciare a tutte le altre facilitazioni che Typetta offre. Questo approccio segue il principio generale a cui ci si è attenuti nella progettazione dell'intero sistema: aggiungere complessità per l'utilizzatore solo quando questi ne necessita e solo nei punti in cui ne necessita.
+If a user needs a particular feature provided only by one of the supported drivers, with its specific syntax, they must be able to do so without having to give up all the other facilities that Typetta offers. This approach follows the general principle that has been adhered to in the design of the entire system: adding complexity for the user only when and where they need it.
 
-Typetta offre quindi all'utente la possibilità di creare interrogazioni specifiche a diversi livelli:
-  - [Filtri dipendenti dal driver](#filtri-dipendenti-dal-driver)
-  - [Ordinamenti dipendenti dal driver](#ordinamenti-dipendenti-dal-driver)
-  - [Updates dipendenti dal driver](#updates-dipendenti-dal-driver)
+Typetta therefore offers the user the possibility to create specific queries at different levels:
+  - [Driver-dependent filters](#driver-dependent-filters)
+  - [Driver-dependent sorts](#driver-dependent-sorts)
+  - [Driver-dependent updates](#driver-dependent-updates)
   - [Raw queries](#raw-queries)
-  
-## Filtri dipendenti dal driver
 
-Tutte le API che ricevono il parametro `filter` accettano, a discrezione dell'utente, una funzione che permette di esprimere il filtro utilizzando riferimenti, sintassi e potenzialità del driver sottostante.
+## Driver-dependent filters
 
-Questo approccio permette di accedere alle potenzialità del database in utilizzo senza però rinunciare a tutte le altre funzionalità che offre Typetta, nello specifico il meccanismo di proiezioni, la risoluzione delle relazioni ed il typing dei risultati. Una descrizione più di dettaglio di questa funzionalità è fornita nell'apposita [sezione sull'utilizzo dei filtri](filters.md#filtri-avanzati-dipendenti-dal-driver) di questa guida.
+All APIs that receive the `filter` parameter accept, at the user's discretion, a function that allows the filter to be applied using the references, syntax and potential of the underlying driver.
 
-## Ordinamenti dipendenti dal driver
+This approach allows you to access the potential of the database in use without sacrificing all the other features that Typetta offers, specifically the projection mechanism, the resolution of relationships and the typing of results. A more detailed description of this feature is provided in the [filter usage section](filters#advanced-driver-dependent-filters) of this guide.
 
-Così come per il filtri, tutte le API che ricevono il parametro `sorts` accettano, a discrezione dell'utente, una funzione che permette di esprimere il l'ordinamento utilizzando riferimenti, sintassi e potenzialità del driver sottostante. Una descrizione più di dettaglio di questa funzionalità è fornita nell'apposita [sezione sull'utilizzo degli ordinamenti](sorting.md#ordinamenti-avanzati-dipendenti-dal-driver) di questa guida.
+## Driver-dependent sorts
 
-## Updates dipendenti dal driver
+As with the filters, all APIs that receive the `sorts` parameter accept, at the user's discretion, a function that allows for sorting using the references, syntax and potential of the underlying driver. A more detailed description of this feature is provided in the [sorting usage section](sorts#advanced-driver-dependent-sorts) of this guide.
 
-La terza possibilità di customizzazione che fa uso delle funzionalità dirette del driver è la definizione del parametro `changes` delle API `updateOne` e `updateAll`.
+## Driver-dependent updates
 
-In pseudo-codice questa possibilità è esemplificata di seguito:
+The third customisation option that makes use of the direct functions of the driver is the definition of the `changes` parameter of the `updateOne` and `updateAll` APIs.
+
+This possibility is exemplified in pseudo-code below:
 ```typescript
 await daoContext.user.updateOne({
-  filter: { 
+  filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
   changes: (/* driverRefs... */) => {
@@ -38,53 +38,53 @@ await daoContext.user.updateOne({
 
 ### MongoDB
 
-Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}, la creazione di un oggetto di update specifico consiste in una funzione che ritorna `UpdateFilter<TSchema>`. 
+Since the MongoDB driver is developed through the [official MongoDB Node Driver](https://docs.mongodb.com/drivers/node/current/){:target="_blank"}, creating a specific update object consists of a function returned by `UpdateFilter<TSchema>`.
 
-Ipotizziamo per esempio di voler utilizzare l'operatore `$inc` di MongoDB per incrementare il valore di un campo numerico senza necessariamente leggerlo precedentemente. Con il meccanismo di changes specifiche per il driver è possibile scrivere una query come segue:
+Let's assume, for example, that you want to use the `inc` operator of MongoDB to increase the value of a numeric field without necessarily reading it beforehand. With the driver-specific changes mechanism, you can write a query as follows:
 
 ```typescript
 await daoContext.user.updateOne({
-  filter: { 
+  filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
   changes: () => {
-    $inc: { ordersCount: 1 }
+    inc: { ordersCount: 1 }
   }
 })
 ```
 
 ### SQL
 
-Il driver SQL, come già accennato in precedenza, è sviluppato utilizzando il celebre query builder [KnexJS](https://knexjs.org/){:target="_blank"}. La creazione di una query di update in questo caso consiste nell'invocazione di una serie di metodi sull'oggetto `Knex.QueryBuilder`.
+The SQL driver, as mentioned above, is developed using the popular [KnexJS](https://knexjs.org/){: target="_blank"} query builder. Creating an update query in this case involves invoking a set of methods from the object `Knex.QueryBuilder`.
 
-Ipotizziamo per esempio di voler implementare anche in questo caso un'operazione di incremento di un campo tramite le funzionalità offerte da un database target PostgreSQL. Con il meccanismo di changes specifiche possiamo creare un update come segue:
+Let's assume, for example, that we again want to implement an operation to increase a field through the features offered by a PostgreSQL target database. Using the specific changes mechanism, we can create an update as follows:
 
 ```typescript
 await daoContext.user.udpateOne({
-  filter: { 
+  filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
   changes: (builder: Knex.QueryBuilder) => {
     builder.update({ ordersCount: knex.raw('?? + 1', ['ordersCount']) })
     return builder;
-  } 
+  }
 })
 ```
 
 ## Raw queries
 
-L'ultima possibilità di utilizzo di funzionalità di basso livello è costituita dall'API `execQuery` messa a disposizione direttamente dal `DAOContext`. Essa permette di eseguire una qualsiasi operazione (o più di una) utilizzando direttamente le API del driver sottostante.
+The last option to use low-level functionality is the `execQuery` API provided directly by the `DAOContext`. It allows you to perform any operation (or more than one), directly using the underlying driver APIs.
 
-Di seguito un semplice esempio in cui si utilizza direttamente il driver MongoDB per creare un indice sulla collection contenente l'entità user:
+Here is a simple example where you directly use the MongoDB driver to create an index on the collection containing the user entity:
 ```typescript
 await daoContext.execQuery(async (dbs, collections) => {
   await collections.user.createIndex({ firstName: 'text' })
 })
 ```
 
-Si noti che la funzione riceve un primo parametro (nell'esempio `dbs`) che è una mappa dei riferimenti alle sorgenti dati con cui il `DAOContext` viene inizializzato e un secondo parametro (nell'esempio lo abbiamo chiamato `collections`) che è una mappa dei riferimenti alle singole sorgenti dati di ogni entità. Nel caso specifico `collections` è una mappa delle collections MongoDB di ogni entità definita nel modello applicativo.
+Note that the function receives a first parameter (`dbs` in the example), which is a map of the references to the data sources with which the `DAOContext` is initialised and a second parameter (in the example we called it `collections`) which is a map of the references to the individual data sources of each entity. In this case, `collections` is a map of the MongoDB collections of each entity defined in the application model.
 
-E' anche possibile scrive query con un valore di ritorno, il cui tipo viene inferito automaticamente dal compilatore in base al ritorno della funzione fornita. Di seguito un esempio in cui si ricerca la presenza di un indice su una collection MongoDB, il cui risultato è `true/false`:
+You can also write queries with a return value, the type of which is automatically inferred by the compiler based on the return of the function provided. Below is an example that looks for the presence of an index on a MongoDB collection, the result of which is `true/false`:
 
 ```typescript
 const firstNameIndexExists = await daoContext.execQuery(async (dbs, collections) => {
@@ -95,5 +95,5 @@ if (!firstNameIndexExists) {
 }
 ```
 
-L'API `rawQuery` offre quindi la massima flessibilità, a discapito di tutte le funzionalità di utilità introdotte da Typetta, che in questo caso non fa altro che veicolare i dati verso il database. Questo significa che i dati ritornati dall'invocazione diretta del database non sono soggetti a `Middlewares`, a `ScalarAdapters` e a qualsiasi altro pro/post processing effettuato da Typetta.
+The `rawQuery` API therefore offers maximum flexibility, to the detriment of all the utility features introduced by Typetta, which in this case only conveys the data to the database. This means that data returned from a direct call to the database is not subject to `Middlewares`, `ScalarAdapters` and any other pre/post processing performed by Typetta.
 

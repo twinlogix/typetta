@@ -1,13 +1,13 @@
-# Paginazione
+# Pagination
 
-La paginazione dei risultati può generalmente essere effettuata in due modi:
+Pagination of results can generally be done in two ways:
 
-  - [Paginazione tramite offset](#paginazione-tramite-offset)
-  - [Paginazione tramite cursore *[presto disponibile]*](#paginazione-tramite-cursore-presto-disponibile)
+  - [Offset Pagination](#offset-pagination)
+  - [Cursor pagination *[coming soon]*](#cursor-pagination-coming-soon)
 
-## Paginazione tramite offset
+## Offset Pagination
 
-La paginazione tramite offset prevede l'utilizzo di due parametri `skip` e `limit` per definire da quale record partire e limitare il numero totale dei risultati. La seguente lettura permette di recuperare 10 utenti partendo dal terzo (saltando quindi i primi due).
+Offset pagination uses two `skip` and `limit` parameters to define which record to start from and limit the total number of results. The following reading allows you to retrieve 10 users starting from the third (thus skipping the first two).
 
 ```typescript
 const users = await daoContext.user.findAll({
@@ -16,6 +16,6 @@ const users = await daoContext.user.findAll({
 })
 ```
 
-## Paginazione tramite cursore *[presto disponibile]*
+## Cursor pagination *[coming soon]*
 
-Questa funzionalità non è ancora disponibile ed è attualmente in fase di progettazione.
+This feature is not yet available and is currently being designed.

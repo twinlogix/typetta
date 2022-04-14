@@ -1,27 +1,27 @@
 # Getting Started
 
-This tutorial allows you to explore all basic Typetta functionalities providing step by step examples starting from installation and following with the usage of this ORM on a NodeJS Typescript based project.
+This tutorial allows you to explore all basic Typetta functionalities providing step-by-step examples starting from installation and following with the use of this ORM on a NodeJS Typescript-based project.
 
   - [Installation](#installation)
   - [Project structure](#project-structure)
-  - [The data model](#data-model)
+  - [The data model](#the-data-model)
   - [Code generation](#code-generation)
-  - [A simple application](#simple-application)
+  - [A simple application](#a-simple-application)
 
 ## Installation
 
-Typetta is a small sized package that can be installed using npm on any TypeScript project. The only explicit dependency is GraphQL. Both can be very simply added to a project using npm:
+Typetta is a small-sized package that can be installed using npm on any TypeScript project. The only explicit requirement is GraphQL. Both can be very simply added to a project using npm:
 ```bash
 npm install @twinlogix/typetta --save
 ```
 
 ## Project structure
 
-Typetta does not depend on a specific project structure and therefore can be fully configurable. For our example we can think of having a TypeScript project structure like the following:
+Typetta does not depend on a specific project structure and therefore is fully configurable. For our example, we may consider having a TypeScript project structure like the following:
 ```
 MyProject
  ┣ src
- ┃  ┗ index.ts 
+ ┃  ┗ index.ts
  ┣ package.json
  ┗ tsconfig.json
 ```
@@ -29,23 +29,21 @@ MyProject
 All you need is to add a data model in GraphQL language, typically found in src directory in a file named *schema.graphql* and also a config file named *codegen.yml* in the root for code generation purposes.
 
 The updated project structure becomes the following:
-<pre>
-MyProject
+<pre>MyProject
  ┣ src
  ┃  ┣ <b style="color: #bf1c31;">schema.graphql</b>
- ┃  ┗ index.ts 
+ ┃  ┗ index.ts
  ┣ package.json
  ┣ tsconfig.json
- ┗ <b style="color: #bf1c31;">codegen.yml</b>
-</pre>
+ ┗ <b style="color: #bf1c31;">codegen.yml</b></pre>
 
 ## The data model
 
-Inside the file *schema.graphql* you will have to insert the data model in GraphQL language. For a complete GraphQL syntax guide please refer directly to the official web site [graphql.org](https://graphql.org/learn/){:target="_blank"}.
+Inside the file *schema.graphql*, you will have to insert the data model in GraphQL language. For a complete GraphQL syntax guide please refer directly to the official web site [graphql.org](https://graphql.org/learn/){:target="_blank"}.
 
-Typetta relies on customized directives to extend the standard model definitions allowing the developer to specify very useful details in binding to the data source. For a complete guide refer to section [Cos'è un'entità?](../data-model/entities).
+Typetta relies on customised directives to extend the standard model definitions allowing the developer to specify very useful details linked to the data source. For a complete guide, refer to the section [What is an entity?](../data-model/entities).
 
-Here below you can see the simple definition of a User with a first and a last name.
+Below, you can see the simple definition of a User with a first and a last name.
 ```typescript
 type User @entity @mongodb {
   id: ID! @id
@@ -56,14 +54,14 @@ type User @entity @mongodb {
 
 ## Code generation
 
-With Typetta, using a standard language such as GraphQL to model the application enables the developer to use many third party tools and libraries. As a consequence, the developing an application becomes a much quicker and productive experience.
+With Typetta, using a standard language such as GraphQL to model the application enables the developer to use many third-party tools and libraries. As a consequence, developing an application becomes a much quicker and more productive experience.
 
-Code generation in Typetta relies on [GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"} a very customizable and extensible library.
-GraphQL Code Generator enables the developer to choose between many standard generators as well as our embedded generator that automatically provides DAO in TypeScript language.
+Code generation in Typetta relies on [GraphQL Code Generator](https://www.graphql-code-generator.com){:target="_blank"}, a very customizable and extensible library.
+GraphQL Code Generator enables the developer to choose from many standard generators as well as our embedded generator that automatically provides DAO in TypeScript language.
 
-Typetta already includes all default dependencies to use the TypeScript generator but it's also possible to add other generators following the official guide.
+Typetta already includes all default dependencies to use the TypeScript generator, but it's also possible to add other generators following the official guide.
 
-It's now time to configure with a minimum effort our first *codegen.yml*. This operation will enable the code generation.
+It's now time to configure our first *codegen.yml* with a minimum of effort. This operation will enable the code generation.
 
 ```yaml
 schema: "src/schema.graphql"
@@ -80,7 +78,7 @@ generates:
 
 ```
 
-To allow code generation it's also useful to edit the file *package.json* inserting the following script:
+To allow for code generation, it's also useful to edit the *package.json* file by inserting the following script:
 ```json
 {
   "scripts": {
@@ -89,17 +87,17 @@ To allow code generation it's also useful to edit the file *package.json* insert
 }
 ```
 
-Now let's do our first code generation running the following command:
+Now let's carry out our first code generation by running the following command:
 
 ```bash
 npm run generate
 ```
 
-Using the above setup, the code generation command will create two files: *src/models.ts* with all TypeScript types included in *schema.graphql* and another file *src/dao.ts* with DAO and DAOContext. This two files will be useful for later.
+Using the above setup, the code generation command will create two files: *src/models.ts* with all TypeScript types included in *schema.graphql* and another file *src/dao.ts* with DAO and DAOContext. These two files will be useful later.
 
 ## A simple application
 
-The following initial Typetta example writes and reads an entity on a MongoDB database (on ab SQL DB would be pretty much the same). This and other examples are available in a dedicated repository [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"} .
+The following initial Typetta example writes and reads an entity on a MongoDB database (on ab SQL DB it would be pretty much the same). This and other examples are available in a dedicated repository [https://github.com/twinlogix/typetta-examples](https://github.com/twinlogix/typetta-examples){:target="_blank"} .
 
 First things first... open a connection to the MongoDB database using the official Driver:
 
@@ -114,7 +112,7 @@ const main = async () => {
 main();
 ```
 
-Let's do our first DAOContext, our first Typetta code generated class. This class represents the central repo for all entity of the data model.
+Let's do our first DAOContext, our first Typetta code-generated class. This class represents the central repository for all entities of the data model.
 
 ```typescript
 const daoContext = new DAOContext({
@@ -124,7 +122,7 @@ const daoContext = new DAOContext({
 });
 ```
 
-It's now time do do our first CRUD simple operations on User entity.
+It's now time to do our first simple CRUD operations on the User entity.
 
 ```typescript
 const user1 = await daoContext.user.insertOne({
@@ -145,7 +143,7 @@ const users = await daoContext.user.findAll();
 users.forEach(user => console.log(`${user.firstName} ${user.lastName}`));
 ```
 
-Our personal version of Hello World example will print on console the following 2 names:
+Our personal version with the Hello World example will print the following 2 names on the console:
 ```
 Mattia Minotti
 Edoardo Barbieri

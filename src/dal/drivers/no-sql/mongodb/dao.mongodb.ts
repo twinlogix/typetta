@@ -1,9 +1,10 @@
 import { transformObject } from '../../../../generation/utils'
-import { filterUndefiend, mapObject } from '../../../../utils/utils'
+import { filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { LogArgs } from '../../../dao/log/log.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
+import { isEmptyProjection, projection } from '../../../dao/projections/projections.utils'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
 import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
@@ -49,13 +50,14 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     if (typeof update === 'function') {
       return update()
     }
-    return { $set: adaptUpdate(update, this.schema, this.daoContext.adapters.mongo) }
+    const set = adaptUpdate(update, this.schema, this.daoContext.adapters.mongo)
+    return { $set: set }
   }
 
   protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     return this.runQuery('findAll', async () => {
       const filter = this.buildFilter(params.filter)
-      const projection = this.buildProjection(params.projection)
+      const projection = isEmptyProjection(params.projection) ? { [this.schema[this.idField].alias ?? this.idField]: true } : this.buildProjection(params.projection)
       const sort = this.buildSort(params.sorts)
       const options = { projection, sort, skip: params.skip, limit: params.limit ?? this.pageSize } as FindOptions
       return [
@@ -131,7 +133,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
           ]
         : []
       const filter = params.filter ? [{ $match: this.buildFilter(params.filter) }] : []
-      const having = args?.having ? [{ $match: args.having }] : []
+      const having = args?.having ? [{ $match: mapObject(args.having, ([k, v]) => (typeof v === 'object' ? [[k, mapObject(v, ([fk, fv]) => [[`$${fk}`, fv]])]] : [[k, v]])) }] : []
       const skip = params.skip != null ? [{ $skip: params.skip }] : []
       const limit = params.limit != null ? [{ $limit: params.limit }] : []
       const options = params.options ?? {}
@@ -169,7 +171,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     return this.runQuery('insertOne', async () => {
-      const record = this.modelToDb(filterUndefiend(params.record))
+      const record = this.modelToDb(filterUndefiendFields(params.record))
       const options = params.options ?? {}
       return [
         async () => {

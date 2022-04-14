@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "1.2.3",
+  "version": "1.3.9",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
@@ -8,15 +8,16 @@
     "coverage": "jest --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
     "test": "jest --detectOpenHandles --no-cache --forceExit",
     "lint": "eslint . --quiet --ext .js,.jsx,.ts,.tsx",
-    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run generate-security",
+    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run generate-security  && npm run generate-in-memory",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",
     "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
     "generate-multitenant": "graphql-codegen --config tests/multitenant/codegen.yml",
     "generate-security": "graphql-codegen --config tests/security/codegen.yml",
+    "generate-in-memory": "graphql-codegen --config tests/in-memory/codegen.yml",
     "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts",
-    "release": "release-it"
+    "release": "npm run build && release-it"
   },
   "repository": {
     "type": "git",
@@ -38,14 +39,14 @@
     "@graphql-codegen/add": "3.1.1",
     "@trivago/prettier-plugin-sort-imports": "3.2.0",
     "@types/jest": "27.4.1",
-    "@types/node": "12.20.46",
+    "@types/node": "12.20.47",
     "@types/object-hash": "2.2.1",
     "@types/sha256": "0.2.0",
     "@types/uuid": "8.3.4",
     "@typescript-eslint/eslint-plugin": "5.11.0",
     "@typescript-eslint/parser": "5.11.0",
-    "@vscode/sqlite3": "5.0.7",
-    "apollo-server": "3.6.3",
+    "@vscode/sqlite3": "5.0.8",
+    "apollo-server": "3.6.7",
     "apollo-server-testing": "2.25.3",
     "bignumber.js": "9.0.2",
     "eslint": "7.32.0",
@@ -53,27 +54,27 @@
     "make-coverage-badge": "1.2.0",
     "release-it": "14.12.5",
     "sha256": "0.2.0",
-    "ts-jest": "27.1.3",
-    "typedoc": "0.22.12",
+    "ts-jest": "27.1.4",
+    "typedoc": "0.22.13",
     "typescript": "4.5.5",
     "uuid": "8.3.2"
   },
   "dependencies": {
     "@graphql-codegen/cli": "2.6.2",
-    "@graphql-codegen/plugin-helpers": "2.4.1",
+    "@graphql-codegen/plugin-helpers": "2.4.2",
     "@graphql-codegen/schema-ast": "2.4.1",
-    "@graphql-codegen/typescript": "2.4.2",
-    "@graphql-codegen/visitor-plugin-common": "2.6.0",
+    "@graphql-codegen/typescript": "2.4.8",
+    "@graphql-codegen/visitor-plugin-common": "2.7.4",
     "dataloader": "2.0.0",
     "graphql": "15.8.0",
     "graphql-tag": "2.12.6",
     "is-plain-object": "5.0.0",
     "object-hash": "2.2.0",
-    "type-fest": "2.11.1",
-    "mongodb-memory-server": "8.3.0"
+    "type-fest": "2.12.2",
+    "mongodb-memory-server": "8.4.2"
   },
   "peerDependencies": {
-    "knex": "1.0.3",
+    "knex": "1.0.7",
     "mongodb": "4.3.1"
   },
   "resolutions": {
@@ -107,7 +108,8 @@
       "tests/"
     ],
     "coverageReporters": [
-      "json-summary"
+      "json-summary",
+      "lcov"
     ]
   },
   "homepage": "https://twinlogix.github.io/typetta/",
