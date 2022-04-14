@@ -197,12 +197,24 @@ test('empty find', async () => {
 })
 
 test('simple findAll', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, credentials: { username: 'user', password: '123456' } } })
 
   const users = await dao.user.findAll({})
   expect(users.length).toBe(1)
   expect(users[0].firstName).toBe('FirstName')
   expect(users[0].lastName).toBe('LastName')
+
+  const users2 = await dao.user.findAll({ filter: { id: { exists: true } } })
+  expect(users2.length).toBe(1)
+  expect(users2[0].firstName).toBe('FirstName')
+  expect(users2[0].lastName).toBe('LastName')
+
+  const users3 = await dao.user.findAll({ projection: { credentials: { }, firstName: true } })
+  expect(users3[0].credentials).toBe(undefined)
+  const users4 = await dao.user.findAll({ projection: {  } })
+  expect(Object.keys(users4[0]).length).toBe(1)
+  const users5 = await dao.user.findAll({ projection: { credentials: { } } })
+  expect(Object.keys(users5[0]).length).toBe(1)
 })
 
 test('simple findOne multiple filter', async () => {

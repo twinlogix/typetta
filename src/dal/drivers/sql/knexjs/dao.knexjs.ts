@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LogArgs } from '../../../..'
+import { isEmptyProjection, LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterNullFields, filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
@@ -103,7 +103,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         if (params.limit === 0) {
           return { skipReason: 'Limit is 0. Skip.' }
         }
-        const select = this.buildSelect(params.projection)
+        const select = isEmptyProjection(params.projection) ? this.qb().select([this.schema[this.idField].alias ?? this.idField]) : this.buildSelect(params.projection)
         const where = this.buildWhere(params.filter, select)
         const sort = this.buildSort(params.sorts, where)
         return this.buildTransaction(params.options, sort)

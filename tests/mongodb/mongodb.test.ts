@@ -91,7 +91,7 @@ test('empty find', async () => {
 })
 
 test('simple findAll', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, credentials: [{ username: 'user', password: '123456' }] } })
 
   const users = await dao.user.findAll({})
   expect(users.length).toBe(1)
@@ -102,6 +102,15 @@ test('simple findAll', async () => {
   expect(users2.length).toBe(1)
   expect(users2[0].firstName).toBe('FirstName')
   expect(users2[0].lastName).toBe('LastName')
+
+  const users3 = await dao.user.findAll({ projection: { credentials: { }, firstName: true } })
+  expect(users3[0].credentials).toBe(undefined)
+  const users4 = await dao.user.findAll({ projection: {  } })
+  expect(Object.keys(users4[0]).length).toBe(1)
+  const users5 = await dao.user.findAll({ projection: { credentials: { } } })
+  expect(Object.keys(users5[0]).length).toBe(1)
+  const users6 = await dao.user.findAll({ projection: { credentials: undefined } })
+  expect(Object.keys(users6[0]).length).toBe(1)
 })
 
 test('simple findOne', async () => {
@@ -168,10 +177,10 @@ test('findOne simple foreignRef association 2', async () => {
 })
 
 test('findOne self innerRef association', async () => {
-  for(let i = 0; i < 100; i ++) {
+  for (let i = 0; i < 100; i++) {
     await dao.user.insertOne({ record: { id: `u_${i}`, firstName: `FirstName${i}`, lastName: `LastName${i}`, live: true } })
   }
-  await dao.user.insertOne({ record: { firstName: 'FirstName100', lastName: 'LastName100', friendsId: ['u_0', ...Array.from(Array(100).keys()).map(i => `u_${i}`)], live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName100', lastName: 'LastName100', friendsId: ['u_0', ...Array.from(Array(100).keys()).map((i) => `u_${i}`)], live: true } })
 
   const foundUser = await dao.user.findOne({ filter: { firstName: 'FirstName100' }, projection: { friends: { firstName: true } } })
   expect(foundUser!.friends).toBeDefined()
