@@ -13,7 +13,7 @@ The mocking functionality is also useful for testing purposes.
 
 In some cases, it may be useful to create a ``DAOContext`` that has some real and some mock data sources. Every entity associated with a data source instantied with the literal ``'mock'`` will be mocked.
 
-Below is an example in which a default mongodb database is mocked; the other data source instead is a real mongodb instance.
+Below is an example in which a default MongoDB database is mocked; the other data source instead is a real MongoDB instance.
 
 ```typescript
 const mongoClient = new MongoClient(process.env.MONGODB_URL!);
@@ -27,12 +27,12 @@ const daoContext = new DAOContext({
 });
 ```
 
-All the access to entities belonging to the default mongodb data source will be redirected to an in-memory implementation and will not use any mongodb database.
+Every operation on entities belonging to the default MongoDB data source will be redirected to an in-memory implementation and will not use any MongoDB database. You can easily mock your entire data access layer mocking every data source. In this case you don't need a real database at all.
 
 
 ## Implementation details
 
-The implementation of the mock driver is very lightweight and keeps all the data in memory. However, this implementation does not support the feature described here: [Direct access to the database](raw-databse-access).
+The implementation of the mock driver is lightweight and keeps all the data in memory. It doesn't require third-party dependencies and it's perfect for testing purposes. However, this implementation does not support database highly specific features, like those described here: [Direct access to the database](raw-databse-access).
 
 In order to have a mock that supports all the database specific features it is possible to use third party tools to provide the mocked data sources:
 
