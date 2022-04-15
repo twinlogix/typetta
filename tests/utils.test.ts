@@ -11,6 +11,7 @@ import {
   IntersectGenericProjection,
   intersectProjections,
   isEmptyProjection,
+  setTraversing,
 } from '../src'
 import { UserProjection } from './mongodb/dao.mock'
 import { ApolloServer } from 'apollo-server'
@@ -516,4 +517,14 @@ test('is empty projection', () => {
   expect(isEmptyProjection({ name: true, value: {} })).toBe(false)
   expect(isEmptyProjection({ name: undefined, value: {} })).toBe(true)
   expect(isEmptyProjection({ name: false, value: {} })).toBe(false)
+})
+
+test('setTraversing', () => {
+  const obj: Record<string, Record<string, unknown>> = {}
+  setTraversing(obj, 'name.name', 'value')
+  expect(obj.name.name).toBe('value')
+  setTraversing(obj, 'name.__proto__', 'value')
+  expect(obj.name.__proto__).not.toBe('value')
+  setTraversing(obj, '__proto__', 'value')
+  expect(obj.__proto__).not.toBe('value')
 })

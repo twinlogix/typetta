@@ -69,16 +69,20 @@ export const MONGODB_QUERY_PREFIXS = new Set(['eq', 'gte', 'gt', 'lte', 'lt', 'n
 export function setTraversing(object: any, path: string, value: any) {
   if (typeof object === 'object') {
     const pathSplitted = path.split('.')
+    const key = pathSplitted[0]
+    if (key === '__proto__') {
+      return
+    }
     if (pathSplitted.length === 1) {
-      object[pathSplitted[0]] = value
+      object[key] = value
     } else {
-      if (object[pathSplitted[0]] === undefined) {
-        object[pathSplitted[0]] = {}
+      if (object[key] === undefined) {
+        object[key] = {}
       }
-      if (Array.isArray(object[pathSplitted[0]])) {
-        object[pathSplitted[0]].forEach((o: unknown) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
+      if (Array.isArray(object[key])) {
+        object[key].forEach((o: unknown) => setTraversing(o, pathSplitted.slice(1).join('.'), value))
       } else {
-        setTraversing(object[pathSplitted[0]], pathSplitted.slice(1).join('.'), value)
+        setTraversing(object[key], pathSplitted.slice(1).join('.'), value)
       }
     }
   }
