@@ -76,4 +76,4 @@ In case you are still unsure, why use Typetta instead of other ORMs?
 
 - A very **strict typing** system that 100% leverages TypeScript in providing types as responses based on the requested data type.
 
-- Using standard **GraphQL**, you can define the model. Using this standard opens the door to a whole set of instruments and third party frameworks that are based on this standard.
+- Using standard **GraphQL** as data modeling language opens the door to a whole set of instruments and third party tools.
