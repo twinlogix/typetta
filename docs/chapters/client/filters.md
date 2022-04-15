@@ -259,14 +259,14 @@ The following operators are available for `String` fields and allow you to creat
 The `contains` operator allows you to check whether the value contains a supplied string within it. Some examples are listed below:
 
 ```
-"oggi fa caldo" contiene "oggi fa caldo" => sì
-"oggi fa caldo" contiene "caldo" => sì
-"oggi fa caldo" contiene "oggi" => sì
-"oggi fa caldo" contiene "fa" => sì
-"oggi fa caldo" contiene "ggi fa" => sì
-"oggi fa caldo" contiene "freddo" => no
-"oggi fa caldo" contiene "oggi caldo" => no
-"oggi fa caldo" contiene "facaldo" => no
+"today is hot" contains "today is hot" => yes
+"today is hot" contains "hot" => yes
+"today is hot" contains "today" => yes
+"today is hot" contains "is" => yes
+"today is hot" contains "ay is" => yes
+"today is hot" contains "cold" => no
+"today is hot" contains "today hot" => no
+"today is hot" contains "ishot" => no
 ```
 
 For example:
