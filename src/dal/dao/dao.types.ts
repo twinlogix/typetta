@@ -86,7 +86,7 @@ export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>
 export type DAOParams<T extends DAOGenerics> = {
   idField: T['idKey']
   idScalar: T['idScalar']
-  idGeneration: T['idGeneration']
+  idGeneration: IdGenerationStrategy
   idGenerator?: () => T['idScalar'][T['idScalar']]
   daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
@@ -136,7 +136,6 @@ export type DAOGenerics<
   ModelType extends object = any,
   IDKey extends keyof OmitIfKnown<ModelType, ExcludedFields> = any,
   IDScalar extends keyof ScalarsType = any,
-  IdGeneration extends IdGenerationStrategy = any,
   PureFilterType = any,
   RawFilterType = any,
   RelationsType = any,
@@ -165,7 +164,6 @@ export type DAOGenerics<
   idKey: IDKey
   idScalar: IDScalar
   idType: ModelType[IDKey]
-  idGeneration: IdGeneration
   pureFilter: PureFilterType
   rawFilter: RawFilterType
   filter: PureFilterType | RawFilterType

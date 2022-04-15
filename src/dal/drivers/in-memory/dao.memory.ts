@@ -3,7 +3,7 @@ import { transformObject } from '../../../generation/utils'
 import { deepMerge } from '../../../utils/utils'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
-import { compare, getByPath } from './utils.memory'
+import { compare, getByPath, mock } from './utils.memory'
 import { PartialDeep } from 'type-fest'
 
 export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
@@ -123,14 +123,15 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       }, group[0].group)
     })
 
-    const filteredResult = args?.having ? unorderedResults.filter(r => filterEntity(r, args.having)) : unorderedResults
+    const filteredResult = args?.having ? unorderedResults.filter((r) => filterEntity(r, args.having)) : unorderedResults
     const sorted = args?.sorts ? sort(filteredResult, args.sorts) : filteredResult
     const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
-    const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', params.record, this.schema) as T['insert']
+    const record = deepMerge(params.record, this.generateId())
+    const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
     const id = t[this.schema[this.idField].alias ?? this.idField]
     const index = this.emptyIndexes.pop()
     if (index != null) {
@@ -169,10 +170,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
     for (const { record, index } of this.entities(filterEntity)) {
-      const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', params.replace, this.schema)
+      const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', deepMerge(params.replace, { [this.idField]: record[this.idField] }), this.schema)
       this.memory[index] = t
-      this.idIndex.delete(record[this.idField])
-      this.idIndex.set(params.replace[this.idField], index)
       break
     }
   }
@@ -259,5 +258,21 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   private allocMemory(n: number): (T['model'] | null)[] {
     return Array(n).fill(null)
+  }
+
+  private generateId(): Partial<Record<T['idKey'], T['model'][T['idKey']]>> {
+    if (this.idGeneration === 'db') {
+      const s = this.schema[this.idField]
+      if (!('scalar' in s)) {
+        throw new Error('Id is an embedded field. Not supported.')
+      }
+      if (!mock.idGenerators || !mock.idGenerators[s.scalar as string]) {
+        throw new Error(`Id is generated from DB. For in-memory driver it's required to implement mock.idGenerators.${s.scalar} in order to generate the id`)
+      }
+      const generator = mock.idGenerators[s.scalar as string]
+      return { [this.idField]: generator() }
+    } else {
+      return {}
+    }
   }
 }

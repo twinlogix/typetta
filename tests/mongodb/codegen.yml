@@ -13,6 +13,7 @@ generates:
         Coordinates: ../../src#Coordinates
         LocalizedString: ../types#LocalizedString
         Live: boolean
+        MongoID: mongodb#ObjectId
   tests/mongodb/dao.mock.ts:
     config:
       schemaImport: './schema.graphql'

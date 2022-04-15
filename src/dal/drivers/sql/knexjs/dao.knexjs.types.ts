@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OmitIfKnown } from '../../../../utils/utils.types'
-import { DAOGenerics, DAOParams, IdGenerationStrategy } from '../../../dao/dao.types'
+import { DAOGenerics, DAOParams } from '../../../dao/dao.types'
 import { AbstractDAOContext } from '../../../daoContext/daoContext'
 import { DefaultModelScalars } from '../../drivers.types'
 import { Knex } from 'knex'
@@ -9,7 +9,6 @@ export type KnexJsDAOGenerics<
   ModelType extends object = any,
   IDKey extends keyof OmitIfKnown<ModelType, ExcludedFields> = any,
   IDScalar extends keyof ScalarsType = any,
-  IdGeneration extends IdGenerationStrategy = any,
   PureFilterType = any,
   RawFilterType = any,
   RelationsType = any,
@@ -30,7 +29,6 @@ export type KnexJsDAOGenerics<
   ModelType,
   IDKey,
   IDScalar,
-  IdGeneration,
   PureFilterType,
   RawFilterType,
   RelationsType,

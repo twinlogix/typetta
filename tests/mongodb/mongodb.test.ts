@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock } from '../../src'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserDAO, UserProjection } from './dao.mock'
 import { Scalars, State, User } from './models.mock'
@@ -1489,10 +1489,17 @@ test('Inner ref required', async () => {
 })
 
 test('Mock entity', async () => {
+  mock.idGenerators = {
+    'MongoID': () => {
+      return new ObjectId()
+    }
+  }
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
-  await dao.mockedEntity.insertOne({ record: { name: 'name', userId: user.id } })
+  const mockedi = await dao.mockedEntity.insertOne({ record: { name: 'name', userId: user.id } })
   const mocked = await dao.mockedEntity.findAll({ projection: { user: true } })
   expect(mocked[0].user.firstName).toBe('FirstName')
+  const mocked2 = await dao.mockedEntity.findOne({ filter: { id: mockedi.id }})
+  expect(mocked2?.name).toBe('name')
 })
 
 test('Soft delete middleware', async () => {
