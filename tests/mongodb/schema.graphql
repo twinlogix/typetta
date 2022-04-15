@@ -124,3 +124,9 @@ type Audit @entity @mongodb {
   entityId: ID!
   changes: String
 }
+
+type DomainValidation @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  field1: Int
+  field2: Int
+}

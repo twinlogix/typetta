@@ -2,6 +2,7 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock } from '../../src'
+import { validation } from '../../src/dal/dao/middlewares/validation/validation'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserDAO, UserProjection } from './dao.mock'
@@ -1647,6 +1648,25 @@ test('Inserted record middleware', async () => {
   })
   await customDao.hotel.insertOne({ record: { name: 'Hotel', audit: { createdBy: '', createdOn: 0, modifiedBy: '', modifiedOn: 0, state: State.ACTIVE } } })
   expect(i).toBe(2)
+})
+
+test('Validation middleware', async () => {
+  const customDao = new DAOContext({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      domainValidation: {
+        middlewares: [
+          validation({
+            insert: (record) => (record.field1 != null && record.field2 == null) || (record.field2 != null && record.field1 == null),
+            update: (changes) => (typeof changes !== 'function' ? (changes.field1 === null && changes.field2 != null) || (changes.field2 === null && changes.field1 != null) : true),
+          }),
+        ],
+      },
+    },
+  })
 })
 
 // ------------------------------------------------------------------------

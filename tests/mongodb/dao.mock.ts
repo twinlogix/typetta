@@ -763,6 +763,118 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends Abstrac
 
 
 //--------------------------------------------------------------------------------
+//------------------------------- DOMAINVALIDATION -------------------------------
+//--------------------------------------------------------------------------------
+
+export type DomainValidationExcludedFields = never
+export type DomainValidationRelationFields = never
+
+export function domainValidationSchema(): Schema<types.Scalars> {
+  return {
+    'field1': {
+      scalar: 'Int'
+    },
+    'field2': {
+      scalar: 'Int'
+    },
+    'id': {
+      scalar: 'ID', 
+      required: true, 
+      alias: '_id'
+    }
+  }
+}
+
+type DomainValidationFilterFields = {
+  'field1'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'field2'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+}
+export type DomainValidationFilter = DomainValidationFilterFields & LogicalOperators<DomainValidationFilterFields | DomainValidationRawFilter>
+export type DomainValidationRawFilter = () => Filter<Document>
+
+export type DomainValidationRelations = Record<never, string>
+
+export type DomainValidationProjection = {
+  field1?: boolean,
+  field2?: boolean,
+  id?: boolean,
+}
+export type DomainValidationParam<P extends DomainValidationProjection> = ParamProjection<types.DomainValidation, DomainValidationProjection, P>
+
+export type DomainValidationSortKeys = 'field1' | 'field2' | 'id'
+export type DomainValidationSort = OneKey<DomainValidationSortKeys, SortDirection>
+export type DomainValidationRawSort = () => Sort
+
+export type DomainValidationUpdate = {
+  'field1'?: types.Scalars['Int'] | null,
+  'field2'?: types.Scalars['Int'] | null,
+  'id'?: types.Scalars['ID']
+}
+export type DomainValidationRawUpdate = () => UpdateFilter<Document>
+
+export type DomainValidationInsert = {
+  field1?: null | types.Scalars['Int'],
+  field2?: null | types.Scalars['Int'],
+}
+
+type DomainValidationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.DomainValidation, 'id', 'ID', DomainValidationFilter, DomainValidationRawFilter, DomainValidationRelations, DomainValidationProjection, DomainValidationSort, DomainValidationRawSort, DomainValidationInsert, DomainValidationUpdate, DomainValidationRawUpdate, DomainValidationExcludedFields, DomainValidationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'domainValidation', DAOContext<MetadataType, OperationMetadataType>>
+export type DomainValidationDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DomainValidationDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDomainValidationDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DomainValidationDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+
+export class DomainValidationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DomainValidationDAOGenerics<MetadataType, OperationMetadataType>> {  
+  
+  public static projection<P extends DomainValidationProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DomainValidationProjection, P2 extends DomainValidationProjection>(p1: P1, p2: P2): SelectProjection<DomainValidationProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DomainValidationProjection, P1, P2>
+  }
+  
+  public constructor(params: DomainValidationDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: domainValidationSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
+
+export class InMemoryDomainValidationDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DomainValidationDAOGenerics<MetadataType, OperationMetadataType>> {  
+  
+  public static projection<P extends DomainValidationProjection>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends DomainValidationProjection, P2 extends DomainValidationProjection>(p1: P1, p2: P2): SelectProjection<DomainValidationProjection, P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<DomainValidationProjection, P1, P2>
+  }
+  
+  public constructor(params: InMemoryDomainValidationDAOParams<MetadataType, OperationMetadataType>){
+    super({   
+      ...params, 
+      idField: 'id', 
+      schema: domainValidationSchema(), 
+      relations: overrideRelations(
+        [
+          
+        ]
+      ), 
+      idGeneration: 'db', 
+      idScalar: 'ID' 
+    })
+  }
+  }
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------ HOTEL -------------------------------------
 //--------------------------------------------------------------------------------
 
@@ -1585,6 +1697,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     defaultFieldsEntity?: Pick<Partial<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     dog?: Pick<Partial<DogDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
+    domainValidation?: Pick<Partial<DomainValidationDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     hotel?: Pick<Partial<HotelDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     mockedEntity?: Pick<Partial<MockedEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>,
     organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
@@ -1593,7 +1706,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
   },
   mongodb: Record<'default', Db | 'mock'>,
   scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
-  log?: LogInput<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
+  log?: LogInput<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'domainValidation' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
   security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 
@@ -1607,6 +1720,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _defaultFieldsEntity: DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> | undefined
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined
   private _dog: DogDAO<MetadataType, OperationMetadataType> | undefined
+  private _domainValidation: DomainValidationDAO<MetadataType, OperationMetadataType> | undefined
   private _hotel: HotelDAO<MetadataType, OperationMetadataType> | undefined
   private _mockedEntity: MockedEntityDAO<MetadataType, OperationMetadataType> | undefined
   private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined
@@ -1618,7 +1732,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
-  private logger?: LogFunction<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>
+  private logger?: LogFunction<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'domainValidation' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>
   
   get address() : AddressDAO<MetadataType, OperationMetadataType> {
     if(!this._address) {
@@ -1661,6 +1775,13 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
       this._dog = db === 'mock' ? (new InMemoryDogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger }) as unknown as DogDAO<MetadataType, OperationMetadataType>) : new DogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, collection: db.collection('dogs'), middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger })
     }
     return this._dog
+  }
+  get domainValidation() : DomainValidationDAO<MetadataType, OperationMetadataType> {
+    if(!this._domainValidation) {
+      const db = this.mongodb.default
+      this._domainValidation = db === 'mock' ? (new InMemoryDomainValidationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.domainValidation, middlewares: [...(this.overrides?.domainValidation?.middlewares || []), ...selectMiddleware('domainValidation', this.middlewares) as DAOMiddleware<DomainValidationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'domainValidation', logger: this.logger }) as unknown as DomainValidationDAO<MetadataType, OperationMetadataType>) : new DomainValidationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.domainValidation, collection: db.collection('domainValidations'), middlewares: [...(this.overrides?.domainValidation?.middlewares || []), ...selectMiddleware('domainValidation', this.middlewares) as DAOMiddleware<DomainValidationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'domainValidation', logger: this.logger })
+    }
+    return this._domainValidation
   }
   get hotel() : HotelDAO<MetadataType, OperationMetadataType> {
     if(!this._hotel) {
@@ -1713,8 +1834,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
     }
   }
   
-  public async execQuery<T>(run: (dbs: { mongodb: Record<'default', Db | 'mock'> }, entities: { address: Collection<Document> | null, audit: Collection<Document> | null, city: Collection<Document> | null, defaultFieldsEntity: Collection<Document> | null, device: Collection<Document> | null, dog: Collection<Document> | null, hotel: Collection<Document> | null, organization: Collection<Document> | null, post: Collection<Document> | null, user: Collection<Document> | null }) => Promise<T>): Promise<T> {
-    return run({ mongodb: this.mongodb }, { address: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('addresses'), audit: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('audits'), city: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('citys'), defaultFieldsEntity: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('defaultFieldsEntitys'), device: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('devices'), dog: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('dogs'), hotel: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('hotels'), organization: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('organizations'), post: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('posts'), user: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('users') })
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'default', Db | 'mock'> }, entities: { address: Collection<Document> | null, audit: Collection<Document> | null, city: Collection<Document> | null, defaultFieldsEntity: Collection<Document> | null, device: Collection<Document> | null, dog: Collection<Document> | null, domainValidation: Collection<Document> | null, hotel: Collection<Document> | null, organization: Collection<Document> | null, post: Collection<Document> | null, user: Collection<Document> | null }) => Promise<T>): Promise<T> {
+    return run({ mongodb: this.mongodb }, { address: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('addresses'), audit: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('audits'), city: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('citys'), defaultFieldsEntity: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('defaultFieldsEntitys'), device: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('devices'), dog: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('dogs'), domainValidation: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('domainValidations'), hotel: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('hotels'), organization: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('organizations'), post: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('posts'), user: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('users') })
   }
   
   
@@ -1734,6 +1855,7 @@ type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   defaultFieldsEntity: DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>
   device: DeviceDAOGenerics<MetadataType, OperationMetadataType>
   dog: DogDAOGenerics<MetadataType, OperationMetadataType>
+  domainValidation: DomainValidationDAOGenerics<MetadataType, OperationMetadataType>
   hotel: HotelDAOGenerics<MetadataType, OperationMetadataType>
   mockedEntity: MockedEntityDAOGenerics<MetadataType, OperationMetadataType>
   organization: OrganizationDAOGenerics<MetadataType, OperationMetadataType>

@@ -82,6 +82,13 @@ export type Dog = {
   ownerId: Scalars['ID'];
 };
 
+export type DomainValidation = {
+  __typename?: 'DomainValidation';
+  field1?: Maybe<Scalars['Int']>;
+  field2?: Maybe<Scalars['Int']>;
+  id: Scalars['ID'];
+};
+
 export type Hotel = {
   __typename?: 'Hotel';
   audit: Auditable;
