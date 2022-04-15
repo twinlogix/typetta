@@ -5,6 +5,7 @@ import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, De
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
 import { compare, getByPath, mock } from './utils.memory'
 import { PartialDeep } from 'type-fest'
+import _ from 'lodash'
 
 export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
   private idIndex: Map<T['idType'], number>
@@ -20,7 +21,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     const unorderedResults = [...this.entities(params.filter)].map((v) => v.record)
-    return (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
+    const results = (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
+    return results.map(r => _.cloneDeep(r))
     // projection are ignored since there is no performance advance
   }
 
@@ -146,7 +148,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       this.idIndex.set(id, index)
       this.memory[index] = t
     }
-    return transformObject(this.daoContext.adapters.memory, 'dbToModel', t, this.schema)
+    return _.cloneDeep(transformObject(this.daoContext.adapters.memory, 'dbToModel', t, this.schema))
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
