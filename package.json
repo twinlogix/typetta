@@ -71,8 +71,7 @@
     "graphql-tag": "2.12.6",
     "is-plain-object": "5.0.0",
     "object-hash": "2.2.0",
-    "type-fest": "2.12.2",
-    "mongodb-memory-server": "8.4.2"
+    "type-fest": "2.12.2"
   },
   "peerDependencies": {
     "knex": "1.0.7",
