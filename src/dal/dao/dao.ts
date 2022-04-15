@@ -1,5 +1,5 @@
 import { equals } from '../../dal/drivers/in-memory/utils.memory'
-import { deepCopy, getTraversing, reversed, setTraversing } from '../../utils/utils'
+import { getTraversing, reversed, setTraversing } from '../../utils/utils'
 import {
   MiddlewareContext,
   DAO,
@@ -30,6 +30,7 @@ import { getNamedType, GraphQLResolveInfo } from 'graphql'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
+import _ from 'lodash'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   public build<P extends T['projection']>(p: P): P {
@@ -213,7 +214,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
         async (keys) => {
-          const proj = deepCopy(params.projection) as P
+          const proj = _.cloneDeep(params.projection)
           setTraversing(proj, filterKey as string, true)
           const records = await this.findAll({ ...params, projection: proj, filter: buildFilterF(filterKey, keys) })
           return keys.map((key) => records.filter((r) => hasKeyF(r, key)))
@@ -267,7 +268,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     if (proj === true || !proj) {
       return proj
     }
-    const dbProjections = deepCopy(proj)
+    const dbProjections = _.cloneDeep(proj)
     this.relations.forEach((relation) => {
       if (relation.reference === 'inner') {
         if (getTraversing(dbProjections, relation.field).length > 0) {

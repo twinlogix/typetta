@@ -112,27 +112,6 @@ export function getTraversing(object: any, path: string): any[] {
   }
 }
 
-export function deepCopy(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return obj
-  }
-  if (obj instanceof Array) {
-    const cp: Record<string, unknown>[] = []
-    obj.forEach((v) => {
-      cp.push(v)
-    })
-    return cp.map((n: any) => deepCopy(n)) as any
-  }
-  if (isPlainObject(obj)) {
-    const cp = { ...(obj as { [key: string]: any }) } as { [key: string]: any }
-    Object.keys(cp).forEach((k) => {
-      cp[k] = deepCopy(cp[k])
-    })
-    return cp
-  }
-  return obj
-}
-
 export function deepMerge(weak: any, strong: any): any {
   if (weak === null || weak === undefined) {
     return strong
