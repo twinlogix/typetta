@@ -262,7 +262,7 @@ await daoContext.user.deleteAll({
 })
 ```
 
-Note that you can update all the records present by explicitly setting a blank filter, as in the following example where you update the names of all users:
+Note that you can delete all the records present by explicitly setting a blank filter, as in the following example where you update the names of all users:
 
 ```typescript
 await daoContext.user.deleteAll({
