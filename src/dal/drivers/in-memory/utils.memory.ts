@@ -19,9 +19,13 @@ export function getByPath(object: unknown, path: string): unknown {
   return undefined
 }
 
+export type MockIdSpecification<T> = {
+  generate?: () => T
+  stringify?: (t:T) => string
+}
 type MockOverrides = {
   compare?: (l: unknown, r: unknown) => number | void | null | undefined
-  idGenerators?: { [key: string]: () => unknown }
+  idSpecifications?: { [key: string]: MockIdSpecification<unknown> }
 }
 export const mock: MockOverrides = {
   compare: undefined,

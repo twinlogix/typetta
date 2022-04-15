@@ -3,26 +3,36 @@ import { transformObject } from '../../../generation/utils'
 import { deepMerge } from '../../../utils/utils'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
-import { compare, getByPath, mock } from './utils.memory'
-import { PartialDeep } from 'type-fest'
+import { compare, getByPath, mock, MockIdSpecification } from './utils.memory'
 import _ from 'lodash'
+import { PartialDeep } from 'type-fest'
 
 export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
-  private idIndex: Map<T['idType'], number>
+  private idIndex: Map<T['idType'] | string, number>
   private emptyIndexes: number[]
   private memory: (T['model'] | null)[]
+  private mockIdSpecification: MockIdSpecification<unknown> | undefined
 
   protected constructor({ idGenerator, ...params }: InMemoryDAOParams<T>) {
     super({ ...params, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate, driverContext: {} })
     this.memory = []
     this.emptyIndexes = [0]
     this.idIndex = new Map()
+
+    const s = this.schema[this.idField]
+    if (!('scalar' in s)) {
+      throw new Error('Id is an embedded field. Not supported.')
+    }
+    if (this.idGeneration === 'db' && (!mock.idSpecifications || !mock.idSpecifications[s.scalar as string] || !mock.idSpecifications[s.scalar as string].generate)) {
+      throw new Error(`Id is generated from DB. For in-memory driver it's required to implement mock.idSpecifications.${s.scalar} in order to generate the id`)
+    }
+    this.mockIdSpecification = mock.idSpecifications ? mock.idSpecifications[s.scalar as string] : undefined
   }
 
   protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     const unorderedResults = [...this.entities(params.filter)].map((v) => v.record)
     const results = (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
-    return results.map(r => _.cloneDeep(r))
+    return results.map((r) => _.cloneDeep(r))
     // projection are ignored since there is no performance advance
   }
 
@@ -132,12 +142,12 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   }
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
-    const record = deepMerge(params.record, this.generateId())
+    const record = deepMerge(params.record, this.generateRecordWithId())
     const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
     const id = t[this.schema[this.idField].alias ?? this.idField]
     const index = this.emptyIndexes.pop()
     if (index != null) {
-      this.idIndex.set(id, index)
+      this.setIdIndex(id, index)
       this.memory[index] = t
     } else {
       const index = this.memory.length
@@ -145,7 +155,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       this.emptyIndexes = this.allocMemory(sizeIncrement - 1)
         .map((v, i) => this.memory.length + 1 + i)
         .reverse()
-      this.idIndex.set(id, index)
+      this.setIdIndex(id, index)
       this.memory[index] = t
     }
     return _.cloneDeep(transformObject(this.daoContext.adapters.memory, 'dbToModel', t, this.schema))
@@ -199,6 +209,20 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     return 'memory'
   }
 
+  private getIdIndex(id: unknown): number | undefined {
+    if (this.mockIdSpecification?.stringify) {
+      return this.idIndex.get(this.mockIdSpecification?.stringify(id))
+    }
+    return this.idIndex.get(id)
+  }
+  private setIdIndex(id: unknown, index: number): void {
+    if (this.mockIdSpecification?.stringify) {
+      this.idIndex.set(this.mockIdSpecification?.stringify(id), index)
+    } else {
+      this.idIndex.set(id, index)
+    }
+  }
+
   private getIndexes(filter: T['filter']): number[] | null {
     if (filter) {
       const idFilter = filter[this.idField]
@@ -214,16 +238,16 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
       if (filterKeys.includes(this.idField)) {
         if (typeof idFilter === 'object' && idFilterKeys.includes('in')) {
-          const indexes = (idFilter['in'] as T['idType'][]).map((id) => this.idIndex.get(id)).flatMap((i) => (i === undefined ? [] : [i]))
+          const indexes = (idFilter['in'] as T['idType'][]).map((id) => this.getIdIndex(id)).flatMap((i) => (i === undefined ? [] : [i]))
           return [...new Set(indexes)]
         } else if (typeof idFilter === 'object' && idFilterKeys.includes('eq')) {
-          const index = this.idIndex.get(idFilter['eq'])
+          const index = this.getIdIndex(idFilter['eq'])
           if (index !== undefined) {
             return [index]
           }
           return []
         } else if (typeof idFilter !== 'object' || idFilterKeys.every((k) => !MONGODB_QUERY_PREFIXS.has(k))) {
-          const index = this.idIndex.get(idFilter)
+          const index = this.getIdIndex(idFilter)
           if (index !== undefined) {
             return [index]
           }
@@ -262,17 +286,12 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     return Array(n).fill(null)
   }
 
-  private generateId(): Partial<Record<T['idKey'], T['model'][T['idKey']]>> {
+  private generateRecordWithId(): Partial<Record<T['idKey'], T['model'][T['idKey']]>> {
     if (this.idGeneration === 'db') {
-      const s = this.schema[this.idField]
-      if (!('scalar' in s)) {
-        throw new Error('Id is an embedded field. Not supported.')
+      if (!this.mockIdSpecification?.generate) {
+        throw new Error('UNREACHABLE')
       }
-      if (!mock.idGenerators || !mock.idGenerators[s.scalar as string]) {
-        throw new Error(`Id is generated from DB. For in-memory driver it's required to implement mock.idGenerators.${s.scalar} in order to generate the id`)
-      }
-      const generator = mock.idGenerators[s.scalar as string]
-      return { [this.idField]: generator() }
+      return { [this.idField]: this.mockIdSpecification.generate() }
     } else {
       return {}
     }

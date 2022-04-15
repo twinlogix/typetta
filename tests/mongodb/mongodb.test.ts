@@ -2,6 +2,7 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock } from '../../src'
+import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
 import { CityProjection, DAOContext, UserDAO, UserProjection } from './dao.mock'
 import { Scalars, State, User } from './models.mock'
@@ -12,7 +13,6 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
-import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 
@@ -103,11 +103,11 @@ test('simple findAll', async () => {
   expect(users2[0].firstName).toBe('FirstName')
   expect(users2[0].lastName).toBe('LastName')
 
-  const users3 = await dao.user.findAll({ projection: { credentials: { }, firstName: true } })
+  const users3 = await dao.user.findAll({ projection: { credentials: {}, firstName: true } })
   expect(users3[0].credentials).toBe(undefined)
-  const users4 = await dao.user.findAll({ projection: {  } })
+  const users4 = await dao.user.findAll({ projection: {} })
   expect(Object.keys(users4[0]).length).toBe(1)
-  const users5 = await dao.user.findAll({ projection: { credentials: { } } })
+  const users5 = await dao.user.findAll({ projection: { credentials: {} } })
   expect(Object.keys(users5[0]).length).toBe(1)
   const users6 = await dao.user.findAll({ projection: { credentials: undefined } })
   expect(Object.keys(users6[0]).length).toBe(1)
@@ -1489,16 +1489,19 @@ test('Inner ref required', async () => {
 })
 
 test('Mock entity', async () => {
-  mock.idGenerators = {
-    'MongoID': () => {
-      return new ObjectId()
-    }
+  mock.idSpecifications = {
+    MongoID: {
+      generate: () => {
+        return new ObjectId()
+      },
+      stringify: (t: unknown) => (t as ObjectId).toString(),
+    },
   }
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   const mockedi = await dao.mockedEntity.insertOne({ record: { name: 'name', userId: user.id } })
   const mocked = await dao.mockedEntity.findAll({ projection: { user: true } })
   expect(mocked[0].user.firstName).toBe('FirstName')
-  const mocked2 = await dao.mockedEntity.findOne({ filter: { id: mockedi.id }})
+  const mocked2 = await dao.mockedEntity.findOne({ filter: { id: mockedi.id } })
   expect(mocked2?.name).toBe('name')
 })
 
