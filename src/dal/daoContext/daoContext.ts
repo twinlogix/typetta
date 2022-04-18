@@ -4,6 +4,7 @@ import { DAOGenerics } from '../dao/dao.types'
 import { DefaultModelScalars } from '../drivers/drivers.types'
 import { mongoDbAdapters } from '../drivers/no-sql/mongodb/adapters.mongodb'
 import { knexJsAdapters } from '../drivers/sql/knexjs/adapters.knexjs'
+import { inMemoryAdapters } from '../drivers/in-memory/adapters.memory'
 
 export abstract class AbstractDAOContext<ScalarsType extends DefaultModelScalars = DefaultModelScalars, MetadataType = unknown> {
   public adapters: DriverDataTypeAdapterMap<ScalarsType>
@@ -15,6 +16,7 @@ export abstract class AbstractDAOContext<ScalarsType extends DefaultModelScalars
       : ({
           knex: knexJsAdapters,
           mongo: mongoDbAdapters,
+          memory: inMemoryAdapters,
         } as DriverDataTypeAdapterMap<ScalarsType>)
     this.metadata = args?.metadata
   }
