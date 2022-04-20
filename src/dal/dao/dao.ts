@@ -1,6 +1,5 @@
 import { equals } from '../../dal/drivers/in-memory/utils.memory'
 import { getTraversing, reversed, setTraversing } from '../../utils/utils'
-import { Expand, TypeTraversal } from '../../utils/utils.types'
 import {
   MiddlewareContext,
   DAO,
