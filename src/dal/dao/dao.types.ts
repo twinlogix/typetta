@@ -8,6 +8,7 @@ import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { GraphQLResolveInfo } from 'graphql'
+import { MappedIterable } from '../../utils/iterable'
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
@@ -123,6 +124,9 @@ export abstract class LiveQuery<T> implements AsyncIterable<T> {
   }
   public abstract close(): Promise<void>
   public abstract asyncIterator(): AsyncIterator<T>
+  public map<O>(f: (t: T) => O): AsyncIterable<O> {
+    return new MappedIterable(this, f)
+  }
 }
 
 export interface DAO<T extends DAOGenerics> {
