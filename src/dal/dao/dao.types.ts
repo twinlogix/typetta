@@ -117,6 +117,14 @@ export type MiddlewareContext<T extends DAOGenerics> = {
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 export type DefaultGenerationStrategy = 'middleware' | 'generator'
 
+export abstract class LiveQuery<T> implements AsyncIterable<T> {
+  public [Symbol.asyncIterator]() {
+    return this.asyncIterator()
+  }
+  public abstract close(): Promise<void>
+  public abstract asyncIterator(): AsyncIterator<T>
+}
+
 export interface DAO<T extends DAOGenerics> {
   findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<ModelProjection<T, P>[]>
   findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<ModelProjection<T, P> | null>
@@ -130,6 +138,13 @@ export interface DAO<T extends DAOGenerics> {
   replaceOne(params: ReplaceParams<T>): Promise<void>
   deleteOne(params: DeleteParams<T>): Promise<void>
   deleteAll(params: DeleteParams<T>): Promise<void>
+
+  liveFindAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P> & { maxRateMs?: number }): LiveQuery<ModelProjection<T, P>[]>
+  liveFindOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P> & { maxRateMs?: number }): LiveQuery<ModelProjection<T, P> | null>
+  liveFindPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P> & { maxRateMs?: number }): LiveQuery<{ totalCount: number; records: ModelProjection<T, P>[] }>
+  liveExists(params: FilterParams<T> & { maxRateMs?: number }): LiveQuery<boolean>
+  liveCount(params?: FilterParams<T> & { maxRateMs?: number }): LiveQuery<number>
+  liveAggregate<A extends AggregateParams<T>>(params: A & { maxRateMs?: number }, args?: AggregatePostProcessing<T, A>): LiveQuery<AggregateResults<T, A>>
 }
 
 export type DAOGenerics<

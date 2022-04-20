@@ -1,5 +1,6 @@
 import { equals } from '../../dal/drivers/in-memory/utils.memory'
 import { getTraversing, reversed, setTraversing } from '../../utils/utils'
+import { Expand, TypeTraversal } from '../../utils/utils.types'
 import {
   MiddlewareContext,
   DAO,
@@ -17,7 +18,9 @@ import {
   FindOneParams,
   DriverType,
   IdGenerationStrategy,
+  LiveQuery,
 } from './dao.types'
+import { LiveQueryImpl } from './live-query'
 import { LogArgs, LogFunction } from './log/log.types'
 import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { buildMiddleware } from './middlewares/utils/builder'
@@ -27,10 +30,10 @@ import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
 import { getNamedType, GraphQLResolveInfo } from 'graphql'
+import _ from 'lodash'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
-import _ from 'lodash'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   public build<P extends T['projection']>(p: P): P {
@@ -125,6 +128,25 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.metadata = metadata
     this.driverContext = driverContext
     this.schema = schema
+  }
+
+  liveFindAll<P extends GraphQLResolveInfo | AnyProjection<T['projection']>>(params?: FindParams<T, P> & { maxRateMs?: number }): LiveQuery<ModelProjection<T, P>[]> {
+    return new LiveQueryImpl(() => this.findAll(params), params?.maxRateMs)
+  }
+  liveFindOne<P extends GraphQLResolveInfo | AnyProjection<T['projection']>>(params?: FindOneParams<T, P> & { maxRateMs?: number }): LiveQuery<ModelProjection<T, P> | null> {
+    return new LiveQueryImpl(() => this.findOne(params), params?.maxRateMs)
+  }
+  liveFindPage<P extends GraphQLResolveInfo | AnyProjection<T['projection']>>(params?: FindParams<T, P> & { maxRateMs?: number }): LiveQuery<{ totalCount: number; records: ModelProjection<T, P>[] }> {
+    return new LiveQueryImpl(() => this.findPage(params), params?.maxRateMs)
+  }
+  liveCount(params?: FilterParams<T> & { maxRateMs?: number }): LiveQuery<number> {
+    return new LiveQueryImpl(() => this.count(params), params?.maxRateMs)
+  }
+  liveExists(params: FilterParams<T> & { maxRateMs?: number }): LiveQuery<boolean> {
+    return new LiveQueryImpl(() => this.exists(params), params?.maxRateMs)
+  }
+  liveAggregate<A extends AggregateParams<T>>(params: A & { maxRateMs?: number }, args?: AggregatePostProcessing<T, A>): LiveQuery<AggregateResults<T, A>> {
+    return new LiveQueryImpl(() => this.aggregate(params, args), params?.maxRateMs)
   }
 
   async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<ModelProjection<T, P>[]> {

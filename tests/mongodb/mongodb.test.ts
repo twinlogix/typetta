@@ -1649,6 +1649,27 @@ test('Inserted record middleware', async () => {
   expect(i).toBe(2)
 })
 
+test('Live query', async () => {
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const lq = dao.user.liveFindAll({ filter: { firstName: 'Mario' }, projection: { lastName: true }, maxRateMs: 100 })
+  setTimeout(() => {
+    dao.user.insertOne({ record: { firstName: 'Mario', lastName: 'Luigi', live: true } })
+  }, 2000)
+  const t = setTimeout(() => {
+    lq.close()
+  }, 20000)
+  let state = 'zero'
+  for await (const res of lq) {
+    if (res.length === 1) {
+      state = 'one'
+      expect(res[0].lastName).toBe('Luigi')
+      break
+    }
+  }
+  expect(state).toBe('one')
+  clearTimeout(t)
+})
+
 // ------------------------------------------------------------------------
 // ------------------------- SECURITY POLICIES ----------------------------
 // ------------------------------------------------------------------------
