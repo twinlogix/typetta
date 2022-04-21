@@ -42,7 +42,7 @@ export class PollingLiveQuery<T> extends LiveQuery<T> {
     )
   }
 
-  public async close() {
+  public async close(): Promise<void> {
     this.running = false
     clearInterval(this.intervalId)
     for (const listener of this.listeners.values()) {

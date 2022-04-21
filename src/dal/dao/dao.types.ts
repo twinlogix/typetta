@@ -119,7 +119,7 @@ export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 export type DefaultGenerationStrategy = 'middleware' | 'generator'
 
 export abstract class LiveQuery<T> implements AsyncIterable<T> {
-  public [Symbol.asyncIterator]() {
+  public [Symbol.asyncIterator](): AsyncIterator<T> {
     return this.asyncIterator()
   }
   public abstract close(): Promise<void>
