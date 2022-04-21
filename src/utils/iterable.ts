@@ -10,11 +10,17 @@ export class MappedIterable<T, O> implements AsyncIterable<O> {
     return {
       next: async () => {
         const result = await iterator.next()
+        if(result.done) {
+          return result
+        }
         return { value: this.map(result.value), done: false }
       },
       return: async (value) => {
         if (iterator.return) {
           const result = await iterator.return(value)
+          if(result.done) {
+            return result
+          }
           return { value: this.map(result.value), done: false }
         }
         return { value: undefined, done: true }
@@ -22,6 +28,9 @@ export class MappedIterable<T, O> implements AsyncIterable<O> {
       throw: async (e) => {
         if (iterator.throw) {
           const result = await iterator.throw(e)
+          if(result.done) {
+            return result
+          }
           return { value: this.map(result.value), done: false }
         }
         return { value: undefined, done: true }

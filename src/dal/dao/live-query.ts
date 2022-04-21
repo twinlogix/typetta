@@ -58,8 +58,7 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
       next: async () => {
         console.log(new Date, "NEXT", this.running, this.error)
         if (!this.running) {
-          // throw new Error("Iterator is closed")
-          //return { value: undefined, done: true }
+          return { value: undefined, done: true }
         }
         if (this.error !== undefined) {
           throw this.error
@@ -72,8 +71,8 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
           }
         })
       },
-      return: async (value) => {
-        console.log(new Date, "RETURN", this.running, this.error, JSON.stringify(value))
+      return: async () => {
+        console.log(new Date, "RETURN", this.running, this.error)
         const listener = this.listeners.get(id)
         if (listener) {
           listener({ value: undefined, done: true })
@@ -83,7 +82,7 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
           this.running = false
           clearInterval(this.intervalId)
         }
-        return { value, done: true }
+        return { value: undefined, done: true }
       },
       throw: async () => {
         console.log(new Date, "THROW", this.running, this.error)
