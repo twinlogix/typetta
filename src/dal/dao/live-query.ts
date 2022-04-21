@@ -58,7 +58,8 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
       next: async () => {
         console.log(new Date, "NEXT", this.running, this.error)
         if (!this.running) {
-          return { value: undefined, done: true }
+          throw new Error("Iterator is closed")
+          //return { value: undefined, done: true }
         }
         if (this.error !== undefined) {
           throw this.error
