@@ -130,22 +130,26 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   liveFindAll<P extends GraphQLResolveInfo | AnyProjection<T['projection']>>(params?: FindParams<T, P> & { maxRateMs?: number }): LiveQuery<ModelProjection<T, P>[]> {
-    return new PollingLiveQuery(() => this.findAll(params), params?.maxRateMs)
+    return new PollingLiveQuery(() => this.findAll({ ...params, metadata: this.liveQueryMetadata(params) }), params?.maxRateMs)
   }
   liveFindOne<P extends GraphQLResolveInfo | AnyProjection<T['projection']>>(params?: FindOneParams<T, P> & { maxRateMs?: number }): LiveQuery<ModelProjection<T, P> | null> {
-    return new PollingLiveQuery(() => this.findOne(params), params?.maxRateMs)
+    return new PollingLiveQuery(() => this.findOne({ ...params, metadata: this.liveQueryMetadata(params) }), params?.maxRateMs)
   }
   liveFindPage<P extends GraphQLResolveInfo | AnyProjection<T['projection']>>(params?: FindParams<T, P> & { maxRateMs?: number }): LiveQuery<{ totalCount: number; records: ModelProjection<T, P>[] }> {
-    return new PollingLiveQuery(() => this.findPage(params), params?.maxRateMs)
+    return new PollingLiveQuery(() => this.findPage({ ...params, metadata: this.liveQueryMetadata(params) }), params?.maxRateMs)
   }
   liveCount(params?: FilterParams<T> & { maxRateMs?: number }): LiveQuery<number> {
-    return new PollingLiveQuery(() => this.count(params), params?.maxRateMs)
+    return new PollingLiveQuery(() => this.count({ ...params, metadata: this.liveQueryMetadata(params) }), params?.maxRateMs)
   }
   liveExists(params: FilterParams<T> & { maxRateMs?: number }): LiveQuery<boolean> {
-    return new PollingLiveQuery(() => this.exists(params), params?.maxRateMs)
+    return new PollingLiveQuery(() => this.exists({ ...params, metadata: this.liveQueryMetadata(params) }), params?.maxRateMs)
   }
   liveAggregate<A extends AggregateParams<T>>(params: A & { maxRateMs?: number }, args?: AggregatePostProcessing<T, A>): LiveQuery<AggregateResults<T, A>> {
-    return new PollingLiveQuery(() => this.aggregate(params, args), params?.maxRateMs)
+    return new PollingLiveQuery(() => this.aggregate({ ...params, metadata: this.liveQueryMetadata(params) }, args), params?.maxRateMs)
+  }
+
+  private liveQueryMetadata(params?: { metadata?: T['operationMetadata'] }): T['operationMetadata'] {
+    return { ...(params?.metadata ?? {}), __liveQueryId: uuidv4() }
   }
 
   async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<ModelProjection<T, P>[]> {
