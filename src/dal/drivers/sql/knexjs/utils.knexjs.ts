@@ -49,6 +49,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
           if (!adapter) {
             throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
           }
+          const vr = v as Record<string, unknown>
           Object.entries(v).forEach(([fk, fv]) => {
             const av = () => adapter.modelToDB(fv) as any
             const avs = () => (fv as any[]).map((fve) => adapter.modelToDB(fve) as any)
@@ -63,9 +64,28 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case 'ne': builder.not.where(columnName, av()); break
               case 'in': builder.whereIn(columnName, avs()); break
               case 'nin': builder.not.whereIn(columnName, avs()); break
-              case 'contains': builder.where(columnName, 'like', `%${fv}%`); break
-              case 'startsWith': builder.where(columnName, 'like', `${fv}%`); break
-              case 'endsWith': builder.where(columnName, 'like', `%${fv}`); break
+              case 'contains': 
+                if(vr.mode && vr.mode === 'sensitive'){
+                  builder.whereLike(columnName, `%${fv}%`)
+                } else {
+                  builder.whereILike(columnName, `%${fv}%`)
+                }
+                break
+              case 'startsWith': 
+                if(vr.mode && vr.mode === 'sensitive'){
+                  builder.whereLike(columnName, `${fv}%`)
+                } else {
+                  builder.whereILike(columnName, `${fv}%`)
+                }
+                break
+              case 'endsWith': 
+                if(vr.mode && vr.mode === 'sensitive'){
+                  builder.whereLike(columnName, `%${fv}`)
+                } else {
+                  builder.whereILike(columnName, `%${fv}`)
+                }
+                break
+              case 'mode': break
               default: throw new Error(`${fk} query is not supported on sql entity.`)
             }
           })

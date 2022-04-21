@@ -21,7 +21,7 @@ export function getByPath(object: unknown, path: string): unknown {
 
 export type MockIdSpecification<T> = {
   generate?: () => T
-  stringify?: (t:T) => string
+  stringify?: (t: T) => string
 }
 type MockOverrides = {
   compare?: (l: unknown, r: unknown) => number | void | null | undefined
@@ -129,14 +129,26 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
           if (typeof value !== 'string') {
             return false
           }
-          if ('contains' in so && so.contains) {
-            return value.includes(so.contains)
-          }
-          if ('startsWith' in so && so.startsWith) {
-            return value.startsWith(so.startsWith)
-          }
-          if ('endsWith' in so && so.endsWith) {
-            return value.endsWith(so.endsWith)
+          if ((f as Record<string, unknown>).mode && (f as Record<string, unknown>).mode === 'sensitive') {
+            if ('contains' in so && so.contains) {
+              return value.includes(so.contains)
+            }
+            if ('startsWith' in so && so.startsWith) {
+              return value.startsWith(so.startsWith)
+            }
+            if ('endsWith' in so && so.endsWith) {
+              return value.endsWith(so.endsWith)
+            }
+          } else {
+            if ('contains' in so && so.contains) {
+              return value.toLocaleLowerCase().includes(so.contains.toLocaleLowerCase())
+            }
+            if ('startsWith' in so && so.startsWith) {
+              return value.toLocaleLowerCase().startsWith(so.startsWith.toLocaleLowerCase())
+            }
+            if ('endsWith' in so && so.endsWith) {
+              return value.toLocaleLowerCase().endsWith(so.endsWith.toLocaleLowerCase())
+            }
           }
         }
         return equals(value, f)
