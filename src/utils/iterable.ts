@@ -5,7 +5,7 @@ export class MappedIterable<T, O> implements AsyncIterable<O> {
     this.map = map
     this.iterable = iterable
   }
-  [Symbol.asyncIterator](): AsyncIterator<O, any, undefined> {
+  [Symbol.asyncIterator](): AsyncIterator<O> {
     const iterator = this.iterable[Symbol.asyncIterator]()
     return {
       next: async () => {

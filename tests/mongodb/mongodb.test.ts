@@ -1651,22 +1651,30 @@ test('Inserted record middleware', async () => {
 
 test('Live query', async () => {
   await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
-  const lq = dao.user.liveFindAll({ filter: { firstName: 'Mario' }, projection: { lastName: true }, maxRateMs: 100 })
+  console.log('Live query', new Date())
+  const lq = dao.user.liveFindAll({ filter: { firstName: 'Mario' }, projection: { lastName: true }, maxRateMs: 1000 })
   setTimeout(() => {
     dao.user.insertOne({ record: { firstName: 'Mario', lastName: 'Luigi', live: true } })
-  }, 2000)
+  }, 3000)
   const t = setTimeout(() => {
     lq.close()
   }, 20000)
-  let state = 'zero'
+  let state = 1
   for await (const res of lq) {
-    if (res.length === 1) {
-      state = 'one'
-      expect(res[0].lastName).toBe('Luigi')
+    if (state === 1) {
+      expect(res.length).toBe(0)
+      state = 2
+    } else if (state === 2) {
+      state = 3
+      expect(res.length).toBe(1)
       break
     }
   }
-  expect(state).toBe('one')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const _res of lq) {
+    fail()
+  }
+  expect(state).toBe(3)
   clearTimeout(t)
 })
 
