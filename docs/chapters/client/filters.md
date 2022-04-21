@@ -305,6 +305,19 @@ await daoContext.user.findAll({
 })
 ```
 
+### mode
+
+The `mode` operator does not add a filter but acts as a configuration for other string operators. It allows the following values: `insensitive` (default) or `sensitive`:
+
+For example:
+```typescript
+await daoContext.user.findAll({
+  filter: {
+    { 'address.street': { $contains: "Piave", mode: "sensitive" } }
+  }
+})
+```
+
 ## Other operators
 
 Below is the list of additional operators made available by Typetta:
