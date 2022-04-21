@@ -19,6 +19,7 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
   }
 
   private tick() {
+    console.log(new Date, "TICK", this.running, this.error)
     this.refresh().then(
       (state) => {
         const hash = crypto.createHash('sha256').update(JSON.stringify(state)).digest('base64')
@@ -54,6 +55,7 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
     const id = this.id++
     return {
       next: async () => {
+        console.log(new Date, "NEXT", this.running, this.error)
         if (!this.running) {
           return { value: undefined, done: true }
         }
@@ -69,6 +71,7 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
         })
       },
       return: async () => {
+        console.log(new Date, "RETURN", this.running, this.error)
         const listener = this.listeners.get(id)
         if (listener) {
           listener({ value: undefined, done: true })
@@ -81,6 +84,7 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
         return { value: undefined, done: true }
       },
       throw: async () => {
+        console.log(new Date, "THROW", this.running, this.error)
         const listener = this.listeners.get(id)
         if (listener) {
           listener({ value: undefined, done: true })
