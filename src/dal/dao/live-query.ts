@@ -72,8 +72,8 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
           }
         })
       },
-      return: async () => {
-        console.log(new Date, "RETURN", this.running, this.error)
+      return: async (value) => {
+        console.log(new Date, "RETURN", this.running, this.error, JSON.stringify(value))
         const listener = this.listeners.get(id)
         if (listener) {
           listener({ value: undefined, done: true })
@@ -83,7 +83,7 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
           this.running = false
           clearInterval(this.intervalId)
         }
-        return { value: undefined, done: true }
+        return { value, done: true }
       },
       throw: async () => {
         console.log(new Date, "THROW", this.running, this.error)
