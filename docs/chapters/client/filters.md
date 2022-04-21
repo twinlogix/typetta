@@ -43,6 +43,7 @@ Typetta supports various operators and filters in order to give you a powerful d
     - [contains](#contains)
     - [startsWith](#startswith)
     - [endsWith](#endswith)
+    - [mode](#mode)
   - [Other operators](#other-operators)
     - [exists](#exist)
   - [Advanced, driver-dependent filters](#advanced-driver-dependent-filters)
