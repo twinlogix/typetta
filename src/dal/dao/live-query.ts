@@ -53,6 +53,7 @@ export class LiveQueryImpl<T> extends LiveQuery<T> {
 
   public asyncIterator(): AsyncIterator<T> {
     const id = this.id++
+    console.log(new Date, "NEW ITERATOR", this.running, this.error)
     return {
       next: async () => {
         console.log(new Date, "NEXT", this.running, this.error)
