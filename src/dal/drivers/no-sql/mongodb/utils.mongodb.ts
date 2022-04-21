@@ -99,21 +99,22 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
         }
         return [[fk, fv]]
       })
+      const $options = 'mode' in filter && filter.mode === 'sensitive' ? '' : 'i'
       const stringFilter =
         'contains' in filter && 'startsWith' in filter && 'endsWith' in filter
-          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains}).*(?<=${filter.endsWith}$)`) }
+          ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains}).*(?<=${filter.endsWith}$)`) }
           : 'startsWith' in filter && 'endsWith' in filter
-          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.endsWith}$)`) }
+          ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.endsWith}$)`) }
           : 'contains' in filter && 'startsWith' in filter
-          ? { $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains})`) }
+          ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains})`) }
           : 'contains' in filter && 'endsWith' in filter
-          ? { $regex: new RegExp(`(${filter.contains}).*(?<=${filter.endsWith}$)`) }
+          ? { $options, $regex: new RegExp(`(${filter.contains}).*(?<=${filter.endsWith}$)`) }
           : 'contains' in filter
-          ? { $regex: filter.contains }
+          ? { $options, $regex: filter.contains }
           : 'startsWith' in filter
-          ? { $regex: new RegExp(`^${filter.startsWith}`) }
+          ? { $options, $regex: new RegExp(`^${filter.startsWith}`) }
           : 'endsWith' in filter
-          ? { $regex: new RegExp(`${filter.endsWith}$`) }
+          ? { $options, $regex: new RegExp(`${filter.endsWith}$`) }
           : {}
       return { ...mappedFilter, ...stringFilter }
     } else {

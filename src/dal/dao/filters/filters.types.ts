@@ -26,4 +26,5 @@ export type StringOperators = {
   contains?: string
   startsWith?: string
   endsWith?: string
+  mode?: 'sensitive' | 'insensitive'
 }
