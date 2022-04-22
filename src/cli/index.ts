@@ -1,17 +1,24 @@
 #!/usr/bin/env node
 import packageJson from '../../package.json'
+import generate from './generate'
 import init from './init'
+import { TYPETTA_COLOR } from './utils'
+import chalk from 'chalk'
 import { Command } from 'commander'
 
 const program = new Command('typetta')
   .version(packageJson.version)
-  .description('The offical Command Line Interface for the Typetta framework.')
-  .usage('<command>')
+  .description(`${chalk.bold.underline.hex(TYPETTA_COLOR)('The offical CLI (Command Line Interface) for the Typetta framework.')}`)
+  .usage('<command> [options]')
   .addHelpCommand(false)
   .helpOption(false)
 
 program
   .command('init')
-  .argument('<project-directory>', "<project-directory> where you'd like to setup Typetta", './')
+  .argument('[project-directory]', "[project-directory] where you'd like to setup Typetta")
   .description('Setup a new Typetta project or add Typetta to an existing one.')
   .action(init)
+
+program.command('generate').option('-w, --watch', 'The generate command will continue to watch and re-generate.').description('Generate the Typetta client files.').action(generate)
+
+program.parse(process.argv)

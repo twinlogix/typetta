@@ -1,11 +1,11 @@
 {
   "name": "@twinlogix/typetta",
   "version": "1.4.5",
-  "main": "lib/index.js",
+  "main": "lib/src/index.js",
   "bin": {
-    "typetta": "lib/cli/index.js"
+    "typetta": "lib/src/cli/index.js"
   },
-  "types": "lib/index.d.ts",
+  "types": "lib/src/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "coverage": "jest --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
@@ -76,8 +76,10 @@
     "is-plain-object": "5.0.0",
     "lodash": "4.17.21",
     "object-hash": "2.2.0",
+    "type-fest": "2.12.2",
     "commander": "9.2.0",
-    "type-fest": "2.12.2"
+    "chalk": "4.1.2",
+    "yaml": "2.0.1"
   },
   "peerDependencies": {
     "knex": "1.0.7",
