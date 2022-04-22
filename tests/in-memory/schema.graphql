@@ -1,0 +1,130 @@
+scalar Coordinates @geopoint
+scalar LocalizedString
+scalar Decimal
+scalar Password
+scalar JSON
+scalar Live
+
+type PostType @entity @memory {
+  id: ID! @id(from: "user")
+  name: String!
+}
+
+type Device @entity @memory {
+  id: ID! @id
+  name: String!
+  userId: ID
+  user: User @innerRef
+}
+
+type UsernamePasswordCredentials {
+  username: String! @alias(value: "user")
+  password: Password! @alias(value: "pwd")
+}
+
+type City @entity @memory {
+  id: ID! @id
+  name: String!
+  addressId: ID!
+  computedName: String @exclude
+  computedAddressName: String @exclude
+}
+
+type Address @entity @memory {
+  id: ID! @id
+  cities: [City!] @foreignRef
+}
+
+type Organization @entity @memory {
+  id: ID! @id
+  name: String!
+  vatNumber: String
+  address: Address
+  computedName: String @exclude
+}
+
+type User @entity @memory {
+  id: ID! @id @alias(value: "ID")
+  usernamePasswordCredentials: UsernamePasswordCredentials @alias(value: "cred")
+  firstName: String @alias(value: "name")
+  lastName: String
+  live: Boolean!
+  localization: Coordinates
+  title: LocalizedString
+  amounts: [Decimal!] @alias(value: "amounts")
+  amount: Decimal
+  friendsId: [ID!] @alias(value: "fIds")
+  friends: [User!] @innerRef
+  dogs: [Dog!] @foreignRef(refFrom: "ownerId")
+  credentials: [UsernamePasswordCredentials]
+  embeddedPost: Post
+}
+
+type Dog @entity @memory {
+  id: ID! @id
+  name: String!
+  ownerId: ID!
+  owner: User @innerRef
+}
+
+type Post @entity @memory {
+  id: ID! @id
+  title: String!
+  body: String
+  views: Int!
+  clicks: Int
+  authorId: ID! @alias(value: "aId")
+  author: User! @innerRef
+  metadata: PostMetadata
+}
+
+type PostMetadata {
+  region: String!
+  visible: Boolean!
+}
+
+type MockedEntity @entity @memory {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  name: String!
+  userId: ID!
+  user: User! @innerRef
+}
+
+type DefaultFieldsEntity @entity @memory {
+  id: ID! @id(from: "user")
+  name: String!
+  live: Live! @default(from: "generator")
+  creationDate: Int! @default
+
+  opt1: Live @default(from: "middleware")
+  opt2: Live @default(from: "generator")
+}
+
+enum State {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  DELETED
+}
+
+type Auditable {
+  createdOn: Int!
+  modifiedOn: Int!
+  createdBy: String!
+  modifiedBy: String!
+  deletedOn: Int
+  state: State!
+  versions: [Audit]! @foreignRef(refFrom: "entityId", refTo: "../id")
+}
+
+type Hotel @entity @memory {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  name: String!
+  audit: Auditable! @default(from: "middleware")
+}
+
+type Audit @entity @memory {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  entityId: ID!
+  changes: String
+}

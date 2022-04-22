@@ -13,8 +13,8 @@ main:
         title: Scalars
       - url: /chapters/data-model/entities
         title: Entities
-      - url: /chapters/data-model/relations
-        title: Relations
+      - url: /chapters/data-model/relationships
+        title: Relationships
   - client:
     title: Typetta Client
     children:
@@ -26,10 +26,10 @@ main:
         title: Filters
       - url: /chapters/client/projections
         title: Projections
-      - url: /chapters/client/sorting
+      - url: /chapters/client/sorts
         title: Sorts
-      - url: /chapters/client/relations
-        title: Relations
+      - url: /chapters/client/relationships
+        title: Relationships
       - url: /chapters/client/pagination
         title: Pagination
       - url: /chapters/client/aggregations
@@ -47,14 +47,18 @@ main:
   - advanced:
     title: Advanced Topics
     children:
+      - url: /chapters/advanced/security
+        title: Security
+      - url: /chapters/advanced/multi-tenancy
+        title: Multi-Tenancy
+      - url: /chapters/advanced/soft-delete
+        title: Soft-Delete
+      - url: /chapters/advanced/auditing
+        title: Auditing
       - url: /chapters/advanced/projection-dependency
         title: Projection Dependency
       - url: /chapters/advanced/computed-fields
         title: Computed Fields
-      - url: /chapters/advanced/multi-tenancy
-        title: Multi Tenancy
-      - url: /chapters/advanced/security
-        title: Security
       - url: /chapters/advanced/type-safety
         title: Type Safety
       - url: /chapters/advanced/graphql

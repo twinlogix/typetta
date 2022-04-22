@@ -1,8 +1,9 @@
-import { defaultValueMiddleware, inMemoryMongoDb, tenantSecurityPolicy } from '../../src'
+import { defaultValueMiddleware, tenantSecurityPolicy } from '../../src'
 import { DAOContext, groupMiddleware } from './dao.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
+import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 

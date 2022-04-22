@@ -12,7 +12,9 @@ html {
 body {
   padding: 50px !important;
   margin: 0px !important;
-  width: calc(100% - 100px);
+  @media print, screen and (max-width: 500px) {
+    padding: 25px !important;
+  }
 }
 
 a {
@@ -36,7 +38,6 @@ pre.highlight {
   align-items: flex-start;
 
   @media print, screen and (max-width: 960px) {
-    width: calc(100% - 100px) !important;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
@@ -109,4 +110,8 @@ div.alert {
   padding: 10px 20px;
   border-radius: 4px;
   margin-bottom: 25px;
+}
+
+ul ul {
+  margin-bottom: 0px;
 }

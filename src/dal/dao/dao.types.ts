@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DefaultModelScalars, EqualityOperators, Expand, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
+import { OmitIfKnown } from '../../utils/utils.types'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { LogFunction } from './log/log.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
@@ -19,6 +21,7 @@ export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<Fil
   options?: T['driverFindOptions']
   skip?: number
   sorts?: T['sort']
+  operationId?: string
 }
 
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
@@ -83,7 +86,7 @@ export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>
 export type DAOParams<T extends DAOGenerics> = {
   idField: T['idKey']
   idScalar: T['idScalar']
-  idGeneration: T['idGeneration']
+  idGeneration: IdGenerationStrategy
   idGenerator?: () => T['idScalar'][T['idScalar']]
   daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
@@ -96,9 +99,11 @@ export type DAOParams<T extends DAOGenerics> = {
   name: T['name']
 }
 
+export type DriverType = 'mongo' | 'knex' | 'memory'
+
 export type MiddlewareContext<T extends DAOGenerics> = {
   daoName: T['name']
-  daoDriver: 'mongo' | 'knex'
+  daoDriver: DriverType
   schema: Schema<T['scalars']>
   idField: T['idKey']
   driver: T['driverContext']
@@ -106,6 +111,7 @@ export type MiddlewareContext<T extends DAOGenerics> = {
   specificOperation: 'findAll' | 'findOne' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'replaceAll' | 'deleteOne' | 'deleteAll' | 'aggregate' | 'count' | 'exists' | 'findPage'
   logger?: LogFunction<T['name']>
   dao: DAO<T>
+  daoContext: T['daoContext']
 }
 
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
@@ -128,9 +134,8 @@ export interface DAO<T extends DAOGenerics> {
 
 export type DAOGenerics<
   ModelType extends object = any,
-  IDKey extends keyof Omit<ModelType, ExcludedFields> = any,
+  IDKey extends keyof OmitIfKnown<ModelType, ExcludedFields> = any,
   IDScalar extends keyof ScalarsType = any,
-  IdGeneration extends IdGenerationStrategy = any,
   PureFilterType = any,
   RawFilterType = any,
   RelationsType = any,
@@ -153,11 +158,12 @@ export type DAOGenerics<
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
   NameType extends string = any,
+  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = AbstractDAOContext<ScalarsType, MetadataType>,
 > = {
   model: ModelType
   idKey: IDKey
   idScalar: IDScalar
-  idGeneration: IdGeneration
+  idType: ModelType[IDKey]
   pureFilter: PureFilterType
   rawFilter: RawFilterType
   filter: PureFilterType | RawFilterType
@@ -178,6 +184,7 @@ export type DAOGenerics<
   driverContext: DriverContextType
   scalars: ScalarsType
   name: NameType
+  daoContext: DAOContext
 
   driverFilterOptions: DriverFilterOptions
   driverFindOptions: DriverFindOptions

@@ -1,9 +1,16 @@
 # Computed Fields
 
-Per **campo calcolato** si intende un campo di un'entità che non è presente nella sorgente dati, ma è frutto di un'elaborazione eseguita utilizzando il valore di altri campi. Un campo calcolato quindi viene ignorato in ogni operazione di inserimento o modifica e viene invece popolato automaticamente dal sistema in ogni operazione di lettura in cui site richiesto.
+A **computed field** is a field in an entity that is not in the data source, but is the result of processing using the value of other fields. A computed field is then ignored in each insert or edit operation and is automatically populated by the system in each read operation where site is requested.
 
-Typetta offre un comodo middleware che può essere utilizzato per la definizione di campi calcolati. Nel seguente esempio si mostra come è possibile definire un campo ``fullName`` che è la composizione di ``firstName`` e ``lastName`` di un'ipotetica entità che rappresenta un utente. Questi ultimi due sono campi effettivamente storicizzati nella sorgente dati, mentre ``fullName`` è di fatto un campo virtuale.
-
+Typetta offers convenient middleware that can be used to define calculated fields. The following example shows how you can define a ``fullName`` field that is the composition of ``firstName`` and ``lastName`` of a hypothetical entity that represents a user. These last two fields are actually historicised in the data source, while ``fullName`` is in fact a virtual field.
+```typescript
+type User @entity @mongo {
+  id: ID! @id
+  firstName: String!
+  lastName: String!
+  fullName: String! @default(from: "middleware")
+}
+```
 ```typescript
 const daoContext = new DAOContext({
   overrides: {
@@ -29,6 +36,6 @@ const daoContext = new DAOContext({
 }
 ```
 
-Nell'esempio precedente ``fieldsProjection`` rappresenta l'insieme del campi calcolati, ``requiredProjection`` rappresenta l'insieme dei campi che sono necerrari per l'elaborazione e ``compute`` la funzione che riceve in input i campi presenti sulla sorgente dati e deve fornire in output i campi calcolati a valle dell'elaborazione.
+In the previous example, ``fieldsProjection`` represents the set of computed fields, ``requiredProjection`` represents the set of fields that are required for processing, and it ``computes`` the function that receives the fields on the data source as input and must provide the computed fields downstream of the processing as output.
 
-Si noti che questo middleware utilizza il [Projection Dependency Middleware](./projection-dependency.md) descritto in precedenza con una logica di composizione e riutilizzo.
+Note that this middleware uses the [Projection Dependency Middleware](./projection-dependency.md) described above with a composition and reuse logic.

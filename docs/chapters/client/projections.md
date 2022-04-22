@@ -1,23 +1,23 @@
-# Proiezioni
+# Projections
 
-Per **proiezione** si intende il sottoinsieme dei campi di un'entità di modello che vengono richiesti in una query, siano essi dell'entità principale, si una entità embedded o di una entità collegata. Typetta sfrutta il meccanismo delle proiezioni per garantise un accesso al dato **efficiente** e **type-safe**.
+A **projection** is a subset of the fields in a model entity that are requested by a query, whether they are from the parent entity, an embedded entity, or a linked entity. Typetta leverages the projection mechanism to ensure **efficient** and **type-safe** data access.
 
-  - [Proiezioni di default](#proiezioni-di-default)
-  - [Proiezioni esplicite](#proiezioni-esplicite)
-  - [Proiezioni e relazioni](#proiezioni-e-relazioni)
-  - [L'importanza delle proiezioni](#limportanza-delle-proiezioni)
-    - [Proiezioni e GraphQL](#proiezioni-e-graphql)
+  - [Default projections](#default-projections)
+  - [Explicit projections](#explicit-projections)
+  - [Projections and relationships](#projections-and-relationships)
+  - [The importance of projections](#the-importance-of-projections)
+    - [Projections and GraphQL](#projections-and-graphql)
     - [Typing](#typing)
 
-## Proiezioni di default
+## Default projections
 
-In ogni query che ritorna un elenco di record, i risultati includono di default:
-- **Tutti** gli scalari e le entità embedded con i loro scalari
-- **Nessuna** delle relazioni
+In each query that returns a list of records, the results include by default:
+- **All** scalars and embedded entities with their scalars
+- **None** of the relationships
 
-Questo comportamento di base è giustificato dal fatto che il sistema recupera di default tutte le informazioni contenute nella tabella/collection relativa all'entità in un'unica query e non esegue ulteriori query per recuperare le informazioni di entità collegate a meno che non venga esplicitamente richiesto.
+This basic behaviour is justified by the fact that the system retrieves by default all the information contained in the entity table/collection in a single query and does not execute further queries to retrieve the linked entity information unless explicitly requested.
 
-Prendendo ad esempio il seguente modello applicativo:
+Taking the following application model as an example:
 
 ```typescript
 type User @entity @mongodb {
@@ -44,13 +44,13 @@ type Address {
 }
 ```
 
-Una query che non specifica alcuna proiezione esplicita come la seguente: 
+A query that does not specify any explicit projections such as the following:
 
 ```typescript
 const users = await daoContext.user.findOne({ filter: { firstName: "Mattia" } });
 ```
 
-Ritornerà un oggetto del tipo: 
+Returns an object of the type:
 
 ```typescript
 {
@@ -68,16 +68,16 @@ Ritornerà un oggetto del tipo:
 ```
 
 
-## Proiezioni esplicite
+## Explicit projections
 
-Tutte le operazione che ritornano dei record prevedono anche la possibilità di esplicitare una proiezione, ossia un elenco dei campi richiesti. Per farlo, ogni API che lo prevede mette a disposizione un parametro opzionare di nome `projection`. 
+All the operations that return records also include the possibility of making a projection explicit, that is, a list of the requested fields. To do so, each API allowing for this provides an optional parameter called `projection`.
 
-Di seguito una query di ricerca di un utente che richiede solamente il nome e il cognome:
+Below is a search query for a user who requires only their first and last name:
 
 ```typescript
-const user = await daoContext.user.findOne({ 
-  filter: { 
-    firstName: "Mattia" 
+const user = await daoContext.user.findOne({
+  filter: {
+    firstName: "Mattia"
   },
   projection: {
     firstName: true,
@@ -86,7 +86,7 @@ const user = await daoContext.user.findOne({
 });
 ```
 
-La query precedente ritornerà un oggetto come il seguente:
+The previous query will return an object such as the following:
 ```typescript
 {
   firstName: "Mattia",
@@ -94,12 +94,12 @@ La query precedente ritornerà un oggetto come il seguente:
 }
 ```
 
-Allo stesso modo è possibile selezionare i campi di un'entità embedded, quindi la seguente query: 
+Similarly, you can select the fields of an embedded entity, e.g. the following query:
 
 ```typescript
-const user = await daoContext.user.findOne({ 
-  filter: { 
-    firstName: "Mattia" 
+const user = await daoContext.user.findOne({
+  filter: {
+    firstName: "Mattia"
   },
   projection: {
     firstName: true,
@@ -111,7 +111,7 @@ const user = await daoContext.user.findOne({
 });
 ```
 
-Ritornerà il seguente risultato:
+The following result will be returned:
 
 ```typescript
 {
@@ -123,12 +123,12 @@ Ritornerà il seguente risultato:
 }
 ```
 
-Sebbene sia buona norma specificare sempre l'elenco completo dei campi necessari, sia per questioni di efficienza che di correttezza, per le entità embedded è possibile selezionare anche l'intera entità in una proiezione con la seguente sintassi:
+Although it is good practice to always specify the complete list of required fields, both for reasons of efficiency and correctness, for embedded entities it is also possible to select the entire entity in a projection with the following syntax:
 
 ```typescript
-const user = await daoContext.user.findOne({ 
-  filter: { 
-    firstName: "Mattia" 
+const user = await daoContext.user.findOne({
+  filter: {
+    firstName: "Mattia"
   },
   projection: {
     firstName: true,
@@ -138,7 +138,7 @@ const user = await daoContext.user.findOne({
 });
 ```
 
-In questo caso il risultato sarà:
+In this case the result will be:
 
 ```typescript
 {
@@ -154,40 +154,40 @@ In questo caso il risultato sarà:
 }
 ```
 
-## Proiezioni e relazioni
+## Projections and relationships
 
-Tramite la specifica di una proiezione esplicita l'utente può decidere di selezionare le relazioni che intende caricare. Dal punto di vista delle proiezioni, le relazioni sono gestite esattamente come le entità embedded.
+By specifying an explicit projection, the user can decide to select the relationships they want to load. From the point of view of projections, relationships are managed exactly like embedded entities.
 
-Dato il modello applicativo precedente, è quindi possibile selezionare un utente con i suoi post:
+Given the previous application model, it is therefore possible to select a user with their posts:
 
 ```typescript
-const user = await daoContext.user.findOne({ 
-  filter: { 
+const user = await daoContext.user.findOne({
+  filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
   projection: {
     firstName: true,
     lastName: true,
     posts: {
-      id: true, 
+      id: true,
       content: true
     }
   }
 });
 ```
 
-Il sistema supporta la possibilità di richiedere campi con una profondità a piacere, è quindi possibile caricare per esempio un utente, i suoi post e per ogni post nuovamente l'utente:
+The system supports the possibility of requesting fields with a desired depth; it is therefore possible to load, for example, a user, their posts and, for each post, once again the user:
 
 ```typescript
-const user = await daoContext.user.findOne({ 
-  filter: { 
+const user = await daoContext.user.findOne({
+  filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
   projection: {
     firstName: true,
     lastName: true,
     posts: {
-      id: true, 
+      id: true,
       user: {
         firstName: true,
         lastName: true
@@ -198,25 +198,25 @@ const user = await daoContext.user.findOne({
 });
 ```
 
-Ovviamente richiedere una relazine ha un effetto molto diverso sull'interazione con il database sottostante, infatti il sistema dovrà sostenere tutte le query necessarie al caricamento dei dati, su tutte le tabelle/collection interessate. Typetta si occupa comunque di rendere questa complessità completamente trasparente all'utente.
+Obviously requesting a relationship has a very different effect on the interaction with the underlying database. Indeed, the system will have to support all the queries necessary to load the data, on all the tables/collections involved. However, Typetta takes care of making this complexity completely transparent to the user.
 
-## L'importanza delle proiezioni
+## The importance of projections
 
-Come detto in precedenza, un corretto utilizzo delle proiezioni è importante sia per efficientare l'accesso al dato, sia per una corretta gestione dei tipi di ritorno.
+As mentioned above, the correct use of projections is important both for efficient access to the data and for the correct management of return types.
 
-### Proiezioni e GraphQL
-La filosofia GraphQL, da cui Typetta è fortemente ispirato, prevede che ogni richiesta definisca esplicitamene ed esattamente i campi necessari. Questo permette di eseguire il numero minimo di query necessarie al recupero del dato che è sempre caricato in maniera *eager*.
+### Projections and GraphQL
+The GraphQL philosophy, from which Typetta is strongly inspired, requires that each request explicitly and precisely defines the necessary fields. This allows you to perform the minimum number of queries required to retrieve the data that is always loaded in *eager* mode.
 
-Per agevolare l'integrazione di Typetta proprio con i back-end GraphQL, ogni API di recupero dei dati può ricevere al posto di una proiezione esplicita un oggetto ``GraphQLResolveInfo`` che contiene l'AST di una richiesta GraphQL. E' quindi il sistema a trasformare in maniera automatica l'input dell'utente in una proiezione di Typetta.
+To facilitate Typetta's integration with GraphQL backends, each data retrieval API can receive a ``GraphQLResolveInfo`` object that contains the AST of a GraphQL request instead of an explicit projection. It is therefore the system that automatically transforms user input into a Typetta projection.
 
-Di seguito un esempio di un resolver GraphQL implementato utilizzando un DAO Context:
+Here is an example of a GraphQL resolver implemented using a DAO Context:
 
 ```typescript
 Query: {
   user: async (parent: never, args: never, ctx: GraphQLContext, info: GraphQLResolveInfo) => {
       return await ctx.daoContext.user.findOne({
-        filter: { 
-          id: ctx.user.id 
+        filter: {
+          id: ctx.user.id
         },
         projection: info,
       })
@@ -226,41 +226,41 @@ Query: {
 ```
 
 ### Typing
-Nella maggior parte dei linguaggi di programmazione, l'accesso al dato tramite DAO prevede la creazione di oggetti chiamati DTO (data transfer object), ossia oggetti che definiscono quale porzione o composizione del dato storicizzato viene ritornato da un'API. La definizione dei DTO è un processo costoso sia in termini di sviluppo che di manutenzione.
+In most programming languages, access to data through DAO involves creating objects called data transfer objects (DTOs), which are objects that define which portion or composition of the historicized data is returned by an API. Defining DTOs is an expensive process in terms of both development and maintenance.
 
-Il linguaggio TypeScript, grazie al suo evoluto concetto di *tipo* e alla sua possibilità di manipolazione, ci offre l'opportunità di superare il design pattern DTO ed offrire allo sviluppatore uno strumento in grado di conciliare produttività e type-safety.
+The TypeScript language, thanks to its advanced *type* concept and its capacity for manipulation, offers us the opportunity to outdo the DTO design pattern and offer the developer a tool capable of reconciling productivity and type-safety.
 
-Nello specifico, ogni API di Typetta ritorna un tipo di dato che dipende dalla proiezione passata in input, sia in termini di insieme di campi che di loro opzionalità.
+Specifically, each Typetta API returns a type of data that depends on the projection set as input, both in terms of the set of fields and their related options.
 
-Prendendo come esempio il modello applicativo di cui sopra, con la seguente chiamata ad API:
+Taking the above application model as an example, with the following API call:
 
 ```typescript
 const user = await ctx.daoContext.user.findOne({
-  filter: { 
+  filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
   projection: {
     firstName: true,
     lastName: true,
     posts: {
-      id: true, 
+      id: true,
       content: true
     }
   }
 })
 ```
 
-La costante `user` avrà come tipo: 
+The `user` constant will have as its type:
 
 ```typescript
 type GeneratedUserType = {
   firstName?: string,
   lastName?: string,
   posts?: {
-    id: string, 
+    id: string,
     content: string
   }[]
 } | null
 ```
 
-Questo significa che a livello di compilatore (e di controlli/suggerimenti dell'IDE) sarà possibile accedere, per esempio, ai campi `firstName` e `lastName` del risultato, ma non al campo `address`, il tutto senza la necessità di definire esplicitamente un DTO e tenerlo allineato al modello applicativo.
+This means that at the compiler (and IDE controls/hints) level, you can access, for example, the `firstName` and `lastName` fields of the result, but not the `address` field, and all of this without the need to explicitly define a DTO and keep it aligned with the application model.

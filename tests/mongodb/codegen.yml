@@ -11,8 +11,9 @@ generates:
         Date: Date
         Decimal: bignumber.js#BigNumber
         Coordinates: ../../src#Coordinates
-        LocalizedString: ../../src#LocalizedString
+        LocalizedString: ../types#LocalizedString
         Live: boolean
+        MongoID: mongodb#ObjectId
   tests/mongodb/dao.mock.ts:
     config:
       schemaImport: './schema.graphql'

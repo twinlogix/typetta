@@ -16,7 +16,7 @@ export function findNode(code: string, typesMap: Map<string, TsTypettaGeneratorN
 
 export function getID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField {
   const field = node.fields.find((field) => field.isID)
-  if(!field) {
+  if (!field) {
     throw new Error(`Id field in node ${node.name} not found!`)
   }
   return field
@@ -24,24 +24,60 @@ export function getID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField {
 
 export function getNode(code: string, typesMap: Map<string, TsTypettaGeneratorNode>): TsTypettaGeneratorNode {
   const node = typesMap.get(code)
-  if(!node) {
+  if (!node) {
     throw new Error(`Node with code ${code} not found!`)
   }
   return node
 }
 
-export function findField(node: TsTypettaGeneratorNode, fieldPath: string, typesMap: Map<string, TsTypettaGeneratorNode>): TsTypettaGeneratorField | undefined {
+// example:
+// id -> id
+// entity.id -> entity.id
+// entity.../id -> id
+export function resolveParentPath(fieldPath: string): string {
+  const c: (string | null)[] = fieldPath.split('../').join('__PARENT__').split('.')
+  for (let i = 1; i < c.length; i++) {
+    const value = c[i]
+    if (value && value.includes('__PARENT__')) {
+      c[i - 1] = null
+    }
+  }
+  return c.flatMap((v) => (v === null ? [] : [v.split('__PARENT__').join('')])).join('.')
+}
+
+export function removeParentPath(fieldPath: string): string {
+  return fieldPath.split('../').join('')
+}
+
+export function findField(
+  node: TsTypettaGeneratorNode,
+  fieldPath: string,
+  typesMap: Map<string, TsTypettaGeneratorNode>,
+  parents: TsTypettaGeneratorNode[],
+): { field?: TsTypettaGeneratorField; root: TsTypettaGeneratorNode } {
+  let parentIndex = -1
+  while (fieldPath.startsWith('../')) {
+    fieldPath = fieldPath.substring(3)
+    parentIndex++
+  }
+  if (parentIndex >= parents.length) {
+    return { root: node }
+  }
+  if (parentIndex != -1) {
+    node = parents[parentIndex]
+  }
+
   const fieldPathSplitted = fieldPath.split('.')
   if (fieldPathSplitted.length === 1) {
-    return node.fields.find((f) => f.name === fieldPathSplitted[0])
+    return { field: node.fields.find((f) => f.name === fieldPathSplitted[0]), root: node }
   } else {
     const key = fieldPathSplitted.shift()
     const tmpField = node.fields.find((f) => f.name === key)
     if (tmpField && tmpField.type.kind === 'embedded') {
       const embeddedType = findNode(tmpField.type.embed, typesMap)
-      return embeddedType && findField(embeddedType, fieldPathSplitted.join('.'), typesMap)
+      return { field: embeddedType && findField(embeddedType, fieldPathSplitted.join('.'), typesMap, []).field, root: node }
     }
-    return tmpField
+    return { field: tmpField, root: node }
   }
 }
 
@@ -66,23 +102,27 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
   object: From,
   schema: Schema<ModelScalars>,
 ): To {
+  if(object === null) {
+    return null as unknown as To
+  }
   const result: any = {}
-  const keySet = new Set(Object.keys(object))
+  const isModelToDB = direction === 'modelToDB'
+  const isDbToModel = !isModelToDB
   for (const [fieldName, schemaField] of Object.entries(schema)) {
-    const sourceName = schemaField.alias && direction === 'dbToModel' ? schemaField.alias : fieldName
-    const destName = schemaField.alias && direction === 'modelToDB' ? schemaField.alias : fieldName
+    const sourceName = schemaField.alias && isDbToModel ? schemaField.alias : fieldName
+    const destName = schemaField.alias && isModelToDB ? schemaField.alias : fieldName
     if (sourceName in object) {
       const value = object[sourceName]
-      keySet.delete(sourceName)
       if (!schemaField.required && (value === null || value === undefined)) {
         result[destName] = value
       } else {
         if ('scalar' in schemaField) {
-          const adapter = adapters[schemaField.scalar] ?? identityAdapter
+          const adapter = adapters[schemaField.scalar] ?? identityAdapter()
+          const validator = adapter.validate
           const mapper =
-            direction === 'modelToDB' && adapter.validate
+            validator && isModelToDB
               ? (data: ModelScalars[keyof ModelScalars]) => {
-                  const validation = adapter.validate!(data)
+                  const validation = validator(data)
                   if (validation === true) {
                     return adapter.modelToDB(data)
                   }
@@ -103,10 +143,6 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
         }
       }
     }
-  }
-  for (const key of keySet.values()) {
-    // copy remaining unknown key
-    result[key] = object[key]
   }
   return result
 }

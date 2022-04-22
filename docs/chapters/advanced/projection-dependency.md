@@ -1,8 +1,8 @@
 # Projection Dependency
 
-Il concetto di **projection dependency** consiste nell'avere alcuni campi di un'entità legati ad altri da una dipendenza per cui, selezionati i primi in una projection il sistema deve sempre e automaticamente selezionare i secondi.
+The concept of **projection dependency** consists of having some fields of an entity linked to others by a dependency so, when the first are selected in a projection, the system must always and automatically select the second ones.
 
-Typetta offre la possibilità di creare un middleware che permette in maniera semplice di definire una projetion dependency. Di seguito un esempio in cui alla richiesta del campo ``fullName`` il middleware impone l'aggiunta dei campi ``firstName`` e ``lastName`` alla proiezione:
+Typetta offers the possibility to create a middleware that allows you to easily define a projection dependency. Here is an example in which, when the ``fullName`` field is requested, the middleware forces the ``firstName`` and ``lastName`` fields to be added to the projection:
 
 ```typescript
 const daoContext = new DAOContext({
@@ -24,4 +24,4 @@ const daoContext = new DAOContext({
 }
 ```
 
-Di per sé l'utilizzo di questo middleware non risulta particolarmente frequente in manierà a sé stante, ma è invece estremamente utile nella creazione di altri middleware. Esso permette ad esempio di costruire il middleware [computed fields](./computed-fields), grazie al quale è possibile definire del campi virtuali che sono frutto dell'elaborazione di uno o più campi dell'entità storicizzata.
+The use of this middleware is not particularly frequent in and of itself, but it is extremely useful in the creation of other middleware. For example, it allows you to construct [computed middleware fields](./computed-fields), allowing for the definition of virtual fields that are the result of the processing of one or more fields of the historicised entity.

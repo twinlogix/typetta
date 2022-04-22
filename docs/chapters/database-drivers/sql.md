@@ -1,12 +1,12 @@
 # SQL
 
-Typetta offre un supporto completo ai principali database **SQL**, tra cui PostgreSQL, CockroachDB, MSSQL, MySQL, MariaDB, SQLite3, Better-SQLite3, Oracle, e Amazon Redshift. Un supporto così ampio è garantito dal fatto che, internamente, viene utilizzata la libreria [KnexJS](https://knexjs.org/){:target="_blank"}. KnexJS è un query-builder open.source estremamente diffuso in ambito Node JS e vanta il supporto di un'ampia community. Con una test coverage maggiore del 90% è inoltre comunemente considerato un software adatto all'utilizzo in ambito enterprise.
+Typetta provides comprehensive support for major **SQL** databases, including PostgreSQL, CockroachDB, MSSQL, MySQL, MariaDB, SQLite3, Better-SQLite3, Oracle, and Amazon Redshift. Such extensive support is ensured by the fact that, internally, the [KnexJS](https://knexjs.org/){:target="_blank"} library is used. KnexJS is an open.source query-builder that is widely used in Node JS and is supported by a large community. With a test coverage greater than 90%, it is also commonly considered a software suitable for use in a corporate setting.
 
-Tutte le funzionalità di Typetta permettono l'accesso diretto ad un'istanza KnexJS, garantendo grande flessibilità e un'ampia gamma di funzionalità con cui effettuare un accesso diretto al database.
+All the features of Typetta allow direct access to a KnexJS instance, ensuring great flexibility and a wide range of features with which to directly access the database.
 
-## Creazione della connessione
+## How to connect
 
-In accordo con la documentazione ufficiale, la connessione ad un database SQL utilizzando KnexJS può essere implementata come segue:
+In line with official documentation, connecting to an SQL database using KnexJS can be implemented as follows:
 
 ```typescript
 import knex from 'knex'
@@ -26,7 +26,7 @@ async function run() {
 run().catch(console.dir);
 ```
 
-Si noti che è l'istanza knex ad occuparsi del connection pooling, quindi ogni processo Node JS deve generalmente può utilizzare un'unica istanza KnexJS, configurandola appositamente:
+Note that it is the knex instance that handles connection pooling, so each JS Node process must generally use a single KnexJS instance, configuring it specifically:
 
 ```typescript
 import knex from 'knex'
@@ -47,11 +47,11 @@ async function run() {
 run().catch(console.dir);
 ```
 
-## Creazione del DAOContext
+## Creation of the DAOContext
 
-Contrariamente alla connessione, il ``DAOContext`` può essere istanziato più volte e con parametri diversi. E' ad esempio consigliabile istanziare un ``DAOContext`` per ogni contesto chiamante (ogni chiamata REST o GraphQL ad esempio).
+Unlike connection, the ``DAOContext`` can be instantiated multiple times and with different parameters. For example, it is advisable to create a ``DAOContext`` for each calling context (for example, each REST or GraphQL call).
 
-Il ``DAOContext`` richiede in input un riferimento all'istanza KnexJS che utilizzerà per accedere alle varie entità del modello dati. Di seguito un esempio di configurazione:
+The ``DAOContext`` requests an input reference to the KnexJS instance that it will use to access the various data model entities. Here is an example configuration:
 
 ```typescript
 const daoContext = new DAOContext({
@@ -61,7 +61,7 @@ const daoContext = new DAOContext({
 })
 ```
 
-E infine un esempio completo:
+And finally a complete example:
 
 ```typescript
 import knex from 'knex'

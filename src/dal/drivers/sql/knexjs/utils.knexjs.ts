@@ -1,5 +1,5 @@
 import { AggregatePostProcessing } from '../../../..'
-import { getSchemaFieldTraversing, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
+import { getSchemaFieldTraversing, mapObject, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { AggregateParams, DAOGenerics } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
@@ -33,7 +33,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   schema: Schema<ScalarsType>,
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>,
 ): Knex.QueryBuilder<TRecord, TResult> {
-  if(typeof filter === 'function') {
+  if (typeof filter === 'function') {
     return filter(builder)
   }
   Object.entries(filter).forEach(([k, v]) => {
@@ -49,23 +49,43 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
           if (!adapter) {
             throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
           }
+          const vr = v as Record<string, unknown>
           Object.entries(v).forEach(([fk, fv]) => {
             const av = () => adapter.modelToDB(fv) as any
             const avs = () => (fv as any[]).map((fve) => adapter.modelToDB(fve) as any)
             // prettier-ignore
             switch (fk) {
-              case '$exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
-              case '$eq': builder.where(columnName, av()); break
-              case '$gte': builder.where(columnName, '>=', av()); break
-              case '$gt': builder.where(columnName, '>', av()); break
-              case '$lte': builder.where(columnName, '<=', av()); break
-              case '$lt': builder.where(columnName, '<', av()); break
-              case '$ne': builder.not.where(columnName, av()); break
-              case '$in': builder.whereIn(columnName, avs()); break
-              case '$nin': builder.not.whereIn(columnName, avs()); break
-              case '$contains': builder.where(columnName, 'like', `%${fv}%`); break
-              case '$startsWith': builder.where(columnName, 'like', `${fv}%`); break
-              case '$endsWith': builder.where(columnName, 'like', `%${fv}`); break
+              case 'exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
+              case 'eq': builder.where(columnName, av()); break
+              case 'gte': builder.where(columnName, '>=', av()); break
+              case 'gt': builder.where(columnName, '>', av()); break
+              case 'lte': builder.where(columnName, '<=', av()); break
+              case 'lt': builder.where(columnName, '<', av()); break
+              case 'ne': builder.not.where(columnName, av()); break
+              case 'in': builder.whereIn(columnName, avs()); break
+              case 'nin': builder.not.whereIn(columnName, avs()); break
+              case 'contains': 
+                if(vr.mode && vr.mode === 'sensitive'){
+                  builder.whereLike(columnName, `%${fv}%`)
+                } else {
+                  builder.whereILike(columnName, `%${fv}%`)
+                }
+                break
+              case 'startsWith': 
+                if(vr.mode && vr.mode === 'sensitive'){
+                  builder.whereLike(columnName, `${fv}%`)
+                } else {
+                  builder.whereILike(columnName, `${fv}%`)
+                }
+                break
+              case 'endsWith': 
+                if(vr.mode && vr.mode === 'sensitive'){
+                  builder.whereLike(columnName, `%${fv}`)
+                } else {
+                  builder.whereILike(columnName, `%${fv}`)
+                }
+                break
+              case 'mode': break
               default: throw new Error(`${fk} query is not supported on sql entity.`)
             }
           })
@@ -101,10 +121,6 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
           buildWhereConditions(qb.or, f, schema, adapters)
         }
       })
-    } else if (k === '$not') {
-      builder.whereNot((qb) => {
-        buildWhereConditions(qb, v as AbstractFilter, schema, adapters)
-      })
     } else {
       // throw new Error(`${k} is not a scalar in the schema. (Filtering on embedded types is not supported.)`)
     }
@@ -121,15 +137,15 @@ export function buildHavingConditions<TRecord, TResult>(
       Object.entries(v).forEach(([fk, fv]) => {
         // prettier-ignore
         switch (fk) {
-          case '$exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
-          case '$eq': builder.having(k, '=', fv as number); break
-          case '$gte': builder.having(k, '>=', fv as number); break
-          case '$gt': builder.having(k, '>', fv as number); break
-          case '$lte': builder.having(k, '<=', fv as number); break
-          case '$lt': builder.having(k, '<', fv as number); break
-          case '$ne': builder.not.having(k, '=', fv as number); break
-          case '$in': builder.havingIn(k, fv as number[]); break
-          case '$nin': builder.havingNotIn(k, fv as number[]); break
+          case 'exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
+          case 'eq': builder.having(k, '=', fv as number); break
+          case 'gte': builder.having(k, '>=', fv as number); break
+          case 'gt': builder.having(k, '>', fv as number); break
+          case 'lte': builder.having(k, '<=', fv as number); break
+          case 'lt': builder.having(k, '<', fv as number); break
+          case 'ne': builder.not.having(k, '=', fv as number); break
+          case 'in': builder.havingIn(k, fv as number[]); break
+          case 'nin': builder.havingNotIn(k, fv as number[]); break
           default: throw new Error(`${fk} query is not supported on sql entity.`)
         }
       })
@@ -193,24 +209,24 @@ export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuil
 }
 
 export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
-  function flat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: any): object {
-    return Object.entries(schemaFiled.embedded).reduce((result, [k, subSchemaField]) => {
-      const key = subSchemaField.alias || k
+  function flat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: any): [string, unknown][] {
+    return Object.entries(schemaFiled.embedded).flatMap(([k, subSchemaField]) => {
+      const key = subSchemaField.alias ?? k
       if (key in value) {
         const name = concatEmbeddedNames(prefix, key)
         if ('embedded' in subSchemaField) {
-          return { ...result, ...flat(name, subSchemaField, value[key]) }
+          return flat(name, subSchemaField, value[key])
         } else {
-          return { ...result, [name]: value[key] }
+          return [[name, value[key]]]
         }
       }
-      return result
-    }, {})
+      return []
+    })
   }
   return Object.entries(schema).reduce((result, [k, schemaFiled]) => {
     const name = schemaFiled.alias || k
     if ('embedded' in schemaFiled && name in object) {
-      const flatted = { ...result, ...flat(name, schemaFiled, object[name]) }
+      const flatted = { ...result, ...Object.fromEntries(flat(name, schemaFiled, object[name])) }
       delete flatted[name]
       return flatted
     }
@@ -222,16 +238,17 @@ export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, 
   function unflat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
     const res = Object.entries(schemaFiled.embedded).reduce(
       ([record, oldToDelete], [k, subSchemaField]) => {
-        const name = concatEmbeddedNames(prefix, subSchemaField.alias || k)
+        const name = concatEmbeddedNames(prefix, subSchemaField.alias ?? k)
+        const subName = subSchemaField.alias ?? k
         if ('embedded' in subSchemaField) {
           const [obj, newToDelete] = unflat(name, subSchemaField, value, oldToDelete)
           if (newToDelete.length > 0) {
-            return [{ ...(record || {}), [k]: obj }, newToDelete] as [object, string[]]
+            return [{ ...(record ?? {}), [subName]: obj }, newToDelete] as [object, string[]]
           } else {
             return [record, oldToDelete] as [object | undefined, string[]]
           }
         } else if (name in value) {
-          return [{ ...(record || {}), [k]: value[name] }, [...oldToDelete, name]] as [object, string[]]
+          return [{ ...(record ?? {}), [subName]: value[name] }, [...oldToDelete, name]] as [object, string[]]
         }
         return [record, oldToDelete] as [object | undefined, string[]]
       },
@@ -241,11 +258,18 @@ export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, 
   }
   return Object.entries(schema).reduce((result, [k, schemaFiled]) => {
     if ('embedded' in schemaFiled) {
-      const [obj, toDelete] = unflat(schemaFiled.alias || k, schemaFiled, object)
-      if (obj) {
-        const res = { ...result, [k]: obj }
+      const [obj, toDelete] = unflat(schemaFiled.alias ?? k, schemaFiled, object)
+      //if every key of embedded is null the emedded was not inserted
+      if (toDelete.every((k) => object[k] === null) && !schemaFiled.required) {
         for (const key of toDelete) {
-          delete (res as any)[key]
+          delete result[key]
+        }
+        return result
+      }
+      if (obj) {
+        const res = { ...result, [schemaFiled.alias ?? k]: obj }
+        for (const key of toDelete) {
+          delete res[key]
         }
         return res
       }
@@ -276,20 +300,20 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
   schema: Schema<ScalarsType>
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>
 }): object {
-  return Object.entries(update).reduce((p, [k, v]) => {
-    if (v === undefined) return p
+  return mapObject(update as any, ([k, v]) => {
+    if (v === undefined) return []
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
-      const adapter = adapters[schemaField.scalar] ?? identityAdapter
-      return { [columnName]: modelValueToDbValue(v, schemaField, adapter), ...p }
+      const adapter = adapters[schemaField.scalar] ?? identityAdapter()
+      return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField) {
       const adapted = adaptUpdate({ update: v, schema: schemaField.embedded, adapters })
-      return Object.entries(adapted).reduce((sp, [sk, sv]) => {
-        return { [concatEmbeddedNames(columnName, sk)]: sv, ...sp }
-      }, p)
+      return Object.entries(adapted).map(([sk, sv]) => {
+        return [concatEmbeddedNames(columnName, sk), sv]
+      })
     } else {
-      return p
+      return []
     }
-  }, {})
+  })
 }

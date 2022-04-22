@@ -1,4 +1,5 @@
-import { computedField } from '../../src'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { computedField, inMemoryKnexConfig } from '../../src'
 import { DAOContext } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
@@ -6,33 +7,13 @@ import sha256 from 'sha256'
 
 jest.setTimeout(20000)
 
-let knexInstance: Knex<any, unknown[]>
-let dao: DAOContext<any>
-
-const config: Knex.Config = {
-  client: 'sqlite3',
-  connection: ':memory:',
-  useNullAsDefault: true,
-  log: {
-    warn: () => {
-      return
-    },
-    debug: () => {
-      return
-    },
-    error: () => {
-      return
-    },
-    deprecate: () => {
-      return
-    },
-  },
-}
+let knexInstance: Knex<{ [K in string]: unknown }, unknown[]>
+let dao: DAOContext
 
 let idCounter = 0
 
 beforeEach(async () => {
-  knexInstance = knex(config)
+  knexInstance = knex(inMemoryKnexConfig())
   dao = new DAOContext({
     overrides: {
       user: {
@@ -77,7 +58,7 @@ beforeEach(async () => {
       },
       JSON: {
         dbToModel: (o: unknown) => JSON.parse(o as string),
-        modelToDB: (o: any) => JSON.stringify(o),
+        modelToDB: (o: unknown) => JSON.stringify(o),
       },
       Password: {
         dbToModel: (o: unknown) => o as string,
@@ -133,7 +114,7 @@ test('Demo', async () => {
 
   const pippo = await dao.user.findOne({
     filter: {
-      createdAt: { $lte: new Date() },
+      createdAt: { lte: new Date() },
       'credentials.username': 'Pippo',
     },
     projection: {
@@ -150,7 +131,7 @@ test('Demo', async () => {
     },
     relations: {
       posts: {
-        filter: { title: { $in: ['Title 1', 'Title 2', 'Title 3'] } },
+        filter: { title: { in: ['Title 1', 'Title 2', 'Title 3'] } },
         limit: 2,
         skip: 1,
         sorts: (qb) => qb.orderBy('title', 'desc'),
@@ -196,11 +177,11 @@ test('Aggregate test', async () => {
         'metadata.region': true,
       },
       aggregations: { count: { field: 'authorId', operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
-      filter: { 'metadata.visible': true, views: { $gt: 0 } },
+      filter: { 'metadata.visible': true, views: { gt: 0 } },
       skip: 1,
       limit: 2,
     },
-    { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { $lt: 150 } } },
+    { sorts: [{ totalAuthorViews: 'asc' }], having: { totalAuthorViews: { lt: 150 } } },
   )
   expect(aggregation1.length).toBe(2)
   // expect(aggregation1[0]).toEqual({ count: 4, totalAuthorViews: 20, authorId: 'user_0', 'metadata.region': 'it' })
@@ -210,8 +191,8 @@ test('Aggregate test', async () => {
   const aggregation2 = await dao.post.aggregate({
     aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' }, avgAuthorViews: { field: 'views', operation: 'avg' } },
   })
-  expect(aggregation2.avgAuthorViews!).toBe(49.5)
-  expect(aggregation2.avgAuthorViews!).toBe(aggregation2.totalAuthorViews! / aggregation2.count!)
+  expect(aggregation2.avgAuthorViews).toBe(49.5)
+  expect(aggregation2.avgAuthorViews).toBe((aggregation2.totalAuthorViews ?? 0) / aggregation2.count)
 
   const aggregation3 = await dao.post.aggregate({
     aggregations: { max: { field: 'views', operation: 'max' }, min: { field: 'views', operation: 'min' } },
@@ -250,4 +231,55 @@ test('Aggregate test', async () => {
   for (const a of aggregation6) {
     expect(a.count).toBe(1)
   }
+})
+
+test('Aggregate test 2', async () => {
+  const type1 = await dao.postType.insertOne({ record: { name: 'type1', id: '1' } })
+  for (let i = 0; i < 100; i++) {
+    await dao.post.insertOne({
+      record: {
+        authorId: `user_${Math.floor(i / 10)}`,
+        title: 'Title ' + i,
+        views: i,
+        createdAt: new Date(),
+        metadata:
+          i % 4 === 0
+            ? null
+            : i % 4 === 1
+            ? undefined
+            : {
+                region: i % 4 === 2 ? 'it' : 'en',
+                visible: i % 2 === 0 || i === 99,
+                typeId: type1.id,
+              },
+      },
+    })
+  }
+  const aggregation1 = await dao.post.aggregate(
+    {
+      by: {
+        'metadata.region': true,
+      },
+      aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
+    },
+    { sorts: [{ 'metadata.region': 'desc' }, { totalAuthorViews: 'desc' }] },
+  )
+  expect(aggregation1.length).toBe(3)
+  expect(aggregation1.find((a) => a['metadata.region'] == null)?.count).toBe(50)
+  expect(aggregation1.find((a) => a['metadata.region'] === 'it')?.count).toBe(25)
+  expect(aggregation1.find((a) => a['metadata.region'] === 'en')?.count).toBe(25)
+
+  const aggregation2 = await dao.post.aggregate(
+    {
+      by: {
+        'metadata.region': true,
+      },
+      aggregations: { count: { operation: 'count' }, totalAuthorViews: { field: 'views', operation: 'sum' } },
+      filter: { 'metadata.visible': true, views: { gt: 0 } },
+    },
+    { sorts: [{ 'metadata.region': 'desc' }, { totalAuthorViews: 'desc' }] },
+  )
+  expect(aggregation2.length).toBe(2)
+  expect(aggregation2.find((a) => a['metadata.region'] === 'it')?.count).toBe(25)
+  expect(aggregation2.find((a) => a['metadata.region'] === 'en')?.count).toBe(1)
 })

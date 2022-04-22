@@ -1,15 +1,18 @@
-# Multi Tenancy
+# Multi-Tenancy
 
-La gestione della **multi tenancy** è un problema estremamente comune nei moderni sistemi cloud e consiste nel servire più utenti (tenant) con un'unica architettura software quindi, per quanto riguarda Typetta, un un'unico strato di accesso al dato.
+The management of **multi-tenancy** is an extremely common problem in modern cloud systems and consists of serving multiple users (tenants) with a single software architecture, therefore, as far as Typetta is concerned, a single data access layer.
 
-Ci sono tre approcci alla gestione della multi tenancy:
-- *Database separati*: la base dati di ogni tenant è su un database dedicato a lui.
-- *Schema separati*: la base dati di ogni tenant sono su schema diversi di un unico database.
-- *Partizionamento*: tutti i tenant sono su un unico database e un unico schema partizionato grazie ad un campo detto discriminatore.
+There are three approaches to managing multi-tenancy:
 
-## Partizionamento
+- **Separate databases**: the database of each tenant is on a database dedicated to them.
 
-Utilizzando il meccanismo dei middlewares, Typetta offre una gestine completamente automatica dello scenario di multi tenancy tramite partizionamento. Di seguito un esempio di come configurare un ``DAOContext``:
+- **Separate schemas**: the databases of each tenant are on different schemas of a single database.
+
+- **Partitioning**: all tenants are on a single database and a single partitioned schema thanks to a field called discriminator.
+
+## Partitioning
+
+Using the middlewares mechanism, Typetta offers fully automatic management of the multi-tenancy scenario via partitioning. Here is an example of how to configure a ``DAOContext``:
 
 ```typescript
 const daoContext = new DAOContext({
@@ -24,16 +27,16 @@ const daoContext = new DAOContext({
 }
 ```
 
-Il campo ``tenantKey``, che nell'esempio specifico è valorizzato come ``tenantId``, identifica il nome del discriminatore che ogni entità del modello dati avrà e che rappresenta la sua appartenenza ad un tenant. Il ``DAOContext`` inoltre, dovrà essere inizializzato con i metadati dell'utente chiamante e in particolare dovrà contenere il discriminatore definito con la stessa chiave ``tenantId``. Si noti che, in alternativa, è possibile passare i metadati ad ogni operazione invece che alla creazione del ``DAOContext``. 
+The ``tenantKey`` field, which in the specific example is set as ``tenantId``, identifies the name of the discriminator that each entity of the data model will have and that represents its belonging to a tenant. The ``DAOContext`` must also be initialised with the metadata of the calling user and, in particular, must contain the discriminator defined with the same ``tenantId`` key. Note that, alternatively, you can set the metadata for each operation instead of creating the ``DAOContext``.
 
-Il middleware aggiunge allo strato di accesso al dato i seguenti comportamenti:
+The middleware adds the following behaviours to the data access layer:
 
-- In tutte le operazioni che ricevono un filtro in input si assicura che l'utente abbia inserito una condizione che controlla l'appartenenza di un'entità al suo tenant. Se l'utente non setta alcun filtro, il middleware ne impone uno di default del tipo:
+- All operations that receive an input filter ensure that the user has entered a condition that controls an entity's belonging to its tenant. If the user does not set any filter, the middleware imposes a default filter of the type:
 
 ```typescript
 { tenantId: 'user-tentant-id' }
 ```
 
-- In tutte le operazioni di scrittura il middleware si assicura che il record inserito o modificato appartenga allo stesso tenanto dell'utente chiamante.
+- In all write operations, the middleware ensures that the inserted or modified record belongs to the same tenant as the calling user.
 
-Questo fa sì che, definendo l'attributo ``tenantId`` in tutte le entità del modello, lo sviluppatore non debba più preoccuparsi di valorizzarlo correttamente e di controllarlo ad ogni operazione.
+This means that, by defining the ``tenantId`` attribute in all the entities of the model, the developer no longer has to worry about setting its value correctly and checking it with each operation.

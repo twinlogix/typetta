@@ -31,32 +31,22 @@ export type KeyOfTypeStrict<T extends object, V> = {
 
 export type OmitUndefinedAndNeverKeys<T> = T extends object ? Pick<T, KeyOfType<T, undefined>> : never
 
-export type LocalizedString = {
-  [key: string]: string
-}
-
 export type Coordinates = {
   latitude: number
   longitude: number
 }
 
-export type TypeTraversal<T, Path extends string> = Path extends keyof T ? T[Path] : Path extends `${infer R}.${infer F}` ? (R extends keyof T ? TypeTraversal<T[R], F> : never) : never
-
-type MongoMockDAOContextParams<T> = T extends Record<'mongo', object>
-  ? Omit<T, 'mongo'> & {
-      mongo?: {
-        [K in keyof T['mongo']]?: T['mongo'][K] | 'mock'
-      }
-    }
-  : T
-type KnexMockDAOContextParams<T> = T extends Record<'knex', object>
-  ? Omit<T, 'knex'> & {
-      knex?: {
-        [K in keyof T['knex']]?: T['knex'][K] | 'mock'
-      }
-    }
-  : T
-export type MockDAOContextParams<T> = MongoMockDAOContextParams<KnexMockDAOContextParams<T>>
+export type TypeTraversal<T, Path extends string> = T extends null
+  ? null
+  : T extends undefined
+  ? undefined
+  : Path extends keyof T
+  ? T[Path]
+  : Path extends `${infer R}.${infer F}`
+  ? R extends keyof T
+    ? TypeTraversal<T[R], F>
+    : never
+  : never
 
 type Prev = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...0[]]
 
@@ -75,3 +65,5 @@ type RecursiveKeyOfHandleValue<TValue, Text extends string, D extends number> = 
   : TValue extends object
   ? Text | `${Text}${RecursiveKeyOfInner<TValue, D>}`
   : Text
+
+export type OmitIfKnown<T, K extends keyof T> = [K] extends [any] ? any : Omit<T, K>

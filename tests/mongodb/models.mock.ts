@@ -1,6 +1,7 @@
 import { Coordinates } from '../../src';
 import { BigNumber } from 'bignumber.js';
-import { LocalizedString } from '../../src';
+import { LocalizedString } from '../types';
+import { ObjectId } from 'mongodb';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -18,12 +19,20 @@ export type Scalars = {
   JSON: any;
   Live: boolean;
   LocalizedString: LocalizedString;
+  MongoID: ObjectId;
   Password: any;
 };
 
 export type Address = {
   __typename?: 'Address';
   cities?: Maybe<Array<City>>;
+  id: Scalars['ID'];
+};
+
+export type Audit = {
+  __typename?: 'Audit';
+  changes?: Maybe<Scalars['String']>;
+  entityId: Scalars['ID'];
   id: Scalars['ID'];
 };
 
@@ -35,6 +44,7 @@ export type Auditable = {
   modifiedBy: Scalars['String'];
   modifiedOn: Scalars['Int'];
   state: State;
+  versions: Array<Maybe<Audit>>;
 };
 
 export type City = {
@@ -81,7 +91,7 @@ export type Hotel = {
 
 export type MockedEntity = {
   __typename?: 'MockedEntity';
-  id: Scalars['ID'];
+  id: Scalars['MongoID'];
   name: Scalars['String'];
   user: User;
   userId: Scalars['ID'];
@@ -125,7 +135,9 @@ export type User = {
   __typename?: 'User';
   amount?: Maybe<Scalars['Decimal']>;
   amounts?: Maybe<Array<Scalars['Decimal']>>;
+  credentials?: Maybe<Array<Maybe<UsernamePasswordCredentials>>>;
   dogs?: Maybe<Array<Dog>>;
+  embeddedPost?: Maybe<Post>;
   firstName?: Maybe<Scalars['String']>;
   friends?: Maybe<Array<User>>;
   friendsId?: Maybe<Array<Scalars['ID']>>;

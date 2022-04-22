@@ -4,7 +4,7 @@ import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 import { PartialDeep } from 'type-fest'
 
-export function audit<T extends DAOGenerics>(input: (metadata: T['metadata']) => { changes: T['update']; insert: PartialDeep<T['insert']> }): DAOMiddleware<T> {
+export function audit<T extends DAOGenerics>(input: (metadata?: T['metadata']) => { changes: T['update']; insert: PartialDeep<T['insert']> }): DAOMiddleware<T> {
   return buildMiddleware({
     beforeInsert: async (params, context) => {
       return {

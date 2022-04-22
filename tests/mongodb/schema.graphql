@@ -4,6 +4,7 @@ scalar Decimal
 scalar Password
 scalar JSON
 scalar Live
+scalar MongoID
 
 type Device @entity @mongodb {
   id: ID! @id
@@ -51,6 +52,8 @@ type User @entity @mongodb {
   friendsId: [ID!] @alias(value: "fIds")
   friends: [User!] @innerRef
   dogs: [Dog!] @foreignRef(refFrom: "ownerId")
+  credentials: [UsernamePasswordCredentials]
+  embeddedPost: Post
 }
 
 type Dog @entity @mongodb {
@@ -76,8 +79,8 @@ type PostMetadata {
   visible: Boolean!
 }
 
-type MockedEntity @entity {
-  id: ID! @id(from: "db") @alias(value: "_id")
+type MockedEntity @entity @memory {
+  id: MongoID! @id(from: "db") @alias(value: "_id")
   name: String!
   userId: ID!
   user: User! @innerRef
@@ -107,10 +110,17 @@ type Auditable {
   modifiedBy: String!
   deletedOn: Int
   state: State!
+  versions: [Audit]! @foreignRef(refFrom: "entityId", refTo: "../id")
 }
 
 type Hotel @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   name: String!
   audit: Auditable! @default(from: "middleware")
+}
+
+type Audit @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  entityId: ID!
+  changes: String
 }

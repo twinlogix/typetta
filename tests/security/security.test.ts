@@ -1,10 +1,11 @@
-import { inMemoryMongoDb, SecurityPolicyReadError, SecurityPolicyWriteError } from '../../src'
+import { SecurityPolicyReadError, SecurityPolicyWriteError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
 import { DAOContext, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
+import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 
@@ -145,7 +146,7 @@ test('security test 1', async () => {
   const dao = await createSecureDaoContext(user.id)
 
   try {
-    await dao.hotel.findAll({ projection: { id: true, name: true }, filter: { name: { $startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
+    await dao.hotel.findAll({ projection: { id: true, name: true }, filter: { name: { startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -158,7 +159,7 @@ test('security test 1', async () => {
   try {
     await dao.hotel.findAll({
       projection: { id: true, name: true, totalCustomers: true },
-      filter: { name: { $startsWith: 'AHotel' } },
+      filter: { name: { startsWith: 'AHotel' } },
       metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
     })
     fail()
@@ -172,7 +173,7 @@ test('security test 1', async () => {
   }
 
   try {
-    await dao.hotel.findAll({ projection: { id: true, name: true, totalCustomers: true }, filter: { name: { $startsWith: 'AHotel' } } })
+    await dao.hotel.findAll({ projection: { id: true, name: true, totalCustomers: true }, filter: { name: { startsWith: 'AHotel' } } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -186,7 +187,7 @@ test('security test 1', async () => {
 
   const hotels = await dao.hotel.findAll({
     projection: { id: true, name: true, totalCustomers: true },
-    filter: { name: { $startsWith: 'AHotel' } },
+    filter: { name: { startsWith: 'AHotel' } },
     metadata: { securityDomain: { hotelId: ['h1', 'h2'] } },
   })
   expect(hotels.length).toBe(2)
@@ -341,8 +342,6 @@ test('security test 4', async () => {
 })
 
 afterEach(async () => {
-  if (mongodb.connection) {
-    await mongodb.connection.close()
-    await mongodb.replSet.stop()
-  }
+  await mongodb.connection.close()
+  await mongodb.replSet.stop()
 })

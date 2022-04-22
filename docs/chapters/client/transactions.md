@@ -1,22 +1,22 @@
-# Transazioni
+# Transactions
 
-Una transazione è una qualunque sequenza di operazioni di lettua e scrittura che, se eseguita in modo corretto, produce una variazione nello stato di una base di dati. In caso di successo, il risultato delle operazioni deve essere permanente o persistente, mentre in caso di insuccesso si deve tornare allo stato precedente all'inizio della transazione.
+A transaction is any sequence of read-write operations that, if performed correctly, results in a change in the state of a database. In the event of success, the result of the operations must be permanent or persistent, while, in the event of failure, it must return to the state prior to the start of the transaction.
 
-  - [Le transazioni in Typetta](#le-transazioni-in-typetta)
-  - [Transazioni MongoDB](#transazioni-mongodb)
-  - [Transazioni SQL](#transazioni-sql)
-  
-## Le transazioni in Typetta
+  - [Transactions in Typetta](#transactions-in-typetta)
+  - [MongoDB Transactions](#mongodb-transactions)
+  - [SQL Transactions](#sql-transactions)
 
-La maggior parte dei moderni database ha una qualche forma di supporto alle transazioni. Questo supporto può variare sia nella forma che nella sostanza a seconda delle caratteristiche più peculiari di ogni database. 
+## Transactions in Typetta
 
-Offrire una funzionalità omogenea per tutti i driver supportati ci avrebbe obbligati a compromessi funzionali che avrebbero ridotto le possibilità a disposizione dell'utente. Per questo motivo l'approccio scelto in Typetta è quello di supportare le diverse strategie di gestione delle transazioni di ogni driver, mantenendo invece omogeneo lo strato di accesso al dato.
+Most modern databases have some form of transaction support. This support can vary both in form and content depending on the unique characteristics of each database.
 
-## Transazioni MongoDB
+Offering homogeneous functionality for all supported drivers would have forced us to make functional compromises that would have reduced the possibilities available to the user. For this reason, the approach chosen in Typetta is to support the different transaction management strategies of each driver, while keeping the data access layer homogeneous.
 
-MongoDB offre un supporto completo alle transazioni su più documenti dalla versione 4.2. Tale supporto è fornito tramite il costrutto `session` che prevede un metodo `startTransaction`, come da [documentazione ufficiale](https://docs.mongodb.com/manual/core/transactions/){:target="_blank"}. Una volta avviata una transazione, la relativa `session` contiene un riferimento alla stessa e può essere per fare in modo che le chiamate ad API di Typetta vengano eseguite nel suo contesto.
+## MongoDB Transactions
 
-Di seguito un esempio di avvio di una transazione, recupero e modifica di informazioni di un utente ed infine commit della transazione utilizzando il driver MongoDB:
+MongoDB has offered full support for transactions on multiple documents since version 4.2. This support is provided through the `session` construct that provides a `startTransaction` method, as per the [official documentation](https://docs.mongodb.com/manual/core/transactions/){:target="_blank"}. Once a transaction is initiated, its `session` contains a reference to it and can be used to ensure that Typetta calls to APIs are made in its context.
+
+Here is an example of starting a transaction, retrieving and editing a user's information, and finally committing the transaction using the MongoDB driver:
 
 ```typescript
   const session = mongoClient.startSession()
@@ -26,14 +26,14 @@ Di seguito un esempio di avvio di una transazione, recupero e modifica di inform
   })
 
   try {
-    const user = await dao.user.findOne({ 
+    const user = await dao.user.findOne({
       filter: { id: '1fc70958-b791-4855-bbb3-d7b02b22b39e' },
       projection: { id: true, balance: true },
       options: { session }
     )
-    await dao.user.updateOne({ 
+    await dao.user.updateOne({
       filter: { id: user.id },
-      changes: { balance: user.balance + 10 }, 
+      changes: { balance: user.balance + 10 },
       options: { session }
     });
     await session.commitTransaction()
@@ -44,28 +44,28 @@ Di seguito un esempio di avvio di una transazione, recupero e modifica di inform
   }
 ```
 
-Come mostrato nell'esempio, la creazione della transazione è effettuata utilizzando direttamente il driver ufficiale MongoDB, il che assicura di avere tutte le potenzialità che il database fornisce. E' poi possibile scegliere, operazione per operazione, se essa deve essere eseguita in transazione o meno, semplicemente passando o meno il parametro `session` tra le `options`.
+As shown in the example, the creation of the transaction is done directly using the official MongoDB driver, which ensures that you have all the potential that the database provides. You can then choose, operation by operation, whether it should be executed as a transaction or not, simply by setting the `session` parameter among the `options` or otherwise.
 
-## Transazioni SQL
+## SQL Transactions
 
-Tutti i principali database SQL offrono un supporto alle transazioni. Grazie all'utilizzo della libreria KnexJS, la creazione e la gestione di una transazione risulta identica a prescindere dall'engine SQL sottostante. 
+All major SQL databases provide transaction support. Using the KnexJS library, creating and managing a transaction is identical regardless of the underlying SQL engine.
 
-Utilzzando KnexJS, la creazione di una transazione può essere eseguita direttamente utilizzando un'istanza `knexInstance`, sulla quale invocare il metodo `transaction`, che riceve alcuni parametri specific per il contesto SQL. Per un riferimento completo di queste API è possibile controllare la [documentazione ufficiale](https://knexjs.org/#Transactions){:target="_blank"}
+Using KnexJS, you can create a transaction directly by using a `knexInstance` instance, on which to invoke the `transaction` method, which receives certain parameters specific to the SQL context. For a complete reference of these APIs, you can check the [official documentation](https://knexjs.org/#Transactions){:target="_blank"}.
 
-Di seguito un esempio di avvio di una transazione, recupero e modifica di informazioni di un utente ed infine commit della transazione utilizzando il driver KnexJS:
+Here is an example of starting a transaction, retrieving and editing a user's information, and finally committing the transaction using the KnexJS driver:
 
 ```typescript
   const trx = await knexInstance.transaction({ isolationLevel: 'snapshot' })
 
   try {
-    const user = await dao.user.findOne({ 
+    const user = await dao.user.findOne({
       filter: { id: '1fc70958-b791-4855-bbb3-d7b02b22b39e' },
       projection: { id: true, balance: true },
       options: { trx }
     )
-    await dao.user.updateOne({ 
+    await dao.user.updateOne({
       filter: { id: user.id },
-      changes: { balance: user.balance + 10 }, 
+      changes: { balance: user.balance + 10 },
       options: { trx }
     });
     await trx.commit()

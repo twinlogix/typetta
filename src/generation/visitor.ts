@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { IdGenerationStrategy } from '..'
+import { DefaultGenerationStrategy } from '../dal/dao/dao.types'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { Directives } from './directives'
 import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
@@ -6,7 +8,6 @@ import { toFirstLower } from './utils'
 import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 import autoBind from 'auto-bind'
 import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
-import { DefaultGenerationStrategy } from '../dal/dao/dao.types'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
@@ -61,7 +62,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       return null
     }
 
-    const foundDirective = node.directives.find((d) => (d.name as any) === directiveName || (d.name.value && d.name.value === directiveName))
+    const foundDirective = node.directives.find((d) => d.name.value && d.name.value === directiveName)
 
     if (!foundDirective) {
       return null
@@ -124,7 +125,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       if (defaultDirective && defaultGenerationStrategy !== 'generator' && defaultGenerationStrategy !== 'middleware') {
         throw new Error(`@default(from: "generator" | "middleware") "from" must be either "generator" or "middleware" but it is ${defaultGenerationStrategy}`)
       }
-      if(defaultDirective && defaultGenerationStrategy === 'generator' && resFieldType.kind === 'embedded') {
+      if (defaultDirective && defaultGenerationStrategy === 'generator' && resFieldType.kind === 'embedded') {
         throw new Error(`@default(from: "generator") cannot be used on embdedded fields`)
       }
 
@@ -166,6 +167,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         isID: idDirective != null,
         idGenerationStrategy,
         isList: field.type.kind === Kind.LIST_TYPE || (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE),
+        isListElementRequired: field.type.kind === Kind.LIST_TYPE && field.type.type.kind === Kind.NON_NULL_TYPE,
         isExcluded: excludeDirective != null,
         defaultGenerationStrategy,
         isEnum: isEnumType(schemaType),
@@ -193,13 +195,18 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     const table = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'table')) || toFirstLower(plainName) + 's'
     const knexSource = (sqlEntityDirective && this._getDirectiveArgValue<string>(sqlEntityDirective, 'source')) || 'default'
 
+    const memoryEntityDirective = this._getDirectiveFromAstNode(node, Directives.MEMORY)
+
     const fields = this._buildFields(node.fields!, node)
 
-    if (mongoEntityDirective && sqlEntityDirective) {
+    if ([mongoEntityDirective, sqlEntityDirective, memoryEntityDirective].filter((v) => v).length > 1) {
       throw new Error(`Type ${plainName} is a @mongodb and a @sqlEntity at the same time. A type can be related to only one source.`)
     }
-    if ((mongoEntityDirective || sqlEntityDirective) && !entityEntityDirective) {
-      throw new Error(`Directives @${Directives.MONGO} and @${Directives.SQL} must be defined with @${Directives.ENTITY}.`)
+    if ((mongoEntityDirective || sqlEntityDirective || memoryEntityDirective) && !entityEntityDirective) {
+      throw new Error(`Directives @${Directives.MONGO} and @${Directives.SQL} and @${Directives.MEMORY} must be defined with @${Directives.ENTITY}.`)
+    }
+    if(entityEntityDirective && !mongoEntityDirective && !sqlEntityDirective && !memoryEntityDirective) {
+      throw new Error(`Directives @${Directives.ENTITY} need to specify a driver: @${Directives.MONGO} and @${Directives.SQL} and @${Directives.MEMORY}.`)
     }
 
     return {
@@ -209,8 +216,8 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         ? { type: 'mongo', collection, source: mongoSource }
         : sqlEntityDirective
         ? { type: 'sql', table, source: knexSource }
-        : entityEntityDirective
-        ? { type: 'mongo', collection: toFirstLower(plainName) + 's', source: '__mock' }
+        : memoryEntityDirective
+        ? { type: 'memory' }
         : undefined,
       fields,
     }
