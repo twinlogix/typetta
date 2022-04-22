@@ -43,6 +43,7 @@ Typetta supports various operators and filters in order to give you a powerful d
     - [contains](#contains)
     - [startsWith](#startswith)
     - [endsWith](#endswith)
+    - [mode](#mode)
   - [Other operators](#other-operators)
     - [exists](#exist)
   - [Advanced, driver-dependent filters](#advanced-driver-dependent-filters)
@@ -301,6 +302,19 @@ For example:
 await daoContext.user.findAll({
   filter: {
     { 'address.street': { $endWith: "48" } }
+  }
+})
+```
+
+### mode
+
+The `mode` operator does not add a filter but acts as a configuration for other string operators. It allows the following values: `insensitive` (default) or `sensitive`:
+
+For example:
+```typescript
+await daoContext.user.findAll({
+  filter: {
+    { 'address.street': { $contains: "Piave", mode: "sensitive" } }
   }
 })
 ```
