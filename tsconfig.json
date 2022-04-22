@@ -9,6 +9,7 @@
     "baseUrl": ".",
     "declaration": true,
     "incremental": true,
+    "resolveJsonModule": true,
     //"allowSyntheticDefaultImports": true,
     "strict": true,
     "noErrorTruncation": true,

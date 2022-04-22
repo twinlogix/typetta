@@ -2,6 +2,9 @@
   "name": "@twinlogix/typetta",
   "version": "1.1.1",
   "main": "lib/index.js",
+  "bin": {
+    "typetta": "lib/cli/index.js"
+  },
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
@@ -70,7 +73,8 @@
     "is-plain-object": "5.0.0",
     "object-hash": "2.2.0",
     "type-fest": "2.11.1",
-    "mongodb-memory-server": "8.2.0"
+    "mongodb-memory-server": "8.2.0",
+    "commander": "9.2.0"
   },
   "peerDependencies": {
     "knex": "1.0.3",
