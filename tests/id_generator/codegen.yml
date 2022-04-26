@@ -15,6 +15,7 @@ generates:
         IntAutoInc: number
   tests/id_generator/dao.mock.ts:
     config:
+      generationOutput: 'dao'
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
       typettaImport: ../../src

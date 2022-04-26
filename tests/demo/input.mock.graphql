@@ -47,18 +47,14 @@ input BooleanFilterInput {
   exists: Boolean
 }
 
-
-input AIDFilterInput {
-  eq: AID
-  ne: AID
-  in: [AID!]
-  nin: [AID!]
-  exists: Boolean
-  contains: AID
-  startsWith: AID
-  endsWith: AID
-  mode: StringFilterMode
+input IDFilterInput {
+  eq: ID
+  ne: ID
+  in: [ID!]
+  nin: [ID!]
+  exists: ID
 }
+
 
 input DateTimeFilterInput {
   eq: DateTime

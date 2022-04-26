@@ -111,6 +111,12 @@ test('simple findAll', async () => {
   expect(Object.keys(users5[0]).length).toBe(1)
   const users6 = await dao.user.findAll({ projection: { credentials: undefined } })
   expect(Object.keys(users6[0]).length).toBe(1)
+
+  const user7 = await dao.user.findOne({ filter: { firstName: { gt: 'z' } } })
+  expect(user7?.firstName).toBe('FirstName')
+
+  const user8 = await dao.user.findOne({ filter: { firstName: { gt: 'z' } } })
+  expect(user8).toBe(null)
 })
 
 test('simple findOne', async () => {
@@ -843,7 +849,7 @@ test('insert and retrieve decimal array field', async () => {
   expect((user?.amounts ?? [])[0].comparedTo(1.02)).toBe(0)
   expect((user?.amounts ?? [])[1].comparedTo(2.223)).toBe(0)
 
-  const user2 = await dao.user.findOne({ filter: { amounts: { in: [[new BigNumber(1.02)], [new BigNumber(1.02), new BigNumber(2.223)]]} }, projection: { id: true, amounts: true } })
+  const user2 = await dao.user.findOne({ filter: { amounts: { in: [[new BigNumber(1.02)], [new BigNumber(1.02), new BigNumber(2.223)]] } }, projection: { id: true, amounts: true } })
   expect(user2).toBeDefined()
   expect(user2?.amounts?.length).toBe(2)
   expect((user2?.amounts ?? [])[0].comparedTo(1.02)).toBe(0)

@@ -19,7 +19,6 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }
     })
 
-    //TODO: what for scalar ID?
     const customScalars = this.generateCustomScalarFilter(customScalarsMap)
     return [
       this.defaultInput(),
@@ -99,6 +98,14 @@ export class InputTypettaGenerator extends TypettaGenerator {
         in: [Boolean!]
         nin: [Boolean!]
         exists: Boolean
+      }
+      
+      input IDFilterInput {
+        eq: ID
+        ne: ID
+        in: [ID!]
+        nin: [ID!]
+        exists: ID
       }`
   }
 
