@@ -763,6 +763,86 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends Abstrac
 
 
 //--------------------------------------------------------------------------------
+//--------------------------------- EMBEDDEDUSER ---------------------------------
+//--------------------------------------------------------------------------------
+
+export function embeddedUserSchema(): Schema<types.Scalars> {
+  return {
+    'e': { embedded: embeddedUser2Schema(), array: true },
+    'userId': {
+      scalar: 'ID', 
+      required: true
+    }
+  }
+}
+
+export type EmbeddedUserProjection = {
+  e?: {
+    user?: UserProjection | boolean,
+    userId?: boolean,
+  } | boolean,
+  user?: UserProjection | boolean,
+  userId?: boolean,
+}
+export type EmbeddedUserParam<P extends EmbeddedUserProjection> = ParamProjection<types.EmbeddedUser, EmbeddedUserProjection, P>
+
+export type EmbeddedUserInsert = {
+  e?: null | EmbeddedUser2Insert[],
+  userId: types.Scalars['ID'],
+}
+
+
+
+//--------------------------------------------------------------------------------
+//-------------------------------- EMBEDDEDUSER2 ---------------------------------
+//--------------------------------------------------------------------------------
+
+export function embeddedUser2Schema(): Schema<types.Scalars> {
+  return {
+    'userId': {
+      scalar: 'ID', 
+      required: true
+    }
+  }
+}
+
+export type EmbeddedUser2Projection = {
+  user?: UserProjection | boolean,
+  userId?: boolean,
+}
+export type EmbeddedUser2Param<P extends EmbeddedUser2Projection> = ParamProjection<types.EmbeddedUser2, EmbeddedUser2Projection, P>
+
+export type EmbeddedUser2Insert = {
+  userId: types.Scalars['ID'],
+}
+
+
+
+//--------------------------------------------------------------------------------
+//-------------------------------- EMBEDDEDUSER3 ---------------------------------
+//--------------------------------------------------------------------------------
+
+export function embeddedUser3Schema(): Schema<types.Scalars> {
+  return {
+    'value': {
+      scalar: 'Int'
+    }
+  }
+}
+
+export type EmbeddedUser3Projection = {
+  user?: UserProjection | boolean,
+  value?: boolean,
+}
+export type EmbeddedUser3Param<P extends EmbeddedUser3Projection> = ParamProjection<types.EmbeddedUser3, EmbeddedUser3Projection, P>
+
+export type EmbeddedUser3Insert = {
+  value?: null | types.Scalars['Int'],
+}
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------ HOTEL -------------------------------------
 //--------------------------------------------------------------------------------
 
@@ -772,6 +852,9 @@ export type HotelRelationFields = never
 export function hotelSchema(): Schema<types.Scalars> {
   return {
     'audit': { embedded: auditableSchema(), required: true, defaultGenerationStrategy: 'middleware' },
+    'embeddedUser3': { embedded: embeddedUser3Schema() },
+    'embeddedUsers': { embedded: embeddedUserSchema(), array: true },
+    'embeddedUsers3': { embedded: embeddedUser3Schema(), array: true },
     'id': {
       scalar: 'ID', 
       required: true, 
@@ -780,7 +863,11 @@ export function hotelSchema(): Schema<types.Scalars> {
     'name': {
       scalar: 'String', 
       required: true
-    }
+    },
+    'userId': {
+      scalar: 'ID'
+    },
+    'users': { embedded: userCollectionSchema() }
   }
 }
 
@@ -791,8 +878,14 @@ type HotelFilterFields = {
   'audit.modifiedBy'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'audit.modifiedOn'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'audit.state'?: types.State | null | EqualityOperators<types.State> | ElementOperators | StringOperators,
+  'embeddedUser3.value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'embeddedUsers.e.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'embeddedUsers.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'embeddedUsers3.value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
+  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'users.usersId'?: types.Scalars['ID'][] | null | EqualityOperators<types.Scalars['ID'][]> | ElementOperators
 }
 export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields | HotelRawFilter>
 export type HotelRawFilter = () => Filter<Document>
@@ -809,12 +902,33 @@ export type HotelProjection = {
     state?: boolean,
     versions?: AuditProjection | boolean,
   } | boolean,
+  embeddedUser3?: {
+    user?: UserProjection | boolean,
+    value?: boolean,
+  } | boolean,
+  embeddedUsers?: {
+    e?: {
+      user?: UserProjection | boolean,
+      userId?: boolean,
+    } | boolean,
+    user?: UserProjection | boolean,
+    userId?: boolean,
+  } | boolean,
+  embeddedUsers3?: {
+    user?: UserProjection | boolean,
+    value?: boolean,
+  } | boolean,
   id?: boolean,
   name?: boolean,
+  userId?: boolean,
+  users?: {
+    users?: UserProjection | boolean,
+    usersId?: boolean,
+  } | boolean,
 }
 export type HotelParam<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
 
-export type HotelSortKeys = 'audit.createdBy' | 'audit.createdOn' | 'audit.deletedOn' | 'audit.modifiedBy' | 'audit.modifiedOn' | 'audit.state' | 'id' | 'name'
+export type HotelSortKeys = 'audit.createdBy' | 'audit.createdOn' | 'audit.deletedOn' | 'audit.modifiedBy' | 'audit.modifiedOn' | 'audit.state' | 'embeddedUser3.value' | 'embeddedUsers.e.userId' | 'embeddedUsers.userId' | 'embeddedUsers3.value' | 'id' | 'name' | 'userId' | 'users.usersId'
 export type HotelSort = OneKey<HotelSortKeys, SortDirection>
 export type HotelRawSort = () => Sort
 
@@ -826,14 +940,26 @@ export type HotelUpdate = {
   'audit.modifiedBy'?: types.Scalars['String'],
   'audit.modifiedOn'?: types.Scalars['Int'],
   'audit.state'?: types.State,
+  'embeddedUser3'?: EmbeddedUser3Insert | null,
+  'embeddedUser3.value'?: types.Scalars['Int'] | null,
+  'embeddedUsers'?: EmbeddedUserInsert[] | null,
+  'embeddedUsers3'?: EmbeddedUser3Insert[] | null,
   'id'?: types.Scalars['ID'],
-  'name'?: types.Scalars['String']
+  'name'?: types.Scalars['String'],
+  'userId'?: types.Scalars['ID'] | null,
+  'users'?: UserCollectionInsert | null,
+  'users.usersId'?: (null | types.Scalars['ID'])[]
 }
 export type HotelRawUpdate = () => UpdateFilter<Document>
 
 export type HotelInsert = {
   audit?: null | AuditableInsert,
+  embeddedUser3?: null | EmbeddedUser3Insert,
+  embeddedUsers?: null | EmbeddedUserInsert[],
+  embeddedUsers3?: null | EmbeddedUser3Insert[],
   name: types.Scalars['String'],
+  userId?: null | types.Scalars['ID'],
+  users?: null | UserCollectionInsert,
 }
 
 type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel', DAOContext<MetadataType, OperationMetadataType>>
@@ -856,7 +982,12 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
       schema: hotelSchema(), 
       relations: overrideRelations(
         [
-          { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true }
+          { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true },
+          { type: '1-1', reference: 'inner', field: 'embeddedUser3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-1', reference: 'inner', field: 'embeddedUsers.e.user', refFrom: 'embeddedUsers.e.userId', refTo: 'id', dao: 'user', required: true },
+          { type: '1-1', reference: 'inner', field: 'embeddedUsers.user', refFrom: 'embeddedUsers.userId', refTo: 'id', dao: 'user', required: true },
+          { type: '1-1', reference: 'inner', field: 'embeddedUsers3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-n', reference: 'inner', field: 'users.users', refFrom: 'users.usersId', refTo: 'id', dao: 'user', required: true }
         ]
       ), 
       idGeneration: 'db', 
@@ -881,7 +1012,12 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends Abstr
       schema: hotelSchema(), 
       relations: overrideRelations(
         [
-          { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true }
+          { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true },
+          { type: '1-1', reference: 'inner', field: 'embeddedUser3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-1', reference: 'inner', field: 'embeddedUsers.e.user', refFrom: 'embeddedUsers.e.userId', refTo: 'id', dao: 'user', required: true },
+          { type: '1-1', reference: 'inner', field: 'embeddedUsers.user', refFrom: 'embeddedUsers.userId', refTo: 'id', dao: 'user', required: true },
+          { type: '1-1', reference: 'inner', field: 'embeddedUsers3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-n', reference: 'inner', field: 'users.users', refFrom: 'users.usersId', refTo: 'id', dao: 'user', required: true }
         ]
       ), 
       idGeneration: 'db', 
@@ -1541,6 +1677,32 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends Abstra
     })
   }
   }
+
+
+
+//--------------------------------------------------------------------------------
+//-------------------------------- USERCOLLECTION --------------------------------
+//--------------------------------------------------------------------------------
+
+export function userCollectionSchema(): Schema<types.Scalars> {
+  return {
+    'usersId': {
+      scalar: 'ID', 
+      required: true, 
+      array: true
+    }
+  }
+}
+
+export type UserCollectionProjection = {
+  users?: UserProjection | boolean,
+  usersId?: boolean,
+}
+export type UserCollectionParam<P extends UserCollectionProjection> = ParamProjection<types.UserCollection, UserCollectionProjection, P>
+
+export type UserCollectionInsert = {
+  usersId: (null | types.Scalars['ID'])[],
+}
 
 
 

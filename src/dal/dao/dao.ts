@@ -27,10 +27,11 @@ import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
 import { getNamedType, GraphQLResolveInfo } from 'graphql'
+import _, { map } from 'lodash'
+import { ObjectId } from 'mongodb'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
-import _ from 'lodash'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   public build<P extends T['projection']>(p: P): P {
@@ -332,7 +333,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.reference === 'inner') {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refTo, getTraversing(record, relation.refFrom))
+            const keys = getTraversing(record, relation.refFrom)
+            const results = await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refTo, keys)
             this.setResult(record, relation, results)
           }
         } else if (relation.reference === 'foreign') {
@@ -350,6 +352,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     if (relation.type === '1-n') {
       setTraversing(record, relation.field, results)
     } else {
+      if (relation.reference === 'inner') {
+        const map = _.mapKeys(results, r => getTraversing(r, relation.refTo)[0])
+        this.setInnerRefResults(map, { refFrom: relation.refFrom, field: relation.field, schema: this.schema }, record)
+        return
+      }
       if (results.length > 0) {
         setTraversing(record, relation.field, results[0])
       } else if (relation.required) {
@@ -358,6 +365,37 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       } else {
         setTraversing(record, relation.field, null)
       }
+    }
+  }
+
+  private setInnerRefResults(
+    results: _.Dictionary<ModelProjection<DAOGenerics, T['projection']>>,
+    reference: { refFrom: string; field: string; ref?: unknown; schema: Schema<T['scalars']> },
+    record: PartialDeep<T['model']>,
+  ) {
+    const [subRefFrom, ...tailRefFrom] = reference.refFrom.split('.')
+    const [subField, ...tailField] = reference.field.split('.')
+    const ref = reference.ref != null ? reference.ref : record[subRefFrom]
+    if (tailRefFrom.length === 0) {
+      reference.ref = ref
+    }
+    if (tailField.length === 0) {
+      record[subField] = results[(reference.ref as object).toString()] ?? null
+      return
+    }
+    const subSchema = reference.schema[subField]
+    if (!('embedded' in subSchema)) {
+      throw new Error('Unreachable')
+    }
+    if (record[subField] == null) {
+      record[subField] = subSchema.array ? [] : {}
+    }
+    if (Array.isArray(record[subField])) {
+      for (const r of record[subField]) {
+        this.setInnerRefResults(results, { refFrom: tailRefFrom.join('.'), field: tailField.join('.'), ref: reference.ref, schema: subSchema.embedded }, r)
+      }
+    } else {
+      this.setInnerRefResults(results, { refFrom: tailRefFrom.join('.'), field: tailField.join('.'), ref: reference.ref, schema: subSchema.embedded }, record[subField])
     }
   }
 

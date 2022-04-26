@@ -82,11 +82,35 @@ export type Dog = {
   ownerId: Scalars['ID'];
 };
 
+export type EmbeddedUser = {
+  __typename?: 'EmbeddedUser';
+  e?: Maybe<Array<EmbeddedUser2>>;
+  user: User;
+  userId: Scalars['ID'];
+};
+
+export type EmbeddedUser2 = {
+  __typename?: 'EmbeddedUser2';
+  user: User;
+  userId: Scalars['ID'];
+};
+
+export type EmbeddedUser3 = {
+  __typename?: 'EmbeddedUser3';
+  user?: Maybe<User>;
+  value?: Maybe<Scalars['Int']>;
+};
+
 export type Hotel = {
   __typename?: 'Hotel';
   audit: Auditable;
+  embeddedUser3?: Maybe<EmbeddedUser3>;
+  embeddedUsers?: Maybe<Array<EmbeddedUser>>;
+  embeddedUsers3?: Maybe<Array<EmbeddedUser3>>;
   id: Scalars['ID'];
   name: Scalars['String'];
+  userId?: Maybe<Scalars['ID']>;
+  users?: Maybe<UserCollection>;
 };
 
 export type MockedEntity = {
@@ -147,6 +171,12 @@ export type User = {
   localization?: Maybe<Scalars['Coordinates']>;
   title?: Maybe<Scalars['LocalizedString']>;
   usernamePasswordCredentials?: Maybe<UsernamePasswordCredentials>;
+};
+
+export type UserCollection = {
+  __typename?: 'UserCollection';
+  users: Array<User>;
+  usersId: Array<Scalars['ID']>;
 };
 
 export type UsernamePasswordCredentials = {

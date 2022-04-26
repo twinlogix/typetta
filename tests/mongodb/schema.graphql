@@ -117,10 +117,36 @@ type Hotel @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   name: String!
   audit: Auditable! @default(from: "middleware")
+  users: UserCollection
+  userId: ID
+  embeddedUsers: [EmbeddedUser!]
+  embeddedUsers3: [EmbeddedUser3!]
+  embeddedUser3: EmbeddedUser3
 }
 
 type Audit @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   entityId: ID!
   changes: String
+}
+
+type UserCollection {
+  usersId: [ID!]!
+  users: [User!]! @innerRef
+}
+
+type EmbeddedUser {
+  userId: ID!
+  user: User! @innerRef
+  e: [EmbeddedUser2!]
+}
+
+type EmbeddedUser2 {
+  userId: ID!
+  user: User! @innerRef
+}
+
+type EmbeddedUser3 {
+  value: Int
+  user: User @innerRef(refFrom: "../userId")
 }
