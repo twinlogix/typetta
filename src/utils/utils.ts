@@ -2,7 +2,6 @@ import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
 import knex, { Knex } from 'knex'
-import { Db, MongoClient } from 'mongodb'
 
 export type OneKey<K extends string | number | symbol, V = any> = {
   [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never

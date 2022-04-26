@@ -842,6 +842,12 @@ test('insert and retrieve decimal array field', async () => {
   expect(user?.amounts?.length).toBe(2)
   expect((user?.amounts ?? [])[0].comparedTo(1.02)).toBe(0)
   expect((user?.amounts ?? [])[1].comparedTo(2.223)).toBe(0)
+
+  const user2 = await dao.user.findOne({ filter: { amounts: { in: [[new BigNumber(1.02)], [new BigNumber(1.02), new BigNumber(2.223)]]} }, projection: { id: true, amounts: true } })
+  expect(user2).toBeDefined()
+  expect(user2?.amounts?.length).toBe(2)
+  expect((user2?.amounts ?? [])[0].comparedTo(1.02)).toBe(0)
+  expect((user2?.amounts ?? [])[1].comparedTo(2.223)).toBe(0)
 })
 
 // ------------------------------------------------------------------------

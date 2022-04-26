@@ -1,0 +1,210 @@
+enum StringFilterMode {
+  SENSITIVE
+  INSENSITIVE
+}
+
+input StringFilterInput {
+  eq: String
+  ne: String
+  in: [String!]
+  nin: [String!]
+  exists: Boolean
+  contains: String
+  startsWith: String
+  endsWith: String
+  mode: StringFilterMode
+}
+
+input IntFilterInput {
+  eq: Int
+  ne: Int
+  in: [Int!]
+  nin: [Int!]
+  exists: Boolean
+  gte: Int
+  gt: Int
+  lte: Int
+  lt: Int
+}
+
+input FloatFilterInput {
+  eq: Float
+  ne: Float
+  in: [Float!]
+  nin: [Float!]
+  exists: Boolean
+  gte: Float
+  gt: Float
+  lte: Float
+  lt: Float
+}
+
+input BooleanFilterInput {
+  eq: Boolean
+  ne: Boolean
+  in: [Boolean!]
+  nin: [Boolean!]
+  exists: Boolean
+}
+
+
+input AIDFilterInput {
+  eq: AID
+  ne: AID
+  in: [AID!]
+  nin: [AID!]
+  exists: Boolean
+  contains: AID
+  startsWith: AID
+  endsWith: AID
+  mode: StringFilterMode
+}
+
+input DateTimeFilterInput {
+  eq: DateTime
+  ne: DateTime
+  in: [DateTime!]
+  nin: [DateTime!]
+  exists: Boolean
+  gte: DateTime
+  gt: DateTime
+  lte: DateTime
+  lt: DateTime
+}
+
+input DecimalFilterInput {
+  eq: Decimal
+  ne: Decimal
+  in: [Decimal!]
+  nin: [Decimal!]
+  exists: Boolean
+  gte: Decimal
+  gt: Decimal
+  lte: Decimal
+  lt: Decimal
+}
+
+input JSONFilterInput {
+  eq: JSON
+  ne: JSON
+  in: [JSON!]
+  nin: [JSON!]
+  exists: Boolean
+}
+
+input PasswordFilterInput {
+  eq: Password
+  ne: Password
+  in: [Password!]
+  nin: [Password!]
+  exists: Boolean
+  contains: Password
+  startsWith: Password
+  endsWith: Password
+  mode: StringFilterMode
+}
+
+
+########### Post ###########
+input PostFilterInput {
+  authorId: IDFilterInput
+  body: StringFilterInput
+  clicks: IntFilterInput
+  createdAt: DateTimeFilterInput
+  id: IDFilterInput
+  metadataRegion: StringFilterInput
+  metadataTypeId: IDFilterInput
+  metadataVisible: BooleanFilterInput
+  title: StringFilterInput
+  views: IntFilterInput
+  and: [PostFilterInput!]
+  or: [PostFilterInput!]
+  nor: [PostFilterInput!]
+}
+input PostRelationsFilterInput {
+  author: UserFindInput
+  tags: TagFindInput
+}
+input PostSortsInput { }
+input PostInsertInput { }
+input PostUpdateInput { }
+input PostFindInput {
+  filter: PostFilterInput
+  sorts: PostSortsInput
+  skip: Int
+  limit: Int
+  relations: PostRelationsFilterInput
+}
+########### Post ###########
+
+
+########### PostType ###########
+input PostTypeFilterInput {
+  id: IDFilterInput
+  name: StringFilterInput
+  and: [PostTypeFilterInput!]
+  or: [PostTypeFilterInput!]
+  nor: [PostTypeFilterInput!]
+}
+input PostTypeSortsInput { }
+input PostTypeInsertInput { }
+input PostTypeUpdateInput { }
+input PostTypeFindInput {
+  filter: PostTypeFilterInput
+  sorts: PostTypeSortsInput
+  skip: Int
+  limit: Int
+}
+########### PostType ###########
+
+
+########### Tag ###########
+input TagFilterInput {
+  id: IDFilterInput
+  name: StringFilterInput
+  postId: IDFilterInput
+  and: [TagFilterInput!]
+  or: [TagFilterInput!]
+  nor: [TagFilterInput!]
+}
+input TagSortsInput { }
+input TagInsertInput { }
+input TagUpdateInput { }
+input TagFindInput {
+  filter: TagFilterInput
+  sorts: TagSortsInput
+  skip: Int
+  limit: Int
+}
+########### Tag ###########
+
+
+########### User ###########
+input UserFilterInput {
+  averageViewsPerPost: FloatFilterInput
+  createdAt: DateTimeFilterInput
+  credentialsPassword: PasswordFilterInput
+  credentialsUsername: StringFilterInput
+  email: StringFilterInput
+  firstName: StringFilterInput
+  id: IDFilterInput
+  lastName: StringFilterInput
+  totalPostsViews: IntFilterInput
+  and: [UserFilterInput!]
+  or: [UserFilterInput!]
+  nor: [UserFilterInput!]
+}
+input UserRelationsFilterInput {
+  posts: PostFindInput
+}
+input UserSortsInput { }
+input UserInsertInput { }
+input UserUpdateInput { }
+input UserFindInput {
+  filter: UserFilterInput
+  sorts: UserSortsInput
+  skip: Int
+  limit: Int
+  relations: UserRelationsFilterInput
+}
+########### User ###########

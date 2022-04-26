@@ -16,11 +16,17 @@ generates:
         Password: string
   tests/demo/dao.mock.ts:
     config:
-      skipTypename: true
+      generationOutput: 'dao'
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
       typettaImport: ../../src
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
+    plugins:
+      - lib/generation/index.js
+  tests/demo/input.mock.graphql:
+    config:
+      generationOutput: 'inputs'
+      namingConvention: keep
     plugins:
       - lib/generation/index.js
