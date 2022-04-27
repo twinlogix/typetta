@@ -30,7 +30,11 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
       if (typeof v === 'object' && Object.keys(v ?? {}).length === 0) {
         return []
       }
-      return [[name, adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded, true)]]
+      const p = adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded, true)
+      if(typeof p === 'object' && Object.keys(p).length === 0) {
+        return []
+      }
+      return [[name, p]]
     }
     return []
   }) as AnyProjection<ProjectionType>

@@ -1620,6 +1620,61 @@ test('Audit middlewares', async () => {
   expect(cesena2?.computedName).toBe(undefined)
 })
 
+test('Inner ref inside embedded', async () => {
+  const u1 = await dao.user.insertOne({ record: { live: true, firstName: '1' } })
+  const u2 = await dao.user.insertOne({ record: { live: true, firstName: '2' } })
+  const u3 = await dao.user.insertOne({ record: { live: true, firstName: '3' } })
+  await dao.hotel.insertOne({
+    record: {
+      name: 'h',
+      users: { usersId: [u1.id, u2.id] },
+      embeddedUsers: [
+        { userId: u1.id, e: [{ userId: u3.id }] },
+        { userId: u2.id, e: [{ userId: u2.id }, { userId: u1.id }] },
+      ],
+      userId: u2.id,
+      embeddedUsers3: [{ value: 1 }, { value: 2 }],
+      embeddedUser4: { e: { userId: u3.id } },
+      embeddedUsers4: [{ e: { userId: u2.id } }, { e: { userId: u1.id } }, { e: { userId: "asd" } }, { e: { userId: null } }],
+      audit: { createdBy: '', createdOn: 2, modifiedBy: '', modifiedOn: 1, state: State.ACTIVE },
+    },
+  })
+
+  //TODO: relations on innerRef not working because it's 1-1 but with array is [1-1] so it may have sense to introduce relations
+  const h = await dao.hotel.findOne({
+    projection: {
+      users: { users: { firstName: true } },
+      embeddedUsers: { user: { firstName: true }, e: { user: { firstName: true } } },
+      embeddedUser3: { user: { firstName: true } },
+      embeddedUsers3: { user: { firstName: true }, value: true },
+      embeddedUser4: { user: { firstName: true } },
+      embeddedUsers4: { user: { firstName: true } },
+    },
+  })
+  const h2 = await dao.hotel.findOne({
+    projection: {
+      embeddedUsers3: { user: { firstName: true } },
+    },
+  })
+
+  expect(h2?.embeddedUsers3?.length).toBe(0)
+  expect((h?.embeddedUsers3 ?? [])[0]?.user?.firstName).toBe('2')
+  expect((h?.embeddedUsers3 ?? [])[1]?.user?.firstName).toBe('2')
+  expect(h?.embeddedUser3?.user?.firstName).toBe('2')
+  expect(h?.embeddedUser4?.user?.firstName).toBe('3')
+  expect((h?.embeddedUsers4 ?? [])[0].user?.firstName).toBe('2')
+  expect((h?.embeddedUsers4 ?? [])[1].user?.firstName).toBe('1')
+  expect((h?.embeddedUsers4 ?? [])[2].user).toBe(null)
+  expect((h?.embeddedUsers4 ?? [])[3].user).toBe(null)
+  expect(h?.users?.users[0].firstName).toBe('1')
+  expect(h?.users?.users[1].firstName).toBe('2')
+  expect((h?.embeddedUsers ?? [])[0].user.firstName).toBe('1')
+  expect((h?.embeddedUsers ?? [])[1].user.firstName).toBe('2')
+  expect(((h?.embeddedUsers ?? [])[0].e ?? [])[0].user.firstName).toBe('3')
+  expect(((h?.embeddedUsers ?? [])[1].e ?? [])[0].user.firstName).toBe('2')
+  expect(((h?.embeddedUsers ?? [])[1].e ?? [])[1].user.firstName).toBe('1')
+})
+
 test('Inserted record middleware', async () => {
   let i = 0
   const customDao = new DAOContext({
