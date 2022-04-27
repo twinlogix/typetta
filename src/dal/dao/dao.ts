@@ -27,8 +27,7 @@ import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
 import { getNamedType, GraphQLResolveInfo } from 'graphql'
-import _, { map } from 'lodash'
-import { ObjectId } from 'mongodb'
+import _ from 'lodash'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
@@ -353,7 +352,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       setTraversing(record, relation.field, results)
     } else {
       if (relation.reference === 'inner') {
-        const map = _.mapKeys(results, r => getTraversing(r, relation.refTo)[0])
+        const map = _.mapKeys(results, (r) => getTraversing(r, relation.refTo)[0])
         this.setInnerRefResults(map, { refFrom: relation.refFrom, field: relation.field, schema: this.schema }, record)
         return
       }
@@ -370,7 +369,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   private setInnerRefResults(
     results: _.Dictionary<ModelProjection<DAOGenerics, T['projection']>>,
-    reference: { refFrom: string; field: string; ref?: unknown; schema: Schema<T['scalars']> },
+    reference: { refFrom: string; field: string; ref?: Record<string, unknown>; schema: Schema<T['scalars']> },
     record: PartialDeep<T['model']>,
   ) {
     const [subRefFrom, ...tailRefFrom] = reference.refFrom.split('.')
@@ -380,7 +379,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       reference.ref = ref
     }
     if (tailField.length === 0) {
-      record[subField] = results[(reference.ref as object).toString()] ?? null
+      if (reference.ref == null) {
+        throw new Error('TODO') // TODO
+      }
+      record[subField] = results[reference.ref.toString()] ?? null
       return
     }
     const subSchema = reference.schema[subField]
