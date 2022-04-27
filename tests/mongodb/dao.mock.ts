@@ -843,6 +843,53 @@ export type EmbeddedUser3Insert = {
 
 
 //--------------------------------------------------------------------------------
+//-------------------------------- EMBEDDEDUSER4 ---------------------------------
+//--------------------------------------------------------------------------------
+
+export function embeddedUser4Schema(): Schema<types.Scalars> {
+  return {
+    'e': { embedded: embeddedUser5Schema() }
+  }
+}
+
+export type EmbeddedUser4Projection = {
+  e?: {
+    userId?: boolean,
+  } | boolean,
+  user?: UserProjection | boolean,
+}
+export type EmbeddedUser4Param<P extends EmbeddedUser4Projection> = ParamProjection<types.EmbeddedUser4, EmbeddedUser4Projection, P>
+
+export type EmbeddedUser4Insert = {
+  e?: null | EmbeddedUser5Insert,
+}
+
+
+
+//--------------------------------------------------------------------------------
+//-------------------------------- EMBEDDEDUSER5 ---------------------------------
+//--------------------------------------------------------------------------------
+
+export function embeddedUser5Schema(): Schema<types.Scalars> {
+  return {
+    'userId': {
+      scalar: 'ID'
+    }
+  }
+}
+
+export type EmbeddedUser5Projection = {
+  userId?: boolean,
+}
+export type EmbeddedUser5Param<P extends EmbeddedUser5Projection> = ParamProjection<types.EmbeddedUser5, EmbeddedUser5Projection, P>
+
+export type EmbeddedUser5Insert = {
+  userId?: null | types.Scalars['ID'],
+}
+
+
+
+//--------------------------------------------------------------------------------
 //------------------------------------ HOTEL -------------------------------------
 //--------------------------------------------------------------------------------
 
@@ -853,8 +900,10 @@ export function hotelSchema(): Schema<types.Scalars> {
   return {
     'audit': { embedded: auditableSchema(), required: true, defaultGenerationStrategy: 'middleware' },
     'embeddedUser3': { embedded: embeddedUser3Schema() },
+    'embeddedUser4': { embedded: embeddedUser4Schema() },
     'embeddedUsers': { embedded: embeddedUserSchema(), array: true },
     'embeddedUsers3': { embedded: embeddedUser3Schema(), array: true },
+    'embeddedUsers4': { embedded: embeddedUser4Schema(), array: true },
     'id': {
       scalar: 'ID', 
       required: true, 
@@ -879,9 +928,11 @@ type HotelFilterFields = {
   'audit.modifiedOn'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'audit.state'?: types.State | null | EqualityOperators<types.State> | ElementOperators | StringOperators,
   'embeddedUser3.value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'embeddedUser4.e.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'embeddedUsers.e.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'embeddedUsers.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'embeddedUsers3.value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
+  'embeddedUsers4.e.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
   'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
@@ -906,6 +957,12 @@ export type HotelProjection = {
     user?: UserProjection | boolean,
     value?: boolean,
   } | boolean,
+  embeddedUser4?: {
+    e?: {
+      userId?: boolean,
+    } | boolean,
+    user?: UserProjection | boolean,
+  } | boolean,
   embeddedUsers?: {
     e?: {
       user?: UserProjection | boolean,
@@ -918,6 +975,12 @@ export type HotelProjection = {
     user?: UserProjection | boolean,
     value?: boolean,
   } | boolean,
+  embeddedUsers4?: {
+    e?: {
+      userId?: boolean,
+    } | boolean,
+    user?: UserProjection | boolean,
+  } | boolean,
   id?: boolean,
   name?: boolean,
   userId?: boolean,
@@ -928,7 +991,7 @@ export type HotelProjection = {
 }
 export type HotelParam<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
 
-export type HotelSortKeys = 'audit.createdBy' | 'audit.createdOn' | 'audit.deletedOn' | 'audit.modifiedBy' | 'audit.modifiedOn' | 'audit.state' | 'embeddedUser3.value' | 'embeddedUsers.e.userId' | 'embeddedUsers.userId' | 'embeddedUsers3.value' | 'id' | 'name' | 'userId' | 'users.usersId'
+export type HotelSortKeys = 'audit.createdBy' | 'audit.createdOn' | 'audit.deletedOn' | 'audit.modifiedBy' | 'audit.modifiedOn' | 'audit.state' | 'embeddedUser3.value' | 'embeddedUser4.e.userId' | 'embeddedUsers.e.userId' | 'embeddedUsers.userId' | 'embeddedUsers3.value' | 'embeddedUsers4.e.userId' | 'id' | 'name' | 'userId' | 'users.usersId'
 export type HotelSort = OneKey<HotelSortKeys, SortDirection>
 export type HotelRawSort = () => Sort
 
@@ -942,8 +1005,12 @@ export type HotelUpdate = {
   'audit.state'?: types.State,
   'embeddedUser3'?: EmbeddedUser3Insert | null,
   'embeddedUser3.value'?: types.Scalars['Int'] | null,
+  'embeddedUser4'?: EmbeddedUser4Insert | null,
+  'embeddedUser4.e'?: EmbeddedUser5Insert | null,
+  'embeddedUser4.e.userId'?: types.Scalars['ID'] | null,
   'embeddedUsers'?: EmbeddedUserInsert[] | null,
   'embeddedUsers3'?: EmbeddedUser3Insert[] | null,
+  'embeddedUsers4'?: EmbeddedUser4Insert[] | null,
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'],
   'userId'?: types.Scalars['ID'] | null,
@@ -955,8 +1022,10 @@ export type HotelRawUpdate = () => UpdateFilter<Document>
 export type HotelInsert = {
   audit?: null | AuditableInsert,
   embeddedUser3?: null | EmbeddedUser3Insert,
+  embeddedUser4?: null | EmbeddedUser4Insert,
   embeddedUsers?: null | EmbeddedUserInsert[],
   embeddedUsers3?: null | EmbeddedUser3Insert[],
+  embeddedUsers4?: null | EmbeddedUser4Insert[],
   name: types.Scalars['String'],
   userId?: null | types.Scalars['ID'],
   users?: null | UserCollectionInsert,
@@ -984,9 +1053,11 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
         [
           { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true },
           { type: '1-1', reference: 'inner', field: 'embeddedUser3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-1', reference: 'inner', field: 'embeddedUser4.user', refFrom: 'embeddedUser4.e.userId', refTo: 'id', dao: 'user', required: false },
           { type: '1-1', reference: 'inner', field: 'embeddedUsers.e.user', refFrom: 'embeddedUsers.e.userId', refTo: 'id', dao: 'user', required: true },
           { type: '1-1', reference: 'inner', field: 'embeddedUsers.user', refFrom: 'embeddedUsers.userId', refTo: 'id', dao: 'user', required: true },
           { type: '1-1', reference: 'inner', field: 'embeddedUsers3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-1', reference: 'inner', field: 'embeddedUsers4.user', refFrom: 'embeddedUsers4.e.userId', refTo: 'id', dao: 'user', required: false },
           { type: '1-n', reference: 'inner', field: 'users.users', refFrom: 'users.usersId', refTo: 'id', dao: 'user', required: true }
         ]
       ), 
@@ -1014,9 +1085,11 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends Abstr
         [
           { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true },
           { type: '1-1', reference: 'inner', field: 'embeddedUser3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-1', reference: 'inner', field: 'embeddedUser4.user', refFrom: 'embeddedUser4.e.userId', refTo: 'id', dao: 'user', required: false },
           { type: '1-1', reference: 'inner', field: 'embeddedUsers.e.user', refFrom: 'embeddedUsers.e.userId', refTo: 'id', dao: 'user', required: true },
           { type: '1-1', reference: 'inner', field: 'embeddedUsers.user', refFrom: 'embeddedUsers.userId', refTo: 'id', dao: 'user', required: true },
           { type: '1-1', reference: 'inner', field: 'embeddedUsers3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
+          { type: '1-1', reference: 'inner', field: 'embeddedUsers4.user', refFrom: 'embeddedUsers4.e.userId', refTo: 'id', dao: 'user', required: false },
           { type: '1-n', reference: 'inner', field: 'users.users', refFrom: 'users.usersId', refTo: 'id', dao: 'user', required: true }
         ]
       ), 

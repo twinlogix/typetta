@@ -122,6 +122,8 @@ type Hotel @entity @mongodb {
   embeddedUsers: [EmbeddedUser!]
   embeddedUsers3: [EmbeddedUser3!]
   embeddedUser3: EmbeddedUser3
+  embeddedUsers4: [EmbeddedUser4!]
+  embeddedUser4: EmbeddedUser4
 }
 
 type Audit @entity @mongodb {
@@ -149,4 +151,13 @@ type EmbeddedUser2 {
 type EmbeddedUser3 {
   value: Int
   user: User @innerRef(refFrom: "../userId")
+}
+
+type EmbeddedUser4 {
+  e: EmbeddedUser5
+  user: User @innerRef(refFrom: "e.userId")
+}
+
+type EmbeddedUser5 {
+  userId: ID
 }

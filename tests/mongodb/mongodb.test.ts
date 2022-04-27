@@ -1634,6 +1634,8 @@ test('Inner ref inside embedded', async () => {
       ],
       userId: u2.id,
       embeddedUsers3: [{ value: 1 }, { value: 2 }],
+      embeddedUser4: { e: { userId: u3.id } },
+      embeddedUsers4: [{ e: { userId: u2.id } }, { e: { userId: u1.id } }],
       audit: { createdBy: '', createdOn: 2, modifiedBy: '', modifiedOn: 1, state: State.ACTIVE },
     },
   })
@@ -1645,6 +1647,8 @@ test('Inner ref inside embedded', async () => {
       embeddedUsers: { user: { firstName: true }, e: { user: { firstName: true } } },
       embeddedUser3: { user: { firstName: true } },
       embeddedUsers3: { user: { firstName: true }, value: true },
+      embeddedUser4: { user: { firstName: true } },
+      embeddedUsers4: { user: { firstName: true } },
     },
   })
   const h2 = await dao.hotel.findOne({
@@ -1657,6 +1661,9 @@ test('Inner ref inside embedded', async () => {
   expect((h?.embeddedUsers3 ?? [])[0]?.user?.firstName).toBe('2')
   expect((h?.embeddedUsers3 ?? [])[1]?.user?.firstName).toBe('2')
   expect(h?.embeddedUser3?.user?.firstName).toBe('2')
+  expect(h?.embeddedUser4?.user?.firstName).toBe('3')
+  expect((h?.embeddedUsers4 ?? [])[0].user?.firstName).toBe('2')
+  expect((h?.embeddedUsers4 ?? [])[1].user?.firstName).toBe('1')
   expect(h?.users?.users[0].firstName).toBe('1')
   expect(h?.users?.users[1].firstName).toBe('2')
   expect((h?.embeddedUsers ?? [])[0].user.firstName).toBe('1')

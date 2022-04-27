@@ -554,7 +554,7 @@ public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n
       const linkedType = getNode(field.type.innerRef, typesMap)
       const reference: DAORelation['reference'] = 'inner'
       const refField = path + field.name
-      const refFrom = field.type.refFrom ? field.type.refFrom : path + field.name + 'Id'
+      const refFrom = field.type.refFrom ? path + field.type.refFrom : path + field.name + 'Id'
       const refTo = field.type.refTo ? field.type.refTo : getID(linkedType).name
       const dao = toFirstLower(field.type.innerRef)
       return [

@@ -380,7 +380,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     if (tailField.length === 0) {
       if (reference.ref == null) {
-        throw new Error('TODO') // TODO
+        reference.ref = getTraversing(record, reference.refFrom)[0]
+      }
+      if (reference.ref == null) {
+        throw new Error(`Broken inner ref: from: ${reference.refFrom}, field: ${reference.field}`)
       }
       record[subField] = results[reference.ref.toString()] ?? null
       return

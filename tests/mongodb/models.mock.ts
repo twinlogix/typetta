@@ -101,12 +101,25 @@ export type EmbeddedUser3 = {
   value?: Maybe<Scalars['Int']>;
 };
 
+export type EmbeddedUser4 = {
+  __typename?: 'EmbeddedUser4';
+  e?: Maybe<EmbeddedUser5>;
+  user?: Maybe<User>;
+};
+
+export type EmbeddedUser5 = {
+  __typename?: 'EmbeddedUser5';
+  userId?: Maybe<Scalars['ID']>;
+};
+
 export type Hotel = {
   __typename?: 'Hotel';
   audit: Auditable;
   embeddedUser3?: Maybe<EmbeddedUser3>;
+  embeddedUser4?: Maybe<EmbeddedUser4>;
   embeddedUsers?: Maybe<Array<EmbeddedUser>>;
   embeddedUsers3?: Maybe<Array<EmbeddedUser3>>;
+  embeddedUsers4?: Maybe<Array<EmbeddedUser4>>;
   id: Scalars['ID'];
   name: Scalars['String'];
   userId?: Maybe<Scalars['ID']>;
