@@ -353,23 +353,27 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     } else {
       if (relation.reference === 'inner') {
         const map = _.mapKeys(results, (r) => getTraversing(r, relation.refTo)[0])
-        this.setInnerRefResults(map, { refFrom: relation.refFrom, field: relation.field, schema: this.schema }, record)
-        return
-      }
-      if (results.length > 0) {
-        setTraversing(record, relation.field, results[0])
-      } else if (relation.required) {
-        // TODO: this is not logged
-        throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}`)
+        try {
+          this.setInnerRefResults(map, { refFrom: relation.refFrom, field: relation.field, schema: this.schema, required: relation.required }, record)
+        } catch (e: unknown) {
+          throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}. Details: ${(e as Error).message}`)
+        }
       } else {
-        setTraversing(record, relation.field, null)
+        if (results.length > 0) {
+          setTraversing(record, relation.field, results[0])
+        } else if (relation.required) {
+          // TODO: this is not logged
+          throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}`)
+        } else {
+          setTraversing(record, relation.field, null)
+        }
       }
     }
   }
 
   private setInnerRefResults(
     results: _.Dictionary<ModelProjection<DAOGenerics, T['projection']>>,
-    reference: { refFrom: string; field: string; ref?: Record<string, unknown>; schema: Schema<T['scalars']> },
+    reference: { refFrom: string; field: string; ref?: Record<string, unknown>; schema: Schema<T['scalars']>; required: boolean },
     record: PartialDeep<T['model']>,
   ) {
     const [subRefFrom, ...tailRefFrom] = reference.refFrom.split('.')
@@ -382,10 +386,13 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       if (reference.ref == null) {
         reference.ref = getTraversing(record, reference.refFrom)[0]
       }
-      if (reference.ref == null) {
+      if (reference.ref == null && reference.required) {
         throw new Error(`Broken inner ref: from: ${reference.refFrom}, field: ${reference.field}`)
       }
-      record[subField] = results[reference.ref.toString()] ?? null
+      record[subField] = reference.ref ? results[reference.ref.toString()] ?? null : null
+      if (record[subField] === null && reference.required) {
+        throw new Error(`Broken inner ref: from: ${reference.refFrom}, field: ${reference.field}`)
+      }
       return
     }
     const subSchema = reference.schema[subField]
@@ -397,10 +404,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     if (Array.isArray(record[subField])) {
       for (const r of record[subField]) {
-        this.setInnerRefResults(results, { refFrom: tailRefFrom.join('.'), field: tailField.join('.'), ref: reference.ref, schema: subSchema.embedded }, r)
+        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded }, r)
       }
     } else {
-      this.setInnerRefResults(results, { refFrom: tailRefFrom.join('.'), field: tailField.join('.'), ref: reference.ref, schema: subSchema.embedded }, record[subField])
+      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded }, record[subField])
     }
   }
 
