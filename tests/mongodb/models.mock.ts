@@ -179,6 +179,7 @@ export type User = {
   friends?: Maybe<Array<User>>;
   friendsId?: Maybe<Array<Scalars['ID']>>;
   id: Scalars['ID'];
+  int?: Maybe<Scalars['Int']>;
   lastName?: Maybe<Scalars['String']>;
   live: Scalars['Boolean'];
   localization?: Maybe<Scalars['Coordinates']>;

@@ -1551,6 +1551,9 @@ export function userSchema(): Schema<types.Scalars> {
       required: true, 
       alias: 'ID'
     },
+    'int': {
+      scalar: 'Int'
+    },
     'lastName': {
       scalar: 'String'
     },
@@ -1584,6 +1587,7 @@ type UserFilterFields = {
   'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'friendsId'?: types.Scalars['ID'][] | null | EqualityOperators<types.Scalars['ID'][]> | ElementOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
+  'int'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
   'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'live'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
   'localization'?: types.Scalars['Coordinates'] | null | EqualityOperators<types.Scalars['Coordinates']> | ElementOperators,
@@ -1636,6 +1640,7 @@ export type UserProjection = {
   friends?: UserProjection | boolean,
   friendsId?: boolean,
   id?: boolean,
+  int?: boolean,
   lastName?: boolean,
   live?: boolean,
   localization?: boolean,
@@ -1647,7 +1652,7 @@ export type UserProjection = {
 }
 export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
-export type UserSortKeys = 'amount' | 'amounts' | 'credentials.password' | 'credentials.username' | 'embeddedPost.authorId' | 'embeddedPost.body' | 'embeddedPost.clicks' | 'embeddedPost.id' | 'embeddedPost.metadata.region' | 'embeddedPost.metadata.visible' | 'embeddedPost.title' | 'embeddedPost.views' | 'firstName' | 'friendsId' | 'id' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username'
+export type UserSortKeys = 'amount' | 'amounts' | 'credentials.password' | 'credentials.username' | 'embeddedPost.authorId' | 'embeddedPost.body' | 'embeddedPost.clicks' | 'embeddedPost.id' | 'embeddedPost.metadata.region' | 'embeddedPost.metadata.visible' | 'embeddedPost.title' | 'embeddedPost.views' | 'firstName' | 'friendsId' | 'id' | 'int' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username'
 export type UserSort = OneKey<UserSortKeys, SortDirection>
 export type UserRawSort = () => Sort
 
@@ -1668,6 +1673,7 @@ export type UserUpdate = {
   'firstName'?: types.Scalars['String'] | null,
   'friendsId'?: types.Scalars['ID'][] | null,
   'id'?: types.Scalars['ID'],
+  'int'?: types.Scalars['Int'] | null,
   'lastName'?: types.Scalars['String'] | null,
   'live'?: types.Scalars['Boolean'],
   'localization'?: types.Scalars['Coordinates'] | null,
@@ -1686,6 +1692,7 @@ export type UserInsert = {
   firstName?: null | types.Scalars['String'],
   friendsId?: null | types.Scalars['ID'][],
   id?: null | types.Scalars['ID'],
+  int?: null | types.Scalars['Int'],
   lastName?: null | types.Scalars['String'],
   live: types.Scalars['Boolean'],
   localization?: null | types.Scalars['Coordinates'],

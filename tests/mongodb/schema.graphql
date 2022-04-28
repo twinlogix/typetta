@@ -54,6 +54,7 @@ type User @entity @mongodb {
   dogs: [Dog!] @foreignRef(refFrom: "ownerId")
   credentials: [UsernamePasswordCredentials]
   embeddedPost: Post
+  int: Int
 }
 
 type Dog @entity @mongodb {

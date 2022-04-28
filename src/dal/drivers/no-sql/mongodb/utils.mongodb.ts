@@ -31,7 +31,7 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
         return []
       }
       const p = adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded, true)
-      if(typeof p === 'object' && Object.keys(p).length === 0) {
+      if (typeof p === 'object' && Object.keys(p).length === 0) {
         return []
       }
       return [[name, p]]
@@ -143,6 +143,9 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && 'scalar' in schemaField) {
+      if (v === null) {
+        return [[columnName, null]]
+      }
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField) {

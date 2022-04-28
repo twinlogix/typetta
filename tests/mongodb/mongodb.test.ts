@@ -91,7 +91,7 @@ test('empty find', async () => {
 })
 
 test('simple findAll', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, credentials: [{ username: 'user', password: '123456' }] } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', int: 0, live: true, credentials: [{ username: 'user', password: '123456' }] } })
 
   const users = await dao.user.findAll({})
   expect(users.length).toBe(1)
@@ -102,6 +102,7 @@ test('simple findAll', async () => {
   expect(users2.length).toBe(1)
   expect(users2[0].firstName).toBe('FirstName')
   expect(users2[0].lastName).toBe('LastName')
+  expect(users2[0].int).toBe(0)
 
   const users3 = await dao.user.findAll({ projection: { credentials: {}, firstName: true } })
   expect(users3[0].credentials).toBe(undefined)
@@ -111,6 +112,10 @@ test('simple findAll', async () => {
   expect(Object.keys(users5[0]).length).toBe(1)
   const users6 = await dao.user.findAll({ projection: { credentials: undefined } })
   expect(Object.keys(users6[0]).length).toBe(1)
+
+  await dao.user.updateOne({ filter: {}, changes: { int: null } })
+  const users7 = await dao.user.findAll({ filter: { id: { exists: true } } })
+  expect(users7[0].int).toBe(null)
 })
 
 test('simple findOne', async () => {
@@ -1655,7 +1660,7 @@ test('Inner ref inside embedded', async () => {
         { userId: u2.id, e: [{ userId: u2.id }, { userId: u1.id }] },
       ],
       userId: u2.id,
-      embeddedUsers3: [{ value: 1 }, { value: 2 }],
+      embeddedUsers3: [{ value: null }, { value: 2 }],
       embeddedUser4: { e: { userId: u3.id } },
       embeddedUsers4: [{ e: { userId: u2.id } }, { e: { userId: u1.id } }, { e: { userId: 'asd' } }, { e: { userId: null } }],
       audit: { createdBy: '', createdOn: 2, modifiedBy: '', modifiedOn: 1, state: State.ACTIVE },
@@ -1681,7 +1686,9 @@ test('Inner ref inside embedded', async () => {
 
   expect(h2?.embeddedUsers3?.length).toBe(0)
   expect((h?.embeddedUsers3 ?? [])[0]?.user?.firstName).toBe('2')
+  expect((h?.embeddedUsers3 ?? [])[0]?.value).toBe(null)
   expect((h?.embeddedUsers3 ?? [])[1]?.user?.firstName).toBe('2')
+  expect((h?.embeddedUsers3 ?? [])[1]?.value).toBe(2)
   expect(h?.embeddedUser3?.user?.firstName).toBe('2')
   expect(h?.embeddedUser4?.user?.firstName).toBe('3')
   expect((h?.embeddedUsers4 ?? [])[0].user?.firstName).toBe('2')
