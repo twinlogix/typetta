@@ -27,12 +27,12 @@ export type MockIdSpecification<T> = {
 type MockOverrides = {
   compare?: (l: unknown, r: unknown) => number | void | null | undefined
   idSpecifications?: { [key: string]: MockIdSpecification<unknown> }
+  readonly clearMemory: () => void
 }
 export const mock: MockOverrides = {
   compare: undefined,
-}
-export function clearMemoryMock() {
-  IN_MEMORY_STATE.clear()
+  idSpecifications: undefined,
+  clearMemory: () => IN_MEMORY_STATE.clear()
 }
 
 export function compare(l: unknown, r: unknown): number {

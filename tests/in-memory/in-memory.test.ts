@@ -1,4 +1,4 @@
-import { clearMemoryMock, defaultValueMiddleware, mock } from '../../src'
+import { defaultValueMiddleware, mock } from '../../src'
 import { DAOContext } from './dao.mock'
 import { User } from './models.mock'
 import BigNumber from 'bignumber.js'
@@ -18,7 +18,7 @@ mock.compare = (l, r) => {
 }
 
 beforeEach(async () => {
-  clearMemoryMock()
+  mock.clearMemory()
   dao = new DAOContext({
     scalars: {
       ID: {
