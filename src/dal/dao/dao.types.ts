@@ -199,5 +199,5 @@ export type DAOGenerics<
 
 export type TransactionData<MongoDBDatasources extends string, KnexDataSources extends string> = ([MongoDBDatasources] extends [never]
   ? { mongodb?: undefined }
-  : { mongodb?: Record<MongoDBDatasources, ClientSession> }) &
-  ([KnexDataSources] extends [never] ? { knex?: undefined } : { knex?: Record<KnexDataSources, Knex.Transaction> })
+  : { mongodb?: Partial<Record<MongoDBDatasources, ClientSession>> }) &
+  ([KnexDataSources] extends [never] ? { knex?: undefined } : { knex?: Partial<Record<KnexDataSources, Knex.Transaction>> })
