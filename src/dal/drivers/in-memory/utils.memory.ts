@@ -1,5 +1,6 @@
 import { LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
 import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../../dao/filters/filters.types'
+import { IN_MEMORY_STATE } from './state.memory'
 import { ObjectId } from 'mongodb'
 
 type AbstractFilterFields = {
@@ -29,6 +30,9 @@ type MockOverrides = {
 }
 export const mock: MockOverrides = {
   compare: undefined,
+}
+export function clearMemoryMock() {
+  IN_MEMORY_STATE.clear()
 }
 
 export function compare(l: unknown, r: unknown): number {
