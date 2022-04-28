@@ -1447,7 +1447,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
 
 type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<never, 'default', types.Scalars, MetadataType>  {
 
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined
   private _author: AuthorDAO<MetadataType, OperationMetadataType> | undefined
@@ -1461,6 +1461,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
   
+  private params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+  
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
   private knex: Record<'default', Knex | 'mock'>
   
@@ -1468,80 +1470,80 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   private logger?: LogFunction<'address' | 'author' | 'authorBook' | 'book' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>
   
-  get address() : AddressDAO<MetadataType, OperationMetadataType> {
+  get address(): AddressDAO<MetadataType, OperationMetadataType> {
     if(!this._address) {
       const db = this.knex.default
-      this._address = db === 'mock' ? (new InMemoryAddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger }) as unknown as AddressDAO<MetadataType, OperationMetadataType>) : new AddressDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.address, knex: db, tableName: 'addresses', middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger })
+      this._address = db === 'mock' ? (new InMemoryAddressDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.address, middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger }) as unknown as AddressDAO<MetadataType, OperationMetadataType>) : new AddressDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.address, knex: db, tableName: 'addresses', middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger })
     }
     return this._address
   }
-  get author() : AuthorDAO<MetadataType, OperationMetadataType> {
+  get author(): AuthorDAO<MetadataType, OperationMetadataType> {
     if(!this._author) {
       const db = this.knex.default
-      this._author = db === 'mock' ? (new InMemoryAuthorDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.author, middlewares: [...(this.overrides?.author?.middlewares || []), ...selectMiddleware('author', this.middlewares) as DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'author', logger: this.logger }) as unknown as AuthorDAO<MetadataType, OperationMetadataType>) : new AuthorDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.author, knex: db, tableName: 'authors', middlewares: [...(this.overrides?.author?.middlewares || []), ...selectMiddleware('author', this.middlewares) as DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'author', logger: this.logger })
+      this._author = db === 'mock' ? (new InMemoryAuthorDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.author, middlewares: [...(this.overrides?.author?.middlewares || []), ...selectMiddleware('author', this.middlewares) as DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'author', logger: this.logger }) as unknown as AuthorDAO<MetadataType, OperationMetadataType>) : new AuthorDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.author, knex: db, tableName: 'authors', middlewares: [...(this.overrides?.author?.middlewares || []), ...selectMiddleware('author', this.middlewares) as DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'author', logger: this.logger })
     }
     return this._author
   }
-  get authorBook() : AuthorBookDAO<MetadataType, OperationMetadataType> {
+  get authorBook(): AuthorBookDAO<MetadataType, OperationMetadataType> {
     if(!this._authorBook) {
       const db = this.knex.default
-      this._authorBook = db === 'mock' ? (new InMemoryAuthorBookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.authorBook, middlewares: [...(this.overrides?.authorBook?.middlewares || []), ...selectMiddleware('authorBook', this.middlewares) as DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'authorBook', logger: this.logger }) as unknown as AuthorBookDAO<MetadataType, OperationMetadataType>) : new AuthorBookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.authorBook, knex: db, tableName: 'authorBooks', middlewares: [...(this.overrides?.authorBook?.middlewares || []), ...selectMiddleware('authorBook', this.middlewares) as DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'authorBook', logger: this.logger })
+      this._authorBook = db === 'mock' ? (new InMemoryAuthorBookDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.authorBook, middlewares: [...(this.overrides?.authorBook?.middlewares || []), ...selectMiddleware('authorBook', this.middlewares) as DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'authorBook', logger: this.logger }) as unknown as AuthorBookDAO<MetadataType, OperationMetadataType>) : new AuthorBookDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.authorBook, knex: db, tableName: 'authorBooks', middlewares: [...(this.overrides?.authorBook?.middlewares || []), ...selectMiddleware('authorBook', this.middlewares) as DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'authorBook', logger: this.logger })
     }
     return this._authorBook
   }
-  get book() : BookDAO<MetadataType, OperationMetadataType> {
+  get book(): BookDAO<MetadataType, OperationMetadataType> {
     if(!this._book) {
       const db = this.knex.default
-      this._book = db === 'mock' ? (new InMemoryBookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.book, middlewares: [...(this.overrides?.book?.middlewares || []), ...selectMiddleware('book', this.middlewares) as DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'book', logger: this.logger }) as unknown as BookDAO<MetadataType, OperationMetadataType>) : new BookDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.book, knex: db, tableName: 'books', middlewares: [...(this.overrides?.book?.middlewares || []), ...selectMiddleware('book', this.middlewares) as DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'book', logger: this.logger })
+      this._book = db === 'mock' ? (new InMemoryBookDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.book, middlewares: [...(this.overrides?.book?.middlewares || []), ...selectMiddleware('book', this.middlewares) as DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'book', logger: this.logger }) as unknown as BookDAO<MetadataType, OperationMetadataType>) : new BookDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.book, knex: db, tableName: 'books', middlewares: [...(this.overrides?.book?.middlewares || []), ...selectMiddleware('book', this.middlewares) as DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'book', logger: this.logger })
     }
     return this._book
   }
-  get city() : CityDAO<MetadataType, OperationMetadataType> {
+  get city(): CityDAO<MetadataType, OperationMetadataType> {
     if(!this._city) {
       const db = this.knex.default
-      this._city = db === 'mock' ? (new InMemoryCityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.city, middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger }) as unknown as CityDAO<MetadataType, OperationMetadataType>) : new CityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.city, knex: db, tableName: 'citys', middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger })
+      this._city = db === 'mock' ? (new InMemoryCityDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.city, middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger }) as unknown as CityDAO<MetadataType, OperationMetadataType>) : new CityDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.city, knex: db, tableName: 'citys', middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger })
     }
     return this._city
   }
-  get defaultFieldsEntity() : DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> {
+  get defaultFieldsEntity(): DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> {
     if(!this._defaultFieldsEntity) {
       const db = this.knex.default
-      this._defaultFieldsEntity = db === 'mock' ? (new InMemoryDefaultFieldsEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>) : new DefaultFieldsEntityDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, knex: db, tableName: 'defaultFieldsEntitys', middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger })
+      this._defaultFieldsEntity = db === 'mock' ? (new InMemoryDefaultFieldsEntityDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>) : new DefaultFieldsEntityDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, knex: db, tableName: 'defaultFieldsEntitys', middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger })
     }
     return this._defaultFieldsEntity
   }
-  get device() : DeviceDAO<MetadataType, OperationMetadataType> {
+  get device(): DeviceDAO<MetadataType, OperationMetadataType> {
     if(!this._device) {
       const db = this.knex.default
-      this._device = db === 'mock' ? (new InMemoryDeviceDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.device, middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>) : new DeviceDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.device, knex: db, tableName: 'devices', middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger })
+      this._device = db === 'mock' ? (new InMemoryDeviceDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.device, middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>) : new DeviceDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.device, knex: db, tableName: 'devices', middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger })
     }
     return this._device
   }
-  get dog() : DogDAO<MetadataType, OperationMetadataType> {
+  get dog(): DogDAO<MetadataType, OperationMetadataType> {
     if(!this._dog) {
       const db = this.knex.default
-      this._dog = db === 'mock' ? (new InMemoryDogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger }) as unknown as DogDAO<MetadataType, OperationMetadataType>) : new DogDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.dog, knex: db, tableName: 'dogs', middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger })
+      this._dog = db === 'mock' ? (new InMemoryDogDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.dog, middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger }) as unknown as DogDAO<MetadataType, OperationMetadataType>) : new DogDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.dog, knex: db, tableName: 'dogs', middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger })
     }
     return this._dog
   }
-  get friends() : FriendsDAO<MetadataType, OperationMetadataType> {
+  get friends(): FriendsDAO<MetadataType, OperationMetadataType> {
     if(!this._friends) {
       const db = this.knex.default
-      this._friends = db === 'mock' ? (new InMemoryFriendsDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.friends, middlewares: [...(this.overrides?.friends?.middlewares || []), ...selectMiddleware('friends', this.middlewares) as DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'friends', logger: this.logger }) as unknown as FriendsDAO<MetadataType, OperationMetadataType>) : new FriendsDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.friends, knex: db, tableName: 'friendss', middlewares: [...(this.overrides?.friends?.middlewares || []), ...selectMiddleware('friends', this.middlewares) as DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'friends', logger: this.logger })
+      this._friends = db === 'mock' ? (new InMemoryFriendsDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.friends, middlewares: [...(this.overrides?.friends?.middlewares || []), ...selectMiddleware('friends', this.middlewares) as DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'friends', logger: this.logger }) as unknown as FriendsDAO<MetadataType, OperationMetadataType>) : new FriendsDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.friends, knex: db, tableName: 'friendss', middlewares: [...(this.overrides?.friends?.middlewares || []), ...selectMiddleware('friends', this.middlewares) as DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'friends', logger: this.logger })
     }
     return this._friends
   }
-  get organization() : OrganizationDAO<MetadataType, OperationMetadataType> {
+  get organization(): OrganizationDAO<MetadataType, OperationMetadataType> {
     if(!this._organization) {
       const db = this.knex.default
-      this._organization = db === 'mock' ? (new InMemoryOrganizationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.organization, middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>) : new OrganizationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.organization, knex: db, tableName: 'organizations', middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger })
+      this._organization = db === 'mock' ? (new InMemoryOrganizationDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.organization, middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>) : new OrganizationDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.organization, knex: db, tableName: 'organizations', middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger })
     }
     return this._organization
   }
-  get user() : UserDAO<MetadataType, OperationMetadataType> {
+  get user(): UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
       const db = this.knex.default
-      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, knex: db, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
+      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.user, knex: db, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
     }
     return this._user
   }
@@ -1560,10 +1562,15 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
       const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
       this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
     }
+    this.params = params
   }
   
   public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex | 'mock'> }, entities: { address: Knex.QueryBuilder<any, unknown[]> | null, author: Knex.QueryBuilder<any, unknown[]> | null, authorBook: Knex.QueryBuilder<any, unknown[]> | null, book: Knex.QueryBuilder<any, unknown[]> | null, city: Knex.QueryBuilder<any, unknown[]> | null, defaultFieldsEntity: Knex.QueryBuilder<any, unknown[]> | null, device: Knex.QueryBuilder<any, unknown[]> | null, dog: Knex.QueryBuilder<any, unknown[]> | null, friends: Knex.QueryBuilder<any, unknown[]> | null, organization: Knex.QueryBuilder<any, unknown[]> | null, user: Knex.QueryBuilder<any, unknown[]> | null }) => Promise<T>): Promise<T> {
     return run({ knex: this.knex }, { address: this.knex.default === 'mock' ? null : this.knex.default.table('addresses'), author: this.knex.default === 'mock' ? null : this.knex.default.table('authors'), authorBook: this.knex.default === 'mock' ? null : this.knex.default.table('authorBooks'), book: this.knex.default === 'mock' ? null : this.knex.default.table('books'), city: this.knex.default === 'mock' ? null : this.knex.default.table('citys'), defaultFieldsEntity: this.knex.default === 'mock' ? null : this.knex.default.table('defaultFieldsEntitys'), device: this.knex.default === 'mock' ? null : this.knex.default.table('devices'), dog: this.knex.default === 'mock' ? null : this.knex.default.table('dogs'), friends: this.knex.default === 'mock' ? null : this.knex.default.table('friendss'), organization: this.knex.default === 'mock' ? null : this.knex.default.table('organizations'), user: this.knex.default === 'mock' ? null : this.knex.default.table('users') })
+  }
+  
+  protected clone(): this {
+    return new DAOContext<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
   
   public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string, arrayType?: string }>>, defaultType: { singleType: string, arrayType?: string } }): Promise<void> {

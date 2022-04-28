@@ -19,7 +19,7 @@ import {
   IdGenerationStrategy,
 } from './dao.types'
 import { LogArgs, LogFunction } from './log/log.types'
-import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
+import { BeforeMiddlewareResult, DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { buildMiddleware } from './middlewares/utils/builder'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection, infoToProjection } from './projections/projections.utils'
@@ -52,8 +52,24 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idGenerator?: () => T['scalars'][T['idScalar']]
   protected name: T['name']
   private logger?: LogFunction<T['name']>
+  protected datasource: string | null
 
-  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, name, logger, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
+  protected constructor({
+    idField,
+    datasource,
+    idScalar,
+    idGeneration,
+    idGenerator,
+    daoContext,
+    name,
+    logger,
+    pageSize = 50,
+    relations = [],
+    middlewares = [],
+    schema,
+    metadata,
+    driverContext,
+  }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.dataLoaderRefs = new Map<string, string[]>()
     this.idField = idField
@@ -65,6 +81,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.idGeneration = idGeneration
     this.name = name
     this.logger = logger
+    this.datasource = datasource
     if (this.idGeneration === 'generator' && !this.idGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
     }
@@ -98,6 +115,48 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       },
     })
     this.middlewares = [
+      {
+        before: async (args) => {
+          if (this.daoContext.isTransacting() && this.datasource !== null) {
+            const driver = this._driver()
+            if (driver === 'mongo') {
+              const session = this.daoContext.getMongoSession(this.datasource)
+              if (session) {
+                return {
+                  continue: true,
+                  ...args,
+                  params: {
+                    ...args.params,
+                    options: {
+                      ...args.params.options,
+                      session,
+                    },
+                  },
+                } as BeforeMiddlewareResult<T>
+              }
+            }
+            if (driver === 'knex') {
+              const trx = this.daoContext.getKenxTransaction(this.datasource)
+              if (trx) {
+                return {
+                  continue: true,
+                  ...args,
+                  params: {
+                    ...args.params,
+                    options: {
+                      ...args.params.options,
+                      trx,
+                    },
+                  },
+                } as BeforeMiddlewareResult<T>
+              }
+            }
+            //if (driver === 'memory') {
+            // TODO
+            //}
+          }
+        },
+      },
       {
         before: async (args, context) => {
           if (args.operation === 'find') {

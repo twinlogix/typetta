@@ -809,7 +809,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
 
 type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<'default', never, types.Scalars, MetadataType>  {
 
   private _hotel: HotelDAO<MetadataType, OperationMetadataType> | undefined
   private _reservation: ReservationDAO<MetadataType, OperationMetadataType> | undefined
@@ -818,6 +818,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
   private _userRole: UserRoleDAO<MetadataType, OperationMetadataType> | undefined
   
+  private params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+  
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
   private mongodb: Record<'default', Db | 'mock'>
   
@@ -825,45 +827,45 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   private logger?: LogFunction<'hotel' | 'reservation' | 'role' | 'room' | 'user' | 'userRole'>
   
-  get hotel() : HotelDAO<MetadataType, OperationMetadataType> {
+  get hotel(): HotelDAO<MetadataType, OperationMetadataType> {
     if(!this._hotel) {
       const db = this.mongodb.default
-      this._hotel = db === 'mock' ? (new InMemoryHotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger }) as unknown as HotelDAO<MetadataType, OperationMetadataType>) : new HotelDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.hotel, collection: db.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger })
+      this._hotel = db === 'mock' ? (new InMemoryHotelDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.hotel, middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger }) as unknown as HotelDAO<MetadataType, OperationMetadataType>) : new HotelDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.hotel, collection: db.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger })
     }
     return this._hotel
   }
-  get reservation() : ReservationDAO<MetadataType, OperationMetadataType> {
+  get reservation(): ReservationDAO<MetadataType, OperationMetadataType> {
     if(!this._reservation) {
       const db = this.mongodb.default
-      this._reservation = db === 'mock' ? (new InMemoryReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger }) as unknown as ReservationDAO<MetadataType, OperationMetadataType>) : new ReservationDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.reservation, collection: db.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger })
+      this._reservation = db === 'mock' ? (new InMemoryReservationDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.reservation, middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger }) as unknown as ReservationDAO<MetadataType, OperationMetadataType>) : new ReservationDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.reservation, collection: db.collection('reservations'), middlewares: [...(this.overrides?.reservation?.middlewares || []), ...selectMiddleware('reservation', this.middlewares) as DAOMiddleware<ReservationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'reservation', logger: this.logger })
     }
     return this._reservation
   }
-  get role() : RoleDAO<MetadataType, OperationMetadataType> {
+  get role(): RoleDAO<MetadataType, OperationMetadataType> {
     if(!this._role) {
       const db = this.mongodb.default
-      this._role = db === 'mock' ? (new InMemoryRoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.role, middlewares: [...(this.overrides?.role?.middlewares || []), ...selectMiddleware('role', this.middlewares) as DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'role', logger: this.logger }) as unknown as RoleDAO<MetadataType, OperationMetadataType>) : new RoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.role, collection: db.collection('roles'), middlewares: [...(this.overrides?.role?.middlewares || []), ...selectMiddleware('role', this.middlewares) as DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'role', logger: this.logger })
+      this._role = db === 'mock' ? (new InMemoryRoleDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.role, middlewares: [...(this.overrides?.role?.middlewares || []), ...selectMiddleware('role', this.middlewares) as DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'role', logger: this.logger }) as unknown as RoleDAO<MetadataType, OperationMetadataType>) : new RoleDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.role, collection: db.collection('roles'), middlewares: [...(this.overrides?.role?.middlewares || []), ...selectMiddleware('role', this.middlewares) as DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'role', logger: this.logger })
     }
     return this._role
   }
-  get room() : RoomDAO<MetadataType, OperationMetadataType> {
+  get room(): RoomDAO<MetadataType, OperationMetadataType> {
     if(!this._room) {
       const db = this.mongodb.default
-      this._room = db === 'mock' ? (new InMemoryRoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger }) as unknown as RoomDAO<MetadataType, OperationMetadataType>) : new RoomDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.room, collection: db.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger })
+      this._room = db === 'mock' ? (new InMemoryRoomDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.room, middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger }) as unknown as RoomDAO<MetadataType, OperationMetadataType>) : new RoomDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.room, collection: db.collection('rooms'), middlewares: [...(this.overrides?.room?.middlewares || []), ...selectMiddleware('room', this.middlewares) as DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'room', logger: this.logger })
     }
     return this._room
   }
-  get user() : UserDAO<MetadataType, OperationMetadataType> {
+  get user(): UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
       const db = this.mongodb.default
-      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, collection: db.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
+      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.user, collection: db.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
     }
     return this._user
   }
-  get userRole() : UserRoleDAO<MetadataType, OperationMetadataType> {
+  get userRole(): UserRoleDAO<MetadataType, OperationMetadataType> {
     if(!this._userRole) {
       const db = this.mongodb.default
-      this._userRole = db === 'mock' ? (new InMemoryUserRoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.userRole, middlewares: [...(this.overrides?.userRole?.middlewares || []), ...selectMiddleware('userRole', this.middlewares) as DAOMiddleware<UserRoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'userRole', logger: this.logger }) as unknown as UserRoleDAO<MetadataType, OperationMetadataType>) : new UserRoleDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.userRole, collection: db.collection('userRoles'), middlewares: [...(this.overrides?.userRole?.middlewares || []), ...selectMiddleware('userRole', this.middlewares) as DAOMiddleware<UserRoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'userRole', logger: this.logger })
+      this._userRole = db === 'mock' ? (new InMemoryUserRoleDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.userRole, middlewares: [...(this.overrides?.userRole?.middlewares || []), ...selectMiddleware('userRole', this.middlewares) as DAOMiddleware<UserRoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'userRole', logger: this.logger }) as unknown as UserRoleDAO<MetadataType, OperationMetadataType>) : new UserRoleDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.userRole, collection: db.collection('userRoles'), middlewares: [...(this.overrides?.userRole?.middlewares || []), ...selectMiddleware('userRole', this.middlewares) as DAOMiddleware<UserRoleDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'userRole', logger: this.logger })
     }
     return this._userRole
   }
@@ -882,10 +884,15 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
       const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
       this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
     }
+    this.params = params
   }
   
   public async execQuery<T>(run: (dbs: { mongodb: Record<'default', Db | 'mock'> }, entities: { hotel: Collection<Document> | null, reservation: Collection<Document> | null, role: Collection<Document> | null, room: Collection<Document> | null, user: Collection<Document> | null, userRole: Collection<Document> | null }) => Promise<T>): Promise<T> {
     return run({ mongodb: this.mongodb }, { hotel: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('hotels'), reservation: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('reservations'), role: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('roles'), room: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('rooms'), user: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('users'), userRole: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('userRoles') })
+  }
+  
+  protected clone(): this {
+    return new DAOContext<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
   
   

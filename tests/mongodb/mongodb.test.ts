@@ -1226,7 +1226,7 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 // --------------------------- TRANSACTIONS -------------------------------
 // ------------------------------------------------------------------------
 
-test('Simple transaction', async () => {
+test('Simple transaction options', async () => {
   const session = connection.startSession()
   session.startTransaction({
     readConcern: { level: 'local' },
@@ -1242,6 +1242,28 @@ test('Simple transaction', async () => {
   expect(user1.live).toBe(true)
   expect(user2).toBe(null)
   expect(user3?.live).toBe(true)
+  expect(user4?.live).toBe(true)
+})
+
+test('Simple transaction functional', async () => {
+  const session = connection.startSession()
+  session.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+  await dao.transaction({ mongodb: { default: session } }, async (dao2) => {
+    const user1 = await dao2.user.insertOne({ record: { id: '123', live: true } })
+    const user2 = await dao2.user.findOne({ filter: { id: '123' } })
+    const user5 = await dao.user.findOne({ filter: { id: '123' } })
+    expect(user5).toBe(null)
+    expect(user1.live).toBe(true)
+    expect(user2?.live).toBe(true)
+  })
+  const user3 = await dao.user.findOne({ filter: { id: '123' } })
+  expect(user3).toBe(null)
+  const res = await session.commitTransaction()
+  expect(res.ok).toBe(1)
+  const user4 = await dao.user.findOne({ filter: { id: '123' } })
   expect(user4?.live).toBe(true)
 })
 
@@ -1635,7 +1657,7 @@ test('Inner ref inside embedded', async () => {
       userId: u2.id,
       embeddedUsers3: [{ value: 1 }, { value: 2 }],
       embeddedUser4: { e: { userId: u3.id } },
-      embeddedUsers4: [{ e: { userId: u2.id } }, { e: { userId: u1.id } }, { e: { userId: "asd" } }, { e: { userId: null } }],
+      embeddedUsers4: [{ e: { userId: u2.id } }, { e: { userId: u1.id } }, { e: { userId: 'asd' } }, { e: { userId: null } }],
       audit: { createdBy: '', createdOn: 2, modifiedBy: '', modifiedOn: 1, state: State.ACTIVE },
     },
   })

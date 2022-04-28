@@ -626,12 +626,14 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
 
 type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<never, 'default', types.Scalars, MetadataType>  {
 
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined
   private _postType: PostTypeDAO<MetadataType, OperationMetadataType> | undefined
   private _tag: TagDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
+  
+  private params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
   private knex: Record<'default', Knex | 'mock'>
@@ -640,31 +642,31 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   private logger?: LogFunction<'post' | 'postType' | 'tag' | 'user'>
   
-  get post() : PostDAO<MetadataType, OperationMetadataType> {
+  get post(): PostDAO<MetadataType, OperationMetadataType> {
     if(!this._post) {
       const db = this.knex.default
-      this._post = db === 'mock' ? (new InMemoryPostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger }) as unknown as PostDAO<MetadataType, OperationMetadataType>) : new PostDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.post, knex: db, tableName: 'posts', middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger })
+      this._post = db === 'mock' ? (new InMemoryPostDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.post, middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger }) as unknown as PostDAO<MetadataType, OperationMetadataType>) : new PostDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.post, knex: db, tableName: 'posts', middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger })
     }
     return this._post
   }
-  get postType() : PostTypeDAO<MetadataType, OperationMetadataType> {
+  get postType(): PostTypeDAO<MetadataType, OperationMetadataType> {
     if(!this._postType) {
       const db = this.knex.default
-      this._postType = db === 'mock' ? (new InMemoryPostTypeDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.postType, middlewares: [...(this.overrides?.postType?.middlewares || []), ...selectMiddleware('postType', this.middlewares) as DAOMiddleware<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'postType', logger: this.logger }) as unknown as PostTypeDAO<MetadataType, OperationMetadataType>) : new PostTypeDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.postType, knex: db, tableName: 'postTypes', middlewares: [...(this.overrides?.postType?.middlewares || []), ...selectMiddleware('postType', this.middlewares) as DAOMiddleware<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'postType', logger: this.logger })
+      this._postType = db === 'mock' ? (new InMemoryPostTypeDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.postType, middlewares: [...(this.overrides?.postType?.middlewares || []), ...selectMiddleware('postType', this.middlewares) as DAOMiddleware<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'postType', logger: this.logger }) as unknown as PostTypeDAO<MetadataType, OperationMetadataType>) : new PostTypeDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.postType, knex: db, tableName: 'postTypes', middlewares: [...(this.overrides?.postType?.middlewares || []), ...selectMiddleware('postType', this.middlewares) as DAOMiddleware<PostTypeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'postType', logger: this.logger })
     }
     return this._postType
   }
-  get tag() : TagDAO<MetadataType, OperationMetadataType> {
+  get tag(): TagDAO<MetadataType, OperationMetadataType> {
     if(!this._tag) {
       const db = this.knex.default
-      this._tag = db === 'mock' ? (new InMemoryTagDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tag, middlewares: [...(this.overrides?.tag?.middlewares || []), ...selectMiddleware('tag', this.middlewares) as DAOMiddleware<TagDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tag', logger: this.logger }) as unknown as TagDAO<MetadataType, OperationMetadataType>) : new TagDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.tag, knex: db, tableName: 'tags', middlewares: [...(this.overrides?.tag?.middlewares || []), ...selectMiddleware('tag', this.middlewares) as DAOMiddleware<TagDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tag', logger: this.logger })
+      this._tag = db === 'mock' ? (new InMemoryTagDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.tag, middlewares: [...(this.overrides?.tag?.middlewares || []), ...selectMiddleware('tag', this.middlewares) as DAOMiddleware<TagDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tag', logger: this.logger }) as unknown as TagDAO<MetadataType, OperationMetadataType>) : new TagDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.tag, knex: db, tableName: 'tags', middlewares: [...(this.overrides?.tag?.middlewares || []), ...selectMiddleware('tag', this.middlewares) as DAOMiddleware<TagDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'tag', logger: this.logger })
     }
     return this._tag
   }
-  get user() : UserDAO<MetadataType, OperationMetadataType> {
+  get user(): UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
       const db = this.knex.default
-      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.user, knex: db, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
+      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.user, knex: db, tableName: 'users', middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
     }
     return this._user
   }
@@ -683,10 +685,15 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
       const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
       this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
     }
+    this.params = params
   }
   
   public async execQuery<T>(run: (dbs: { knex: Record<'default', Knex | 'mock'> }, entities: { post: Knex.QueryBuilder<any, unknown[]> | null, postType: Knex.QueryBuilder<any, unknown[]> | null, tag: Knex.QueryBuilder<any, unknown[]> | null, user: Knex.QueryBuilder<any, unknown[]> | null }) => Promise<T>): Promise<T> {
     return run({ knex: this.knex }, { post: this.knex.default === 'mock' ? null : this.knex.default.table('posts'), postType: this.knex.default === 'mock' ? null : this.knex.default.table('postTypes'), tag: this.knex.default === 'mock' ? null : this.knex.default.table('tags'), user: this.knex.default === 'mock' ? null : this.knex.default.table('users') })
+  }
+  
+  protected clone(): this {
+    return new DAOContext<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
   
   public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string, arrayType?: string }>>, defaultType: { singleType: string, arrayType?: string } }): Promise<void> {

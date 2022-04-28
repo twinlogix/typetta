@@ -1,11 +1,11 @@
 import { SecurityPolicyReadError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
+import { inMemoryMongoDb } from '../utils'
 import { DAOContext, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
-import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 
@@ -21,7 +21,7 @@ let mongodb: {
 }
 
 function createDao(securityContext: SecurityContext | undefined, db: Db) {
-  return new DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, never>({
+  return new DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>({
     mongodb: {
       default: db,
     },
@@ -31,10 +31,18 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
       },
     },
     security: {
+      operationDomain: () => {
+        return {}
+      },
       applySecurity: securityContext != null,
       context: securityContext ?? [],
       policies: {
         hotel: {
+          domain: {
+            hotelId: null,
+            tenantId: null,
+            userId: null,
+          },
           permissions: {
             MANAGE_HOTEL: PERMISSION.ALLOW,
             ANALYST: { read: { totalCustomers: true } },
@@ -49,6 +57,11 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           defaultPermissions: PERMISSION.DENY,
         },
         room: {
+          domain: {
+            hotelId: null,
+            tenantId: null,
+            userId: null,
+          },
           permissions: {
             MANAGE_ROOM: { create: true },
           },

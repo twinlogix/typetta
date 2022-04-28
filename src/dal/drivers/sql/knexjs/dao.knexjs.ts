@@ -304,6 +304,6 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   protected _driver(): Exclude<LogArgs<string>['driver'], undefined> {
-    return 'mongo'
+    return 'knex'
   }
 }

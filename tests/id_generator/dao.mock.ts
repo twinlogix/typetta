@@ -659,7 +659,7 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
 
 type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<'a' | 'default', 'default', types.Scalars, MetadataType>  {
 
   private _a: ADAO<MetadataType, OperationMetadataType> | undefined
   private _b: BDAO<MetadataType, OperationMetadataType> | undefined
@@ -667,6 +667,8 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private _d: DDAO<MetadataType, OperationMetadataType> | undefined
   private _e: EDAO<MetadataType, OperationMetadataType> | undefined
   private _f: FDAO<MetadataType, OperationMetadataType> | undefined
+  
+  private params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
   private mongodb: Record<'a' | 'default', Db | 'mock'>
@@ -676,45 +678,45 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   
   private logger?: LogFunction<'a' | 'b' | 'c' | 'd' | 'e' | 'f'>
   
-  get a() : ADAO<MetadataType, OperationMetadataType> {
+  get a(): ADAO<MetadataType, OperationMetadataType> {
     if(!this._a) {
       const db = this.mongodb.a
-      this._a = db === 'mock' ? (new InMemoryADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger }) as unknown as ADAO<MetadataType, OperationMetadataType>) : new ADAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.a, collection: db.collection('as'), middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger })
+      this._a = db === 'mock' ? (new InMemoryADAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.a, middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger }) as unknown as ADAO<MetadataType, OperationMetadataType>) : new ADAO({ daoContext: this, datasource: 'a', metadata: this.metadata, ...this.overrides?.a, collection: db.collection('as'), middlewares: [...(this.overrides?.a?.middlewares || []), ...selectMiddleware('a', this.middlewares) as DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'a', logger: this.logger })
     }
     return this._a
   }
-  get b() : BDAO<MetadataType, OperationMetadataType> {
+  get b(): BDAO<MetadataType, OperationMetadataType> {
     if(!this._b) {
       const db = this.mongodb.default
-      this._b = db === 'mock' ? (new InMemoryBDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger }) as unknown as BDAO<MetadataType, OperationMetadataType>) : new BDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.b, collection: db.collection('bs'), middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger })
+      this._b = db === 'mock' ? (new InMemoryBDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.b, middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger }) as unknown as BDAO<MetadataType, OperationMetadataType>) : new BDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.b, collection: db.collection('bs'), middlewares: [...(this.overrides?.b?.middlewares || []), ...selectMiddleware('b', this.middlewares) as DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'b', logger: this.logger })
     }
     return this._b
   }
-  get c() : CDAO<MetadataType, OperationMetadataType> {
+  get c(): CDAO<MetadataType, OperationMetadataType> {
     if(!this._c) {
       const db = this.mongodb.default
-      this._c = db === 'mock' ? (new InMemoryCDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger }) as unknown as CDAO<MetadataType, OperationMetadataType>) : new CDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.c, collection: db.collection('cs'), middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger })
+      this._c = db === 'mock' ? (new InMemoryCDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.c, middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger }) as unknown as CDAO<MetadataType, OperationMetadataType>) : new CDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.c, collection: db.collection('cs'), middlewares: [...(this.overrides?.c?.middlewares || []), ...selectMiddleware('c', this.middlewares) as DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'c', logger: this.logger })
     }
     return this._c
   }
-  get d() : DDAO<MetadataType, OperationMetadataType> {
+  get d(): DDAO<MetadataType, OperationMetadataType> {
     if(!this._d) {
       const db = this.knex.default
-      this._d = db === 'mock' ? (new InMemoryDDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger }) as unknown as DDAO<MetadataType, OperationMetadataType>) : new DDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.d, knex: db, tableName: 'ds', middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger })
+      this._d = db === 'mock' ? (new InMemoryDDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.d, middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger }) as unknown as DDAO<MetadataType, OperationMetadataType>) : new DDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.d, knex: db, tableName: 'ds', middlewares: [...(this.overrides?.d?.middlewares || []), ...selectMiddleware('d', this.middlewares) as DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'd', logger: this.logger })
     }
     return this._d
   }
-  get e() : EDAO<MetadataType, OperationMetadataType> {
+  get e(): EDAO<MetadataType, OperationMetadataType> {
     if(!this._e) {
       const db = this.knex.default
-      this._e = db === 'mock' ? (new InMemoryEDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger }) as unknown as EDAO<MetadataType, OperationMetadataType>) : new EDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.e, knex: db, tableName: 'es', middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger })
+      this._e = db === 'mock' ? (new InMemoryEDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.e, middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger }) as unknown as EDAO<MetadataType, OperationMetadataType>) : new EDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.e, knex: db, tableName: 'es', middlewares: [...(this.overrides?.e?.middlewares || []), ...selectMiddleware('e', this.middlewares) as DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'e', logger: this.logger })
     }
     return this._e
   }
-  get f() : FDAO<MetadataType, OperationMetadataType> {
+  get f(): FDAO<MetadataType, OperationMetadataType> {
     if(!this._f) {
       const db = this.knex.default
-      this._f = db === 'mock' ? (new InMemoryFDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger }) as unknown as FDAO<MetadataType, OperationMetadataType>) : new FDAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.f, knex: db, tableName: 'fs', middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger })
+      this._f = db === 'mock' ? (new InMemoryFDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.f, middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger }) as unknown as FDAO<MetadataType, OperationMetadataType>) : new FDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.f, knex: db, tableName: 'fs', middlewares: [...(this.overrides?.f?.middlewares || []), ...selectMiddleware('f', this.middlewares) as DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'f', logger: this.logger })
     }
     return this._f
   }
@@ -734,10 +736,15 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
       const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
       this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
     }
+    this.params = params
   }
   
   public async execQuery<T>(run: (dbs: { mongodb: Record<'a' | 'default', Db | 'mock'>, knex: Record<'default', Knex | 'mock'> }, entities: { a: Collection<Document> | null, b: Collection<Document> | null, c: Collection<Document> | null, d: Knex.QueryBuilder<any, unknown[]> | null, e: Knex.QueryBuilder<any, unknown[]> | null, f: Knex.QueryBuilder<any, unknown[]> | null }) => Promise<T>): Promise<T> {
     return run({ mongodb: this.mongodb, knex: this.knex }, { a: this.mongodb.a === 'mock' ? null : this.mongodb.a.collection('as'), b: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('bs'), c: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('cs'), d: this.knex.default === 'mock' ? null : this.knex.default.table('ds'), e: this.knex.default === 'mock' ? null : this.knex.default.table('es'), f: this.knex.default === 'mock' ? null : this.knex.default.table('fs') })
+  }
+  
+  protected clone(): this {
+    return new DAOContext<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
   
   public async createTables(args: { typeMap?: Partial<Record<keyof types.Scalars, { singleType: string, arrayType?: string }>>, defaultType: { singleType: string, arrayType?: string } }): Promise<void> {
