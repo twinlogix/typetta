@@ -189,18 +189,18 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   }
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(params.filter)) {
+    for (const { record, index } of this.entities(params.filter, false)) {
       this.memory[index] = null
-      this.idIndex.delete(record[this.idField])
+      this.deleteIdIndex(record[this.schema[this.idField].alias ?? this.idField])
       this.emptyIndexes.push(index)
       break
     }
   }
 
   protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(params.filter)) {
+    for (const { record, index } of this.entities(params.filter, false)) {
       this.memory[index] = null
-      this.idIndex.delete(record[this.idField])
+      this.deleteIdIndex(record[this.schema[this.idField].alias ?? this.idField])
       this.emptyIndexes.push(index)
     }
   }
@@ -220,6 +220,13 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       this.idIndex.set(this.mockIdSpecification?.stringify(id), index)
     } else {
       this.idIndex.set(id, index)
+    }
+  }
+  private deleteIdIndex(id: unknown): void {
+    if (this.mockIdSpecification?.stringify) {
+      this.idIndex.delete(this.mockIdSpecification?.stringify(id))
+    } else {
+      this.idIndex.delete(id)
     }
   }
 

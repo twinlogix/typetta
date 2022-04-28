@@ -55,8 +55,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'mongo' ? [type.entity.source] : [])))]
     const hasMongoDBEntites = mongoSources.length > 0
     const hasSQLEntities = sqlSources.length > 0
-    const sqlSourcesType = `Record<${sqlSources.map((v) => `'${v}'`).join(' | ')}, Knex | 'mock'>`
-    const mongoSourcesType = `Record<${mongoSources.map((v) => `'${v}'`).join(' | ')}, Db | 'mock'>`
+    const sqlSourcesLiteral = sqlSources.map((v) => `'${v}'`).join(' | ')
+    const mongoSourcesLiteral = mongoSources.map((v) => `'${v}'`).join(' | ')
+    const sqlSourcesType = `Record<${sqlSourcesLiteral}, Knex | 'mock'>`
+    const mongoSourcesType = `Record<${mongoSourcesLiteral}, Db | 'mock'>`
     const daoNamesType = Array.from(typesMap.values())
       .filter((node) => node.entity)
       .map((node) => `'${toFirstLower(node.name)}'`)
@@ -107,7 +109,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .join(', ')
     const execQueryF =
       `public async execQuery<T>(run: (dbs: { ${dbsInputParam} }, entities: { ${entitiesInputParam} }) => Promise<T>): Promise<T> {\n` + `  return run({ ${dbsParam} }, { ${entitiesParam} })\n` + `}`
-
+    const cloneF = `protected clone(): this {\n  return new DAOContext<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this\n}`
     const createTableBody = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'sql' ? [`this.${toFirstLower(node.name)}.createTable(args.typeMap ?? {}, args.defaultType)`] : []
@@ -137,16 +139,18 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     const overridesDeclaration = `private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']${mongoDBFields}${knexJsFields}`
     const middlewareDeclaration = 'private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]'
     const loggerDeclaration = `private logger?: LogFunction<${daoNamesType}>`
+    const paramsDeclaration = `private params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>`
 
     const daoGetters = Array.from(typesMap.values())
       .filter((node) => node.entity)
       .map((node) => {
+        const datasource = node.entity?.type === 'mongo' ? "'" + node.entity.source + "'" : node.entity?.type === 'sql' ? "'" + node.entity.source + "'" : 'null'
         const daoImplementationInit =
           node.entity?.type === 'sql' ? `, knex: db, tableName: '${node.entity?.table}'` : node.entity?.type === 'mongo' ? `, collection: db.collection('${node.entity?.collection}')` : ''
         const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...selectMiddleware('${toFirstLower(
           node.name,
         )}', this.middlewares) as DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
-        const normalDaoInstance = `new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
+        const normalDaoInstance = `new ${node.name}DAO({ daoContext: this, datasource: ${datasource}, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
         )}${daoImplementationInit}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger })`
         const daoInit =
@@ -154,11 +158,11 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
             ? `this._${toFirstLower(node.name)} = ${normalDaoInstance}`
             : `${
                 node.entity?.type === 'mongo' ? `const db = this.mongodb.${node.entity.source}` : node.entity?.type === 'sql' ? `const db = this.knex.${node.entity.source}` : ''
-              }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
+              }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.${toFirstLower(
                 node.name,
               )}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}`
-        return `get ${toFirstLower(node.name)}() : ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(daoGet)}\n}`
+        return `get ${toFirstLower(node.name)}(): ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(daoGet)}\n}`
       })
       .join('\n')
 
@@ -175,14 +179,17 @@ if(params.security && params.security.applySecurity !== false) {
   const securityMiddlewares = createSecurityPolicyMiddlewares(params.security)
   const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
   this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
-}`,
+}
+this.params = params`,
       ) +
       '\n}'
 
-    const declarations = [daoDeclarations, overridesDeclaration, middlewareDeclaration, loggerDeclaration, daoGetters, daoConstructor, execQueryF, createTableF].join('\n\n')
+    const declarations = [daoDeclarations, paramsDeclaration, overridesDeclaration, middlewareDeclaration, loggerDeclaration, daoGetters, daoConstructor, execQueryF, cloneF, createTableF].join('\n\n')
 
     const daoExport =
-      'export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {\n\n' +
+      `export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<${
+        mongoSourcesLiteral || 'never'
+      }, ${sqlSourcesLiteral || 'never'}, types.Scalars, MetadataType>  {\n\n` +
       indentMultiline(declarations) +
       '\n\n}'
 
@@ -488,11 +495,11 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     const dbDAOParams = node.entity?.type === 'sql' ? 'KnexJsDAOParams' : node.entity?.type === 'mongo' ? 'MongoDBDAOParams' : node.entity?.type === 'memory' ? 'InMemoryDAOParams' : 'DAOParams'
     const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${
       idField.isEnum ? 'String' : idField.graphqlType
-    }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${
+    }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${
       node.name
-    }Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${node.name}RawUpdate, ${node.name}ExcludedFields, ${
-      node.name
-    }RelationFields, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(node.name)}', DAOContext<MetadataType, OperationMetadataType>>`
+    }RawUpdate, ${node.name}ExcludedFields, ${node.name}RelationFields, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(
+      node.name,
+    )}', DAOContext<MetadataType, OperationMetadataType>>`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
