@@ -111,29 +111,14 @@ input CredentialsInsertInput {
   password: Password
   username: String
 }
+input CredentialsUpdateInput {
+  password: Password
+  username: String
+}
 ########### Credentials ###########
 
 
 ########### Post ###########
-input PostFilterInput {
-  authorId: IDFilterInput
-  body: StringFilterInput
-  clicks: IntFilterInput
-  createdAt: DateTimeFilterInput
-  id: IDFilterInput
-  metadata_region: StringFilterInput
-  metadata_typeId: IDFilterInput
-  metadata_visible: BooleanFilterInput
-  title: StringFilterInput
-  views: IntFilterInput
-  and: [PostFilterInput!]
-  or: [PostFilterInput!]
-  nor: [PostFilterInput!]
-}
-input PostRelationsFilterInput {
-  author: UserFindInput
-  tags: TagFindInput
-}
 input PostInsertInput {
   authorId: ID!
   body: String
@@ -150,11 +135,22 @@ input PostUpdateInput {
   clicks: Int
   createdAt: DateTime
   id: ID
-  metadata_region: String
-  metadata_typeId: ID
-  metadata_visible: Boolean
+  metadata: PostMetadataUpdateInput
   title: String
   views: Int
+}
+input PostFilterInput {
+  authorId: IDFilterInput
+  body: StringFilterInput
+  clicks: IntFilterInput
+  createdAt: DateTimeFilterInput
+  id: IDFilterInput
+  title: StringFilterInput
+  views: IntFilterInput
+}
+input PostRelationsFilterInput {
+  author: UserFindInput
+  tags: TagFindInput
 }
 input PostSortInput {
   authorId: SortDirection
@@ -162,18 +158,8 @@ input PostSortInput {
   clicks: SortDirection
   createdAt: SortDirection
   id: SortDirection
-  metadata_region: SortDirection
-  metadata_typeId: SortDirection
-  metadata_visible: SortDirection
   title: SortDirection
   views: SortDirection
-}
-input PostFindInput {
-  filter: PostFilterInput
-  sorts: [PostSortInput!]
-  skip: Int
-  limit: Int
-  relations: PostRelationsFilterInput
 }
 ########### Post ###########
 
@@ -184,17 +170,15 @@ input PostMetadataInsertInput {
   typeId: ID!
   visible: Boolean!
 }
+input PostMetadataUpdateInput {
+  region: String
+  typeId: ID
+  visible: Boolean
+}
 ########### PostMetadata ###########
 
 
 ########### PostType ###########
-input PostTypeFilterInput {
-  id: IDFilterInput
-  name: StringFilterInput
-  and: [PostTypeFilterInput!]
-  or: [PostTypeFilterInput!]
-  nor: [PostTypeFilterInput!]
-}
 input PostTypeInsertInput {
   id: ID!
   name: String!
@@ -203,28 +187,18 @@ input PostTypeUpdateInput {
   id: ID
   name: String
 }
+input PostTypeFilterInput {
+  id: IDFilterInput
+  name: StringFilterInput
+}
 input PostTypeSortInput {
   id: SortDirection
   name: SortDirection
-}
-input PostTypeFindInput {
-  filter: PostTypeFilterInput
-  sorts: [PostTypeSortInput!]
-  skip: Int
-  limit: Int
 }
 ########### PostType ###########
 
 
 ########### Tag ###########
-input TagFilterInput {
-  id: IDFilterInput
-  name: StringFilterInput
-  postId: IDFilterInput
-  and: [TagFilterInput!]
-  or: [TagFilterInput!]
-  nor: [TagFilterInput!]
-}
 input TagInsertInput {
   id: ID!
   name: String
@@ -235,38 +209,20 @@ input TagUpdateInput {
   name: String
   postId: ID
 }
+input TagFilterInput {
+  id: IDFilterInput
+  name: StringFilterInput
+  postId: IDFilterInput
+}
 input TagSortInput {
   id: SortDirection
   name: SortDirection
   postId: SortDirection
 }
-input TagFindInput {
-  filter: TagFilterInput
-  sorts: [TagSortInput!]
-  skip: Int
-  limit: Int
-}
 ########### Tag ###########
 
 
 ########### User ###########
-input UserFilterInput {
-  averageViewsPerPost: FloatFilterInput
-  createdAt: DateTimeFilterInput
-  credentials_password: PasswordFilterInput
-  credentials_username: StringFilterInput
-  email: StringFilterInput
-  firstName: StringFilterInput
-  id: IDFilterInput
-  lastName: StringFilterInput
-  totalPostsViews: IntFilterInput
-  and: [UserFilterInput!]
-  or: [UserFilterInput!]
-  nor: [UserFilterInput!]
-}
-input UserRelationsFilterInput {
-  posts: PostFindInput
-}
 input UserInsertInput {
   averageViewsPerPost: Float
   createdAt: DateTime!
@@ -280,30 +236,56 @@ input UserInsertInput {
 input UserUpdateInput {
   averageViewsPerPost: Float
   createdAt: DateTime
-  credentials_password: Password
-  credentials_username: String
+  credentials: CredentialsUpdateInput
   email: String
   firstName: String
   id: ID
   lastName: String
   totalPostsViews: Int
 }
+input UserFilterInput {
+  averageViewsPerPost: FloatFilterInput
+  createdAt: DateTimeFilterInput
+  email: StringFilterInput
+  firstName: StringFilterInput
+  id: IDFilterInput
+  lastName: StringFilterInput
+  totalPostsViews: IntFilterInput
+}
+input UserRelationsFilterInput {
+  posts: PostFindInput
+}
 input UserSortInput {
   averageViewsPerPost: SortDirection
   createdAt: SortDirection
-  credentials_password: SortDirection
-  credentials_username: SortDirection
   email: SortDirection
   firstName: SortDirection
   id: SortDirection
   lastName: SortDirection
   totalPostsViews: SortDirection
 }
-input UserFindInput {
-  filter: UserFilterInput
-  sorts: [UserSortInput!]
-  skip: Int
-  limit: Int
-  relations: UserRelationsFilterInput
-}
 ########### User ###########
+
+
+input Query {
+  posts(filter: PostFilterInput, sorts: [PostSortInput!], relations: PostRelationsFilterInput, skip: Int, limit: Int): [Post!]!
+  postTypes(filter: PostTypeFilterInput, sorts: [PostTypeSortInput!], relations: PostTypeRelationsFilterInput, skip: Int, limit: Int): [PostType!]!
+  tags(filter: TagFilterInput, sorts: [TagSortInput!], relations: TagRelationsFilterInput, skip: Int, limit: Int): [Tag!]!
+  users(filter: UserFilterInput, sorts: [UserSortInput!], relations: UserRelationsFilterInput, skip: Int, limit: Int): [User!]!
+}
+
+
+input Mutation {
+  createPost(record: PostInsertInput): Post!
+  updatePosts(filter: PostFilterInput, changes: PostUpdateInput): Void
+  deletePosts(filter: PostFilterInput): Void
+  createPostType(record: PostTypeInsertInput): PostType!
+  updatePostTypes(filter: PostTypeFilterInput, changes: PostTypeUpdateInput): Void
+  deletePostTypes(filter: PostTypeFilterInput): Void
+  createTag(record: TagInsertInput): Tag!
+  updateTags(filter: TagFilterInput, changes: TagUpdateInput): Void
+  deleteTags(filter: TagFilterInput): Void
+  createUser(record: UserInsertInput): User!
+  updateUsers(filter: UserFilterInput, changes: UserUpdateInput): Void
+  deleteUsers(filter: UserFilterInput): Void
+}
