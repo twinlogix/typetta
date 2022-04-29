@@ -42,12 +42,13 @@ export abstract class AbstractDAOContext<MongoDBDatasources extends string, Knex
     return ((this.transactionData?.knex ?? {}) as Record<string, Knex.Transaction>)[datasource]
   }
 
-  public async transaction(transaction: TransactionData<MongoDBDatasources, KnexDataSources>, f: (dao: this['Transaction']) => Promise<void>): Promise<void> {
+  public async transaction<T>(transaction: TransactionData<MongoDBDatasources, KnexDataSources>, f: (dao: this['Transaction']) => Promise<T>): Promise<T> {
     const dao = this.clone()
     try {
       dao.transactionData = transaction
-      await f(dao as this & { __transaction_enabled__: true })
+      const result = await f(dao as this & { __transaction_enabled__: true })
       dao.transactionData = null
+      return result
     } catch (e) {
       dao.transactionData = null
       throw e
