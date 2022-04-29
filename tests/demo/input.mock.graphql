@@ -1,3 +1,8 @@
+enum SortDirection {
+  ASC
+  DESC
+}
+
 enum StringFilterMode {
   SENSITIVE
   INSENSITIVE
@@ -101,6 +106,14 @@ input PasswordFilterInput {
 }
 
 
+########### Credentials ###########
+input CredentialsInsertInput {
+  password: Password
+  username: String
+}
+########### Credentials ###########
+
+
 ########### Post ###########
 input PostFilterInput {
   authorId: IDFilterInput
@@ -108,9 +121,9 @@ input PostFilterInput {
   clicks: IntFilterInput
   createdAt: DateTimeFilterInput
   id: IDFilterInput
-  metadataRegion: StringFilterInput
-  metadataTypeId: IDFilterInput
-  metadataVisible: BooleanFilterInput
+  metadata_region: StringFilterInput
+  metadata_typeId: IDFilterInput
+  metadata_visible: BooleanFilterInput
   title: StringFilterInput
   views: IntFilterInput
   and: [PostFilterInput!]
@@ -121,17 +134,57 @@ input PostRelationsFilterInput {
   author: UserFindInput
   tags: TagFindInput
 }
-input PostSortsInput { }
-input PostInsertInput { }
-input PostUpdateInput { }
+input PostInsertInput {
+  authorId: ID!
+  body: String
+  clicks: Int
+  createdAt: DateTime!
+  id: ID!
+  metadata: PostMetadata
+  title: String!
+  views: Int!
+}
+input PostUpdateInput {
+  authorId: ID
+  body: String
+  clicks: Int
+  createdAt: DateTime
+  id: ID
+  metadata_region: String
+  metadata_typeId: ID
+  metadata_visible: Boolean
+  title: String
+  views: Int
+}
+input PostSortInput {
+  authorId: SortDirection
+  body: SortDirection
+  clicks: SortDirection
+  createdAt: SortDirection
+  id: SortDirection
+  metadata_region: SortDirection
+  metadata_typeId: SortDirection
+  metadata_visible: SortDirection
+  title: SortDirection
+  views: SortDirection
+}
 input PostFindInput {
   filter: PostFilterInput
-  sorts: PostSortsInput
+  sorts: [PostSortInput!]
   skip: Int
   limit: Int
   relations: PostRelationsFilterInput
 }
 ########### Post ###########
+
+
+########### PostMetadata ###########
+input PostMetadataInsertInput {
+  region: String!
+  typeId: ID!
+  visible: Boolean!
+}
+########### PostMetadata ###########
 
 
 ########### PostType ###########
@@ -142,12 +195,21 @@ input PostTypeFilterInput {
   or: [PostTypeFilterInput!]
   nor: [PostTypeFilterInput!]
 }
-input PostTypeSortsInput { }
-input PostTypeInsertInput { }
-input PostTypeUpdateInput { }
+input PostTypeInsertInput {
+  id: ID!
+  name: String!
+}
+input PostTypeUpdateInput {
+  id: ID
+  name: String
+}
+input PostTypeSortInput {
+  id: SortDirection
+  name: SortDirection
+}
 input PostTypeFindInput {
   filter: PostTypeFilterInput
-  sorts: PostTypeSortsInput
+  sorts: [PostTypeSortInput!]
   skip: Int
   limit: Int
 }
@@ -163,12 +225,24 @@ input TagFilterInput {
   or: [TagFilterInput!]
   nor: [TagFilterInput!]
 }
-input TagSortsInput { }
-input TagInsertInput { }
-input TagUpdateInput { }
+input TagInsertInput {
+  id: ID!
+  name: String
+  postId: ID!
+}
+input TagUpdateInput {
+  id: ID
+  name: String
+  postId: ID
+}
+input TagSortInput {
+  id: SortDirection
+  name: SortDirection
+  postId: SortDirection
+}
 input TagFindInput {
   filter: TagFilterInput
-  sorts: TagSortsInput
+  sorts: [TagSortInput!]
   skip: Int
   limit: Int
 }
@@ -179,13 +253,17 @@ input TagFindInput {
 input UserFilterInput {
   averageViewsPerPost: FloatFilterInput
   createdAt: DateTimeFilterInput
-  credentialsPassword: PasswordFilterInput
-  credentialsUsername: StringFilterInput
+  credentials_password: PasswordFilterInput
+  credentials_username: StringFilterInput
   email: StringFilterInput
   firstName: StringFilterInput
   id: IDFilterInput
   lastName: StringFilterInput
   totalPostsViews: IntFilterInput
+  values1: IntFilterInput
+  values2: IntFilterInput
+  values3: IntFilterInput
+  values4: IntFilterInput
   and: [UserFilterInput!]
   or: [UserFilterInput!]
   nor: [UserFilterInput!]
@@ -193,12 +271,53 @@ input UserFilterInput {
 input UserRelationsFilterInput {
   posts: PostFindInput
 }
-input UserSortsInput { }
-input UserInsertInput { }
-input UserUpdateInput { }
+input UserInsertInput {
+  averageViewsPerPost: Float
+  createdAt: DateTime!
+  credentials: Credentials!
+  email: String
+  firstName: String
+  id: ID!
+  lastName: String
+  totalPostsViews: Int
+  values1: [Int]
+  values2: [Int!]
+  values3: [Int]!
+  values4: [Int!]!
+}
+input UserUpdateInput {
+  averageViewsPerPost: Float
+  createdAt: DateTime
+  credentials_password: Password
+  credentials_username: String
+  email: String
+  firstName: String
+  id: ID
+  lastName: String
+  totalPostsViews: Int
+  values1: Int
+  values2: Int
+  values3: Int
+  values4: Int
+}
+input UserSortInput {
+  averageViewsPerPost: SortDirection
+  createdAt: SortDirection
+  credentials_password: SortDirection
+  credentials_username: SortDirection
+  email: SortDirection
+  firstName: SortDirection
+  id: SortDirection
+  lastName: SortDirection
+  totalPostsViews: SortDirection
+  values1: SortDirection
+  values2: SortDirection
+  values3: SortDirection
+  values4: SortDirection
+}
 input UserFindInput {
   filter: UserFilterInput
-  sorts: UserSortsInput
+  sorts: [UserSortInput!]
   skip: Int
   limit: Int
   relations: UserRelationsFilterInput

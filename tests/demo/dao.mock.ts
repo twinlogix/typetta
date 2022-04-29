@@ -487,6 +487,24 @@ export function userSchema(): Schema<types.Scalars> {
     },
     'lastName': {
       scalar: 'String'
+    },
+    'values1': {
+      scalar: 'Int', 
+      array: true
+    },
+    'values2': {
+      scalar: 'Int', 
+      array: true
+    },
+    'values3': {
+      scalar: 'Int', 
+      required: true, 
+      array: true
+    },
+    'values4': {
+      scalar: 'Int', 
+      required: true, 
+      array: true
     }
   }
 }
@@ -498,7 +516,11 @@ type UserFilterFields = {
   'email'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
   'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
+  'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
+  'values1'?: types.Scalars['Int'][] | null | EqualityOperators<types.Scalars['Int'][]> | ElementOperators | QuantityOperators<types.Scalars['Int'][]>,
+  'values2'?: types.Scalars['Int'][] | null | EqualityOperators<types.Scalars['Int'][]> | ElementOperators | QuantityOperators<types.Scalars['Int'][]>,
+  'values3'?: types.Scalars['Int'][] | null | EqualityOperators<types.Scalars['Int'][]> | ElementOperators | QuantityOperators<types.Scalars['Int'][]>,
+  'values4'?: types.Scalars['Int'][] | null | EqualityOperators<types.Scalars['Int'][]> | ElementOperators | QuantityOperators<types.Scalars['Int'][]>
 }
 export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields | UserRawFilter>
 export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -526,10 +548,14 @@ export type UserProjection = {
   lastName?: boolean,
   posts?: PostProjection | boolean,
   totalPostsViews?: boolean,
+  values1?: boolean,
+  values2?: boolean,
+  values3?: boolean,
+  values4?: boolean,
 }
 export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
 
-export type UserSortKeys = 'createdAt' | 'credentials.password' | 'credentials.username' | 'email' | 'firstName' | 'id' | 'lastName'
+export type UserSortKeys = 'createdAt' | 'credentials.password' | 'credentials.username' | 'email' | 'firstName' | 'id' | 'lastName' | 'values1' | 'values2' | 'values3' | 'values4'
 export type UserSort = OneKey<UserSortKeys, SortDirection>
 export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -541,7 +567,11 @@ export type UserUpdate = {
   'email'?: types.Scalars['String'] | null,
   'firstName'?: types.Scalars['String'] | null,
   'id'?: types.Scalars['ID'],
-  'lastName'?: types.Scalars['String'] | null
+  'lastName'?: types.Scalars['String'] | null,
+  'values1'?: (null | types.Scalars['Int'])[] | null,
+  'values2'?: types.Scalars['Int'][] | null,
+  'values3'?: (null | types.Scalars['Int'])[],
+  'values4'?: types.Scalars['Int'][]
 }
 export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -552,6 +582,10 @@ export type UserInsert = {
   firstName?: null | types.Scalars['String'],
   id?: null | types.Scalars['ID'],
   lastName?: null | types.Scalars['String'],
+  values1?: null | (null | types.Scalars['Int'])[],
+  values2?: null | types.Scalars['Int'][],
+  values3: (null | types.Scalars['Int'])[],
+  values4: types.Scalars['Int'][],
 }
 
 type UserDAOGenerics<MetadataType, OperationMetadataType> = KnexJsDAOGenerics<types.User, 'id', 'ID', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>

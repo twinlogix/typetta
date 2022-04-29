@@ -167,7 +167,9 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
         isID: idDirective != null,
         idGenerationStrategy,
         isList: field.type.kind === Kind.LIST_TYPE || (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE),
-        isListElementRequired: field.type.kind === Kind.LIST_TYPE && field.type.type.kind === Kind.NON_NULL_TYPE,
+        isListElementRequired:
+          (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE && field.type.type.type.kind === Kind.NON_NULL_TYPE) ||
+          (field.type.kind === Kind.LIST_TYPE && field.type.type.kind === Kind.NON_NULL_TYPE),
         isExcluded: excludeDirective != null,
         defaultGenerationStrategy,
         isEnum: isEnumType(schemaType),
@@ -205,7 +207,7 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
     if ((mongoEntityDirective || sqlEntityDirective || memoryEntityDirective) && !entityEntityDirective) {
       throw new Error(`Directives @${Directives.MONGO} and @${Directives.SQL} and @${Directives.MEMORY} must be defined with @${Directives.ENTITY}.`)
     }
-    if(entityEntityDirective && !mongoEntityDirective && !sqlEntityDirective && !memoryEntityDirective) {
+    if (entityEntityDirective && !mongoEntityDirective && !sqlEntityDirective && !memoryEntityDirective) {
       throw new Error(`Directives @${Directives.ENTITY} need to specify a driver: @${Directives.MONGO} and @${Directives.SQL} and @${Directives.MEMORY}.`)
     }
 

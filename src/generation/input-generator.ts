@@ -1,5 +1,5 @@
 import { TypeScriptTypettaPluginConfig } from './config'
-import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
 import { removeEmptyLines, toFirstUpper } from './utils'
 import dedent from 'dedent'
 
@@ -19,38 +19,37 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }
     })
 
-    const customScalars = this.generateCustomScalarFilter(customScalarsMap)
+    const customScalars = this.generateCustomScalarFilterInput(customScalarsMap)
     return [
       this.defaultInput(),
       customScalars,
       ...nodes.flatMap((n) => {
-        if (n.type === 'scalar' || !n.entity) {
+        if (n.type === 'scalar') {
           return []
         }
-
-        const filter = this.generateFilter(n, typesMap)
-        const relationFilter = this.generateRelationsFilter(n)
-        const findParams = this.generateFindParams(n)
-        return [
-          removeEmptyLines(
-            [
-              `########### ${n.name} ###########`,
-              filter,
-              relationFilter,
-              `input ${n.name}SortsInput { }`,
-              `input ${n.name}InsertInput { }`,
-              `input ${n.name}UpdateInput { }`,
-              findParams,
-              `########### ${n.name} ###########`,
-            ].join('\n'),
-          ),
-        ]
+        const delimiter = `########### ${n.name} ###########`
+        const insertInput = this.generateInsertInput(n, typesMap)
+        if (n.entity) {
+          const filterInput = this.generateFilterInput(n, typesMap)
+          const relationFilterInput = this.generateRelationsFilterInput(n)
+          const findInput = this.generateFindInput(n)
+          const sortInput = this.generateSortInput(n, typesMap)
+          const updateInput = this.generateUpdateInput(n, typesMap)
+          return [removeEmptyLines([delimiter, filterInput, relationFilterInput, insertInput, updateInput, sortInput, findInput, delimiter].join('\n'))]
+        } else {
+          return [removeEmptyLines([delimiter, insertInput, delimiter].join('\n'))]
+        }
       }),
     ].join('\n\n\n')
   }
 
   private defaultInput(): string {
     return dedent`
+      enum SortDirection {
+        ASC
+        DESC
+      }
+
       enum StringFilterMode {
         SENSITIVE
         INSENSITIVE
@@ -109,7 +108,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }`
   }
 
-  private generateCustomScalarFilter(customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
+  private generateCustomScalarFilterInput(customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     return Array.from(customScalarsMap.values())
       .map((s) => {
         const additionalFields = []
@@ -132,34 +131,22 @@ export class InputTypettaGenerator extends TypettaGenerator {
       .join('\n\n')
   }
 
-  private generateFilter(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+  private generateFilterInput(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     return dedent`
       input ${node.name}FilterInput {
-        ${this.generateFilterFields(node, typesMap).join('\n        ')}
+        ${this.flattenFields(node, typesMap)
+          .map((r) => `${r.name}: ${r.field.graphqlType}FilterInput`)
+          .join('\n        ')}
         and: [${node.name}FilterInput!]
         or: [${node.name}FilterInput!]
         nor: [${node.name}FilterInput!]
       }`
   }
-  private generateFilterFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, prefix = ''): string[] {
-    return node.fields.flatMap((f) => {
-      if (f.type.kind === 'scalar') {
-        return [`${prefix}${prefix.length === 0 ? f.name : toFirstUpper(f.name)}: ${f.graphqlType}FilterInput`]
-      }
-      if (f.type.kind === 'embedded') {
-        const type = typesMap.get(f.graphqlType)
-        if (type) {
-          return this.generateFilterFields(type, typesMap, f.name)
-        }
-      }
-      return []
-    })
-  }
 
   private hasRelations(node: TsTypettaGeneratorNode): boolean {
     return node.fields.some((f) => f.type.kind === 'innerRef' || f.type.kind === 'foreignRef' || f.type.kind === 'relationEntityRef')
   }
-  private generateRelationsFilter(node: TsTypettaGeneratorNode): string {
+  private generateRelationsFilterInput(node: TsTypettaGeneratorNode): string {
     if (!this.hasRelations(node)) {
       return ''
     }
@@ -175,14 +162,79 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }`
   }
 
-  private generateFindParams(node: TsTypettaGeneratorNode): string {
+  private generateFindInput(node: TsTypettaGeneratorNode): string {
     return dedent`
       input ${node.name}FindInput {
         filter: ${node.name}FilterInput
-        sorts: ${node.name}SortsInput
+        sorts: [${node.name}SortInput!]
         skip: Int
         limit: Int
         ${this.hasRelations(node) ? `relations: ${node.name}RelationsFilterInput` : ``}
       }`
+  }
+
+  private generateSortInput(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    return dedent`
+      input ${node.name}SortInput {
+        ${this.flattenFields(node, typesMap)
+          .map((r) => `${r.name}: SortDirection`)
+          .join('\n        ')}
+      }`
+  }
+
+  private generateUpdateInput(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    return dedent`
+      input ${node.name}UpdateInput {
+        ${this.flattenFields(node, typesMap)
+          .map((r) => `${r.name}: ${r.field.graphqlType}`)
+          .join('\n        ')}
+      }`
+  }
+
+  private generateInsertInput(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    return dedent`
+      input ${node.name}InsertInput {
+        ${node.fields
+          .flatMap((f) => {
+            if (f.type.kind === 'scalar') {
+              const t = f.isList ? `[${f.graphqlType}${f.isListElementRequired ? '!' : ''}]` : f.graphqlType
+              return [`${f.name}: ${t}${f.isRequired ? '!' : ''}`]
+            }
+            if (f.type.kind === 'embedded') {
+              const type = typesMap.get(f.graphqlType)
+              if (type) {
+                const t = f.isList ? `[${f.graphqlType}InsertInput${f.isListElementRequired ? '!' : ''}]` : f.graphqlType
+                return [`${f.name}: ${t}${f.isRequired ? '!' : ''}`]
+              }
+            }
+            return []
+          })
+          .join('\n        ')}
+      }`
+  }
+
+  private flattenFields(
+    node: TsTypettaGeneratorNode,
+    typesMap: Map<string, TsTypettaGeneratorNode>,
+    prefix = '',
+    parents: TsTypettaGeneratorNode[] = [],
+  ): { field: TsTypettaGeneratorField; name: string; parents: TsTypettaGeneratorNode[] }[] {
+    return node.fields.flatMap((f) => {
+      if (f.type.kind === 'scalar') {
+        return [{ name: this.concatPrefix(prefix, f.name), field: f, parents }]
+      }
+      if (f.type.kind === 'embedded') {
+        const type = typesMap.get(f.graphqlType)
+        if (type) {
+          return this.flattenFields(type, typesMap, this.concatPrefix(prefix, f.name), [...parents, type])
+        }
+      }
+      return []
+    })
+  }
+
+  private concatPrefix(prefix: string, name: string): string {
+    //return `${prefix}${prefix.length === 0 ? name : toFirstUpper(name)}`
+    return `${prefix}${prefix.length === 0 ? name : '_' + name}`
   }
 }
