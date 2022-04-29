@@ -32,7 +32,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
     if (!Array.from(typesMap.values()).some((v) => v.entity?.type)) {
       throw new Error('At least one entity is required for code generation. (@entity)')
     }
-    const definitions = [...typesMap.values()].flatMap((node) => {
+    const definitions = [...typesMap.values()].filter(node => node.name !== 'Query' && node.name !== 'Mutation').flatMap((node) => {
       const definition = this._generators
         .map((generator) => generator.generateDefinition(node, typesMap, customScalarsMap))
         .filter((def) => def !== '')

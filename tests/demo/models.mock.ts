@@ -69,8 +69,4 @@ export type User = {
   lastName?: Maybe<Scalars['String']>;
   posts?: Maybe<Array<Post>>;
   totalPostsViews?: Maybe<Scalars['Int']>;
-  values1?: Maybe<Array<Maybe<Scalars['Int']>>>;
-  values2?: Maybe<Array<Scalars['Int']>>;
-  values3: Array<Maybe<Scalars['Int']>>;
-  values4: Array<Scalars['Int']>;
 };

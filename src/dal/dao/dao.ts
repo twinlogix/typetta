@@ -19,7 +19,7 @@ import {
   IdGenerationStrategy,
 } from './dao.types'
 import { LogArgs, LogFunction } from './log/log.types'
-import { DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
+import { BeforeMiddlewareResult, DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { buildMiddleware } from './middlewares/utils/builder'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
 import { getProjection, infoToProjection } from './projections/projections.utils'
@@ -27,10 +27,10 @@ import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
 import { getNamedType, GraphQLResolveInfo } from 'graphql'
+import _ from 'lodash'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
-import _ from 'lodash'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   public build<P extends T['projection']>(p: P): P {
@@ -52,8 +52,24 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected idGenerator?: () => T['scalars'][T['idScalar']]
   protected name: T['name']
   private logger?: LogFunction<T['name']>
+  protected datasource: string | null
 
-  protected constructor({ idField, idScalar, idGeneration, idGenerator, daoContext, name, logger, pageSize = 50, relations = [], middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
+  protected constructor({
+    idField,
+    datasource,
+    idScalar,
+    idGeneration,
+    idGenerator,
+    daoContext,
+    name,
+    logger,
+    pageSize = 50,
+    relations = [],
+    middlewares = [],
+    schema,
+    metadata,
+    driverContext,
+  }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.dataLoaderRefs = new Map<string, string[]>()
     this.idField = idField
@@ -65,6 +81,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.idGeneration = idGeneration
     this.name = name
     this.logger = logger
+    this.datasource = datasource
     if (this.idGeneration === 'generator' && !this.idGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
     }
@@ -98,6 +115,48 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       },
     })
     this.middlewares = [
+      {
+        before: async (args) => {
+          if (this.daoContext.isTransacting() && this.datasource !== null) {
+            const driver = this._driver()
+            if (driver === 'mongo') {
+              const session = this.daoContext.getMongoSession(this.datasource)
+              if (session) {
+                return {
+                  continue: true,
+                  ...args,
+                  params: {
+                    ...args.params,
+                    options: {
+                      ...args.params.options,
+                      session,
+                    },
+                  },
+                } as BeforeMiddlewareResult<T>
+              }
+            }
+            if (driver === 'knex') {
+              const trx = this.daoContext.getKenxTransaction(this.datasource)
+              if (trx) {
+                return {
+                  continue: true,
+                  ...args,
+                  params: {
+                    ...args.params,
+                    options: {
+                      ...args.params.options,
+                      trx,
+                    },
+                  },
+                } as BeforeMiddlewareResult<T>
+              }
+            }
+            //if (driver === 'memory') {
+            // TODO
+            //}
+          }
+        },
+      },
       {
         before: async (args, context) => {
           if (args.operation === 'find') {
@@ -332,7 +391,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.reference === 'inner') {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refTo, getTraversing(record, relation.refFrom))
+            const keys = getTraversing(record, relation.refFrom)
+            const results = await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refTo, keys)
             this.setResult(record, relation, results)
           }
         } else if (relation.reference === 'foreign') {
@@ -350,14 +410,63 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     if (relation.type === '1-n') {
       setTraversing(record, relation.field, results)
     } else {
-      if (results.length > 0) {
-        setTraversing(record, relation.field, results[0])
-      } else if (relation.required) {
-        // TODO: this is not logged
-        throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}`)
+      if (relation.reference === 'inner') {
+        const map = _.mapKeys(results, (r) => getTraversing(r, relation.refTo)[0])
+        try {
+          this.setInnerRefResults(map, { refFrom: relation.refFrom, field: relation.field, schema: this.schema, required: relation.required }, record)
+        } catch (e: unknown) {
+          throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}. Details: ${(e as Error).message}`)
+        }
       } else {
-        setTraversing(record, relation.field, null)
+        if (results.length > 0) {
+          setTraversing(record, relation.field, results[0])
+        } else if (relation.required) {
+          // TODO: this is not logged
+          throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}`)
+        } else {
+          setTraversing(record, relation.field, null)
+        }
       }
+    }
+  }
+
+  private setInnerRefResults(
+    results: _.Dictionary<ModelProjection<DAOGenerics, T['projection']>>,
+    reference: { refFrom: string; field: string; ref?: Record<string, unknown>; schema: Schema<T['scalars']>; required: boolean },
+    record: PartialDeep<T['model']>,
+  ) {
+    const [subRefFrom, ...tailRefFrom] = reference.refFrom.split('.')
+    const [subField, ...tailField] = reference.field.split('.')
+    const ref = reference.ref != null ? reference.ref : record[subRefFrom]
+    if (tailRefFrom.length === 0) {
+      reference.ref = ref
+    }
+    if (tailField.length === 0) {
+      if (reference.ref == null) {
+        reference.ref = getTraversing(record, reference.refFrom)[0]
+      }
+      if (reference.ref == null && reference.required) {
+        throw new Error(`Broken inner ref: from: ${reference.refFrom}, field: ${reference.field}`)
+      }
+      record[subField] = reference.ref ? results[reference.ref.toString()] ?? null : null
+      if (record[subField] === null && reference.required) {
+        throw new Error(`Broken inner ref: from: ${reference.refFrom}, field: ${reference.field}`)
+      }
+      return
+    }
+    const subSchema = reference.schema[subField]
+    if (!('embedded' in subSchema)) {
+      throw new Error('Unreachable')
+    }
+    if (record[subField] == null) {
+      record[subField] = subSchema.array ? [] : {}
+    }
+    if (Array.isArray(record[subField])) {
+      for (const r of record[subField]) {
+        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded }, r)
+      }
+    } else {
+      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded }, record[subField])
     }
   }
 

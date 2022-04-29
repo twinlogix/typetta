@@ -54,6 +54,7 @@ type User @entity @mongodb {
   dogs: [Dog!] @foreignRef(refFrom: "ownerId")
   credentials: [UsernamePasswordCredentials]
   embeddedPost: Post
+  int: Int
 }
 
 type Dog @entity @mongodb {
@@ -117,10 +118,47 @@ type Hotel @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   name: String!
   audit: Auditable! @default(from: "middleware")
+  users: UserCollection
+  userId: ID
+  embeddedUsers: [EmbeddedUser!]
+  embeddedUsers3: [EmbeddedUser3!]
+  embeddedUser3: EmbeddedUser3
+  embeddedUsers4: [EmbeddedUser4!]
+  embeddedUser4: EmbeddedUser4
 }
 
 type Audit @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   entityId: ID!
   changes: String
+}
+
+type UserCollection {
+  usersId: [ID!]!
+  users: [User!]! @innerRef
+}
+
+type EmbeddedUser {
+  userId: ID!
+  user: User! @innerRef
+  e: [EmbeddedUser2!]
+}
+
+type EmbeddedUser2 {
+  userId: ID!
+  user: User! @innerRef
+}
+
+type EmbeddedUser3 {
+  value: Int
+  user: User @innerRef(refFrom: "../userId")
+}
+
+type EmbeddedUser4 {
+  e: EmbeddedUser5
+  user: User @innerRef(refFrom: "e.userId")
+}
+
+type EmbeddedUser5 {
+  userId: ID
 }

@@ -12,21 +12,11 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'mongo' ? [type.entity.source] : [])))]
     const hasMongoDBEntites = mongoSources.length > 0
 
-    const knexImports = [`import { KnexJsDAOGenerics, KnexJsDAOParams, AbstractKnexJsDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}'`, "import { Knex } from 'knex'"]
+    const knexImports = "import { Knex } from 'knex'"
+    const mongodbImports = "import * as M from 'mongodb'"
+    const commonImports = [`import * as T from '${this._config.typettaImport || '@twinlogix/typetta'}'`, `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}'`]
 
-    const mongodbImports = [
-      `import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '${this._config.typettaImport || '@twinlogix/typetta'}'`,
-      "import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb'",
-    ]
-
-    const commonImports = [
-      `import { DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '${
-        this._config.typettaImport || '@twinlogix/typetta'
-      }'`,
-      `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}'`,
-    ]
-
-    return [...commonImports, ...(hasSQLEntities ? knexImports : []), ...(hasMongoDBEntites ? mongodbImports : [])]
+    return [...commonImports, ...(hasSQLEntities ? [knexImports] : []), ...(hasMongoDBEntites ? [mongodbImports] : [])]
   }
 
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
@@ -55,8 +45,10 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'mongo' ? [type.entity.source] : [])))]
     const hasMongoDBEntites = mongoSources.length > 0
     const hasSQLEntities = sqlSources.length > 0
-    const sqlSourcesType = `Record<${sqlSources.map((v) => `'${v}'`).join(' | ')}, Knex | 'mock'>`
-    const mongoSourcesType = `Record<${mongoSources.map((v) => `'${v}'`).join(' | ')}, Db | 'mock'>`
+    const sqlSourcesLiteral = sqlSources.map((v) => `'${v}'`).join(' | ')
+    const mongoSourcesLiteral = mongoSources.map((v) => `'${v}'`).join(' | ')
+    const sqlSourcesType = `Record<${sqlSourcesLiteral}, Knex | 'mock'>`
+    const mongoSourcesType = `Record<${mongoSourcesLiteral}, M.Db | 'mock'>`
     const daoNamesType = Array.from(typesMap.values())
       .filter((node) => node.entity)
       .map((node) => `'${toFirstLower(node.name)}'`)
@@ -75,9 +67,9 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
     const mongoDBParams = hasMongoDBEntites ? `,\nmongodb: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
-    const adaptersParams = `,\nscalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, '${hasMongoDBEntites && hasSQLEntities ? 'both' : hasMongoDBEntites ? 'mongo' : 'knex'}'>`
-    const loggerParams = `,\nlog?: LogInput<${daoNamesType}>`
-    const securityPolicyParam = ',\nsecurity?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>'
+    const adaptersParams = `,\nscalars?: T.UserInputDriverDataTypeAdapterMap<types.Scalars, '${hasMongoDBEntites && hasSQLEntities ? 'both' : hasMongoDBEntites ? 'mongo' : 'knex'}'>`
+    const loggerParams = `,\nlog?: T.LogInput<${daoNamesType}>`
+    const securityPolicyParam = ',\nsecurity?: T.DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>'
     const dbsInputParam =
       hasMongoDBEntites && hasSQLEntities
         ? `mongodb: ${mongoSourcesType}, knex: ${sqlSourcesType}`
@@ -90,7 +82,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
     const entitiesInputParam = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'mongo'
-          ? [`${toFirstLower(node.name)}: Collection<Document> | null`]
+          ? [`${toFirstLower(node.name)}: M.Collection<M.Document> | null`]
           : node.entity?.type === 'sql'
           ? [`${toFirstLower(node.name)}: Knex.QueryBuilder<any, unknown[]> | null`]
           : []
@@ -107,7 +99,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       .join(', ')
     const execQueryF =
       `public async execQuery<T>(run: (dbs: { ${dbsInputParam} }, entities: { ${entitiesInputParam} }) => Promise<T>): Promise<T> {\n` + `  return run({ ${dbsParam} }, { ${entitiesParam} })\n` + `}`
-
+    const cloneF = `protected clone(): this {\n  return new DAOContext<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this\n}`
     const createTableBody = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'sql' ? [`this.${toFirstLower(node.name)}.createTable(args.typeMap ?? {}, args.defaultType)`] : []
@@ -136,17 +128,19 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     const knexJsFields = hasSQLEntities ? `\nprivate knex: ${sqlSourcesType}` : ''
     const overridesDeclaration = `private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']${mongoDBFields}${knexJsFields}`
     const middlewareDeclaration = 'private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]'
-    const loggerDeclaration = `private logger?: LogFunction<${daoNamesType}>`
+    const loggerDeclaration = `private logger?: T.LogFunction<${daoNamesType}>`
+    const paramsDeclaration = `private params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>`
 
     const daoGetters = Array.from(typesMap.values())
       .filter((node) => node.entity)
       .map((node) => {
+        const datasource = node.entity?.type === 'mongo' ? "'" + node.entity.source + "'" : node.entity?.type === 'sql' ? "'" + node.entity.source + "'" : 'null'
         const daoImplementationInit =
           node.entity?.type === 'sql' ? `, knex: db, tableName: '${node.entity?.table}'` : node.entity?.type === 'mongo' ? `, collection: db.collection('${node.entity?.collection}')` : ''
         const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...selectMiddleware('${toFirstLower(
           node.name,
-        )}', this.middlewares) as DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
-        const normalDaoInstance = `new ${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
+        )}', this.middlewares) as T.DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
+        const normalDaoInstance = `new ${node.name}DAO({ daoContext: this, datasource: ${datasource}, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
         )}${daoImplementationInit}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger })`
         const daoInit =
@@ -154,11 +148,11 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
             ? `this._${toFirstLower(node.name)} = ${normalDaoInstance}`
             : `${
                 node.entity?.type === 'mongo' ? `const db = this.mongodb.${node.entity.source}` : node.entity?.type === 'sql' ? `const db = this.knex.${node.entity.source}` : ''
-              }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ daoContext: this, metadata: this.metadata, ...this.overrides?.${toFirstLower(
+              }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.${toFirstLower(
                 node.name,
               )}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
         const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}`
-        return `get ${toFirstLower(node.name)}() : ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(daoGet)}\n}`
+        return `get ${toFirstLower(node.name)}(): ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(daoGet)}\n}`
       })
       .join('\n')
 
@@ -168,25 +162,28 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     const daoConstructor =
       'constructor(params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {\n' +
       indentMultiline(
-        `super({\n  ...params,\n  scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [${scalarsNameList.map((v) => `'${v}'`).join(', ')}]) : undefined\n})
+        `super({\n  ...params,\n  scalars: params.scalars ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [${scalarsNameList.map((v) => `'${v}'`).join(', ')}]) : undefined\n})
 this.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares || []
-this.logger = logInputToLogger(params.log)
+this.logger = T.logInputToLogger(params.log)
 if(params.security && params.security.applySecurity !== false) {
-  const securityMiddlewares = createSecurityPolicyMiddlewares(params.security)
+  const securityMiddlewares = T.createSecurityPolicyMiddlewares(params.security)
   const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
   this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
-}`,
+}
+this.params = params`,
       ) +
       '\n}'
 
-    const declarations = [daoDeclarations, overridesDeclaration, middlewareDeclaration, loggerDeclaration, daoGetters, daoConstructor, execQueryF, createTableF].join('\n\n')
+    const declarations = [daoDeclarations, paramsDeclaration, overridesDeclaration, middlewareDeclaration, loggerDeclaration, daoGetters, daoConstructor, execQueryF, cloneF, createTableF].join('\n\n')
 
     const daoExport =
-      'export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<types.Scalars, MetadataType>  {\n\n' +
+      `export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractDAOContext<${
+        mongoSourcesLiteral || 'never'
+      }, ${sqlSourcesLiteral || 'never'}, types.Scalars, MetadataType>  {\n\n` +
       indentMultiline(declarations) +
       '\n\n}'
 
-    const daoContextMiddleware = `type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>`
+    const daoContextMiddleware = `type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>`
 
     const utilsCode = `
 //--------------------------------------------------------------------------------
@@ -206,16 +203,16 @@ type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
   | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
 type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   include: { [K in N]: true }
-  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
+  middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
 }
 type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   exclude: { [K in N]: true }
-  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
+  middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
 }
 export const groupMiddleware = {
   includes<N extends DAOName, MetadataType, OperationMetadataType>(
     include: { [K in N]: true },
-    middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
+    middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
   ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
     return { include, middleware }
   },
@@ -270,7 +267,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
 
   public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'))
-    const daoSchema = `export function ${toFirstLower(node.name)}Schema(): Schema<types.Scalars> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
+    const daoSchema = `export function ${toFirstLower(node.name)}Schema(): T.Schema<types.Scalars> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
     return daoSchema
   }
 
@@ -299,9 +296,9 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap, customScalarsMap).join(',\n'))
     const daoFilterFields = `type ${node.name}FilterFields = {\n` + daoFilterFieldsBody + `\n}`
     const daoRawFilter = `export type ${node.name}RawFilter = ${
-      node.entity?.type === 'mongo' ? '() => Filter<Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+      node.entity?.type === 'mongo' ? '() => M.Filter<M.Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
     }`
-    const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & LogicalOperators<${node.name}FilterFields | ${node.name}RawFilter>`
+    const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & T.LogicalOperators<${node.name}FilterFields | ${node.name}RawFilter>`
 
     return [daoFilterFields, daoFilter, daoRawFilter].join('\n')
   }
@@ -315,9 +312,9 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
           fieldName += field.name
           const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
           const fieldType = field.isList ? `${baseType}[]` : baseType
-          const quantityOperators = field.graphqlType === 'Int' || field.graphqlType === 'Float' || customScalarsMap.get(field.graphqlType)?.isQuantity ? ` | QuantityOperators<${fieldType}>` : ''
-          const stringOperators = field.graphqlType === 'String' || customScalarsMap.get(field.graphqlType)?.isString || field.isEnum ? ` | StringOperators` : ''
-          return [`'${fieldName}'?: ${fieldType} | null | EqualityOperators<${fieldType}> | ElementOperators` + stringOperators + quantityOperators]
+          const quantityOperators = field.graphqlType === 'Int' || field.graphqlType === 'Float' || customScalarsMap.get(field.graphqlType)?.isQuantity ? ` | T.QuantityOperators<${fieldType}>` : ''
+          const stringOperators = field.graphqlType === 'String' || customScalarsMap.get(field.graphqlType)?.isString || field.isEnum ? ` | T.StringOperators` : ''
+          return [`'${fieldName}'?: ${fieldType} | null | T.EqualityOperators<${fieldType}> | T.ElementOperators` + stringOperators + quantityOperators]
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
           return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.')
@@ -353,7 +350,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   public _generateDAOProjection(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoProjectionBody = indentMultiline(this._generateDAOProjectionFields(node, typesMap))
     const daoProjection = `export type ${node.name}Projection = {\n` + daoProjectionBody + `\n}`
-    const daoParams = `export type ${node.name}Param<P extends ${node.name}Projection> = ParamProjection<types.${node.name}, ${node.name}Projection, P>`
+    const daoParams = `export type ${node.name}Param<P extends ${node.name}Projection> = T.ParamProjection<types.${node.name}, ${node.name}Projection, P>`
     return [daoProjection, daoParams].join('\n')
   }
 
@@ -386,9 +383,9 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   public _generateDAOSort(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSortFields = this._generateDAOSortFields(node, typesMap).join(' | ')
     const daoSortKeys = `export type ${node.name}SortKeys = ${daoSortFields}`
-    const daoSort = `export type ${node.name}Sort = OneKey<${node.name}SortKeys, SortDirection>`
+    const daoSort = `export type ${node.name}Sort = T.OneKey<${node.name}SortKeys, T.SortDirection>`
     const daoRawSort = `export type ${node.name}RawSort = ${
-      node.entity?.type === 'mongo' ? '() => Sort' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+      node.entity?.type === 'mongo' ? '() => M.Sort' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
     }`
     return `${daoSortKeys}\n${daoSort}\n${daoRawSort}`
   }
@@ -417,7 +414,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   public _generateDAOUpdate(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoUpdateFieldsBody = indentMultiline(this._generateDAOUpdateFields(node, typesMap).join(',\n'))
     const daoRawUpdate = `export type ${node.name}RawUpdate = ${
-      node.entity?.type === 'mongo' ? '() => UpdateFilter<Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+      node.entity?.type === 'mongo' ? '() => M.UpdateFilter<M.Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
     }`
     const daoUpdate = `export type ${node.name}Update = {\n` + daoUpdateFieldsBody + `\n}`
     return [daoUpdate, daoRawUpdate].join('\n')
@@ -484,8 +481,9 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   public _generateDAOParams(node: TsTypettaGeneratorNode): string {
     const idField = getID(node)
     const dbDAOGenerics =
-      node.entity?.type === 'sql' ? 'KnexJsDAOGenerics' : node.entity?.type === 'mongo' ? 'MongoDBDAOGenerics' : node.entity?.type === 'memory' ? 'InMemoryDAOGenerics' : 'DAOGenerics'
-    const dbDAOParams = node.entity?.type === 'sql' ? 'KnexJsDAOParams' : node.entity?.type === 'mongo' ? 'MongoDBDAOParams' : node.entity?.type === 'memory' ? 'InMemoryDAOParams' : 'DAOParams'
+      node.entity?.type === 'sql' ? 'T.KnexJsDAOGenerics' : node.entity?.type === 'mongo' ? 'T.MongoDBDAOGenerics' : node.entity?.type === 'memory' ? 'T.InMemoryDAOGenerics' : 'T.DAOGenerics'
+    const dbDAOParams =
+      node.entity?.type === 'sql' ? 'T.KnexJsDAOParams' : node.entity?.type === 'mongo' ? 'T.MongoDBDAOParams' : node.entity?.type === 'memory' ? 'T.InMemoryDAOParams' : 'T.DAOParams'
     const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<types.${node.name}, '${idField.name}', '${
       idField.isEnum ? 'String' : idField.graphqlType
     }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${
@@ -496,7 +494,9 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
-    const inMemoryDaoParams = `export type InMemory${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
+    const inMemoryDaoParams = `export type InMemory${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<${
+      node.name
+    }DAOGenerics<MetadataType, OperationMetadataType>>, ${
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
     return [daoGenerics, daoParams, inMemoryDaoParams].join('\n')
@@ -507,19 +507,20 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   // ---------------------------------------------------------------------------------------------------------
 
   public _generateDAO(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoName = node.entity?.type === 'sql' ? 'AbstractKnexJsDAO' : node.entity?.type === 'mongo' ? 'AbstractMongoDBDAO' : node.entity?.type === 'memory' ? 'AbstractInMemoryDAO' : 'AbstractDAO'
+    const daoName =
+      node.entity?.type === 'sql' ? 'T.AbstractKnexJsDAO' : node.entity?.type === 'mongo' ? 'T.AbstractMongoDBDAO' : node.entity?.type === 'memory' ? 'T.AbstractInMemoryDAO' : 'AbstractDAO'
     const daoBody = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap, `${node.name}DAOParams`) + '\n')
     const daoBodyInMemory = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap, `InMemory${node.name}DAOParams`) + '\n')
     return [
       `export class ${node.name}DAO<MetadataType, OperationMetadataType> extends ${daoName}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>> {${daoBody}}`,
-      `export class InMemory${node.name}DAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<${node.name}DAOGenerics<MetadataType, OperationMetadataType>> {${daoBodyInMemory}}`,
+      `export class InMemory${node.name}DAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<${node.name}DAOGenerics<MetadataType, OperationMetadataType>> {${daoBodyInMemory}}`,
     ].join('\n\n')
   }
 
   private _generateConstructorMethod(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, daoParams: string): string {
     const idField = getID(node)
     const generatedRelations = `[\n${indentMultiline(this._generateRelations(node, typesMap).join(',\n'))}\n]`
-    const relations = `relations: overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
+    const relations = `relations: T.overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
     const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'}'`
     const idScalar = `idScalar: '${idField.isEnum ? 'String' : idField.graphqlType}'`
     const constructorBody = `super({ ${indentMultiline(
@@ -530,8 +531,8 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
 public static projection<P extends ${node.name}Projection>(p: P) {
   return p
 }
-public static mergeProjection<P1 extends ${node.name}Projection, P2 extends ${node.name}Projection>(p1: P1, p2: P2): SelectProjection<${node.name}Projection, P1, P2> {
-  return mergeProjections(p1, p2) as SelectProjection<${node.name}Projection, P1, P2>
+public static mergeProjection<P1 extends ${node.name}Projection, P2 extends ${node.name}Projection>(p1: P1, p2: P2): T.SelectProjection<${node.name}Projection, P1, P2> {
+  return T.mergeProjections(p1, p2) as T.SelectProjection<${node.name}Projection, P1, P2>
 }
 
 public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n` +
@@ -554,7 +555,7 @@ public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n
       const linkedType = getNode(field.type.innerRef, typesMap)
       const reference: DAORelation['reference'] = 'inner'
       const refField = path + field.name
-      const refFrom = field.type.refFrom ? field.type.refFrom : path + field.name + 'Id'
+      const refFrom = field.type.refFrom ? path + field.type.refFrom : path + field.name + 'Id'
       const refTo = field.type.refTo ? field.type.refTo : getID(linkedType).name
       const dao = toFirstLower(field.type.innerRef)
       return [

@@ -260,10 +260,6 @@ input UserFilterInput {
   id: IDFilterInput
   lastName: StringFilterInput
   totalPostsViews: IntFilterInput
-  values1: IntFilterInput
-  values2: IntFilterInput
-  values3: IntFilterInput
-  values4: IntFilterInput
   and: [UserFilterInput!]
   or: [UserFilterInput!]
   nor: [UserFilterInput!]
@@ -280,10 +276,6 @@ input UserInsertInput {
   id: ID!
   lastName: String
   totalPostsViews: Int
-  values1: [Int]
-  values2: [Int!]
-  values3: [Int]!
-  values4: [Int!]!
 }
 input UserUpdateInput {
   averageViewsPerPost: Float
@@ -295,10 +287,6 @@ input UserUpdateInput {
   id: ID
   lastName: String
   totalPostsViews: Int
-  values1: Int
-  values2: Int
-  values3: Int
-  values4: Int
 }
 input UserSortInput {
   averageViewsPerPost: SortDirection
@@ -310,10 +298,6 @@ input UserSortInput {
   id: SortDirection
   lastName: SortDirection
   totalPostsViews: SortDirection
-  values1: SortDirection
-  values2: SortDirection
-  values3: SortDirection
-  values4: SortDirection
 }
 input UserFindInput {
   filter: UserFilterInput

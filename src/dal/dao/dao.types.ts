@@ -8,6 +8,8 @@ import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { GraphQLResolveInfo } from 'graphql'
+import { Knex } from 'knex'
+import { ClientSession } from 'mongodb'
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
@@ -88,7 +90,7 @@ export type DAOParams<T extends DAOGenerics> = {
   idScalar: T['idScalar']
   idGeneration: IdGenerationStrategy
   idGenerator?: () => T['idScalar'][T['idScalar']]
-  daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
+  daoContext: AbstractDAOContext<string, string, T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
   metadata?: T['metadata']
   driverContext: T['driverContext']
@@ -97,6 +99,7 @@ export type DAOParams<T extends DAOGenerics> = {
   middlewares?: DAOMiddleware<T>[]
   logger?: LogFunction<T['name']>
   name: T['name']
+  datasource: string | null
 }
 
 export type DriverType = 'mongo' | 'knex' | 'memory'
@@ -158,7 +161,7 @@ export type DAOGenerics<
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
   NameType extends string = any,
-  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = AbstractDAOContext<ScalarsType, MetadataType>,
+  DAOContext extends AbstractDAOContext<string, string, ScalarsType, MetadataType> = AbstractDAOContext<string, string, ScalarsType, MetadataType>,
 > = {
   model: ModelType
   idKey: IDKey
@@ -193,3 +196,8 @@ export type DAOGenerics<
   driverReplaceOptions: DriverReplaceOptions
   driverDeleteOptions: DriverDeleteOptions
 }
+
+export type TransactionData<MongoDBDatasources extends string, KnexDataSources extends string> = ([MongoDBDatasources] extends [never]
+  ? { mongodb?: undefined }
+  : { mongodb?: Partial<Record<MongoDBDatasources, ClientSession>> }) &
+  ([KnexDataSources] extends [never] ? { knex?: undefined } : { knex?: Partial<Record<KnexDataSources, Knex.Transaction>> })
