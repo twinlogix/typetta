@@ -3,10 +3,10 @@
 A transaction is any sequence of read-write operations that, if performed correctly, results in a change in the state of a database. In the event of success, the result of the operations must be permanent or persistent, while, in the event of failure, it must return to the state prior to the start of the transaction.
 
   - [Transactions in Typetta](#transactions-in-typetta)
-    - [Implicit Transactions](#implicit-transactions)
-    - [Explicit Transactions](#explicit-transactions)
   - [MongoDB Transactions](#mongodb-transactions)
   - [SQL Transactions](#sql-transactions)
+  - [Implicit Transactions](#implicit-transactions)
+  - [Explicit Transactions](#explicit-transactions)
 
 ## Transactions in Typetta
 
@@ -87,7 +87,7 @@ const res = await session.commitTransaction()
 
 Note that the first parameter allows you to provide a reference to a transaction for each data source, while the second is a function that receives only one parameter, a new ``DAOContext`` on which you can perform all the Typetta operations. It's important to use this provided context and not the outer one to be sure of executing those operation in transaction. 
 
-### Explicit Transactions 
+## Explicit Transactions 
 A second way to execute multiple operations in transaction is to pass a reference to it to each operation has an explicit `options` parameter. In this case it is possible to specify in which transaction an operation should be performed and you can even exclude some operations. Following an example to obtain the exact result of the previous but with this different approach:
 
 ```typescript
