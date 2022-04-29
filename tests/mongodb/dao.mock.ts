@@ -1015,7 +1015,7 @@ export type HotelUpdate = {
   'name'?: types.Scalars['String'],
   'userId'?: types.Scalars['ID'] | null,
   'users'?: UserCollectionInsert | null,
-  'users.usersId'?: (null | types.Scalars['ID'])[]
+  'users.usersId'?: types.Scalars['ID'][]
 }
 export type HotelRawUpdate = () => UpdateFilter<Document>
 
@@ -1781,7 +1781,7 @@ export type UserCollectionProjection = {
 export type UserCollectionParam<P extends UserCollectionProjection> = ParamProjection<types.UserCollection, UserCollectionProjection, P>
 
 export type UserCollectionInsert = {
-  usersId: (null | types.Scalars['ID'])[],
+  usersId: types.Scalars['ID'][],
 }
 
 
