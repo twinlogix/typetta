@@ -1,7 +1,6 @@
-import { DAOMiddleware, Coordinates, UserInputDriverDataTypeAdapterMap, Schema, AbstractDAOContext, LogicalOperators, QuantityOperators, EqualityOperators, StringOperators, ElementOperators, OneKey, SortDirection, overrideRelations, userInputDataTypeAdapterToDataTypeAdapter, LogFunction, LogInput, logInputToLogger, ParamProjection, DAOGenerics, CRUDPermission, DAOContextSecurtyPolicy, createSecurityPolicyMiddlewares, SelectProjection, mergeProjections, AbstractInMemoryDAO, InMemoryDAOGenerics, InMemoryDAOParams } from '../../src'
+import * as T from '../../src'
 import * as types from './models.mock'
-import { MongoDBDAOGenerics, MongoDBDAOParams, AbstractMongoDBDAO } from '../../src'
-import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb'
+import * as M from 'mongodb'
 
 //--------------------------------------------------------------------------------
 //----------------------------------- ADDRESS ------------------------------------
@@ -10,7 +9,7 @@ import { Collection, Db, Filter, Sort, UpdateFilter, Document } from 'mongodb'
 export type AddressExcludedFields = never
 export type AddressRelationFields = 'cities'
 
-export function addressSchema(): Schema<types.Scalars> {
+export function addressSchema(): T.Schema<types.Scalars> {
   return {
     'id': {
       scalar: 'ID', 
@@ -20,10 +19,10 @@ export function addressSchema(): Schema<types.Scalars> {
 }
 
 type AddressFilterFields = {
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
 }
-export type AddressFilter = AddressFilterFields & LogicalOperators<AddressFilterFields | AddressRawFilter>
-export type AddressRawFilter = () => Filter<Document>
+export type AddressFilter = AddressFilterFields & T.LogicalOperators<AddressFilterFields | AddressRawFilter>
+export type AddressRawFilter = () => M.Filter<M.Document>
 
 export type AddressRelations = {
   cities?: {
@@ -39,32 +38,32 @@ export type AddressProjection = {
   cities?: CityProjection | boolean,
   id?: boolean,
 }
-export type AddressParam<P extends AddressProjection> = ParamProjection<types.Address, AddressProjection, P>
+export type AddressParam<P extends AddressProjection> = T.ParamProjection<types.Address, AddressProjection, P>
 
 export type AddressSortKeys = 'id'
-export type AddressSort = OneKey<AddressSortKeys, SortDirection>
-export type AddressRawSort = () => Sort
+export type AddressSort = T.OneKey<AddressSortKeys, T.SortDirection>
+export type AddressRawSort = () => M.Sort
 
 export type AddressUpdate = {
   'id'?: types.Scalars['ID']
 }
-export type AddressRawUpdate = () => UpdateFilter<Document>
+export type AddressRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type AddressInsert = {
   id?: null | types.Scalars['ID'],
 }
 
-type AddressDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Address, 'id', 'ID', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address', DAOContext<MetadataType, OperationMetadataType>>
-export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type AddressDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.Address, 'id', 'ID', AddressFilter, AddressRawFilter, AddressRelations, AddressProjection, AddressSort, AddressRawSort, AddressInsert, AddressUpdate, AddressRawUpdate, AddressExcludedFields, AddressRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'address', DAOContext<MetadataType, OperationMetadataType>>
+export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AddressProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): SelectProjection<AddressProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<AddressProjection, P1, P2>
+  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): T.SelectProjection<AddressProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<AddressProjection, P1, P2>
   }
   
   public constructor(params: AddressDAOParams<MetadataType, OperationMetadataType>){
@@ -72,7 +71,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
       ...params, 
       idField: 'id', 
       schema: addressSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
         ]
@@ -83,13 +82,13 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends AbstractMon
   }
   }
 
-export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AddressProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): SelectProjection<AddressProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<AddressProjection, P1, P2>
+  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): T.SelectProjection<AddressProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<AddressProjection, P1, P2>
   }
   
   public constructor(params: InMemoryAddressDAOParams<MetadataType, OperationMetadataType>){
@@ -97,7 +96,7 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends Abs
       ...params, 
       idField: 'id', 
       schema: addressSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }
         ]
@@ -117,7 +116,7 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends Abs
 export type AuditExcludedFields = never
 export type AuditRelationFields = never
 
-export function auditSchema(): Schema<types.Scalars> {
+export function auditSchema(): T.Schema<types.Scalars> {
   return {
     'changes': {
       scalar: 'String'
@@ -135,12 +134,12 @@ export function auditSchema(): Schema<types.Scalars> {
 }
 
 type AuditFilterFields = {
-  'changes'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'entityId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+  'changes'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'entityId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
 }
-export type AuditFilter = AuditFilterFields & LogicalOperators<AuditFilterFields | AuditRawFilter>
-export type AuditRawFilter = () => Filter<Document>
+export type AuditFilter = AuditFilterFields & T.LogicalOperators<AuditFilterFields | AuditRawFilter>
+export type AuditRawFilter = () => M.Filter<M.Document>
 
 export type AuditRelations = Record<never, string>
 
@@ -149,35 +148,35 @@ export type AuditProjection = {
   entityId?: boolean,
   id?: boolean,
 }
-export type AuditParam<P extends AuditProjection> = ParamProjection<types.Audit, AuditProjection, P>
+export type AuditParam<P extends AuditProjection> = T.ParamProjection<types.Audit, AuditProjection, P>
 
 export type AuditSortKeys = 'changes' | 'entityId' | 'id'
-export type AuditSort = OneKey<AuditSortKeys, SortDirection>
-export type AuditRawSort = () => Sort
+export type AuditSort = T.OneKey<AuditSortKeys, T.SortDirection>
+export type AuditRawSort = () => M.Sort
 
 export type AuditUpdate = {
   'changes'?: types.Scalars['String'] | null,
   'entityId'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID']
 }
-export type AuditRawUpdate = () => UpdateFilter<Document>
+export type AuditRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type AuditInsert = {
   changes?: null | types.Scalars['String'],
   entityId: types.Scalars['ID'],
 }
 
-type AuditDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Audit, 'id', 'ID', AuditFilter, AuditRawFilter, AuditRelations, AuditProjection, AuditSort, AuditRawSort, AuditInsert, AuditUpdate, AuditRawUpdate, AuditExcludedFields, AuditRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'audit', DAOContext<MetadataType, OperationMetadataType>>
-export type AuditDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<AuditDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryAuditDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<AuditDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type AuditDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.Audit, 'id', 'ID', AuditFilter, AuditRawFilter, AuditRelations, AuditProjection, AuditSort, AuditRawSort, AuditInsert, AuditUpdate, AuditRawUpdate, AuditExcludedFields, AuditRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'audit', DAOContext<MetadataType, OperationMetadataType>>
+export type AuditDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<AuditDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryAuditDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<AuditDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class AuditDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class AuditDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AuditProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AuditProjection, P2 extends AuditProjection>(p1: P1, p2: P2): SelectProjection<AuditProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<AuditProjection, P1, P2>
+  public static mergeProjection<P1 extends AuditProjection, P2 extends AuditProjection>(p1: P1, p2: P2): T.SelectProjection<AuditProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<AuditProjection, P1, P2>
   }
   
   public constructor(params: AuditDAOParams<MetadataType, OperationMetadataType>){
@@ -185,7 +184,7 @@ export class AuditDAO<MetadataType, OperationMetadataType> extends AbstractMongo
       ...params, 
       idField: 'id', 
       schema: auditSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           
         ]
@@ -196,13 +195,13 @@ export class AuditDAO<MetadataType, OperationMetadataType> extends AbstractMongo
   }
   }
 
-export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends AuditProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AuditProjection, P2 extends AuditProjection>(p1: P1, p2: P2): SelectProjection<AuditProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<AuditProjection, P1, P2>
+  public static mergeProjection<P1 extends AuditProjection, P2 extends AuditProjection>(p1: P1, p2: P2): T.SelectProjection<AuditProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<AuditProjection, P1, P2>
   }
   
   public constructor(params: InMemoryAuditDAOParams<MetadataType, OperationMetadataType>){
@@ -210,7 +209,7 @@ export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends Abstr
       ...params, 
       idField: 'id', 
       schema: auditSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           
         ]
@@ -227,7 +226,7 @@ export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends Abstr
 //---------------------------------- AUDITABLE -----------------------------------
 //--------------------------------------------------------------------------------
 
-export function auditableSchema(): Schema<types.Scalars> {
+export function auditableSchema(): T.Schema<types.Scalars> {
   return {
     'createdBy': {
       scalar: 'String', 
@@ -264,7 +263,7 @@ export type AuditableProjection = {
   state?: boolean,
   versions?: AuditProjection | boolean,
 }
-export type AuditableParam<P extends AuditableProjection> = ParamProjection<types.Auditable, AuditableProjection, P>
+export type AuditableParam<P extends AuditableProjection> = T.ParamProjection<types.Auditable, AuditableProjection, P>
 
 export type AuditableInsert = {
   createdBy: types.Scalars['String'],
@@ -284,7 +283,7 @@ export type AuditableInsert = {
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
 export type CityRelationFields = never
 
-export function citySchema(): Schema<types.Scalars> {
+export function citySchema(): T.Schema<types.Scalars> {
   return {
     'addressId': {
       scalar: 'ID', 
@@ -302,12 +301,12 @@ export function citySchema(): Schema<types.Scalars> {
 }
 
 type CityFilterFields = {
-  'addressId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
+  'addressId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'name'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
 }
-export type CityFilter = CityFilterFields & LogicalOperators<CityFilterFields | CityRawFilter>
-export type CityRawFilter = () => Filter<Document>
+export type CityFilter = CityFilterFields & T.LogicalOperators<CityFilterFields | CityRawFilter>
+export type CityRawFilter = () => M.Filter<M.Document>
 
 export type CityRelations = Record<never, string>
 
@@ -318,18 +317,18 @@ export type CityProjection = {
   id?: boolean,
   name?: boolean,
 }
-export type CityParam<P extends CityProjection> = ParamProjection<types.City, CityProjection, P>
+export type CityParam<P extends CityProjection> = T.ParamProjection<types.City, CityProjection, P>
 
 export type CitySortKeys = 'addressId' | 'id' | 'name'
-export type CitySort = OneKey<CitySortKeys, SortDirection>
-export type CityRawSort = () => Sort
+export type CitySort = T.OneKey<CitySortKeys, T.SortDirection>
+export type CityRawSort = () => M.Sort
 
 export type CityUpdate = {
   'addressId'?: types.Scalars['ID'],
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String']
 }
-export type CityRawUpdate = () => UpdateFilter<Document>
+export type CityRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type CityInsert = {
   addressId: types.Scalars['ID'],
@@ -337,17 +336,17 @@ export type CityInsert = {
   name: types.Scalars['String'],
 }
 
-type CityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.City, 'id', 'ID', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, CityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'city', DAOContext<MetadataType, OperationMetadataType>>
-export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type CityDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.City, 'id', 'ID', CityFilter, CityRawFilter, CityRelations, CityProjection, CitySort, CityRawSort, CityInsert, CityUpdate, CityRawUpdate, CityExcludedFields, CityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'city', DAOContext<MetadataType, OperationMetadataType>>
+export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends CityProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): SelectProjection<CityProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<CityProjection, P1, P2>
+  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): T.SelectProjection<CityProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<CityProjection, P1, P2>
   }
   
   public constructor(params: CityDAOParams<MetadataType, OperationMetadataType>){
@@ -355,7 +354,7 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       ...params, 
       idField: 'id', 
       schema: citySchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           
         ]
@@ -366,13 +365,13 @@ export class CityDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
   }
   }
 
-export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends CityProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): SelectProjection<CityProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<CityProjection, P1, P2>
+  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): T.SelectProjection<CityProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<CityProjection, P1, P2>
   }
   
   public constructor(params: InMemoryCityDAOParams<MetadataType, OperationMetadataType>){
@@ -380,7 +379,7 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends Abstra
       ...params, 
       idField: 'id', 
       schema: citySchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           
         ]
@@ -400,7 +399,7 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends Abstra
 export type DefaultFieldsEntityExcludedFields = never
 export type DefaultFieldsEntityRelationFields = never
 
-export function defaultFieldsEntitySchema(): Schema<types.Scalars> {
+export function defaultFieldsEntitySchema(): T.Schema<types.Scalars> {
   return {
     'creationDate': {
       scalar: 'Int', 
@@ -432,15 +431,15 @@ export function defaultFieldsEntitySchema(): Schema<types.Scalars> {
 }
 
 type DefaultFieldsEntityFilterFields = {
-  'creationDate'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'live'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators,
-  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'opt1'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators,
-  'opt2'?: types.Scalars['Live'] | null | EqualityOperators<types.Scalars['Live']> | ElementOperators
+  'creationDate'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'live'?: types.Scalars['Live'] | null | T.EqualityOperators<types.Scalars['Live']> | T.ElementOperators,
+  'name'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'opt1'?: types.Scalars['Live'] | null | T.EqualityOperators<types.Scalars['Live']> | T.ElementOperators,
+  'opt2'?: types.Scalars['Live'] | null | T.EqualityOperators<types.Scalars['Live']> | T.ElementOperators
 }
-export type DefaultFieldsEntityFilter = DefaultFieldsEntityFilterFields & LogicalOperators<DefaultFieldsEntityFilterFields | DefaultFieldsEntityRawFilter>
-export type DefaultFieldsEntityRawFilter = () => Filter<Document>
+export type DefaultFieldsEntityFilter = DefaultFieldsEntityFilterFields & T.LogicalOperators<DefaultFieldsEntityFilterFields | DefaultFieldsEntityRawFilter>
+export type DefaultFieldsEntityRawFilter = () => M.Filter<M.Document>
 
 export type DefaultFieldsEntityRelations = Record<never, string>
 
@@ -452,11 +451,11 @@ export type DefaultFieldsEntityProjection = {
   opt1?: boolean,
   opt2?: boolean,
 }
-export type DefaultFieldsEntityParam<P extends DefaultFieldsEntityProjection> = ParamProjection<types.DefaultFieldsEntity, DefaultFieldsEntityProjection, P>
+export type DefaultFieldsEntityParam<P extends DefaultFieldsEntityProjection> = T.ParamProjection<types.DefaultFieldsEntity, DefaultFieldsEntityProjection, P>
 
 export type DefaultFieldsEntitySortKeys = 'creationDate' | 'id' | 'live' | 'name' | 'opt1' | 'opt2'
-export type DefaultFieldsEntitySort = OneKey<DefaultFieldsEntitySortKeys, SortDirection>
-export type DefaultFieldsEntityRawSort = () => Sort
+export type DefaultFieldsEntitySort = T.OneKey<DefaultFieldsEntitySortKeys, T.SortDirection>
+export type DefaultFieldsEntityRawSort = () => M.Sort
 
 export type DefaultFieldsEntityUpdate = {
   'creationDate'?: types.Scalars['Int'],
@@ -466,7 +465,7 @@ export type DefaultFieldsEntityUpdate = {
   'opt1'?: types.Scalars['Live'] | null,
   'opt2'?: types.Scalars['Live'] | null
 }
-export type DefaultFieldsEntityRawUpdate = () => UpdateFilter<Document>
+export type DefaultFieldsEntityRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type DefaultFieldsEntityInsert = {
   creationDate?: null | types.Scalars['Int'],
@@ -477,17 +476,17 @@ export type DefaultFieldsEntityInsert = {
   opt2?: null | types.Scalars['Live'],
 }
 
-type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity', DAOContext<MetadataType, OperationMetadataType>>
-export type DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.DefaultFieldsEntity, 'id', 'ID', DefaultFieldsEntityFilter, DefaultFieldsEntityRawFilter, DefaultFieldsEntityRelations, DefaultFieldsEntityProjection, DefaultFieldsEntitySort, DefaultFieldsEntityRawSort, DefaultFieldsEntityInsert, DefaultFieldsEntityUpdate, DefaultFieldsEntityRawUpdate, DefaultFieldsEntityExcludedFields, DefaultFieldsEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'defaultFieldsEntity', DAOContext<MetadataType, OperationMetadataType>>
+export type DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<DefaultFieldsEntityProjection, P1, P2>
+  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): T.SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<DefaultFieldsEntityProjection, P1, P2>
   }
   
   public constructor(params: DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>){
@@ -495,7 +494,7 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
       ...params, 
       idField: 'id', 
       schema: defaultFieldsEntitySchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           
         ]
@@ -506,13 +505,13 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
   }
   }
 
-export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<DefaultFieldsEntityProjection, P1, P2>
+  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): T.SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<DefaultFieldsEntityProjection, P1, P2>
   }
   
   public constructor(params: InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>){
@@ -520,7 +519,7 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
       ...params, 
       idField: 'id', 
       schema: defaultFieldsEntitySchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           
         ]
@@ -540,7 +539,7 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
 export type DeviceExcludedFields = never
 export type DeviceRelationFields = 'user'
 
-export function deviceSchema(): Schema<types.Scalars> {
+export function deviceSchema(): T.Schema<types.Scalars> {
   return {
     'id': {
       scalar: 'ID', 
@@ -557,12 +556,12 @@ export function deviceSchema(): Schema<types.Scalars> {
 }
 
 type DeviceFilterFields = {
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'name'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'userId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
 }
-export type DeviceFilter = DeviceFilterFields & LogicalOperators<DeviceFilterFields | DeviceRawFilter>
-export type DeviceRawFilter = () => Filter<Document>
+export type DeviceFilter = DeviceFilterFields & T.LogicalOperators<DeviceFilterFields | DeviceRawFilter>
+export type DeviceRawFilter = () => M.Filter<M.Document>
 
 export type DeviceRelations = Record<never, string>
 
@@ -572,18 +571,18 @@ export type DeviceProjection = {
   user?: UserProjection | boolean,
   userId?: boolean,
 }
-export type DeviceParam<P extends DeviceProjection> = ParamProjection<types.Device, DeviceProjection, P>
+export type DeviceParam<P extends DeviceProjection> = T.ParamProjection<types.Device, DeviceProjection, P>
 
 export type DeviceSortKeys = 'id' | 'name' | 'userId'
-export type DeviceSort = OneKey<DeviceSortKeys, SortDirection>
-export type DeviceRawSort = () => Sort
+export type DeviceSort = T.OneKey<DeviceSortKeys, T.SortDirection>
+export type DeviceRawSort = () => M.Sort
 
 export type DeviceUpdate = {
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'],
   'userId'?: types.Scalars['ID'] | null
 }
-export type DeviceRawUpdate = () => UpdateFilter<Document>
+export type DeviceRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type DeviceInsert = {
   id?: null | types.Scalars['ID'],
@@ -591,17 +590,17 @@ export type DeviceInsert = {
   userId?: null | types.Scalars['ID'],
 }
 
-type DeviceDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Device, 'id', 'ID', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device', DAOContext<MetadataType, OperationMetadataType>>
-export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type DeviceDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.Device, 'id', 'ID', DeviceFilter, DeviceRawFilter, DeviceRelations, DeviceProjection, DeviceSort, DeviceRawSort, DeviceInsert, DeviceUpdate, DeviceRawUpdate, DeviceExcludedFields, DeviceRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'device', DAOContext<MetadataType, OperationMetadataType>>
+export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DeviceProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): SelectProjection<DeviceProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<DeviceProjection, P1, P2>
+  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): T.SelectProjection<DeviceProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<DeviceProjection, P1, P2>
   }
   
   public constructor(params: DeviceDAOParams<MetadataType, OperationMetadataType>){
@@ -609,7 +608,7 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMong
       ...params, 
       idField: 'id', 
       schema: deviceSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
         ]
@@ -620,13 +619,13 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends AbstractMong
   }
   }
 
-export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DeviceProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): SelectProjection<DeviceProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<DeviceProjection, P1, P2>
+  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): T.SelectProjection<DeviceProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<DeviceProjection, P1, P2>
   }
   
   public constructor(params: InMemoryDeviceDAOParams<MetadataType, OperationMetadataType>){
@@ -634,7 +633,7 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends Abst
       ...params, 
       idField: 'id', 
       schema: deviceSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }
         ]
@@ -654,7 +653,7 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends Abst
 export type DogExcludedFields = never
 export type DogRelationFields = 'owner'
 
-export function dogSchema(): Schema<types.Scalars> {
+export function dogSchema(): T.Schema<types.Scalars> {
   return {
     'id': {
       scalar: 'ID', 
@@ -672,12 +671,12 @@ export function dogSchema(): Schema<types.Scalars> {
 }
 
 type DogFilterFields = {
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'ownerId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'name'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'ownerId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
 }
-export type DogFilter = DogFilterFields & LogicalOperators<DogFilterFields | DogRawFilter>
-export type DogRawFilter = () => Filter<Document>
+export type DogFilter = DogFilterFields & T.LogicalOperators<DogFilterFields | DogRawFilter>
+export type DogRawFilter = () => M.Filter<M.Document>
 
 export type DogRelations = Record<never, string>
 
@@ -687,18 +686,18 @@ export type DogProjection = {
   owner?: UserProjection | boolean,
   ownerId?: boolean,
 }
-export type DogParam<P extends DogProjection> = ParamProjection<types.Dog, DogProjection, P>
+export type DogParam<P extends DogProjection> = T.ParamProjection<types.Dog, DogProjection, P>
 
 export type DogSortKeys = 'id' | 'name' | 'ownerId'
-export type DogSort = OneKey<DogSortKeys, SortDirection>
-export type DogRawSort = () => Sort
+export type DogSort = T.OneKey<DogSortKeys, T.SortDirection>
+export type DogRawSort = () => M.Sort
 
 export type DogUpdate = {
   'id'?: types.Scalars['ID'],
   'name'?: types.Scalars['String'],
   'ownerId'?: types.Scalars['ID']
 }
-export type DogRawUpdate = () => UpdateFilter<Document>
+export type DogRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type DogInsert = {
   id?: null | types.Scalars['ID'],
@@ -706,17 +705,17 @@ export type DogInsert = {
   ownerId: types.Scalars['ID'],
 }
 
-type DogDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Dog, 'id', 'ID', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, DogRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'dog', DAOContext<MetadataType, OperationMetadataType>>
-export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type DogDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.Dog, 'id', 'ID', DogFilter, DogRawFilter, DogRelations, DogProjection, DogSort, DogRawSort, DogInsert, DogUpdate, DogRawUpdate, DogExcludedFields, DogRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'dog', DAOContext<MetadataType, OperationMetadataType>>
+export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DogProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): SelectProjection<DogProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<DogProjection, P1, P2>
+  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): T.SelectProjection<DogProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<DogProjection, P1, P2>
   }
   
   public constructor(params: DogDAOParams<MetadataType, OperationMetadataType>){
@@ -724,7 +723,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
       ...params, 
       idField: 'id', 
       schema: dogSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
         ]
@@ -735,13 +734,13 @@ export class DogDAO<MetadataType, OperationMetadataType> extends AbstractMongoDB
   }
   }
 
-export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends DogProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): SelectProjection<DogProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<DogProjection, P1, P2>
+  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): T.SelectProjection<DogProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<DogProjection, P1, P2>
   }
   
   public constructor(params: InMemoryDogDAOParams<MetadataType, OperationMetadataType>){
@@ -749,7 +748,7 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends Abstrac
       ...params, 
       idField: 'id', 
       schema: dogSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }
         ]
@@ -766,7 +765,7 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends Abstrac
 //--------------------------------- EMBEDDEDUSER ---------------------------------
 //--------------------------------------------------------------------------------
 
-export function embeddedUserSchema(): Schema<types.Scalars> {
+export function embeddedUserSchema(): T.Schema<types.Scalars> {
   return {
     'e': { embedded: embeddedUser2Schema(), array: true },
     'userId': {
@@ -784,7 +783,7 @@ export type EmbeddedUserProjection = {
   user?: UserProjection | boolean,
   userId?: boolean,
 }
-export type EmbeddedUserParam<P extends EmbeddedUserProjection> = ParamProjection<types.EmbeddedUser, EmbeddedUserProjection, P>
+export type EmbeddedUserParam<P extends EmbeddedUserProjection> = T.ParamProjection<types.EmbeddedUser, EmbeddedUserProjection, P>
 
 export type EmbeddedUserInsert = {
   e?: null | EmbeddedUser2Insert[],
@@ -797,7 +796,7 @@ export type EmbeddedUserInsert = {
 //-------------------------------- EMBEDDEDUSER2 ---------------------------------
 //--------------------------------------------------------------------------------
 
-export function embeddedUser2Schema(): Schema<types.Scalars> {
+export function embeddedUser2Schema(): T.Schema<types.Scalars> {
   return {
     'userId': {
       scalar: 'ID', 
@@ -810,7 +809,7 @@ export type EmbeddedUser2Projection = {
   user?: UserProjection | boolean,
   userId?: boolean,
 }
-export type EmbeddedUser2Param<P extends EmbeddedUser2Projection> = ParamProjection<types.EmbeddedUser2, EmbeddedUser2Projection, P>
+export type EmbeddedUser2Param<P extends EmbeddedUser2Projection> = T.ParamProjection<types.EmbeddedUser2, EmbeddedUser2Projection, P>
 
 export type EmbeddedUser2Insert = {
   userId: types.Scalars['ID'],
@@ -822,7 +821,7 @@ export type EmbeddedUser2Insert = {
 //-------------------------------- EMBEDDEDUSER3 ---------------------------------
 //--------------------------------------------------------------------------------
 
-export function embeddedUser3Schema(): Schema<types.Scalars> {
+export function embeddedUser3Schema(): T.Schema<types.Scalars> {
   return {
     'value': {
       scalar: 'Int'
@@ -834,7 +833,7 @@ export type EmbeddedUser3Projection = {
   user?: UserProjection | boolean,
   value?: boolean,
 }
-export type EmbeddedUser3Param<P extends EmbeddedUser3Projection> = ParamProjection<types.EmbeddedUser3, EmbeddedUser3Projection, P>
+export type EmbeddedUser3Param<P extends EmbeddedUser3Projection> = T.ParamProjection<types.EmbeddedUser3, EmbeddedUser3Projection, P>
 
 export type EmbeddedUser3Insert = {
   value?: null | types.Scalars['Int'],
@@ -846,7 +845,7 @@ export type EmbeddedUser3Insert = {
 //-------------------------------- EMBEDDEDUSER4 ---------------------------------
 //--------------------------------------------------------------------------------
 
-export function embeddedUser4Schema(): Schema<types.Scalars> {
+export function embeddedUser4Schema(): T.Schema<types.Scalars> {
   return {
     'e': { embedded: embeddedUser5Schema() }
   }
@@ -858,7 +857,7 @@ export type EmbeddedUser4Projection = {
   } | boolean,
   user?: UserProjection | boolean,
 }
-export type EmbeddedUser4Param<P extends EmbeddedUser4Projection> = ParamProjection<types.EmbeddedUser4, EmbeddedUser4Projection, P>
+export type EmbeddedUser4Param<P extends EmbeddedUser4Projection> = T.ParamProjection<types.EmbeddedUser4, EmbeddedUser4Projection, P>
 
 export type EmbeddedUser4Insert = {
   e?: null | EmbeddedUser5Insert,
@@ -870,7 +869,7 @@ export type EmbeddedUser4Insert = {
 //-------------------------------- EMBEDDEDUSER5 ---------------------------------
 //--------------------------------------------------------------------------------
 
-export function embeddedUser5Schema(): Schema<types.Scalars> {
+export function embeddedUser5Schema(): T.Schema<types.Scalars> {
   return {
     'userId': {
       scalar: 'ID'
@@ -881,7 +880,7 @@ export function embeddedUser5Schema(): Schema<types.Scalars> {
 export type EmbeddedUser5Projection = {
   userId?: boolean,
 }
-export type EmbeddedUser5Param<P extends EmbeddedUser5Projection> = ParamProjection<types.EmbeddedUser5, EmbeddedUser5Projection, P>
+export type EmbeddedUser5Param<P extends EmbeddedUser5Projection> = T.ParamProjection<types.EmbeddedUser5, EmbeddedUser5Projection, P>
 
 export type EmbeddedUser5Insert = {
   userId?: null | types.Scalars['ID'],
@@ -896,7 +895,7 @@ export type EmbeddedUser5Insert = {
 export type HotelExcludedFields = never
 export type HotelRelationFields = never
 
-export function hotelSchema(): Schema<types.Scalars> {
+export function hotelSchema(): T.Schema<types.Scalars> {
   return {
     'audit': { embedded: auditableSchema(), required: true, defaultGenerationStrategy: 'middleware' },
     'embeddedUser3': { embedded: embeddedUser3Schema() },
@@ -921,25 +920,25 @@ export function hotelSchema(): Schema<types.Scalars> {
 }
 
 type HotelFilterFields = {
-  'audit.createdBy'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'audit.createdOn'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'audit.deletedOn'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'audit.modifiedBy'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'audit.modifiedOn'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'audit.state'?: types.State | null | EqualityOperators<types.State> | ElementOperators | StringOperators,
-  'embeddedUser3.value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'embeddedUser4.e.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'embeddedUsers.e.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'embeddedUsers.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'embeddedUsers3.value'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'embeddedUsers4.e.userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'users.usersId'?: types.Scalars['ID'][] | null | EqualityOperators<types.Scalars['ID'][]> | ElementOperators
+  'audit.createdBy'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'audit.createdOn'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'audit.deletedOn'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'audit.modifiedBy'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'audit.modifiedOn'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'audit.state'?: types.State | null | T.EqualityOperators<types.State> | T.ElementOperators | T.StringOperators,
+  'embeddedUser3.value'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'embeddedUser4.e.userId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'embeddedUsers.e.userId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'embeddedUsers.userId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'embeddedUsers3.value'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'embeddedUsers4.e.userId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'name'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'userId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'users.usersId'?: types.Scalars['ID'][] | null | T.EqualityOperators<types.Scalars['ID'][]> | T.ElementOperators
 }
-export type HotelFilter = HotelFilterFields & LogicalOperators<HotelFilterFields | HotelRawFilter>
-export type HotelRawFilter = () => Filter<Document>
+export type HotelFilter = HotelFilterFields & T.LogicalOperators<HotelFilterFields | HotelRawFilter>
+export type HotelRawFilter = () => M.Filter<M.Document>
 
 export type HotelRelations = Record<never, string>
 
@@ -989,11 +988,11 @@ export type HotelProjection = {
     usersId?: boolean,
   } | boolean,
 }
-export type HotelParam<P extends HotelProjection> = ParamProjection<types.Hotel, HotelProjection, P>
+export type HotelParam<P extends HotelProjection> = T.ParamProjection<types.Hotel, HotelProjection, P>
 
 export type HotelSortKeys = 'audit.createdBy' | 'audit.createdOn' | 'audit.deletedOn' | 'audit.modifiedBy' | 'audit.modifiedOn' | 'audit.state' | 'embeddedUser3.value' | 'embeddedUser4.e.userId' | 'embeddedUsers.e.userId' | 'embeddedUsers.userId' | 'embeddedUsers3.value' | 'embeddedUsers4.e.userId' | 'id' | 'name' | 'userId' | 'users.usersId'
-export type HotelSort = OneKey<HotelSortKeys, SortDirection>
-export type HotelRawSort = () => Sort
+export type HotelSort = T.OneKey<HotelSortKeys, T.SortDirection>
+export type HotelRawSort = () => M.Sort
 
 export type HotelUpdate = {
   'audit'?: AuditableInsert,
@@ -1017,7 +1016,7 @@ export type HotelUpdate = {
   'users'?: UserCollectionInsert | null,
   'users.usersId'?: types.Scalars['ID'][]
 }
-export type HotelRawUpdate = () => UpdateFilter<Document>
+export type HotelRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type HotelInsert = {
   audit?: null | AuditableInsert,
@@ -1031,17 +1030,17 @@ export type HotelInsert = {
   users?: null | UserCollectionInsert,
 }
 
-type HotelDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Hotel, 'id', 'ID', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel', DAOContext<MetadataType, OperationMetadataType>>
-export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type HotelDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.Hotel, 'id', 'ID', HotelFilter, HotelRawFilter, HotelRelations, HotelProjection, HotelSort, HotelRawSort, HotelInsert, HotelUpdate, HotelRawUpdate, HotelExcludedFields, HotelRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'hotel', DAOContext<MetadataType, OperationMetadataType>>
+export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends HotelProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends HotelProjection, P2 extends HotelProjection>(p1: P1, p2: P2): SelectProjection<HotelProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<HotelProjection, P1, P2>
+  public static mergeProjection<P1 extends HotelProjection, P2 extends HotelProjection>(p1: P1, p2: P2): T.SelectProjection<HotelProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<HotelProjection, P1, P2>
   }
   
   public constructor(params: HotelDAOParams<MetadataType, OperationMetadataType>){
@@ -1049,7 +1048,7 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
       ...params, 
       idField: 'id', 
       schema: hotelSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true },
           { type: '1-1', reference: 'inner', field: 'embeddedUser3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
@@ -1067,13 +1066,13 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends AbstractMongo
   }
   }
 
-export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends HotelProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends HotelProjection, P2 extends HotelProjection>(p1: P1, p2: P2): SelectProjection<HotelProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<HotelProjection, P1, P2>
+  public static mergeProjection<P1 extends HotelProjection, P2 extends HotelProjection>(p1: P1, p2: P2): T.SelectProjection<HotelProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<HotelProjection, P1, P2>
   }
   
   public constructor(params: InMemoryHotelDAOParams<MetadataType, OperationMetadataType>){
@@ -1081,7 +1080,7 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends Abstr
       ...params, 
       idField: 'id', 
       schema: hotelSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'audit.versions', refFrom: 'entityId', refTo: 'id', dao: 'audit', required: true },
           { type: '1-1', reference: 'inner', field: 'embeddedUser3.user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false },
@@ -1108,7 +1107,7 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends Abstr
 export type MockedEntityExcludedFields = never
 export type MockedEntityRelationFields = 'user'
 
-export function mockedEntitySchema(): Schema<types.Scalars> {
+export function mockedEntitySchema(): T.Schema<types.Scalars> {
   return {
     'id': {
       scalar: 'MongoID', 
@@ -1127,11 +1126,11 @@ export function mockedEntitySchema(): Schema<types.Scalars> {
 }
 
 type MockedEntityFilterFields = {
-  'id'?: types.Scalars['MongoID'] | null | EqualityOperators<types.Scalars['MongoID']> | ElementOperators,
-  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'userId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators
+  'id'?: types.Scalars['MongoID'] | null | T.EqualityOperators<types.Scalars['MongoID']> | T.ElementOperators,
+  'name'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'userId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
 }
-export type MockedEntityFilter = MockedEntityFilterFields & LogicalOperators<MockedEntityFilterFields | MockedEntityRawFilter>
+export type MockedEntityFilter = MockedEntityFilterFields & T.LogicalOperators<MockedEntityFilterFields | MockedEntityRawFilter>
 export type MockedEntityRawFilter = never
 
 export type MockedEntityRelations = Record<never, string>
@@ -1142,10 +1141,10 @@ export type MockedEntityProjection = {
   user?: UserProjection | boolean,
   userId?: boolean,
 }
-export type MockedEntityParam<P extends MockedEntityProjection> = ParamProjection<types.MockedEntity, MockedEntityProjection, P>
+export type MockedEntityParam<P extends MockedEntityProjection> = T.ParamProjection<types.MockedEntity, MockedEntityProjection, P>
 
 export type MockedEntitySortKeys = 'id' | 'name' | 'userId'
-export type MockedEntitySort = OneKey<MockedEntitySortKeys, SortDirection>
+export type MockedEntitySort = T.OneKey<MockedEntitySortKeys, T.SortDirection>
 export type MockedEntityRawSort = never
 
 export type MockedEntityUpdate = {
@@ -1160,17 +1159,17 @@ export type MockedEntityInsert = {
   userId: types.Scalars['ID'],
 }
 
-type MockedEntityDAOGenerics<MetadataType, OperationMetadataType> = InMemoryDAOGenerics<types.MockedEntity, 'id', 'MongoID', MockedEntityFilter, MockedEntityRawFilter, MockedEntityRelations, MockedEntityProjection, MockedEntitySort, MockedEntityRawSort, MockedEntityInsert, MockedEntityUpdate, MockedEntityRawUpdate, MockedEntityExcludedFields, MockedEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'mockedEntity', DAOContext<MetadataType, OperationMetadataType>>
-export type MockedEntityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type MockedEntityDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<types.MockedEntity, 'id', 'MongoID', MockedEntityFilter, MockedEntityRawFilter, MockedEntityRelations, MockedEntityProjection, MockedEntitySort, MockedEntityRawSort, MockedEntityInsert, MockedEntityUpdate, MockedEntityRawUpdate, MockedEntityExcludedFields, MockedEntityRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'mockedEntity', DAOContext<MetadataType, OperationMetadataType>>
+export type MockedEntityDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>, 'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class MockedEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class MockedEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends MockedEntityProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends MockedEntityProjection, P2 extends MockedEntityProjection>(p1: P1, p2: P2): SelectProjection<MockedEntityProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<MockedEntityProjection, P1, P2>
+  public static mergeProjection<P1 extends MockedEntityProjection, P2 extends MockedEntityProjection>(p1: P1, p2: P2): T.SelectProjection<MockedEntityProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<MockedEntityProjection, P1, P2>
   }
   
   public constructor(params: MockedEntityDAOParams<MetadataType, OperationMetadataType>){
@@ -1178,7 +1177,7 @@ export class MockedEntityDAO<MetadataType, OperationMetadataType> extends Abstra
       ...params, 
       idField: 'id', 
       schema: mockedEntitySchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: true }
         ]
@@ -1189,13 +1188,13 @@ export class MockedEntityDAO<MetadataType, OperationMetadataType> extends Abstra
   }
   }
 
-export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends MockedEntityProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends MockedEntityProjection, P2 extends MockedEntityProjection>(p1: P1, p2: P2): SelectProjection<MockedEntityProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<MockedEntityProjection, P1, P2>
+  public static mergeProjection<P1 extends MockedEntityProjection, P2 extends MockedEntityProjection>(p1: P1, p2: P2): T.SelectProjection<MockedEntityProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<MockedEntityProjection, P1, P2>
   }
   
   public constructor(params: InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType>){
@@ -1203,7 +1202,7 @@ export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extend
       ...params, 
       idField: 'id', 
       schema: mockedEntitySchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: true }
         ]
@@ -1223,7 +1222,7 @@ export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extend
 export type OrganizationExcludedFields = 'computedName'
 export type OrganizationRelationFields = never
 
-export function organizationSchema(): Schema<types.Scalars> {
+export function organizationSchema(): T.Schema<types.Scalars> {
   return {
     'address': { embedded: addressSchema() },
     'id': {
@@ -1241,13 +1240,13 @@ export function organizationSchema(): Schema<types.Scalars> {
 }
 
 type OrganizationFilterFields = {
-  'address.id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'name'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'vatNumber'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
+  'address.id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'name'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'vatNumber'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
 }
-export type OrganizationFilter = OrganizationFilterFields & LogicalOperators<OrganizationFilterFields | OrganizationRawFilter>
-export type OrganizationRawFilter = () => Filter<Document>
+export type OrganizationFilter = OrganizationFilterFields & T.LogicalOperators<OrganizationFilterFields | OrganizationRawFilter>
+export type OrganizationRawFilter = () => M.Filter<M.Document>
 
 export type OrganizationRelations = Record<never, string>
 
@@ -1261,11 +1260,11 @@ export type OrganizationProjection = {
   name?: boolean,
   vatNumber?: boolean,
 }
-export type OrganizationParam<P extends OrganizationProjection> = ParamProjection<types.Organization, OrganizationProjection, P>
+export type OrganizationParam<P extends OrganizationProjection> = T.ParamProjection<types.Organization, OrganizationProjection, P>
 
 export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber'
-export type OrganizationSort = OneKey<OrganizationSortKeys, SortDirection>
-export type OrganizationRawSort = () => Sort
+export type OrganizationSort = T.OneKey<OrganizationSortKeys, T.SortDirection>
+export type OrganizationRawSort = () => M.Sort
 
 export type OrganizationUpdate = {
   'address'?: AddressInsert | null,
@@ -1274,7 +1273,7 @@ export type OrganizationUpdate = {
   'name'?: types.Scalars['String'],
   'vatNumber'?: types.Scalars['String'] | null
 }
-export type OrganizationRawUpdate = () => UpdateFilter<Document>
+export type OrganizationRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type OrganizationInsert = {
   address?: null | AddressInsert,
@@ -1283,17 +1282,17 @@ export type OrganizationInsert = {
   vatNumber?: null | types.Scalars['String'],
 }
 
-type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Organization, 'id', 'ID', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization', DAOContext<MetadataType, OperationMetadataType>>
-export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.Organization, 'id', 'ID', OrganizationFilter, OrganizationRawFilter, OrganizationRelations, OrganizationProjection, OrganizationSort, OrganizationRawSort, OrganizationInsert, OrganizationUpdate, OrganizationRawUpdate, OrganizationExcludedFields, OrganizationRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'organization', DAOContext<MetadataType, OperationMetadataType>>
+export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class OrganizationDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class OrganizationDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends OrganizationProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): SelectProjection<OrganizationProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<OrganizationProjection, P1, P2>
+  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): T.SelectProjection<OrganizationProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<OrganizationProjection, P1, P2>
   }
   
   public constructor(params: OrganizationDAOParams<MetadataType, OperationMetadataType>){
@@ -1301,7 +1300,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
       ...params, 
       idField: 'id', 
       schema: organizationSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
         ]
@@ -1312,13 +1311,13 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends Abstra
   }
   }
 
-export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends OrganizationProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): SelectProjection<OrganizationProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<OrganizationProjection, P1, P2>
+  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): T.SelectProjection<OrganizationProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<OrganizationProjection, P1, P2>
   }
   
   public constructor(params: InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType>){
@@ -1326,7 +1325,7 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
       ...params, 
       idField: 'id', 
       schema: organizationSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }
         ]
@@ -1346,7 +1345,7 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
 export type PostExcludedFields = never
 export type PostRelationFields = 'author'
 
-export function postSchema(): Schema<types.Scalars> {
+export function postSchema(): T.Schema<types.Scalars> {
   return {
     'authorId': {
       scalar: 'ID', 
@@ -1376,17 +1375,17 @@ export function postSchema(): Schema<types.Scalars> {
 }
 
 type PostFilterFields = {
-  'authorId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'body'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'clicks'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'metadata.region'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'metadata.visible'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
-  'title'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'views'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>
+  'authorId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'body'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'clicks'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'metadata.region'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'metadata.visible'?: types.Scalars['Boolean'] | null | T.EqualityOperators<types.Scalars['Boolean']> | T.ElementOperators,
+  'title'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'views'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
 }
-export type PostFilter = PostFilterFields & LogicalOperators<PostFilterFields | PostRawFilter>
-export type PostRawFilter = () => Filter<Document>
+export type PostFilter = PostFilterFields & T.LogicalOperators<PostFilterFields | PostRawFilter>
+export type PostRawFilter = () => M.Filter<M.Document>
 
 export type PostRelations = Record<never, string>
 
@@ -1403,11 +1402,11 @@ export type PostProjection = {
   title?: boolean,
   views?: boolean,
 }
-export type PostParam<P extends PostProjection> = ParamProjection<types.Post, PostProjection, P>
+export type PostParam<P extends PostProjection> = T.ParamProjection<types.Post, PostProjection, P>
 
 export type PostSortKeys = 'authorId' | 'body' | 'clicks' | 'id' | 'metadata.region' | 'metadata.visible' | 'title' | 'views'
-export type PostSort = OneKey<PostSortKeys, SortDirection>
-export type PostRawSort = () => Sort
+export type PostSort = T.OneKey<PostSortKeys, T.SortDirection>
+export type PostRawSort = () => M.Sort
 
 export type PostUpdate = {
   'authorId'?: types.Scalars['ID'],
@@ -1420,7 +1419,7 @@ export type PostUpdate = {
   'title'?: types.Scalars['String'],
   'views'?: types.Scalars['Int']
 }
-export type PostRawUpdate = () => UpdateFilter<Document>
+export type PostRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type PostInsert = {
   authorId: types.Scalars['ID'],
@@ -1432,17 +1431,17 @@ export type PostInsert = {
   views: types.Scalars['Int'],
 }
 
-type PostDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.Post, 'id', 'ID', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post', DAOContext<MetadataType, OperationMetadataType>>
-export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type PostDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.Post, 'id', 'ID', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post', DAOContext<MetadataType, OperationMetadataType>>
+export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends PostProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends PostProjection, P2 extends PostProjection>(p1: P1, p2: P2): SelectProjection<PostProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<PostProjection, P1, P2>
+  public static mergeProjection<P1 extends PostProjection, P2 extends PostProjection>(p1: P1, p2: P2): T.SelectProjection<PostProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<PostProjection, P1, P2>
   }
   
   public constructor(params: PostDAOParams<MetadataType, OperationMetadataType>){
@@ -1450,7 +1449,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       ...params, 
       idField: 'id', 
       schema: postSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user', required: true }
         ]
@@ -1461,13 +1460,13 @@ export class PostDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
   }
   }
 
-export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends PostProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends PostProjection, P2 extends PostProjection>(p1: P1, p2: P2): SelectProjection<PostProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<PostProjection, P1, P2>
+  public static mergeProjection<P1 extends PostProjection, P2 extends PostProjection>(p1: P1, p2: P2): T.SelectProjection<PostProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<PostProjection, P1, P2>
   }
   
   public constructor(params: InMemoryPostDAOParams<MetadataType, OperationMetadataType>){
@@ -1475,7 +1474,7 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends Abstra
       ...params, 
       idField: 'id', 
       schema: postSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-1', reference: 'inner', field: 'author', refFrom: 'authorId', refTo: 'id', dao: 'user', required: true }
         ]
@@ -1492,7 +1491,7 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends Abstra
 //--------------------------------- POSTMETADATA ---------------------------------
 //--------------------------------------------------------------------------------
 
-export function postMetadataSchema(): Schema<types.Scalars> {
+export function postMetadataSchema(): T.Schema<types.Scalars> {
   return {
     'region': {
       scalar: 'String', 
@@ -1509,7 +1508,7 @@ export type PostMetadataProjection = {
   region?: boolean,
   visible?: boolean,
 }
-export type PostMetadataParam<P extends PostMetadataProjection> = ParamProjection<types.PostMetadata, PostMetadataProjection, P>
+export type PostMetadataParam<P extends PostMetadataProjection> = T.ParamProjection<types.PostMetadata, PostMetadataProjection, P>
 
 export type PostMetadataInsert = {
   region: types.Scalars['String'],
@@ -1525,7 +1524,7 @@ export type PostMetadataInsert = {
 export type UserExcludedFields = never
 export type UserRelationFields = 'dogs' | 'friends'
 
-export function userSchema(): Schema<types.Scalars> {
+export function userSchema(): T.Schema<types.Scalars> {
   return {
     'amount': {
       scalar: 'Decimal'
@@ -1572,31 +1571,31 @@ export function userSchema(): Schema<types.Scalars> {
 }
 
 type UserFilterFields = {
-  'amount'?: types.Scalars['Decimal'] | null | EqualityOperators<types.Scalars['Decimal']> | ElementOperators,
-  'amounts'?: types.Scalars['Decimal'][] | null | EqualityOperators<types.Scalars['Decimal'][]> | ElementOperators,
-  'credentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators,
-  'credentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'embeddedPost.authorId'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'embeddedPost.body'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'embeddedPost.clicks'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'embeddedPost.id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'embeddedPost.metadata.region'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'embeddedPost.metadata.visible'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
-  'embeddedPost.title'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'embeddedPost.views'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'firstName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'friendsId'?: types.Scalars['ID'][] | null | EqualityOperators<types.Scalars['ID'][]> | ElementOperators,
-  'id'?: types.Scalars['ID'] | null | EqualityOperators<types.Scalars['ID']> | ElementOperators,
-  'int'?: types.Scalars['Int'] | null | EqualityOperators<types.Scalars['Int']> | ElementOperators | QuantityOperators<types.Scalars['Int']>,
-  'lastName'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators,
-  'live'?: types.Scalars['Boolean'] | null | EqualityOperators<types.Scalars['Boolean']> | ElementOperators,
-  'localization'?: types.Scalars['Coordinates'] | null | EqualityOperators<types.Scalars['Coordinates']> | ElementOperators,
-  'title'?: types.Scalars['LocalizedString'] | null | EqualityOperators<types.Scalars['LocalizedString']> | ElementOperators,
-  'usernamePasswordCredentials.password'?: types.Scalars['Password'] | null | EqualityOperators<types.Scalars['Password']> | ElementOperators,
-  'usernamePasswordCredentials.username'?: types.Scalars['String'] | null | EqualityOperators<types.Scalars['String']> | ElementOperators | StringOperators
+  'amount'?: types.Scalars['Decimal'] | null | T.EqualityOperators<types.Scalars['Decimal']> | T.ElementOperators,
+  'amounts'?: types.Scalars['Decimal'][] | null | T.EqualityOperators<types.Scalars['Decimal'][]> | T.ElementOperators,
+  'credentials.password'?: types.Scalars['Password'] | null | T.EqualityOperators<types.Scalars['Password']> | T.ElementOperators,
+  'credentials.username'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'embeddedPost.authorId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'embeddedPost.body'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'embeddedPost.clicks'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'embeddedPost.id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'embeddedPost.metadata.region'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'embeddedPost.metadata.visible'?: types.Scalars['Boolean'] | null | T.EqualityOperators<types.Scalars['Boolean']> | T.ElementOperators,
+  'embeddedPost.title'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'embeddedPost.views'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'firstName'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'friendsId'?: types.Scalars['ID'][] | null | T.EqualityOperators<types.Scalars['ID'][]> | T.ElementOperators,
+  'id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators,
+  'int'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>,
+  'lastName'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators,
+  'live'?: types.Scalars['Boolean'] | null | T.EqualityOperators<types.Scalars['Boolean']> | T.ElementOperators,
+  'localization'?: types.Scalars['Coordinates'] | null | T.EqualityOperators<types.Scalars['Coordinates']> | T.ElementOperators,
+  'title'?: types.Scalars['LocalizedString'] | null | T.EqualityOperators<types.Scalars['LocalizedString']> | T.ElementOperators,
+  'usernamePasswordCredentials.password'?: types.Scalars['Password'] | null | T.EqualityOperators<types.Scalars['Password']> | T.ElementOperators,
+  'usernamePasswordCredentials.username'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
 }
-export type UserFilter = UserFilterFields & LogicalOperators<UserFilterFields | UserRawFilter>
-export type UserRawFilter = () => Filter<Document>
+export type UserFilter = UserFilterFields & T.LogicalOperators<UserFilterFields | UserRawFilter>
+export type UserRawFilter = () => M.Filter<M.Document>
 
 export type UserRelations = {
   dogs?: {
@@ -1650,11 +1649,11 @@ export type UserProjection = {
     username?: boolean,
   } | boolean,
 }
-export type UserParam<P extends UserProjection> = ParamProjection<types.User, UserProjection, P>
+export type UserParam<P extends UserProjection> = T.ParamProjection<types.User, UserProjection, P>
 
 export type UserSortKeys = 'amount' | 'amounts' | 'credentials.password' | 'credentials.username' | 'embeddedPost.authorId' | 'embeddedPost.body' | 'embeddedPost.clicks' | 'embeddedPost.id' | 'embeddedPost.metadata.region' | 'embeddedPost.metadata.visible' | 'embeddedPost.title' | 'embeddedPost.views' | 'firstName' | 'friendsId' | 'id' | 'int' | 'lastName' | 'live' | 'localization' | 'title' | 'usernamePasswordCredentials.password' | 'usernamePasswordCredentials.username'
-export type UserSort = OneKey<UserSortKeys, SortDirection>
-export type UserRawSort = () => Sort
+export type UserSort = T.OneKey<UserSortKeys, T.SortDirection>
+export type UserRawSort = () => M.Sort
 
 export type UserUpdate = {
   'amount'?: types.Scalars['Decimal'] | null,
@@ -1682,7 +1681,7 @@ export type UserUpdate = {
   'usernamePasswordCredentials.password'?: types.Scalars['Password'],
   'usernamePasswordCredentials.username'?: types.Scalars['String']
 }
-export type UserRawUpdate = () => UpdateFilter<Document>
+export type UserRawUpdate = () => M.UpdateFilter<M.Document>
 
 export type UserInsert = {
   amount?: null | types.Scalars['Decimal'],
@@ -1700,17 +1699,17 @@ export type UserInsert = {
   usernamePasswordCredentials?: null | UsernamePasswordCredentialsInsert,
 }
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = MongoDBDAOGenerics<types.User, 'id', 'ID', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
-export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<MongoDBDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
-export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+type UserDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<types.User, 'id', 'ID', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
+export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
+export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
-export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends UserProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): SelectProjection<UserProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<UserProjection, P1, P2>
+  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): T.SelectProjection<UserProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<UserProjection, P1, P2>
   }
   
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>){
@@ -1718,7 +1717,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
       ...params, 
       idField: 'id', 
       schema: userSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
           { type: '1-1', reference: 'inner', field: 'embeddedPost.author', refFrom: 'embeddedPost.authorId', refTo: 'id', dao: 'user', required: true },
@@ -1731,13 +1730,13 @@ export class UserDAO<MetadataType, OperationMetadataType> extends AbstractMongoD
   }
   }
 
-export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
+export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {  
   
   public static projection<P extends UserProjection>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): SelectProjection<UserProjection, P1, P2> {
-    return mergeProjections(p1, p2) as SelectProjection<UserProjection, P1, P2>
+  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): T.SelectProjection<UserProjection, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<UserProjection, P1, P2>
   }
   
   public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>){
@@ -1745,7 +1744,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends Abstra
       ...params, 
       idField: 'id', 
       schema: userSchema(), 
-      relations: overrideRelations(
+      relations: T.overrideRelations(
         [
           { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
           { type: '1-1', reference: 'inner', field: 'embeddedPost.author', refFrom: 'embeddedPost.authorId', refTo: 'id', dao: 'user', required: true },
@@ -1764,7 +1763,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends Abstra
 //-------------------------------- USERCOLLECTION --------------------------------
 //--------------------------------------------------------------------------------
 
-export function userCollectionSchema(): Schema<types.Scalars> {
+export function userCollectionSchema(): T.Schema<types.Scalars> {
   return {
     'usersId': {
       scalar: 'ID', 
@@ -1778,7 +1777,7 @@ export type UserCollectionProjection = {
   users?: UserProjection | boolean,
   usersId?: boolean,
 }
-export type UserCollectionParam<P extends UserCollectionProjection> = ParamProjection<types.UserCollection, UserCollectionProjection, P>
+export type UserCollectionParam<P extends UserCollectionProjection> = T.ParamProjection<types.UserCollection, UserCollectionProjection, P>
 
 export type UserCollectionInsert = {
   usersId: types.Scalars['ID'][],
@@ -1790,7 +1789,7 @@ export type UserCollectionInsert = {
 //------------------------- USERNAMEPASSWORDCREDENTIALS --------------------------
 //--------------------------------------------------------------------------------
 
-export function usernamePasswordCredentialsSchema(): Schema<types.Scalars> {
+export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
   return {
     'password': {
       scalar: 'Password', 
@@ -1809,7 +1808,7 @@ export type UsernamePasswordCredentialsProjection = {
   password?: boolean,
   username?: boolean,
 }
-export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
+export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = T.ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
 
 export type UsernamePasswordCredentialsInsert = {
   password: types.Scalars['Password'],
@@ -1833,15 +1832,15 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   },
-  mongodb: Record<'default', Db | 'mock'>,
-  scalars?: UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
-  log?: LogInput<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
-  security?: DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
+  mongodb: Record<'default', M.Db | 'mock'>,
+  scalars?: T.UserInputDriverDataTypeAdapterMap<types.Scalars, 'mongo'>,
+  log?: T.LogInput<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>,
+  security?: T.DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 
-type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
+type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends AbstractDAOContext<'default', never, types.Scalars, MetadataType>  {
+export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractDAOContext<'default', never, types.Scalars, MetadataType>  {
 
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined
   private _audit: AuditDAO<MetadataType, OperationMetadataType> | undefined
@@ -1858,85 +1857,85 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   private params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
   
   private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
-  private mongodb: Record<'default', Db | 'mock'>
+  private mongodb: Record<'default', M.Db | 'mock'>
   
   private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
-  private logger?: LogFunction<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>
+  private logger?: T.LogFunction<'address' | 'audit' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'hotel' | 'mockedEntity' | 'organization' | 'post' | 'user'>
   
   get address(): AddressDAO<MetadataType, OperationMetadataType> {
     if(!this._address) {
       const db = this.mongodb.default
-      this._address = db === 'mock' ? (new InMemoryAddressDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.address, middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger }) as unknown as AddressDAO<MetadataType, OperationMetadataType>) : new AddressDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.address, collection: db.collection('addresses'), middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger })
+      this._address = db === 'mock' ? (new InMemoryAddressDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.address, middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as T.DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger }) as unknown as AddressDAO<MetadataType, OperationMetadataType>) : new AddressDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.address, collection: db.collection('addresses'), middlewares: [...(this.overrides?.address?.middlewares || []), ...selectMiddleware('address', this.middlewares) as T.DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'address', logger: this.logger })
     }
     return this._address
   }
   get audit(): AuditDAO<MetadataType, OperationMetadataType> {
     if(!this._audit) {
       const db = this.mongodb.default
-      this._audit = db === 'mock' ? (new InMemoryAuditDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.audit, middlewares: [...(this.overrides?.audit?.middlewares || []), ...selectMiddleware('audit', this.middlewares) as DAOMiddleware<AuditDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'audit', logger: this.logger }) as unknown as AuditDAO<MetadataType, OperationMetadataType>) : new AuditDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.audit, collection: db.collection('audits'), middlewares: [...(this.overrides?.audit?.middlewares || []), ...selectMiddleware('audit', this.middlewares) as DAOMiddleware<AuditDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'audit', logger: this.logger })
+      this._audit = db === 'mock' ? (new InMemoryAuditDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.audit, middlewares: [...(this.overrides?.audit?.middlewares || []), ...selectMiddleware('audit', this.middlewares) as T.DAOMiddleware<AuditDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'audit', logger: this.logger }) as unknown as AuditDAO<MetadataType, OperationMetadataType>) : new AuditDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.audit, collection: db.collection('audits'), middlewares: [...(this.overrides?.audit?.middlewares || []), ...selectMiddleware('audit', this.middlewares) as T.DAOMiddleware<AuditDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'audit', logger: this.logger })
     }
     return this._audit
   }
   get city(): CityDAO<MetadataType, OperationMetadataType> {
     if(!this._city) {
       const db = this.mongodb.default
-      this._city = db === 'mock' ? (new InMemoryCityDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.city, middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger }) as unknown as CityDAO<MetadataType, OperationMetadataType>) : new CityDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.city, collection: db.collection('citys'), middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger })
+      this._city = db === 'mock' ? (new InMemoryCityDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.city, middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger }) as unknown as CityDAO<MetadataType, OperationMetadataType>) : new CityDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.city, collection: db.collection('citys'), middlewares: [...(this.overrides?.city?.middlewares || []), ...selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'city', logger: this.logger })
     }
     return this._city
   }
   get defaultFieldsEntity(): DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> {
     if(!this._defaultFieldsEntity) {
       const db = this.mongodb.default
-      this._defaultFieldsEntity = db === 'mock' ? (new InMemoryDefaultFieldsEntityDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>) : new DefaultFieldsEntityDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, collection: db.collection('defaultFieldsEntitys'), middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger })
+      this._defaultFieldsEntity = db === 'mock' ? (new InMemoryDefaultFieldsEntityDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as T.DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>) : new DefaultFieldsEntityDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.defaultFieldsEntity, collection: db.collection('defaultFieldsEntitys'), middlewares: [...(this.overrides?.defaultFieldsEntity?.middlewares || []), ...selectMiddleware('defaultFieldsEntity', this.middlewares) as T.DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'defaultFieldsEntity', logger: this.logger })
     }
     return this._defaultFieldsEntity
   }
   get device(): DeviceDAO<MetadataType, OperationMetadataType> {
     if(!this._device) {
       const db = this.mongodb.default
-      this._device = db === 'mock' ? (new InMemoryDeviceDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.device, middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>) : new DeviceDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.device, collection: db.collection('devices'), middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger })
+      this._device = db === 'mock' ? (new InMemoryDeviceDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.device, middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as T.DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>) : new DeviceDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.device, collection: db.collection('devices'), middlewares: [...(this.overrides?.device?.middlewares || []), ...selectMiddleware('device', this.middlewares) as T.DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'device', logger: this.logger })
     }
     return this._device
   }
   get dog(): DogDAO<MetadataType, OperationMetadataType> {
     if(!this._dog) {
       const db = this.mongodb.default
-      this._dog = db === 'mock' ? (new InMemoryDogDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.dog, middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger }) as unknown as DogDAO<MetadataType, OperationMetadataType>) : new DogDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.dog, collection: db.collection('dogs'), middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger })
+      this._dog = db === 'mock' ? (new InMemoryDogDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.dog, middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger }) as unknown as DogDAO<MetadataType, OperationMetadataType>) : new DogDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.dog, collection: db.collection('dogs'), middlewares: [...(this.overrides?.dog?.middlewares || []), ...selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'dog', logger: this.logger })
     }
     return this._dog
   }
   get hotel(): HotelDAO<MetadataType, OperationMetadataType> {
     if(!this._hotel) {
       const db = this.mongodb.default
-      this._hotel = db === 'mock' ? (new InMemoryHotelDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.hotel, middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger }) as unknown as HotelDAO<MetadataType, OperationMetadataType>) : new HotelDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.hotel, collection: db.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger })
+      this._hotel = db === 'mock' ? (new InMemoryHotelDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.hotel, middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as T.DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger }) as unknown as HotelDAO<MetadataType, OperationMetadataType>) : new HotelDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.hotel, collection: db.collection('hotels'), middlewares: [...(this.overrides?.hotel?.middlewares || []), ...selectMiddleware('hotel', this.middlewares) as T.DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'hotel', logger: this.logger })
     }
     return this._hotel
   }
   get mockedEntity(): MockedEntityDAO<MetadataType, OperationMetadataType> {
     if(!this._mockedEntity) {
-      this._mockedEntity = new MockedEntityDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.mockedEntity, middlewares: [...(this.overrides?.mockedEntity?.middlewares || []), ...selectMiddleware('mockedEntity', this.middlewares) as DAOMiddleware<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'mockedEntity', logger: this.logger })
+      this._mockedEntity = new MockedEntityDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.mockedEntity, middlewares: [...(this.overrides?.mockedEntity?.middlewares || []), ...selectMiddleware('mockedEntity', this.middlewares) as T.DAOMiddleware<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'mockedEntity', logger: this.logger })
     }
     return this._mockedEntity
   }
   get organization(): OrganizationDAO<MetadataType, OperationMetadataType> {
     if(!this._organization) {
       const db = this.mongodb.default
-      this._organization = db === 'mock' ? (new InMemoryOrganizationDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.organization, middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>) : new OrganizationDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.organization, collection: db.collection('organizations'), middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger })
+      this._organization = db === 'mock' ? (new InMemoryOrganizationDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.organization, middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as T.DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>) : new OrganizationDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.organization, collection: db.collection('organizations'), middlewares: [...(this.overrides?.organization?.middlewares || []), ...selectMiddleware('organization', this.middlewares) as T.DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'organization', logger: this.logger })
     }
     return this._organization
   }
   get post(): PostDAO<MetadataType, OperationMetadataType> {
     if(!this._post) {
       const db = this.mongodb.default
-      this._post = db === 'mock' ? (new InMemoryPostDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.post, middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger }) as unknown as PostDAO<MetadataType, OperationMetadataType>) : new PostDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.post, collection: db.collection('posts'), middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger })
+      this._post = db === 'mock' ? (new InMemoryPostDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.post, middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger }) as unknown as PostDAO<MetadataType, OperationMetadataType>) : new PostDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.post, collection: db.collection('posts'), middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger })
     }
     return this._post
   }
   get user(): UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
       const db = this.mongodb.default
-      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.user, collection: db.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
+      this._user = db === 'mock' ? (new InMemoryUserDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger }) as unknown as UserDAO<MetadataType, OperationMetadataType>) : new UserDAO({ daoContext: this, datasource: 'default', metadata: this.metadata, ...this.overrides?.user, collection: db.collection('users'), middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
     }
     return this._user
   }
@@ -1944,21 +1943,21 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   constructor(params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
     super({
       ...params,
-      scalars: params.scalars ? userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Coordinates', 'Decimal', 'JSON', 'Live', 'LocalizedString', 'MongoID', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
+      scalars: params.scalars ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Coordinates', 'Decimal', 'JSON', 'Live', 'LocalizedString', 'MongoID', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
     })
     this.overrides = params.overrides
     this.mongodb = params.mongodb
     this.middlewares = params.middlewares || []
-    this.logger = logInputToLogger(params.log)
+    this.logger = T.logInputToLogger(params.log)
     if(params.security && params.security.applySecurity !== false) {
-      const securityMiddlewares = createSecurityPolicyMiddlewares(params.security)
+      const securityMiddlewares = T.createSecurityPolicyMiddlewares(params.security)
       const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
       this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
     }
     this.params = params
   }
   
-  public async execQuery<T>(run: (dbs: { mongodb: Record<'default', Db | 'mock'> }, entities: { address: Collection<Document> | null, audit: Collection<Document> | null, city: Collection<Document> | null, defaultFieldsEntity: Collection<Document> | null, device: Collection<Document> | null, dog: Collection<Document> | null, hotel: Collection<Document> | null, organization: Collection<Document> | null, post: Collection<Document> | null, user: Collection<Document> | null }) => Promise<T>): Promise<T> {
+  public async execQuery<T>(run: (dbs: { mongodb: Record<'default', M.Db | 'mock'> }, entities: { address: M.Collection<M.Document> | null, audit: M.Collection<M.Document> | null, city: M.Collection<M.Document> | null, defaultFieldsEntity: M.Collection<M.Document> | null, device: M.Collection<M.Document> | null, dog: M.Collection<M.Document> | null, hotel: M.Collection<M.Document> | null, organization: M.Collection<M.Document> | null, post: M.Collection<M.Document> | null, user: M.Collection<M.Document> | null }) => Promise<T>): Promise<T> {
     return run({ mongodb: this.mongodb }, { address: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('addresses'), audit: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('audits'), city: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('citys'), defaultFieldsEntity: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('defaultFieldsEntitys'), device: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('devices'), dog: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('dogs'), hotel: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('hotels'), organization: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('organizations'), post: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('posts'), user: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('users') })
   }
   
@@ -1995,16 +1994,16 @@ type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
   | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
 type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   include: { [K in N]: true }
-  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
+  middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
 }
 type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
   exclude: { [K in N]: true }
-  middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
+  middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
 }
 export const groupMiddleware = {
   includes<N extends DAOName, MetadataType, OperationMetadataType>(
     include: { [K in N]: true },
-    middleware: DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
+    middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
   ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
     return { include, middleware }
   },
