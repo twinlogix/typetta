@@ -18,6 +18,7 @@ mock.compare = (l, r) => {
 }
 
 beforeEach(async () => {
+  mock.clearMemory()
   dao = new DAOContext({
     scalars: {
       ID: {
