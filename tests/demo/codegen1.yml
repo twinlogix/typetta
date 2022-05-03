@@ -2,7 +2,7 @@ overwrite: true
 schema: 'tests/demo/**.graphql'
 documents: null
 generates:
-  tests/demo/input.mock.ts:
+  tests/demo/types.generated.ts:
     plugins:
       - 'typescript'
     config:
@@ -14,14 +14,14 @@ generates:
         LocalizedString: ../types#LocalizedString
         JSON: any
         Password: string
-  tests/demo/resolver.mock.ts:
+  tests/demo/resolvers.generated.ts:
     plugins:
       - add:
           content:
             - import { PartialDeep } from 'type-fest'
-            - import * as types from './input.mock'
+            - import * as types from './types.generated'
       - typescript-resolvers
     config:
       resolverTypeWrapperSignature: PartialDeep<T>
-      contextType: ./dao.mock#DAOContext
+      contextType: ./dao.generated#DAOContext
       namespacedImportName: types

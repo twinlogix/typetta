@@ -11,7 +11,7 @@
     "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run generate-security  && npm run generate-in-memory",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
-    "generate-demo": "graphql-codegen --config tests/demo/codegen.yml && graphql-codegen --config tests/demo/codegen-input.yml",
+    "generate-demo": "graphql-codegen --config tests/demo/codegen0.yml && graphql-codegen --config tests/demo/codegen1.yml",
     "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
     "generate-multitenant": "graphql-codegen --config tests/multitenant/codegen.yml",
     "generate-security": "graphql-codegen --config tests/security/codegen.yml",

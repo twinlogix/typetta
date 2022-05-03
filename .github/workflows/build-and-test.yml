@@ -20,6 +20,8 @@ jobs:
         run: node --version && npm --version
       - name: Installing node packages
         run: npm ci
+      - name: Code generation
+        run: npm run generate
       - name: Building
         run: npm run build
       - name: Test code generation

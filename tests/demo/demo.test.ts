@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField, inMemoryKnexConfig } from '../../src'
-import { DAOContext } from './dao.mock'
+import { DAOContext } from './dao.generated'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'

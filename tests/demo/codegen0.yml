@@ -2,29 +2,17 @@ overwrite: true
 schema: 'tests/demo/schema.graphql'
 documents: null
 generates:
-  tests/demo/models.mock.ts:
-    plugins:
-      - 'typescript'
-    config:
-      namingConvention: keep
-      scalars:
-        DateTime: Date
-        Decimal: bignumber.js#BigNumber
-        Coordinates: ../../src#Coordinates
-        LocalizedString: ../types#LocalizedString
-        JSON: any
-        Password: string
-  tests/demo/dao.mock.ts:
+  tests/demo/dao.generated.ts:
     config:
       generationOutput: 'dao'
       schemaImport: './schema.graphql'
-      tsTypesImport: ./models.mock
+      tsTypesImport: ./types.generated
       typettaImport: ../../src
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
     plugins:
       - lib/generation/index.js
-  tests/demo/input.mock.graphql:
+  tests/demo/input.generated.graphql:
     config:
       generationOutput: 'inputs'
       namingConvention: keep
