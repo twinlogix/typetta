@@ -19,10 +19,12 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }
     })
 
-    const customScalars = this.generateCustomScalarFilterInput(customScalarsMap)
+    const customScalars = this.generateCustomScalars(customScalarsMap)
+    const customScalarsFilterInput = this.generateCustomScalarFilterInput(customScalarsMap)
     return [
       this.defaultInput(),
       customScalars,
+      customScalarsFilterInput,
       ...nodes
         .filter((n) => n.name !== 'Query' && n.name !== 'Mutation')
         .flatMap((n) => {
@@ -36,8 +38,9 @@ export class InputTypettaGenerator extends TypettaGenerator {
             if (n.entity) {
               const filterInput = this.generateFilterInput(n, typesMap)
               const relationFilterInput = this.generateRelationsFilterInput(n)
+              const findInput = this.generateFindInput(n)
               const sortInput = this.generateSortInput(n, typesMap)
-              return [filterInput, relationFilterInput, sortInput]
+              return [filterInput, relationFilterInput, sortInput, findInput]
             } else {
               return []
             }
@@ -112,6 +115,12 @@ export class InputTypettaGenerator extends TypettaGenerator {
         nin: [ID!]
         exists: ID
       }`
+  }
+
+  private generateCustomScalars(customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
+    return Array.from(customScalarsMap.values())
+      .map((s) => `scalar ${s.name}`)
+      .join('\n')
   }
 
   private generateCustomScalarFilterInput(customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
@@ -209,13 +218,26 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }`
   }
 
+  private generateFindInput(node: TsTypettaGeneratorNode): string {
+    return dedent`
+      input ${node.name}FindInput {
+        filter: ${node.name}FilterInput
+        sorts: [${node.name}SortInput!]
+        skip: Int
+        limit: Int
+        ${this.hasRelations(node) ? `relations: ${node.name}RelationsFilterInput` : ''}
+      }`
+  }
+
   private generateQuery(typesMap: Map<string, TsTypettaGeneratorNode>) {
     const enitityNodes = [...typesMap.values()].filter((n) => n.entity)
     return dedent`
-    input Query {
+    type Query {
       ${enitityNodes
         .map((n) => {
-          return `${toFirstLower(n.name)}s(filter: ${n.name}FilterInput, sorts: [${n.name}SortInput!], relations: ${n.name}RelationsFilterInput, skip: Int, limit: Int): [${n.name}!]!`
+          return `${toFirstLower(n.name)}s(filter: ${n.name}FilterInput, sorts: [${n.name}SortInput!], ${
+            this.hasRelations(n) ? `relations: ${n.name}RelationsFilterInput, ` : ''
+          }skip: Int, limit: Int): [${n.name}!]!`
         })
         .join('\n      ')}
     }`
@@ -224,13 +246,13 @@ export class InputTypettaGenerator extends TypettaGenerator {
   private generateMutation(typesMap: Map<string, TsTypettaGeneratorNode>) {
     const enitityNodes = [...typesMap.values()].filter((n) => n.entity)
     return dedent`
-    input Mutation {
+    type Mutation {
       ${enitityNodes
         .flatMap((n) => {
           return [
             `create${n.name}(record: ${n.name}InsertInput): ${n.name}!`,
-            `update${n.name}s(filter: ${n.name}FilterInput, changes: ${n.name}UpdateInput): Void`,
-            `delete${n.name}s(filter: ${n.name}FilterInput): Void`,
+            `update${n.name}s(filter: ${n.name}FilterInput, changes: ${n.name}UpdateInput): Boolean`,
+            `delete${n.name}s(filter: ${n.name}FilterInput): Boolean`,
           ]
         })
         .join('\n      ')}

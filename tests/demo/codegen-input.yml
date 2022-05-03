@@ -1,0 +1,27 @@
+overwrite: true
+schema: 'tests/demo/**.graphql'
+documents: null
+generates:
+  tests/demo/input.mock.ts:
+    plugins:
+      - 'typescript'
+    config:
+      enumsAsConst: true
+      scalars:
+        DateTime: Date
+        Decimal: bignumber.js#BigNumber
+        Coordinates: ../../src#Coordinates
+        LocalizedString: ../types#LocalizedString
+        JSON: any
+        Password: string
+  tests/demo/resolver.mock.ts:
+    plugins:
+      - add:
+          content:
+            - import { PartialDeep } from 'type-fest'
+            - import * as types from './input.mock'
+      - typescript-resolvers
+    config:
+      resolverTypeWrapperSignature: PartialDeep<T>
+      contextType: ./dao.mock#DAOContext
+      namespacedImportName: types

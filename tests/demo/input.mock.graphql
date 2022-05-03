@@ -61,6 +61,12 @@ input IDFilterInput {
 }
 
 
+scalar DateTime
+scalar Decimal
+scalar JSON
+scalar Password
+
+
 input DateTimeFilterInput {
   eq: DateTime
   ne: DateTime
@@ -161,6 +167,13 @@ input PostSortInput {
   title: SortDirection
   views: SortDirection
 }
+input PostFindInput {
+  filter: PostFilterInput
+  sorts: [PostSortInput!]
+  skip: Int
+  limit: Int
+  relations: PostRelationsFilterInput
+}
 ########### Post ###########
 
 
@@ -195,6 +208,12 @@ input PostTypeSortInput {
   id: SortDirection
   name: SortDirection
 }
+input PostTypeFindInput {
+  filter: PostTypeFilterInput
+  sorts: [PostTypeSortInput!]
+  skip: Int
+  limit: Int
+}
 ########### PostType ###########
 
 
@@ -218,6 +237,12 @@ input TagSortInput {
   id: SortDirection
   name: SortDirection
   postId: SortDirection
+}
+input TagFindInput {
+  filter: TagFilterInput
+  sorts: [TagSortInput!]
+  skip: Int
+  limit: Int
 }
 ########### Tag ###########
 
@@ -264,28 +289,35 @@ input UserSortInput {
   lastName: SortDirection
   totalPostsViews: SortDirection
 }
+input UserFindInput {
+  filter: UserFilterInput
+  sorts: [UserSortInput!]
+  skip: Int
+  limit: Int
+  relations: UserRelationsFilterInput
+}
 ########### User ###########
 
 
-input Query {
+type Query {
   posts(filter: PostFilterInput, sorts: [PostSortInput!], relations: PostRelationsFilterInput, skip: Int, limit: Int): [Post!]!
-  postTypes(filter: PostTypeFilterInput, sorts: [PostTypeSortInput!], relations: PostTypeRelationsFilterInput, skip: Int, limit: Int): [PostType!]!
-  tags(filter: TagFilterInput, sorts: [TagSortInput!], relations: TagRelationsFilterInput, skip: Int, limit: Int): [Tag!]!
+  postTypes(filter: PostTypeFilterInput, sorts: [PostTypeSortInput!], skip: Int, limit: Int): [PostType!]!
+  tags(filter: TagFilterInput, sorts: [TagSortInput!], skip: Int, limit: Int): [Tag!]!
   users(filter: UserFilterInput, sorts: [UserSortInput!], relations: UserRelationsFilterInput, skip: Int, limit: Int): [User!]!
 }
 
 
-input Mutation {
+type Mutation {
   createPost(record: PostInsertInput): Post!
-  updatePosts(filter: PostFilterInput, changes: PostUpdateInput): Void
-  deletePosts(filter: PostFilterInput): Void
+  updatePosts(filter: PostFilterInput, changes: PostUpdateInput): Boolean
+  deletePosts(filter: PostFilterInput): Boolean
   createPostType(record: PostTypeInsertInput): PostType!
-  updatePostTypes(filter: PostTypeFilterInput, changes: PostTypeUpdateInput): Void
-  deletePostTypes(filter: PostTypeFilterInput): Void
+  updatePostTypes(filter: PostTypeFilterInput, changes: PostTypeUpdateInput): Boolean
+  deletePostTypes(filter: PostTypeFilterInput): Boolean
   createTag(record: TagInsertInput): Tag!
-  updateTags(filter: TagFilterInput, changes: TagUpdateInput): Void
-  deleteTags(filter: TagFilterInput): Void
+  updateTags(filter: TagFilterInput, changes: TagUpdateInput): Boolean
+  deleteTags(filter: TagFilterInput): Boolean
   createUser(record: UserInsertInput): User!
-  updateUsers(filter: UserFilterInput, changes: UserUpdateInput): Void
-  deleteUsers(filter: UserFilterInput): Void
+  updateUsers(filter: UserFilterInput, changes: UserUpdateInput): Boolean
+  deleteUsers(filter: UserFilterInput): Boolean
 }
