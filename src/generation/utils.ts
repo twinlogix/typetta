@@ -2,11 +2,11 @@ import { Schema } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../dal/drivers/drivers.types'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './types'
 
-export function toFirstLower(typeName: string) {
+export function toFirstLower(typeName: string): string {
   return typeName.charAt(0).toLowerCase() + typeName.slice(1)
 }
 
-export function toFirstUpper(typeName: string) {
+export function toFirstUpper(typeName: string): string {
   return typeName.charAt(0).toUpperCase() + typeName.slice(1)
 }
 
