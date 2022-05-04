@@ -37,7 +37,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return p
   }
 
-  protected idField: T['idKey']
+  public readonly idField: T['idKey']
   protected idScalar: T['idScalar']
   protected idGeneration: IdGenerationStrategy
   protected daoContext: T['daoContext']

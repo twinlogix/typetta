@@ -194,6 +194,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
         ${this.flattenFields(node, typesMap)
           .filter((r) => r.parents.length === 0)
           .map((r) => {
+            if(r.field.isID) return ''
             if (r.kind === 'leaf') {
               return `${r.name}: ${r.field.graphqlType}`
             } else {
@@ -222,7 +223,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
     return dedent`
       input ${node.name}FindInput {
         filter: ${node.name}FilterInput
-        sorts: [${node.name}SortInput!]
+        #sorts: [${node.name}SortInput!]
         skip: Int
         limit: Int
         ${this.hasRelations(node) ? `relations: ${node.name}RelationsFilterInput` : ''}
@@ -234,8 +235,8 @@ export class InputTypettaGenerator extends TypettaGenerator {
     return dedent`
     type Query {
       ${enitityNodes
-        .map((n) => {
-          return `${toFirstLower(n.name)}s(filter: ${n.name}FilterInput, sorts: [${n.name}SortInput!], ${
+        .map((n) => { //, sorts: [${n.name}SortInput!]
+          return `${toFirstLower(n.name)}s(filter: ${n.name}FilterInput, ${
             this.hasRelations(n) ? `relations: ${n.name}RelationsFilterInput, ` : ''
           }skip: Int, limit: Int): [${n.name}!]!`
         })
@@ -250,9 +251,9 @@ export class InputTypettaGenerator extends TypettaGenerator {
       ${enitityNodes
         .flatMap((n) => {
           return [
-            `create${n.name}(record: ${n.name}InsertInput): ${n.name}!`,
-            `update${n.name}s(filter: ${n.name}FilterInput, changes: ${n.name}UpdateInput): Boolean`,
-            `delete${n.name}s(filter: ${n.name}FilterInput): Boolean`,
+            `create${n.name}(record: ${n.name}InsertInput!): ${n.name}!`,
+            `update${n.name}s(filter: ${n.name}FilterInput!, changes: ${n.name}UpdateInput!): Boolean`,
+            `delete${n.name}s(filter: ${n.name}FilterInput!): Boolean`,
           ]
         })
         .join('\n      ')}
