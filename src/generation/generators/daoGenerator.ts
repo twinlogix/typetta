@@ -383,7 +383,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   public _generateDAOSort(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSortFields = this._generateDAOSortFields(node, typesMap).join(' | ')
     const daoSortKeys = `export type ${node.name}SortKeys = ${daoSortFields}`
-    const daoSort = `export type ${node.name}Sort = T.OneKey<${node.name}SortKeys, T.SortDirection>`
+    const daoSort = `export type ${node.name}Sort = Partial<Record<${node.name}SortKeys, T.SortDirection>>`
     const daoRawSort = `export type ${node.name}RawSort = ${
       node.entity?.type === 'mongo' ? '() => M.Sort' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
     }`

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { computedField, flattenEmbeddedFilter, inMemoryKnexConfig } from '../../src'
+import { computedField, flattenEmbeddeds, inMemoryKnexConfig } from '../../src'
 import { DAOContext, postSchema } from './dao.generated'
 import { PostUpdateInput } from './types.generated'
 import BigNumber from 'bignumber.js'
@@ -292,7 +292,7 @@ test('flattenEmbeddedFilter', () => {
       region: 'it',
     },
   }
-  const r = flattenEmbeddedFilter(f, postSchema())
+  const r = flattenEmbeddeds(f, postSchema())
   expect(r['metadata.region']).toBe('it')
   expect(r['metadata.typeId']).toBe(undefined)
   expect(r.authorId).toBe('123')

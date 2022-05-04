@@ -419,6 +419,9 @@ test('find with multiple sorts', async () => {
   const response1 = await dao.user.findAll({ sorts: [{ firstName: 'desc' }, { lastName: 'desc' }] })
   expect(response1[0].lastName).toBe('9')
   expect(response1[1].lastName).toBe('8')
+  const response2 = await dao.user.findAll({ sorts: [{ firstName: 'desc', lastName: 'desc' }] })
+  expect(response2[0].lastName).toBe('9')
+  expect(response2[1].lastName).toBe('8')
 })
 
 test('find with start and limit', async () => {

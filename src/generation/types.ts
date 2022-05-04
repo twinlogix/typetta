@@ -7,6 +7,10 @@ export abstract class TypettaGenerator {
     this.config = config
   }
   abstract generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string>
+
+  protected hasRelations(node: TsTypettaGeneratorNode): boolean {
+    return node.fields.some((f) => f.type.kind === 'innerRef' || f.type.kind === 'foreignRef' || f.type.kind === 'relationEntityRef')
+  }
 }
 
 type ScalarType = { kind: 'scalar'; scalar: string }

@@ -38,21 +38,21 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   public readonly idField: T['idKey']
-  protected idScalar: T['idScalar']
-  protected idGeneration: IdGenerationStrategy
-  protected daoContext: T['daoContext']
-  protected relations: DAORelation[]
-  protected middlewares: DAOMiddleware<T>[]
-  protected pageSize: number
-  protected dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>
-  protected dataLoaderRefs: Map<string, string[]>
-  protected metadata?: T['metadata']
-  protected driverContext: T['driverContext']
-  protected schema: Schema<T['scalars']>
-  protected idGenerator?: () => T['scalars'][T['idScalar']]
-  protected name: T['name']
-  private logger?: LogFunction<T['name']>
-  protected datasource: string | null
+  protected readonly idScalar: T['idScalar']
+  protected readonly idGeneration: IdGenerationStrategy
+  protected readonly daoContext: T['daoContext']
+  protected readonly relations: DAORelation[]
+  protected readonly middlewares: DAOMiddleware<T>[]
+  protected readonly pageSize: number
+  protected readonly dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>
+  protected readonly dataLoaderRefs: Map<string, string[]>
+  protected readonly metadata?: T['metadata']
+  protected readonly driverContext: T['driverContext']
+  protected readonly schema: Schema<T['scalars']>
+  protected readonly idGenerator?: () => T['scalars'][T['idScalar']]
+  protected readonly name: T['name']
+  private readonly logger?: LogFunction<T['name']>
+  protected readonly datasource: string | null
 
   protected constructor({
     idField,

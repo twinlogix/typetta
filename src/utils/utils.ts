@@ -4,10 +4,6 @@ import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
 import knex, { Knex } from 'knex'
 
-export type OneKey<K extends string | number | symbol, V = any> = {
-  [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
-}[K]
-
 export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
   const c = key.split('.')
   if (c.length === 1) {
@@ -179,11 +175,11 @@ export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [str
   return Object.fromEntries(Object.entries(obj).flatMap(([k, v]) => f([k, v as T[keyof T]])))
 }
 
-export function flattenEmbeddedFilter<T extends Record<string, unknown>, ScalarsType>(filter: T, schema: Schema<ScalarsType>, prefix = ''): FlattenEmbeddedFilter<T> {
+export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>(filter: T, schema: Schema<ScalarsType>, prefix = ''): FlattenEmbeddedFilter<T> {
   return mapObject(filter, ([k, v]) => {
     const field = schema[k]
     if ('embedded' in field) {
-      return Object.entries(flattenEmbeddedFilter(v as Record<string, unknown>, field.embedded, `${prefix}${k}.`))
+      return Object.entries(flattenEmbeddeds(v as Record<string, unknown>, field.embedded, `${prefix}${k}.`))
     }
     return [[`${prefix}${k}`, v]]
   }) as FlattenEmbeddedFilter<T>

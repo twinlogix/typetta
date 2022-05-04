@@ -20,7 +20,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
     })
     const typeNodes = nodes.flatMap((n) => (n.type === 'type' && n.entity ? [n] : []))
 
-    const prettierOptions = await prettier.resolveConfig('./*.ts') ?? { parser: 'typescript' }
+    const prettierOptions = (await prettier.resolveConfig('./*.ts')) ?? { parser: 'typescript' }
     return prettier.format(
       [
         this.generateImports(),
@@ -53,7 +53,10 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
 
   private generateQuery(node: TsTypettaGeneratorNode): string {
     return `${toFirstLower(node.name)}s: (parent, args, context, info) => {
-      return ${this.daoContextPath()}.${toFirstLower(node.name)}.findAll({ ...args, projection: info })
+      const sorts = args.sorts ? args.sorts.map((s) => T.flattenEmbeddeds(s, D.${toFirstLower(node.name)}Schema())) : undefined
+      return ${this.daoContextPath()}.${toFirstLower(node.name)}.findAll({ filter: args.filter, skip: args.skip, limit: args.limit,${
+      this.hasRelations(node) ? `relations: args.relations, ` : ``
+    } sorts, projection: info })
     },`
   }
 
@@ -74,7 +77,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
     update${node.name}s: async (parent, args, context) => {
       await ${this.daoContextPath()}.${toFirstLower(node.name)}.updateAll({ 
         filter: args.filter, 
-        changes: T.flattenEmbeddedFilter(args.changes, D.${toFirstLower(node.name)}Schema()) 
+        changes: T.flattenEmbeddeds(args.changes, D.${toFirstLower(node.name)}Schema()) 
       })
       return true
     },

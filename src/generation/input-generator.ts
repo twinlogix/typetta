@@ -35,18 +35,18 @@ export class InputTypettaGenerator extends TypettaGenerator {
             const delimiter = `########### ${n.name} ###########`
             const insertInput = this.generateInsertInput(n, typesMap)
             const updateInput = this.generateUpdateInput(n, typesMap)
+            const sortInput = this.generateSortInput(n, typesMap)
             const enitityInputs = (() => {
               if (n.entity) {
                 const filterInput = this.generateFilterInput(n, typesMap)
                 const relationFilterInput = this.generateRelationsFilterInput(n)
                 const findInput = this.generateFindInput(n)
-                const sortInput = this.generateSortInput(n, typesMap)
-                return [filterInput, relationFilterInput, sortInput, findInput]
+                return [filterInput, relationFilterInput, findInput]
               } else {
                 return []
               }
             })()
-            return [removeEmptyLines([delimiter, insertInput, updateInput, ...enitityInputs, delimiter].join('\n'))]
+            return [removeEmptyLines([delimiter, insertInput, updateInput, sortInput, ...enitityInputs, delimiter].join('\n'))]
           }),
         this.generateQuery(typesMap),
         this.generateMutation(typesMap),
@@ -60,8 +60,8 @@ export class InputTypettaGenerator extends TypettaGenerator {
   private defaultInput(): string {
     return `
       enum SortDirection {
-        ASC
-        DESC
+        asc
+        desc
       }
 
       enum StringFilterMode {
@@ -164,9 +164,6 @@ export class InputTypettaGenerator extends TypettaGenerator {
     //nor: [${node.name}FilterInput!]
   }
 
-  private hasRelations(node: TsTypettaGeneratorNode): boolean {
-    return node.fields.some((f) => f.type.kind === 'innerRef' || f.type.kind === 'foreignRef' || f.type.kind === 'relationEntityRef')
-  }
   private generateRelationsFilterInput(node: TsTypettaGeneratorNode): string {
     if (!this.hasRelations(node)) {
       return ''
@@ -187,8 +184,14 @@ export class InputTypettaGenerator extends TypettaGenerator {
     return `
       input ${node.name}SortInput {
         ${this.flattenFields(node, typesMap)
-          .filter((r) => r.kind === 'leaf' && r.parents.length === 0)
-          .map((r) => `${r.name}: SortDirection`)
+          .filter((r) => r.parents.length === 0)
+          .map((r) => {
+            if (r.kind === 'leaf') {
+              return `${r.name}: SortDirection`
+            } else {
+              return `${r.name}: ${r.node.name}SortInput`
+            }
+          })
           .join('\n')}
       }`
   }
@@ -228,7 +231,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
     return `
       input ${node.name}FindInput {
         filter: ${node.name}FilterInput
-        #sorts: [${node.name}SortInput!]
+        sorts: [${node.name}SortInput!]
         skip: Int
         limit: Int
         ${this.hasRelations(node) ? `relations: ${node.name}RelationsFilterInput` : ''}
@@ -241,8 +244,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
     type Query {
       ${enitityNodes
         .map((n) => {
-          //, sorts: [${n.name}SortInput!]
-          return `${toFirstLower(n.name)}s(filter: ${n.name}FilterInput, ${this.hasRelations(n) ? `relations: ${n.name}RelationsFilterInput, ` : ''}skip: Int, limit: Int): [${n.name}!]!`
+          return `${toFirstLower(n.name)}s(filter: ${n.name}FilterInput, sorts: [${n.name}SortInput!], ${this.hasRelations(n) ? `relations: ${n.name}RelationsFilterInput, ` : ''}skip: Int, limit: Int): [${n.name}!]!`
         })
         .join('\n')}
     }`

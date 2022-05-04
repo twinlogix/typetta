@@ -131,7 +131,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     })
 
     const filteredResult = args?.having ? unorderedResults.filter((r) => filterEntity(r, args.having)) : unorderedResults
-    const sorted = args?.sorts ? sort(filteredResult, args.sorts) : filteredResult
+    const sorted = args?.sorts ? sort<T['model']>(filteredResult, args.sorts) : filteredResult
     const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? sorted.length))
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
