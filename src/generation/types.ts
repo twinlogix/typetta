@@ -6,7 +6,7 @@ export abstract class TypettaGenerator {
   constructor(config: TypeScriptTypettaPluginConfig) {
     this.config = config
   }
-  abstract generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string
+  abstract generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string>
 }
 
 type ScalarType = { kind: 'scalar'; scalar: string }

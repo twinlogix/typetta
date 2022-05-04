@@ -8,7 +8,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
     super(config)
   }
 
-  public generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string {
+  public async generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string> {
     const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
     const typesMap = new Map<string, TsTypettaGeneratorNode>()
     nodes.forEach((node) => {

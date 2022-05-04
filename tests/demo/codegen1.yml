@@ -32,5 +32,6 @@ generates:
       typettaImport: ../../src
       daoImport: ./dao.generated
       tsTypesImport: ./resolvers.types.generated
+      prettierConfigFile: ../../prettierrc
     plugins:
       - lib/generation/index.js

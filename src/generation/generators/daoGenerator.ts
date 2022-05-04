@@ -358,20 +358,20 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     return node.fields
       .map((field) => {
         if (field.type.kind === 'scalar') {
-          return `${field.name}?: boolean,`
+          return `${field.name}?: boolean`
         } else if (field.type.kind === 'innerRef') {
           const linkedType = getNode(field.type.innerRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean,`
+          return `${field.name}?: ${linkedType.name}Projection | boolean`
         } else if (field.type.kind === 'foreignRef') {
           const linkedType = getNode(field.type.foreignRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean,`
+          return `${field.name}?: ${linkedType.name}Projection | boolean`
         } else if (field.type.kind === 'relationEntityRef') {
           const linkedType = getNode(field.type.destRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean,`
+          return `${field.name}?: ${linkedType.name}Projection | boolean`
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
           const embeddedProjection = indentMultiline(this._generateDAOProjectionFields(embeddedType, typesMap))
-          return `${field.name}?: {\n${embeddedProjection}\n} | boolean,`
+          return `${field.name}?: {\n${embeddedProjection}\n} | boolean`
         }
       })
       .join('\n')

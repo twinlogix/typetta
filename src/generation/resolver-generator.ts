@@ -8,7 +8,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
     super(config)
   }
 
-  public generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string {
+  public async generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string> {
     const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
     const typesMap = new Map<string, TsTypettaGeneratorNode>()
     nodes.forEach((node) => {
@@ -20,6 +20,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
     })
     const typeNodes = nodes.flatMap((n) => (n.type === 'type' && n.entity ? [n] : []))
 
+    const prettierOptions = await prettier.resolveConfig('./*.ts') ?? { parser: 'typescript' }
     return prettier.format(
       [
         this.generateImports(),
@@ -32,9 +33,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
           }
         }`,
       ].join('\n'),
-      {
-        parser: 'typescript',
-      },
+      prettierOptions,
     )
   }
 

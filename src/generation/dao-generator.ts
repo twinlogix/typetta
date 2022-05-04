@@ -13,7 +13,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
     this._generators = [new TsTypettaDAOGenerator(config)]
   }
 
-  public generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string {
+  public async generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string> {
     const typesMap = new Map<string, TsTypettaGeneratorNode>()
     nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
 
@@ -49,7 +49,8 @@ export class TsTypettaGenerator extends TypettaGenerator {
 
     const exports = this._generators.map((generator) => generator.generateExports(typesMap, customScalarsMap))
 
-    return prettier.format([imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n'), { parser: 'typescript' })
+    const prettierOptions = await prettier.resolveConfig('./*.ts') ?? { parser: 'typescript' }
+    return prettier.format([imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n'), prettierOptions)
   }
 
   private _generateTitle(node: TsTypettaGeneratorNode): string {
