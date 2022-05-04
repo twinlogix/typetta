@@ -26,3 +26,11 @@ generates:
       resolverTypeWrapperSignature: PartialDeep<T>
       contextType: ./dao.generated#DAOContext
       namespacedImportName: types
+  tests/demo/resolvers.generated.ts:
+    config:
+      generationOutput: resolvers
+      typettaImport: ../../src
+      daoImport: ./dao.generated
+      tsTypesImport: ./resolvers.types.generated
+    plugins:
+      - lib/generation/index.js

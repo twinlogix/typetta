@@ -1,3 +1,4 @@
+import { FlattenEmbeddedFilter } from '..'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
@@ -176,4 +177,14 @@ export function filterNullFields<T extends Record<string, unknown>>(obj: T): T {
 
 export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [string, T[keyof T]]) => [string, unknown][]): Record<string, unknown> {
   return Object.fromEntries(Object.entries(obj).flatMap(([k, v]) => f([k, v as T[keyof T]])))
+}
+
+export function flattenEmbeddedFilter<T extends Record<string, unknown>, ScalarsType>(filter: T, schema: Schema<ScalarsType>, prefix = ''): FlattenEmbeddedFilter<T> {
+  return mapObject(filter, ([k, v]) => {
+    const field = schema[k]
+    if ('embedded' in field) {
+      return Object.entries(flattenEmbeddedFilter(v as Record<string, unknown>, field.embedded, `${prefix}${k}.`))
+    }
+    return [[`${prefix}${k}`, v]]
+  }) as FlattenEmbeddedFilter<T>
 }

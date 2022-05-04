@@ -60,10 +60,34 @@ type RecursiveKeyOfInner<TObj extends object, D extends number> = {
 
 type RecursiveKeyOfHandleValue<TValue, Text extends string, D extends number> = [D] extends [never]
   ? never
-  : TValue extends any[]
+  : TValue extends (infer O)[]
   ? Text
   : TValue extends object
   ? Text | `${Text}${RecursiveKeyOfInner<TValue, D>}`
   : Text
 
+export type RecursiveKeyOfLeaf<TObj extends object, DepthLimit extends number = 3> = {
+  [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValueLeaf<TObj[TKey], `${TKey}`, DepthLimit>
+}[keyof TObj & (string | number)]
+
+type RecursiveKeyOfInnerLeaf<TObj extends object, D extends number> = {
+  [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValueLeaf<TObj[TKey], `.${TKey}`, Prev[D]>
+}[keyof TObj & (string | number)]
+
+type RecursiveKeyOfHandleValueLeaf<TValue, Text extends string, D extends number> = [D] extends [never]
+  ? never
+  : TValue extends (infer O)[]
+  ? Text
+  : TValue extends object
+  ? `${Text}${RecursiveKeyOfInnerLeaf<TValue, D>}`
+  : Text
+
 export type OmitIfKnown<T, K extends keyof T> = [K] extends [any] ? any : Omit<T, K>
+
+export type DeepRequired<T> = Required<{
+  [K in keyof T]: Required<DeepRequired<T[K]>>
+}>
+
+export type FlattenEmbeddedFilter<T> = {
+  [K in RecursiveKeyOfLeaf<DeepRequired<T>>]?: TypeTraversal<T, K>
+}

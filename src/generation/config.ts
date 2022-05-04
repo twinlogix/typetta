@@ -30,4 +30,22 @@ export interface TypeScriptTypettaPluginConfig extends RawConfig {
    *
    */
   defaultIdGenerationStrategy?: IdGenerationStrategy
+
+  /**
+   * @name daoContextPath
+   * @type string
+   * @default context
+   * @description Customize path to access the DAOContext from resolver context. Needed for resolvers generation.
+   *
+   */
+  daoContextPath?: string
+
+   /**
+   * @name daoContextPath
+   * @type string
+   * @default undefined
+   * @description Customize the import DAOContext. Needed for resolvers generation.
+   *
+   */
+  daoImport?: string
 }

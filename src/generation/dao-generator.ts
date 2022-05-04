@@ -3,6 +3,7 @@ import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
 import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
 import { findField, findID, findNode, removeParentPath, toFirstLower } from './utils'
+import prettier from 'prettier'
 
 export class TsTypettaGenerator extends TypettaGenerator {
   private _generators: TsTypettaAbstractGenerator[]
@@ -32,21 +33,23 @@ export class TsTypettaGenerator extends TypettaGenerator {
     if (!Array.from(typesMap.values()).some((v) => v.entity?.type)) {
       throw new Error('At least one entity is required for code generation. (@entity)')
     }
-    const definitions = [...typesMap.values()].filter(node => node.name !== 'Query' && node.name !== 'Mutation').flatMap((node) => {
-      const definition = this._generators
-        .map((generator) => generator.generateDefinition(node, typesMap, customScalarsMap))
-        .filter((def) => def !== '')
-        .join('\n\n')
-      if (definition.trim().length === 0) {
-        return []
-      } else {
-        return [[this._generateTitle(node), definition].join('\n\n')]
-      }
-    })
+    const definitions = [...typesMap.values()]
+      .filter((node) => node.name !== 'Query' && node.name !== 'Mutation')
+      .flatMap((node) => {
+        const definition = this._generators
+          .map((generator) => generator.generateDefinition(node, typesMap, customScalarsMap))
+          .filter((def) => def !== '')
+          .join('\n\n')
+        if (definition.trim().length === 0) {
+          return []
+        } else {
+          return [[this._generateTitle(node), definition].join('\n\n')]
+        }
+      })
 
     const exports = this._generators.map((generator) => generator.generateExports(typesMap, customScalarsMap))
 
-    return [imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
+    return prettier.format([imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n'), { parser: 'typescript' })
   }
 
   private _generateTitle(node: TsTypettaGeneratorNode): string {

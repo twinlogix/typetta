@@ -6,6 +6,7 @@ import { Types, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin
 import { transformSchemaAST } from '@graphql-codegen/schema-ast'
 import { visit, GraphQLSchema } from 'graphql'
 import { extname } from 'path'
+import { ResolverTypettaGenerator } from './resolver-generator'
 
 export const plugin: PluginFunction<TypeScriptTypettaPluginConfig> = async (schema: GraphQLSchema, documents: Types.DocumentFile[], config: TypeScriptTypettaPluginConfig): Promise<string> => {
   const { ast } = transformSchemaAST(schema, config)
@@ -13,7 +14,7 @@ export const plugin: PluginFunction<TypeScriptTypettaPluginConfig> = async (sche
   const visitor = new TsTypettaVisitor(schema, config)
   const visitorResult = visit(ast, { leave: visitor })
 
-  const generator = config.generationOutput === 'dao' ? new TsTypettaGenerator(config) : config.generationOutput === 'inputs' ? new InputTypettaGenerator(config) : new InputTypettaGenerator(config)
+  const generator = config.generationOutput === 'dao' ? new TsTypettaGenerator(config) : config.generationOutput === 'inputs' ? new InputTypettaGenerator(config) : new ResolverTypettaGenerator(config)
   return generator.generate(visitorResult.definitions)
 }
 
@@ -33,7 +34,7 @@ export const validate: PluginValidateFn<TypeScriptTypettaPluginConfig> = async (
       throw new Error(`Plugin "typescript-typetta" requires extension to be ".graphql" when config.generationOutput is "inputs"`)
     }
   } else if (config.generationOutput === 'resolvers') {
-    if (extname(outputFile) !== '.graphql') {
+    if (extname(outputFile) !== '.ts') {
       throw new Error(`Plugin "typescript-typetta" requires extension to be ".graphql" when config.generationOutput is "resolvers"`)
     }
   } else {
