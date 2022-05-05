@@ -1782,6 +1782,7 @@ export type UserProjection = {
   credentials?:
     | {
         password?: boolean
+        user?: UserProjection | boolean
         username?: boolean
       }
     | boolean
@@ -1815,6 +1816,7 @@ export type UserProjection = {
   usernamePasswordCredentials?:
     | {
         password?: boolean
+        user?: UserProjection | boolean
         username?: boolean
       }
     | boolean
@@ -1932,9 +1934,11 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
       idField: 'id',
       schema: userSchema(),
       relations: T.overrideRelations([
+        { type: '1-1', reference: 'inner', field: 'credentials.user', refFrom: 'id', refTo: 'id', dao: 'user', required: false },
         { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
         { type: '1-1', reference: 'inner', field: 'embeddedPost.author', refFrom: 'embeddedPost.authorId', refTo: 'id', dao: 'user', required: true },
         { type: '1-n', reference: 'inner', field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user', required: false },
+        { type: '1-1', reference: 'inner', field: 'usernamePasswordCredentials.user', refFrom: 'id', refTo: 'id', dao: 'user', required: false },
       ]),
       idGeneration: 'generator',
       idScalar: 'ID',
@@ -1956,9 +1960,11 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
       idField: 'id',
       schema: userSchema(),
       relations: T.overrideRelations([
+        { type: '1-1', reference: 'inner', field: 'credentials.user', refFrom: 'id', refTo: 'id', dao: 'user', required: false },
         { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
         { type: '1-1', reference: 'inner', field: 'embeddedPost.author', refFrom: 'embeddedPost.authorId', refTo: 'id', dao: 'user', required: true },
         { type: '1-n', reference: 'inner', field: 'friends', refFrom: 'friendsId', refTo: 'id', dao: 'user', required: false },
+        { type: '1-1', reference: 'inner', field: 'usernamePasswordCredentials.user', refFrom: 'id', refTo: 'id', dao: 'user', required: false },
       ]),
       idGeneration: 'generator',
       idScalar: 'ID',
@@ -2011,6 +2017,7 @@ export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
 
 export type UsernamePasswordCredentialsProjection = {
   password?: boolean
+  user?: UserProjection | boolean
   username?: boolean
 }
 export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = T.ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
