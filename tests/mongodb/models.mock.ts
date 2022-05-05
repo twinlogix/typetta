@@ -196,5 +196,6 @@ export type UserCollection = {
 export type UsernamePasswordCredentials = {
   __typename?: 'UsernamePasswordCredentials';
   password: Scalars['Password'];
+  user?: Maybe<User>;
   username: Scalars['String'];
 };

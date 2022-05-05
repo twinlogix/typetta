@@ -642,6 +642,12 @@ test('simple update', async () => {
 test('update embedded entity', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
 
+  const user0 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { user: { firstName: true }, password: true } } })
+  expect(user0?.usernamePasswordCredentials).toBe(undefined)
+
+  const user1 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user1?.usernamePasswordCredentials).toBe(undefined)
+
   await dao.user.updateOne({ filter: { id: user.id }, changes: { usernamePasswordCredentials: { username: 'username', password: 'password' } } })
   const user2 = await dao.user.findOne({ filter: { id: user.id } })
 
@@ -662,6 +668,19 @@ test('update embedded entity', async () => {
   expect(user4?.usernamePasswordCredentials).toBeDefined()
   expect(user4?.usernamePasswordCredentials?.username).toBe('newUsername_2')
   expect(user4?.usernamePasswordCredentials?.password).toBe('5c29a959abce4eda5f0e7a4e7ea53dce4fa0f0abbe8eaa63717e2fed5f193d31')
+
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { usernamePasswordCredentials: null } })
+  const user5 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user5?.usernamePasswordCredentials).toBe(null)
+
+  const user6 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { user: { firstName: true } } } })
+  expect(user6?.usernamePasswordCredentials).toBe(undefined)
+
+  const user7 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: true } })
+  expect(user7?.usernamePasswordCredentials).toBe(null)
+
+  const user8 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { username: true } } })
+  expect(user8?.usernamePasswordCredentials).toBe(undefined)
 })
 
 test('update with undefined', async () => {
@@ -1678,18 +1697,21 @@ test('Inner ref inside embedded', async () => {
       embeddedUsers4: { user: { firstName: true } },
     },
   })
+  await dao.hotel.updateOne({ filter: {}, changes: {"embeddedUser3.value":2}})
   const h2 = await dao.hotel.findOne({
     projection: {
       embeddedUsers3: { user: { firstName: true } },
+      embeddedUser3: { user: { firstName: true }, value: true },
     },
   })
 
-  expect(h2?.embeddedUsers3?.length).toBe(0)
+  expect(h2?.embeddedUsers3).toBe(undefined)
   expect((h?.embeddedUsers3 ?? [])[0]?.user?.firstName).toBe('2')
   expect((h?.embeddedUsers3 ?? [])[0]?.value).toBe(null)
   expect((h?.embeddedUsers3 ?? [])[1]?.user?.firstName).toBe('2')
   expect((h?.embeddedUsers3 ?? [])[1]?.value).toBe(2)
-  expect(h?.embeddedUser3?.user?.firstName).toBe('2')
+  expect(h?.embeddedUser3).toBe(undefined)
+  expect(h2?.embeddedUser3?.user?.firstName).toBe('2')
   expect(h?.embeddedUser4?.user?.firstName).toBe('3')
   expect((h?.embeddedUsers4 ?? [])[0].user?.firstName).toBe('2')
   expect((h?.embeddedUsers4 ?? [])[1].user?.firstName).toBe('1')

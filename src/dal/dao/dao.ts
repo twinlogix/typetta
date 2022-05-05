@@ -392,7 +392,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         } else if (relation.reference === 'inner') {
           for (const record of records) {
             const keys = getTraversing(record, relation.refFrom)
-            const results = await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refTo, keys)
+            const results = keys.length > 0 ? await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refTo, keys) : []
             this.setResult(record, relation, results)
           }
         } else if (relation.reference === 'foreign') {
@@ -459,7 +459,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       throw new Error('Unreachable')
     }
     if (record[subField] == null) {
-      record[subField] = subSchema.array ? [] : {}
+      //record[subField] = subSchema.array ? [] : {}
+      return
     }
     if (Array.isArray(record[subField])) {
       for (const r of record[subField]) {
