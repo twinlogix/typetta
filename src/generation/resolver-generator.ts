@@ -39,8 +39,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
 
   private generateImports(): string {
     return `import * as T from '${this.config.typettaImport || '@twinlogix/typetta'}'
-    import * as types from '${this.config.tsTypesImport}'
-    import * as D from '${this.config.daoImport}'`
+    import * as types from '${this.config.tsTypesImport}'`
   }
 
   private generateQueries(nodes: TsTypettaGeneratorNode[]): string {
@@ -53,7 +52,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
 
   private generateQuery(node: TsTypettaGeneratorNode): string {
     return `${toFirstLower(node.name)}s: (parent, args, context, info) => {
-      const sorts = args.sorts ? args.sorts.map((s) => T.flattenEmbeddeds(s, D.${toFirstLower(node.name)}Schema())) : undefined
+      const sorts = args.sorts ? args.sorts.map((s) => T.flattenEmbeddeds(s, ${this.daoContextPath()}.${toFirstLower(node.name)}.info.schema)) : undefined
       return ${this.daoContextPath()}.${toFirstLower(node.name)}.findAll({ filter: args.filter, skip: args.skip, limit: args.limit,${
       this.hasRelations(node) ? `relations: args.relations, ` : ``
     } sorts, projection: info })
@@ -65,7 +64,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
       const inserted = await ${this.daoContextPath()}.${toFirstLower(node.name)}.insertOne(args)
       const entry = await ${this.daoContextPath()}.${toFirstLower(node.name)}.findOne({ 
         filter: { 
-          [${this.daoContextPath()}.${toFirstLower(node.name)}.idField]: inserted[${this.daoContextPath()}.${toFirstLower(node.name)}.idField] 
+          [${this.daoContextPath()}.${toFirstLower(node.name)}.info.idField]: inserted[${this.daoContextPath()}.${toFirstLower(node.name)}.info.idField] 
         }, 
         projection: info 
       })
@@ -77,7 +76,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
     update${node.name}s: async (parent, args, context) => {
       await ${this.daoContextPath()}.${toFirstLower(node.name)}.updateAll({ 
         filter: args.filter, 
-        changes: T.flattenEmbeddeds(args.changes, D.${toFirstLower(node.name)}Schema()) 
+        changes: T.flattenEmbeddeds(args.changes, ${this.daoContextPath()}.${toFirstLower(node.name)}.info.schema) 
       })
       return true
     },

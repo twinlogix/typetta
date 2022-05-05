@@ -30,7 +30,6 @@ generates:
     config:
       generationOutput: resolvers
       typettaImport: ../../src
-      daoImport: ./dao.generated
       tsTypesImport: ./resolvers.types.generated
       prettierConfigFile: ../../prettierrc
     plugins:

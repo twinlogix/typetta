@@ -22,7 +22,7 @@ import { LogArgs, LogFunction } from './log/log.types'
 import { BeforeMiddlewareResult, DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { buildMiddleware } from './middlewares/utils/builder'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
-import { getProjection, infoToProjection } from './projections/projections.utils'
+import { getProjection, infoToProjection, mergeProjections, SelectProjection } from './projections/projections.utils'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
@@ -33,11 +33,8 @@ import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
-  public build<P extends T['projection']>(p: P): P {
-    return p
-  }
-
-  public readonly idField: T['idKey']
+  protected readonly idField: T['idKey']
+  protected readonly name: T['name']
   protected readonly idScalar: T['idScalar']
   protected readonly idGeneration: IdGenerationStrategy
   protected readonly daoContext: T['daoContext']
@@ -50,7 +47,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected readonly driverContext: T['driverContext']
   protected readonly schema: Schema<T['scalars']>
   protected readonly idGenerator?: () => T['scalars'][T['idScalar']]
-  protected readonly name: T['name']
   private readonly logger?: LogFunction<T['name']>
   protected readonly datasource: string | null
 
@@ -676,4 +672,17 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _deleteOne(params: DeleteParams<T>): Promise<void>
   protected abstract _deleteAll(params: DeleteParams<T>): Promise<void>
   protected abstract _driver(): DriverType
+
+  // -----------------------------------------------------------------------
+  // ------------------------------ UTILS ----------------------------------
+  // -----------------------------------------------------------------------
+  public projection<P extends T['projection']>(p: P): P {
+    return p
+  }
+  public mergeProjection<P1 extends T['projection'], P2 extends T['projection']>(p1: P1, p2: P2): SelectProjection<T['projection'], P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<T['projection'], P1, P2>
+  }
+  get info(): { name: T['name']; idField: T['idKey']; schema: Schema<T['scalars']> } {
+    return { name: this.name, idField: this.idField, schema: this.schema }
+  }
 }
