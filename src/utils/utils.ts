@@ -127,7 +127,7 @@ export function deepMerge(weak: any, strong: any, nullsAsUndefined = true): any 
   keySet.forEach((k) => {
     const [s, w] = [strongKey.has(k), weakKey.has(k)]
     if (s && w) {
-      result[k] = deepMerge(weak[k], strong[k])
+      result[k] = deepMerge(weak[k], strong[k], nullsAsUndefined)
     } else if (s) {
       result[k] = strong[k]
     } else {
