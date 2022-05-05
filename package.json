@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "1.4.5",
+  "version": "1.6.0-beta.2",
   "main": "lib/src/index.js",
   "bin": {
     "typetta": "lib/src/cli/index.js"
@@ -14,7 +14,7 @@
     "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run generate-security  && npm run generate-in-memory",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
-    "generate-demo": "graphql-codegen --config tests/demo/codegen.yml",
+    "generate-demo": "graphql-codegen --config tests/demo/codegen0.yml && graphql-codegen --config tests/demo/codegen1.yml",
     "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
     "generate-multitenant": "graphql-codegen --config tests/multitenant/codegen.yml",
     "generate-security": "graphql-codegen --config tests/security/codegen.yml",
@@ -42,9 +42,10 @@
     "@graphql-codegen/add": "3.1.1",
     "@trivago/prettier-plugin-sort-imports": "3.2.0",
     "@types/jest": "27.4.1",
-    "@types/lodash": "4.14.181",
-    "@types/node": "12.20.48",
+    "@types/lodash": "4.14.182",
+    "@types/node": "12.20.50",
     "@types/object-hash": "2.2.1",
+    "@types/prettier": "^2.6.0",
     "@types/sha256": "0.2.0",
     "@types/uuid": "8.3.4",
     "@typescript-eslint/eslint-plugin": "5.11.0",
@@ -69,6 +70,7 @@
     "@graphql-codegen/plugin-helpers": "2.4.2",
     "@graphql-codegen/schema-ast": "2.4.1",
     "@graphql-codegen/typescript": "2.4.8",
+    "@graphql-codegen/typescript-resolvers": "^2.6.1",
     "@graphql-codegen/visitor-plugin-common": "2.7.4",
     "dataloader": "2.0.0",
     "graphql": "15.8.0",
@@ -79,7 +81,8 @@
     "type-fest": "2.12.2",
     "commander": "9.2.0",
     "chalk": "4.1.2",
-    "yaml": "2.0.1"
+    "yaml": "2.0.1",
+    "prettier": "^2.6.2"
   },
   "peerDependencies": {
     "knex": "1.0.7",

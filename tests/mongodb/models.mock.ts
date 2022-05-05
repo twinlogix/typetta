@@ -82,11 +82,48 @@ export type Dog = {
   ownerId: Scalars['ID'];
 };
 
+export type EmbeddedUser = {
+  __typename?: 'EmbeddedUser';
+  e?: Maybe<Array<EmbeddedUser2>>;
+  user: User;
+  userId: Scalars['ID'];
+};
+
+export type EmbeddedUser2 = {
+  __typename?: 'EmbeddedUser2';
+  user: User;
+  userId: Scalars['ID'];
+};
+
+export type EmbeddedUser3 = {
+  __typename?: 'EmbeddedUser3';
+  user?: Maybe<User>;
+  value?: Maybe<Scalars['Int']>;
+};
+
+export type EmbeddedUser4 = {
+  __typename?: 'EmbeddedUser4';
+  e?: Maybe<EmbeddedUser5>;
+  user?: Maybe<User>;
+};
+
+export type EmbeddedUser5 = {
+  __typename?: 'EmbeddedUser5';
+  userId?: Maybe<Scalars['ID']>;
+};
+
 export type Hotel = {
   __typename?: 'Hotel';
   audit: Auditable;
+  embeddedUser3?: Maybe<EmbeddedUser3>;
+  embeddedUser4?: Maybe<EmbeddedUser4>;
+  embeddedUsers?: Maybe<Array<EmbeddedUser>>;
+  embeddedUsers3?: Maybe<Array<EmbeddedUser3>>;
+  embeddedUsers4?: Maybe<Array<EmbeddedUser4>>;
   id: Scalars['ID'];
   name: Scalars['String'];
+  userId?: Maybe<Scalars['ID']>;
+  users?: Maybe<UserCollection>;
 };
 
 export type MockedEntity = {
@@ -142,6 +179,7 @@ export type User = {
   friends?: Maybe<Array<User>>;
   friendsId?: Maybe<Array<Scalars['ID']>>;
   id: Scalars['ID'];
+  int?: Maybe<Scalars['Int']>;
   lastName?: Maybe<Scalars['String']>;
   live: Scalars['Boolean'];
   localization?: Maybe<Scalars['Coordinates']>;
@@ -149,8 +187,15 @@ export type User = {
   usernamePasswordCredentials?: Maybe<UsernamePasswordCredentials>;
 };
 
+export type UserCollection = {
+  __typename?: 'UserCollection';
+  users: Array<User>;
+  usersId: Array<Scalars['ID']>;
+};
+
 export type UsernamePasswordCredentials = {
   __typename?: 'UsernamePasswordCredentials';
   password: Scalars['Password'];
+  user?: Maybe<User>;
   username: Scalars['String'];
 };

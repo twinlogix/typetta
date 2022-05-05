@@ -3,15 +3,15 @@ import { IdGenerationStrategy } from '..'
 import { DefaultGenerationStrategy } from '../dal/dao/dao.types'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { Directives } from './directives'
-import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
+import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './types'
 import { toFirstLower } from './utils'
 import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 import autoBind from 'auto-bind'
-import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
+import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isEnumType } from 'graphql'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
-export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig, ParsedConfig> {
+export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig, ParsedConfig> {
   constructor(private _schema: GraphQLSchema, pluginConfig: TypeScriptTypettaPluginConfig) {
     super(pluginConfig, {
       scalars: buildScalars(_schema, pluginConfig.scalars!, DEFAULT_SCALARS),
@@ -167,7 +167,9 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         isID: idDirective != null,
         idGenerationStrategy,
         isList: field.type.kind === Kind.LIST_TYPE || (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE),
-        isListElementRequired: field.type.kind === Kind.LIST_TYPE && field.type.type.kind === Kind.NON_NULL_TYPE,
+        isListElementRequired:
+          (field.type.kind === Kind.NON_NULL_TYPE && field.type.type.kind === Kind.LIST_TYPE && field.type.type.type.kind === Kind.NON_NULL_TYPE) ||
+          (field.type.kind === Kind.LIST_TYPE && field.type.type.kind === Kind.NON_NULL_TYPE),
         isExcluded: excludeDirective != null,
         defaultGenerationStrategy,
         isEnum: isEnumType(schemaType),
@@ -205,7 +207,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
     if ((mongoEntityDirective || sqlEntityDirective || memoryEntityDirective) && !entityEntityDirective) {
       throw new Error(`Directives @${Directives.MONGO} and @${Directives.SQL} and @${Directives.MEMORY} must be defined with @${Directives.ENTITY}.`)
     }
-    if(entityEntityDirective && !mongoEntityDirective && !sqlEntityDirective && !memoryEntityDirective) {
+    if (entityEntityDirective && !mongoEntityDirective && !sqlEntityDirective && !memoryEntityDirective) {
       throw new Error(`Directives @${Directives.ENTITY} need to specify a driver: @${Directives.MONGO} and @${Directives.SQL} and @${Directives.MEMORY}.`)
     }
 

@@ -91,7 +91,7 @@ test('empty find', async () => {
 })
 
 test('simple findAll', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, credentials: [{ username: 'user', password: '123456' }] } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', int: 0, live: true, credentials: [{ username: 'user', password: '123456' }] } })
 
   const users = await dao.user.findAll({})
   expect(users.length).toBe(1)
@@ -102,6 +102,7 @@ test('simple findAll', async () => {
   expect(users2.length).toBe(1)
   expect(users2[0].firstName).toBe('FirstName')
   expect(users2[0].lastName).toBe('LastName')
+  expect(users2[0].int).toBe(0)
 
   const users3 = await dao.user.findAll({ projection: { credentials: {}, firstName: true } })
   expect(users3[0].credentials).toBe(undefined)
@@ -111,6 +112,10 @@ test('simple findAll', async () => {
   expect(Object.keys(users5[0]).length).toBe(1)
   const users6 = await dao.user.findAll({ projection: { credentials: undefined } })
   expect(Object.keys(users6[0]).length).toBe(1)
+
+  await dao.user.updateOne({ filter: {}, changes: { int: null } })
+  const users7 = await dao.user.findAll({ filter: { id: { exists: true } } })
+  expect(users7[0].int).toBe(null)
 })
 
 test('simple findOne', async () => {
@@ -414,6 +419,9 @@ test('find with multiple sorts', async () => {
   const response1 = await dao.user.findAll({ sorts: [{ firstName: 'desc' }, { lastName: 'desc' }] })
   expect(response1[0].lastName).toBe('9')
   expect(response1[1].lastName).toBe('8')
+  const response2 = await dao.user.findAll({ sorts: [{ firstName: 'desc', lastName: 'desc' }] })
+  expect(response2[0].lastName).toBe('9')
+  expect(response2[1].lastName).toBe('8')
 })
 
 test('find with start and limit', async () => {
@@ -637,6 +645,12 @@ test('simple update', async () => {
 test('update embedded entity', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
 
+  const user0 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { user: { firstName: true }, password: true } } })
+  expect(user0?.usernamePasswordCredentials).toBe(undefined)
+
+  const user1 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user1?.usernamePasswordCredentials).toBe(undefined)
+
   await dao.user.updateOne({ filter: { id: user.id }, changes: { usernamePasswordCredentials: { username: 'username', password: 'password' } } })
   const user2 = await dao.user.findOne({ filter: { id: user.id } })
 
@@ -657,6 +671,19 @@ test('update embedded entity', async () => {
   expect(user4?.usernamePasswordCredentials).toBeDefined()
   expect(user4?.usernamePasswordCredentials?.username).toBe('newUsername_2')
   expect(user4?.usernamePasswordCredentials?.password).toBe('5c29a959abce4eda5f0e7a4e7ea53dce4fa0f0abbe8eaa63717e2fed5f193d31')
+
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { usernamePasswordCredentials: null } })
+  const user5 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user5?.usernamePasswordCredentials).toBe(null)
+
+  const user6 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { user: { firstName: true } } } })
+  expect(user6?.usernamePasswordCredentials).toBe(undefined)
+
+  const user7 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: true } })
+  expect(user7?.usernamePasswordCredentials).toBe(null)
+
+  const user8 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { username: true } } })
+  expect(user8?.usernamePasswordCredentials).toBe(undefined)
 })
 
 test('update with undefined', async () => {
@@ -842,6 +869,12 @@ test('insert and retrieve decimal array field', async () => {
   expect(user?.amounts?.length).toBe(2)
   expect((user?.amounts ?? [])[0].comparedTo(1.02)).toBe(0)
   expect((user?.amounts ?? [])[1].comparedTo(2.223)).toBe(0)
+
+  const user2 = await dao.user.findOne({ filter: { amounts: { in: [[new BigNumber(1.02)], [new BigNumber(1.02), new BigNumber(2.223)]] } }, projection: { id: true, amounts: true } })
+  expect(user2).toBeDefined()
+  expect(user2?.amounts?.length).toBe(2)
+  expect((user2?.amounts ?? [])[0].comparedTo(1.02)).toBe(0)
+  expect((user2?.amounts ?? [])[1].comparedTo(2.223)).toBe(0)
 })
 
 // ------------------------------------------------------------------------
@@ -1226,7 +1259,7 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 // --------------------------- TRANSACTIONS -------------------------------
 // ------------------------------------------------------------------------
 
-test('Simple transaction', async () => {
+test('Simple transaction options', async () => {
   const session = connection.startSession()
   session.startTransaction({
     readConcern: { level: 'local' },
@@ -1242,6 +1275,28 @@ test('Simple transaction', async () => {
   expect(user1.live).toBe(true)
   expect(user2).toBe(null)
   expect(user3?.live).toBe(true)
+  expect(user4?.live).toBe(true)
+})
+
+test('Simple transaction functional', async () => {
+  const session = connection.startSession()
+  session.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+  await dao.transaction({ mongodb: { default: session } }, async (dao2) => {
+    const user1 = await dao2.user.insertOne({ record: { id: '123', live: true } })
+    const user2 = await dao2.user.findOne({ filter: { id: '123' } })
+    const user5 = await dao.user.findOne({ filter: { id: '123' } })
+    expect(user5).toBe(null)
+    expect(user1.live).toBe(true)
+    expect(user2?.live).toBe(true)
+  })
+  const user3 = await dao.user.findOne({ filter: { id: '123' } })
+  expect(user3).toBe(null)
+  const res = await session.commitTransaction()
+  expect(res.ok).toBe(1)
+  const user4 = await dao.user.findOne({ filter: { id: '123' } })
   expect(user4?.live).toBe(true)
 })
 
@@ -1618,6 +1673,66 @@ test('Audit middlewares', async () => {
 
   expect(cesena1?.computedName).toBe('Computed: Cesena')
   expect(cesena2?.computedName).toBe(undefined)
+})
+
+test('Inner ref inside embedded', async () => {
+  const u1 = await dao.user.insertOne({ record: { live: true, firstName: '1' } })
+  const u2 = await dao.user.insertOne({ record: { live: true, firstName: '2' } })
+  const u3 = await dao.user.insertOne({ record: { live: true, firstName: '3' } })
+  await dao.hotel.insertOne({
+    record: {
+      name: 'h',
+      users: { usersId: [u1.id, u2.id] },
+      embeddedUsers: [
+        { userId: u1.id, e: [{ userId: u3.id }] },
+        { userId: u2.id, e: [{ userId: u2.id }, { userId: u1.id }] },
+      ],
+      userId: u2.id,
+      embeddedUsers3: [{ value: null }, { value: 2 }],
+      embeddedUser4: { e: { userId: u3.id } },
+      embeddedUsers4: [{ e: { userId: u2.id } }, { e: { userId: u1.id } }, { e: { userId: 'asd' } }, { e: { userId: null } }],
+      audit: { createdBy: '', createdOn: 2, modifiedBy: '', modifiedOn: 1, state: State.ACTIVE },
+    },
+  })
+
+  //TODO: relations on innerRef not working because it's 1-1 but with array is [1-1] so it may have sense to introduce relations
+  const h = await dao.hotel.findOne({
+    projection: {
+      users: { users: { firstName: true } },
+      embeddedUsers: { user: { firstName: true }, e: { user: { firstName: true } } },
+      embeddedUser3: { user: { firstName: true } },
+      embeddedUsers3: { user: { firstName: true }, value: true },
+      embeddedUser4: { user: { firstName: true } },
+      embeddedUsers4: { user: { firstName: true } },
+    },
+  })
+  await dao.hotel.updateOne({ filter: {}, changes: {"embeddedUser3.value":2}})
+  const h2 = await dao.hotel.findOne({
+    projection: {
+      embeddedUsers3: { user: { firstName: true } },
+      embeddedUser3: { user: { firstName: true }, value: true },
+    },
+  })
+
+  expect(h2?.embeddedUsers3).toBe(undefined)
+  expect((h?.embeddedUsers3 ?? [])[0]?.user?.firstName).toBe('2')
+  expect((h?.embeddedUsers3 ?? [])[0]?.value).toBe(null)
+  expect((h?.embeddedUsers3 ?? [])[1]?.user?.firstName).toBe('2')
+  expect((h?.embeddedUsers3 ?? [])[1]?.value).toBe(2)
+  expect(h?.embeddedUser3).toBe(undefined)
+  expect(h2?.embeddedUser3?.user?.firstName).toBe('2')
+  expect(h?.embeddedUser4?.user?.firstName).toBe('3')
+  expect((h?.embeddedUsers4 ?? [])[0].user?.firstName).toBe('2')
+  expect((h?.embeddedUsers4 ?? [])[1].user?.firstName).toBe('1')
+  expect((h?.embeddedUsers4 ?? [])[2].user).toBe(null)
+  expect((h?.embeddedUsers4 ?? [])[3].user).toBe(null)
+  expect(h?.users?.users[0].firstName).toBe('1')
+  expect(h?.users?.users[1].firstName).toBe('2')
+  expect((h?.embeddedUsers ?? [])[0].user.firstName).toBe('1')
+  expect((h?.embeddedUsers ?? [])[1].user.firstName).toBe('2')
+  expect(((h?.embeddedUsers ?? [])[0].e ?? [])[0].user.firstName).toBe('3')
+  expect(((h?.embeddedUsers ?? [])[1].e ?? [])[0].user.firstName).toBe('2')
+  expect(((h?.embeddedUsers ?? [])[1].e ?? [])[1].user.firstName).toBe('1')
 })
 
 test('Inserted record middleware', async () => {

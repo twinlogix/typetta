@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DefaultModelScalars, EqualityOperators, Expand, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
+import { DefaultModelScalars, EqualityOperators, Expand, QuantityOperators, SortDirection, TypeTraversal } from '../..'
 import { OmitIfKnown } from '../../utils/utils.types'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { LogFunction } from './log/log.types'
@@ -8,6 +8,8 @@ import { AnyProjection, ModelProjection } from './projections/projections.types'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { GraphQLResolveInfo } from 'graphql'
+import { Knex } from 'knex'
+import { ClientSession } from 'mongodb'
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
@@ -70,7 +72,7 @@ export type AggregateParams<T extends DAOGenerics> = {
 
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
   having?: { [K in keyof A['aggregations']]?: EqualityOperators<number> | QuantityOperators<number> | number }
-  sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
+  sorts?: Partial<Record<keyof A['aggregations'] | keyof A['by'], SortDirection>>[]
 }
 
 export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
@@ -88,7 +90,7 @@ export type DAOParams<T extends DAOGenerics> = {
   idScalar: T['idScalar']
   idGeneration: IdGenerationStrategy
   idGenerator?: () => T['idScalar'][T['idScalar']]
-  daoContext: AbstractDAOContext<T['scalars'], T['metadata']>
+  daoContext: AbstractDAOContext<string, string, T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
   metadata?: T['metadata']
   driverContext: T['driverContext']
@@ -97,6 +99,7 @@ export type DAOParams<T extends DAOGenerics> = {
   middlewares?: DAOMiddleware<T>[]
   logger?: LogFunction<T['name']>
   name: T['name']
+  datasource: string | null
 }
 
 export type DriverType = 'mongo' | 'knex' | 'memory'
@@ -158,7 +161,7 @@ export type DAOGenerics<
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
   NameType extends string = any,
-  DAOContext extends AbstractDAOContext<ScalarsType, MetadataType> = AbstractDAOContext<ScalarsType, MetadataType>,
+  DAOContext extends AbstractDAOContext<string, string, ScalarsType, MetadataType> = AbstractDAOContext<string, string, ScalarsType, MetadataType>,
 > = {
   model: ModelType
   idKey: IDKey
@@ -193,3 +196,8 @@ export type DAOGenerics<
   driverReplaceOptions: DriverReplaceOptions
   driverDeleteOptions: DriverDeleteOptions
 }
+
+export type TransactionData<MongoDBDatasources extends string, KnexDataSources extends string> = ([MongoDBDatasources] extends [never]
+  ? { mongodb?: undefined }
+  : { mongodb?: Partial<Record<MongoDBDatasources, ClientSession>> }) &
+  ([KnexDataSources] extends [never] ? { knex?: undefined } : { knex?: Partial<Record<KnexDataSources, Knex.Transaction>> })

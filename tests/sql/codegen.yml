@@ -17,6 +17,7 @@ generates:
         Live: boolean
   tests/sql/dao.mock.ts:
     config:
+      generationOutput: 'dao'
       skipTypename: true
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock

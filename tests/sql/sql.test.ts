@@ -175,7 +175,7 @@ test('Inner ref', async () => {
   expect(device?.user?.credentials?.another?.test).toBe(null)
 })
 
-test('Simple transaction', async () => {
+test('Simple transaction trx', async () => {
   const trx = await knexInstance.transaction({ isolationLevel: 'snapshot' })
   await dao.device.insertOne({ record: { name: 'dev' }, options: { trx } })
   const dev1 = await dao.device.findOne({ filter: { name: 'dev' }, options: { trx } })
@@ -183,6 +183,18 @@ test('Simple transaction', async () => {
   await trx.rollback()
   const dev2 = await dao.device.findOne({ filter: { name: 'dev' } })
   expect(dev2).toBe(null)
+})
+
+test('Simple transaction function', async () => {
+  const trx = await knexInstance.transaction({ isolationLevel: 'snapshot' })
+  await dao.transaction({ knex: { default: trx } }, async (dao2) => {
+    await dao2.device.insertOne({ record: { name: 'dev' } })
+    const dev1 = await dao2.device.findOne({ filter: { name: 'dev' } })
+    expect(dev1?.name).toBe('dev')
+  })
+  await trx.rollback()
+  const dev3 = await dao.device.findOne({ filter: { name: 'dev' } })
+  expect(dev3).toBe(null)
 })
 
 // ------------------------------------------------------------------------
