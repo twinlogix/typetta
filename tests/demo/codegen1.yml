@@ -31,6 +31,5 @@ generates:
       generationOutput: resolvers
       typettaImport: ../../src
       tsTypesImport: ./resolvers.types.generated
-      prettierConfigFile: ../../prettierrc
     plugins:
       - lib/generation/index.js

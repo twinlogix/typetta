@@ -218,10 +218,14 @@ export class InputTypettaGenerator extends TypettaGenerator {
       input ${node.name}InsertInput {
         ${this.flattenFields(node, typesMap)
           .filter((r) => r.parents.length === 0)
-          .map((r) => {
+          .flatMap((r) => {
+            if ((r.field.isID && r.field.idGenerationStrategy === 'db') || r.field.isExcluded) {
+              return []
+            }
             const type = r.kind === 'leaf' ? r.field.graphqlType : `${r.field.graphqlType}InsertInput`
             const t = r.field.isList ? `[${type}${r.field.isListElementRequired ? '!' : ''}]` : r.field.graphqlType
-            return `${r.name}: ${t}${r.field.isRequired ? '!' : ''}`
+            const required = (r.field.isID && r.field.idGenerationStrategy === 'user') || (!r.field.isID && r.field.isRequired && !r.field.defaultGenerationStrategy)
+            return [`${r.name}: ${t}${required ? '!' : ''}`]
           })
           .join('\n')}
       }`
