@@ -203,11 +203,9 @@ export class InputTypettaGenerator extends TypettaGenerator {
           .filter((r) => r.parents.length === 0)
           .map((r) => {
             if (r.field.isID) return ''
-            if (r.kind === 'leaf') {
-              return `${r.name}: ${r.field.graphqlType}`
-            } else {
-              return `${r.name}: ${r.node.name}UpdateInput`
-            }
+            const type = r.kind === 'leaf' ? r.field.graphqlType : `${r.field.graphqlType}UpdateInput`
+            const t = r.field.isList ? `[${type}${r.field.isListElementRequired ? '!' : ''}]` : type
+            return [`${r.name}: ${t}`]
           })
           .join('\n')}
       }`
@@ -223,7 +221,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
               return []
             }
             const type = r.kind === 'leaf' ? r.field.graphqlType : `${r.field.graphqlType}InsertInput`
-            const t = r.field.isList ? `[${type}${r.field.isListElementRequired ? '!' : ''}]` : r.field.graphqlType
+            const t = r.field.isList ? `[${type}${r.field.isListElementRequired ? '!' : ''}]` : type
             const required = (r.field.isID && r.field.idGenerationStrategy === 'user') || (!r.field.isID && r.field.isRequired && !r.field.defaultGenerationStrategy)
             return [`${r.name}: ${t}${required ? '!' : ''}`]
           })
