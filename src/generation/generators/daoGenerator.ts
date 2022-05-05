@@ -22,7 +22,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     if (node.entity) {
       const daoExcluded = this._generateDAOExludedFields(node)
-      const daoSchema = this._generateDAOSchema(node, typesMap)
+      const daoSchema = this._generateDAOSchema(node)
       const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
       const daoRelations = this._generateDAORelations(node)
       const daoProjection = this._generateDAOProjection(node, typesMap)
@@ -34,7 +34,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
       const daoProjection = this._generateDAOProjection(node, typesMap)
-      const daoSchema = this._generateDAOSchema(node, typesMap)
+      const daoSchema = this._generateDAOSchema(node)
       const daoInsert = this._generateDAOInsert(node)
       return [daoSchema, daoProjection, daoInsert].join('\n\n')
     }
@@ -265,13 +265,13 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   // ----------------------------------------------- SCHEMA --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'))
+  public _generateDAOSchema(node: TsTypettaGeneratorNode): string {
+    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node).join(',\n'))
     const daoSchema = `export function ${toFirstLower(node.name)}Schema(): T.Schema<types.Scalars> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
     return daoSchema
   }
 
-  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode): string[] {
     return node.fields
       .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {
