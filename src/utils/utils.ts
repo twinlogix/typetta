@@ -175,11 +175,17 @@ export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [str
   return Object.fromEntries(Object.entries(obj).flatMap(([k, v]) => f([k, v as T[keyof T]])))
 }
 
-export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>(filter: T, schema: Schema<ScalarsType>, prefix = ''): FlattenEmbeddedFilter<T> {
-  return mapObject(filter, ([k, v]) => {
+export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>(obj: T, schema: Schema<ScalarsType>, prefix = ''): FlattenEmbeddedFilter<T> {
+  if (!obj) {
+    return obj
+  }
+  return mapObject(obj, ([k, v]) => {
     const field = schema[k]
     if ('embedded' in field) {
-      return Object.entries(flattenEmbeddeds(v as Record<string, unknown>, field.embedded, `${prefix}${k}.`))
+      if(!v) {
+        return [[`${prefix}${k}`, v]]
+      }
+      return Object.entries(flattenEmbeddeds(v as T, field.embedded, `${prefix}${k}.`))
     }
     return [[`${prefix}${k}`, v]]
   }) as FlattenEmbeddedFilter<T>
