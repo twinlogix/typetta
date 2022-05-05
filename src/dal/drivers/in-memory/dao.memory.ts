@@ -149,7 +149,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
     const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
-      this.stateManager.updateElement(index, deepMerge(record, changes))
+      this.stateManager.updateElement(index, deepMerge(record, changes, false))
       return
     }
   }
@@ -159,7 +159,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
     const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
-      this.stateManager.updateElement(index, deepMerge(record, changes))
+      this.stateManager.updateElement(index, deepMerge(record, changes, false))
     }
   }
 

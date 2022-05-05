@@ -108,11 +108,11 @@ export function getTraversing(object: any, path: string): any[] {
   }
 }
 
-export function deepMerge(weak: any, strong: any): any {
-  if (weak === null || weak === undefined) {
+export function deepMerge(weak: any, strong: any, nullsAsUndefined = true): any {
+  if ((nullsAsUndefined && weak === null) || weak === undefined) {
     return strong
   }
-  if (strong === null || strong === undefined) {
+  if ((nullsAsUndefined && strong === null) || strong === undefined) {
     return weak
   }
   if (!isPlainObject(weak) || !isPlainObject(strong)) {
