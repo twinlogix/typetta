@@ -12,7 +12,7 @@
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen0.yml && graphql-codegen --config tests/demo/codegen1.yml",
-    "generate-id": "graphql-codegen --config tests/id_generator/codegen.yml",
+    "generate-id": "graphql-codegen --config tests/id-generator/codegen.yml",
     "generate-multitenant": "graphql-codegen --config tests/multitenant/codegen.yml",
     "generate-security": "graphql-codegen --config tests/security/codegen.yml",
     "generate-in-memory": "graphql-codegen --config tests/in-memory/codegen.yml",
