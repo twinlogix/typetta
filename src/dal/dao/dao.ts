@@ -628,7 +628,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const result = await body()
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      const query = JSON.stringify({ ...params, options: undefined })
+      const parsedParams = this.infoToProjection(params)
+      const query = JSON.stringify({ ...parsedParams, options: undefined })
       this.log(this.createLog({ date: start, level: 'debug', duration, operation, query }))
       return result
     }
