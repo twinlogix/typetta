@@ -32,7 +32,7 @@ type MockOverrides = {
 export const mock: MockOverrides = {
   compare: undefined,
   idSpecifications: undefined,
-  clearMemory: () => IN_MEMORY_STATE.clear()
+  clearMemory: () => IN_MEMORY_STATE.clear(),
 }
 
 export function compare(l: unknown, r: unknown): number {
@@ -43,14 +43,17 @@ export function compare(l: unknown, r: unknown): number {
   if (Array.isArray(r)) {
     return Number.NaN
   }
-  if (l instanceof ObjectId && r instanceof ObjectId) {
-    return l.equals(r) ? 0 : l.toHexString().localeCompare(r.toHexString())
-  }
   if (mock.compare) {
     const result = mock.compare(l, r)
     if (typeof result === 'number') {
       return result
     }
+  }
+  if (l instanceof ObjectId && r instanceof ObjectId) {
+    return l.equals(r) ? 0 : l.toHexString().localeCompare(r.toHexString())
+  }
+  if (l instanceof Date && r instanceof Date) {
+    return l.getTime() - r.getTime()
   }
   if ((typeof l === 'bigint' || typeof l === 'number') && (typeof r === 'bigint' || typeof r === 'number')) {
     return l > r ? 1 : l < r ? -1 : 0
@@ -164,8 +167,9 @@ export function sort<T>(entities: T[], sorts: { [K in keyof T]?: SortDirection }
   if (index < 0) {
     return entities
   }
-  const [sortKey, sortDirection] = Object.entries(sorts[index])[0] as [string, SortDirection]
-  const sortM = sortDirection === 'asc' ? 1 : -1
-  const sorted = entities.sort((a, b) => compare(getByPath(a, sortKey), getByPath(b, sortKey)) * sortM)
+  const sorted = Object.entries(sorts[index]).reduce((sorted, [sortKey, sortDirection]) => {
+    const sortM = sortDirection === 'asc' ? 1 : -1
+    return sorted.sort((a, b) => compare(getByPath(a, sortKey), getByPath(b, sortKey)) * sortM)
+  }, entities)
   return sort(sorted, sorts, index - 1)
 }

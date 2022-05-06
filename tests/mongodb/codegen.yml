@@ -16,6 +16,7 @@ generates:
         MongoID: mongodb#ObjectId
   tests/mongodb/dao.mock.ts:
     config:
+      generationOutput: 'dao'
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
       typettaImport: ../../src

@@ -1,5 +1,5 @@
 import { equals } from '../../dal/drivers/in-memory/utils.memory'
-import { getTraversing, reversed, setTraversing } from '../../utils/utils'
+import { flattenEmbeddeds, getTraversing, renameLogicalOperators, reversed, setTraversing } from '../../utils/utils'
 import {
   MiddlewareContext,
   DAO,
@@ -22,7 +22,7 @@ import { LogArgs, LogFunction } from './log/log.types'
 import { BeforeMiddlewareResult, DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { buildMiddleware } from './middlewares/utils/builder'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
-import { getProjection, infoToProjection } from './projections/projections.utils'
+import { getProjection, infoToProjection, mergeProjections, SelectProjection } from './projections/projections.utils'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
@@ -33,26 +33,22 @@ import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
-  public build<P extends T['projection']>(p: P): P {
-    return p
-  }
-
-  protected idField: T['idKey']
-  protected idScalar: T['idScalar']
-  protected idGeneration: IdGenerationStrategy
-  protected daoContext: T['daoContext']
-  protected relations: DAORelation[]
-  protected middlewares: DAOMiddleware<T>[]
-  protected pageSize: number
-  protected dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>
-  protected dataLoaderRefs: Map<string, string[]>
-  protected metadata?: T['metadata']
-  protected driverContext: T['driverContext']
-  protected schema: Schema<T['scalars']>
-  protected idGenerator?: () => T['scalars'][T['idScalar']]
-  protected name: T['name']
-  private logger?: LogFunction<T['name']>
-  protected datasource: string | null
+  protected readonly idField: T['idKey']
+  protected readonly name: T['name']
+  protected readonly idScalar: T['idScalar']
+  protected readonly idGeneration: IdGenerationStrategy
+  protected readonly daoContext: T['daoContext']
+  protected readonly relations: DAORelation[]
+  protected readonly middlewares: DAOMiddleware<T>[]
+  protected readonly pageSize: number
+  protected readonly dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>
+  protected readonly dataLoaderRefs: Map<string, string[]>
+  protected readonly metadata?: T['metadata']
+  protected readonly driverContext: T['driverContext']
+  protected readonly schema: Schema<T['scalars']>
+  protected readonly idGenerator?: () => T['scalars'][T['idScalar']]
+  private readonly logger?: LogFunction<T['name']>
+  protected readonly datasource: string | null
 
   protected constructor({
     idField,
@@ -380,14 +376,15 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             records.flatMap((r) => getTraversing(r, relation.refThis.refTo)),
           )
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.entityDao).findAllWithBatching(
-              params,
-              relation.refOther.refTo,
-              rels
-                .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
-                .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom)),
-            )
-            this.setResult(record, relation, results)
+            const filterValues = rels
+              .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
+              .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom))
+            if (filterValues.length > 0) {
+              const results = await this.daoContext.dao(relation.entityDao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
+              this.setResult(record, relation, results)
+            } else {
+              this.setResult(record, relation, [])
+            }
           }
         } else if (relation.reference === 'inner') {
           for (const record of records) {
@@ -477,7 +474,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     filterValues: T['filter'][K] | T['filter'][K][],
   ): Promise<ModelProjection<T, P>[]> {
     const values = Array.isArray(filterValues) ? filterValues : [filterValues]
-    if (params.skip != null || params.limit != null || params.filter != null) {
+    if (params.skip != null || params.limit != null || params.filter != null || params.sorts != null) {
       return this.findAll({ ...params, filter: params.filter ? { $and: [{ [filterKey]: { in: values } }, params.filter] } : { [filterKey]: { in: values } } })
     }
     return await this.loadAll(params, filterKey, values)
@@ -677,4 +674,72 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _deleteOne(params: DeleteParams<T>): Promise<void>
   protected abstract _deleteAll(params: DeleteParams<T>): Promise<void>
   protected abstract _driver(): DriverType
+
+  // -----------------------------------------------------------------------
+  // ------------------------------ UTILS ----------------------------------
+  // -----------------------------------------------------------------------
+  public projection<P extends T['projection']>(p: P): P {
+    return p
+  }
+  public mergeProjection<P1 extends T['projection'], P2 extends T['projection']>(p1: P1, p2: P2): SelectProjection<T['projection'], P1, P2> {
+    return mergeProjections(p1, p2) as SelectProjection<T['projection'], P1, P2>
+  }
+  get info(): { name: T['name']; idField: T['idKey']; schema: Schema<T['scalars']> } {
+    return { name: this.name, idField: this.idField, schema: this.schema }
+  }
+  public mapResolverFindParams(params: FindParams<T>): FindParams<T> {
+    const relations = Object.fromEntries(
+      this.relations.flatMap((r) => {
+        if (params.relations && params.relations[r.field]) {
+          const relationDao = this.daoContext.dao(r.reference === 'relation' ? r.entityDao : r.dao)
+          return [[r.field, relationDao.mapResolverFindParams(params.relations[r.field])]]
+        }
+        return []
+      }),
+    )
+    return {
+      ...params,
+      filter: params.filter ? renameLogicalOperators(params.filter) : params.filter,
+      sorts: params.sorts ? (params.sorts.map((s: Record<string, unknown>) => flattenEmbeddeds(s, this.schema)) as T['pureSort']) : undefined,
+      relations,
+    }
+  }
+  get resolvers(): {
+    read: (params: Record<string, unknown>, info: GraphQLResolveInfo) => Promise<PartialDeep<T['model']>[]>
+    create: (params: InsertParams<T>, info: GraphQLResolveInfo) => Promise<PartialDeep<T['model']>>
+    update: (params: Record<string, Record<string, unknown>>) => Promise<boolean>
+    delete: (params: Record<string, Record<string, unknown>>) => Promise<boolean>
+  } {
+    return {
+      read: async (params, info) => {
+        return this.findAll({ ...this.mapResolverFindParams(params), projection: info })
+      },
+      create: async (params, info) => {
+        const inserted = await this.insertOne(params)
+        const entry = await this.findOne({
+          filter: {
+            [this.info.idField]: inserted[this.info.idField],
+          },
+          projection: info,
+        })
+        if (!entry) {
+          throw new Error('Unreachable')
+        }
+        return entry
+      },
+      update: async (params) => {
+        await this.updateAll({
+          filter: renameLogicalOperators(params.filter),
+          changes: flattenEmbeddeds(params.changes, this.info.schema),
+        })
+        return true
+      },
+      delete: async (params) => {
+        await this.deleteAll({
+          filter: renameLogicalOperators(params.filter),
+        })
+        return true
+      },
+    }
+  }
 }

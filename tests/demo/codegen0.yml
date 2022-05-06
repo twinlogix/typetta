@@ -1,0 +1,20 @@
+overwrite: true
+schema: 'tests/demo/schema.graphql'
+documents: null
+generates:
+  tests/demo/dao.generated.ts:
+    config:
+      generationOutput: 'dao'
+      schemaImport: './schema.graphql'
+      tsTypesImport: ./types.generated
+      typettaImport: ../../src
+      namingConvention: keep
+      defaultIdGenerationStrategy: 'generator'
+    plugins:
+      - lib/generation/index.js
+  tests/demo/input.generated.graphql:
+    config:
+      generationOutput: 'inputs'
+      namingConvention: keep
+    plugins:
+      - lib/generation/index.js

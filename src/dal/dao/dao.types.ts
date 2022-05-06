@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DefaultModelScalars, EqualityOperators, Expand, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
+import { DefaultModelScalars, EqualityOperators, Expand, QuantityOperators, SortDirection, TypeTraversal } from '../..'
 import { OmitIfKnown } from '../../utils/utils.types'
 import { AbstractDAOContext } from '../daoContext/daoContext'
 import { LogFunction } from './log/log.types'
@@ -72,7 +72,7 @@ export type AggregateParams<T extends DAOGenerics> = {
 
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
   having?: { [K in keyof A['aggregations']]?: EqualityOperators<number> | QuantityOperators<number> | number }
-  sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
+  sorts?: Partial<Record<keyof A['aggregations'] | keyof A['by'], SortDirection>>[]
 }
 
 export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<

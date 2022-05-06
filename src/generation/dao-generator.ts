@@ -1,60 +1,19 @@
-import { DefaultGenerationStrategy, IdGenerationStrategy } from '..'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
+import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
 import { findField, findID, findNode, removeParentPath, toFirstLower } from './utils'
+import prettier from 'prettier'
 
-type ScalarType = { kind: 'scalar'; scalar: string }
-type EmbedFieldType = { kind: 'embedded'; embed: string }
-type InnerRefFieldType = { kind: 'innerRef'; innerRef: string; refFrom?: string; refTo?: string }
-type ForeignRefFieldType = { kind: 'foreignRef'; foreignRef: string; refFrom?: string; refTo?: string }
-type RelationEntityRefFieldType = {
-  kind: 'relationEntityRef'
-  sourceRef: string
-  destRef: string
-  entity: string
-  refThis?: { refFrom: string; refTo?: string }
-  refOther?: { refFrom: string; refTo?: string }
-}
-export type FieldTypeType = ScalarType | EmbedFieldType | InnerRefFieldType | ForeignRefFieldType | RelationEntityRefFieldType
-
-export type TsTypettaGeneratorField = {
-  name: string
-  type: FieldTypeType
-  graphqlType: string
-  isRequired: boolean
-  isID: boolean
-  idGenerationStrategy?: IdGenerationStrategy
-  isList: boolean
-  isListElementRequired: boolean
-  isExcluded: boolean
-  isEnum: boolean
-  defaultGenerationStrategy?: DefaultGenerationStrategy
-  alias?: string
-}
-
-export type TsTypettaGeneratorNode = {
-  type: 'type'
-  name: string
-  entity?: { type: 'mongo'; collection: string; source: string } | { type: 'sql'; table: string; source: string } | { type: 'memory' }
-  fields: TsTypettaGeneratorField[]
-}
-
-export type TsTypettaGeneratorScalar = {
-  type: 'scalar'
-  name: string
-  isString: boolean
-  isQuantity: boolean
-}
-
-export class TsTypettaGenerator {
+export class TsTypettaGenerator extends TypettaGenerator {
   private _generators: TsTypettaAbstractGenerator[]
 
   constructor(config: TypeScriptTypettaPluginConfig) {
+    super(config)
     this._generators = [new TsTypettaDAOGenerator(config)]
   }
 
-  public generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): string {
+  public async generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string> {
     const typesMap = new Map<string, TsTypettaGeneratorNode>()
     nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
 
@@ -74,21 +33,24 @@ export class TsTypettaGenerator {
     if (!Array.from(typesMap.values()).some((v) => v.entity?.type)) {
       throw new Error('At least one entity is required for code generation. (@entity)')
     }
-    const definitions = [...typesMap.values()].filter(node => node.name !== 'Query' && node.name !== 'Mutation').flatMap((node) => {
-      const definition = this._generators
-        .map((generator) => generator.generateDefinition(node, typesMap, customScalarsMap))
-        .filter((def) => def !== '')
-        .join('\n\n')
-      if (definition.trim().length === 0) {
-        return []
-      } else {
-        return [[this._generateTitle(node), definition].join('\n\n')]
-      }
-    })
+    const definitions = [...typesMap.values()]
+      .filter((node) => node.name !== 'Query' && node.name !== 'Mutation')
+      .flatMap((node) => {
+        const definition = this._generators
+          .map((generator) => generator.generateDefinition(node, typesMap, customScalarsMap))
+          .filter((def) => def !== '')
+          .join('\n\n')
+        if (definition.trim().length === 0) {
+          return []
+        } else {
+          return [[this._generateTitle(node), definition].join('\n\n')]
+        }
+      })
 
     const exports = this._generators.map((generator) => generator.generateExports(typesMap, customScalarsMap))
 
-    return [imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
+    const prettierOptions = await prettier.resolveConfig('./*.ts') ?? { parser: 'typescript' }
+    return prettier.format([imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n'), prettierOptions)
   }
 
   private _generateTitle(node: TsTypettaGeneratorNode): string {

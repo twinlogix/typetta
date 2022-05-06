@@ -131,7 +131,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     })
 
     const filteredResult = args?.having ? unorderedResults.filter((r) => filterEntity(r, args.having)) : unorderedResults
-    const sorted = args?.sorts ? sort(filteredResult, args.sorts) : filteredResult
+    const sorted = args?.sorts ? sort<T['model']>(filteredResult, args.sorts) : filteredResult
     const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? sorted.length))
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
@@ -149,7 +149,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
     const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
-      this.stateManager.updateElement(index, deepMerge(record, changes))
+      const result = deepMerge(record, changes, false)
+      this.stateManager.updateElement(index, result)
       return
     }
   }
@@ -159,7 +160,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
     const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
-      this.stateManager.updateElement(index, deepMerge(record, changes))
+      const result = deepMerge(record, changes, false)
+      this.stateManager.updateElement(index, result)
     }
   }
 

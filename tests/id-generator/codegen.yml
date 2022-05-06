@@ -1,22 +1,21 @@
 overwrite: true
-schema: 'tests/demo/schema.graphql'
+schema: 'tests/id-generator/schema.graphql'
 documents: null
 generates:
-  tests/demo/models.mock.ts:
+  tests/id-generator/models.mock.ts:
     plugins:
       - 'typescript'
     config:
+      skipTypename: true
       namingConvention: keep
       scalars:
-        DateTime: Date
-        Decimal: bignumber.js#BigNumber
-        Coordinates: ../../src#Coordinates
-        LocalizedString: ../types#LocalizedString
         JSON: any
-        Password: string
-  tests/demo/dao.mock.ts:
+        Decimal: bignumber.js#BigNumber
+        MongoID: mongodb#ObjectId
+        IntAutoInc: number
+  tests/id-generator/dao.mock.ts:
     config:
-      skipTypename: true
+      generationOutput: 'dao'
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
       typettaImport: ../../src

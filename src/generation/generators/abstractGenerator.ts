@@ -1,14 +1,10 @@
-import { IdGenerationStrategy } from '../..'
 import { TypeScriptTypettaPluginConfig } from '../config'
-import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
+import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../types'
 
-type AddtionalPluginConfig = {
-  defaultIdGenerationStrategy?: IdGenerationStrategy
-}
 export abstract class TsTypettaAbstractGenerator {
-  protected _config: TypeScriptTypettaPluginConfig & AddtionalPluginConfig
+  protected _config: TypeScriptTypettaPluginConfig
 
-  constructor(config: TypeScriptTypettaPluginConfig & AddtionalPluginConfig) {
+  constructor(config: TypeScriptTypettaPluginConfig) {
     this._config = config
   }
 

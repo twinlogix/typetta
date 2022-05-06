@@ -1,24 +1,23 @@
 overwrite: true
-schema: 'tests/id_generator/schema.graphql'
+schema: 'tests/resolvers/schema.graphql'
 documents: null
 generates:
-  tests/id_generator/models.mock.ts:
+  tests/resolvers/models.mock.ts:
     plugins:
       - 'typescript'
     config:
-      skipTypename: true
       namingConvention: keep
       scalars:
-        JSON: any
-        Decimal: bignumber.js#BigNumber
-        MongoID: mongodb#ObjectId
-        IntAutoInc: number
-  tests/id_generator/dao.mock.ts:
+        Date: Date
+        ID: string
+  tests/resolvers/dao.mock.ts:
     config:
+      generationOutput: 'dao'
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
       typettaImport: ../../src
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
+      skipTypename: true
     plugins:
       - lib/generation/index.js

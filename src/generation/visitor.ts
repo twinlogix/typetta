@@ -3,15 +3,15 @@ import { IdGenerationStrategy } from '..'
 import { DefaultGenerationStrategy } from '../dal/dao/dao.types'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { Directives } from './directives'
-import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
+import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './types'
 import { toFirstLower } from './utils'
 import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 import autoBind from 'auto-bind'
-import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
+import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isEnumType } from 'graphql'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
-export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig, ParsedConfig> {
+export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig, ParsedConfig> {
   constructor(private _schema: GraphQLSchema, pluginConfig: TypeScriptTypettaPluginConfig) {
     super(pluginConfig, {
       scalars: buildScalars(_schema, pluginConfig.scalars!, DEFAULT_SCALARS),

@@ -341,6 +341,15 @@ test('insert and find embedded entity', async () => {
   expect(response[0].usernamePasswordCredentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
 })
 
+test('set embedded to null', async () => {
+  await dao.post.insertOne({ record: { authorId: '123', title: 'T', views: 1, metadata: { region: 'it', visible: true } } })
+  const p1 = await dao.post.findOne({})
+  expect(p1?.metadata?.visible).toBe(true)
+  await dao.post.updateAll({ filter: {}, changes: { metadata: null } })
+  const p2 = await dao.post.findOne({})
+  expect(p2?.metadata).toBe(null)
+})
+
 test('insert generic test 1', async () => {
   const ins = await dao.user.insertOne({
     record: {

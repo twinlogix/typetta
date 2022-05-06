@@ -1,5 +1,5 @@
 import { DAORelation } from '../../dal/dao/relations/relations.types'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../generator'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../types'
 import { getID, getNode, indentMultiline, resolveParentPath, toFirstLower } from '../utils'
 import { TsTypettaAbstractGenerator } from './abstractGenerator'
 import { DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
@@ -22,7 +22,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     if (node.entity) {
       const daoExcluded = this._generateDAOExludedFields(node)
-      const daoSchema = this._generateDAOSchema(node, typesMap)
+      const daoSchema = this._generateDAOSchema(node)
       const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
       const daoRelations = this._generateDAORelations(node)
       const daoProjection = this._generateDAOProjection(node, typesMap)
@@ -34,7 +34,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
       const daoProjection = this._generateDAOProjection(node, typesMap)
-      const daoSchema = this._generateDAOSchema(node, typesMap)
+      const daoSchema = this._generateDAOSchema(node)
       const daoInsert = this._generateDAOInsert(node)
       return [daoSchema, daoProjection, daoInsert].join('\n\n')
     }
@@ -265,13 +265,13 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   // ----------------------------------------------- SCHEMA --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'))
+  public _generateDAOSchema(node: TsTypettaGeneratorNode): string {
+    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node).join(',\n'))
     const daoSchema = `export function ${toFirstLower(node.name)}Schema(): T.Schema<types.Scalars> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
     return daoSchema
   }
 
-  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode): string[] {
     return node.fields
       .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {
@@ -358,20 +358,20 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     return node.fields
       .map((field) => {
         if (field.type.kind === 'scalar') {
-          return `${field.name}?: boolean,`
+          return `${field.name}?: boolean`
         } else if (field.type.kind === 'innerRef') {
           const linkedType = getNode(field.type.innerRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean,`
+          return `${field.name}?: ${linkedType.name}Projection | boolean`
         } else if (field.type.kind === 'foreignRef') {
           const linkedType = getNode(field.type.foreignRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean,`
+          return `${field.name}?: ${linkedType.name}Projection | boolean`
         } else if (field.type.kind === 'relationEntityRef') {
           const linkedType = getNode(field.type.destRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean,`
+          return `${field.name}?: ${linkedType.name}Projection | boolean`
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
           const embeddedProjection = indentMultiline(this._generateDAOProjectionFields(embeddedType, typesMap))
-          return `${field.name}?: {\n${embeddedProjection}\n} | boolean,`
+          return `${field.name}?: {\n${embeddedProjection}\n} | boolean`
         }
       })
       .join('\n')
@@ -383,7 +383,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   public _generateDAOSort(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSortFields = this._generateDAOSortFields(node, typesMap).join(' | ')
     const daoSortKeys = `export type ${node.name}SortKeys = ${daoSortFields}`
-    const daoSort = `export type ${node.name}Sort = T.OneKey<${node.name}SortKeys, T.SortDirection>`
+    const daoSort = `export type ${node.name}Sort = Partial<Record<${node.name}SortKeys, T.SortDirection>>`
     const daoRawSort = `export type ${node.name}RawSort = ${
       node.entity?.type === 'mongo' ? '() => M.Sort' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
     }`
