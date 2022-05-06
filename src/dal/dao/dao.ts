@@ -376,14 +376,15 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             records.flatMap((r) => getTraversing(r, relation.refThis.refTo)),
           )
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.entityDao).findAllWithBatching(
-              params,
-              relation.refOther.refTo,
-              rels
-                .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
-                .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom)),
-            )
-            this.setResult(record, relation, results)
+            const filterValues = rels
+              .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
+              .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom))
+            if (filterValues.length > 0) {
+              const results = await this.daoContext.dao(relation.entityDao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
+              this.setResult(record, relation, results)
+            } else {
+              this.setResult(record, relation, [])
+            }
           }
         } else if (relation.reference === 'inner') {
           for (const record of records) {
@@ -473,7 +474,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     filterValues: T['filter'][K] | T['filter'][K][],
   ): Promise<ModelProjection<T, P>[]> {
     const values = Array.isArray(filterValues) ? filterValues : [filterValues]
-    if (params.skip != null || params.limit != null || params.filter != null) {
+    if (params.skip != null || params.limit != null || params.filter != null || params.sorts != null) {
       return this.findAll({ ...params, filter: params.filter ? { $and: [{ [filterKey]: { in: values } }, params.filter] } : { [filterKey]: { in: values } } })
     }
     return await this.loadAll(params, filterKey, values)

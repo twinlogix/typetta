@@ -1,0 +1,23 @@
+overwrite: true
+schema: 'tests/resolvers/schema.graphql'
+documents: null
+generates:
+  tests/resolvers/models.mock.ts:
+    plugins:
+      - 'typescript'
+    config:
+      namingConvention: keep
+      scalars:
+        Date: Date
+        ID: string
+  tests/resolvers/dao.mock.ts:
+    config:
+      generationOutput: 'dao'
+      schemaImport: './schema.graphql'
+      tsTypesImport: ./models.mock
+      typettaImport: ../../src
+      namingConvention: keep
+      defaultIdGenerationStrategy: 'generator'
+      skipTypename: true
+    plugins:
+      - lib/generation/index.js

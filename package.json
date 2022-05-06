@@ -8,7 +8,7 @@
     "coverage": "jest --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
     "test": "jest --detectOpenHandles --no-cache --forceExit",
     "lint": "eslint . --quiet --ext .js,.jsx,.ts,.tsx",
-    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run generate-security  && npm run generate-in-memory",
+    "generate": "npm run generate-mongodb && npm run generate-sql && npm run generate-demo && npm run generate-id && npm run generate-multitenant && npm run generate-security && npm run generate-in-memory && npm run generate-resolvers",
     "generate-mongodb": "graphql-codegen --config tests/mongodb/codegen.yml",
     "generate-sql": "graphql-codegen --config tests/sql/codegen.yml",
     "generate-demo": "graphql-codegen --config tests/demo/codegen0.yml && graphql-codegen --config tests/demo/codegen1.yml",
@@ -16,6 +16,7 @@
     "generate-multitenant": "graphql-codegen --config tests/multitenant/codegen.yml",
     "generate-security": "graphql-codegen --config tests/security/codegen.yml",
     "generate-in-memory": "graphql-codegen --config tests/in-memory/codegen.yml",
+    "generate-resolvers": "graphql-codegen --config tests/resolvers/codegen.yml",
     "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts",
     "release": "npm run build && release-it"
   },
