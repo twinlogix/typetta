@@ -33,3 +33,6 @@ generates:
       tsTypesImport: ./resolvers.types.generated
     plugins:
       - lib/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

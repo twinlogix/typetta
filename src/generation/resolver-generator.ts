@@ -1,7 +1,6 @@
 import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
 import { toFirstLower } from './utils'
-import prettier from 'prettier'
 
 export class ResolverTypettaGenerator extends TypettaGenerator {
   constructor(config: TypeScriptTypettaPluginConfig) {
@@ -20,11 +19,9 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
     })
     const typeNodes = nodes.flatMap((n) => (n.type === 'type' && n.entity ? [n] : []))
 
-    const prettierOptions = (await prettier.resolveConfig('./*.ts')) ?? { parser: 'typescript' }
-    return prettier.format(
-      [
-        this.generateImports(),
-        `export const resolvers: { Mutation: types.MutationResolvers; Query: types.QueryResolvers } = {
+    return [
+      this.generateImports(),
+      `export const resolvers: { Mutation: types.MutationResolvers; Query: types.QueryResolvers } = {
           Query: {
             ${this.generateQueries(typeNodes)}
           },
@@ -32,9 +29,7 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
             ${this.generateMutations(typeNodes)}
           }
         }`,
-      ].join('\n'),
-      prettierOptions,
-    )
+    ].join('\n')
   }
 
   private generateImports(): string {
