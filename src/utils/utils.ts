@@ -1,8 +1,9 @@
-import { FlattenEmbeddedFilter } from '..'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
 import { isPlainObject } from 'is-plain-object'
 import knex, { Knex } from 'knex'
+import { DeepRequired, RecursiveKeyOfLeaf, TypeTraversal } from './utils.types'
+import { DAOGenerics } from '../dal/dao/dao.types'
 
 export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
   const c = key.split('.')
@@ -175,6 +176,10 @@ export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [str
   return Object.fromEntries(Object.entries(obj).flatMap(([k, v]) => f([k, v as T[keyof T]])))
 }
 
+type FlattenEmbeddedFilter<T> = {
+  [K in RecursiveKeyOfLeaf<DeepRequired<T>>]?: TypeTraversal<T, K>
+}
+
 export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>(obj: T, schema: Schema<ScalarsType>, prefix = ''): FlattenEmbeddedFilter<T> {
   if (!obj) {
     return obj
@@ -191,11 +196,11 @@ export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>
   }) as FlattenEmbeddedFilter<T>
 }
 
-export function renameLogicalOperators<T extends Record<string, unknown>>(obj: T): Omit<T, 'and_' | 'or_' | 'nor_'> & Record<'$and', T['and_']> & Record<'$or', T['or_']> & Record<'$nor', T['nor_']> {
+export function renameLogicalOperators<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {
   return mapObject(obj, ([k, v]) => {
-    if (k === 'and_') return [['$and', v]]
-    if (k === 'or_') return [['$or', v]]
-    if (k === 'nor_') return [['$nor', v]]
+    if (k === 'and_' || k === '$and') return [['$and', (v as Record<string, unknown>[]).map(ve => renameLogicalOperators(ve))]]
+    if (k === 'or_' || k === '$or') return [['$or', (v as Record<string, unknown>[]).map(ve => renameLogicalOperators(ve))]]
+    if (k === 'nor_' || k === '$nor') return [['$nor', (v as Record<string, unknown>[]).map(ve => renameLogicalOperators(ve))]]
     return [[k, v]]
-  }) as Omit<T, 'and_' | 'or_' | 'nor_'> & Record<'$and', T['and_']> & Record<'$or', T['or_']> & Record<'$nor', T['nor_']>
+  }) as D['pureFilter']
 }

@@ -1,5 +1,5 @@
 import { equals } from '../../dal/drivers/in-memory/utils.memory'
-import { getTraversing, reversed, setTraversing } from '../../utils/utils'
+import { flattenEmbeddeds, getTraversing, renameLogicalOperators, reversed, setTraversing } from '../../utils/utils'
 import {
   MiddlewareContext,
   DAO,
@@ -685,5 +685,60 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
   get info(): { name: T['name']; idField: T['idKey']; schema: Schema<T['scalars']> } {
     return { name: this.name, idField: this.idField, schema: this.schema }
+  }
+  public mapResolverFindParams(params: FindParams<T>): FindParams<T> {
+    const relations = Object.fromEntries(
+      this.relations.flatMap((r) => {
+        if (params.relations && params.relations[r.field]) {
+          const relationDao = this.daoContext.dao(r.reference === 'relation' ? r.entityDao : r.dao)
+          return [[r.field, relationDao.mapResolverFindParams(params.relations[r.field])]]
+        }
+        return []
+      }),
+    )
+    return {
+      ...params,
+      filter: params.filter ? renameLogicalOperators(params.filter) : params.filter,
+      sorts: params.sorts ? (params.sorts.map((s: Record<string, unknown>) => flattenEmbeddeds(s, this.schema)) as T['pureSort']) : undefined,
+      relations,
+    }
+  }
+  get resolvers(): {
+    read: (params: Record<string, unknown>, info: GraphQLResolveInfo) => Promise<PartialDeep<T['model']>[]>
+    create: (params: InsertParams<T>, info: GraphQLResolveInfo) => Promise<PartialDeep<T['model']>>
+    update: (params: Record<string, Record<string, unknown>>) => Promise<boolean>
+    delete: (params: Record<string, Record<string, unknown>>) => Promise<boolean>
+  } {
+    return {
+      read: async (params, info) => {
+        return this.findAll({ ...this.mapResolverFindParams(params), projection: info })
+      },
+      create: async (params, info) => {
+        const inserted = await this.insertOne(params)
+        const entry = await this.findOne({
+          filter: {
+            [this.info.idField]: inserted[this.info.idField],
+          },
+          projection: info,
+        })
+        if (!entry) {
+          throw new Error('Unreachable')
+        }
+        return entry
+      },
+      update: async (params) => {
+        await this.updateAll({
+          filter: renameLogicalOperators(params.filter),
+          changes: flattenEmbeddeds(params.changes, this.info.schema),
+        })
+        return true
+      },
+      delete: async (params) => {
+        await this.deleteAll({
+          filter: renameLogicalOperators(params.filter),
+        })
+        return true
+      },
+    }
   }
 }
