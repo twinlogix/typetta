@@ -182,11 +182,20 @@ export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>
   return mapObject(obj, ([k, v]) => {
     const field = schema[k]
     if ('embedded' in field) {
-      if(!v) {
+      if (!v) {
         return [[`${prefix}${k}`, v]]
       }
       return Object.entries(flattenEmbeddeds(v as T, field.embedded, `${prefix}${k}.`))
     }
     return [[`${prefix}${k}`, v]]
   }) as FlattenEmbeddedFilter<T>
+}
+
+export function renameLogicalOperators<T extends Record<string, unknown>>(obj: T): Omit<T, 'and_' | 'or_' | 'nor_'> & Record<'$and', T['and_']> & Record<'$or', T['or_']> & Record<'$nor', T['nor_']> {
+  return mapObject(obj, ([k, v]) => {
+    if (k === 'and_') return [['$and', v]]
+    if (k === 'or_') return [['$or', v]]
+    if (k === 'nor_') return [['$nor', v]]
+    return [[k, v]]
+  }) as Omit<T, 'and_' | 'or_' | 'nor_'> & Record<'$and', T['and_']> & Record<'$or', T['or_']> & Record<'$nor', T['nor_']>
 }
