@@ -30,8 +30,8 @@ export const validate: PluginValidateFn<TypeScriptTypettaPluginConfig> = async (
       throw new Error(`Plugin "typescript-typetta" requires extension to be ".ts" or ".tsx" when config.generationOutput is "dao"`)
     }
   } else if (config.generationOutput === 'inputs') {
-    if (extname(outputFile) !== '.graphql') {
-      throw new Error(`Plugin "typescript-typetta" requires extension to be ".graphql" when config.generationOutput is "inputs"`)
+    if (extname(outputFile) !== '.ts') {
+      throw new Error(`Plugin "typescript-typetta" requires extension to be ".ts" when config.generationOutput is "inputs"`)
     }
   } else if (config.generationOutput === 'resolvers') {
     if (extname(outputFile) !== '.ts') {

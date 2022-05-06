@@ -21,8 +21,11 @@ export class InputTypettaGenerator extends TypettaGenerator {
 
     const customScalars = this.generateCustomScalars(customScalarsMap)
     const customScalarsFilterInput = this.generateCustomScalarFilterInput(customScalarsMap)
+    const prettierOptions = (await prettier.resolveConfig('./*.ts')) ?? { parser: 'typescript' }
     return prettier.format(
       [
+        "import { gql } from 'graphql-tag'",
+        'export default gql`',
         this.defaultInput(),
         customScalars,
         customScalarsFilterInput,
@@ -50,10 +53,9 @@ export class InputTypettaGenerator extends TypettaGenerator {
           }),
         this.generateQuery(typesMap),
         this.generateMutation(typesMap),
+        '`',
       ].join('\n\n'),
-      {
-        parser: 'graphql',
-      },
+      prettierOptions,
     )
   }
 

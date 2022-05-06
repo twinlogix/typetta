@@ -12,7 +12,7 @@ generates:
       defaultIdGenerationStrategy: 'generator'
     plugins:
       - lib/generation/index.js
-  tests/demo/input.generated.graphql:
+  tests/demo/operations-types.generated.ts:
     config:
       generationOutput: 'inputs'
       namingConvention: keep
