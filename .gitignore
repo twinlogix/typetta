@@ -3,3 +3,4 @@ lib
 .npmrc
 docs/_site
 tests/**/*.generated.*
+tests/cli/example

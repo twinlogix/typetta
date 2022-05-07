@@ -11,10 +11,10 @@ generates:
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
     plugins:
-      - lib/generation/index.js
+      - lib/src/generation/index.js
   tests/demo/input.generated.graphql:
     config:
       generationOutput: 'inputs'
       namingConvention: keep
     plugins:
-      - lib/generation/index.js
+      - lib/src/generation/index.js

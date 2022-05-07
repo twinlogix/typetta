@@ -25,4 +25,4 @@ generates:
       defaultIdGenerationStrategy: 'generator'
       skipTypename: true
     plugins:
-      - lib/generation/index.js
+      - lib/src/generation/index.js

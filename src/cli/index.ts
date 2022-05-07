@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import packageJson from '../../package.json'
-import generate from './generate'
-import init from './init'
+import generate from './generate/generate'
+import init from './init/init'
 import { TYPETTA_COLOR } from './utils'
 import chalk from 'chalk'
 import { Command } from 'commander'
@@ -19,6 +19,11 @@ program
   .description('Setup a new Typetta project or add Typetta to an existing one.')
   .action(init)
 
-program.command('generate').option('-w, --watch', 'The generate command will continue to watch and re-generate.').description('Generate the Typetta client files.').action(generate)
+program
+  .command('generate')
+  .option('-c, --config <config>', 'The Typetta configuration file.')
+  // .option('-w, --watch', 'The generate command will continue to watch and re-generate.')
+  .description('Generate types and ORM files.')
+  .action(generate)
 
 program.parse(process.argv)
