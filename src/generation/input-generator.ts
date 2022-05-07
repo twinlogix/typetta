@@ -158,10 +158,10 @@ export class InputTypettaGenerator extends TypettaGenerator {
           .filter((r) => r.kind === 'leaf' && r.parents.length === 0)
           .map((r) => `${r.name}: ${r.field.graphqlType}FilterInput`)
           .join('\n')}
+          and_: [${node.name}FilterInput!]
+          or_: [${node.name}FilterInput!]
+          nor_: [${node.name}FilterInput!]
       }`
-    //and: [${node.name}FilterInput!]
-    //or: [${node.name}FilterInput!]
-    //nor: [${node.name}FilterInput!]
   }
 
   private generateRelationsFilterInput(node: TsTypettaGeneratorNode): string {
@@ -246,7 +246,9 @@ export class InputTypettaGenerator extends TypettaGenerator {
     type Query {
       ${enitityNodes
         .map((n) => {
-          return `${toFirstLower(n.name)}s(filter: ${n.name}FilterInput, sorts: [${n.name}SortInput!], ${this.hasRelations(n) ? `relations: ${n.name}RelationsFilterInput, ` : ''}skip: Int, limit: Int): [${n.name}!]!`
+          return `${toFirstLower(n.name)}s(filter: ${n.name}FilterInput, sorts: [${n.name}SortInput!], ${
+            this.hasRelations(n) ? `relations: ${n.name}RelationsFilterInput, ` : ''
+          }skip: Int, limit: Int): [${n.name}!]!`
         })
         .join('\n')}
     }`

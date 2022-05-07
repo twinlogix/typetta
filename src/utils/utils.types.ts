@@ -87,7 +87,3 @@ export type OmitIfKnown<T, K extends keyof T> = [K] extends [any] ? any : Omit<T
 export type DeepRequired<T> = Required<{
   [K in keyof T]: Required<DeepRequired<T[K]>>
 }>
-
-export type FlattenEmbeddedFilter<T> = {
-  [K in RecursiveKeyOfLeaf<DeepRequired<T>>]?: TypeTraversal<T, K>
-}

@@ -1,8 +1,8 @@
 overwrite: true
-schema: 'tests/id_generator/schema.graphql'
+schema: 'tests/id-generator/schema.graphql'
 documents: null
 generates:
-  tests/id_generator/models.mock.ts:
+  tests/id-generator/models.mock.ts:
     plugins:
       - 'typescript'
     config:
@@ -13,7 +13,7 @@ generates:
         Decimal: bignumber.js#BigNumber
         MongoID: mongodb#ObjectId
         IntAutoInc: number
-  tests/id_generator/dao.mock.ts:
+  tests/id-generator/dao.mock.ts:
     config:
       generationOutput: 'dao'
       schemaImport: './schema.graphql'

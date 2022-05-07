@@ -293,8 +293,19 @@ test('flattenEmbeddedFilter', () => {
     },
   }
   const r = flattenEmbeddeds(f, postSchema())
+  if (!r) {
+    fail()
+  }
   expect(r['metadata.region']).toBe('it')
   expect(r['metadata.typeId']).toBe(undefined)
   expect(r.authorId).toBe('123')
   expect(r.body).toBe(undefined)
+
+  const r1 = flattenEmbeddeds(
+    {
+      metadata: null,
+    },
+    postSchema(),
+  )
+  expect(r1.metadata).toBe(null)
 })
