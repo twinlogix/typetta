@@ -24,13 +24,13 @@ export default async (args: GenerateArgs) => {
           {
             schema: config?.schema,
             generates: {
-              [outputPath + '/operations.graphql']: {
+              [outputPath + '/operations.ts']: {
                 plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
                 config: {
                   namingConvention: 'keep',
                   ...(config.generateORM !== undefined && config.generateORM !== true ? config.generateORM : {}),
                   scalars: config.scalars,
-                  generationOutput: 'inputs',
+                  generationOutput: 'operations',
                 },
               },
             },
@@ -70,7 +70,7 @@ export default async (args: GenerateArgs) => {
           plugins: [
             {
               add: {
-                content: ["import * as types from './model.types'"],
+                content: ["import { PartialDeep } from 'type-fest'", "import * as types from './model.types'"],
               },
             },
             'typescript-resolvers',
@@ -92,7 +92,7 @@ export default async (args: GenerateArgs) => {
 
       let schema: Types.Schema[] = []
       if (config.generateGraphQLOperations !== false) {
-        schema.push('./operations.graphql')
+        schema.push(path.join(config.outputDir, 'operations.ts'))
       }
       schema = schema.concat(config.schema || [])
       await generate(
