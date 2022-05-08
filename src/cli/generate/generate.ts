@@ -18,35 +18,102 @@ export default async (args: GenerateArgs) => {
   } else {
     const outputPath = path.join(path.resolve(basePath), config?.outputDir)
     try {
+      console.log()
+      if (config.generateGraphQLOperations !== false) {
+        await generate(
+          {
+            schema: config?.schema,
+            generates: {
+              [outputPath + '/operations.graphql']: {
+                plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
+                config: {
+                  namingConvention: 'keep',
+                  ...(config.generateORM !== undefined && config.generateORM !== true ? config.generateORM : {}),
+                  scalars: config.scalars,
+                  generationOutput: 'inputs',
+                },
+              },
+            },
+            silent: true,
+          },
+          true,
+        )
+        console.log(`- GraphQL operations generation ${chalk.bold.green('completed')}.`)
+      }
+
       const generates: Types.Config['generates'] = {}
-      if (config.generateTypes) {
+      if (config.generateTypes !== false) {
         generates[outputPath + '/model.types.ts'] = {
           plugins: ['typescript'],
           config: {
+            enumsAsConst: true,
             ...(config.generateTypes !== undefined && config.generateTypes !== true ? config.generateTypes : {}),
             scalars: config.scalars,
           },
         }
       }
-      if (config.generateORM) {
+      if (config.generateORM !== false) {
         generates[outputPath + '/dao.ts'] = {
-          plugins: ['@twinlogix/typetta'],
+          plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
+            tsTypesImport: './model.types',
+            namingConvention: 'keep',
+            defaultIdGenerationStrategy: 'generator',
             ...(config.generateORM !== undefined && config.generateORM !== true ? config.generateORM : {}),
             scalars: config.scalars,
+            generationOutput: 'dao',
           },
         }
       }
+      if (config.generateGraphQLOperations !== false) {
+        generates[outputPath + '/resolvers.types.ts'] = {
+          plugins: [
+            {
+              add: {
+                content: ["import * as types from './model.types'"],
+              },
+            },
+            'typescript-resolvers',
+          ],
+          config: {
+            resolverTypeWrapperSignature: 'PartialDeep<T>',
+            contextType: './dao#DAOContext', // TODO
+            namespacedImportName: 'types',
+          },
+        }
+        generates[outputPath + '/resolvers.ts'] = {
+          plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
+          config: {
+            generationOutput: 'resolvers',
+            tsTypesImport: './resolvers.types',
+          },
+        }
+      }
+
+      let schema: Types.Schema[] = []
+      if (config.generateGraphQLOperations !== false) {
+        schema.push('./operations.graphql')
+      }
+      schema = schema.concat(config.schema || [])
       await generate(
         {
-          schema: config?.schema,
+          schema,
           generates,
           silent: true,
         },
         true,
       )
-    } catch (e) {
+      if (config.generateTypes !== false) {
+        console.log(`- TypeScript types generation ${chalk.bold.green('completed')}.`)
+      }
+      if (config.generateORM !== false) {
+        console.log(`- DAOContext generation ${chalk.bold.green('completed')}.`)
+      }
+      if (config.generateGraphQLOperations !== false) {
+        console.log(`- GraphQL resolvers generation ${chalk.bold.green('completed')}.`)
+      }
       console.log()
+    } catch (e) {
       console.error(chalk.red('Error: generation failed due to the following error...'))
       console.log()
       console.log(e)

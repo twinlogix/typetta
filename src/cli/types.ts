@@ -13,7 +13,7 @@ export type Config = {
     | {
         codegenConfig?: Types.ConfiguredOutput
       }
-  generateGraphQL?:
+  generateGraphQLOperations?:
     | boolean
     | {
         contextType?: string
@@ -21,4 +21,5 @@ export type Config = {
         daoContextPath?: string
       }
   scalars?: Record<string, string>[]
+  typettaGeneratorPath?: string
 }

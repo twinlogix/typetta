@@ -52,9 +52,9 @@ const createConfig = (projectDirectoryPath: string, answers: Answers): string =>
   const config: Config = {
     schema: answers.schema,
     outputDir: answers.output_dir,
-    generateTypes: answers.types,
-    generateORM: answers.orm,
-    generateGraphQL: answers.graphql,
+    generateTypes: answers.types === false ? false : undefined,
+    generateORM: answers.orm === false ? false : undefined,
+    generateGraphQLOperations: answers.graphql === false ? false : undefined,
   }
   const ext = answers.config.toLocaleLowerCase().endsWith('.json') ? 'json' : 'yml'
   const content = ext === 'json' ? JSON.stringify(config) : new yaml.Document(config).toString()
