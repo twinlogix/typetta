@@ -1,5 +1,5 @@
 overwrite: true
-schema: 'tests/demo/**.graphql'
+schema: ['tests/demo/schema.graphql', 'tests/demo/operations-types.generated.ts']
 documents: null
 generates:
   tests/demo/types.generated.ts:
@@ -33,3 +33,6 @@ generates:
       tsTypesImport: ./resolvers.types.generated
     plugins:
       - lib/src/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

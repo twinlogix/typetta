@@ -3,7 +3,6 @@ import { TsTypettaAbstractGenerator } from './generators/abstractGenerator'
 import { TsTypettaDAOGenerator } from './generators/daoGenerator'
 import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
 import { findField, findID, findNode, removeParentPath, toFirstLower } from './utils'
-import prettier from 'prettier'
 
 export class TsTypettaGenerator extends TypettaGenerator {
   private _generators: TsTypettaAbstractGenerator[]
@@ -49,8 +48,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
 
     const exports = this._generators.map((generator) => generator.generateExports(typesMap, customScalarsMap))
 
-    const prettierOptions = await prettier.resolveConfig('./*.ts') ?? { parser: 'typescript' }
-    return prettier.format([imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n'), prettierOptions)
+    return [imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
   }
 
   private _generateTitle(node: TsTypettaGeneratorNode): string {

@@ -1,7 +1,6 @@
 import { TypeScriptTypettaPluginConfig } from './config'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
 import { removeEmptyLines, toFirstLower } from './utils'
-import prettier from 'prettier'
 
 export class InputTypettaGenerator extends TypettaGenerator {
   constructor(config: TypeScriptTypettaPluginConfig) {
@@ -21,40 +20,38 @@ export class InputTypettaGenerator extends TypettaGenerator {
 
     const customScalars = this.generateCustomScalars(customScalarsMap)
     const customScalarsFilterInput = this.generateCustomScalarFilterInput(customScalarsMap)
-    return prettier.format(
-      [
-        this.defaultInput(),
-        customScalars,
-        customScalarsFilterInput,
-        ...nodes
-          .filter((n) => n.name !== 'Query' && n.name !== 'Mutation')
-          .flatMap((n) => {
-            if (n.type === 'scalar') {
+    return [
+      "import { gql } from 'graphql-tag'",
+      'export default gql`',
+      this.defaultInput(),
+      customScalars,
+      customScalarsFilterInput,
+      ...nodes
+        .filter((n) => n.name !== 'Query' && n.name !== 'Mutation')
+        .flatMap((n) => {
+          if (n.type === 'scalar') {
+            return []
+          }
+          const delimiter = `########### ${n.name} ###########`
+          const insertInput = this.generateInsertInput(n, typesMap)
+          const updateInput = this.generateUpdateInput(n, typesMap)
+          const sortInput = this.generateSortInput(n, typesMap)
+          const enitityInputs = (() => {
+            if (n.entity) {
+              const filterInput = this.generateFilterInput(n, typesMap)
+              const relationFilterInput = this.generateRelationsFilterInput(n)
+              const findInput = this.generateFindInput(n)
+              return [filterInput, relationFilterInput, findInput]
+            } else {
               return []
             }
-            const delimiter = `########### ${n.name} ###########`
-            const insertInput = this.generateInsertInput(n, typesMap)
-            const updateInput = this.generateUpdateInput(n, typesMap)
-            const sortInput = this.generateSortInput(n, typesMap)
-            const enitityInputs = (() => {
-              if (n.entity) {
-                const filterInput = this.generateFilterInput(n, typesMap)
-                const relationFilterInput = this.generateRelationsFilterInput(n)
-                const findInput = this.generateFindInput(n)
-                return [filterInput, relationFilterInput, findInput]
-              } else {
-                return []
-              }
-            })()
-            return [removeEmptyLines([delimiter, insertInput, updateInput, sortInput, ...enitityInputs, delimiter].join('\n'))]
-          }),
-        this.generateQuery(typesMap),
-        this.generateMutation(typesMap),
-      ].join('\n\n'),
-      {
-        parser: 'graphql',
-      },
-    )
+          })()
+          return [removeEmptyLines([delimiter, insertInput, updateInput, sortInput, ...enitityInputs, delimiter].join('\n'))]
+        }),
+      this.generateQuery(typesMap),
+      this.generateMutation(typesMap),
+      '`',
+    ].join('\n\n')
   }
 
   private defaultInput(): string {

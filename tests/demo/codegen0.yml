@@ -12,9 +12,12 @@ generates:
       defaultIdGenerationStrategy: 'generator'
     plugins:
       - lib/src/generation/index.js
-  tests/demo/input.generated.graphql:
+  tests/demo/operations-types.generated.ts:
     config:
       generationOutput: 'inputs'
       namingConvention: keep
     plugins:
       - lib/src/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

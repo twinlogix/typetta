@@ -4,5 +4,12 @@
   "printWidth": 200,
   "tabWidth": 2,
   "semi": false,
-  "parser": "typescript"
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "options": {
+        "parser": "typescript"
+      }
+    }
+  ]
 }
