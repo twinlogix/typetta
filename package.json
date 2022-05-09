@@ -38,7 +38,7 @@
   "devDependencies": {
     "@graphql-codegen/add": "3.1.1",
     "@trivago/prettier-plugin-sort-imports": "3.2.0",
-    "@types/jest": "27.4.1",
+    "@types/jest": "27.5.0",
     "@types/lodash": "4.14.182",
     "@types/node": "12.20.50",
     "@types/object-hash": "2.2.1",
