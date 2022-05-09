@@ -11,13 +11,13 @@ generates:
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
     plugins:
-      - lib/generation/index.js
+      - lib/src/generation/index.js
   tests/demo/operations-types.generated.ts:
     config:
-      generationOutput: 'inputs'
+      generationOutput: 'operations'
       namingConvention: keep
     plugins:
-      - lib/generation/index.js
+      - lib/src/generation/index.js
 hooks:
   afterAllFileWrite:
     - prettier --write

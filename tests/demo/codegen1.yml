@@ -32,7 +32,7 @@ generates:
       typettaImport: ../../src
       tsTypesImport: ./resolvers.types.generated
     plugins:
-      - lib/generation/index.js
+      - lib/src/generation/index.js
 hooks:
   afterAllFileWrite:
     - prettier --write

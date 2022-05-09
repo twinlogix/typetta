@@ -2,7 +2,7 @@ import { IdGenerationStrategy } from '..'
 import { RawConfig } from '@graphql-codegen/visitor-plugin-common'
 
 export interface TypeScriptTypettaPluginConfig extends RawConfig {
-  generationOutput?: 'dao' | 'inputs' | 'resolvers'
+  generationOutput?: 'dao' | 'operations' | 'resolvers'
 
   /**
    * @name tsTypesImport
