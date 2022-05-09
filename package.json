@@ -1,11 +1,11 @@
 {
   "name": "@twinlogix/typetta",
   "version": "1.6.0-beta.13",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "bin": {
-    "typetta": "src/cli/index.js"
+    "typetta": "lib/cli/index.js"
   },
-  "types": "src/index.d.ts",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "coverage": "jest --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
@@ -139,6 +139,6 @@
     "access": "public"
   },
   "files": [
-    "src"
+    "lib"
   ]
 }
