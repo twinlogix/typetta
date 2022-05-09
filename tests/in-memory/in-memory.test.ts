@@ -1,5 +1,5 @@
 import { defaultValueMiddleware, mock } from '../../src'
-import { DAOContext } from './dao.mock'
+import { EntityManager } from './dao.mock'
 import { User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import sha256 from 'sha256'
@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 jest.setTimeout(20000)
 
-let dao: DAOContext
+let dao: EntityManager
 mock.compare = (l, r) => {
   if (l instanceof Date && r instanceof Date) {
     return l.getTime() - r.getTime()
@@ -19,7 +19,7 @@ mock.compare = (l, r) => {
 
 beforeEach(async () => {
   mock.clearMemory()
-  dao = new DAOContext({
+  dao = new EntityManager({
     scalars: {
       ID: {
         generate: () => uuidv4(),
@@ -401,7 +401,7 @@ test('Insert default', async () => {
     expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
   }
 
-  const dao1 = new DAOContext({
+  const dao1 = new EntityManager({
     scalars: {
       Live: {
         generate: () => true,
@@ -419,7 +419,7 @@ test('Insert default', async () => {
   const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
   expect(e1.live).toBe(true)
 
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     scalars: {
       Live: {
         generate: () => true,

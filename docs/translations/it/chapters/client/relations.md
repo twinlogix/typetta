@@ -38,7 +38,7 @@ type Category @entity @mongodb {
 E' quindi possibile eseguire un'API di lettura di un utente, includendo i relativi post e, per ogni post, le sue categorie:
 
 ```typescript
-const user = await daoContext.user.findOne({ 
+const user = await entityManager.user.findOne({ 
   filter: { 
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e"
   },
@@ -96,7 +96,7 @@ Si noti che non è data la possibilità di specifica `projection` in quanto le p
 Di seguito un esempio in cui, rispetto alla lettura precedente, si richiede un solo post per ogni utente:
 
 ```typescript
-const user = await daoContext.user.findOne({ 
+const user = await entityManager.user.findOne({ 
   filter: { 
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e"
   },
@@ -122,7 +122,7 @@ const user = await daoContext.user.findOne({
 A seguire invece un esempio più complesso in cui, per ogni utente, si richiedoono solo i post contenenti la parola ``friend`` e per ogni post solo le categorie in ordine alfabetico.
 
 ```typescript
-const user = await daoContext.user.findOne({ 
+const user = await entityManager.user.findOne({ 
   filter: { 
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e"
   },

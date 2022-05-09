@@ -1,7 +1,7 @@
 import { SecurityPolicyReadError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
 import { inMemoryMongoDb } from '../utils'
-import { DAOContext, UserRoleParam } from './dao.mock'
+import { EntityManager, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -12,8 +12,8 @@ jest.setTimeout(20000)
 type SecurityDomain = { hotelId?: string; userId?: string; tenantId?: number }
 type OperationSecurityDomain = { [K in keyof SecurityDomain]: SecurityDomain[K][] }
 type SecurityContext = Permission[]
-type SecureDAOContext = DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>
-let unsafeDao: SecureDAOContext
+type SecureEntityManager = EntityManager<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>
+let unsafeDao: SecureEntityManager
 let mongodb: {
   replSet: MongoMemoryReplSet
   connection: MongoClient
@@ -21,7 +21,7 @@ let mongodb: {
 }
 
 function createDao(securityContext: SecurityContext | undefined, db: Db) {
-  return new DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>({
+  return new EntityManager<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>({
     mongodb: {
       default: db,
     },
@@ -74,7 +74,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
   })
 }
 
-async function createSecureDaoContext(userId: string): Promise<SecureDAOContext> {
+async function createSecureEntityManager(userId: string): Promise<SecureEntityManager> {
   const user = await unsafeDao.user.findOne({ filter: { id: userId }, projection: { id: true, roles: { role: { permissions: true }, hotelId: true, userId: true, tenantId: true } } })
   if (!user) {
     throw new Error('User does not exists')
@@ -117,7 +117,7 @@ test('security test 1', async () => {
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_VIEWER' } })
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'ANALYST' } })
 
-  const dao = await createSecureDaoContext(user.id)
+  const dao = await createSecureEntityManager(user.id)
 
   try {
     await dao.hotel.findAll({ filter: { name: { startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })

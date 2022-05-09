@@ -12,7 +12,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   private stateManager: InMemoryStateManager
   private mockIdSpecification: MockIdSpecification<unknown> | undefined
   protected constructor({ idGenerator, ...params }: InMemoryDAOParams<T>) {
-    super({ ...params, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate, driverContext: {} })
+    super({ ...params, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[params.idScalar]?.generate, driverContext: {} })
     const s = this.schema[this.idField]
     if (!('scalar' in s)) {
       throw new Error('Id is an embedded field. Not supported.')
@@ -138,16 +138,16 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
     const record = deepMerge(params.record, this.generateRecordWithId())
-    const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
+    const t = transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
     const id = t[this.schema[this.idField].alias ?? this.idField]
     this.stateManager.insertElement(id, t)
-    return _.cloneDeep(transformObject(this.daoContext.adapters.memory, 'dbToModel', t, this.schema))
+    return _.cloneDeep(transformObject(this.entityManager.adapters.memory, 'dbToModel', t, this.schema))
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
     const changesObject = {}
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
-    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
+    const changes = transformObject(this.entityManager.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
       const result = deepMerge(record, changes, false)
       this.stateManager.updateElement(index, result)
@@ -158,7 +158,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
     const changesObject = {}
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
-    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
+    const changes = transformObject(this.entityManager.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
       const result = deepMerge(record, changes, false)
       this.stateManager.updateElement(index, result)
@@ -167,7 +167,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
     for (const { record, index } of this.entities(filterEntity)) {
-      const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', deepMerge(params.replace, { [this.idField]: record[this.idField] }), this.schema)
+      const t = transformObject(this.entityManager.adapters.memory, 'modelToDB', deepMerge(params.replace, { [this.idField]: record[this.idField] }), this.schema)
       this.stateManager.updateElement(index, deepMerge(record, t))
       break
     }
@@ -230,7 +230,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       for (const index of indexes) {
         const record = this.stateManager.getElement(index)
         if (record !== null) {
-          const t = transformObject(this.daoContext.adapters.memory, 'dbToModel', record, this.schema)
+          const t = transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema)
           if (filterEntity(t, filter)) {
             yield { record: transform ? t : record, index }
           }
@@ -240,7 +240,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
     for (const { index, record } of this.stateManager.elements()) {
       if (record !== null) {
-        const t = transformObject(this.daoContext.adapters.memory, 'dbToModel', record, this.schema)
+        const t = transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema)
         if (filterEntity(t, filter)) {
           yield { record: transform ? t : record, index }
         }

@@ -31,7 +31,7 @@ type User {
 
 You can implement soft-delete behaviour for the `User` entity using this middleware as follows:
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   overrides: {
     user: {
       middlewares: [

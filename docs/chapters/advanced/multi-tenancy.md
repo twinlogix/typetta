@@ -12,10 +12,10 @@ There are three approaches to managing multi-tenancy:
 
 ## Partitioning
 
-Using the middlewares mechanism, Typetta offers fully automatic management of the multi-tenancy scenario via partitioning. Here is an example of how to configure a ``DAOContext``:
+Using the middlewares mechanism, Typetta offers fully automatic management of the multi-tenancy scenario via partitioning. Here is an example of how to configure a ``EntityManager``:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   metadata: {
     tenantId: 'user-tenant-id'
   },
@@ -27,7 +27,7 @@ const daoContext = new DAOContext({
 }
 ```
 
-The ``tenantKey`` field, which in the specific example is set as ``tenantId``, identifies the name of the discriminator that each entity of the data model will have and that represents its belonging to a tenant. The ``DAOContext`` must also be initialised with the metadata of the calling user and, in particular, must contain the discriminator defined with the same ``tenantId`` key. Note that, alternatively, you can set the metadata for each operation instead of creating the ``DAOContext``.
+The ``tenantKey`` field, which in the specific example is set as ``tenantId``, identifies the name of the discriminator that each entity of the data model will have and that represents its belonging to a tenant. The ``EntityManager`` must also be initialised with the metadata of the calling user and, in particular, must contain the discriminator defined with the same ``tenantId`` key. Note that, alternatively, you can set the metadata for each operation instead of creating the ``EntityManager``.
 
 The middleware adds the following behaviours to the data access layer:
 

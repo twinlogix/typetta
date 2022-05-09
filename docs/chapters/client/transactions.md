@@ -59,7 +59,7 @@ Here is an example of starting, committing and rollbacking a transaction using t
 ```
 
 ## Implicit Transactions
-Typetta provides two different ways to perform multiple operations in a transaction. The first one is a ``transaction`` operation offered by the ``DAOContext``. Using it you can execute a user-defined function where every Typetta operation is performed in the transaction passed as a parameter. Following an example with a MongoDB data source:
+Typetta provides two different ways to perform multiple operations in a transaction. The first one is a ``transaction`` operation offered by the ``EntityManager``. Using it you can execute a user-defined function where every Typetta operation is performed in the transaction passed as a parameter. Following an example with a MongoDB data source:
  
 ```typescript
 const session = connection.startSession()
@@ -67,11 +67,11 @@ session.startTransaction({
   readConcern: { level: 'local' },
   writeConcern: { w: 'majority' },
 })
-await daoContext.transaction(
+await entityManager.transaction(
   { 
     mongodb: { default: session } 
   }, 
-  async (transactionDAOContext) => {
+  async (transactionEntityManager) => {
     const user = await dao.user.findOne({
       filter: { id: '1fc70958-b791-4855-bbb3-d7b02b22b39e' },
       projection: { id: true, balance: true }
@@ -85,7 +85,7 @@ await daoContext.transaction(
 const res = await session.commitTransaction()
 ```
 
-Note that the first parameter allows you to provide a reference to a transaction for each data source, while the second is a function that receives only one parameter, a new ``DAOContext`` on which you can perform all the Typetta operations. It's important to use this provided context and not the outer one to be sure of executing those operation in transaction. 
+Note that the first parameter allows you to provide a reference to a transaction for each data source, while the second is a function that receives only one parameter, a new ``EntityManager`` on which you can perform all the Typetta operations. It's important to use this provided context and not the outer one to be sure of executing those operation in transaction. 
 
 ## Explicit Transactions 
 A second way to execute multiple operations in transaction is to pass a reference to it to each operation has an explicit `options` parameter. In this case it is possible to specify in which transaction an operation should be performed and you can even exclude some operations. Following an example to obtain the exact result of the previous but with this different approach:

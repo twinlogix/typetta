@@ -47,14 +47,14 @@ async function run() {
 run().catch(console.dir);
 ```
 
-## Creation of the DAOContext
+## Creation of the EntityManager
 
-Unlike connection, the ``DAOContext`` can be instantiated multiple times and with different parameters. For example, it is advisable to create a ``DAOContext`` for each calling context (for example, each REST or GraphQL call).
+Unlike connection, the ``EntityManager`` can be instantiated multiple times and with different parameters. For example, it is advisable to create a ``EntityManager`` for each calling context (for example, each REST or GraphQL call).
 
-The ``DAOContext`` requests an input reference to the KnexJS instance that it will use to access the various data model entities. Here is an example configuration:
+The ``EntityManager`` requests an input reference to the KnexJS instance that it will use to access the various data model entities. Here is an example configuration:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   knex: {
     default: knexInstace,
   },
@@ -79,14 +79,14 @@ async function run() {
     pool: { min: 0, max: 7 }
   });
 
-  const daoContext = new DAOContext({
+  const entityManager = new EntityManager({
     knex: {
       default: knexInstance,
     },
   })
 
   // ...
-  // const users = daoContext.user.findAll();
+  // const users = entityManager.user.findAll();
   // ...
 }
 run().catch(console.dir);

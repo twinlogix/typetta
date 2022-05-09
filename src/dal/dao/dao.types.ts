@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DefaultModelScalars, EqualityOperators, Expand, QuantityOperators, SortDirection, TypeTraversal } from '../..'
 import { OmitIfKnown } from '../../utils/utils.types'
-import { AbstractDAOContext } from '../daoContext/daoContext'
+import { AbstractEntityManager } from '../entity-manager'
 import { LogFunction } from './log/log.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
@@ -90,7 +90,7 @@ export type DAOParams<T extends DAOGenerics> = {
   idScalar: T['idScalar']
   idGeneration: IdGenerationStrategy
   idGenerator?: () => T['idScalar'][T['idScalar']]
-  daoContext: AbstractDAOContext<string, string, T['scalars'], T['metadata']>
+  entityManager: AbstractEntityManager<string, string, T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
   metadata?: T['metadata']
   driverContext: T['driverContext']
@@ -114,7 +114,7 @@ export type MiddlewareContext<T extends DAOGenerics> = {
   specificOperation: 'findAll' | 'findOne' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'replaceAll' | 'deleteOne' | 'deleteAll' | 'aggregate' | 'count' | 'exists' | 'findPage'
   logger?: LogFunction<T['name']>
   dao: DAO<T>
-  daoContext: T['daoContext']
+  entityManager: T['entityManager']
 }
 
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
@@ -161,7 +161,7 @@ export type DAOGenerics<
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
   NameType extends string = any,
-  DAOContext extends AbstractDAOContext<string, string, ScalarsType, MetadataType> = AbstractDAOContext<string, string, ScalarsType, MetadataType>,
+  EntityManager extends AbstractEntityManager<string, string, ScalarsType, MetadataType> = AbstractEntityManager<string, string, ScalarsType, MetadataType>,
 > = {
   model: ModelType
   idKey: IDKey
@@ -187,7 +187,7 @@ export type DAOGenerics<
   driverContext: DriverContextType
   scalars: ScalarsType
   name: NameType
-  daoContext: DAOContext
+  entityManager: EntityManager
 
   driverFilterOptions: DriverFilterOptions
   driverFindOptions: DriverFindOptions

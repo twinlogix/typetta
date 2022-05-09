@@ -10,7 +10,7 @@ La paginazione dei risultati può generalmente essere effettuata in due modi:
 La paginazione tramite offset prevede l'utilizzo di due parametri `start` e `limit` per definite il primo record richiesto e limitare il numero totale dei risultati. La seguente lettura permette di recuperare 10 utenti partendo dal terzo (saltando quindi i primi due).
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   start: 2,
   limit: 10
 })

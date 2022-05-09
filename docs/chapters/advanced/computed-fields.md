@@ -12,7 +12,7 @@ type User @entity @mongo {
 }
 ```
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   overrides: {
     user: {
       middlewares: [

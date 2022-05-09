@@ -29,7 +29,7 @@ type User {
 
 The `User` entity has a number of fields for auditing purposes. This is a simple example; the number and complexity of these fields could be considerably higher. In any case, thanks to the `audit` middleware, it is possible to implement this simple behaviour:
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   metadata: { 
     user: { 
       id: 'logged-user-id' 

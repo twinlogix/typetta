@@ -5,7 +5,7 @@ The `findOne`, `findAll`, and `findPage` APIs support result sorting functionali
 Below is a simple example of use where users are searched and sorted by date of birth:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   sorts: [{
     birthDate: 'desc'
   }]
@@ -17,7 +17,7 @@ As shown in the example, the sort direction is defined by a simple literal TypeS
 Note that you can also filter by embedded entity fields, with the same notation that you use for filters. Here is a simple example where you sort users by city in ascending alphabetical order:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   sorts: [{
     'address.city': 'asc'
   ]
@@ -30,7 +30,7 @@ All the APIs that receive the sorts parameter, as already described for the filt
 
 Here is an example in pseudo-code:
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   projection: {
     firstName: true
   },
@@ -49,7 +49,7 @@ Since the MongoDB driver is developed through the [official MongoDB Node Driver]
 Let's assume, for example, that we have used the `$text` operator of MongoDB, which is a very specific operator that, through a textual index of the collection, is able to perform a complex full text search. This search operator also allows you to sort the results based on a matching score between the result and the text searched. Below is an example of how this is used:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   projection: {
     firstName: true
   },
@@ -69,7 +69,7 @@ The SQL driver is developed using the popular [KnexJS](https://knexjs.org/){: ta
 For example, suppose you want to sort a list of users by month of birth (ignoring the year and day) starting from a date of birth field. Using the specific filter mechanism, we can create a search as follows:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   projection: {
     firstName: true
   },

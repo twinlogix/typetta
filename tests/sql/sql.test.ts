@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Coordinates, defaultValueMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { LocalizedString } from '../types'
-import { DAOContext } from './dao.mock'
+import { EntityManager } from './dao.mock'
 import { Scalars } from './models.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid'
 jest.setTimeout(20000)
 
 let knexInstance: Knex<any, unknown[]>
-let dao: DAOContext<unknown>
+let dao: EntityManager<unknown>
 
 const config: Knex.Config = {
   client: 'sqlite3',
@@ -75,7 +75,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   knexInstance = knex(config)
-  dao = new DAOContext({
+  dao = new EntityManager({
     log: { maxQueryExecutionTime: 100000 },
     knex: {
       default: knexInstance,
@@ -570,7 +570,7 @@ test('insert generic test 1', async () => {
 })
 
 test('Insert default', async () => {
-  const dao0 = new DAOContext({
+  const dao0 = new EntityManager({
     knex: {
       default: knexInstance,
     },
@@ -587,7 +587,7 @@ test('Insert default', async () => {
     expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
   }
 
-  const dao1 = new DAOContext({
+  const dao1 = new EntityManager({
     knex: {
       default: knexInstance,
     },
@@ -611,7 +611,7 @@ test('Insert default', async () => {
   const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
   expect(e1.live).toBe(true)
 
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     knex: {
       default: knexInstance,
     },

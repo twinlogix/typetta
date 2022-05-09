@@ -4,7 +4,7 @@
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { CityProjection, DAOContext, UserDAO, UserProjection } from './dao.mock'
+import { CityProjection, EntityManager, UserDAO, UserProjection } from './dao.mock'
 import { Scalars, State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -19,8 +19,8 @@ jest.setTimeout(20000)
 let replSet: MongoMemoryReplSet
 let connection: MongoClient
 let db: Db
-type DAOContextType = DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
-let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
+type EntityManagerType = EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }>
+let dao: EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }>
 const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
   ID: {
     generate: () => uuidv4(),
@@ -47,8 +47,8 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
   },
 }
 
-function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {
-  return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
+function createDao(): EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }> {
+  return new EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }>({
     mongodb: {
       default: db,
     },
@@ -526,7 +526,7 @@ test('Insert default', async () => {
     expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
   }
 
-  const dao1 = new DAOContext({
+  const dao1 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -548,7 +548,7 @@ test('Insert default', async () => {
   const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
   expect(e1.live).toBe(true)
 
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -894,7 +894,7 @@ test('insert and retrieve localized string field', async () => {
 // ------------------------------------------------------------------------
 test('middleware 1', async () => {
   let operationCount = 0
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     log: ['error', 'warning'],
     mongodb: {
       default: db,
@@ -1025,7 +1025,7 @@ test('middleware 1', async () => {
 })
 
 test('middleware 2', async () => {
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1066,7 +1066,7 @@ test('middleware 2', async () => {
 })
 
 test('middleware options', async () => {
-  const dao2 = new DAOContext<{ m1?: string; m2?: string }, { m3: string }>({
+  const dao2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
     metadata: { m1: 'test1', m2: 'no' },
     mongodb: {
       default: db,
@@ -1093,7 +1093,7 @@ test('middleware options', async () => {
 // ------------------------- COMPUTED FIELDS ------------------------------
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1123,7 +1123,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 })
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1146,7 +1146,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 })
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1181,7 +1181,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 })
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1209,7 +1209,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 })
 
 /*test('computed fields (one dependency - deep level - one calculated)', async () => {
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
@@ -1230,7 +1230,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 })
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
@@ -1564,7 +1564,7 @@ test('Mock entity', async () => {
 })
 
 test('Soft delete middleware', async () => {
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1594,7 +1594,7 @@ test('Soft delete middleware', async () => {
 })
 
 test('Audit middlewares', async () => {
-  const dao2 = new DAOContext({
+  const dao2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1644,7 +1644,7 @@ test('Audit middlewares', async () => {
 })
 
 test('Audit middlewares', async () => {
-  const dao2 = new DAOContext<never, { opts: 1 | 2 }>({
+  const dao2 = new EntityManager<never, { opts: 1 | 2 }>({
     mongodb: {
       default: db,
     },
@@ -1737,7 +1737,7 @@ test('Inner ref inside embedded', async () => {
 
 test('Inserted record middleware', async () => {
   let i = 0
-  const customDao = new DAOContext({
+  const customDao = new EntityManager({
     mongodb: {
       default: db,
     },

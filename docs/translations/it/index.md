@@ -17,7 +17,7 @@ A partire dal modello, frutto dell'analisi del dominio, Typetta fornisce una ser
 
 - I DAO (Data Access Object) di ciascuna entità che è storicizzata in una sorgente dati. Ogni DAO è un oggetto su cui l'utente può invocare le più avanzate operazioni CRUD.
 
-- Un DAOContext, ossia un oggetto di contesto su cui configurare le varie sorgenti dati e da cui è possibile recuperare il riferimento ad ogni DAO.
+- Un EntityManager, ossia un oggetto di contesto su cui configurare le varie sorgenti dati e da cui è possibile recuperare il riferimento ad ogni DAO.
 
 ## Principali Funzionalità
 

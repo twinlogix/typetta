@@ -1,6 +1,6 @@
 # Lettura e Scrittura
 
-Il componente fondamentale per eseguire operazioni di lettura o scrittura sulle entità di modello è il `DAO`. Esiste un DAO per ogni entità ed il suo riferimento si può ottenere semplicemente dal `DAOContext`, come descritto nella sezion della guida riguardante [il contesto](dao-context.md).
+Il componente fondamentale per eseguire operazioni di lettura o scrittura sulle entità di modello è il `DAO`. Esiste un DAO per ogni entità ed il suo riferimento si può ottenere semplicemente dal `EntityManager`, come descritto nella sezion della guida riguardante [il contesto](entity-manager.md).
 
 Ogni DAO, indipendentemente da quale sia la sua sorgente dati, sia essa SQL o MongoDB, offre le principali funzionalità di lettura e manipolazione delle entità e delle loro relazioni. 
 
@@ -52,7 +52,7 @@ L'API [insertOne](/typedoc/classes/AbstractDAO.html#insertOne){:target="_blank"}
 Di seguito un esempio di creazione di un utente:
 
 ```typescript
-const user = await daoContext.user.insertOne({
+const user = await entityManager.user.insertOne({
   record: {
     firstName: "Mattia",
     lastName: "Minotti",
@@ -74,7 +74,7 @@ L'API [findOne](/typedoc/classes/AbstractDAO.html#findOne){:target="_blank"} per
 Di seguito un esempio di ricerca di un utente filtrando per nome:
 
 ```typescript
-const user = await daoContext.user.findOne({
+const user = await entityManager.user.findOne({
   filter: {
     firstName: "Mattia",
     lastName: "Minotti"
@@ -90,7 +90,7 @@ L'API [findAll](/typedoc/classes/AbstractDAO.html#findAll){:target="_blank"} per
 Di seguito un esempio di ricerca di utenti filtrando per città:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   filter: {
     "address.city": "Milan"
   },
@@ -115,7 +115,7 @@ Il parametro `start` identifica quanti recordo saltare, quindi se si vuole inizi
 Di seguito un esempio di ricerca di una pagina di utenti filtrando per città:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   start: 0,
   limit: 10,
   filter: {
@@ -156,7 +156,7 @@ L'API [updateOne](/typedoc/classes/AbstractDAO.html#updateOne){:target="_blank"}
 Di seguito un esempio di aggiornamento dell'indirizzo di un utente:
 
 ```typescript
-await daoContext.user.updateOne({
+await entityManager.user.updateOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -173,7 +173,7 @@ await daoContext.user.updateOne({
 Si noti che per entità composte come è il caso dell'utente e dell'indirizzo, l'API permette sia di aggiornare l'intera entità embedded che solamente uno dei suoi campi. Se si vuole per esempio modificare solamente il campo `street` di un utente lasciando invariato il resto dell'indirizzo si può eseguire il seguente codice:
 
 ```typescript
-await daoContext.user.updateOne({
+await entityManager.user.updateOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -190,7 +190,7 @@ L'API [updateAll](/typedoc/classes/AbstractDAO.html#updateAll){:target="_blank"}
 Di seguito un esempio di aggiornamento di tutti gli utenti che hanno per nome `mattia`, modificando il nome in `Mattia` con la lettera maiuscola:
 
 ```typescript
-await daoContext.user.updateAll({
+await entityManager.user.updateAll({
   filter: {
     firstName: "mattia",
   },
@@ -203,7 +203,7 @@ await daoContext.user.updateAll({
 Si noti che è possibile aggiornare tutti i record presenti passando esplicitamente un filtro vuoto, come nel seguente esempio in cui si aggiorna il nome di tutti gli utenti:
 
 ```typescript
-await daoContext.user.updateAll({
+await entityManager.user.updateAll({
   filter: {},
   changes: {
     firstName: "Mattia",
@@ -218,7 +218,7 @@ L'API [replaceOne](/typedoc/classes/AbstractDAO.html#replaceOne){:target="_blank
 Di seguito un esempio di sostituzione di un utente:
 
 ```typescript
-await daoContext.user.replaceOne({
+await entityManager.user.replaceOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -241,7 +241,7 @@ L'API [deleteOne](/typedoc/classes/AbstractDAO.html#deleteOne){:target="_blank"}
 Di seguito un esempio di eliminazione di un utente:
 
 ```typescript
-await daoContext.user.deleteOne({
+await entityManager.user.deleteOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   }
@@ -255,7 +255,7 @@ L'API [deleteAll](/typedoc/classes/AbstractDAO.html#deleteAll){:target="_blank"}
 Di seguito un esempio di eliminazione di tutti gli utenti che hanno per nome `Mattia`:
 
 ```typescript
-await daoContext.user.deleteAll({
+await entityManager.user.deleteAll({
   filter: {
     firstName: "Mattia",
   }
@@ -265,7 +265,7 @@ await daoContext.user.deleteAll({
 Si noti che è possibile eliminare tutti i record presenti passando esplicitamente un filtro vuoto, come nel seguente esempio in cui si eliminano tutti gli utenti:
 
 ```typescript
-await daoContext.user.deleteAll({
+await entityManager.user.deleteAll({
   filter: {},
 })
 ```

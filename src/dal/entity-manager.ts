@@ -1,14 +1,14 @@
-import { DriverDataTypeAdapterMap } from '../../dal/drivers/drivers.adapters'
-import { AbstractDAO } from '../dao/dao'
-import { DAOGenerics, TransactionData } from '../dao/dao.types'
-import { DefaultModelScalars } from '../drivers/drivers.types'
-import { inMemoryAdapters } from '../drivers/in-memory/adapters.memory'
-import { mongoDbAdapters } from '../drivers/no-sql/mongodb/adapters.mongodb'
-import { knexJsAdapters } from '../drivers/sql/knexjs/adapters.knexjs'
+import { DriverDataTypeAdapterMap } from './drivers/drivers.adapters'
+import { AbstractDAO } from './dao/dao'
+import { DAOGenerics, TransactionData } from './dao/dao.types'
+import { DefaultModelScalars } from './drivers/drivers.types'
+import { inMemoryAdapters } from './drivers/in-memory/adapters.memory'
+import { mongoDbAdapters } from './drivers/no-sql/mongodb/adapters.mongodb'
+import { knexJsAdapters } from './drivers/sql/knexjs/adapters.knexjs'
 import { Knex } from 'knex'
 import { ClientSession } from 'mongodb'
 
-export abstract class AbstractDAOContext<MongoDBDatasources extends string, KnexDataSources extends string, ScalarsType extends DefaultModelScalars = DefaultModelScalars, MetadataType = unknown> {
+export abstract class AbstractEntityManager<MongoDBDatasources extends string, KnexDataSources extends string, ScalarsType extends DefaultModelScalars = DefaultModelScalars, MetadataType = unknown> {
   public Transaction: this & { __transaction_enabled__: true } = this as this & { __transaction_enabled__: true }
 
   public adapters: DriverDataTypeAdapterMap<ScalarsType>

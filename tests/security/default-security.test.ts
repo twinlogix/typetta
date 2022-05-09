@@ -1,5 +1,5 @@
 import { SecurityPolicyReadError } from '../../src'
-import { DAOContext } from './dao.mock'
+import { EntityManager } from './dao.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
@@ -14,7 +14,7 @@ let mongodb: {
 }
 
 function createDao() {
-  return new DAOContext({
+  return new EntityManager({
     mongodb: {
       default: mongodb.db,
     },
@@ -40,7 +40,7 @@ function createDao() {
 }
 
 function createDao2() {
-  return new DAOContext({
+  return new EntityManager({
     mongodb: {
       default: mongodb.db,
     },

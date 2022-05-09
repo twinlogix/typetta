@@ -46,7 +46,7 @@ type User @entity @sql {
 ```
 
 L'annotazione `sqlEntity` riceve inoltre due parametri opzionali:
-- `source`: che rappresenta il data source SQL in cui risiede la tabella che rappresenta questa entità. Si tratta di un'etichetta logica la cui configurazione andrà settata sul DAOContext. Il valore di default è `default`.
+- `source`: che rappresenta il data source SQL in cui risiede la tabella che rappresenta questa entità. Si tratta di un'etichetta logica la cui configurazione andrà settata sul EntityManager. Il valore di default è `default`.
 
 - `table`: che rappresenta il nome della tabella SQL, il valore di default è il nome dell'entità pluralizzato aggiungendo una s finale e con l'iniziale minuscola (quindi nell'esempio di cui sopra sarebbe `users`).
 
@@ -71,7 +71,7 @@ type User @entity @mongodb {
 ```
 
 L'annotazione `mongoEntity` riceve inoltre due parametri opzionali:
-- `source`: che rappresenta il data source MongoDB in cui risiede la collection che rappresenta questa entità. Si tratta di un'etichetta logica la cui configurazione andrà settata sul DAOContext. Il valore di default è `default`.
+- `source`: che rappresenta il data source MongoDB in cui risiede la collection che rappresenta questa entità. Si tratta di un'etichetta logica la cui configurazione andrà settata sul EntityManager. Il valore di default è `default`.
 
 - `collection`: che rappresenta il nome della collection MongoDB, il valore di default è il nome dell'entità pluralizzato aggiungendo una s finale e con l'iniziale minuscola (quindi nell'esempio di cui sopra sarebbe `users`).
 
@@ -109,12 +109,12 @@ type User @entity @mongodb {
 
 - `user`: quando l'id viene generato manualmente dall'utilizzatore di Typetta, sarà quindi un campo obbligatorio di ogni operazione di insert.
 
-- `generator`: quando l'id viene autogenerato da Typetta con una logica configurabile a livello di DAOContext o di singolo DAO. Si può creare un generatore di ID per ogni scalare che verrà quindi invocato per tutti i campi dello specifico scalare annotati con la direttiva `@id`. Un esempio di utilizzo è il caso in cui tutti gli ID debbano essere gestiti come UUID creati a livello applicativo. Per ottenere questo si può quindi configurare il DAOContext come segue:
+- `generator`: quando l'id viene autogenerato da Typetta con una logica configurabile a livello di EntityManager o di singolo DAO. Si può creare un generatore di ID per ogni scalare che verrà quindi invocato per tutti i campi dello specifico scalare annotati con la direttiva `@id`. Un esempio di utilizzo è il caso in cui tutti gli ID debbano essere gestiti come UUID creati a livello applicativo. Per ottenere questo si può quindi configurare il EntityManager come segue:
 
 ```typescript
 import { v4 as uuidv4 } from 'uuid'
 
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   scalars: {
     ID: {
       generator: () => uuidv4()
@@ -128,7 +128,7 @@ Se si vuole un comportamento diverso per un singolo DAO, si può creare un overr
 ```typescript
 import { v4 as uuidv4 } from 'uuid'
 
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   scalars: {
     ID: {
       generator: () => uuidv4()

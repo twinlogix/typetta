@@ -45,16 +45,16 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
   }
 
   private generateQuery(node: TsTypettaGeneratorNode): string {
-    return `${toFirstLower(node.name)}s: (parent, args, context, info) => ${this.daoContextPath()}.${toFirstLower(node.name)}.resolvers.read(args, info),`
+    return `${toFirstLower(node.name)}s: (parent, args, context, info) => ${this.entityManagerPath()}.${toFirstLower(node.name)}.resolvers.read(args, info),`
   }
 
   private generateMutation(node: TsTypettaGeneratorNode): string {
-    return `create${node.name}: async (parent, args, context, info) => ${this.daoContextPath()}.${toFirstLower(node.name)}.resolvers.create(args, info),
-    update${node.name}s: async (parent, args, context) => ${this.daoContextPath()}.${toFirstLower(node.name)}.resolvers.update(args),
-    delete${node.name}s: async (parent, args, context) => ${this.daoContextPath()}.${toFirstLower(node.name)}.resolvers.delete(args),`
+    return `create${node.name}: async (parent, args, context, info) => ${this.entityManagerPath()}.${toFirstLower(node.name)}.resolvers.create(args, info),
+    update${node.name}s: async (parent, args, context) => ${this.entityManagerPath()}.${toFirstLower(node.name)}.resolvers.update(args),
+    delete${node.name}s: async (parent, args, context) => ${this.entityManagerPath()}.${toFirstLower(node.name)}.resolvers.delete(args),`
   }
 
-  private daoContextPath(): string {
-    return this.config.daoContextPath ? `context.${this.config.daoContextPath}` : 'context'
+  private entityManagerPath(): string {
+    return this.config.entityManagerPath ? `context.${this.config.entityManagerPath}` : 'context'
   }
 }

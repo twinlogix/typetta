@@ -24,7 +24,7 @@ generates:
       - typescript-resolvers
     config:
       resolverTypeWrapperSignature: PartialDeep<T>
-      contextType: ./dao.generated#DAOContext
+      contextType: ./dao.generated#EntityManager
       namespacedImportName: types
   tests/demo/resolvers.generated.ts:
     config:

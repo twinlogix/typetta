@@ -20,7 +20,7 @@ export type DAOSecurityPolicy<T extends DAOGenerics, Permissions extends string,
   ? { domain?: { [K in keyof Required<SecurityDomain>]: keyof T['model'] | null } }
   : { domain: { [K in keyof Required<SecurityDomain>]: keyof T['model'] | null } })
 
-export type DAOContextSecurtyPolicy<DAOGenericsMap extends { [K in string]: DAOGenerics }, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
+export type EntityManagerSecurtyPolicy<DAOGenericsMap extends { [K in string]: DAOGenerics }, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
   applySecurity?: boolean
   context?: DAOSecurityContext<SecurityDomain, Permissions>
   policies?: {

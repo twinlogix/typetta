@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AbstractDAOContext, DAOGenerics, DAOParams, OmitIfKnown } from '../../..'
+import { AbstractEntityManager, DAOGenerics, DAOParams, OmitIfKnown } from '../../..'
 import { DefaultModelScalars } from '../drivers.types'
 
 export type InMemoryDAOGenerics<
@@ -21,7 +21,7 @@ export type InMemoryDAOGenerics<
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
   NameType extends string = any,
-  DAOContext extends AbstractDAOContext<string, string, ScalarsType, MetadataType> = AbstractDAOContext<string, string, ScalarsType, MetadataType>,
+  EntityManager extends AbstractEntityManager<string, string, ScalarsType, MetadataType> = AbstractEntityManager<string, string, ScalarsType, MetadataType>,
 > = DAOGenerics<
   ModelType,
   IDKey,
@@ -48,7 +48,7 @@ export type InMemoryDAOGenerics<
   unknown,
   unknown,
   NameType,
-  DAOContext
+  EntityManager
 >
 
 export type InMemoryDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverContext'>

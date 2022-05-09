@@ -94,7 +94,7 @@ A questo punto è possibile avviare la prima generazione eseguendo il comando ap
 npm run generate
 ```
 
-Data la configurazione d'esempio di cui sopra, il comando di generazione produrrà due distinti file *src/models.ts* contentente i tipi TypeScript relativi a tutte le entità di modello presenti nello *schema.graphql* e un file *src/dao.ts* contenente i DAO e il DAOContext che vedremo in seguito come utilizzare.
+Data la configurazione d'esempio di cui sopra, il comando di generazione produrrà due distinti file *src/models.ts* contentente i tipi TypeScript relativi a tutte le entità di modello presenti nello *schema.graphql* e un file *src/dao.ts* contenente i DAO e il EntityManager che vedremo in seguito come utilizzare.
 
 ## Una semplice applicazione
 
@@ -104,7 +104,7 @@ Come prima cosa occorre creare connessione e database MongoDB utilizzano il driv
 
 ```typescript
 import { MongoClient } from 'mongodb';
-import { DAOContext } from './dao';
+import { EntityManager } from './dao';
 
 const main = async () => {
   const mongoConnection = await MongoClient.connect(process.env.MONGODB_URL!);
@@ -113,10 +113,10 @@ const main = async () => {
 main();
 ```
 
-Dopodiché possiamo già istanziare un DAOContext, prima classe generata da Typetta che rappresenta il repository centrale di tutte le entità del modello applicativo.
+Dopodiché possiamo già istanziare un EntityManager, prima classe generata da Typetta che rappresenta il repository centrale di tutte le entità del modello applicativo.
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   mongo: {
     default: mongoDb
   }
@@ -126,21 +126,21 @@ const daoContext = new DAOContext({
 A questo punto possiamo iniziare ad interagire con il database con alcune semplici operazioni CRUD sull'entità User che abbiamo definito nel modello applicaitvo.
 
 ```typescript
-const user1 = await daoContext.user.insertOne({
+const user1 = await entityManager.user.insertOne({
   record: {
     firstName: "Mattia",
     lastName: "Minotti"
   }
 });
 
-const user2 = await daoContext.user.insertOne({
+const user2 = await entityManager.user.insertOne({
   record: {
     firstName: "Edoardo",
     lastName: "Barbieri"
   }
 });
 
-const users = await daoContext.user.findAll();
+const users = await entityManager.user.findAll();
 users.forEach(user => console.log(`${user.firstName} ${user.lastName}`));
 ```
 
@@ -154,34 +154,34 @@ Di seguito il codice sorgente completo di questo primo esempio di utilizzo di Ty
 
 ```typescript
 import { MongoClient } from 'mongodb';
-import { DAOContext } from './dao';
+import { EntityManager } from './dao';
 
 const main = async () => {
 
   const mongoConnection = await MongoClient.connect(process.env.MONGODB_URL!);
   const mongoDb = mongoConnection.db(process.env.MONGODB_DATABASE_NAME);
 
-  const daoContext = new DAOContext({
+  const entityManager = new EntityManager({
     mongo: {
       default: mongoDb
     }
   });
 
-  const user1 = await daoContext.user.insertOne({
+  const user1 = await entityManager.user.insertOne({
     record: {
       firstName: "Mattia",
       lastName: "Minotti"
     }
   });
 
-  const user2 = await daoContext.user.insertOne({
+  const user2 = await entityManager.user.insertOne({
     record: {
       firstName: "Edoardo",
       lastName: "Barbieri"
     }
   });
 
-  const users = await daoContext.user.findAll();
+  const users = await entityManager.user.findAll();
   users.forEach(user => console.log(`${user.firstName} ${user.lastName}`));
 
 };

@@ -37,7 +37,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected readonly name: T['name']
   protected readonly idScalar: T['idScalar']
   protected readonly idGeneration: IdGenerationStrategy
-  protected readonly daoContext: T['daoContext']
+  protected readonly entityManager: T['entityManager']
   protected readonly relations: DAORelation[]
   protected readonly middlewares: DAOMiddleware<T>[]
   protected readonly pageSize: number
@@ -56,7 +56,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     idScalar,
     idGeneration,
     idGenerator,
-    daoContext,
+    entityManager,
     name,
     logger,
     pageSize = 50,
@@ -71,7 +71,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.idField = idField
     this.idScalar = idScalar
     this.idGenerator = idGenerator
-    this.daoContext = daoContext
+    this.entityManager = entityManager
     this.pageSize = pageSize
     this.relations = relations
     this.idGeneration = idGeneration
@@ -79,20 +79,20 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.logger = logger
     this.datasource = datasource
     if (this.idGeneration === 'generator' && !this.idGenerator) {
-      throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in DAOContext or in DAOParams.`)
+      throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in EntityManager or in DAOParams.`)
     }
     Object.entries(schema)
       .flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v.scalar] as const] : []))
       .forEach(([key, scalar]) => {
-        if (!daoContext.adapters[this._driver()][scalar].generate) {
-          throw new Error(`Generator for scalar ${scalar} is needed for generate default fields ${key}. Define one in DAOContext or in DAOParams.`)
+        if (!entityManager.adapters[this._driver()][scalar].generate) {
+          throw new Error(`Generator for scalar ${scalar} is needed for generate default fields ${key}. Define one in EntityManager or in DAOParams.`)
         }
       })
     const defaultMiddleware = buildMiddleware<T>({
       beforeInsert: async (params, context) => {
         const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v] as const] : []))
         const record = fieldsToGenerate.reduce((record, [key, schema]) => {
-          const generator = this.daoContext.adapters[context.daoDriver][schema.scalar].generate
+          const generator = this.entityManager.adapters[context.daoDriver][schema.scalar].generate
           if (record[key] == null && generator) {
             return {
               ...record,
@@ -113,10 +113,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.middlewares = [
       {
         before: async (args) => {
-          if (this.daoContext.isTransacting() && this.datasource !== null) {
+          if (this.entityManager.isTransacting() && this.datasource !== null) {
             const driver = this._driver()
             if (driver === 'mongo') {
-              const session = this.daoContext.getMongoSession(this.datasource)
+              const session = this.entityManager.getMongoSession(this.datasource)
               if (session) {
                 return {
                   continue: true,
@@ -132,7 +132,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               }
             }
             if (driver === 'knex') {
-              const trx = this.daoContext.getKenxTransaction(this.datasource)
+              const trx = this.entityManager.getKenxTransaction(this.datasource)
               if (trx) {
                 return {
                   continue: true,
@@ -310,10 +310,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       }
       for (const relation of this.relations) {
         if (relation.reference === 'relation') {
-          this.daoContext.dao(relation.entityDao).clearDataLoader(operationId)
-          this.daoContext.dao(relation.relationDao).clearDataLoader(operationId)
+          this.entityManager.dao(relation.entityDao).clearDataLoader(operationId)
+          this.entityManager.dao(relation.relationDao).clearDataLoader(operationId)
         } else {
-          this.daoContext.dao(relation.dao).clearDataLoader(operationId)
+          this.entityManager.dao(relation.dao).clearDataLoader(operationId)
         }
       }
     }
@@ -368,7 +368,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           operationId,
         }
         if (relation.reference === 'relation') {
-          const rels = await this.daoContext.dao(relation.relationDao).loadAll(
+          const rels = await this.entityManager.dao(relation.relationDao).loadAll(
             {
               projection: { [relation.refThis.refFrom]: true, [relation.refOther.refFrom]: true },
             },
@@ -380,7 +380,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
               .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom))
             if (filterValues.length > 0) {
-              const results = await this.daoContext.dao(relation.entityDao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
+              const results = await this.entityManager.dao(relation.entityDao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
               this.setResult(record, relation, results)
             } else {
               this.setResult(record, relation, [])
@@ -389,12 +389,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         } else if (relation.reference === 'inner') {
           for (const record of records) {
             const keys = getTraversing(record, relation.refFrom)
-            const results = keys.length > 0 ? await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refTo, keys) : []
+            const results = keys.length > 0 ? await this.entityManager.dao(relation.dao).findAllWithBatching(params, relation.refTo, keys) : []
             this.setResult(record, relation, results)
           }
         } else if (relation.reference === 'foreign') {
           for (const record of records) {
-            const results = await this.daoContext.dao(relation.dao).findAllWithBatching(params, relation.refFrom, getTraversing(record, relation.refTo))
+            const results = await this.entityManager.dao(relation.dao).findAllWithBatching(params, relation.refFrom, getTraversing(record, relation.refTo))
             this.setResult(record, relation, results)
           }
         }
@@ -550,7 +550,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       daoDriver: this._driver(),
       specificOperation: operation,
       dao: this,
-      daoContext: this.daoContext,
+      entityManager: this.entityManager,
     }
   }
 
@@ -692,7 +692,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     const relations = Object.fromEntries(
       this.relations.flatMap((r) => {
         if (params.relations && params.relations[r.field]) {
-          const relationDao = this.daoContext.dao(r.reference === 'relation' ? r.entityDao : r.dao)
+          const relationDao = this.entityManager.dao(r.reference === 'relation' ? r.entityDao : r.dao)
           return [[r.field, relationDao.mapResolverFindParams(params.relations[r.field])]]
         }
         return []

@@ -32,11 +32,11 @@ export interface TypeScriptTypettaPluginConfig extends RawConfig {
   defaultIdGenerationStrategy?: IdGenerationStrategy
 
   /**
-   * @name daoContextPath
+   * @name entityManagerPath
    * @type string
    * @default context
-   * @description Customize path to access the DAOContext from resolver context. Needed for resolvers generation.
+   * @description Customize path to access the EntityManager from resolver context. Needed for resolvers generation.
    *
    */
-  daoContextPath?: string
+  entityManagerPath?: string
 }

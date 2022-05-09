@@ -15,7 +15,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   private collection: Collection
 
   protected constructor({ collection, idGenerator, ...params }: MongoDBDAOParams<T>) {
-    super({ ...params, driverContext: { collection }, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate })
+    super({ ...params, driverContext: { collection }, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[params.idScalar]?.generate })
     this.collection = collection
   }
 
@@ -24,11 +24,11 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private dbToModel(object: WithId<Document>): PartialDeep<T['model']> {
-    return transformObject(this.daoContext.adapters.mongo, 'dbToModel', object, this.schema)
+    return transformObject(this.entityManager.adapters.mongo, 'dbToModel', object, this.schema)
   }
 
   private modelToDb(object: T['insert'] | T['update']): OptionalId<Document> {
-    return transformObject(this.daoContext.adapters.mongo, 'modelToDB', object, this.schema)
+    return transformObject(this.entityManager.adapters.mongo, 'modelToDB', object, this.schema)
   }
 
   private buildProjection(projection?: AnyProjection<T['projection']>): Document | undefined {
@@ -36,7 +36,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildFilter(filter?: T['filter']): Filter<Document> {
-    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongo) : {}
+    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.entityManager.adapters.mongo) : {}
   }
 
   private buildSort(sort?: T['sort']): [string, SortDirection][] {
@@ -50,7 +50,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     if (typeof update === 'function') {
       return update()
     }
-    const set = adaptUpdate(update, this.schema, this.daoContext.adapters.mongo)
+    const set = adaptUpdate(update, this.schema, this.entityManager.adapters.mongo)
     return { $set: set }
   }
 

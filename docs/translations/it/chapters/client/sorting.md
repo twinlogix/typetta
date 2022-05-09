@@ -5,7 +5,7 @@ Le API `findAll` e `findPage`, che ritornano un elenco di record, supportano la 
 Di seguito un semplice esempio di utilizzo i cui vengono ricercati degli utenti ordinati per data di nascita:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   sorts: [{ 
     birthDate: 'desc'
   }]
@@ -17,7 +17,7 @@ Come mostrato nell'esempio, la direzione di sort è definita tramite un semplice
 Si noti che è possibile filtrare anche per campi di entità embedded, con la stessa notazione che si utilizza per i filtri. Di seguito un semplice esempio in cui si ordinano gli utenti per città in ordine alfabetico ascendente:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   sorts: [{ 
     'address.city': 'asc'
   ]
@@ -30,7 +30,7 @@ Tutte le API che ricevono il parametro sorts, così come già descritto per i fi
 
 In pseudo-codice risulta come nel seguente esempio:
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   projection: {
     firstName: true
   },
@@ -49,7 +49,7 @@ Essendo il driver MongoDB sviluppato tramite il [MongoDB Node Driver ufficiale](
 Ipotizziamo per esempio aver utilizzato l'operatore `$text` di MongoDB che è un'operatore molto specifico che, tramite un indice testuale sulla collection, è in grado di eseguire una ricerca full text complessa. Questo operatore di ricerca permette anche di ordinare i risultati in base ad uno score di matghing tra il risultato e il testo ricercato. Di seguito un esempio di utilizzo:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   projection: {
     firstName: true
   },
@@ -69,7 +69,7 @@ Il driver SQL è sviluppato utilizzando il celebre query builder [KnexJS](https:
 Ipotizziamo per esempio di voler implementare un ordinamento di un elenco di utenti per mese di nascita (ignorando l'anno e il giorno) a partire da un campo data di nascita. Con il meccanismo di filtri specifici possiamo creare una ricerca come segue:
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   projection: {
     firstName: true
   },

@@ -7,7 +7,7 @@
 
 The heart of Typetta is a type-safe, self-generated query builder tailor-made to the data model. The best way to start using it is to follow our [Getting Started](../overview/getting-started) guide.
 
-Each time the data model is modified, you can execute a supplied generator that creates and updates all TypeScript types, a DAOContext class and all the related DAOs. These objects allow you to access the data sources in a powerful and type-safe way, using the Typetta query builder.
+Each time the data model is modified, you can execute a supplied generator that creates and updates all TypeScript types, a EntityManager class and all the related DAOs. These objects allow you to access the data sources in a powerful and type-safe way, using the Typetta query builder.
 
 Simply run the following command to start the generation:
 
@@ -23,22 +23,22 @@ npx graphql-codegen --watch
 
 For any additional details on the generation tool, refer to the official documentation [GraphQL Code Generator](https://www.graphql-code-generator.com/docs/getting-started){:target="_blank"}.
 
-The main result of the generation process is a component we call `DAOContext`. It is a container for so-called `DAOs`, data access objects that allow you to perform all operations on the entities of the data model.
+The main result of the generation process is a component we call `EntityManager`. It is a container for so-called `DAOs`, data access objects that allow you to perform all operations on the entities of the data model.
 
-The role of the DAOContext is absolutely central because it is on it that a whole series of settings can be configured that can modify the behaviour of the entire data access system. It also represents a replicable unit, so it is possible to instantiate any number of DAOContexts, each with different settings.
+The role of the EntityManager is absolutely central because it is on it that a whole series of settings can be configured that can modify the behaviour of the entire data access system. It also represents a replicable unit, so it is possible to instantiate any number of EntityManagers, each with different settings.
 
 ## How to create a Context
 
-Instantiating the `DAOContext` is very simple. The only mandatory configurations are the SQL and MongoDB data sources (both if you are using both databases, or just the one you need).
+Instantiating the `EntityManager` is very simple. The only mandatory configurations are the SQL and MongoDB data sources (both if you are using both databases, or just the one you need).
 
 Note that Typetta implements two different drivers to connect to the supported databases, one is built on the [MongoDB native driver](https://docs.mongodb.com/drivers/node/current/){:target="_blank"} and the other on [KnexJS](https://knexjs.org/){:target="_blank"}, one of the most consolidated NodeJS query builder libraries for SQL databases.
 
-Here is an example that shows how to instantiate a DAOContext with two data sources, one SQL and one MongoDB:
+Here is an example that shows how to instantiate a EntityManager with two data sources, one SQL and one MongoDB:
 
 ```typescript
 import { MongoClient } from 'mongodb';
 import knex from 'knex'
-import { DAOContext } from './dao';
+import { EntityManager } from './dao';
 
 const mongoClient = new MongoClient(process.env.MONGODB_URL!);
 const mongoDb = mongoClient.db(process.env.MONGODB_DATABASE_NAME);
@@ -48,20 +48,20 @@ const knexInstance = knex({
   connection: process.env.SLQ_DATABASE_URL
 })
 
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   mongodb: { default: mongoDb },
   knex: { default: knexInstance },
 });
 ```
 
-The `DAOContext` is a centralised access point to data, which is why it is usually saved in the context of an application or service and used throughout its life cycle.
+The `EntityManager` is a centralised access point to data, which is why it is usually saved in the context of an application or service and used throughout its life cycle.
 
 ## Multi-database
 
-The mechanism for defining data sources in the DAOContext allows for the possibility of indicating any number of MongoDB databases and KnexJS instances. To indicate additional data sources in addition to the default ones, simply add values to the `mongo` and `knex` key value maps, as shown below:
+The mechanism for defining data sources in the EntityManager allows for the possibility of indicating any number of MongoDB databases and KnexJS instances. To indicate additional data sources in addition to the default ones, simply add values to the `mongo` and `knex` key value maps, as shown below:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   mongodb: {
     default: primaryMongoDb,
     secondary: secondaryMongoDb,
@@ -115,9 +115,9 @@ type Post @entity @sql {
 }
 ```
 
-The generated DAOContext will automatically contain the references to the two DAOs that correspond to the two stored entities. Obtaining a reference to a DAO is really simple: you can access the DAOContext as an associative array as follows:
+The generated EntityManager will automatically contain the references to the two DAOs that correspond to the two stored entities. Obtaining a reference to a DAO is really simple: you can access the EntityManager as an associative array as follows:
 
 ```typescript
-const userDAO = daoContext.user;
-const postDAO = daoContext.post;
+const userDAO = entityManager.user;
+const postDAO = entityManager.post;
 ```

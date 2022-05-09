@@ -1,5 +1,5 @@
 import { defaultValueMiddleware, tenantSecurityPolicy } from '../../src'
-import { DAOContext, groupMiddleware } from './dao.mock'
+import { EntityManager, groupMiddleware } from './dao.mock'
 import { MongoClient, Db, Int32 } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
@@ -9,17 +9,17 @@ jest.setTimeout(20000)
 
 type DaoMetadata = {
   tenantId: number
-  dao: (tenantId: number, db: Db) => DAOContext<DaoMetadata>
+  dao: (tenantId: number, db: Db) => EntityManager<DaoMetadata>
 }
-let dao1: DAOContext<DaoMetadata>
-let dao2: DAOContext<DaoMetadata>
+let dao1: EntityManager<DaoMetadata>
+let dao2: EntityManager<DaoMetadata>
 let mongodb: {
   replSet: MongoMemoryReplSet
   connection: MongoClient
   db: Db
 }
-function createDao(tenantId: number, db: Db): DAOContext<DaoMetadata> {
-  return new DAOContext<DaoMetadata>({
+function createDao(tenantId: number, db: Db): EntityManager<DaoMetadata> {
+  return new EntityManager<DaoMetadata>({
     mongodb: {
       default: db,
     },

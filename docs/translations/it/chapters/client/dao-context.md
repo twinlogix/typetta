@@ -1,12 +1,12 @@
 # Il Contesto
 
-  - [Come istanziare il DAOContext](#come-istanziare-il-daocontext)
+  - [Come istanziare il EntityManager](#come-istanziare-il-entity-manager)
   - [Multi-database](#multi-database)
   - [DAO](#dao)
 
 Il cuore di Typetta è costituito da un query builder type-safe e auto-generato tagliato sul modello applicativo. Il modo migliore per iniziare ad utilizzarlo è seguire tutti i passi del [Getting Started](../overview/getting-started.md).
 
-Ogni volta che si modifica il modello applicativo occorre avviare il generatore in modo che vengano prodotti i tipi TypeScript, il DAOContext e tutti i relativi DAO che permettono all'utilizzatore di accesedere alle sorgenti dati tramite il query builder.
+Ogni volta che si modifica il modello applicativo occorre avviare il generatore in modo che vengano prodotti i tipi TypeScript, il EntityManager e tutti i relativi DAO che permettono all'utilizzatore di accesedere alle sorgenti dati tramite il query builder.
 
 Per avviare la generazione è sufficiente eseguire il comando:
 
@@ -22,22 +22,22 @@ npx graphql-codegen --watch
 
 Per ogni dettaglio aggiuntivo sullo strumento di generazione fare riferimento alla guida ufficiale [GraphQL Code Generatore](https://www.graphql-code-generator.com/docs/getting-started){:target="_blank"}.
 
-Il principale risultato della generazione di codice è un componente che abbiamo chiamato `DAOContext`. Il DAOContext è un container per tutti i `DAO`, i data access objects che permettono di eseguire tutte le operazioni sulle entità del modello applicativo.
+Il principale risultato della generazione di codice è un componente che abbiamo chiamato `EntityManager`. Il EntityManager è un container per tutti i `DAO`, i data access objects che permettono di eseguire tutte le operazioni sulle entità del modello applicativo.
 
-Il ruolo del DAOContext è fondamentale perchè è su di esso che si possono configurare tutta una serie di impostazioni in grado di modificare il comportamento dell'intero sistema di accesso al dato o di un singolo DAO. Esso inoltre rappresenta un contesto perimetrato e replicabile, quindi è possibile istanziare un numero a piacere di DAOContext, ognuno con impostazioni diverse.
+Il ruolo del EntityManager è fondamentale perchè è su di esso che si possono configurare tutta una serie di impostazioni in grado di modificare il comportamento dell'intero sistema di accesso al dato o di un singolo DAO. Esso inoltre rappresenta un contesto perimetrato e replicabile, quindi è possibile istanziare un numero a piacere di EntityManager, ognuno con impostazioni diverse.
 
-## Come istanziare il DAOContext
+## Come istanziare il EntityManager
 
-Istanziare il `DAOContext` è molto semplice. Le uniche configurazioni obbligatorie sono le sorgenti dati SQL e MongoDB (entrambe se si utilizzano entrambi i database, oppure solo quello necessario).
+Istanziare il `EntityManager` è molto semplice. Le uniche configurazioni obbligatorie sono le sorgenti dati SQL e MongoDB (entrambe se si utilizzano entrambi i database, oppure solo quello necessario).
 
 Si noti che Typetta implementa due diversi driver per connettersi ai vari database supportati, uno è costruito sul [driver nativo MongoDB](https://docs.mongodb.com/drivers/node/current/){:target="_blank"} e l'altro su [KnexJS](https://knexjs.org/){:target="_blank"}, una delle librerie in ambito Node JS più consolidate per l'accesso a database SQL.
 
-Di seguito quindi un esempio che mostra come istanziare un DAOContext con due data source, uno SQL e uno MongoDB:
+Di seguito quindi un esempio che mostra come istanziare un EntityManager con due data source, uno SQL e uno MongoDB:
 
 ```typescript
 import { MongoClient } from 'mongodb';
 import knex from 'knex'
-import { DAOContext } from './dao';
+import { EntityManager } from './dao';
 
 const mongoClient = new MongoClient(process.env.MONGODB_URL!);
 const mongoDb = mongoClient.db(process.env.MONGODB_DATABASE_NAME);
@@ -47,20 +47,20 @@ const knexInstance = knex({
   connection: process.env.SLQ_DATABASE_URL
 })
 
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   mongo: { default: mongoDb },
   knex: { default: knexInstance },
 });
 ```
 
-Il `DAOContext` è un punto di accesso centralizzato al dato, per questo motivo viene generalmente salvato nel contesto di un'applicazione o di un servizio e utilizzato per tutto il suo ciclo di vita.
+Il `EntityManager` è un punto di accesso centralizzato al dato, per questo motivo viene generalmente salvato nel contesto di un'applicazione o di un servizio e utilizzato per tutto il suo ciclo di vita.
 
 ## Multi-database
 
-Il meccanismo di definizione delle sorgenti dati nel DAOContext prevede la possibilità di indicare un numero a piacere di database MongoDB e istanze KnexJS. Per indicare delle sorgenti dati aggiuntive oltre a quelle di default è sufficiente aggiungere dei valori alle mappe chiave valore `mongo` e `knex`, come mostrato di seguito:
+Il meccanismo di definizione delle sorgenti dati nel EntityManager prevede la possibilità di indicare un numero a piacere di database MongoDB e istanze KnexJS. Per indicare delle sorgenti dati aggiuntive oltre a quelle di default è sufficiente aggiungere dei valori alle mappe chiave valore `mongo` e `knex`, come mostrato di seguito:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   mongo: { 
     default: primaryMongoDb,
     secondary: secondaryMongoDb,
@@ -114,9 +114,9 @@ type Post @entity @sql {
 }
 ```
 
-Il DAOContext generato conterrà automaticamente il riferimento ai due DAO che corrispondono alle due entità storicizzate. L'accesso ad ogni DAO si ottiene direttamente in maniera associativa dall'istanza del DAOContext:
+Il EntityManager generato conterrà automaticamente il riferimento ai due DAO che corrispondono alle due entità storicizzate. L'accesso ad ogni DAO si ottiene direttamente in maniera associativa dall'istanza del EntityManager:
 
 ```typescript
-const userDAO = daoContext.user;
-const postDAO = daoContext.post;
+const userDAO = entityManager.user;
+const postDAO = entityManager.post;
 ```

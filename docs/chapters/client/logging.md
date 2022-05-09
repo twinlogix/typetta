@@ -8,10 +8,10 @@ The possibility of having an accurate logging system is a very important feature
 
 ## How to enable Logs
 
-You can enable logging simply by setting the ``log: true`` parameter when creating the ``DAOContext``.
+You can enable logging simply by setting the ``log: true`` parameter when creating the ``EntityManager``.
 
 ```typescript
-new DAOContext({
+new EntityManager({
   log: true,
 })
 ```
@@ -21,7 +21,7 @@ Alternatively, you can specify which log levels should be enabled among those pr
 To explicitly specify the enabled levels, you must set an array in the ``log`` parameter:
 
 ```typescript
-new DAOContext({
+new EntityManager({
   log: ['warning', 'error'],
 })
 ```
@@ -40,10 +40,10 @@ In this example, we see the log of a query containing:
 
 ## Log long-running queries
 
-If there are performance problems or there is simply the need to perform an analysis on the data access times, it is possible to enable the logging of all operations that take too long to be performed through the ``maxQueryExecutionTime`` parameter. Then configuring the ``DAOContext`` as follows:
+If there are performance problems or there is simply the need to perform an analysis on the data access times, it is possible to enable the logging of all operations that take too long to be performed through the ``maxQueryExecutionTime`` parameter. Then configuring the ``EntityManager`` as follows:
 
 ```typescript
-new DAOContext({
+new EntityManager({
   log: { maxQueryExecutionTime: 2000 },
 })
 ```
@@ -68,7 +68,7 @@ A custom logger is a function that the user can write and set to the log paramet
 Here is an example of a custom logger:
 
 ```typescript
-new DAOContext({
+new EntityManager({
   log: async ({ raw }) => {
     console.log(`My custom log is: ${raw}`)
   },

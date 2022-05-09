@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { mock } from '../../src'
-import { DAOContext } from './dao.mock'
+import { EntityManager } from './dao.mock'
 import { v4 as uuid } from 'uuid'
 
 jest.setTimeout(20000)
 
-const dao: DAOContext = new DAOContext({
+const dao: EntityManager = new EntityManager({
   scalars: {
     ID: { generate: () => uuid() },
     Date: { generate: () => new Date() },

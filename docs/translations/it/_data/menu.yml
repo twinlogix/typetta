@@ -18,7 +18,7 @@ main:
   - client:
     title: Database Client
     children:
-      - url: /chapters/client/dao-context
+      - url: /chapters/client/entity-manager
         title: Il Contesto
       - url: /chapters/client/read-write
         title: Lettura e Scrittura
