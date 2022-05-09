@@ -4,6 +4,7 @@ import { generate } from '@graphql-codegen/cli'
 import { Types } from '@graphql-codegen/plugin-helpers'
 import chalk from 'chalk'
 import fs from 'fs'
+import { isObject } from 'lodash'
 import path from 'path'
 import yaml from 'yaml'
 
@@ -28,7 +29,7 @@ export default async (args: GenerateArgs): Promise<void> => {
                 plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
                 config: {
                   namingConvention: 'keep',
-                  ...(config.generateGraphQLOperations !== undefined && config.generateGraphQLOperations !== true ? config.generateGraphQLOperations.operationsCodegenConfig : {}),
+                  ...(isObject(config.generateGraphQLOperations) ? config.generateGraphQLOperations.operationsCodegenConfig : {}),
                   scalars: config.scalars,
                   generationOutput: 'operations',
                 },
@@ -50,7 +51,7 @@ export default async (args: GenerateArgs): Promise<void> => {
           plugins: ['typescript'],
           config: {
             enumsAsConst: true,
-            ...(config.generateTypes !== undefined && config.generateTypes !== true ? config.generateTypes.codegenConfig : {}),
+            ...(isObject(config.generateTypes) ? config.generateTypes.codegenConfig : {}),
             scalars: config.scalars,
           },
         }
@@ -62,7 +63,7 @@ export default async (args: GenerateArgs): Promise<void> => {
             tsTypesImport: './model.types',
             namingConvention: 'keep',
             defaultIdGenerationStrategy: 'generator',
-            ...(config.generateORM !== undefined && config.generateORM !== true ? config.generateORM.codegenConfig : {}),
+            ...(isObject(config.generateORM) ? config.generateORM.codegenConfig : {}),
             scalars: config.scalars,
             generationOutput: 'dao',
           },
@@ -79,10 +80,10 @@ export default async (args: GenerateArgs): Promise<void> => {
             'typescript-resolvers',
           ],
           config: {
-            ...(config.generateGraphQLOperations !== undefined && config.generateGraphQLOperations !== true ? config.generateGraphQLOperations.resolversTypesCodegenConfig : {}),
+            ...(isObject(config.generateGraphQLOperations) ? config.generateGraphQLOperations.resolversTypesCodegenConfig : {}),
             resolverTypeWrapperSignature: 'PartialDeep<T>',
             namespacedImportName: 'types',
-            ...(config.generateGraphQLOperations !== true
+            ...(isObject(config.generateGraphQLOperations)
               ? {
                   contextType: config.generateGraphQLOperations?.context?.type,
                   daoContextPath: config.generateGraphQLOperations?.context?.path,
@@ -95,10 +96,10 @@ export default async (args: GenerateArgs): Promise<void> => {
         generates[outputPath + '/resolvers.ts'] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
-            ...(config.generateGraphQLOperations !== undefined && config.generateGraphQLOperations !== true ? config.generateGraphQLOperations.resolversCodegenConfig : {}),
+            ...(isObject(config.generateGraphQLOperations) ? config.generateGraphQLOperations.resolversCodegenConfig : {}),
             generationOutput: 'resolvers',
             tsTypesImport: './resolvers.types',
-            ...(config.generateGraphQLOperations !== true
+            ...(config.generateGraphQLOperations !== true && config.generateGraphQLOperations !== undefined
               ? {
                   contextType: config.generateGraphQLOperations?.context?.type,
                   daoContextPath: config.generateGraphQLOperations?.context?.path,
