@@ -25,4 +25,4 @@ generates:
       namingConvention: keep
       defaultIdGenerationStrategy: 'generator'
     plugins:
-      - lib/src/generation/index.js
+      - lib/generation/index.js

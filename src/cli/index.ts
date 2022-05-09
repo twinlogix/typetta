@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-import packageJson from '../../package.json'
 import generate from './generate/generate'
 import init from './init/init'
 import { TYPETTA_COLOR } from './utils'
 import chalk from 'chalk'
 import { Command } from 'commander'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const packageJson = require('../../package.json')
 
 const program = new Command('typetta')
   .version(packageJson.version)
