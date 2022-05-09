@@ -82,7 +82,14 @@ export default async (args: GenerateArgs): Promise<void> => {
             ...(config.generateGraphQLOperations !== undefined && config.generateGraphQLOperations !== true ? config.generateGraphQLOperations.resolversTypesCodegenConfig : {}),
             resolverTypeWrapperSignature: 'PartialDeep<T>',
             namespacedImportName: 'types',
-            ...(config.generateGraphQLOperations !== true ? config.generateGraphQLOperations?.context : { contextType: './dao#DAOContext' }),
+            ...(config.generateGraphQLOperations !== true
+              ? {
+                  contextType: config.generateGraphQLOperations?.context?.type,
+                  daoContextPath: config.generateGraphQLOperations?.context?.path,
+                }
+              : {
+                  contextType: './typetta#DAOContext',
+                }),
           },
         }
         generates[outputPath + '/resolvers.ts'] = {
@@ -91,6 +98,14 @@ export default async (args: GenerateArgs): Promise<void> => {
             ...(config.generateGraphQLOperations !== undefined && config.generateGraphQLOperations !== true ? config.generateGraphQLOperations.resolversCodegenConfig : {}),
             generationOutput: 'resolvers',
             tsTypesImport: './resolvers.types',
+            ...(config.generateGraphQLOperations !== true
+              ? {
+                  contextType: config.generateGraphQLOperations?.context?.type,
+                  daoContextPath: config.generateGraphQLOperations?.context?.path,
+                }
+              : {
+                  contextType: './typetta#DAOContext',
+                }),
           },
         }
       }
