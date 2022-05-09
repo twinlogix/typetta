@@ -29,7 +29,7 @@ Note that it is the driver that deals with the connection pooling, that is, each
 
 ## Creation of the EntityManager
 
-Unlike connection, the ``EntityManager`` can be instantiated multiple times and with different parameters. For example, it is advisable to create a ``EntityManager`` for each calling context (for example, each REST or GraphQL call).
+Unlike connection, the ``EntityManager`` can be instantiated multiple times and with different parameters. For example, it is advisable to create an ``EntityManager`` for each calling context (for example, each REST or GraphQL call).
 
 The ``EntityManager`` requires as input a reference to the MongoDB database to be accessed to provide access to the various entities of the data model. Here is an example configuration:
 

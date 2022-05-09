@@ -12,7 +12,7 @@ The mocking functionality is also useful for testing purposes.
 
 ## Mocking some data sources
 
-In some cases, it may be useful to create a `EntityManager` that has some real and some mock data sources. Every entity associated with a data source instantied with the literal `'mock'` will be mocked.
+In some cases, it may be useful to create an `EntityManager` that has some real and some mock data sources. Every entity associated with a data source instantied with the literal `'mock'` will be mocked.
 
 Below is an example in which a default MongoDB database is mocked; the other data source instead is a real MongoDB instance.
 

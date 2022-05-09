@@ -61,20 +61,20 @@ const middleware = {
 By contrast, the second parameter (``context`` in the example) contains the following fields:
 ```typescript
 {
-  // riferimento al driver MongoDB o all'oggeto knexjs
+  // MongoDB's driver reference or knexjs's driver reference
   driver: ...,
-  // oggetto contentene metadati passati al EntityManager o allo specifico DAO
+  // object that contains metadata passed to the EntityManager or to the specific DAO
   metadata: {...},
-  // oggetto generato che descrive la struttura dell'entità
+  // generated object that describes the structure of the entity
   schema: { ... };
-  // chiave del campo @id dell'entità
+  // key of the @id field of the entity
   idField: ...,
 }
 ```
 
 ## Applying a Middleware
 
-Each middleware can be applied to three different levels within a ``EntityManager``:
+Each middleware can be applied to three different levels within an ``EntityManager``:
   - [Middleware for a specific DAO](#middleware-for-a-specific-dao)
   - [Middleware for several DAOs](#middleware-for-several-daos)
   - [Middleware for the whole EntityManager](#middleware-for-the-whole-entity-manager)
@@ -98,7 +98,7 @@ Note that a middleware created for a single entity can make use of TypeScript ty
 
 ### Middleware for several DAOs
 
-You may need to create middleware that must be applied to a subset of the entities in a ``EntityManager``. To do this, it is possible to define an override for each of these entities, as seen above, but this can be lengthy and difficult to maintain. Typetta provides a utility function with which you can define a middleware for a specific group of entities:
+You may need to create middleware that must be applied to a subset of the entities in an ``EntityManager``. To do this, it is possible to define an override for each of these entities, as seen above, but this can be lengthy and difficult to maintain. Typetta provides a utility function with which you can define a middleware for a specific group of entities:
 
 ```typescript
 const entityManager = new EntityManager({

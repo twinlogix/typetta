@@ -135,7 +135,7 @@ In this way we have defined that:
 
 ## How can I enable security?
 
-The default behavior of a `EntityManager` is not to apply any security policy, leaving the Typetta user with full control. However, if you intend to manage security within Typetta, you can enable this feature by properly configuring the `EntityManager`:
+The default behavior of an `EntityManager` is not to apply any security policy, leaving the Typetta user with full control. However, if you intend to manage security within Typetta, you can enable this feature by properly configuring the `EntityManager`:
 
 ```typescript
 const entityManager = new EntityManager({
@@ -205,7 +205,7 @@ const entityManager = new EntityManager({
 ## Permissions and security policies
 In order to impose different restrictions to different `identities`, it is very useful to add the concept of `permission` that is able to group and reuse the access rules to the various `resources`.
 
-Referring to the given model described in the previous [example](#example), a `EntityManager` can be defined in which the access policies to the individual entities depend on the user's permissions:
+Referring to the given model described in the previous [example](#example), an `EntityManager` can be defined in which the access policies to the individual entities depend on the user's permissions:
 
 ```typescript
 const entityManager = new EntityManager({
@@ -315,7 +315,7 @@ If a `security domain` field must be ignored in a specific `security policy`, yo
 
 ### Operation security domain
 
-Whenever a `EntityManager` operation is performed for which a security configuration is specified, Typetta applies all the rules described above to determine whether the operation is allowed or prohibited. In the presence of different `security policies` for different `security domains`, not knowing which `security domain` will be the target of the operation, the system applies an intersection between all the `security policies` provided for the entity in question. Intersection means that an operation is allowed (or a visible field) only if it is allowed in all `security policies`.
+Whenever an `EntityManager` operation is performed for which a security configuration is specified, Typetta applies all the rules described above to determine whether the operation is allowed or prohibited. In the presence of different `security policies` for different `security domains`, not knowing which `security domain` will be the target of the operation, the system applies an intersection between all the `security policies` provided for the entity in question. Intersection means that an operation is allowed (or a visible field) only if it is allowed in all `security policies`.
 
 Let's assume that we have two levels of visibility of the posts, one that allows reading of the entire post, `VIEW_POSTS`, and one that allows you to read only the content and not the author `VIEW_POSTS_CONTENT`. We then assume that a user has these two `permissions` on different `security domains`. Below is the definition of the `EntityManager`:
 

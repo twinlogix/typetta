@@ -12,7 +12,7 @@ There are three approaches to managing multi-tenancy:
 
 ## Partitioning
 
-Using the middlewares mechanism, Typetta offers fully automatic management of the multi-tenancy scenario via partitioning. Here is an example of how to configure a ``EntityManager``:
+Using the middlewares mechanism, Typetta offers fully automatic management of the multi-tenancy scenario via partitioning. Here is an example of how to configure an ``EntityManager``:
 
 ```typescript
 const entityManager = new EntityManager({

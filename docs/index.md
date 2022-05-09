@@ -17,7 +17,7 @@ Starting from the model output of the domain analysis, Typetta provides a range 
 
 - Data Access Object (aka DAO) for each entity type that has a corresponding data source. Each DAO is an object that the developer can also query with advanced CRUD operations.
 
-- A EntityManager, a contextual object where the developer can configure each data source and retrieve the reference of any DAO.
+- An EntityManager, a contextual object where the developer can configure each data source and retrieve the reference of any DAO.
 
 ## Main Functionalities
 

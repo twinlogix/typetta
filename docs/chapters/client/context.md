@@ -7,7 +7,7 @@
 
 The heart of Typetta is a type-safe, self-generated query builder tailor-made to the data model. The best way to start using it is to follow our [Getting Started](../overview/getting-started) guide.
 
-Each time the data model is modified, you can execute a supplied generator that creates and updates all TypeScript types, a EntityManager class and all the related DAOs. These objects allow you to access the data sources in a powerful and type-safe way, using the Typetta query builder.
+Each time the data model is modified, you can execute a supplied generator that creates and updates all TypeScript types, an EntityManager class and all the related DAOs. These objects allow you to access the data sources in a powerful and type-safe way, using the Typetta query builder.
 
 Simply run the following command to start the generation:
 
@@ -33,7 +33,7 @@ Instantiating the `EntityManager` is very simple. The only mandatory configurati
 
 Note that Typetta implements two different drivers to connect to the supported databases, one is built on the [MongoDB native driver](https://docs.mongodb.com/drivers/node/current/){:target="_blank"} and the other on [KnexJS](https://knexjs.org/){:target="_blank"}, one of the most consolidated NodeJS query builder libraries for SQL databases.
 
-Here is an example that shows how to instantiate a EntityManager with two data sources, one SQL and one MongoDB:
+Here is an example that shows how to instantiate an EntityManager with two data sources, one SQL and one MongoDB:
 
 ```typescript
 import { MongoClient } from 'mongodb';

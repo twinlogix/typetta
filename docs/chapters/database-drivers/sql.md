@@ -49,7 +49,7 @@ run().catch(console.dir);
 
 ## Creation of the EntityManager
 
-Unlike connection, the ``EntityManager`` can be instantiated multiple times and with different parameters. For example, it is advisable to create a ``EntityManager`` for each calling context (for example, each REST or GraphQL call).
+Unlike connection, the ``EntityManager`` can be instantiated multiple times and with different parameters. For example, it is advisable to create an ``EntityManager`` for each calling context (for example, each REST or GraphQL call).
 
 The ``EntityManager`` requests an input reference to the KnexJS instance that it will use to access the various data model entities. Here is an example configuration:
 

@@ -209,7 +209,7 @@ The GraphQL philosophy, from which Typetta is strongly inspired, requires that e
 
 To facilitate Typetta's integration with GraphQL backends, each data retrieval API can receive a ``GraphQLResolveInfo`` object that contains the AST of a GraphQL request instead of an explicit projection. It is therefore the system that automatically transforms user input into a Typetta projection.
 
-Here is an example of a GraphQL resolver implemented using a EntityManager:
+Here is an example of a GraphQL resolver implemented using an EntityManager:
 
 ```typescript
 Query: {
