@@ -14,7 +14,7 @@ generates:
       - lib/src/generation/index.js
   tests/demo/operations-types.generated.ts:
     config:
-      generationOutput: 'inputs'
+      generationOutput: 'operations'
       namingConvention: keep
     plugins:
       - lib/src/generation/index.js

@@ -39,6 +39,6 @@ export const validate: PluginValidateFn<TypeScriptTypettaPluginConfig> = async (
       throw new Error(`Plugin "typescript-typetta" requires extension to be ".graphql" when config.generationOutput is "resolvers"`)
     }
   } else {
-    throw new Error(`config.generationOutput must be one of this values: ['dao', 'inputs', 'resolvers']. '${config.generationOutput}' is not a valid value.`)
+    throw new Error(`config.generationOutput must be one of this values: ['dao', 'operations', 'resolvers']. '${config.generationOutput}' is not a valid value.`)
   }
 }
