@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "1.6.0-beta.11",
+  "version": "1.6.0-beta.13",
   "main": "lib/index.js",
   "bin": {
     "typetta": "lib/cli/index.js"
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "3.2.0",
-    "@types/jest": "27.4.1",
+    "@types/jest": "27.5.0",
     "@types/lodash": "4.14.182",
     "@types/node": "12.20.50",
     "@types/object-hash": "2.2.1",
@@ -59,7 +59,7 @@
     "jest": "27.5.1",
     "make-coverage-badge": "1.2.0",
     "mongodb-memory-server": "8.4.2",
-    "prettier": "^2.6.2",
+    "prettier": "2.6.2",
     "release-it": "14.12.5",
     "sha256": "0.2.0",
     "ts-jest": "27.1.4",
@@ -71,10 +71,10 @@
     "@graphql-codegen/cli": "2.6.2",
     "@graphql-codegen/plugin-helpers": "2.4.2",
     "@graphql-codegen/schema-ast": "2.4.1",
-    "@graphql-codegen/typescript": "2.4.8",
-    "@graphql-codegen/typescript-resolvers": "^2.6.1",
-    "@graphql-codegen/visitor-plugin-common": "2.7.4",
+    "@graphql-codegen/typescript-resolvers": "2.6.1",
     "@graphql-codegen/add": "3.1.1",
+    "@graphql-codegen/typescript": "2.4.10",
+    "@graphql-codegen/visitor-plugin-common": "2.7.6",
     "dataloader": "2.0.0",
     "graphql": "15.8.0",
     "graphql-tag": "2.12.6",
