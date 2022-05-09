@@ -137,5 +137,8 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "files": [
+    "lib"
+  ]
 }
