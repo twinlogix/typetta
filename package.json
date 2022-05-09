@@ -21,7 +21,7 @@
     "generate-in-memory": "graphql-codegen --config tests/in-memory/codegen.yml",
     "generate-resolvers": "graphql-codegen --config tests/resolvers/codegen.yml",
     "typedoc": "typedoc --excludePrivate --excludeProtected --excludeInternal --githubPages false --out docs/typedoc src/index.ts",
-    "release": "npm run build && cd lib && release-it"
+    "release": "npm run build && release-it"
   },
   "repository": {
     "type": "git",
