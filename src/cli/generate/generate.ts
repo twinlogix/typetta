@@ -28,11 +28,14 @@ export default async (args: GenerateArgs) => {
                 plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
                 config: {
                   namingConvention: 'keep',
-                  ...(config.generateORM !== undefined && config.generateORM !== true ? config.generateORM : {}),
+                  ...(config.generateGraphQLOperations !== undefined && config.generateGraphQLOperations !== true ? config.generateGraphQLOperations.operationsCodegenConfig : {}),
                   scalars: config.scalars,
                   generationOutput: 'operations',
                 },
               },
+            },
+            hooks: {
+              afterAllFileWrite: 'prettier --write',
             },
             silent: true,
           },
@@ -47,19 +50,19 @@ export default async (args: GenerateArgs) => {
           plugins: ['typescript'],
           config: {
             enumsAsConst: true,
-            ...(config.generateTypes !== undefined && config.generateTypes !== true ? config.generateTypes : {}),
+            ...(config.generateTypes !== undefined && config.generateTypes !== true ? config.generateTypes.codegenConfig : {}),
             scalars: config.scalars,
           },
         }
       }
       if (config.generateORM !== false) {
-        generates[outputPath + '/dao.ts'] = {
+        generates[outputPath + '/typetta.ts'] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
             tsTypesImport: './model.types',
             namingConvention: 'keep',
             defaultIdGenerationStrategy: 'generator',
-            ...(config.generateORM !== undefined && config.generateORM !== true ? config.generateORM : {}),
+            ...(config.generateORM !== undefined && config.generateORM !== true ? config.generateORM.codegenConfig : {}),
             scalars: config.scalars,
             generationOutput: 'dao',
           },
@@ -76,14 +79,16 @@ export default async (args: GenerateArgs) => {
             'typescript-resolvers',
           ],
           config: {
+            ...(config.generateGraphQLOperations !== undefined && config.generateGraphQLOperations !== true ? config.generateGraphQLOperations.resolversTypesCodegenConfig : {}),
             resolverTypeWrapperSignature: 'PartialDeep<T>',
-            contextType: './dao#DAOContext', // TODO
             namespacedImportName: 'types',
+            ...(config.generateGraphQLOperations !== true ? config.generateGraphQLOperations?.context : { contextType: './dao#DAOContext' }),
           },
         }
         generates[outputPath + '/resolvers.ts'] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
+            ...(config.generateGraphQLOperations !== undefined && config.generateGraphQLOperations !== true ? config.generateGraphQLOperations.resolversCodegenConfig : {}),
             generationOutput: 'resolvers',
             tsTypesImport: './resolvers.types',
           },
@@ -92,13 +97,16 @@ export default async (args: GenerateArgs) => {
 
       let schema: Types.Schema[] = []
       if (config.generateGraphQLOperations !== false) {
-        schema.push(path.join(config.outputDir, 'operations.ts'))
+        schema.push(path.join(outputPath, 'operations.ts'))
       }
       schema = schema.concat(config.schema || [])
       await generate(
         {
           schema,
           generates,
+          hooks: {
+            afterAllFileWrite: 'prettier --write',
+          },
           silent: true,
         },
         true,

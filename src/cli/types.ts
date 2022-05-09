@@ -16,9 +16,13 @@ export type Config = {
   generateGraphQLOperations?:
     | boolean
     | {
-        contextType?: string
-        codegenConfig?: Types.ConfiguredOutput
-        daoContextPath?: string
+        context?: {
+          type: string
+          path: string
+        }
+        operationsCodegenConfig?: Types.ConfiguredOutput
+        resolversCodegenConfig?: Types.ConfiguredOutput
+        resolversTypesCodegenConfig?: Types.ConfiguredOutput
       }
   scalars?: Record<string, string>[]
   typettaGeneratorPath?: string
