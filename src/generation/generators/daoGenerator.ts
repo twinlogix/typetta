@@ -131,35 +131,35 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     const loggerDeclaration = `private logger?: T.LogFunction<${daoNamesType}>`
     const paramsDeclaration = `private params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>`
 
-    const daoGetters = Array.from(typesMap.values())
+    const entityManagerGetters = Array.from(typesMap.values())
       .filter((node) => node.entity)
       .map((node) => {
         const datasource = node.entity?.type === 'mongo' ? "'" + node.entity.source + "'" : node.entity?.type === 'sql' ? "'" + node.entity.source + "'" : 'null'
-        const daoImplementationInit =
+        const entityManagerImplementationInit =
           node.entity?.type === 'sql' ? `, knex: db, tableName: '${node.entity?.table}'` : node.entity?.type === 'mongo' ? `, collection: db.collection('${node.entity?.collection}')` : ''
-        const daoMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...selectMiddleware('${toFirstLower(
+        const entityManagerMiddlewareInit = `, middlewares: [...(this.overrides?.${toFirstLower(node.name)}?.middlewares || []), ...selectMiddleware('${toFirstLower(
           node.name,
         )}', this.middlewares) as T.DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
         const normalDaoInstance = `new ${node.name}DAO({ entityManager: this, datasource: ${datasource}, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
-        )}${daoImplementationInit}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger })`
-        const daoInit =
+        )}${entityManagerImplementationInit}${entityManagerMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger })`
+        const entityManagerInit =
           node.entity?.type === 'memory'
             ? `this._${toFirstLower(node.name)} = ${normalDaoInstance}`
             : `${
                 node.entity?.type === 'mongo' ? `const db = this.mongodb.${node.entity.source}` : node.entity?.type === 'sql' ? `const db = this.knex.${node.entity.source}` : ''
               }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ entityManager: this, datasource: null, metadata: this.metadata, ...this.overrides?.${toFirstLower(
                 node.name,
-              )}${daoMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
-        const daoGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(daoInit)}\n}\nreturn this._${toFirstLower(node.name)}`
-        return `get ${toFirstLower(node.name)}(): ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(daoGet)}\n}`
+              )}${entityManagerMiddlewareInit}, name: '${toFirstLower(node.name)}', logger: this.logger }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
+        const entityManagerGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(entityManagerInit)}\n}\nreturn this._${toFirstLower(node.name)}`
+        return `get ${toFirstLower(node.name)}(): ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(entityManagerGet)}\n}`
       })
       .join('\n')
 
     const mongoDBConstructor = hasMongoDBEntites ? '\nthis.mongodb = params.mongodb' : ''
     const knexJsContsructor = hasSQLEntities ? '\nthis.knex = params.knex' : ''
     const scalarsNameList = [...Array.from(customScalarsMap.keys()), ...Object.keys(DEFAULT_SCALARS)]
-    const daoConstructor =
+    const entityManagerConstructor =
       'constructor(params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {\n' +
       indentMultiline(
         `super({\n  ...params,\n  scalars: params.scalars ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [${scalarsNameList.map((v) => `'${v}'`).join(', ')}]) : undefined\n})
@@ -174,9 +174,9 @@ this.params = params`,
       ) +
       '\n}'
 
-    const declarations = [daoDeclarations, paramsDeclaration, overridesDeclaration, middlewareDeclaration, loggerDeclaration, daoGetters, daoConstructor, execQueryF, cloneF, createTableF].join('\n\n')
+    const declarations = [daoDeclarations, paramsDeclaration, overridesDeclaration, middlewareDeclaration, loggerDeclaration, entityManagerGetters, entityManagerConstructor, execQueryF, cloneF, createTableF].join('\n\n')
 
-    const daoExport =
+    const entityManagerExport =
       `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<${
         mongoSourcesLiteral || 'never'
       }, ${sqlSourcesLiteral || 'never'}, types.Scalars, MetadataType>  {\n\n` +
@@ -240,7 +240,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   )
 }
 `
-    return [[entityManagerParamsExport, entityManagerMiddleware, daoExport, utilsCode].join('\n\n')]
+    return [[entityManagerParamsExport, entityManagerMiddleware, entityManagerExport, utilsCode].join('\n\n')]
   }
 
   // ---------------------------------------------------------------------------------------------------------

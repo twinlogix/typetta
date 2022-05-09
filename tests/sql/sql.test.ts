@@ -187,9 +187,9 @@ test('Simple transaction trx', async () => {
 
 test('Simple transaction function', async () => {
   const trx = await knexInstance.transaction({ isolationLevel: 'snapshot' })
-  await dao.transaction({ knex: { default: trx } }, async (dao2) => {
-    await dao2.device.insertOne({ record: { name: 'dev' } })
-    const dev1 = await dao2.device.findOne({ filter: { name: 'dev' } })
+  await dao.transaction({ knex: { default: trx } }, async (entityManager2) => {
+    await entityManager2.device.insertOne({ record: { name: 'dev' } })
+    const dev1 = await entityManager2.device.findOne({ filter: { name: 'dev' } })
     expect(dev1?.name).toBe('dev')
   })
   await trx.rollback()
@@ -570,7 +570,7 @@ test('insert generic test 1', async () => {
 })
 
 test('Insert default', async () => {
-  const dao0 = new EntityManager({
+  const entityManager0 = new EntityManager({
     knex: {
       default: knexInstance,
     },
@@ -581,13 +581,13 @@ test('Insert default', async () => {
   })
 
   try {
-    await dao0.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    await entityManager0.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
     fail()
   } catch (error: unknown) {
     expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
   }
 
-  const dao1 = new EntityManager({
+  const entityManager1 = new EntityManager({
     knex: {
       default: knexInstance,
     },
@@ -602,16 +602,16 @@ test('Insert default', async () => {
   })
 
   try {
-    await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
     fail()
   } catch (error: unknown) {
     expect(((error as Error).message as string).startsWith('Fields creationDate should have been generated from a middleware but it is undefined')).toBe(true)
   }
 
-  const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
+  const e1 = await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
   expect(e1.live).toBe(true)
 
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     knex: {
       default: knexInstance,
     },
@@ -630,13 +630,13 @@ test('Insert default', async () => {
     },
   })
 
-  const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
+  const e2 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
   expect(e2.live).toBe(true)
   expect(e2.creationDate).toBe(1234)
   expect(e2.opt1).toBe(undefined)
   expect(e2.opt2).toBe(true)
 
-  const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
+  const e3 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
   expect(e3.opt1).toBe(undefined)
 })
 

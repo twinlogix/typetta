@@ -526,7 +526,7 @@ test('Insert default', async () => {
     expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
   }
 
-  const dao1 = new EntityManager({
+  const entityManager1 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -539,16 +539,16 @@ test('Insert default', async () => {
   })
 
   try {
-    await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
     fail()
   } catch (error: unknown) {
     expect(((error as Error).message as string).startsWith('Fields creationDate should have been generated from a middleware but it is undefined')).toBe(true)
   }
 
-  const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
+  const e1 = await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
   expect(e1.live).toBe(true)
 
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -565,13 +565,13 @@ test('Insert default', async () => {
     },
   })
 
-  const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
+  const e2 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
   expect(e2.live).toBe(true)
   expect(e2.creationDate).toBe(1234)
   expect(e2.opt1).toBe(undefined)
   expect(e2.opt2).toBe(true)
 
-  const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
+  const e3 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
   expect(e3.opt1).toBe(undefined)
 })
 
@@ -894,7 +894,7 @@ test('insert and retrieve localized string field', async () => {
 // ------------------------------------------------------------------------
 test('middleware 1', async () => {
   let operationCount = 0
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     log: ['error', 'warning'],
     mongodb: {
       default: db,
@@ -994,38 +994,38 @@ test('middleware 1', async () => {
   })
 
   try {
-    await dao2.user.insertOne({ record: { id: 'u1', firstName: 'Mario', live: true } })
+    await entityManager2.user.insertOne({ record: { id: 'u1', firstName: 'Mario', live: true } })
     fail()
   } catch (error) {
     expect((error as Error).message).toBe('is Mario')
   }
 
-  await dao2.user.insertOne({ record: { id: 'u1', firstName: 'Luigi', live: true } })
-  const u = await dao2.user.findOne({ filter: { id: 'u1' } })
+  await entityManager2.user.insertOne({ record: { id: 'u1', firstName: 'Luigi', live: true } })
+  const u = await entityManager2.user.findOne({ filter: { id: 'u1' } })
   expect(u?.firstName).toBe('LUIGI OK')
 
-  await dao2.user.updateOne({ filter: { id: 'u1' }, changes: { firstName: 'Mario' } })
-  const lastName = (await dao2.user.findOne({ filter: { id: 'u1' } }))?.lastName
+  await entityManager2.user.updateOne({ filter: { id: 'u1' }, changes: { firstName: 'Mario' } })
+  const lastName = (await entityManager2.user.findOne({ filter: { id: 'u1' } }))?.lastName
   expect(lastName).toBe('Bros')
 
-  await dao2.user.findAll({})
-  await dao2.user.deleteOne({ filter: { id: 'u1' } })
-  await dao2.user.findAll({})
-  expect(await dao2.user.exists({ filter: { id: 'u1' } })).toBe(true)
+  await entityManager2.user.findAll({})
+  await entityManager2.user.deleteOne({ filter: { id: 'u1' } })
+  await entityManager2.user.findAll({})
+  expect(await entityManager2.user.exists({ filter: { id: 'u1' } })).toBe(true)
 
-  await dao2.user.insertOne({ record: { id: 'u2', firstName: 'Mario', live: true } })
-  await dao2.user.deleteOne({ filter: { id: 'u2' } })
-  expect(await dao2.user.exists({ filter: { id: 'u2' } })).toBe(false)
+  await entityManager2.user.insertOne({ record: { id: 'u2', firstName: 'Mario', live: true } })
+  await entityManager2.user.deleteOne({ filter: { id: 'u2' } })
+  expect(await entityManager2.user.exists({ filter: { id: 'u2' } })).toBe(false)
 
-  await dao2.user.replaceOne({ filter: { id: 'u1' }, replace: { live: true, id: 'u3' } })
-  const luigi = await dao2.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } })
+  await entityManager2.user.replaceOne({ filter: { id: 'u1' }, replace: { live: true, id: 'u3' } })
+  const luigi = await entityManager2.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } })
   expect(luigi?.firstName).toBe('Luigi')
 
   expect(operationCount).toBe(4)
 })
 
 test('middleware 2', async () => {
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1061,12 +1061,12 @@ test('middleware 2', async () => {
       },
     },
   })
-  const mario = await dao2.user.findOne({})
+  const mario = await entityManager2.user.findOne({})
   expect(mario?.firstName).toBe('MARIO')
 })
 
 test('middleware options', async () => {
-  const dao2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
     metadata: { m1: 'test1', m2: 'no' },
     mongodb: {
       default: db,
@@ -1086,7 +1086,7 @@ test('middleware options', async () => {
       },
     },
   })
-  await dao2.user.insertOne({ record: { live: true }, metadata: { m3: 'yes' } })
+  await entityManager2.user.insertOne({ record: { live: true }, metadata: { m3: 'yes' } })
 })
 
 // ------------------------------------------------------------------------
@@ -1181,7 +1181,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 })
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1199,17 +1199,17 @@ test('computed fields (one dependency - same level - one calculated - multiple m
     },
   })
 
-  await dao2.city.insertOne({ record: { id: 'c1', name: 'c1', addressId: 'address1' } })
-  await dao2.city.insertOne({ record: { id: 'c2', name: 'c1', addressId: 'address1' } })
-  await dao2.city.insertOne({ record: { id: 'c3', name: 'c1', addressId: 'address1' } })
-  const cities = await dao2.city.findAll({ projection: { id: true, computedName: true } })
+  await entityManager2.city.insertOne({ record: { id: 'c1', name: 'c1', addressId: 'address1' } })
+  await entityManager2.city.insertOne({ record: { id: 'c2', name: 'c1', addressId: 'address1' } })
+  await entityManager2.city.insertOne({ record: { id: 'c3', name: 'c1', addressId: 'address1' } })
+  const cities = await entityManager2.city.findAll({ projection: { id: true, computedName: true } })
   cities.forEach((c) => {
     expect(c?.computedName).toBe('Computed: c1')
   })
 })
 
 /*test('computed fields (one dependency - deep level - one calculated)', async () => {
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
@@ -1230,7 +1230,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 })
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
@@ -1284,9 +1284,9 @@ test('Simple transaction functional', async () => {
     readConcern: { level: 'local' },
     writeConcern: { w: 'majority' },
   })
-  await dao.transaction({ mongodb: { default: session } }, async (dao2) => {
-    const user1 = await dao2.user.insertOne({ record: { id: '123', live: true } })
-    const user2 = await dao2.user.findOne({ filter: { id: '123' } })
+  await dao.transaction({ mongodb: { default: session } }, async (entityManager2) => {
+    const user1 = await entityManager2.user.insertOne({ record: { id: '123', live: true } })
+    const user2 = await entityManager2.user.findOne({ filter: { id: '123' } })
     const user5 = await dao.user.findOne({ filter: { id: '123' } })
     expect(user5).toBe(null)
     expect(user1.live).toBe(true)
@@ -1564,7 +1564,7 @@ test('Mock entity', async () => {
 })
 
 test('Soft delete middleware', async () => {
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1576,25 +1576,25 @@ test('Soft delete middleware', async () => {
     },
   })
 
-  await dao2.user.insertOne({ record: { live: true, firstName: 'Mario' } })
-  await dao2.user.insertOne({ record: { live: true, firstName: 'Luigi' } })
+  await entityManager2.user.insertOne({ record: { live: true, firstName: 'Mario' } })
+  await entityManager2.user.insertOne({ record: { live: true, firstName: 'Luigi' } })
 
-  const users = await dao2.user.findAll()
+  const users = await entityManager2.user.findAll()
   expect(users.length).toBe(2)
 
-  await dao2.user.deleteOne({ filter: { firstName: 'Mario' } })
+  await entityManager2.user.deleteOne({ filter: { firstName: 'Mario' } })
 
   const deletedUser = await dao.user.findAll({ filter: { live: false } })
   expect(deletedUser.length).toBe(1)
   expect(deletedUser[0].firstName).toBe('Mario')
 
-  const liveUsers = await dao2.user.findAll({ filter: { firstName: { in: ['Mario', 'Luigi'] } } })
+  const liveUsers = await entityManager2.user.findAll({ filter: { firstName: { in: ['Mario', 'Luigi'] } } })
   expect(liveUsers.length).toBe(1)
   expect(liveUsers[0].firstName).toBe('Luigi')
 })
 
 test('Audit middlewares', async () => {
-  const dao2 = new EntityManager({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1612,24 +1612,24 @@ test('Audit middlewares', async () => {
     },
   })
 
-  const { id } = await dao2.hotel.insertOne({ record: { name: 'h1' } })
-  await dao2.hotel.insertOne({ record: { name: 'H2' } })
-  await dao2.audit.insertOne({ record: { entityId: id, changes: 'NONE' } })
+  const { id } = await entityManager2.hotel.insertOne({ record: { name: 'h1' } })
+  await entityManager2.hotel.insertOne({ record: { name: 'H2' } })
+  await entityManager2.audit.insertOne({ record: { entityId: id, changes: 'NONE' } })
 
-  const hotels = await dao2.hotel.findAll()
+  const hotels = await entityManager2.hotel.findAll()
   expect(hotels.length).toBe(2)
   expect(hotels[0].audit.createdBy).toBe('userId1')
   expect(hotels[0].audit.createdOn).toBe(1)
   expect(hotels[0].audit.modifiedOn).toBe(1)
 
-  await dao2.hotel.updateOne({ filter: { name: 'h1' }, changes: { name: 'H1' } })
-  const h1 = await dao2.hotel.findOne({ filter: { name: 'H1' }, projection: { audit: { modifiedBy: true, modifiedOn: true, versions: true } } })
+  await entityManager2.hotel.updateOne({ filter: { name: 'h1' }, changes: { name: 'H1' } })
+  const h1 = await entityManager2.hotel.findOne({ filter: { name: 'H1' }, projection: { audit: { modifiedBy: true, modifiedOn: true, versions: true } } })
   expect(h1?.audit.modifiedOn).toBe(2)
   expect(h1?.audit.modifiedBy).toBe('userId2')
   expect(h1?.audit.versions[0]?.changes).toBe('NONE')
 
-  await dao2.hotel.deleteAll({ filter: { name: { in: ['H1', 'H2'] } } })
-  const hotels2 = await dao2.hotel.findAll()
+  await entityManager2.hotel.deleteAll({ filter: { name: { in: ['H1', 'H2'] } } })
+  const hotels2 = await entityManager2.hotel.findAll()
   expect(hotels2.length).toBe(0)
 
   const hotels3 = await dao.hotel.findAll()
@@ -1637,14 +1637,14 @@ test('Audit middlewares', async () => {
   expect(hotels3[0].audit.deletedOn).toBe(3)
   expect(hotels3[0].audit.modifiedBy).toBe('userId3')
 
-  await dao2.hotel.insertOne({ record: { name: 'H3' } })
-  await dao2.hotel.replaceOne({ replace: { name: 'H4' }, filter: { name: 'H3' } })
-  const h4 = await dao2.hotel.aggregate({ by: { 'audit.modifiedBy': true }, aggregations: { c: { operation: 'count' } } })
+  await entityManager2.hotel.insertOne({ record: { name: 'H3' } })
+  await entityManager2.hotel.replaceOne({ replace: { name: 'H4' }, filter: { name: 'H3' } })
+  const h4 = await entityManager2.hotel.aggregate({ by: { 'audit.modifiedBy': true }, aggregations: { c: { operation: 'count' } } })
   expect(h4[0]['audit.modifiedBy']).toBe('userId1')
 })
 
 test('Audit middlewares', async () => {
-  const dao2 = new EntityManager<never, { opts: 1 | 2 }>({
+  const entityManager2 = new EntityManager<never, { opts: 1 | 2 }>({
     mongodb: {
       default: db,
     },
@@ -1666,10 +1666,10 @@ test('Audit middlewares', async () => {
     },
   })
 
-  await dao2.city.insertOne({ record: { id: 'cesena', name: 'Cesena', addressId: 'address1' } })
+  await entityManager2.city.insertOne({ record: { id: 'cesena', name: 'Cesena', addressId: 'address1' } })
 
-  const cesena1 = await dao2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true }, metadata: { opts: 1 } })
-  const cesena2 = await dao2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true } })
+  const cesena1 = await entityManager2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true }, metadata: { opts: 1 } })
+  const cesena2 = await entityManager2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true } })
 
   expect(cesena1?.computedName).toBe('Computed: Cesena')
   expect(cesena2?.computedName).toBe(undefined)

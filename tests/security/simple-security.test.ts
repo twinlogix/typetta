@@ -117,10 +117,10 @@ test('security test 1', async () => {
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_VIEWER' } })
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'ANALYST' } })
 
-  const dao = await createSecureEntityManager(user.id)
+  const entityManager = await createSecureEntityManager(user.id)
 
   try {
-    await dao.hotel.findAll({ filter: { name: { startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
+    await entityManager.hotel.findAll({ filter: { name: { startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {

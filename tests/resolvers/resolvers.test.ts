@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid'
 
 jest.setTimeout(20000)
 
-const dao: EntityManager = new EntityManager({
+const entityManager: EntityManager = new EntityManager({
   scalars: {
     ID: { generate: () => uuid() },
     Date: { generate: () => new Date() },
@@ -20,14 +20,14 @@ beforeEach(async () => {
 })
 
 test('Test 1', async () => {
-  await dao.user.insertOne({
+  await entityManager.user.insertOne({
     record: {
       id: '123',
       firstName: 'Mattia',
       lastName: 'Minotti',
     },
   })
-  await dao.user.insertOne({
+  await entityManager.user.insertOne({
     record: {
       id: '124',
       firstName: 'Edoardo',
@@ -35,14 +35,14 @@ test('Test 1', async () => {
     },
   })
 
-  await dao.post.insertOne({
+  await entityManager.post.insertOne({
     record: {
       id: '1',
       content: 'Typetta is awesome',
       userId: '123',
     },
   })
-  await dao.post.insertOne({
+  await entityManager.post.insertOne({
     record: {
       id: '2',
       content: 'Graphql Security',
@@ -50,7 +50,7 @@ test('Test 1', async () => {
       metadata: { views: 2 },
     },
   })
-  await dao.post.insertOne({
+  await entityManager.post.insertOne({
     record: {
       id: '3',
       content: 'Graphql Federations',
@@ -58,7 +58,7 @@ test('Test 1', async () => {
       metadata: { views: 1 },
     },
   })
-  await dao.post.insertOne({
+  await entityManager.post.insertOne({
     record: {
       id: '4',
       content: 'Graphql 101',
@@ -66,26 +66,26 @@ test('Test 1', async () => {
     },
   })
 
-  await dao.like.insertOne({
+  await entityManager.like.insertOne({
     record: {
       userId: '124',
       postId: '3',
     },
   })
-  await dao.like.insertOne({
+  await entityManager.like.insertOne({
     record: {
       userId: '124',
       postId: '2',
     },
   })
-  await dao.like.insertOne({
+  await entityManager.like.insertOne({
     record: {
       userId: '123',
       postId: '3',
     },
   })
 
-  const results = await dao.user.findAll({
+  const results = await entityManager.user.findAll({
     filter: { firstName: { startsWith: 'M' } },
     relations: {
       posts: {
