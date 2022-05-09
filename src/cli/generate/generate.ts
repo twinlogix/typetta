@@ -11,7 +11,7 @@ type GenerateArgs = {
   config?: string
 }
 
-export default async (args: GenerateArgs) => {
+export default async (args: GenerateArgs): Promise<void> => {
   const { config, basePath } = loadConfig(args.config) || { basePath: './' }
   if (!config) {
     err('Error: Typetta configuration not found.')
@@ -95,11 +95,9 @@ export default async (args: GenerateArgs) => {
         }
       }
 
-      let schema: Types.Schema[] = []
-      if (config.generateGraphQLOperations !== false) {
-        schema.push(path.join(outputPath, 'operations.ts'))
-      }
-      schema = schema.concat(config.schema || [])
+      const operationsSchema: Types.Schema[] = config.generateGraphQLOperations !== false ? [path.join(outputPath, 'operations.ts')] : []
+      const schema: Types.Schema[] = operationsSchema.concat(config.schema || [])
+
       await generate(
         {
           schema,

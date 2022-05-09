@@ -8,7 +8,7 @@ import inquirer from 'inquirer'
 import path from 'path'
 import yaml from 'yaml'
 
-export default async (projectDirectory = './') => {
+export default async (projectDirectory = './'): Promise<void> => {
   const projectDirectoryPath = checkProjectDirectory(projectDirectory)
 
   console.log()
