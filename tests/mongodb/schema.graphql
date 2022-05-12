@@ -16,6 +16,7 @@ type Device @entity @mongodb {
 type UsernamePasswordCredentials {
   username: String! @alias(value: "user")
   password: Password! @alias(value: "pwd")
+  user: User @innerRef(refFrom: "../id")
 }
 
 type City @entity @mongodb {
