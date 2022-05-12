@@ -67,7 +67,7 @@
     "@graphql-codegen/schema-ast": "2.4.1",
     "@graphql-codegen/typescript": "2.4.10",
     "@graphql-codegen/visitor-plugin-common": "2.7.6",
-    "dataloader": "2.0.0",
+    "dataloader": "2.1.0",
     "graphql": "15.8.0",
     "graphql-tag": "2.12.6",
     "is-plain-object": "5.0.0",
