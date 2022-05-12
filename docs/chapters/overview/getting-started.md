@@ -93,7 +93,7 @@ Now let's carry out our first code generation by running the following command:
 npm run generate
 ```
 
-Using the above setup, the code generation command will create two files: *src/models.ts* with all TypeScript types included in *schema.graphql* and another file *src/dao.ts* with DAO and DAOContext. These two files will be useful later.
+Using the above setup, the code generation command will create two files: *src/models.ts* with all TypeScript types included in *schema.graphql* and another file *src/dao.ts* with DAO and EntityManager. These two files will be useful later.
 
 ## A simple application
 
@@ -103,7 +103,7 @@ First things first... open a connection to the MongoDB database using the offici
 
 ```typescript
 import { MongoClient } from 'mongodb';
-import { DAOContext } from './dao';
+import { EntityManager } from './dao';
 
 const main = async () => {
   const mongoConnection = await MongoClient.connect(process.env.MONGODB_URL!);
@@ -112,10 +112,10 @@ const main = async () => {
 main();
 ```
 
-Let's do our first DAOContext, our first Typetta code-generated class. This class represents the central repository for all entities of the data model.
+Let's do our first EntityManager, our first Typetta code-generated class. This class represents the central repository for all entities of the data model.
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   mongo: {
     default: mongoDb
   }
@@ -125,21 +125,21 @@ const daoContext = new DAOContext({
 It's now time to do our first simple CRUD operations on the User entity.
 
 ```typescript
-const user1 = await daoContext.user.insertOne({
+const user1 = await entityManager.user.insertOne({
   record: {
     firstName: "Mattia",
     lastName: "Minotti"
   }
 });
 
-const user2 = await daoContext.user.insertOne({
+const user2 = await entityManager.user.insertOne({
   record: {
     firstName: "Edoardo",
     lastName: "Barbieri"
   }
 });
 
-const users = await daoContext.user.findAll();
+const users = await entityManager.user.findAll();
 users.forEach(user => console.log(`${user.firstName} ${user.lastName}`));
 ```
 
@@ -153,34 +153,34 @@ This is the complete source code for this initial Typetta example connected to a
 
 ```typescript
 import { MongoClient } from 'mongodb';
-import { DAOContext } from './dao';
+import { EntityManager } from './dao';
 
 const main = async () => {
 
   const mongoConnection = await MongoClient.connect(process.env.MONGODB_URL!);
   const mongoDb = mongoConnection.db(process.env.MONGODB_DATABASE_NAME);
 
-  const daoContext = new DAOContext({
+  const entityManager = new EntityManager({
     mongo: {
       default: mongoDb
     }
   });
 
-  const user1 = await daoContext.user.insertOne({
+  const user1 = await entityManager.user.insertOne({
     record: {
       firstName: "Mattia",
       lastName: "Minotti"
     }
   });
 
-  const user2 = await daoContext.user.insertOne({
+  const user2 = await entityManager.user.insertOne({
     record: {
       firstName: "Edoardo",
       lastName: "Barbieri"
     }
   });
 
-  const users = await daoContext.user.findAll();
+  const users = await entityManager.user.findAll();
   users.forEach(user => console.log(`${user.firstName} ${user.lastName}`));
 
 };

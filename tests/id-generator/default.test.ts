@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField } from '../../src'
-import { DAOContext } from './dao.mock'
+import { EntityManager } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
@@ -33,7 +33,7 @@ let knexInstance: Knex<{ [K in string]: unknown }, unknown[]>
 let con: MongoClient
 let mongoServer: MongoMemoryServer
 let db: Db
-let dao: DAOContext
+let dao: EntityManager
 
 beforeEach(async () => {
   knexInstance = knex(config)
@@ -41,7 +41,7 @@ beforeEach(async () => {
   con = await MongoClient.connect(mongoServer.getUri(), {})
   db = con.db('test')
 
-  dao = new DAOContext({
+  dao = new EntityManager({
     mongodb: {
       default: db,
       a: db,

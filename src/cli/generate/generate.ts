@@ -86,10 +86,10 @@ export default async (args: GenerateArgs): Promise<void> => {
             ...(isObject(config.generateGraphQLOperations)
               ? {
                   contextType: config.generateGraphQLOperations?.context?.type,
-                  daoContextPath: config.generateGraphQLOperations?.context?.path,
+                  entityManagerPath: config.generateGraphQLOperations?.context?.path,
                 }
               : {
-                  contextType: './typetta#DAOContext',
+                  contextType: './typetta#EntityManager',
                 }),
           },
         }
@@ -102,10 +102,10 @@ export default async (args: GenerateArgs): Promise<void> => {
             ...(config.generateGraphQLOperations !== true && config.generateGraphQLOperations !== undefined
               ? {
                   contextType: config.generateGraphQLOperations?.context?.type,
-                  daoContextPath: config.generateGraphQLOperations?.context?.path,
+                  entityManagerPath: config.generateGraphQLOperations?.context?.path,
                 }
               : {
-                  contextType: './typetta#DAOContext',
+                  contextType: './typetta#EntityManager',
                 }),
           },
         }
@@ -129,7 +129,7 @@ export default async (args: GenerateArgs): Promise<void> => {
         console.log(`- TypeScript types generation ${chalk.bold.green('completed')}.`)
       }
       if (config.generateORM !== false) {
-        console.log(`- DAOContext generation ${chalk.bold.green('completed')}.`)
+        console.log(`- EntityManager generation ${chalk.bold.green('completed')}.`)
       }
       if (config.generateGraphQLOperations !== false) {
         console.log(`- GraphQL resolvers generation ${chalk.bold.green('completed')}.`)

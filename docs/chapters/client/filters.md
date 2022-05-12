@@ -8,7 +8,7 @@ The following `findAll` operation has a filter that allows you to find all users
 - Were born on a date that does not include the whole year `2020`
 
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     firstName: "Mattia",
     "address.city": { in: [ "Milan", "Rome" ]},
@@ -60,7 +60,7 @@ The `eq` operator checks that the value is the same as the value provided.
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     firstName: { eq: "Mattia" }
   }
@@ -69,7 +69,7 @@ await daoContext.user.findAll({
 
 The `eq` operator can also be omitted, so the above query is equivalent to the following:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     firstName: "Mattia"
   }
@@ -82,7 +82,7 @@ The `ne` operator checks that the value is different from the one provided; it i
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     firstName: { ne: "Mattia" }
   }
@@ -95,7 +95,7 @@ The `in` operator checks that the value is contained within a given set of value
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     firstName: { in: ["Mattia", "Michele", "Stefano"] }
   }
@@ -108,7 +108,7 @@ The `nin` operator checks that the value is not contained within a given set of 
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     firstName: { nin: ["Piero", "Paolo", "Romeo"] }
   }
@@ -125,7 +125,7 @@ The `lt` operator checks that the value is strictly less than a given value.
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     numberOfFriends: { lt: 100 }
   }
@@ -138,7 +138,7 @@ The `lte` operator checks that the value is less than or equal to a given value.
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     numberOfFriends: { lte: 100 }
   }
@@ -151,7 +151,7 @@ The `gt` operator checks that the value is strictly greater than a given value.
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     numberOfFriends: { gt: 100 }
   }
@@ -164,7 +164,7 @@ The `gte` operator checks that the value is greater than or equal to a given val
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     numberOfFriends: { gte: 100 }
   }
@@ -181,7 +181,7 @@ The `$and` operator is verified if all the set conditions are true.
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     $and: [
       { firstName: "Mattia" }
@@ -197,7 +197,7 @@ The `$or` operator is verified if at least one of the set conditions is true.
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     $or: [
       { "address.country": "Italy" },
@@ -213,7 +213,7 @@ The `$nor` operator is verified if none of the set conditions are true.
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     $or: [
       { firstName: "Mattia" },
@@ -230,7 +230,7 @@ Logical filters have a '$' prefix to avoid conflicts with entity fields as they 
 The above logical operators can be combined however you like to create complex conditions. Below is an example that shows a search query of users whose address is in Italy, or who live abroad and whose surname is `Minotti` or `Barbieri`:
 
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     $or: [
       {
@@ -272,7 +272,7 @@ The `contains` operator allows you to check whether the value contains a supplie
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     { 'address.street': { contains: "Piave" }
   }
@@ -286,7 +286,7 @@ The `startsWith` operator allows you to check whether the value starts with a su
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     { 'address.street': { startsWith: "Via" }
   }
@@ -299,7 +299,7 @@ The `endsWith` operator allows you to check whether the value ends with a suppli
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     { 'address.street': { $endWith: "48" } }
   }
@@ -312,7 +312,7 @@ The `mode` operator does not add a filter but acts as a configuration for other 
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     { 'address.street': { $contains: "Piave", mode: "sensitive" } }
   }
@@ -329,7 +329,7 @@ The `exists` operator checks whether or not the field has a value in the databas
 
 For example:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   filter: {
     name: { exists: true }
   }
@@ -344,7 +344,7 @@ All APIs that receive the `filter` parameter accept both a type of data generate
 
 This possibility is exemplified in pseudo-code below:
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   projection: {
     firstName: true
   },
@@ -363,7 +363,7 @@ Since the MongoDB driver is developed through the [official MongoDB Node Driver]
 Let's assume, for example, that we want to use the `$text` operator of MongoDB, which is a very specific operator that, through a textual index of the collection, is able to perform a complex full text search. Since this feature is not available on other databases or available but in very different modes, it was not factored by Typetta. However, with the driver-specific filter mechanism, it is very easy to use:
 
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   projection: {
     firstName: true
   },
@@ -380,7 +380,7 @@ The SQL driver, as mentioned above, is developed using the popular [KnexJS](http
 Let's assume, for example, that in this case we again want to implement a full text search using the features offered by a PostgreSQL target database. Using the specific filter mechanism, we can create a search as follows:
 
 ```typescript
-await daoContext.user.findAll({
+await entityManager.user.findAll({
   projection: {
     firstName: true
   },

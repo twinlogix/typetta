@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OmitIfKnown } from '../../../../utils/utils.types'
 import { DAOGenerics, DAOParams } from '../../../dao/dao.types'
-import { AbstractDAOContext } from '../../../daoContext/daoContext'
+import { AbstractEntityManager } from '../../../entity-manager'
 import { DefaultModelScalars } from '../../drivers.types'
 import { Collection, CountOptions, DeleteOptions, FindOptions, InsertOneOptions, ReplaceOptions, UpdateOptions } from 'mongodb'
 
@@ -24,7 +24,7 @@ export type MongoDBDAOGenerics<
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
   NameType extends string = any,
-  DAOContext extends AbstractDAOContext<string, string, ScalarsType, MetadataType> = AbstractDAOContext<string, string, ScalarsType, MetadataType>,
+  EntityManager extends AbstractEntityManager<string, string, ScalarsType, MetadataType> = AbstractEntityManager<string, string, ScalarsType, MetadataType>,
 > = DAOGenerics<
   ModelType,
   IDKey,
@@ -51,7 +51,7 @@ export type MongoDBDAOGenerics<
   ReplaceOptions,
   DeleteOptions,
   NameType,
-  DAOContext
+  EntityManager
 >
 
 export type MongoDBDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverContext'> & {

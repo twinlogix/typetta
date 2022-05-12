@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { computedField, flattenEmbeddeds, inMemoryKnexConfig } from '../../src'
-import { DAOContext, postSchema } from './dao.generated'
+import { EntityManager, postSchema } from './dao.generated'
 import { PostUpdateInput } from './types.generated'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
@@ -9,13 +9,13 @@ import sha256 from 'sha256'
 jest.setTimeout(20000)
 
 let knexInstance: Knex<{ [K in string]: unknown }, unknown[]>
-let dao: DAOContext
+let dao: EntityManager
 
 let idCounter = 0
 
 beforeEach(async () => {
   knexInstance = knex(inMemoryKnexConfig())
-  dao = new DAOContext({
+  dao = new EntityManager({
     overrides: {
       user: {
         idGenerator: () => {

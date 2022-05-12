@@ -68,7 +68,7 @@ export type LikeInsert = {
   userId: types.Scalars['ID'],
 }
 
-type LikeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<types.Like, 'id', 'ID', LikeFilter, LikeRawFilter, LikeRelations, LikeProjection, LikeSort, LikeRawSort, LikeInsert, LikeUpdate, LikeRawUpdate, LikeExcludedFields, LikeRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'like', DAOContext<MetadataType, OperationMetadataType>>
+type LikeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<types.Like, 'id', 'ID', LikeFilter, LikeRawFilter, LikeRelations, LikeProjection, LikeSort, LikeRawSort, LikeInsert, LikeUpdate, LikeRawUpdate, LikeExcludedFields, LikeRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'like', EntityManager<MetadataType, OperationMetadataType>>
 export type LikeDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<LikeDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 export type InMemoryLikeDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<LikeDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
@@ -240,7 +240,7 @@ export type PostInsert = {
   userId: types.Scalars['ID'],
 }
 
-type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<types.Post, 'id', 'ID', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post', DAOContext<MetadataType, OperationMetadataType>>
+type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<types.Post, 'id', 'ID', PostFilter, PostRawFilter, PostRelations, PostProjection, PostSort, PostRawSort, PostInsert, PostUpdate, PostRawUpdate, PostExcludedFields, PostRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'post', EntityManager<MetadataType, OperationMetadataType>>
 export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
@@ -378,7 +378,7 @@ export type UserInsert = {
   lastName: types.Scalars['String'],
 }
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<types.User, 'id', 'ID', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', DAOContext<MetadataType, OperationMetadataType>>
+type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<types.User, 'id', 'ID', UserFilter, UserRawFilter, UserRelations, UserProjection, UserSort, UserRawSort, UserInsert, UserUpdate, UserRawUpdate, UserExcludedFields, UserRelationFields, MetadataType, OperationMetadataType, types.Scalars, 'user', EntityManager<MetadataType, OperationMetadataType>>
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
@@ -435,9 +435,9 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 
 
-export type DAOContextParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
   metadata?: MetadataType
-  middlewares?: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
+  middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: { 
     like?: Pick<Partial<LikeDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>,
@@ -445,45 +445,45 @@ export type DAOContextParams<MetadataType, OperationMetadataType, Permissions ex
   },
   scalars?: T.UserInputDriverDataTypeAdapterMap<types.Scalars, 'knex'>,
   log?: T.LogInput<'like' | 'post' | 'user'>,
-  security?: T.DAOContextSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
+  security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 
-type DAOContextMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
+type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class DAOContext<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractDAOContext<never, never, types.Scalars, MetadataType>  {
+export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<never, never, types.Scalars, MetadataType>  {
 
   private _like: LikeDAO<MetadataType, OperationMetadataType> | undefined
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
   
-  private params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+  private params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
   
-  private overrides: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
+  private overrides: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>['overrides']
   
-  private middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
+  private middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   
   private logger?: T.LogFunction<'like' | 'post' | 'user'>
   
   get like(): LikeDAO<MetadataType, OperationMetadataType> {
     if(!this._like) {
-      this._like = new LikeDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.like, middlewares: [...(this.overrides?.like?.middlewares || []), ...selectMiddleware('like', this.middlewares) as T.DAOMiddleware<LikeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'like', logger: this.logger })
+      this._like = new LikeDAO({ entityManager: this, datasource: null, metadata: this.metadata, ...this.overrides?.like, middlewares: [...(this.overrides?.like?.middlewares || []), ...selectMiddleware('like', this.middlewares) as T.DAOMiddleware<LikeDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'like', logger: this.logger })
     }
     return this._like
   }
   get post(): PostDAO<MetadataType, OperationMetadataType> {
     if(!this._post) {
-      this._post = new PostDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.post, middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger })
+      this._post = new PostDAO({ entityManager: this, datasource: null, metadata: this.metadata, ...this.overrides?.post, middlewares: [...(this.overrides?.post?.middlewares || []), ...selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'post', logger: this.logger })
     }
     return this._post
   }
   get user(): UserDAO<MetadataType, OperationMetadataType> {
     if(!this._user) {
-      this._user = new UserDAO({ daoContext: this, datasource: null, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
+      this._user = new UserDAO({ entityManager: this, datasource: null, metadata: this.metadata, ...this.overrides?.user, middlewares: [...(this.overrides?.user?.middlewares || []), ...selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[]], name: 'user', logger: this.logger })
     }
     return this._user
   }
   
-  constructor(params: DAOContextParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
+  constructor(params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
     super({
       ...params,
       scalars: params.scalars ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Date', 'ID', 'String', 'Boolean', 'Int', 'Float']) : undefined
@@ -504,7 +504,7 @@ export class DAOContext<MetadataType = never, OperationMetadataType = never, Per
   }
   
   protected clone(): this {
-    return new DAOContext<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
+    return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
   
   
@@ -550,8 +550,8 @@ export const groupMiddleware = {
 }
 function selectMiddleware<MetadataType, OperationMetadataType>(
   name: DAOName,
-  middlewares: (DAOContextMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<DAOName, MetadataType, OperationMetadataType>)[],
-): DAOContextMiddleware<MetadataType, OperationMetadataType>[] {
+  middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<DAOName, MetadataType, OperationMetadataType>)[],
+): EntityManagerMiddleware<MetadataType, OperationMetadataType>[] {
   return middlewares.flatMap((m) =>
     'include' in m
       ? Object.keys(m.include).includes(name)
@@ -559,7 +559,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         : []
       : 'exclude' in m
       ? !Object.keys(m.exclude).includes(name)
-        ? [m.middleware as DAOContextMiddleware<MetadataType, OperationMetadataType>]
+        ? [m.middleware as EntityManagerMiddleware<MetadataType, OperationMetadataType>]
         : []
       : [m],
   )

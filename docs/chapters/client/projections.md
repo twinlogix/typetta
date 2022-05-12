@@ -47,7 +47,7 @@ type Address {
 A query that does not specify any explicit projections such as the following:
 
 ```typescript
-const users = await daoContext.user.findOne({ filter: { firstName: "Mattia" } });
+const users = await entityManager.user.findOne({ filter: { firstName: "Mattia" } });
 ```
 
 Returns an object of the type:
@@ -75,7 +75,7 @@ All the operations that return records also include the possibility of making a 
 Below is a search query for a user who requires only their first and last name:
 
 ```typescript
-const user = await daoContext.user.findOne({
+const user = await entityManager.user.findOne({
   filter: {
     firstName: "Mattia"
   },
@@ -97,7 +97,7 @@ The previous query will return an object such as the following:
 Similarly, you can select the fields of an embedded entity, e.g. the following query:
 
 ```typescript
-const user = await daoContext.user.findOne({
+const user = await entityManager.user.findOne({
   filter: {
     firstName: "Mattia"
   },
@@ -126,7 +126,7 @@ The following result will be returned:
 Although it is good practice to always specify the complete list of required fields, both for reasons of efficiency and correctness, for embedded entities it is also possible to select the entire entity in a projection with the following syntax:
 
 ```typescript
-const user = await daoContext.user.findOne({
+const user = await entityManager.user.findOne({
   filter: {
     firstName: "Mattia"
   },
@@ -161,7 +161,7 @@ By specifying an explicit projection, the user can decide to select the relation
 Given the previous application model, it is therefore possible to select a user with their posts:
 
 ```typescript
-const user = await daoContext.user.findOne({
+const user = await entityManager.user.findOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -179,7 +179,7 @@ const user = await daoContext.user.findOne({
 The system supports the possibility of requesting fields with a desired depth; it is therefore possible to load, for example, a user, their posts and, for each post, once again the user:
 
 ```typescript
-const user = await daoContext.user.findOne({
+const user = await entityManager.user.findOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -209,12 +209,12 @@ The GraphQL philosophy, from which Typetta is strongly inspired, requires that e
 
 To facilitate Typetta's integration with GraphQL backends, each data retrieval API can receive a ``GraphQLResolveInfo`` object that contains the AST of a GraphQL request instead of an explicit projection. It is therefore the system that automatically transforms user input into a Typetta projection.
 
-Here is an example of a GraphQL resolver implemented using a DAO Context:
+Here is an example of a GraphQL resolver implemented using an EntityManager:
 
 ```typescript
 Query: {
   user: async (parent: never, args: never, ctx: GraphQLContext, info: GraphQLResolveInfo) => {
-      return await ctx.daoContext.user.findOne({
+      return await ctx.entityManager.user.findOne({
         filter: {
           id: ctx.user.id
         },
@@ -235,7 +235,7 @@ Specifically, each Typetta API returns a type of data that depends on the projec
 Taking the above application model as an example, with the following API call:
 
 ```typescript
-const user = await ctx.daoContext.user.findOne({
+const user = await ctx.entityManager.user.findOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },

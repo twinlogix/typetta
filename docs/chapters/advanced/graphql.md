@@ -29,7 +29,7 @@ Typetta shares many of the key concepts with GraphQL and therefore allows you to
 A typical problem in loading data into a GraphQL backend is due to the performance of N+1 queries. Thanks to the use of [DataLoader](https://github.com/graphql/dataloader){:target="_blank"} technology, this is automatically resolved by Typetta and is not a critical issue.
 
 ### Safety
-One of the most critical aspects in developing a GraphQL backend is creating a security layer that regulates data access no matter where graph navigation begins. To do this, the definition of security policies must necessarily be coupled to the data model. Typetta offers the possibility to define a [security](./security.md) level directly from the `DAOContext` in a very simple and meaningful way.
+One of the most critical aspects in developing a GraphQL backend is creating a security layer that regulates data access no matter where graph navigation begins. To do this, the definition of security policies must necessarily be coupled to the data model. Typetta offers the possibility to define a [security](./security.md) level directly from the `EntityManager` in a very simple and meaningful way.
 
 ## Anatomy of a Resolver
 

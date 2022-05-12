@@ -26,7 +26,7 @@ The third customisation option that makes use of the direct functions of the dri
 
 This possibility is exemplified in pseudo-code below:
 ```typescript
-await daoContext.user.updateOne({
+await entityManager.user.updateOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -43,7 +43,7 @@ Since the MongoDB driver is developed through the [official MongoDB Node Driver]
 Let's assume, for example, that you want to use the `inc` operator of MongoDB to increase the value of a numeric field without necessarily reading it beforehand. With the driver-specific changes mechanism, you can write a query as follows:
 
 ```typescript
-await daoContext.user.updateOne({
+await entityManager.user.updateOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -60,7 +60,7 @@ The SQL driver, as mentioned above, is developed using the popular [KnexJS](http
 Let's assume, for example, that we again want to implement an operation to increase a field through the features offered by a PostgreSQL target database. Using the specific changes mechanism, we can create an update as follows:
 
 ```typescript
-await daoContext.user.udpateOne({
+await entityManager.user.udpateOne({
   filter: {
     id: "1fc70958-b791-4855-bbb3-d7b02b22b39e",
   },
@@ -73,21 +73,21 @@ await daoContext.user.udpateOne({
 
 ## Raw queries
 
-The last option to use low-level functionality is the `execQuery` API provided directly by the `DAOContext`. It allows you to perform any operation (or more than one), directly using the underlying driver APIs.
+The last option to use low-level functionality is the `execQuery` API provided directly by the `EntityManager`. It allows you to perform any operation (or more than one), directly using the underlying driver APIs.
 
 Here is a simple example where you directly use the MongoDB driver to create an index on the collection containing the user entity:
 ```typescript
-await daoContext.execQuery(async (dbs, collections) => {
+await entityManager.execQuery(async (dbs, collections) => {
   await collections.user.createIndex({ firstName: 'text' })
 })
 ```
 
-Note that the function receives a first parameter (`dbs` in the example), which is a map of the references to the data sources with which the `DAOContext` is initialised and a second parameter (in the example we called it `collections`) which is a map of the references to the individual data sources of each entity. In this case, `collections` is a map of the MongoDB collections of each entity defined in the application model.
+Note that the function receives a first parameter (`dbs` in the example), which is a map of the references to the data sources with which the `EntityManager` is initialised and a second parameter (in the example we called it `collections`) which is a map of the references to the individual data sources of each entity. In this case, `collections` is a map of the MongoDB collections of each entity defined in the application model.
 
 You can also write queries with a return value, the type of which is automatically inferred by the compiler based on the return of the function provided. Below is an example that looks for the presence of an index on a MongoDB collection, the result of which is `true/false`:
 
 ```typescript
-const firstNameIndexExists = await daoContext.execQuery(async (dbs, collections) => {
+const firstNameIndexExists = await entityManager.execQuery(async (dbs, collections) => {
   return collections.user.indexExists('firstNameIndex');
 })
 if (!firstNameIndexExists) {
