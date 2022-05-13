@@ -1,4 +1,4 @@
-import { Config } from '../types'
+import { Config, GenerateConfig, GenerateGraphQLOperations } from '../types'
 import { err } from '../utils'
 import { generate } from '@graphql-codegen/cli'
 import { Types } from '@graphql-codegen/plugin-helpers'
@@ -14,22 +14,26 @@ type GenerateArgs = {
 }
 
 export default async (args: GenerateArgs): Promise<void> => {
-  const { config, basePath } = loadConfig(args.config) || { basePath: './' }
+  const { config, basePath: userBasePath } = loadConfig(args.config) || {}
   if (!config) {
     err('Error: Typetta configuration not found.')
   } else {
-    const outputPath = path.join(path.resolve(basePath), config?.outputDir)
+    const basePath = path.resolve(userBasePath || './')
+    const outputDirPath = path.join(basePath, config?.outputDir)
     try {
       console.log()
+      const operationsConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'operations')
+      const operationsOutputPath = getOutputPath(operationsConfig, basePath, path.join(outputDirPath, 'operations.ts'))
+      const operationsSchema: Types.Schema[] = config.generateGraphQLOperations !== false ? [operationsOutputPath] : []
       if (config.generateGraphQLOperations !== false) {
         const generateConfigs = {
           schema: config?.schema,
           generates: {
-            [outputPath + '/operations.ts']: {
+            [operationsOutputPath]: {
               plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
               config: {
                 namingConvention: 'keep',
-                ...(isObject(config.generateGraphQLOperations) ? config.generateGraphQLOperations.operationsCodegenConfig : {}),
+                ...getCodegenConfig(operationsConfig),
                 scalars: config.scalars,
                 generationOutput: 'operations',
               },
@@ -39,7 +43,6 @@ export default async (args: GenerateArgs): Promise<void> => {
             afterAllFileWrite: 'prettier --write',
           },
           silent: true,
-          watch: args.watch,
         }
         if (args.watch) {
           generate({ ...generateConfigs, watch: true }, true)
@@ -51,30 +54,31 @@ export default async (args: GenerateArgs): Promise<void> => {
 
       const generates: Types.Config['generates'] = {}
       if (config.generateTypes !== false) {
-        generates[outputPath + '/model.types.ts'] = {
+        generates[getOutputPath(config.generateTypes, basePath, path.join(outputDirPath, 'model.types.ts'))] = {
           plugins: ['typescript'],
           config: {
             enumsAsConst: true,
-            ...(isObject(config.generateTypes) ? config.generateTypes.codegenConfig : {}),
+            ...getCodegenConfig(config.generateTypes),
             scalars: config.scalars,
           },
         }
       }
       if (config.generateORM !== false) {
-        generates[outputPath + '/typetta.ts'] = {
+        generates[getOutputPath(config.generateTypes, basePath, path.join(outputDirPath, 'typetta.ts'))] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
             tsTypesImport: './model.types',
             namingConvention: 'keep',
             defaultIdGenerationStrategy: 'generator',
-            ...(isObject(config.generateORM) ? config.generateORM.codegenConfig : {}),
+            ...getCodegenConfig(config.generateORM),
             scalars: config.scalars,
             generationOutput: 'dao',
           },
         }
       }
       if (config.generateGraphQLOperations !== false) {
-        generates[outputPath + '/resolvers.types.ts'] = {
+        const resolversTypesConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'resolversTypes')
+        generates[getOutputPath(resolversTypesConfig, basePath, path.join(outputDirPath, 'resolvers.types.ts'))] = {
           plugins: [
             {
               add: {
@@ -84,7 +88,7 @@ export default async (args: GenerateArgs): Promise<void> => {
             'typescript-resolvers',
           ],
           config: {
-            ...(isObject(config.generateGraphQLOperations) ? config.generateGraphQLOperations.resolversTypesCodegenConfig : {}),
+            ...getCodegenConfig(resolversTypesConfig),
             resolverTypeWrapperSignature: 'PartialDeep<T>',
             namespacedImportName: 'types',
             ...(isObject(config.generateGraphQLOperations)
@@ -97,10 +101,11 @@ export default async (args: GenerateArgs): Promise<void> => {
                 }),
           },
         }
-        generates[outputPath + '/resolvers.ts'] = {
+        const resolversConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'resolvers')
+        generates[getOutputPath(resolversConfig, basePath, path.join(outputDirPath, 'resolvers.ts'))] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
-            ...(isObject(config.generateGraphQLOperations) ? config.generateGraphQLOperations.resolversCodegenConfig : {}),
+            ...getCodegenConfig(resolversConfig),
             generationOutput: 'resolvers',
             tsTypesImport: './resolvers.types',
             ...(config.generateGraphQLOperations !== true && config.generateGraphQLOperations !== undefined
@@ -115,7 +120,6 @@ export default async (args: GenerateArgs): Promise<void> => {
         }
       }
 
-      const operationsSchema: Types.Schema[] = config.generateGraphQLOperations !== false ? [path.join(outputPath, 'operations.ts')] : []
       const schema: Types.Schema[] = operationsSchema.concat(config.schema || [])
 
       const generateConfig = {
@@ -150,6 +154,29 @@ export default async (args: GenerateArgs): Promise<void> => {
     }
   }
 }
+const getGraphQLStepConfig = (config: boolean | GenerateGraphQLOperations | undefined, step: 'operations' | 'resolvers' | 'resolversTypes'): boolean | undefined | GenerateConfig => {
+  if (isObject(config)) {
+    return config[step]
+  } else {
+    return config
+  }
+}
+
+const getOutputPath = (config: boolean | undefined | GenerateConfig, basePath: string, defaultPath: string): string => {
+  if (isObject(config) && config.output) {
+    return path.join(basePath, config.output)
+  } else {
+    return defaultPath
+  }
+}
+
+const getCodegenConfig = (config: boolean | undefined | GenerateConfig): Record<string, unknown> => {
+  if (isObject(config) && config.codegenConfig) {
+    return config.codegenConfig
+  } else {
+    return {}
+  }
+}
 
 const loadConfig = (configPathParam?: string): { config: Config; basePath: string } | undefined => {
   if (configPathParam) {
@@ -158,7 +185,7 @@ const loadConfig = (configPathParam?: string): { config: Config; basePath: strin
     return { config: loadConfigFromPath(configPath), basePath: path.dirname(configPath) }
   } else {
     const defaultFilenames = ['typetta.yml', 'typetta.yaml', 'typetta.json']
-    for (const filename in defaultFilenames) {
+    for (const filename of defaultFilenames) {
       const filePath = path.resolve(filename)
       if (fs.existsSync(filePath)) return { config: loadConfigFromPath(filePath), basePath: './' }
     }
