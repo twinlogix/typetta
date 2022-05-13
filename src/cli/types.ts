@@ -17,7 +17,7 @@ export type GenerateGraphQLOperations = {
 
 export type Config = {
   schema?: Types.Schema | Types.Schema[]
-  outputDir: string
+  outputDir?: string
   generateTypes?: boolean | GenerateConfig
   generateORM?: boolean | GenerateConfig
   generateGraphQLOperations?: boolean | GenerateGraphQLOperations

@@ -19,7 +19,7 @@ export default async (args: GenerateArgs): Promise<void> => {
     err('Error: Typetta configuration not found.')
   } else {
     const basePath = path.resolve(userBasePath || './')
-    const outputDirPath = path.join(basePath, config?.outputDir)
+    const outputDirPath = path.join(basePath, config?.outputDir || './')
     try {
       console.log()
       const operationsConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'operations')
@@ -43,6 +43,7 @@ export default async (args: GenerateArgs): Promise<void> => {
             afterAllFileWrite: 'prettier --write',
           },
           silent: true,
+          overwrite: true,
         }
         if (args.watch) {
           generate({ ...generateConfigs, watch: true }, true)
@@ -53,8 +54,9 @@ export default async (args: GenerateArgs): Promise<void> => {
       }
 
       const generates: Types.Config['generates'] = {}
+      const typesOutputPath = getOutputPath(config.generateTypes, basePath, path.join(outputDirPath, 'model.types.ts'))
       if (config.generateTypes !== false) {
-        generates[getOutputPath(config.generateTypes, basePath, path.join(outputDirPath, 'model.types.ts'))] = {
+        generates[typesOutputPath] = {
           plugins: ['typescript'],
           config: {
             enumsAsConst: true,
@@ -63,11 +65,12 @@ export default async (args: GenerateArgs): Promise<void> => {
           },
         }
       }
+      const ormOutputPath = getOutputPath(config.generateORM, basePath, path.join(outputDirPath, 'typetta.ts'))
       if (config.generateORM !== false) {
-        generates[getOutputPath(config.generateTypes, basePath, path.join(outputDirPath, 'typetta.ts'))] = {
+        generates[ormOutputPath] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
-            tsTypesImport: './model.types',
+            tsTypesImport: getTypeScriptRef(ormOutputPath, typesOutputPath),
             namingConvention: 'keep',
             defaultIdGenerationStrategy: 'generator',
             ...getCodegenConfig(config.generateORM),
@@ -77,12 +80,13 @@ export default async (args: GenerateArgs): Promise<void> => {
         }
       }
       const resolversTypesConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'resolversTypes')
+      const resolversTypesOutputPath = getOutputPath(resolversTypesConfig, basePath, path.join(outputDirPath, 'resolvers.types.ts'))
       if (resolversTypesConfig !== false) {
-        generates[getOutputPath(resolversTypesConfig, basePath, path.join(outputDirPath, 'resolvers.types.ts'))] = {
+        generates[resolversTypesOutputPath] = {
           plugins: [
             {
               add: {
-                content: ["import { PartialDeep } from 'type-fest'", "import * as types from './model.types'"],
+                content: ["import { PartialDeep } from 'type-fest'", `import * as types from '${getTypeScriptRef(resolversTypesOutputPath, typesOutputPath)}'`],
               },
             },
             'typescript-resolvers',
@@ -97,27 +101,28 @@ export default async (args: GenerateArgs): Promise<void> => {
                   entityManagerPath: config.generateGraphQLOperations?.context?.path,
                 }
               : {
-                  contextType: './typetta#EntityManager',
+                  contextType: getTypeScriptRef(resolversTypesOutputPath, ormOutputPath) + '#EntityManager',
                 }),
           },
         }
       }
 
       const resolversConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'resolvers')
+      const resolversOutputPath = getOutputPath(resolversConfig, basePath, path.join(outputDirPath, 'resolvers.ts'))
       if (resolversConfig !== false) {
-        generates[getOutputPath(resolversConfig, basePath, path.join(outputDirPath, 'resolvers.ts'))] = {
+        generates[resolversOutputPath] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
             ...getCodegenConfig(resolversConfig),
             generationOutput: 'resolvers',
-            tsTypesImport: './resolvers.types',
+            tsTypesImport: getTypeScriptRef(resolversOutputPath, resolversTypesOutputPath),
             ...(isObject(config.generateGraphQLOperations)
               ? {
                   contextType: config.generateGraphQLOperations?.context?.type,
                   entityManagerPath: config.generateGraphQLOperations?.context?.path,
                 }
               : {
-                  contextType: './typetta#EntityManager',
+                  contextType: getTypeScriptRef(resolversOutputPath, ormOutputPath) + '#EntityManager',
                 }),
           },
         }
@@ -132,6 +137,7 @@ export default async (args: GenerateArgs): Promise<void> => {
           afterAllFileWrite: 'prettier --write',
         },
         silent: true,
+        overwrite: true,
       }
       if (args.watch) {
         generate({ ...generateConfig, watch: true }, true)
@@ -157,6 +163,11 @@ export default async (args: GenerateArgs): Promise<void> => {
     }
   }
 }
+
+const getTypeScriptRef = (fromPath: string, toPath: string): string => {
+  return path.relative(path.dirname(fromPath), toPath).replace(/\.[^/.]+$/, '')
+}
+
 const getGraphQLStepConfig = (config: boolean | GenerateGraphQLOperations | undefined, step: 'operations' | 'resolvers' | 'resolversTypes'): boolean | undefined | GenerateConfig => {
   if (isObject(config)) {
     return config[step]
