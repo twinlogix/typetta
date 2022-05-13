@@ -13,7 +13,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
     nodes.forEach((node) => {
       if (node.type === 'scalar') {
         customScalarsMap.set(node.name, node)
-      } else {
+      } else if (node.type === 'type') {
         typesMap.set(node.name, node)
       }
     })
