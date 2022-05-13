@@ -11,6 +11,7 @@ export type AddressRelationFields = 'cities'
 
 export function addressSchema(): T.Schema<types.Scalars> {
   return {
+    'cities': { relation: () => citySchema(), array: true },
     'id': {
       scalar: 'ID', 
       required: true
@@ -142,6 +143,7 @@ export type AuthorRelationFields = 'books'
 
 export function authorSchema(): T.Schema<types.Scalars> {
   return {
+    'books': { relation: () => bookSchema(), array: true },
     'id': {
       scalar: 'ID', 
       required: true
@@ -363,6 +365,7 @@ export type BookRelationFields = 'authors'
 
 export function bookSchema(): T.Schema<types.Scalars> {
   return {
+    'authors': { relation: () => authorSchema(), array: true },
     'id': {
       scalar: 'ID', 
       required: true
@@ -734,6 +737,7 @@ export function deviceSchema(): T.Schema<types.Scalars> {
       scalar: 'String', 
       required: true
     },
+    'user': { relation: () => userSchema() },
     'userId': {
       scalar: 'ID'
     }
@@ -848,6 +852,7 @@ export function dogSchema(): T.Schema<types.Scalars> {
       scalar: 'String', 
       required: true
     },
+    'owner': { relation: () => userSchema() },
     'ownerId': {
       scalar: 'ID', 
       required: true
@@ -1069,7 +1074,7 @@ export type OrganizationRelationFields = never
 
 export function organizationSchema(): T.Schema<types.Scalars> {
   return {
-    'address': { embedded: addressSchema() },
+    'address': { embedded: () => addressSchema() },
     'id': {
       scalar: 'ID', 
       required: true
@@ -1201,14 +1206,17 @@ export function userSchema(): T.Schema<types.Scalars> {
       array: true, 
       alias: 'values'
     },
+    'bestFriend': { relation: () => userSchema() },
     'bestFriendId': {
       scalar: 'ID'
     },
-    'credentials': { embedded: usernamePasswordCredentialsSchema(), alias: 'cred' },
+    'credentials': { embedded: () => usernamePasswordCredentialsSchema(), alias: 'cred' },
+    'dogs': { relation: () => dogSchema(), array: true },
     'firstName': {
       scalar: 'String', 
       alias: 'name'
     },
+    'friends': { relation: () => userSchema(), array: true },
     'id': {
       scalar: 'ID', 
       required: true, 
@@ -1392,7 +1400,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
 
 export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
   return {
-    'another': { embedded: anotherSchema(), alias: 'a' },
+    'another': { embedded: () => anotherSchema(), alias: 'a' },
     'password': {
       scalar: 'Password', 
       required: true, 

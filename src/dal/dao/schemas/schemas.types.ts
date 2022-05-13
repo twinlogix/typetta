@@ -1,10 +1,10 @@
 export type SchemaField<ScalarsType> = Readonly<
-  ({ scalar: keyof ScalarsType } | { embedded: Schema<ScalarsType> }) & {
+  ({ scalar: keyof ScalarsType } | { embedded: () => Schema<ScalarsType> } | { relation: () => Schema<ScalarsType> }) & {
     array?: boolean
     required?: boolean
     alias?: string
     defaultGenerationStrategy?: 'middleware' | 'generator'
-    metadata?: { key: string; value: string }[]
+    metadata?: Record<string, string>
   }
 >
 

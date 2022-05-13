@@ -463,10 +463,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     if (Array.isArray(record[subField])) {
       for (const r of record[subField]) {
-        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded }, r)
+        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded() }, r)
       }
     } else {
-      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded }, record[subField])
+      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded() }, record[subField])
     }
   }
 
@@ -690,7 +690,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   get info(): { name: T['name']; idField: T['idKey']; schema: Schema<T['scalars']> } {
     return { name: this.name, idField: this.idField, schema: this.schema }
   }
-  public mapResolverFindParams(params: FindParams<T>): FindParams<T> {
+  private mapResolverFindParams(params: FindParams<T>): FindParams<T> {
     const relations = Object.fromEntries(
       this.relations.flatMap((r) => {
         if (params.relations && params.relations[r.field]) {

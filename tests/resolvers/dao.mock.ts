@@ -175,7 +175,8 @@ export function postSchema(): T.Schema<types.Scalars> {
       scalar: 'ID', 
       required: true
     },
-    'metadata': { embedded: metadataSchema() },
+    'likes': { relation: () => userSchema(), required: true, array: true },
+    'metadata': { embedded: () => metadataSchema() },
     'userId': {
       scalar: 'ID', 
       required: true
@@ -319,7 +320,9 @@ export function userSchema(): T.Schema<types.Scalars> {
     'lastName': {
       scalar: 'String', 
       required: true
-    }
+    },
+    'likes': { relation: () => postSchema(), required: true, array: true },
+    'posts': { relation: () => postSchema(), array: true }
   }
 }
 

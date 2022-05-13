@@ -145,11 +145,11 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
           } else {
             result[destName] = adapter ? mapper(value) : value
           }
-        } else {
+        } else if ('embedded' in schemaField) {
           if (Array.isArray(value) && schemaField.array) {
-            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded))
+            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded()))
           } else {
-            result[destName] = transformObject(adapters, direction, value, schemaField.embedded)
+            result[destName] = transformObject(adapters, direction, value, schemaField.embedded())
           }
         }
       }

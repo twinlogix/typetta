@@ -155,6 +155,15 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
       if (defaultDirective && relationEntityRefDirective) {
         throw new Error(`@default and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
       }
+      if (excludeDirective && innerRefDirective) {
+        throw new Error(`@exclude and @innerRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (excludeDirective && foreignRefDirective) {
+        throw new Error(`@exclude and @foreignRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (excludeDirective && relationEntityRefDirective) {
+        throw new Error(`@exclude and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
+      }
       if (defaultDirective && idDirective) {
         throw new Error(`@default and @id directives of field '${field.name.value}' are incompatible.`)
       }

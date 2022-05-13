@@ -1,9 +1,9 @@
+import { DAOGenerics } from '../dal/dao/dao.types'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
+import { DeepRequired, RecursiveKeyOfLeaf, TypeTraversal } from './utils.types'
 import { isPlainObject } from 'is-plain-object'
 import knex, { Knex } from 'knex'
-import { DeepRequired, RecursiveKeyOfLeaf, TypeTraversal } from './utils.types'
-import { DAOGenerics } from '../dal/dao/dao.types'
 
 export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
   const c = key.split('.')
@@ -15,7 +15,7 @@ export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schem
       throw new Error('Unreachable')
     }
     const schemaField = schema[k]
-    return schemaField && 'embedded' in schemaField ? getSchemaFieldTraversing(c.join('.'), schemaField.embedded) : null
+    return schemaField && 'embedded' in schemaField ? getSchemaFieldTraversing(c.join('.'), schemaField.embedded()) : null
   }
 }
 
@@ -190,7 +190,7 @@ export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>
       if (!v) {
         return [[`${prefix}${k}`, v]]
       }
-      return Object.entries(flattenEmbeddeds(v as T, field.embedded, `${prefix}${k}.`))
+      return Object.entries(flattenEmbeddeds(v as T, field.embedded(), `${prefix}${k}.`))
     }
     return [[`${prefix}${k}`, v]]
   }) as FlattenEmbeddedFilter<T>
@@ -198,9 +198,9 @@ export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>
 
 export function renameLogicalOperators<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {
   return mapObject(obj, ([k, v]) => {
-    if (k === 'and_' || k === '$and') return [['$and', (v as Record<string, unknown>[]).map(ve => renameLogicalOperators(ve))]]
-    if (k === 'or_' || k === '$or') return [['$or', (v as Record<string, unknown>[]).map(ve => renameLogicalOperators(ve))]]
-    if (k === 'nor_' || k === '$nor') return [['$nor', (v as Record<string, unknown>[]).map(ve => renameLogicalOperators(ve))]]
+    if (k === 'and_' || k === '$and') return [['$and', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]
+    if (k === 'or_' || k === '$or') return [['$or', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]
+    if (k === 'nor_' || k === '$nor') return [['$nor', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]
     return [[k, v]]
   }) as D['pureFilter']
 }

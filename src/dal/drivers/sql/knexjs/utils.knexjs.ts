@@ -23,7 +23,7 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   if (c.length === 0) {
     return n
   } else {
-    return schemaField && 'embedded' in schemaField ? concatEmbeddedNames(n, modelNameToDbName(c.join('.'), schemaField.embedded)) : k + '.' + c.join('.')
+    return schemaField && 'embedded' in schemaField ? concatEmbeddedNames(n, modelNameToDbName(c.join('.'), schemaField.embedded())) : k + '.' + c.join('.')
   }
 }
 
@@ -169,7 +169,10 @@ export function buildSelect<TRecord, TResult, ScalarsType>(
     return Object.entries(s).flatMap(([k, v]) => {
       if (proj === true || (typeof proj === 'object' && k in proj)) {
         if ('embedded' in v) {
-          return embeddedColumns(concatEmbeddedNames(prefix, v.alias || k), v.embedded, proj === true ? proj : proj[k])
+          return embeddedColumns(concatEmbeddedNames(prefix, v.alias || k), v.embedded(), proj === true ? proj : proj[k])
+        }
+        if ('relation' in v) {
+          return []
         }
         return concatEmbeddedNames(prefix, v.alias || k)
       }
@@ -187,9 +190,11 @@ export function buildSelect<TRecord, TResult, ScalarsType>(
         if (k in schema) {
           const schemaField = schema[k]
           if ('embedded' in schemaField) {
-            return embeddedColumns(schemaField.alias || k, schemaField.embedded, v)
-          } else {
+            return embeddedColumns(schemaField.alias || k, schemaField.embedded(), v)
+          } else if('scalar' in schemaField) {
             return [schemaField.alias || k]
+          } else {
+            return []
           }
         } else {
           return []
@@ -210,8 +215,8 @@ export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuil
 }
 
 export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
-  function flat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: any): [string, unknown][] {
-    return Object.entries(schemaFiled.embedded).flatMap(([k, subSchemaField]) => {
+  function flat(prefix: string, schemaFiled: { embedded: () => Schema<ScalarsType> }, value: any): [string, unknown][] {
+    return Object.entries(schemaFiled.embedded()).flatMap(([k, subSchemaField]) => {
       const key = subSchemaField.alias ?? k
       if (key in value) {
         const name = concatEmbeddedNames(prefix, key)
@@ -236,8 +241,8 @@ export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, ob
 }
 
 export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
-  function unflat(prefix: string, schemaFiled: { embedded: Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
-    const res = Object.entries(schemaFiled.embedded).reduce(
+  function unflat(prefix: string, schemaFiled: { embedded: () => Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
+    const res = Object.entries(schemaFiled.embedded()).reduce(
       ([record, oldToDelete], [k, subSchemaField]) => {
         const name = concatEmbeddedNames(prefix, subSchemaField.alias ?? k)
         const subName = subSchemaField.alias ?? k
@@ -286,7 +291,10 @@ function concatEmbeddedNames(prefix: string, name: string) {
 export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<ScalarsType>): [string, { scalar: keyof ScalarsType } & { array?: boolean; required?: boolean; alias?: string }][] {
   return Object.entries(schema).flatMap(([key, schemaField]) => {
     if ('embedded' in schemaField) {
-      return embeddedScalars(concatEmbeddedNames(prefix, schemaField.alias || key), schemaField.embedded)
+      return embeddedScalars(concatEmbeddedNames(prefix, schemaField.alias || key), schemaField.embedded())
+    }
+    if ('relation' in schemaField) {
+      return []
     }
     return [[concatEmbeddedNames(prefix, schemaField.alias || key), schemaField]]
   })
@@ -308,8 +316,8 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
     if (schemaField && 'scalar' in schemaField) {
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
-    } else if (schemaField) {
-      const adapted = adaptUpdate({ update: v, schema: schemaField.embedded, adapters })
+    } else if (schemaField && 'embedded' in schemaField) {
+      const adapted = adaptUpdate({ update: v, schema: schemaField.embedded(), adapters })
       return Object.entries(adapted).map(([sk, sv]) => {
         return [concatEmbeddedNames(columnName, sk), sv]
       })

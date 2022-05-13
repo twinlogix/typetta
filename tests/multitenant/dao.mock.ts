@@ -148,6 +148,7 @@ export function reservationSchema(): T.Schema<types.Scalars> {
       required: true, 
       alias: '_id'
     },
+    'room': { relation: () => roomSchema() },
     'roomId': {
       scalar: 'ID', 
       required: true
@@ -274,6 +275,7 @@ export function roomSchema(): T.Schema<types.Scalars> {
     'deletionDate': {
       scalar: 'Date'
     },
+    'hotel': { relation: () => hotelSchema(), required: true },
     'hotelId': {
       scalar: 'ID', 
       required: true
@@ -508,7 +510,7 @@ export type UserRelationFields = 'reservations'
 
 export function userSchema(): T.Schema<types.Scalars> {
   return {
-    'credentials': { embedded: usernamePasswordCredentialsSchema(), alias: 'cred' },
+    'credentials': { embedded: () => usernamePasswordCredentialsSchema(), alias: 'cred' },
     'deletionDate': {
       scalar: 'Date'
     },
@@ -527,6 +529,7 @@ export function userSchema(): T.Schema<types.Scalars> {
     'lastName': {
       scalar: 'String'
     },
+    'reservations': { relation: () => reservationSchema(), required: true, array: true },
     'tenantId': {
       scalar: 'TenantId', 
       required: true, 

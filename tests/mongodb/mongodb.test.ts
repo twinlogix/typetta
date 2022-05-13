@@ -1706,7 +1706,7 @@ test('Inner ref inside embedded', async () => {
       embeddedUsers4: { user: { firstName: true } },
     },
   })
-  await dao.hotel.updateOne({ filter: {}, changes: {"embeddedUser3.value":2}})
+  await dao.hotel.updateOne({ filter: {}, changes: { 'embeddedUser3.value': 2 } })
   const h2 = await dao.hotel.findOne({
     projection: {
       embeddedUsers3: { user: { firstName: true } },
@@ -1765,6 +1765,35 @@ test('Inserted record middleware', async () => {
   })
   await customDao.hotel.insertOne({ record: { name: 'Hotel', audit: { createdBy: '', createdOn: 0, modifiedBy: '', modifiedOn: 0, state: State.ACTIVE } } })
   expect(i).toBe(2)
+})
+
+test('Schema metadata', async () => {
+  let middlewareExecuted = false
+  const entityManager2 = new EntityManager({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      dog: {
+        middlewares: [
+          buildMiddleware({
+            beforeFind: async (params) => {
+              const field = (params.relationParents ?? [])[0].field
+              expect(field).toBe('dogs')
+              const schema = (params.relationParents ?? [])[0].schema
+              expect(schema[field].metadata?.test).toBe('value')
+              middlewareExecuted = true
+            },
+          }),
+        ],
+      },
+    },
+  })
+  const u = await entityManager2.user.insertOne({ record: { live: true } })
+  await entityManager2.dog.insertOne({ record: { name: 'Dog', ownerId: u.id } })
+  await entityManager2.user.findAll({ projection: { dogs: true } })
+  expect(middlewareExecuted).toBe(true)
 })
 
 // ------------------------------------------------------------------------
