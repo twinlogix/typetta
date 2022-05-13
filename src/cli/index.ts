@@ -24,7 +24,7 @@ program
 program
   .command('generate')
   .option('-c, --config <config>', 'The Typetta configuration file.')
-  // .option('-w, --watch', 'The generate command will continue to watch and re-generate.')
+  .option('-w, --watch', 'The generate command will continue to watch and re-generate.')
   .description('Generate types and ORM files.')
   .action(generate)
 

@@ -74,10 +74,5 @@ const updatePackage = async (packagePath: string, answers: Answers) => {
 
   pkg.scripts[answers.script] = `typetta generate --config ${answers.config}`
 
-  // plugin
-  if (!pkg.devDependencies) {
-    pkg.devDependencies = {}
-  }
-
   fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2))
 }

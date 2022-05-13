@@ -10,6 +10,7 @@ import yaml from 'yaml'
 
 type GenerateArgs = {
   config?: string
+  watch?: boolean
 }
 
 export default async (args: GenerateArgs): Promise<void> => {
@@ -21,28 +22,31 @@ export default async (args: GenerateArgs): Promise<void> => {
     try {
       console.log()
       if (config.generateGraphQLOperations !== false) {
-        await generate(
-          {
-            schema: config?.schema,
-            generates: {
-              [outputPath + '/operations.ts']: {
-                plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
-                config: {
-                  namingConvention: 'keep',
-                  ...(isObject(config.generateGraphQLOperations) ? config.generateGraphQLOperations.operationsCodegenConfig : {}),
-                  scalars: config.scalars,
-                  generationOutput: 'operations',
-                },
+        const generateConfigs = {
+          schema: config?.schema,
+          generates: {
+            [outputPath + '/operations.ts']: {
+              plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
+              config: {
+                namingConvention: 'keep',
+                ...(isObject(config.generateGraphQLOperations) ? config.generateGraphQLOperations.operationsCodegenConfig : {}),
+                scalars: config.scalars,
+                generationOutput: 'operations',
               },
             },
-            hooks: {
-              afterAllFileWrite: 'prettier --write',
-            },
-            silent: true,
           },
-          true,
-        )
-        console.log(`- GraphQL operations generation ${chalk.bold.green('completed')}.`)
+          hooks: {
+            afterAllFileWrite: 'prettier --write',
+          },
+          silent: true,
+          watch: args.watch,
+        }
+        if (args.watch) {
+          generate({ ...generateConfigs, watch: true }, true)
+        } else {
+          await generate({ ...generateConfigs }, true)
+          console.log(`- GraphQL operations generation ${chalk.bold.green('completed')}.`)
+        }
       }
 
       const generates: Types.Config['generates'] = {}
@@ -114,27 +118,29 @@ export default async (args: GenerateArgs): Promise<void> => {
       const operationsSchema: Types.Schema[] = config.generateGraphQLOperations !== false ? [path.join(outputPath, 'operations.ts')] : []
       const schema: Types.Schema[] = operationsSchema.concat(config.schema || [])
 
-      await generate(
-        {
-          schema,
-          generates,
-          hooks: {
-            afterAllFileWrite: 'prettier --write',
-          },
-          silent: true,
+      const generateConfig = {
+        schema,
+        generates,
+        hooks: {
+          afterAllFileWrite: 'prettier --write',
         },
-        true,
-      )
-      if (config.generateTypes !== false) {
-        console.log(`- TypeScript types generation ${chalk.bold.green('completed')}.`)
+        silent: true,
       }
-      if (config.generateORM !== false) {
-        console.log(`- EntityManager generation ${chalk.bold.green('completed')}.`)
+      if (args.watch) {
+        generate({ ...generateConfig, watch: true }, true)
+      } else {
+        await generate({ ...generateConfig }, true)
+        if (config.generateTypes !== false) {
+          console.log(`- TypeScript types generation ${chalk.bold.green('completed')}.`)
+        }
+        if (config.generateORM !== false) {
+          console.log(`- EntityManager generation ${chalk.bold.green('completed')}.`)
+        }
+        if (config.generateGraphQLOperations !== false) {
+          console.log(`- GraphQL resolvers generation ${chalk.bold.green('completed')}.`)
+        }
+        console.log()
       }
-      if (config.generateGraphQLOperations !== false) {
-        console.log(`- GraphQL resolvers generation ${chalk.bold.green('completed')}.`)
-      }
-      console.log()
     } catch (e) {
       console.error(chalk.red('Error: generation failed due to the following error...'))
       console.log()
