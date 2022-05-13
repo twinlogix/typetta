@@ -25,7 +25,7 @@ export default async (args: GenerateArgs): Promise<void> => {
       const operationsConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'operations')
       const operationsOutputPath = getOutputPath(operationsConfig, basePath, path.join(outputDirPath, 'operations.ts'))
       const operationsSchema: Types.Schema[] = config.generateGraphQLOperations !== false ? [operationsOutputPath] : []
-      if (config.generateGraphQLOperations !== false) {
+      if (operationsConfig !== false) {
         const generateConfigs = {
           schema: config?.schema,
           generates: {
@@ -76,8 +76,8 @@ export default async (args: GenerateArgs): Promise<void> => {
           },
         }
       }
-      if (config.generateGraphQLOperations !== false) {
-        const resolversTypesConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'resolversTypes')
+      const resolversTypesConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'resolversTypes')
+      if (resolversTypesConfig !== false) {
         generates[getOutputPath(resolversTypesConfig, basePath, path.join(outputDirPath, 'resolvers.types.ts'))] = {
           plugins: [
             {
@@ -101,14 +101,17 @@ export default async (args: GenerateArgs): Promise<void> => {
                 }),
           },
         }
-        const resolversConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'resolvers')
+      }
+
+      const resolversConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'resolvers')
+      if (resolversConfig !== false) {
         generates[getOutputPath(resolversConfig, basePath, path.join(outputDirPath, 'resolvers.ts'))] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
             ...getCodegenConfig(resolversConfig),
             generationOutput: 'resolvers',
             tsTypesImport: './resolvers.types',
-            ...(config.generateGraphQLOperations !== true && config.generateGraphQLOperations !== undefined
+            ...(isObject(config.generateGraphQLOperations)
               ? {
                   contextType: config.generateGraphQLOperations?.context?.type,
                   entityManagerPath: config.generateGraphQLOperations?.context?.path,
