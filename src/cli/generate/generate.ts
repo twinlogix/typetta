@@ -70,7 +70,7 @@ export default async (args: GenerateArgs): Promise<void> => {
         generates[ormOutputPath] = {
           plugins: [config.typettaGeneratorPath ?? '@twinlogix/typetta'],
           config: {
-            tsTypesImport: getTypeScriptRef(ormOutputPath, typesOutputPath),
+            tsTypesImport: getValueFromConfig(config.generateORM, 'typesImport') ?? getTypeScriptRef(ormOutputPath, typesOutputPath),
             namingConvention: 'keep',
             defaultIdGenerationStrategy: 'generator',
             ...getCodegenConfig(config.generateORM),
@@ -86,7 +86,10 @@ export default async (args: GenerateArgs): Promise<void> => {
           plugins: [
             {
               add: {
-                content: ["import { PartialDeep } from 'type-fest'", `import * as types from '${getTypeScriptRef(resolversTypesOutputPath, typesOutputPath)}'`],
+                content: [
+                  "import { PartialDeep } from 'type-fest'",
+                  `import * as types from '${getValueFromConfig(resolversTypesConfig, 'typesImport') ?? getTypeScriptRef(resolversTypesOutputPath, typesOutputPath)}'`,
+                ],
               },
             },
             'typescript-resolvers',
@@ -101,7 +104,7 @@ export default async (args: GenerateArgs): Promise<void> => {
                   entityManagerPath: config.generateGraphQLOperations?.context?.path,
                 }
               : {
-                  contextType: getTypeScriptRef(resolversTypesOutputPath, ormOutputPath) + '#EntityManager',
+                  contextType: (getValueFromConfig(resolversTypesConfig, 'ormImport') ?? getTypeScriptRef(resolversTypesOutputPath, ormOutputPath)) + '#EntityManager',
                 }),
           },
         }
@@ -115,14 +118,14 @@ export default async (args: GenerateArgs): Promise<void> => {
           config: {
             ...getCodegenConfig(resolversConfig),
             generationOutput: 'resolvers',
-            tsTypesImport: getTypeScriptRef(resolversOutputPath, resolversTypesOutputPath),
+            tsTypesImport: getValueFromConfig(resolversConfig, 'resolversTypesImport') ?? getTypeScriptRef(resolversOutputPath, resolversTypesOutputPath),
             ...(isObject(config.generateGraphQLOperations)
               ? {
                   contextType: config.generateGraphQLOperations?.context?.type,
                   entityManagerPath: config.generateGraphQLOperations?.context?.path,
                 }
               : {
-                  contextType: getTypeScriptRef(resolversOutputPath, ormOutputPath) + '#EntityManager',
+                  contextType: (getValueFromConfig(resolversConfig, 'ormImport') ?? getTypeScriptRef(resolversOutputPath, ormOutputPath)) + '#EntityManager',
                 }),
           },
         }
@@ -164,11 +167,18 @@ export default async (args: GenerateArgs): Promise<void> => {
   }
 }
 
+const getValueFromConfig = <T, K extends keyof T>(config: boolean | T | undefined, key: K): T[K] | undefined => {
+  if (isObject(config)) {
+    return config[key]
+  }
+  return undefined
+}
+
 const getTypeScriptRef = (fromPath: string, toPath: string): string => {
   return path.relative(path.dirname(fromPath), toPath).replace(/\.[^/.]+$/, '')
 }
 
-const getGraphQLStepConfig = (config: boolean | GenerateGraphQLOperations | undefined, step: 'operations' | 'resolvers' | 'resolversTypes'): boolean | undefined | GenerateConfig => {
+const getGraphQLStepConfig = <K extends keyof GenerateGraphQLOperations>(config: boolean | GenerateGraphQLOperations | undefined, step: K) => {
   if (isObject(config)) {
     return config[step]
   } else {
