@@ -4,6 +4,7 @@ export type SchemaField<ScalarsType> = Readonly<
     required?: boolean
     alias?: string
     defaultGenerationStrategy?: 'middleware' | 'generator'
+    metadata?: { key: string; value: string }[]
   }
 >
 

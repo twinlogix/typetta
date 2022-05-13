@@ -40,6 +40,7 @@ export type TsTypettaGeneratorField = {
   isEnum: boolean
   defaultGenerationStrategy?: DefaultGenerationStrategy
   alias?: string
+  schemaMetadata?: { key: string; value: string }[]
 }
 
 export type TsTypettaGeneratorNode = {

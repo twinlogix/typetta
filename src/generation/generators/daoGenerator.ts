@@ -174,7 +174,18 @@ this.params = params`,
       ) +
       '\n}'
 
-    const declarations = [daoDeclarations, paramsDeclaration, overridesDeclaration, middlewareDeclaration, loggerDeclaration, entityManagerGetters, entityManagerConstructor, execQueryF, cloneF, createTableF].join('\n\n')
+    const declarations = [
+      daoDeclarations,
+      paramsDeclaration,
+      overridesDeclaration,
+      middlewareDeclaration,
+      loggerDeclaration,
+      entityManagerGetters,
+      entityManagerConstructor,
+      execQueryF,
+      cloneF,
+      createTableF,
+    ].join('\n\n')
 
     const entityManagerExport =
       `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<${
@@ -277,7 +288,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       .map((field) => {
         const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}${
           field.defaultGenerationStrategy ? `, \ndefaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : ''
-        }`
+        }${field.schemaMetadata ? `, \nschemaMetadata: [${field.schemaMetadata.map((m) => `{ key: '${m.key}', value: '${m.value}'}`).join(', ')}]` : ''}`
         if (field.type.kind === 'scalar') {
           return [`  '${field.name}': {\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`, 2)}\n  }`]
         } else if (field.type.kind === 'embedded') {
