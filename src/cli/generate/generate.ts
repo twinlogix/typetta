@@ -24,7 +24,7 @@ export default async (args: GenerateArgs): Promise<void> => {
       console.log()
       const operationsConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'operations')
       const operationsOutputPath = getOutputPath(operationsConfig, basePath, path.join(outputDirPath, 'operations.ts'))
-      const operationsSchema: Types.Schema[] = operationsConfig !== false ? [operationsOutputPath] : []
+      const operationsSchema: Types.Schema[] = operationsConfig !== false ? [getSchemaRef(operationsOutputPath, basePath)] : []
       if (operationsConfig !== false) {
         const generateConfigs = {
           schema: config?.schema,
@@ -175,7 +175,11 @@ const getValueFromConfig = <T, K extends keyof T>(config: boolean | T | undefine
 }
 
 const getTypeScriptRef = (fromPath: string, toPath: string): string => {
-  return path.relative(path.dirname(fromPath), toPath).replace(/\.[^/.]+$/, '')
+  return path
+    .relative(path.dirname(fromPath), toPath)
+    .replace(/\.[^/.]+$/, '')
+    .split(path.sep)
+    .join(path.posix.sep)
 }
 
 const getGraphQLStepConfig = <K extends keyof GenerateGraphQLOperations>(config: boolean | GenerateGraphQLOperations | undefined, step: K) => {
@@ -184,6 +188,10 @@ const getGraphQLStepConfig = <K extends keyof GenerateGraphQLOperations>(config:
   } else {
     return config
   }
+}
+
+const getSchemaRef = (outputPath: string, basePath: string): string => {
+  return path.relative(basePath, outputPath).split(path.sep).join(path.posix.sep)
 }
 
 const getOutputPath = (config: boolean | undefined | GenerateConfig, basePath: string, defaultPath: string): string => {
