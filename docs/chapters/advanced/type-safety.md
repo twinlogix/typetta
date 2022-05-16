@@ -67,7 +67,7 @@ All these types, exported and usable even directly outside Typetta, allow you to
 Whenever you perform a data read operation specifying a projection, Typetta returns a type of data that depends on the type of projection, in a totally dynamic way. Here is a simple example in which, in a ``findOne`` operation, an object whose return type depends on the ``projection`` parameter is returned:
 
 ```typescript
-const user = await daoContext.user.findOne({
+const user = await entityManager.user.findOne({
   projection: {
     firstName: true,
     lastName: true
@@ -87,7 +87,7 @@ type userType = {
 Changing the value of the ``projection`` automatically changes the return type in compile-time:
 
 ```typescript
-const user = await daoContext.user.findOne({
+const user = await entityManager.user.findOne({
   projection: {
     firstName: true,
     lastName: true,

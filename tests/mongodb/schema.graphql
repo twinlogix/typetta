@@ -52,7 +52,7 @@ type User @entity @mongodb {
   amount: Decimal
   friendsId: [ID!] @alias(value: "fIds")
   friends: [User!] @innerRef
-  dogs: [Dog!] @foreignRef(refFrom: "ownerId")
+  dogs: [Dog!] @foreignRef(refFrom: "ownerId") @schema(metadata: [{ key: "test", value: "value" }])
   credentials: [UsernamePasswordCredentials]
   embeddedPost: Post
   int: Int

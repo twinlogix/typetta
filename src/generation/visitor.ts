@@ -3,15 +3,15 @@ import { IdGenerationStrategy } from '..'
 import { DefaultGenerationStrategy } from '../dal/dao/dao.types'
 import { TypeScriptTypettaPluginConfig } from './config'
 import { Directives } from './directives'
-import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './generator'
+import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './types'
 import { toFirstLower } from './utils'
 import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 import autoBind from 'auto-bind'
-import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isInterfaceType, isEnumType } from 'graphql'
+import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isEnumType } from 'graphql'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
-export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig, ParsedConfig> {
+export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig, ParsedConfig> {
   constructor(private _schema: GraphQLSchema, pluginConfig: TypeScriptTypettaPluginConfig) {
     super(pluginConfig, {
       scalars: buildScalars(_schema, pluginConfig.scalars!, DEFAULT_SCALARS),
@@ -155,11 +155,23 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
       if (defaultDirective && relationEntityRefDirective) {
         throw new Error(`@default and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
       }
+      if (excludeDirective && innerRefDirective) {
+        throw new Error(`@exclude and @innerRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (excludeDirective && foreignRefDirective) {
+        throw new Error(`@exclude and @foreignRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (excludeDirective && relationEntityRefDirective) {
+        throw new Error(`@exclude and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
+      }
       if (defaultDirective && idDirective) {
         throw new Error(`@default and @id directives of field '${field.name.value}' are incompatible.`)
       }
 
-      const fieldAttribute = {
+      const schemaDirective = this._getDirectiveFromAstNode(field, Directives.SCHEMA)
+      const schemaMetadata = schemaDirective ? this._getDirectiveArgValue<{ key: string; value: string }[]>(schemaDirective, 'metadata') ?? [] : undefined
+
+      const fieldAttribute: TsTypettaGeneratorField = {
         name: field.name.value,
         graphqlType: graphqlType.name.value,
         type: resFieldType,
@@ -174,6 +186,7 @@ export class TsMongooseVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig
         defaultGenerationStrategy,
         isEnum: isEnumType(schemaType),
         alias,
+        schemaMetadata,
       }
       if (fieldAttribute.isID && !fieldAttribute.isRequired) {
         throw new Error(`Field '${field.name.value}' has @id directive, it must be a required field (!).`)

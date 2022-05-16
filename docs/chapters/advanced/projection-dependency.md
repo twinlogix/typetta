@@ -5,7 +5,7 @@ The concept of **projection dependency** consists of having some fields of an en
 Typetta offers the possibility to create a middleware that allows you to easily define a projection dependency. Here is an example in which, when the ``fullName`` field is requested, the middleware forces the ``firstName`` and ``lastName`` fields to be added to the projection:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   overrides: {
     user: {
       middlewares: [

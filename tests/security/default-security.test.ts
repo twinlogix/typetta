@@ -1,5 +1,5 @@
 import { SecurityPolicyReadError } from '../../src'
-import { DAOContext } from './dao.mock'
+import { EntityManager } from './dao.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
@@ -14,7 +14,7 @@ let mongodb: {
 }
 
 function createDao() {
-  return new DAOContext({
+  return new EntityManager({
     mongodb: {
       default: mongodb.db,
     },
@@ -40,7 +40,7 @@ function createDao() {
 }
 
 function createDao2() {
-  return new DAOContext({
+  return new EntityManager({
     mongodb: {
       default: mongodb.db,
     },
@@ -71,9 +71,9 @@ beforeEach(async () => {
 })
 
 test('security test 1', async () => {
-  const dao = await createDao()
+  const entityManager = await createDao()
   try {
-    await dao.hotel.findAll({})
+    await entityManager.hotel.findAll({})
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -85,7 +85,7 @@ test('security test 1', async () => {
   }
 
   try {
-    await dao.reservation.findAll({})
+    await entityManager.reservation.findAll({})
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -96,9 +96,9 @@ test('security test 1', async () => {
     }
   }
 
-  const dao2 = await createDao2()
+  const entityManager2 = await createDao2()
   try {
-    await dao2.hotel.findAll({})
+    await entityManager2.hotel.findAll({})
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {

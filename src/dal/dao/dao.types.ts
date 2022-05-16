@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DefaultModelScalars, EqualityOperators, Expand, OneKey, QuantityOperators, SortDirection, TypeTraversal } from '../..'
+import { DefaultModelScalars, EqualityOperators, Expand, QuantityOperators, SortDirection, TypeTraversal } from '../..'
 import { OmitIfKnown } from '../../utils/utils.types'
-import { AbstractDAOContext } from '../daoContext/daoContext'
+import { AbstractEntityManager } from '../entity-manager'
 import { LogFunction } from './log/log.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
@@ -11,12 +11,15 @@ import { GraphQLResolveInfo } from 'graphql'
 import { Knex } from 'knex'
 import { ClientSession } from 'mongodb'
 
-export type FilterParams<T extends DAOGenerics> = {
-  filter?: T['filter']
-  relations?: T['relations']
+export type OperationParams<T extends DAOGenerics> = {
   metadata?: T['operationMetadata']
   options?: T['driverFilterOptions']
 }
+
+export type FilterParams<T extends DAOGenerics> = {
+  filter?: T['filter']
+  relations?: T['relations']
+} & OperationParams<T>
 
 export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<FilterParams<T>, 'options'> & {
   projection?: P
@@ -24,6 +27,7 @@ export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<Fil
   skip?: number
   sorts?: T['sort']
   operationId?: string
+  relationParents?: { field: string; schema: Schema<T['scalars']> }[]
 }
 
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
@@ -32,29 +36,21 @@ export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOnePara
 
 export type InsertParams<T extends DAOGenerics> = {
   record: T['insert']
-  metadata?: T['operationMetadata']
-  options?: T['driverInsertOptions']
-}
+} & OperationParams<T>
 
 export type UpdateParams<T extends DAOGenerics> = {
   filter: T['filter']
   changes: T['update']
-  metadata?: T['operationMetadata']
-  options?: T['driverUpdateOptions']
-}
+} & OperationParams<T>
 
 export type ReplaceParams<T extends DAOGenerics> = {
   filter: T['filter']
   replace: T['insert']
-  metadata?: T['operationMetadata']
-  options?: T['driverReplaceOptions']
-}
+} & OperationParams<T>
 
 export type DeleteParams<T extends DAOGenerics> = {
   filter: T['filter']
-  metadata?: T['operationMetadata']
-  options?: T['driverDeleteOptions']
-}
+} & OperationParams<T>
 
 export type AggregationFields<T extends DAOGenerics> = {
   [key: string]: { field: keyof T['pureSort']; operation: 'sum' | 'avg' | 'min' | 'max' } | { field?: keyof T['pureSort']; operation: 'count' }
@@ -66,13 +62,11 @@ export type AggregateParams<T extends DAOGenerics> = {
   aggregations: AggregationFields<T>
   skip?: number
   limit?: number
-  metadata?: T['operationMetadata']
-  options?: T['driverFilterOptions']
-}
+} & OperationParams<T>
 
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
   having?: { [K in keyof A['aggregations']]?: EqualityOperators<number> | QuantityOperators<number> | number }
-  sorts?: OneKey<keyof A['aggregations'] | keyof A['by'], SortDirection>[]
+  sorts?: Partial<Record<keyof A['aggregations'] | keyof A['by'], SortDirection>>[]
 }
 
 export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>> = Expand<
@@ -90,7 +84,7 @@ export type DAOParams<T extends DAOGenerics> = {
   idScalar: T['idScalar']
   idGeneration: IdGenerationStrategy
   idGenerator?: () => T['idScalar'][T['idScalar']]
-  daoContext: AbstractDAOContext<string, string, T['scalars'], T['metadata']>
+  entityManager: AbstractEntityManager<string, string, T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
   metadata?: T['metadata']
   driverContext: T['driverContext']
@@ -114,7 +108,7 @@ export type MiddlewareContext<T extends DAOGenerics> = {
   specificOperation: 'findAll' | 'findOne' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'replaceAll' | 'deleteOne' | 'deleteAll' | 'aggregate' | 'count' | 'exists' | 'findPage'
   logger?: LogFunction<T['name']>
   dao: DAO<T>
-  daoContext: T['daoContext']
+  entityManager: T['entityManager']
 }
 
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
@@ -161,7 +155,7 @@ export type DAOGenerics<
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
   NameType extends string = any,
-  DAOContext extends AbstractDAOContext<string, string, ScalarsType, MetadataType> = AbstractDAOContext<string, string, ScalarsType, MetadataType>,
+  EntityManager extends AbstractEntityManager<string, string, ScalarsType, MetadataType> = AbstractEntityManager<string, string, ScalarsType, MetadataType>,
 > = {
   model: ModelType
   idKey: IDKey
@@ -187,7 +181,7 @@ export type DAOGenerics<
   driverContext: DriverContextType
   scalars: ScalarsType
   name: NameType
-  daoContext: DAOContext
+  entityManager: EntityManager
 
   driverFilterOptions: DriverFilterOptions
   driverFindOptions: DriverFindOptions

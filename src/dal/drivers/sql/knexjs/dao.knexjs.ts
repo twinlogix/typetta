@@ -31,7 +31,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private knex: Knex<any, unknown[]>
 
   protected constructor({ tableName, knex, idGenerator, ...params }: KnexJsDAOParams<T>) {
-    super({ ...params, driverContext: { tableName, knex }, idGenerator: idGenerator ?? params.daoContext.adapters.knex[params.idScalar]?.generate })
+    super({ ...params, driverContext: { tableName, knex }, idGenerator: idGenerator ?? params.entityManager.adapters.knex[params.idScalar]?.generate })
     this.tableName = tableName
     this.knex = knex
   }
@@ -54,11 +54,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         delete unflatted[schemaField.alias ?? key]
       }
     }
-    return transformObject(this.daoContext.adapters.knex, 'dbToModel', unflatted, this.schema)
+    return transformObject(this.entityManager.adapters.knex, 'dbToModel', unflatted, this.schema)
   }
 
   private modelToDb(object: PartialDeep<T['model']>): any {
-    const transformed = transformObject(this.daoContext.adapters.knex, 'modelToDB', object, this.schema)
+    const transformed = transformObject(this.entityManager.adapters.knex, 'modelToDB', object, this.schema)
     return flatEmbdeddedFields(this.schema, transformed)
   }
 
@@ -67,7 +67,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knex) : qb || this.qb()
+    return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.entityManager.adapters.knex) : qb || this.qb()
   }
 
   private buildSort(sort?: T['sort'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
@@ -93,7 +93,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private adaptUpdate(changes: T['update']): object {
-    return adaptUpdate({ update: changes, schema: this.schema, adapters: this.daoContext.adapters.knex })
+    return adaptUpdate({ update: changes, schema: this.schema, adapters: this.entityManager.adapters.knex })
   }
 
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
@@ -258,8 +258,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
           if (!schemaField.required) {
             cb.nullable()
           }
-        } else {
-          embeddedScalars(schemaField.alias || key, schemaField.embedded).forEach(([subKey, subSchemaField]) => {
+        } else if ('embedded' in schemaField) {
+          embeddedScalars(schemaField.alias || key, schemaField.embedded()).forEach(([subKey, subSchemaField]) => {
             const specificType = typeMap[subSchemaField.scalar] ?? defaultType
             const cb = table.specificType(subKey, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
             if (!subSchemaField.required) {

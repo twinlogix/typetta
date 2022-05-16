@@ -1,5 +1,6 @@
 node_modules
 lib
 tests/**/*.mock.ts
+tests/**/*.generated.ts
 docs
 coverage

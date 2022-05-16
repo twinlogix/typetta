@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { computedField, inMemoryKnexConfig } from '../../src'
-import { DAOContext } from './dao.mock'
+import { computedField, flattenEmbeddeds, inMemoryKnexConfig } from '../../src'
+import { EntityManager, postSchema } from './dao.generated'
+import { PostUpdateInput } from './types.generated'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -8,13 +9,13 @@ import sha256 from 'sha256'
 jest.setTimeout(20000)
 
 let knexInstance: Knex<{ [K in string]: unknown }, unknown[]>
-let dao: DAOContext
+let dao: EntityManager
 
 let idCounter = 0
 
 beforeEach(async () => {
   knexInstance = knex(inMemoryKnexConfig())
-  dao = new DAOContext({
+  dao = new EntityManager({
     overrides: {
       user: {
         idGenerator: () => {
@@ -282,4 +283,29 @@ test('Aggregate test 2', async () => {
   expect(aggregation2.length).toBe(2)
   expect(aggregation2.find((a) => a['metadata.region'] === 'it')?.count).toBe(25)
   expect(aggregation2.find((a) => a['metadata.region'] === 'en')?.count).toBe(1)
+})
+
+test('flattenEmbeddedFilter', () => {
+  const f: PostUpdateInput = {
+    authorId: '123',
+    metadata: {
+      region: 'it',
+    },
+  }
+  const r = flattenEmbeddeds(f, postSchema())
+  if (!r) {
+    fail()
+  }
+  expect(r['metadata.region']).toBe('it')
+  expect(r['metadata.typeId']).toBe(undefined)
+  expect(r.authorId).toBe('123')
+  expect(r.body).toBe(undefined)
+
+  const r1 = flattenEmbeddeds(
+    {
+      metadata: null,
+    },
+    postSchema(),
+  )
+  expect(r1.metadata).toBe(null)
 })

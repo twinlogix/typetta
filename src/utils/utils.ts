@@ -1,11 +1,9 @@
+import { DAOGenerics } from '../dal/dao/dao.types'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
+import { DeepRequired, RecursiveKeyOfLeaf, TypeTraversal } from './utils.types'
 import { isPlainObject } from 'is-plain-object'
 import knex, { Knex } from 'knex'
-
-export type OneKey<K extends string | number | symbol, V = any> = {
-  [P in K]: Record<P, V> & Partial<Record<Exclude<K, P>, never>> extends infer O ? { [Q in keyof O]: O[Q] } : never
-}[K]
 
 export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
   const c = key.split('.')
@@ -17,7 +15,7 @@ export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schem
       throw new Error('Unreachable')
     }
     const schemaField = schema[k]
-    return schemaField && 'embedded' in schemaField ? getSchemaFieldTraversing(c.join('.'), schemaField.embedded) : null
+    return schemaField && 'embedded' in schemaField ? getSchemaFieldTraversing(c.join('.'), schemaField.embedded()) : null
   }
 }
 
@@ -111,11 +109,11 @@ export function getTraversing(object: any, path: string): any[] {
   }
 }
 
-export function deepMerge(weak: any, strong: any): any {
-  if (weak === null || weak === undefined) {
+export function deepMerge(weak: any, strong: any, nullsAsUndefined = true): any {
+  if ((nullsAsUndefined && weak === null) || weak === undefined) {
     return strong
   }
-  if (strong === null || strong === undefined) {
+  if ((nullsAsUndefined && strong === null) || strong === undefined) {
     return weak
   }
   if (!isPlainObject(weak) || !isPlainObject(strong)) {
@@ -130,7 +128,7 @@ export function deepMerge(weak: any, strong: any): any {
   keySet.forEach((k) => {
     const [s, w] = [strongKey.has(k), weakKey.has(k)]
     if (s && w) {
-      result[k] = deepMerge(weak[k], strong[k])
+      result[k] = deepMerge(weak[k], strong[k], nullsAsUndefined)
     } else if (s) {
       result[k] = strong[k]
     } else {
@@ -176,4 +174,33 @@ export function filterNullFields<T extends Record<string, unknown>>(obj: T): T {
 
 export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [string, T[keyof T]]) => [string, unknown][]): Record<string, unknown> {
   return Object.fromEntries(Object.entries(obj).flatMap(([k, v]) => f([k, v as T[keyof T]])))
+}
+
+type FlattenEmbeddedFilter<T> = {
+  [K in RecursiveKeyOfLeaf<DeepRequired<T>>]?: TypeTraversal<T, K>
+}
+
+export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>(obj: T, schema: Schema<ScalarsType>, prefix = ''): FlattenEmbeddedFilter<T> {
+  if (!obj) {
+    return obj
+  }
+  return mapObject(obj, ([k, v]) => {
+    const field = schema[k]
+    if ('embedded' in field) {
+      if (!v) {
+        return [[`${prefix}${k}`, v]]
+      }
+      return Object.entries(flattenEmbeddeds(v as T, field.embedded(), `${prefix}${k}.`))
+    }
+    return [[`${prefix}${k}`, v]]
+  }) as FlattenEmbeddedFilter<T>
+}
+
+export function renameLogicalOperators<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {
+  return mapObject(obj, ([k, v]) => {
+    if (k === 'and_' || k === '$and') return [['$and', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]
+    if (k === 'or_' || k === '$or') return [['$or', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]
+    if (k === 'nor_' || k === '$nor') return [['$nor', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]
+    return [[k, v]]
+  }) as D['pureFilter']
 }

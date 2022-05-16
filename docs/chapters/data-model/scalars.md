@@ -82,7 +82,7 @@ A ``Scalar Adapter`` is an object that contains all the details about how the sy
 - Validation
 - Auto-generation
 
-Scalar adapters must be configured at the DAOContext level and are shared by all DAOs.
+Scalar adapters must be configured at the EntityManager level and are shared by all DAOs.
 
 Below is an example of a Scalar Adapter for the Decimal scalar already described above. The TypeScript type this scalar is mapped to is BigNumber, while the data type to which it must be serialised on MongoDB is Decimal128.
 
@@ -106,10 +106,10 @@ const decimalAdapter = {
   }
 };
 ```
-The configuration of the DAOContext with the above scalar adapter is therefore the following:
+The configuration of the EntityManager with the above scalar adapter is therefore the following:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   scalars: {
     Decimal: decimalAdapter
   }
@@ -129,7 +129,7 @@ scalar IntPositive
 We can define a simple validator and its `Scalar Adapter` as follows:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   scalars: {
     IntPositive: {
       validate: (data: number) : Error | true => {

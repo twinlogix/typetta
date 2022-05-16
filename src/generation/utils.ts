@@ -1,9 +1,20 @@
 import { Schema } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../dal/drivers/drivers.types'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './types'
 
-export function toFirstLower(typeName: string) {
+export function toFirstLower(typeName: string): string {
   return typeName.charAt(0).toLowerCase() + typeName.slice(1)
+}
+
+export function toFirstUpper(typeName: string): string {
+  return typeName.charAt(0).toUpperCase() + typeName.slice(1)
+}
+
+export function removeEmptyLines(s: string): string {
+  return s
+    .split('\n')
+    .filter((v) => v.trim().length !== 0)
+    .join('\n')
 }
 
 export function findID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField | undefined {
@@ -102,7 +113,7 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
   object: From,
   schema: Schema<ModelScalars>,
 ): To {
-  if(object === null) {
+  if (object === null) {
     return null as unknown as To
   }
   const result: any = {}
@@ -134,11 +145,11 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
           } else {
             result[destName] = adapter ? mapper(value) : value
           }
-        } else {
+        } else if ('embedded' in schemaField) {
           if (Array.isArray(value) && schemaField.array) {
-            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded))
+            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded()))
           } else {
-            result[destName] = transformObject(adapters, direction, value, schemaField.embedded)
+            result[destName] = transformObject(adapters, direction, value, schemaField.embedded())
           }
         }
       }

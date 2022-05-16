@@ -27,14 +27,14 @@ run().catch(console.dir);
 
 Note that it is the driver that deals with the connection pooling, that is, each JS Node process usually has to make only one ``connection`` and take only one reference from the ``db`` that can then be reused in each call or procedure. Therefore, it is not recommended to make repeated ``connections``.
 
-## Creation of the DAOContext
+## Creation of the EntityManager
 
-Unlike connection, the ``DAOContext`` can be instantiated multiple times and with different parameters. For example, it is advisable to create a ``DAOContext`` for each calling context (for example, each REST or GraphQL call).
+Unlike connection, the ``EntityManager`` can be instantiated multiple times and with different parameters. For example, it is advisable to create an ``EntityManager`` for each calling context (for example, each REST or GraphQL call).
 
-The ``DAOContext`` requires as input a reference to the MongoDB database to be accessed to provide access to the various entities of the data model. Here is an example configuration:
+The ``EntityManager`` requires as input a reference to the MongoDB database to be accessed to provide access to the various entities of the data model. Here is an example configuration:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   mongo: {
     default: db,
   },
@@ -53,14 +53,14 @@ async function run() {
   try {
     await client.connect();
     const db = await client.db("dbname")
-    const daoContext = new DAOContext({
+    const entityManager = new EntityManager({
       mongo: {
         default: db,
       },
     })
 
     // ...
-    // const users = daoContext.user.findAll();
+    // const users = entityManager.user.findAll();
     // ...
 
   } finally {

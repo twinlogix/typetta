@@ -3,5 +3,13 @@
   "trailingComma": "all",
   "printWidth": 200,
   "tabWidth": 2,
-  "semi": false
+  "semi": false,
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "options": {
+        "parser": "typescript"
+      }
+    }
+  ]
 }
