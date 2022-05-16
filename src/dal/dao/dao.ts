@@ -187,7 +187,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findAll')
       const records = beforeResults.continue ? await this._findAll(beforeResults.params) : beforeResults.records
-      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId)
+      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId, params.relationParents)
       const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex, 'findAll')
       if (isRootOperation) {
         this.clearDataLoader(operationId)
@@ -206,7 +206,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findPage')
       const { totalCount, records } = beforeResults.continue ? await this._findPage(beforeResults.params) : { records: beforeResults.records, totalCount: beforeResults.totalCount ?? 0 }
-      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId)
+      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId, params.relationParents)
       const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex, 'findPage')
       if (isRootOperation) {
         this.clearDataLoader(operationId)
@@ -347,6 +347,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     projections?: AnyProjection<T['projection']>,
     relations?: T['relations'],
     operationId?: string,
+    relationParents?: FindParams<T>['relationParents'],
   ): Promise<PartialDeep<T['model']>[]> {
     if (projections === undefined || projections === true) {
       return records
@@ -366,6 +367,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           options: relationFilter?.options,
           metadata: relationFilter?.metadata,
           operationId,
+          relationParents: [...(relationParents ?? []), { field: relation.field, schema: this.schema }],
         }
         if (relation.reference === 'relation') {
           const rels = await this.entityManager.dao(relation.relationDao).loadAll(
@@ -461,10 +463,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     if (Array.isArray(record[subField])) {
       for (const r of record[subField]) {
-        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded }, r)
+        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded() }, r)
       }
     } else {
-      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded }, record[subField])
+      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded() }, record[subField])
     }
   }
 
@@ -688,7 +690,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   get info(): { name: T['name']; idField: T['idKey']; schema: Schema<T['scalars']> } {
     return { name: this.name, idField: this.idField, schema: this.schema }
   }
-  public mapResolverFindParams(params: FindParams<T>): FindParams<T> {
+  private mapResolverFindParams(params: FindParams<T>): FindParams<T> {
     const relations = Object.fromEntries(
       this.relations.flatMap((r) => {
         if (params.relations && params.relations[r.field]) {

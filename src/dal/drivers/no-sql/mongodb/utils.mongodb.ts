@@ -27,10 +27,13 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
       if ('scalar' in schemaField) {
         return [[name, v]]
       }
+      if ('relation' in schemaField) {
+        return []
+      }
       if (typeof v === 'object' && Object.keys(v ?? {}).length === 0) {
         return []
       }
-      const p = adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded, true)
+      const p = adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded(), true)
       if (typeof p === 'object' && Object.keys(p).length === 0) {
         return []
       }
@@ -48,7 +51,7 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   if (c.length === 0) {
     return n
   } else {
-    return schemaField && 'embedded' in schemaField ? n + '.' + modelNameToDbName(c.join('.'), schemaField.embedded) : k + '.' + c.join('.')
+    return schemaField && 'embedded' in schemaField ? n + '.' + modelNameToDbName(c.join('.'), schemaField.embedded()) : k + '.' + c.join('.')
   }
 }
 
@@ -64,6 +67,9 @@ export function adaptFilter<ScalarsType extends DefaultModelScalars, T extends D
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField) {
+      if ('relation' in schemaField) {
+        return []
+      }
       const adapted = adaptToSchema(v, adapters, schemaField)
       return [[columnName, adapted]]
     } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
@@ -129,9 +135,9 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
         return modelValueToDbValue(value as Scalar, schemaField, adapter)
       }
     }
-  } else {
+  } else if ('embedded' in schemaField) {
     // filter on embedded type
-    return adaptFilter(value as AbstractFilter, schemaField.embedded, adapters)
+    return adaptFilter(value as AbstractFilter, schemaField.embedded(), adapters)
   }
 }
 
@@ -148,11 +154,11 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
       }
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
-    } else if (schemaField) {
+    } else if (schemaField && 'embedded' in schemaField) {
       if (schemaField.array) {
-        return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.embedded, adapters)))]]
+        return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.embedded(), adapters)))]]
       }
-      return [[columnName, v === null ? null : adaptUpdate(v, schemaField.embedded, adapters)]]
+      return [[columnName, v === null ? null : adaptUpdate(v, schemaField.embedded(), adapters)]]
     } else {
       return []
     }

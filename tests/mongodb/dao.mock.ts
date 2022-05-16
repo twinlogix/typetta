@@ -11,6 +11,7 @@ export type AddressRelationFields = 'cities'
 
 export function addressSchema(): T.Schema<types.Scalars> {
   return {
+    'cities': { relation: () => citySchema(), array: true },
     'id': {
       scalar: 'ID', 
       required: true
@@ -250,7 +251,8 @@ export function auditableSchema(): T.Schema<types.Scalars> {
     'state': {
       scalar: 'String', 
       required: true
-    }
+    },
+    'versions': { relation: () => auditSchema(), required: true, array: true }
   }
 }
 
@@ -549,6 +551,7 @@ export function deviceSchema(): T.Schema<types.Scalars> {
       scalar: 'String', 
       required: true
     },
+    'user': { relation: () => userSchema() },
     'userId': {
       scalar: 'ID'
     }
@@ -663,6 +666,7 @@ export function dogSchema(): T.Schema<types.Scalars> {
       scalar: 'String', 
       required: true
     },
+    'owner': { relation: () => userSchema() },
     'ownerId': {
       scalar: 'ID', 
       required: true
@@ -767,7 +771,8 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
 
 export function embeddedUserSchema(): T.Schema<types.Scalars> {
   return {
-    'e': { embedded: embeddedUser2Schema(), array: true },
+    'e': { embedded: () => embeddedUser2Schema(), array: true },
+    'user': { relation: () => userSchema(), required: true },
     'userId': {
       scalar: 'ID', 
       required: true
@@ -798,6 +803,7 @@ export type EmbeddedUserInsert = {
 
 export function embeddedUser2Schema(): T.Schema<types.Scalars> {
   return {
+    'user': { relation: () => userSchema(), required: true },
     'userId': {
       scalar: 'ID', 
       required: true
@@ -823,6 +829,7 @@ export type EmbeddedUser2Insert = {
 
 export function embeddedUser3Schema(): T.Schema<types.Scalars> {
   return {
+    'user': { relation: () => userSchema() },
     'value': {
       scalar: 'Int'
     }
@@ -847,7 +854,8 @@ export type EmbeddedUser3Insert = {
 
 export function embeddedUser4Schema(): T.Schema<types.Scalars> {
   return {
-    'e': { embedded: embeddedUser5Schema() }
+    'e': { embedded: () => embeddedUser5Schema() },
+    'user': { relation: () => userSchema() }
   }
 }
 
@@ -897,12 +905,12 @@ export type HotelRelationFields = never
 
 export function hotelSchema(): T.Schema<types.Scalars> {
   return {
-    'audit': { embedded: auditableSchema(), required: true, defaultGenerationStrategy: 'middleware' },
-    'embeddedUser3': { embedded: embeddedUser3Schema() },
-    'embeddedUser4': { embedded: embeddedUser4Schema() },
-    'embeddedUsers': { embedded: embeddedUserSchema(), array: true },
-    'embeddedUsers3': { embedded: embeddedUser3Schema(), array: true },
-    'embeddedUsers4': { embedded: embeddedUser4Schema(), array: true },
+    'audit': { embedded: () => auditableSchema(), required: true, defaultGenerationStrategy: 'middleware' },
+    'embeddedUser3': { embedded: () => embeddedUser3Schema() },
+    'embeddedUser4': { embedded: () => embeddedUser4Schema() },
+    'embeddedUsers': { embedded: () => embeddedUserSchema(), array: true },
+    'embeddedUsers3': { embedded: () => embeddedUser3Schema(), array: true },
+    'embeddedUsers4': { embedded: () => embeddedUser4Schema(), array: true },
     'id': {
       scalar: 'ID', 
       required: true, 
@@ -915,7 +923,7 @@ export function hotelSchema(): T.Schema<types.Scalars> {
     'userId': {
       scalar: 'ID'
     },
-    'users': { embedded: userCollectionSchema() }
+    'users': { embedded: () => userCollectionSchema() }
   }
 }
 
@@ -1118,6 +1126,7 @@ export function mockedEntitySchema(): T.Schema<types.Scalars> {
       scalar: 'String', 
       required: true
     },
+    'user': { relation: () => userSchema(), required: true },
     'userId': {
       scalar: 'ID', 
       required: true
@@ -1224,7 +1233,7 @@ export type OrganizationRelationFields = never
 
 export function organizationSchema(): T.Schema<types.Scalars> {
   return {
-    'address': { embedded: addressSchema() },
+    'address': { embedded: () => addressSchema() },
     'id': {
       scalar: 'ID', 
       required: true
@@ -1347,6 +1356,7 @@ export type PostRelationFields = 'author'
 
 export function postSchema(): T.Schema<types.Scalars> {
   return {
+    'author': { relation: () => userSchema(), required: true },
     'authorId': {
       scalar: 'ID', 
       required: true, 
@@ -1362,7 +1372,7 @@ export function postSchema(): T.Schema<types.Scalars> {
       scalar: 'ID', 
       required: true
     },
-    'metadata': { embedded: postMetadataSchema() },
+    'metadata': { embedded: () => postMetadataSchema() },
     'title': {
       scalar: 'String', 
       required: true
@@ -1534,12 +1544,14 @@ export function userSchema(): T.Schema<types.Scalars> {
       array: true, 
       alias: 'amounts'
     },
-    'credentials': { embedded: usernamePasswordCredentialsSchema(), array: true },
-    'embeddedPost': { embedded: postSchema() },
+    'credentials': { embedded: () => usernamePasswordCredentialsSchema(), array: true },
+    'dogs': { relation: () => dogSchema(), array: true, metadata: Object.fromEntries([['test', 'value']]) },
+    'embeddedPost': { embedded: () => postSchema() },
     'firstName': {
       scalar: 'String', 
       alias: 'name'
     },
+    'friends': { relation: () => userSchema(), array: true },
     'friendsId': {
       scalar: 'ID', 
       array: true, 
@@ -1566,7 +1578,7 @@ export function userSchema(): T.Schema<types.Scalars> {
     'title': {
       scalar: 'LocalizedString'
     },
-    'usernamePasswordCredentials': { embedded: usernamePasswordCredentialsSchema(), alias: 'cred' }
+    'usernamePasswordCredentials': { embedded: () => usernamePasswordCredentialsSchema(), alias: 'cred' }
   }
 }
 
@@ -1771,6 +1783,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
 
 export function userCollectionSchema(): T.Schema<types.Scalars> {
   return {
+    'users': { relation: () => userSchema(), required: true, array: true },
     'usersId': {
       scalar: 'ID', 
       required: true, 
@@ -1802,6 +1815,7 @@ export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
       required: true, 
       alias: 'pwd'
     },
+    'user': { relation: () => userSchema() },
     'username': {
       scalar: 'String', 
       required: true, 

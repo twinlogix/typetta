@@ -174,7 +174,18 @@ this.params = params`,
       ) +
       '\n}'
 
-    const declarations = [daoDeclarations, paramsDeclaration, overridesDeclaration, middlewareDeclaration, loggerDeclaration, entityManagerGetters, entityManagerConstructor, execQueryF, cloneF, createTableF].join('\n\n')
+    const declarations = [
+      daoDeclarations,
+      paramsDeclaration,
+      overridesDeclaration,
+      middlewareDeclaration,
+      loggerDeclaration,
+      entityManagerGetters,
+      entityManagerConstructor,
+      execQueryF,
+      cloneF,
+      createTableF,
+    ].join('\n\n')
 
     const entityManagerExport =
       `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<${
@@ -273,15 +284,16 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
 
   public _generateDAOSchemaFields(node: TsTypettaGeneratorNode): string[] {
     return node.fields
-      .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {
         const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}${
           field.defaultGenerationStrategy ? `, \ndefaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : ''
-        }`
-        if (field.type.kind === 'scalar') {
+        }${field.schemaMetadata ? `, \nmetadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : ''}`
+        if (field.type.kind === 'scalar' && !field.isExcluded) {
           return [`  '${field.name}': {\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`, 2)}\n  }`]
-        } else if (field.type.kind === 'embedded') {
-          return [`  '${field.name}': { embedded: ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
+        } else if (field.type.kind === 'embedded' && !field.isExcluded) {
+          return [`  '${field.name}': { embedded: () => ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
+        } else if (field.type.kind === 'innerRef' || field.type.kind === 'foreignRef' || field.type.kind === 'relationEntityRef') {
+          return [`  '${field.name}': { relation: () => ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
         }
         return []
       })

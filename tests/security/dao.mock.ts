@@ -148,6 +148,7 @@ export function reservationSchema(): T.Schema<types.Scalars> {
       scalar: 'ID', 
       required: true
     },
+    'room': { relation: () => roomSchema() },
     'roomId': {
       scalar: 'ID', 
       required: true
@@ -386,6 +387,7 @@ export function roomSchema(): T.Schema<types.Scalars> {
       scalar: 'Date', 
       required: true
     },
+    'hotel': { relation: () => hotelSchema(), required: true },
     'hotelId': {
       scalar: 'ID', 
       required: true
@@ -531,6 +533,8 @@ export function userSchema(): T.Schema<types.Scalars> {
     'lastName': {
       scalar: 'String'
     },
+    'reservations': { relation: () => reservationSchema(), required: true, array: true },
+    'roles': { relation: () => userRoleSchema(), required: true, array: true },
     'totalPayments': {
       scalar: 'Int'
     }
@@ -675,6 +679,7 @@ export function userRoleSchema(): T.Schema<types.Scalars> {
       scalar: 'ID', 
       required: true
     },
+    'role': { relation: () => roleSchema(), required: true },
     'roleCode': {
       scalar: 'String', 
       required: true

@@ -258,8 +258,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
           if (!schemaField.required) {
             cb.nullable()
           }
-        } else {
-          embeddedScalars(schemaField.alias || key, schemaField.embedded).forEach(([subKey, subSchemaField]) => {
+        } else if ('embedded' in schemaField) {
+          embeddedScalars(schemaField.alias || key, schemaField.embedded()).forEach(([subKey, subSchemaField]) => {
             const specificType = typeMap[subSchemaField.scalar] ?? defaultType
             const cb = table.specificType(subKey, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
             if (!subSchemaField.required) {

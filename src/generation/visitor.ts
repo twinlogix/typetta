@@ -155,11 +155,23 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
       if (defaultDirective && relationEntityRefDirective) {
         throw new Error(`@default and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
       }
+      if (excludeDirective && innerRefDirective) {
+        throw new Error(`@exclude and @innerRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (excludeDirective && foreignRefDirective) {
+        throw new Error(`@exclude and @foreignRef directives of field '${field.name.value}' are incompatible.`)
+      }
+      if (excludeDirective && relationEntityRefDirective) {
+        throw new Error(`@exclude and @relationEntityRef directives of field '${field.name.value}' are incompatible.`)
+      }
       if (defaultDirective && idDirective) {
         throw new Error(`@default and @id directives of field '${field.name.value}' are incompatible.`)
       }
 
-      const fieldAttribute = {
+      const schemaDirective = this._getDirectiveFromAstNode(field, Directives.SCHEMA)
+      const schemaMetadata = schemaDirective ? this._getDirectiveArgValue<{ key: string; value: string }[]>(schemaDirective, 'metadata') ?? [] : undefined
+
+      const fieldAttribute: TsTypettaGeneratorField = {
         name: field.name.value,
         graphqlType: graphqlType.name.value,
         type: resFieldType,
@@ -174,6 +186,7 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
         defaultGenerationStrategy,
         isEnum: isEnumType(schemaType),
         alias,
+        schemaMetadata,
       }
       if (fieldAttribute.isID && !fieldAttribute.isRequired) {
         throw new Error(`Field '${field.name.value}' has @id directive, it must be a required field (!).`)
