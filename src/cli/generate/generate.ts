@@ -24,7 +24,7 @@ export default async (args: GenerateArgs): Promise<void> => {
       console.log()
       const operationsConfig = getGraphQLStepConfig(config.generateGraphQLOperations, 'operations')
       const operationsOutputPath = getOutputPath(operationsConfig, basePath, path.join(outputDirPath, 'operations.ts'))
-      const operationsSchema: Types.Schema[] = config.generateGraphQLOperations !== false ? [operationsOutputPath] : []
+      const operationsSchema: Types.Schema[] = operationsConfig !== false ? [operationsOutputPath] : []
       if (operationsConfig !== false) {
         const generateConfigs = {
           schema: config?.schema,
