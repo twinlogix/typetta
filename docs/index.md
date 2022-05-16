@@ -19,6 +19,8 @@ Starting from the model output of the domain analysis, Typetta provides a range 
 
 - An EntityManager, a contextual object where the developer can configure each data source and retrieve the reference of any DAO.
 
+- A completely auto-generated GraphQL Endpoint with advanced CRUD operations to access and modify data.
+
 ## Main Functionalities
 
 Below is a brief description of what makes Typetta awesome:
@@ -40,6 +42,7 @@ Below is a brief description of what makes Typetta awesome:
 - Embedded documents supported on MongoDB as well as SQL.
 - Automated code generation.
 - Effortless integration with GraphQL backends.
+- Optional automated GraphQL Endpoint generation for CRUD operations.
 - Transactions.
 - Logging.
 - Mocking.

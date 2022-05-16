@@ -2,7 +2,7 @@
 
 GraphQL is a language that allows you to define and query an API and its data model. Exposing an API through a GraphQL endpoint allows you to develop clients that can perform **efficient**, **expressive** and **typed** queries. However, this great result comes at a price: the complexity of creating a back-end capable of satisfying these types of requests and recovering data from the various sources. Typetta comes into play here and is able to simplify the developer's work.
 
-As a fully-typed ORM capable of supporting complex projections and filters, Typetta can be used more in the development of GraphQL resolvers of any back-end library, such as Apollo Server, NestJS, or Express.
+As a fully-typed ORM capable of supporting complex projections and filters, Typetta can be used in the development of GraphQL resolvers of any back-end library, such as Apollo Server, NestJS, or Express.
 
   - [Why use Typetta with GraphQL?](#why-use-typetta-with-graphql)
     - [End-to-end type safety](#end-to-end-type-safety)
@@ -69,7 +69,7 @@ export const resolvers = {
 }
 ```
 
-To ensure efficiency and correctness, the user loading operation must load from the source of all the data and only the required fields by analysing the content of the `info` parameter contained in the AST schema of the request.
+To ensure efficiency and correctness, the user query operation must load from the data source only the required fields by analysing the content of the `info` parameter contained in the AST schema of the request.
 
 Since the `User` type also contains a `posts field: [Post!]`, you must specify an additional resolver capable of loading all the posts of each user:
 

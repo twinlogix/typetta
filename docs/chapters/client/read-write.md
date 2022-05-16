@@ -1,6 +1,6 @@
 # Read and Write
 
-The fundamental component for performing read or write operations on model entities is `DAO`. There is a DAO for each entity and its reference can be obtained simply from the `EntityManager`, as described in the [context](entity-manager) section of the guide.
+The fundamental component for performing read or write operations on model entities is `DAO`. There is a DAO for each entity and its reference can be obtained simply from the `EntityManager`, as described in the [entity manager](entity-manager) section of the guide.
 
 Each DAO, regardless of its data source, whether SQL or MongoDB, offers the main features of reading and manipulating entities and their relationships.
 

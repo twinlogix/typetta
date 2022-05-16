@@ -1,6 +1,6 @@
-# Context
+# Entity Manager
 
-  - [How to create a Context](#how-to-create-a-context)
+  - [How to create an Entity Manager](#how-to-create-an-entity-manager)
   - [Multi-database](#multi-database)
   - [Data Access Object (DAO)](#data-access-object-dao)
 
@@ -12,22 +12,20 @@ Each time the data model is modified, you can execute a supplied generator that 
 Simply run the following command to start the generation:
 
 ```bash
-npx graphql-codegen
+npx typetta generate
 ```
 
 It is also possible to run it in *watch mode* so that any change to the GraphQL Schema will automatically trigger a new generation:
 
 ```bash
-npx graphql-codegen --watch
+npx typetta generate --watch
 ```
-
-For any additional details on the generation tool, refer to the official documentation [GraphQL Code Generator](https://www.graphql-code-generator.com/docs/getting-started){:target="_blank"}.
 
 The main result of the generation process is a component we call `EntityManager`. It is a container for so-called `DAOs`, data access objects that allow you to perform all operations on the entities of the data model.
 
 The role of the EntityManager is absolutely central because it is on it that a whole series of settings can be configured that can modify the behaviour of the entire data access system. It also represents a replicable unit, so it is possible to instantiate any number of EntityManagers, each with different settings.
 
-## How to create a Context
+## How to create an Entity Manager
 
 Instantiating the `EntityManager` is very simple. The only mandatory configurations are the SQL and MongoDB data sources (both if you are using both databases, or just the one you need).
 
