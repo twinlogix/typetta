@@ -1,10 +1,6 @@
 import * as T from '../../src'
 import * as types from './models.mock'
 
-//--------------------------------------------------------------------------------
-//------------------------------------- LIKE -------------------------------------
-//--------------------------------------------------------------------------------
-
 export type LikeExcludedFields = never
 export type LikeRelationFields = never
 
@@ -124,10 +120,6 @@ export class InMemoryLikeDAO<MetadataType, OperationMetadataType> extends T.Abst
 
 
 
-//--------------------------------------------------------------------------------
-//----------------------------------- METADATA -----------------------------------
-//--------------------------------------------------------------------------------
-
 export function metadataSchema(): T.Schema<types.Scalars> {
   return {
     'tags': {
@@ -152,10 +144,6 @@ export type MetadataInsert = {
 }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- POST -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type PostExcludedFields = never
 export type PostRelationFields = 'likes'
@@ -296,10 +284,6 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- USER -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type UserExcludedFields = never
 export type UserRelationFields = 'likes' | 'posts'
@@ -514,10 +498,6 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
 
 }
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- UTILS ------------------------------------
-//--------------------------------------------------------------------------------
 
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {

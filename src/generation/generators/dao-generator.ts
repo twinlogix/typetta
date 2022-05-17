@@ -1,10 +1,167 @@
 import { DAORelation } from '../../dal/dao/relations/relations.types'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../types'
-import { getID, getNode, indentMultiline, resolveParentPath, toFirstLower } from '../utils'
-import { TsTypettaAbstractGenerator } from './abstractGenerator'
-import { DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
+import { TypeScriptTypettaPluginConfig } from '../config'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from '../types'
+import { findField, findID, findNode, getID, getNode, removeParentPath, resolveParentPath, toFirstLower } from '../utils'
+import { DEFAULT_SCALARS, indentMultiline } from '@graphql-codegen/visitor-plugin-common'
 
-export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
+export class TsTypettaGenerator extends TypettaGenerator {
+  constructor(config: TypeScriptTypettaPluginConfig) {
+    super(config)
+  }
+
+  public async generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string> {
+    const typesMap = new Map<string, TsTypettaGeneratorNode>()
+    nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
+
+    const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
+    nodes.filter((node) => node.type === 'scalar').forEach((type) => customScalarsMap.set(type.name, type as TsTypettaGeneratorScalar))
+
+    this.checkIds(typesMap)
+    this.checkReferences(typesMap, (type) => (type.entity ? true : false))
+    this.checkArrayInSqlEntities(typesMap)
+    const imports = this.generateImports(typesMap)
+    if (!Array.from(typesMap.values()).some((v) => v.entity?.type)) {
+      throw new Error('At least one entity is required for code generation. (@entity)')
+    }
+    const definitions = [...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation').flatMap((node) => this.generateDefinition(node, typesMap, customScalarsMap))
+    const exports = this.generateExports(typesMap, customScalarsMap)
+    return [imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
+  }
+
+  private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
+    Array.from(typesMap.values())
+      .filter((type) => type.entity)
+      .forEach((type) => {
+        const id = findID(type)
+        if (!id) {
+          throw new Error(`Type ${type.name} requires an @id field being a @entity.`)
+        }
+      })
+  }
+
+  private checkArrayInSqlEntities(typesMap: Map<string, TsTypettaGeneratorNode>) {
+    Array.from(typesMap.values())
+      .filter((type) => type.entity?.type === 'sql')
+      .forEach((type) => {
+        type.fields.forEach((f) => {
+          if ((typeof f.type === 'string' || 'embedded' in f.type) && f.isList) {
+            console.warn(
+              `Type ${type.name} is an sql entity and have an array field: ${f.name}. Plain field or embedded field are not supported as array, the only way to define an array is through references (@foreignRef or @relationEntityRef).`,
+            )
+          }
+        })
+      })
+  }
+
+  private checkReferences(typesMap: Map<string, TsTypettaGeneratorNode>, filter: (type: TsTypettaGeneratorNode) => boolean, parents: TsTypettaGeneratorNode[] = []) {
+    Array.from(typesMap.values())
+      .filter(filter)
+      .forEach((type) => {
+        const errorPrefix = `(Type: ${type.name}${parents.length > 0 ? `, Parents: ${parents.map((v) => v.name).join('<-')}` : ''})`
+        type.fields.forEach((field) => {
+          if (field.type.kind === 'embedded') {
+            const type2Name = field.type.embed
+            this.checkReferences(typesMap, (t) => t.name === type2Name, [type, ...parents])
+          } else if (field.type.kind === 'innerRef') {
+            const refType = findNode(field.type.innerRef, typesMap)
+            if (!refType) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a inner reference to ${field.type.innerRef} that cannot be resolved.`)
+            }
+            if (!refType.entity) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a inner reference to ${field.type.innerRef} that isn't an entity.`)
+            }
+            const refFrom = field.type.refFrom ?? field.name + 'Id'
+            const refFromField = findField(type, refFrom, typesMap, parents)
+            if (!refFromField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a inner reference to ${field.type.innerRef} with refFrom = '${refFrom}' that cannot be resolved.`)
+            }
+            const refTo = field.type.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refToField = findField(refType, refTo, typesMap, parents)
+            if (!refToField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a inner reference to ${field.type.innerRef} with refTo = '${refTo}' that cannot be resolved.`)
+            }
+            if (refFromField.field.graphqlType !== refToField.field.graphqlType) {
+              throw new Error(
+                `${errorPrefix} Field '${refFromField.root.name}.${removeParentPath(refFrom)}: ${refFromField.field.graphqlType}' has a inner reference to '${refToField.root.name}.${removeParentPath(
+                  refTo,
+                )}: ${refToField.field.graphqlType}' but they have different scalar type.`,
+              )
+            }
+          } else if (field.type.kind === 'foreignRef') {
+            const refType = findNode(field.type.foreignRef, typesMap)
+            if (!refType) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a foreign reference to ${field.type.foreignRef} that cannot be resolved.`)
+            }
+            const refFrom = field.type.refFrom ?? `${toFirstLower(type.name)}Id`
+            const refFromField = findField(refType, refFrom, typesMap, parents)
+            if (!refFromField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a foreign reference to ${field.type.foreignRef} with refFrom = '${field.type.refFrom}' that cannot be resolved.`)
+            }
+            const refTo = field.type.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refToField = findField(type, refTo, typesMap, parents)
+            if (!refToField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a foreign reference to ${field.type.foreignRef} with refTo = '${field.type.refTo}' that cannot be resolved.`)
+            }
+            if (refFromField.field.graphqlType !== refToField.field.graphqlType) {
+              throw new Error(
+                `${errorPrefix} Field '${refFromField.root.name}.${removeParentPath(refFrom)}: ${refFromField.field.graphqlType}' has a foreign reference to '${
+                  refToField.root.name
+                }.${removeParentPath(refTo)}: ${refToField.field.graphqlType}' but they have different scalar type.`,
+              )
+            }
+          } else if (field.type.kind === 'relationEntityRef') {
+            const refType = findNode(field.type.entity, typesMap)
+            const sourceRefType = findNode(field.type.sourceRef, typesMap)
+            const destRefType = findNode(field.type.destRef, typesMap)
+            if (!sourceRefType || !destRefType) {
+              throw new Error('Unreachable')
+            }
+            if (!refType) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.entity} that cannot be resolved.`)
+            }
+
+            // Ref this check (source type)
+            const refThisRefFrom = field.type.refThis?.refFrom ?? `${toFirstLower(field.type.sourceRef)}Id`
+            const refThisRefFromField = findField(refType, refThisRefFrom, typesMap, parents)
+            if (!refThisRefFromField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.entity} with refThis.refFrom = '${refThisRefFrom}' that cannot be resolved.`)
+            }
+            const refThisRefTo = field.type.refThis?.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refThisRefToField = findField(sourceRefType, refThisRefTo, typesMap, parents)
+            if (!refThisRefToField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.sourceRef} with refThis.refTo = '${refThisRefTo}' that cannot be resolved.`)
+            }
+            if (refThisRefToField.field.graphqlType !== refThisRefFromField.field.graphqlType) {
+              throw new Error(
+                `${errorPrefix} Field '${refThisRefFromField.root.name}.${removeParentPath(refThisRefFrom)}: ${refThisRefFromField.field.graphqlType}' is related to '${
+                  refThisRefToField.root.name
+                }.${removeParentPath(refThisRefTo)}: ${refThisRefToField.field.graphqlType}' but they have different scalar type.`,
+              )
+            }
+
+            // Ref other check (dest type)
+            const refOtherRefFrom = field.type.refOther?.refFrom ?? `${toFirstLower(field.type.destRef)}Id`
+            const refOtherRefFromField = findField(refType, refOtherRefFrom, typesMap, parents)
+            if (!refOtherRefFromField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.entity} with refOther.refFrom = '${refOtherRefFrom}' that cannot be resolved.`)
+            }
+            const refOtherRefTo = field.type.refOther?.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refOtherRefToField = findField(destRefType, refOtherRefTo, typesMap, parents)
+            if (!refOtherRefToField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.destRef} with refOther.refTo = '${refOtherRefTo}' that cannot be resolved.`)
+            }
+            if (refOtherRefToField.field.graphqlType !== refOtherRefFromField.field.graphqlType) {
+              throw new Error(
+                `${errorPrefix} Field '${refOtherRefFromField.root.name}.${removeParentPath(refOtherRefFrom)}: ${refOtherRefFromField.field.graphqlType}' is related to '${
+                  refOtherRefToField.root.name
+                }.${removeParentPath(refOtherRefTo)}: ${refThisRefToField.field.graphqlType}' but they have different scalar type.`,
+              )
+            }
+          }
+        })
+      })
+  }
+
   public generateImports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
     const sqlSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'sql' ? [type.entity.source] : [])))]
     const hasSQLEntities = sqlSources.length > 0
@@ -14,7 +171,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
     const knexImports = "import { Knex } from 'knex'"
     const mongodbImports = "import * as M from 'mongodb'"
-    const commonImports = [`import * as T from '${this._config.typettaImport || '@twinlogix/typetta'}'`, `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}'`]
+    const commonImports = [`import * as T from '${this.config.typettaImport || '@twinlogix/typetta'}'`, `import * as types from '${this.config.tsTypesImport || '@twinlogix/typetta'}'`]
 
     return [...commonImports, ...(hasSQLEntities ? [knexImports] : []), ...(hasMongoDBEntites ? [mongodbImports] : [])]
   }
@@ -197,10 +354,6 @@ this.params = params`,
     const entityManagerMiddleware = `type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>`
 
     const utilsCode = `
-//--------------------------------------------------------------------------------
-//------------------------------------- UTILS ------------------------------------
-//--------------------------------------------------------------------------------
-
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {
 ${Array.from(typesMap.values())
@@ -533,7 +686,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     const idField = getID(node)
     const generatedRelations = `[\n${indentMultiline(this._generateRelations(node, typesMap).join(',\n'))}\n]`
     const relations = `relations: T.overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
-    const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'}'`
+    const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this.config.defaultIdGenerationStrategy || 'generator'}'`
     const idScalar = `idScalar: '${idField.isEnum ? 'String' : idField.graphqlType}'`
     const constructorBody = `super({ ${indentMultiline(
       `\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema(), \n${relations}, \n${idGenerator}, \n${idScalar}`,

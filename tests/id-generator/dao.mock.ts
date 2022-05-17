@@ -3,10 +3,6 @@ import * as types from './models.mock'
 import { Knex } from 'knex'
 import * as M from 'mongodb'
 
-//--------------------------------------------------------------------------------
-//-------------------------------------- A ---------------------------------------
-//--------------------------------------------------------------------------------
-
 export type AExcludedFields = never
 export type ARelationFields = never
 
@@ -108,10 +104,6 @@ export class InMemoryADAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 
 
-
-//--------------------------------------------------------------------------------
-//-------------------------------------- B ---------------------------------------
-//--------------------------------------------------------------------------------
 
 export type BExcludedFields = never
 export type BRelationFields = never
@@ -215,10 +207,6 @@ export class InMemoryBDAO<MetadataType, OperationMetadataType> extends T.Abstrac
 
 
 
-//--------------------------------------------------------------------------------
-//-------------------------------------- C ---------------------------------------
-//--------------------------------------------------------------------------------
-
 export type CExcludedFields = never
 export type CRelationFields = never
 
@@ -321,10 +309,6 @@ export class InMemoryCDAO<MetadataType, OperationMetadataType> extends T.Abstrac
 
 
 
-//--------------------------------------------------------------------------------
-//-------------------------------------- D ---------------------------------------
-//--------------------------------------------------------------------------------
-
 export type DExcludedFields = never
 export type DRelationFields = never
 
@@ -425,10 +409,6 @@ export class InMemoryDDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 
 
-
-//--------------------------------------------------------------------------------
-//-------------------------------------- E ---------------------------------------
-//--------------------------------------------------------------------------------
 
 export type EExcludedFields = never
 export type ERelationFields = never
@@ -531,10 +511,6 @@ export class InMemoryEDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 
 
-
-//--------------------------------------------------------------------------------
-//-------------------------------------- F ---------------------------------------
-//--------------------------------------------------------------------------------
 
 export type FExcludedFields = never
 export type FRelationFields = never
@@ -753,10 +729,6 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
 
 }
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- UTILS ------------------------------------
-//--------------------------------------------------------------------------------
 
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {

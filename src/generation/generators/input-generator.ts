@@ -1,6 +1,6 @@
-import { TypeScriptTypettaPluginConfig } from './config'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
-import { removeEmptyLines, toFirstLower } from './utils'
+import { TypeScriptTypettaPluginConfig } from '../config'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from '../types'
+import { removeEmptyLines, toFirstLower } from '../utils'
 
 export class InputTypettaGenerator extends TypettaGenerator {
   constructor(config: TypeScriptTypettaPluginConfig) {

@@ -1,6 +1,6 @@
-import { TypeScriptTypettaPluginConfig } from './config'
-import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from './types'
-import { toFirstLower } from './utils'
+import { TypeScriptTypettaPluginConfig } from '../config'
+import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from '../types'
+import { toFirstLower } from '../utils'
 
 export class ResolverTypettaGenerator extends TypettaGenerator {
   constructor(config: TypeScriptTypettaPluginConfig) {
