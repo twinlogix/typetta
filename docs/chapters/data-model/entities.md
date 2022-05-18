@@ -12,6 +12,8 @@ A **data model** is made up of a set of entities. Such entities in Typetta are d
   - [Default](#default)
   - [Alias](#alias)
   - [Excluded Fields](#excluded-fields)
+  - [Schema](#schema)
+    - [Schema Metadata](#schema-metadata)
 
 ## Entity definition
 
@@ -271,3 +273,72 @@ type User @entity @mongodb {
   excludedField: String @exclude
 }
 ```
+
+## Schema
+
+A Typetta schema is generated for each entity that, besides being used by typetta drivers to build queries correctly, can be used inside a middleware implementation to enable reflective programming.
+Example:
+```typescript
+type User @entity @mongodb {
+  id: ID! @id
+  firstName: String
+  lastName: String
+  dateOfBirth: Date!
+}
+```
+Example of generated schema:
+```typescript
+{
+  id: {
+    scalar: 'ID', 
+    required: true
+  },
+  firstName: {
+    scalar: 'String', 
+  },
+  lastName: {
+    scalar: 'String', 
+  },
+  dateOfBirth: {
+    scalar: 'Date',
+    required: true
+  }
+}
+```
+### Schema Metadata
+
+Additionally, schema generation can be extended with metadata via the `@schema` directive. This is useful when implementing middleware that works on heterogeneous entities.
+
+Example:
+```typescript
+type User @entity @mongodb {
+  id: ID! @id
+  firstName: String
+  lastName: String
+  dateOfBirth: Date! @schema(metadata: [{"addDays": "1"}])
+}
+```
+Example of generated schema:
+```typescript
+{
+  id: {
+    scalar: 'ID', 
+    required: true
+  },
+  firstName: {
+    scalar: 'String', 
+  },
+  lastName: {
+    scalar: 'String', 
+  },
+  dateOfBirth: {
+    scalar: 'Date',
+    required: true,
+    metadata: {
+      addDays: "1"
+    }
+  }
+}
+```
+
+Now it would be possible to implement a middleware that, scrolling through the schema, would increment all the fields containing the `addDays` metadata by `n` days before insertion.
