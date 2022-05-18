@@ -276,8 +276,8 @@ type User @entity @mongodb {
 
 ## Schema
 
-A Typetta schema is generated for each entity that, besides being used by typetta drivers to build queries correctly, can be used inside a middleware implementation to enable reflective programming.
-Example:
+Typetta generates a schema object for each entity of the defined data model. That schema can be sometimes useful to build powerful middlewares that need a reflective view on the data model. Given the following entity definition:
+
 ```typescript
 type User @entity @mongodb {
   id: ID! @id
@@ -286,7 +286,8 @@ type User @entity @mongodb {
   dateOfBirth: Date!
 }
 ```
-Example of generated schema:
+
+Typetta automatically generates this schema:
 ```typescript
 {
   id: {
@@ -307,9 +308,10 @@ Example of generated schema:
 ```
 ### Schema Metadata
 
-Additionally, schema generation can be extended with metadata via the `@schema` directive. This is useful when implementing middleware that works on heterogeneous entities.
+Schema generation can be extended with some custom metadata via the `@schema` directive. This is particularly useful to implement middlewares with different behaviours based on domain model concepts. 
 
-Example:
+Following an example of a custom metadata on a `dateOfBirth` field:
+
 ```typescript
 type User @entity @mongodb {
   id: ID! @id
@@ -318,7 +320,9 @@ type User @entity @mongodb {
   dateOfBirth: Date! @schema(metadata: [{"addDays": "1"}])
 }
 ```
-Example of generated schema:
+
+And the schema resulting from it:
+
 ```typescript
 {
   id: {
@@ -341,4 +345,4 @@ Example of generated schema:
 }
 ```
 
-Now it would be possible to implement a middleware that, scrolling through the schema, would increment all the fields containing the `addDays` metadata by `n` days before insertion.
+Now you can easily implement a middleware that, reading that schema, increment all the fields containing the `addDays` metadata by `n` days before insertion.

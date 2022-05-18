@@ -171,7 +171,7 @@ await entityManager.user.findAll({
 })
 ```
 
-To enable comparison operators on custom scalars it is necessary to specify the `@quantitative` directive. Example:
+To enable comparison operators on custom scalars it is necessary to add the `@quantitative` directive in the scalar GraphQL definition. Example:
 ```typescript
 scalar DateTime @quantitative
 ```
@@ -324,7 +324,7 @@ await entityManager.user.findAll({
 })
 ```
 
-To enable string operators on custom scalars it is necessary to specify the `@textual` directive. Example:
+To enable string operators on custom scalars it is necessary to add the `@textual` directive in the scalar GraphQL definition. Example:
 ```typescript
 scalar Currency @textual
 ```
