@@ -2,10 +2,6 @@ import * as T from '../../src'
 import * as types from './models.mock'
 import * as M from 'mongodb'
 
-//--------------------------------------------------------------------------------
-//------------------------------------ HOTEL -------------------------------------
-//--------------------------------------------------------------------------------
-
 export type HotelExcludedFields = never
 export type HotelRelationFields = never
 
@@ -130,10 +126,6 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
   }
 
 
-
-//--------------------------------------------------------------------------------
-//--------------------------------- RESERVATION ----------------------------------
-//--------------------------------------------------------------------------------
 
 export type ReservationExcludedFields = never
 export type ReservationRelationFields = 'room'
@@ -263,10 +255,6 @@ export class InMemoryReservationDAO<MetadataType, OperationMetadataType> extends
 
 
 
-//--------------------------------------------------------------------------------
-//------------------------------------- ROLE -------------------------------------
-//--------------------------------------------------------------------------------
-
 export type RoleExcludedFields = never
 export type RoleRelationFields = never
 
@@ -369,10 +357,6 @@ export class InMemoryRoleDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- ROOM -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type RoomExcludedFields = never
 export type RoomRelationFields = 'hotel'
@@ -509,10 +493,6 @@ export class InMemoryRoomDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- USER -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type UserExcludedFields = never
 export type UserRelationFields = 'reservations' | 'roles'
@@ -657,10 +637,6 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 
 
-
-//--------------------------------------------------------------------------------
-//----------------------------------- USERROLE -----------------------------------
-//--------------------------------------------------------------------------------
 
 export type UserRoleExcludedFields = never
 export type UserRoleRelationFields = 'role'
@@ -903,10 +879,6 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
 
 }
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- UTILS ------------------------------------
-//--------------------------------------------------------------------------------
 
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {

@@ -2,10 +2,6 @@ import * as T from '../../src'
 import * as types from './models.mock'
 import { Knex } from 'knex'
 
-//--------------------------------------------------------------------------------
-//----------------------------------- ADDRESS ------------------------------------
-//--------------------------------------------------------------------------------
-
 export type AddressExcludedFields = never
 export type AddressRelationFields = 'cities'
 
@@ -110,10 +106,6 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
 
 
 
-//--------------------------------------------------------------------------------
-//----------------------------------- ANOTHER ------------------------------------
-//--------------------------------------------------------------------------------
-
 export function anotherSchema(): T.Schema<types.Scalars> {
   return {
     'test': {
@@ -133,10 +125,6 @@ export type AnotherInsert = {
 }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------ AUTHOR ------------------------------------
-//--------------------------------------------------------------------------------
 
 export type AuthorExcludedFields = never
 export type AuthorRelationFields = 'books'
@@ -241,10 +229,6 @@ export class InMemoryAuthorDAO<MetadataType, OperationMetadataType> extends T.Ab
   }
 
 
-
-//--------------------------------------------------------------------------------
-//---------------------------------- AUTHORBOOK ----------------------------------
-//--------------------------------------------------------------------------------
 
 export type AuthorBookExcludedFields = never
 export type AuthorBookRelationFields = never
@@ -356,10 +340,6 @@ export class InMemoryAuthorBookDAO<MetadataType, OperationMetadataType> extends 
 
 
 
-//--------------------------------------------------------------------------------
-//------------------------------------- BOOK -------------------------------------
-//--------------------------------------------------------------------------------
-
 export type BookExcludedFields = never
 export type BookRelationFields = 'authors'
 
@@ -463,10 +443,6 @@ export class InMemoryBookDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- CITY -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
 export type CityRelationFields = never
@@ -579,10 +555,6 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 
 
-
-//--------------------------------------------------------------------------------
-//----------------------------- DEFAULTFIELDSENTITY ------------------------------
-//--------------------------------------------------------------------------------
 
 export type DefaultFieldsEntityExcludedFields = never
 export type DefaultFieldsEntityRelationFields = never
@@ -720,10 +692,6 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
 
 
 
-//--------------------------------------------------------------------------------
-//------------------------------------ DEVICE ------------------------------------
-//--------------------------------------------------------------------------------
-
 export type DeviceExcludedFields = never
 export type DeviceRelationFields = 'user'
 
@@ -834,10 +802,6 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- DOG --------------------------------------
-//--------------------------------------------------------------------------------
 
 export type DogExcludedFields = never
 export type DogRelationFields = 'owner'
@@ -951,10 +915,6 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
 
 
 
-//--------------------------------------------------------------------------------
-//----------------------------------- FRIENDS ------------------------------------
-//--------------------------------------------------------------------------------
-
 export type FriendsExcludedFields = never
 export type FriendsRelationFields = never
 
@@ -1064,10 +1024,6 @@ export class InMemoryFriendsDAO<MetadataType, OperationMetadataType> extends T.A
   }
 
 
-
-//--------------------------------------------------------------------------------
-//--------------------------------- ORGANIZATION ---------------------------------
-//--------------------------------------------------------------------------------
 
 export type OrganizationExcludedFields = 'computedName'
 export type OrganizationRelationFields = never
@@ -1187,10 +1143,6 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- USER -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type UserExcludedFields = never
 export type UserRelationFields = 'bestFriend' | 'dogs' | 'friends'
@@ -1394,10 +1346,6 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
 
 
 
-//--------------------------------------------------------------------------------
-//------------------------- USERNAMEPASSWORDCREDENTIALS --------------------------
-//--------------------------------------------------------------------------------
-
 export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
   return {
     'another': { embedded: () => anotherSchema(), alias: 'a' },
@@ -1596,10 +1544,6 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
 
 }
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- UTILS ------------------------------------
-//--------------------------------------------------------------------------------
 
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {

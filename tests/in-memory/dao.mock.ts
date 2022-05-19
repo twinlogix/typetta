@@ -1,10 +1,6 @@
 import * as T from '../../src'
 import * as types from './models.mock'
 
-//--------------------------------------------------------------------------------
-//----------------------------------- ADDRESS ------------------------------------
-//--------------------------------------------------------------------------------
-
 export type AddressExcludedFields = never
 export type AddressRelationFields = 'cities'
 
@@ -108,10 +104,6 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------ AUDIT -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type AuditExcludedFields = never
 export type AuditRelationFields = never
@@ -222,10 +214,6 @@ export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends T.Abs
 
 
 
-//--------------------------------------------------------------------------------
-//---------------------------------- AUDITABLE -----------------------------------
-//--------------------------------------------------------------------------------
-
 export function auditableSchema(): T.Schema<types.Scalars> {
   return {
     'createdBy': {
@@ -276,10 +264,6 @@ export type AuditableInsert = {
 }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- CITY -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
 export type CityRelationFields = never
@@ -392,10 +376,6 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 
 
-
-//--------------------------------------------------------------------------------
-//----------------------------- DEFAULTFIELDSENTITY ------------------------------
-//--------------------------------------------------------------------------------
 
 export type DefaultFieldsEntityExcludedFields = never
 export type DefaultFieldsEntityRelationFields = never
@@ -533,10 +513,6 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
 
 
 
-//--------------------------------------------------------------------------------
-//------------------------------------ DEVICE ------------------------------------
-//--------------------------------------------------------------------------------
-
 export type DeviceExcludedFields = never
 export type DeviceRelationFields = 'user'
 
@@ -647,10 +623,6 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- DOG --------------------------------------
-//--------------------------------------------------------------------------------
 
 export type DogExcludedFields = never
 export type DogRelationFields = 'owner'
@@ -763,10 +735,6 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------ HOTEL -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type HotelExcludedFields = never
 export type HotelRelationFields = never
@@ -894,10 +862,6 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
 
 
 
-//--------------------------------------------------------------------------------
-//--------------------------------- MOCKEDENTITY ---------------------------------
-//--------------------------------------------------------------------------------
-
 export type MockedEntityExcludedFields = never
 export type MockedEntityRelationFields = 'user'
 
@@ -1009,10 +973,6 @@ export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extend
   }
 
 
-
-//--------------------------------------------------------------------------------
-//--------------------------------- ORGANIZATION ---------------------------------
-//--------------------------------------------------------------------------------
 
 export type OrganizationExcludedFields = 'computedName'
 export type OrganizationRelationFields = never
@@ -1132,10 +1092,6 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- POST -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type PostExcludedFields = never
 export type PostRelationFields = 'author'
@@ -1283,10 +1239,6 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
 
 
 
-//--------------------------------------------------------------------------------
-//--------------------------------- POSTMETADATA ---------------------------------
-//--------------------------------------------------------------------------------
-
 export function postMetadataSchema(): T.Schema<types.Scalars> {
   return {
     'region': {
@@ -1312,10 +1264,6 @@ export type PostMetadataInsert = {
 }
 
 
-
-//--------------------------------------------------------------------------------
-//----------------------------------- POSTTYPE -----------------------------------
-//--------------------------------------------------------------------------------
 
 export type PostTypeExcludedFields = never
 export type PostTypeRelationFields = never
@@ -1418,10 +1366,6 @@ export class InMemoryPostTypeDAO<MetadataType, OperationMetadataType> extends T.
   }
 
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- USER -------------------------------------
-//--------------------------------------------------------------------------------
 
 export type UserExcludedFields = never
 export type UserRelationFields = 'dogs' | 'friends'
@@ -1656,10 +1600,6 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
 
 
 
-//--------------------------------------------------------------------------------
-//------------------------- USERNAMEPASSWORDCREDENTIALS --------------------------
-//--------------------------------------------------------------------------------
-
 export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
   return {
     'password': {
@@ -1835,10 +1775,6 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
 
 }
 
-
-//--------------------------------------------------------------------------------
-//------------------------------------- UTILS ------------------------------------
-//--------------------------------------------------------------------------------
 
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {
