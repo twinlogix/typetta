@@ -94,6 +94,14 @@
     "knex": "1.0.7",
     "mongodb": "4.3.1"
   },
+  "peerDependenciesMeta": {
+    "knex": {
+      "optional": true
+    },
+    "mongodb": {
+      "optional": true
+    }
+  },
   "resolutions": {
     "graphql": "15.8.0"
   },
