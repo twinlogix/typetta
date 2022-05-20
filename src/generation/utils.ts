@@ -116,7 +116,7 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
   if (object === null) {
     return null as unknown as To
   }
-  const result: any = {}
+  const result: Record<string, unknown> = {}
   const isModelToDB = direction === 'modelToDB'
   const isDbToModel = !isModelToDB
   for (const [fieldName, schemaField] of Object.entries(schema)) {
@@ -127,7 +127,7 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
       if (!schemaField.required && (value === null || value === undefined)) {
         result[destName] = value
       } else {
-        if ('scalar' in schemaField) {
+        if (schemaField.type === 'scalar') {
           const adapter = adapters[schemaField.scalar] ?? identityAdapter()
           const validator = adapter.validate
           const mapper =
@@ -145,15 +145,15 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
           } else {
             result[destName] = adapter ? mapper(value) : value
           }
-        } else if ('embedded' in schemaField) {
+        } else if (schemaField.type === 'embedded') {
           if (Array.isArray(value) && schemaField.array) {
-            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded()))
+            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.schema()))
           } else {
-            result[destName] = transformObject(adapters, direction, value, schemaField.embedded())
+            result[destName] = transformObject(adapters, direction, value, schemaField.schema())
           }
         }
       }
     }
   }
-  return result
+  return result as To
 }

@@ -21,3 +21,6 @@ generates:
       skipTypename: true
     plugins:
       - lib/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

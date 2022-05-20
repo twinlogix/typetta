@@ -14,7 +14,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   protected constructor({ idGenerator, ...params }: InMemoryDAOParams<T>) {
     super({ ...params, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[params.idScalar]?.generate, driverContext: {} })
     const s = this.schema[this.idField]
-    if (!('scalar' in s)) {
+    if (!(s.type === 'scalar')) {
       throw new Error('Id is an embedded field. Not supported.')
     }
     if (this.idGeneration === 'db' && (!mock.idSpecifications || !mock.idSpecifications[s.scalar as string] || !mock.idSpecifications[s.scalar as string].generate)) {

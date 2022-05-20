@@ -82,7 +82,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in EntityManager or in DAOParams.`)
     }
     Object.entries(schema)
-      .flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v.scalar] as const] : []))
+      .flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && v.type === 'scalar' ? [[k, v.scalar] as const] : []))
       .forEach(([key, scalar]) => {
         if (!entityManager.adapters[this._driver()][scalar].generate) {
           throw new Error(`Generator for scalar ${scalar} is needed for generate default fields ${key}. Define one in EntityManager or in DAOParams.`)
@@ -90,7 +90,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       })
     const defaultMiddleware = buildMiddleware<T>({
       beforeInsert: async (params, context) => {
-        const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v] as const] : []))
+        const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && v.type === 'scalar' ? [[k, v] as const] : []))
         const record = fieldsToGenerate.reduce((record, [key, schema]) => {
           const generator = this.entityManager.adapters[context.daoDriver][schema.scalar].generate
           if (record[key] == null && generator) {
@@ -454,7 +454,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       return
     }
     const subSchema = reference.schema[subField]
-    if (!('embedded' in subSchema)) {
+    if (!(subSchema.type === 'embedded')) {
       throw new Error('Unreachable')
     }
     if (record[subField] == null) {
@@ -463,10 +463,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     if (Array.isArray(record[subField])) {
       for (const r of record[subField]) {
-        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded() }, r)
+        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.schema() }, r)
       }
     } else {
-      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded() }, record[subField])
+      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.schema() }, record[subField])
     }
   }
 

@@ -24,16 +24,16 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
     if (k in schema) {
       const schemaField = schema[k]
       const name = schemaField.alias ?? k
-      if ('scalar' in schemaField) {
+      if (schemaField.type === 'scalar') {
         return [[name, v]]
       }
-      if ('relation' in schemaField) {
+      if (schemaField.type === 'relation') {
         return []
       }
       if (typeof v === 'object' && Object.keys(v ?? {}).length === 0) {
         return []
       }
-      const p = adaptProjection(v as AnyProjection<ProjectionType>, schemaField.embedded(), true)
+      const p = adaptProjection(v as AnyProjection<ProjectionType>, schemaField.schema(), true)
       if (typeof p === 'object' && Object.keys(p).length === 0) {
         return []
       }
@@ -51,7 +51,7 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   if (c.length === 0) {
     return n
   } else {
-    return schemaField && 'embedded' in schemaField ? n + '.' + modelNameToDbName(c.join('.'), schemaField.embedded()) : k + '.' + c.join('.')
+    return schemaField && schemaField.type === 'embedded' ? n + '.' + modelNameToDbName(c.join('.'), schemaField.schema()) : k + '.' + c.join('.')
   }
 }
 
@@ -67,7 +67,7 @@ export function adaptFilter<ScalarsType extends DefaultModelScalars, T extends D
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField) {
-      if ('relation' in schemaField) {
+      if (schemaField.type === 'relation') {
         return []
       }
       const adapted = adaptToSchema(v, adapters, schemaField)
@@ -86,7 +86,7 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
   adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
   schemaField: SchemaField<ScalarsType>,
 ): unknown {
-  if ('scalar' in schemaField) {
+  if (schemaField.type === 'scalar') {
     // filter on scalar type
     const adapter = adapters[schemaField.scalar]
     if (!adapter) {
@@ -135,9 +135,9 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
         return modelValueToDbValue(value as Scalar, schemaField, adapter)
       }
     }
-  } else if ('embedded' in schemaField) {
+  } else if (schemaField.type === 'embedded') {
     // filter on embedded type
-    return adaptFilter(value as AbstractFilter, schemaField.embedded(), adapters)
+    return adaptFilter(value as AbstractFilter, schemaField.schema(), adapters)
   }
 }
 
@@ -148,17 +148,17 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
     }
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
-    if (schemaField && 'scalar' in schemaField) {
+    if (schemaField && schemaField.type === 'scalar') {
       if (v === null) {
         return [[columnName, null]]
       }
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
-    } else if (schemaField && 'embedded' in schemaField) {
+    } else if (schemaField && schemaField.type === 'embedded') {
       if (schemaField.array) {
-        return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.embedded(), adapters)))]]
+        return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.schema(), adapters)))]]
       }
-      return [[columnName, v === null ? null : adaptUpdate(v, schemaField.embedded(), adapters)]]
+      return [[columnName, v === null ? null : adaptUpdate(v, schemaField.schema(), adapters)]]
     } else {
       return []
     }

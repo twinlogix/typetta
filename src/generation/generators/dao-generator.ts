@@ -179,7 +179,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     if (node.entity) {
       const daoExcluded = this._generateDAOExludedFields(node)
-      const daoSchema = this._generateDAOSchema(node)
+      const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
       const daoRelations = this._generateDAORelations(node)
       const daoProjection = this._generateDAOProjection(node, typesMap)
@@ -191,7 +191,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
       return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
       const daoProjection = this._generateDAOProjection(node, typesMap)
-      const daoSchema = this._generateDAOSchema(node)
+      const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoInsert = this._generateDAOInsert(node)
       return [daoSchema, daoProjection, daoInsert].join('\n\n')
     }
@@ -429,28 +429,93 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   // ----------------------------------------------- SCHEMA --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOSchema(node: TsTypettaGeneratorNode): string {
-    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node).join(',\n'))
+  public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'))
     const daoSchema = `export function ${toFirstLower(node.name)}Schema(): T.Schema<types.Scalars> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
     return daoSchema
   }
 
-  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode): string[] {
-    return node.fields
-      .map((field) => {
-        const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}${
-          field.defaultGenerationStrategy ? `, \ndefaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : ''
-        }${field.schemaMetadata ? `, \nmetadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : ''}`
-        if (field.type.kind === 'scalar' && !field.isExcluded) {
-          return [`  '${field.name}': {\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`, 2)}\n  }`]
-        } else if (field.type.kind === 'embedded' && !field.isExcluded) {
-          return [`  '${field.name}': { embedded: () => ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
-        } else if (field.type.kind === 'innerRef' || field.type.kind === 'foreignRef' || field.type.kind === 'relationEntityRef') {
-          return [`  '${field.name}': { relation: () => ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
-        }
-        return []
-      })
-      .reduce((a, c) => [...a, ...c], [])
+  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+    return node.fields.flatMap((field) => {
+      const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}${
+        field.defaultGenerationStrategy ? `, \ndefaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : ''
+      }${field.schemaMetadata ? `, \nmetadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : ''}`
+      if (field.type.kind === 'scalar' && !field.isExcluded) {
+        const scalar = field.isEnum ? 'String' : field.graphqlType
+        return [
+          `'${field.name}': {
+            type: 'scalar',
+            scalar: '${scalar}'
+            ${decorators}
+          }`,
+        ]
+      } else if (field.type.kind === 'embedded' && !field.isExcluded) {
+        const schema = toFirstLower(field.graphqlType)
+        return [
+          `'${field.name}': {
+            type: 'embedded',
+            schema: () => ${schema}Schema()
+            ${decorators}
+          }`,
+        ]
+      } else if (field.type.kind === 'innerRef') {
+        const schema = toFirstLower(field.graphqlType)
+        const linkedType = getNode(field.type.innerRef, typesMap)
+        const refFrom = field.type.refFrom ?? field.name + 'Id'
+        const refTo = field.type.refTo ?? getID(linkedType).name
+        return [
+          `'${field.name}': {
+              type: 'relation',
+              relation: 'inner',
+              schema: () => ${schema}Schema(),
+              refFrom: '${refFrom}',
+              refTo: '${refTo}'
+              ${decorators}
+            }`,
+        ]
+      } else if (field.type.kind === 'foreignRef') {
+        const schema = toFirstLower(field.graphqlType)
+        const refFrom = field.type.refFrom ?? `${toFirstLower(node.name)}Id`
+        const refTo = field.type.refTo ?? getID(node).name
+        return [
+          `'${field.name}':{
+              type: 'relation',
+              relation: 'foreign',
+              schema: () => ${schema}Schema(),
+              refFrom: '${refFrom}',
+              refTo: '${refTo}'
+              ${decorators}
+            }`,
+        ]
+      } else if (field.type.kind === 'relationEntityRef') {
+        const schema = toFirstLower(field.graphqlType)
+        const refThisRefFrom = field.type.refThis?.refFrom ?? toFirstLower(field.type.sourceRef) + 'Id'
+        const refThisRefTo = field.type.refThis?.refTo ?? getID(node).name
+        const refOtherRefFrom = field.type.refOther?.refFrom ?? toFirstLower(field.type.destRef) + 'Id'
+        const refOtherRefTo = field.type.refOther?.refTo ?? getID(node).name
+        const relationDao = toFirstLower(field.type.entity)
+        const entityDao = toFirstLower(field.type.destRef)
+        return [
+          `'${field.name}': { 
+               type: 'relation',
+               relation: 'relationEntity',
+               schema: () => ${schema}Schema(),
+               refThis: {
+                 refFrom: '${refThisRefFrom}',
+                 refTo: '${refThisRefTo}'
+               },
+               refOther: {
+                 refFrom: '${refOtherRefFrom}',
+                 refTo: '${refOtherRefTo}',
+                 dao: '${entityDao}'
+               },
+               relationEntity: { schema: () => ${toFirstLower(field.type.entity)}Schema(), dao: '${relationDao}' }
+               ${decorators}
+            }`,
+        ]
+      }
+      return []
+    })
   }
 
   // ---------------------------------------------------------------------------------------------------------
