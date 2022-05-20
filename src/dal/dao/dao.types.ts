@@ -89,7 +89,6 @@ export type DAOParams<T extends DAOGenerics> = {
   metadata?: T['metadata']
   driverContext: T['driverContext']
   pageSize?: number
-  relations?: DAORelation[]
   middlewares?: DAOMiddleware<T>[]
   logger?: LogFunction<T['name']>
   name: T['name']

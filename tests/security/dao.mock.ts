@@ -14,6 +14,7 @@ export function hotelSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     name: {
@@ -116,7 +117,6 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMon
       ...params,
       idField: 'id',
       schema: hotelSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -136,7 +136,6 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
       ...params,
       idField: 'id',
       schema: hotelSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -156,6 +155,7 @@ export function reservationSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     room: {
@@ -164,6 +164,7 @@ export function reservationSchema(): T.Schema<types.Scalars> {
       schema: () => roomSchema(),
       refFrom: 'roomId',
       refTo: 'id',
+      dao: 'room',
     },
     roomId: {
       type: 'scalar',
@@ -269,7 +270,6 @@ export class ReservationDAO<MetadataType, OperationMetadataType> extends T.Abstr
       ...params,
       idField: 'id',
       schema: reservationSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'room', refFrom: 'roomId', refTo: 'id', dao: 'room', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -289,7 +289,6 @@ export class InMemoryReservationDAO<MetadataType, OperationMetadataType> extends
       ...params,
       idField: 'id',
       schema: reservationSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'room', refFrom: 'roomId', refTo: 'id', dao: 'room', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -304,6 +303,7 @@ export function roleSchema(): T.Schema<types.Scalars> {
     code: {
       type: 'scalar',
       scalar: 'String',
+      isId: true,
       required: true,
     },
     permissions: {
@@ -388,7 +388,6 @@ export class RoleDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
       ...params,
       idField: 'code',
       schema: roleSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'user',
       idScalar: 'String',
     })
@@ -408,7 +407,6 @@ export class InMemoryRoleDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'code',
       schema: roleSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'user',
       idScalar: 'String',
     })
@@ -436,6 +434,7 @@ export function roomSchema(): T.Schema<types.Scalars> {
       schema: () => hotelSchema(),
       refFrom: 'hotelId',
       refTo: 'id',
+      dao: 'hotel',
       required: true,
     },
     hotelId: {
@@ -446,6 +445,7 @@ export function roomSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     tenantId: {
@@ -548,7 +548,6 @@ export class RoomDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
       ...params,
       idField: 'id',
       schema: roomSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'hotel', refFrom: 'hotelId', refTo: 'id', dao: 'hotel', required: true }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -568,7 +567,6 @@ export class InMemoryRoomDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: roomSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'hotel', refFrom: 'hotelId', refTo: 'id', dao: 'hotel', required: true }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -592,6 +590,7 @@ export function userSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     lastName: {
@@ -604,6 +603,7 @@ export function userSchema(): T.Schema<types.Scalars> {
       schema: () => reservationSchema(),
       refFrom: 'userId',
       refTo: 'id',
+      dao: 'reservation',
       required: true,
       array: true,
     },
@@ -613,6 +613,8 @@ export function userSchema(): T.Schema<types.Scalars> {
       schema: () => userRoleSchema(),
       refFrom: 'refUserId',
       refTo: 'id',
+      dao: 'userRole',
+      arrayElementsRequired: true,
       required: true,
       array: true,
     },
@@ -722,10 +724,6 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
       ...params,
       idField: 'id',
       schema: userSchema(),
-      relations: T.overrideRelations([
-        { type: '1-n', reference: 'foreign', field: 'reservations', refFrom: 'userId', refTo: 'id', dao: 'reservation', required: true },
-        { type: '1-n', reference: 'foreign', field: 'roles', refFrom: 'refUserId', refTo: 'id', dao: 'userRole', required: true },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -745,10 +743,6 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: userSchema(),
-      relations: T.overrideRelations([
-        { type: '1-n', reference: 'foreign', field: 'reservations', refFrom: 'userId', refTo: 'id', dao: 'reservation', required: true },
-        { type: '1-n', reference: 'foreign', field: 'roles', refFrom: 'refUserId', refTo: 'id', dao: 'userRole', required: true },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -767,6 +761,7 @@ export function userRoleSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
       alias: '_id',
     },
@@ -781,6 +776,7 @@ export function userRoleSchema(): T.Schema<types.Scalars> {
       schema: () => roleSchema(),
       refFrom: 'roleCode',
       refTo: 'code',
+      dao: 'role',
       required: true,
     },
     roleCode: {
@@ -888,7 +884,6 @@ export class UserRoleDAO<MetadataType, OperationMetadataType> extends T.Abstract
       ...params,
       idField: 'id',
       schema: userRoleSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'role', refFrom: 'roleCode', refTo: 'code', dao: 'role', required: true }]),
       idGeneration: 'db',
       idScalar: 'ID',
     })
@@ -908,7 +903,6 @@ export class InMemoryUserRoleDAO<MetadataType, OperationMetadataType> extends T.
       ...params,
       idField: 'id',
       schema: userRoleSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'role', refFrom: 'roleCode', refTo: 'code', dao: 'role', required: true }]),
       idGeneration: 'db',
       idScalar: 'ID',
     })

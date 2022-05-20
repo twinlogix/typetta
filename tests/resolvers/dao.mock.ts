@@ -15,6 +15,7 @@ export function likeSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     postId: {
@@ -108,7 +109,6 @@ export class LikeDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
       ...params,
       idField: 'id',
       schema: likeSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -128,7 +128,6 @@ export class InMemoryLikeDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: likeSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -140,6 +139,7 @@ export function metadataSchema(): T.Schema<types.Scalars> {
     tags: {
       type: 'scalar',
       scalar: 'String',
+      arrayElementsRequired: true,
       array: true,
     },
     views: {
@@ -179,6 +179,7 @@ export function postSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     likes: {
@@ -195,6 +196,7 @@ export function postSchema(): T.Schema<types.Scalars> {
         dao: 'user',
       },
       relationEntity: { schema: () => likeSchema(), dao: 'like' },
+      arrayElementsRequired: true,
       required: true,
       array: true,
     },
@@ -309,18 +311,6 @@ export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
       ...params,
       idField: 'id',
       schema: postSchema(),
-      relations: T.overrideRelations([
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'likes',
-          relationDao: 'like',
-          entityDao: 'user',
-          refThis: { refFrom: 'postId', refTo: 'id' },
-          refOther: { refFrom: 'userId', refTo: 'id' },
-          required: true,
-        },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -340,18 +330,6 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: postSchema(),
-      relations: T.overrideRelations([
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'likes',
-          relationDao: 'like',
-          entityDao: 'user',
-          refThis: { refFrom: 'postId', refTo: 'id' },
-          refOther: { refFrom: 'userId', refTo: 'id' },
-          required: true,
-        },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -375,6 +353,7 @@ export function userSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     lastName: {
@@ -396,6 +375,7 @@ export function userSchema(): T.Schema<types.Scalars> {
         dao: 'post',
       },
       relationEntity: { schema: () => likeSchema(), dao: 'like' },
+      arrayElementsRequired: true,
       required: true,
       array: true,
     },
@@ -405,6 +385,8 @@ export function userSchema(): T.Schema<types.Scalars> {
       schema: () => postSchema(),
       refFrom: 'userId',
       refTo: 'id',
+      dao: 'post',
+      arrayElementsRequired: true,
       array: true,
     },
   }
@@ -505,19 +487,6 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
       ...params,
       idField: 'id',
       schema: userSchema(),
-      relations: T.overrideRelations([
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'likes',
-          relationDao: 'like',
-          entityDao: 'post',
-          refThis: { refFrom: 'userId', refTo: 'id' },
-          refOther: { refFrom: 'postId', refTo: 'id' },
-          required: true,
-        },
-        { type: '1-n', reference: 'foreign', field: 'posts', refFrom: 'userId', refTo: 'id', dao: 'post', required: false },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -537,19 +506,6 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: userSchema(),
-      relations: T.overrideRelations([
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'likes',
-          relationDao: 'like',
-          entityDao: 'post',
-          refThis: { refFrom: 'userId', refTo: 'id' },
-          refOther: { refFrom: 'postId', refTo: 'id' },
-          required: true,
-        },
-        { type: '1-n', reference: 'foreign', field: 'posts', refFrom: 'userId', refTo: 'id', dao: 'post', required: false },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })

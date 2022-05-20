@@ -31,6 +31,7 @@ import _ from 'lodash'
 import objectHash from 'object-hash'
 import { PartialDeep } from 'type-fest'
 import { v4 as uuidv4 } from 'uuid'
+import { daoRelationsFromSchema } from '../..'
 
 export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected readonly idField: T['idKey']
@@ -60,7 +61,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     name,
     logger,
     pageSize = 50,
-    relations = [],
     middlewares = [],
     schema,
     metadata,
@@ -73,7 +73,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.idGenerator = idGenerator
     this.entityManager = entityManager
     this.pageSize = pageSize
-    this.relations = relations
+    this.relations = daoRelationsFromSchema(schema)
     this.idGeneration = idGeneration
     this.name = name
     this.logger = logger
@@ -310,7 +310,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       }
       for (const relation of this.relations) {
         if (relation.reference === 'relation') {
-          this.entityManager.dao(relation.entityDao).clearDataLoader(operationId)
+          this.entityManager.dao(relation.refOther.dao).clearDataLoader(operationId)
           this.entityManager.dao(relation.relationDao).clearDataLoader(operationId)
         } else {
           this.entityManager.dao(relation.dao).clearDataLoader(operationId)
@@ -382,7 +382,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
               .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom))
             if (filterValues.length > 0) {
-              const results = await this.entityManager.dao(relation.entityDao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
+              const results = await this.entityManager.dao(relation.refOther.dao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
               this.setResult(record, relation, results)
             } else {
               this.setResult(record, relation, [])
@@ -694,7 +694,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     const relations = Object.fromEntries(
       this.relations.flatMap((r) => {
         if (params.relations && params.relations[r.field]) {
-          const relationDao = this.entityManager.dao(r.reference === 'relation' ? r.entityDao : r.dao)
+          const relationDao = this.entityManager.dao(r.reference === 'relation' ? r.refOther.dao : r.dao)
           return [[r.field, relationDao.mapResolverFindParams(params.relations[r.field])]]
         }
         return []

@@ -11,6 +11,7 @@ export function aSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'MongoID',
+      isId: true,
       required: true,
       alias: '_id',
     },
@@ -94,7 +95,6 @@ export class ADAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
       ...params,
       idField: 'id',
       schema: aSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'db',
       idScalar: 'MongoID',
     })
@@ -114,7 +114,6 @@ export class InMemoryADAO<MetadataType, OperationMetadataType> extends T.Abstrac
       ...params,
       idField: 'id',
       schema: aSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'db',
       idScalar: 'MongoID',
     })
@@ -129,6 +128,7 @@ export function bSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     value: {
@@ -206,7 +206,6 @@ export class BDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
       ...params,
       idField: 'id',
       schema: bSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -226,7 +225,6 @@ export class InMemoryBDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       ...params,
       idField: 'id',
       schema: bSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -241,6 +239,7 @@ export function cSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     value: {
@@ -324,7 +323,6 @@ export class CDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
       ...params,
       idField: 'id',
       schema: cSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'user',
       idScalar: 'ID',
     })
@@ -344,7 +342,6 @@ export class InMemoryCDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       ...params,
       idField: 'id',
       schema: cSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'user',
       idScalar: 'ID',
     })
@@ -359,6 +356,7 @@ export function dSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'IntAutoInc',
+      isId: true,
       required: true,
     },
     value: {
@@ -441,7 +439,6 @@ export class DDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
       ...params,
       idField: 'id',
       schema: dSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'db',
       idScalar: 'IntAutoInc',
     })
@@ -461,7 +458,6 @@ export class InMemoryDDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       ...params,
       idField: 'id',
       schema: dSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'db',
       idScalar: 'IntAutoInc',
     })
@@ -476,6 +472,7 @@ export function eSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     value: {
@@ -553,7 +550,6 @@ export class EDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
       ...params,
       idField: 'id',
       schema: eSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -573,7 +569,6 @@ export class InMemoryEDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       ...params,
       idField: 'id',
       schema: eSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -588,6 +583,7 @@ export function fSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     value: {
@@ -671,7 +667,6 @@ export class FDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
       ...params,
       idField: 'id',
       schema: fSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'user',
       idScalar: 'ID',
     })
@@ -691,7 +686,6 @@ export class InMemoryFDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       ...params,
       idField: 'id',
       schema: fSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'user',
       idScalar: 'ID',
     })

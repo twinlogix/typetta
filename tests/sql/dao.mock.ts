@@ -13,11 +13,14 @@ export function addressSchema(): T.Schema<types.Scalars> {
       schema: () => citySchema(),
       refFrom: 'addressId',
       refTo: 'id',
+      dao: 'city',
+      arrayElementsRequired: true,
       array: true,
     },
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
   }
@@ -98,7 +101,6 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractK
       ...params,
       idField: 'id',
       schema: addressSchema(),
-      relations: T.overrideRelations([{ type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -118,7 +120,6 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
       ...params,
       idField: 'id',
       schema: addressSchema(),
-      relations: T.overrideRelations([{ type: '1-n', reference: 'foreign', field: 'cities', refFrom: 'addressId', refTo: 'id', dao: 'city', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -168,6 +169,7 @@ export function authorSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
   }
@@ -248,18 +250,6 @@ export class AuthorDAO<MetadataType, OperationMetadataType> extends T.AbstractKn
       ...params,
       idField: 'id',
       schema: authorSchema(),
-      relations: T.overrideRelations([
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'books',
-          relationDao: 'authorBook',
-          entityDao: 'book',
-          refThis: { refFrom: 'authorId', refTo: 'id' },
-          refOther: { refFrom: 'bookId', refTo: 'id' },
-          required: false,
-        },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -279,18 +269,6 @@ export class InMemoryAuthorDAO<MetadataType, OperationMetadataType> extends T.Ab
       ...params,
       idField: 'id',
       schema: authorSchema(),
-      relations: T.overrideRelations([
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'books',
-          relationDao: 'authorBook',
-          entityDao: 'book',
-          refThis: { refFrom: 'authorId', refTo: 'id' },
-          refOther: { refFrom: 'bookId', refTo: 'id' },
-          required: false,
-        },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -315,6 +293,7 @@ export function authorBookSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
   }
@@ -397,7 +376,6 @@ export class AuthorBookDAO<MetadataType, OperationMetadataType> extends T.Abstra
       ...params,
       idField: 'id',
       schema: authorBookSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -417,7 +395,6 @@ export class InMemoryAuthorBookDAO<MetadataType, OperationMetadataType> extends 
       ...params,
       idField: 'id',
       schema: authorBookSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -448,6 +425,7 @@ export function bookSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
   }
@@ -528,18 +506,6 @@ export class BookDAO<MetadataType, OperationMetadataType> extends T.AbstractKnex
       ...params,
       idField: 'id',
       schema: bookSchema(),
-      relations: T.overrideRelations([
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'authors',
-          relationDao: 'authorBook',
-          entityDao: 'author',
-          refThis: { refFrom: 'bookId', refTo: 'id' },
-          refOther: { refFrom: 'authorId', refTo: 'id' },
-          required: false,
-        },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -559,18 +525,6 @@ export class InMemoryBookDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: bookSchema(),
-      relations: T.overrideRelations([
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'authors',
-          relationDao: 'authorBook',
-          entityDao: 'author',
-          refThis: { refFrom: 'bookId', refTo: 'id' },
-          refOther: { refFrom: 'authorId', refTo: 'id' },
-          required: false,
-        },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -590,6 +544,7 @@ export function citySchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     name: {
@@ -676,7 +631,6 @@ export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractKnex
       ...params,
       idField: 'id',
       schema: citySchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -696,7 +650,6 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: citySchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -717,6 +670,7 @@ export function defaultFieldsEntitySchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     live: {
@@ -832,7 +786,6 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
       ...params,
       idField: 'id',
       schema: defaultFieldsEntitySchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'user',
       idScalar: 'ID',
     })
@@ -852,7 +805,6 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
       ...params,
       idField: 'id',
       schema: defaultFieldsEntitySchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'user',
       idScalar: 'ID',
     })
@@ -867,6 +819,7 @@ export function deviceSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     name: {
@@ -880,6 +833,7 @@ export function deviceSchema(): T.Schema<types.Scalars> {
       schema: () => userSchema(),
       refFrom: 'userId',
       refTo: 'id',
+      dao: 'user',
     },
     userId: {
       type: 'scalar',
@@ -963,7 +917,6 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractKn
       ...params,
       idField: 'id',
       schema: deviceSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -983,7 +936,6 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
       ...params,
       idField: 'id',
       schema: deviceSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'user', refFrom: 'userId', refTo: 'id', dao: 'user', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -998,6 +950,7 @@ export function dogSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     name: {
@@ -1011,6 +964,7 @@ export function dogSchema(): T.Schema<types.Scalars> {
       schema: () => userSchema(),
       refFrom: 'ownerId',
       refTo: 'id',
+      dao: 'user',
     },
     ownerId: {
       type: 'scalar',
@@ -1095,7 +1049,6 @@ export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJ
       ...params,
       idField: 'id',
       schema: dogSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -1115,7 +1068,6 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
       ...params,
       idField: 'id',
       schema: dogSchema(),
-      relations: T.overrideRelations([{ type: '1-1', reference: 'inner', field: 'owner', refFrom: 'ownerId', refTo: 'id', dao: 'user', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -1135,6 +1087,7 @@ export function friendsSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     to: {
@@ -1219,7 +1172,6 @@ export class FriendsDAO<MetadataType, OperationMetadataType> extends T.AbstractK
       ...params,
       idField: 'id',
       schema: friendsSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -1239,7 +1191,6 @@ export class InMemoryFriendsDAO<MetadataType, OperationMetadataType> extends T.A
       ...params,
       idField: 'id',
       schema: friendsSchema(),
-      relations: T.overrideRelations([]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -1258,6 +1209,7 @@ export function organizationSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
     },
     name: {
@@ -1360,7 +1312,6 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: organizationSchema(),
-      relations: T.overrideRelations([{ type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -1380,7 +1331,6 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
       ...params,
       idField: 'id',
       schema: organizationSchema(),
-      relations: T.overrideRelations([{ type: '1-n', reference: 'foreign', field: 'address.cities', refFrom: 'addressId', refTo: 'address.id', dao: 'city', required: false }]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -1400,6 +1350,7 @@ export function userSchema(): T.Schema<types.Scalars> {
     amounts: {
       type: 'scalar',
       scalar: 'Decimal',
+      arrayElementsRequired: true,
       array: true,
       alias: 'values',
     },
@@ -1409,6 +1360,7 @@ export function userSchema(): T.Schema<types.Scalars> {
       schema: () => userSchema(),
       refFrom: 'bestFriendId',
       refTo: 'id',
+      dao: 'user',
     },
     bestFriendId: {
       type: 'scalar',
@@ -1425,6 +1377,8 @@ export function userSchema(): T.Schema<types.Scalars> {
       schema: () => dogSchema(),
       refFrom: 'ownerId',
       refTo: 'id',
+      dao: 'dog',
+      arrayElementsRequired: true,
       array: true,
     },
     firstName: {
@@ -1451,6 +1405,7 @@ export function userSchema(): T.Schema<types.Scalars> {
     id: {
       type: 'scalar',
       scalar: 'ID',
+      isId: true,
       required: true,
       alias: 'ID',
     },
@@ -1626,20 +1581,6 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractKnex
       ...params,
       idField: 'id',
       schema: userSchema(),
-      relations: T.overrideRelations([
-        { type: '1-1', reference: 'inner', field: 'bestFriend', refFrom: 'bestFriendId', refTo: 'id', dao: 'user', required: false },
-        { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'friends',
-          relationDao: 'friends',
-          entityDao: 'user',
-          refThis: { refFrom: 'from', refTo: 'id' },
-          refOther: { refFrom: 'to', refTo: 'id' },
-          required: false,
-        },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
@@ -1659,20 +1600,6 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
       ...params,
       idField: 'id',
       schema: userSchema(),
-      relations: T.overrideRelations([
-        { type: '1-1', reference: 'inner', field: 'bestFriend', refFrom: 'bestFriendId', refTo: 'id', dao: 'user', required: false },
-        { type: '1-n', reference: 'foreign', field: 'dogs', refFrom: 'ownerId', refTo: 'id', dao: 'dog', required: false },
-        {
-          type: '1-n',
-          reference: 'relation',
-          field: 'friends',
-          relationDao: 'friends',
-          entityDao: 'user',
-          refThis: { refFrom: 'from', refTo: 'id' },
-          refOther: { refFrom: 'to', refTo: 'id' },
-          required: false,
-        },
-      ]),
       idGeneration: 'generator',
       idScalar: 'ID',
     })
