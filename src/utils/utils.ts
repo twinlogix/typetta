@@ -25,7 +25,7 @@ export function modelValueToDbValue<ScalarsType>(
   adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
 ): unknown {
   if (adapter.validate) {
-    if (schemaField.array) {
+    if (schemaField.isList) {
       for (const v of value as ScalarsType[keyof ScalarsType][]) {
         const validation = adapter.validate(v)
         if (validation !== true) {
@@ -39,7 +39,7 @@ export function modelValueToDbValue<ScalarsType>(
       }
     }
   }
-  return schemaField.array ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
+  return schemaField.isList ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
 }
 
 export function* reversed<T>(array: T[]): Iterable<T> {

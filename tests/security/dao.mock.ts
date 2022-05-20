@@ -15,6 +15,7 @@ export function hotelSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     name: {
@@ -115,10 +116,7 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMon
   public constructor(params: HotelDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: hotelSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -134,10 +132,7 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
   public constructor(params: InMemoryHotelDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: hotelSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -156,6 +151,7 @@ export function reservationSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     room: {
@@ -268,10 +264,7 @@ export class ReservationDAO<MetadataType, OperationMetadataType> extends T.Abstr
   public constructor(params: ReservationDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: reservationSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -287,10 +280,7 @@ export class InMemoryReservationDAO<MetadataType, OperationMetadataType> extends
   public constructor(params: InMemoryReservationDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: reservationSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -304,13 +294,16 @@ export function roleSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'String',
       isId: true,
+      generationStrategy: 'user',
       required: true,
+      isEnum: true,
     },
     permissions: {
       type: 'scalar',
       scalar: 'String',
       required: true,
-      array: true,
+      isList: true,
+      isEnum: true,
     },
   }
 }
@@ -386,10 +379,7 @@ export class RoleDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
   public constructor(params: RoleDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'code',
       schema: roleSchema(),
-      idGeneration: 'user',
-      idScalar: 'String',
     })
   }
 }
@@ -405,10 +395,7 @@ export class InMemoryRoleDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryRoleDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'code',
       schema: roleSchema(),
-      idGeneration: 'user',
-      idScalar: 'String',
     })
   }
 }
@@ -446,6 +433,7 @@ export function roomSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     tenantId: {
@@ -546,10 +534,7 @@ export class RoomDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
   public constructor(params: RoomDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: roomSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -565,10 +550,7 @@ export class InMemoryRoomDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryRoomDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: roomSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -591,6 +573,7 @@ export function userSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     lastName: {
@@ -605,7 +588,7 @@ export function userSchema(): T.Schema<types.Scalars> {
       refTo: 'id',
       dao: 'reservation',
       required: true,
-      array: true,
+      isList: true,
     },
     roles: {
       type: 'relation',
@@ -614,9 +597,9 @@ export function userSchema(): T.Schema<types.Scalars> {
       refFrom: 'refUserId',
       refTo: 'id',
       dao: 'userRole',
-      arrayElementsRequired: true,
+      isListElementRequired: true,
       required: true,
-      array: true,
+      isList: true,
     },
     totalPayments: {
       type: 'scalar',
@@ -722,10 +705,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: userSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -741,10 +721,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: userSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -762,6 +739,7 @@ export function userRoleSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'db',
       required: true,
       alias: '_id',
     },
@@ -783,6 +761,7 @@ export function userRoleSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      isEnum: true,
     },
     tenantId: {
       type: 'scalar',
@@ -882,10 +861,7 @@ export class UserRoleDAO<MetadataType, OperationMetadataType> extends T.Abstract
   public constructor(params: UserRoleDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: userRoleSchema(),
-      idGeneration: 'db',
-      idScalar: 'ID',
     })
   }
 }
@@ -901,10 +877,7 @@ export class InMemoryUserRoleDAO<MetadataType, OperationMetadataType> extends T.
   public constructor(params: InMemoryUserRoleDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: userRoleSchema(),
-      idGeneration: 'db',
-      idScalar: 'ID',
     })
   }
 }

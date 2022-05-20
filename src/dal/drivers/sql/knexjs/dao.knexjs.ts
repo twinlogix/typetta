@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isEmptyProjection, LogArgs } from '../../../..'
+import { idInfoFromSchema, isEmptyProjection, LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterNullFields, filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
@@ -30,8 +30,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private tableName: string
   private knex: Knex<any, unknown[]>
 
-  protected constructor({ tableName, knex, idGenerator, ...params }: KnexJsDAOParams<T>) {
-    super({ ...params, driverContext: { tableName, knex }, idGenerator: idGenerator ?? params.entityManager.adapters.knex[params.idScalar]?.generate })
+  protected constructor({ tableName, knex, idGenerator, schema, ...params }: KnexJsDAOParams<T>) {
+    super({ ...params, driverContext: { tableName, knex }, schema, idGenerator: idGenerator ?? params.entityManager.adapters.knex[idInfoFromSchema(schema).idScalar]?.generate })
     this.tableName = tableName
     this.knex = knex
   }
@@ -254,14 +254,14 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
       Object.entries(this.schema).forEach(([key, schemaField]) => {
         if (schemaField.type === 'scalar') {
           const specificType = typeMap[schemaField.scalar] ?? defaultType
-          const cb = table.specificType(schemaField.alias || key, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
+          const cb = table.specificType(schemaField.alias || key, schemaField.isList ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
           if (!schemaField.required) {
             cb.nullable()
           }
         } else if (schemaField.type === 'embedded') {
           embeddedScalars(schemaField.alias || key, schemaField.schema()).forEach(([subKey, subSchemaField]) => {
             const specificType = typeMap[subSchemaField.scalar] ?? defaultType
-            const cb = table.specificType(subKey, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
+            const cb = table.specificType(subKey, schemaField.isList ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
             if (!subSchemaField.required) {
               cb.nullable()
             }

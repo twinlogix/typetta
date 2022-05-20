@@ -10,12 +10,13 @@ export function likeSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'Date',
       required: true,
-      defaultGenerationStrategy: 'generator',
+      generationStrategy: 'generator',
     },
     id: {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     postId: {
@@ -107,10 +108,7 @@ export class LikeDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
   public constructor(params: LikeDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: likeSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -126,10 +124,7 @@ export class InMemoryLikeDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryLikeDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: likeSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -139,8 +134,8 @@ export function metadataSchema(): T.Schema<types.Scalars> {
     tags: {
       type: 'scalar',
       scalar: 'String',
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
     },
     views: {
       type: 'scalar',
@@ -174,12 +169,13 @@ export function postSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'Date',
       required: true,
-      defaultGenerationStrategy: 'generator',
+      generationStrategy: 'generator',
     },
     id: {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     likes: {
@@ -196,9 +192,9 @@ export function postSchema(): T.Schema<types.Scalars> {
         dao: 'user',
       },
       relationEntity: { schema: () => likeSchema(), dao: 'like' },
-      arrayElementsRequired: true,
+      isListElementRequired: true,
       required: true,
-      array: true,
+      isList: true,
     },
     metadata: {
       type: 'embedded',
@@ -309,10 +305,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
   public constructor(params: PostDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: postSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -328,10 +321,7 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryPostDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: postSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -354,6 +344,7 @@ export function userSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     lastName: {
@@ -375,9 +366,9 @@ export function userSchema(): T.Schema<types.Scalars> {
         dao: 'post',
       },
       relationEntity: { schema: () => likeSchema(), dao: 'like' },
-      arrayElementsRequired: true,
+      isListElementRequired: true,
       required: true,
-      array: true,
+      isList: true,
     },
     posts: {
       type: 'relation',
@@ -386,8 +377,8 @@ export function userSchema(): T.Schema<types.Scalars> {
       refFrom: 'userId',
       refTo: 'id',
       dao: 'post',
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
     },
   }
 }
@@ -485,10 +476,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: userSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -504,10 +492,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: userSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }

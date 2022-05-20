@@ -125,13 +125,13 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
                   throw validation
                 }
               : adapter[direction]
-          if (Array.isArray(value) && schemaField.array) {
+          if (Array.isArray(value) && schemaField.isList) {
             result[destName] = adapter ? value.map((v) => mapper(v)) : value
           } else {
             result[destName] = adapter ? mapper(value) : value
           }
         } else if (schemaField.type === 'embedded') {
-          if (Array.isArray(value) && schemaField.array) {
+          if (Array.isArray(value) && schemaField.isList) {
             result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.schema()))
           } else {
             result[destName] = transformObject(adapters, direction, value, schemaField.schema())

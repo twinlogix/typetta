@@ -39,7 +39,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   Object.entries(filter).forEach(([k, v]) => {
     const schemaField = getSchemaFieldTraversing(k, schema)
     if (schemaField) {
-      if (schemaField.array) {
+      if (schemaField.isList) {
         throw new Error(`Array filtering not supported on sql entity. (field: ${k})`)
       }
       const columnName = modelNameToDbName(k, schema)

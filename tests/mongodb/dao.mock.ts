@@ -14,13 +14,14 @@ export function addressSchema(): T.Schema<types.Scalars> {
       refFrom: 'addressId',
       refTo: 'id',
       dao: 'city',
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
     },
     id: {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
   }
@@ -102,10 +103,7 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractM
   public constructor(params: AddressDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: addressSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -121,10 +119,7 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
   public constructor(params: InMemoryAddressDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: addressSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -147,6 +142,7 @@ export function auditSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'db',
       required: true,
       alias: '_id',
     },
@@ -227,10 +223,7 @@ export class AuditDAO<MetadataType, OperationMetadataType> extends T.AbstractMon
   public constructor(params: AuditDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: auditSchema(),
-      idGeneration: 'db',
-      idScalar: 'ID',
     })
   }
 }
@@ -246,10 +239,7 @@ export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends T.Abs
   public constructor(params: InMemoryAuditDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: auditSchema(),
-      idGeneration: 'db',
-      idScalar: 'ID',
     })
   }
 }
@@ -284,6 +274,7 @@ export function auditableSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      isEnum: true,
     },
     versions: {
       type: 'relation',
@@ -293,7 +284,7 @@ export function auditableSchema(): T.Schema<types.Scalars> {
       refTo: '../id',
       dao: 'audit',
       required: true,
-      array: true,
+      isList: true,
     },
   }
 }
@@ -332,6 +323,7 @@ export function citySchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     name: {
@@ -416,10 +408,7 @@ export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
   public constructor(params: CityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: citySchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -435,10 +424,7 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryCityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: citySchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -452,19 +438,20 @@ export function defaultFieldsEntitySchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'Int',
       required: true,
-      defaultGenerationStrategy: 'middleware',
+      generationStrategy: 'middleware',
     },
     id: {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'user',
       required: true,
     },
     live: {
       type: 'scalar',
       scalar: 'Live',
       required: true,
-      defaultGenerationStrategy: 'generator',
+      generationStrategy: 'generator',
     },
     name: {
       type: 'scalar',
@@ -474,12 +461,12 @@ export function defaultFieldsEntitySchema(): T.Schema<types.Scalars> {
     opt1: {
       type: 'scalar',
       scalar: 'Live',
-      defaultGenerationStrategy: 'middleware',
+      generationStrategy: 'middleware',
     },
     opt2: {
       type: 'scalar',
       scalar: 'Live',
-      defaultGenerationStrategy: 'generator',
+      generationStrategy: 'generator',
     },
   }
 }
@@ -571,10 +558,7 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
   public constructor(params: DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: defaultFieldsEntitySchema(),
-      idGeneration: 'user',
-      idScalar: 'ID',
     })
   }
 }
@@ -590,10 +574,7 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
   public constructor(params: InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: defaultFieldsEntitySchema(),
-      idGeneration: 'user',
-      idScalar: 'ID',
     })
   }
 }
@@ -607,6 +588,7 @@ export function deviceSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     name: {
@@ -702,10 +684,7 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractMo
   public constructor(params: DeviceDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: deviceSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -721,10 +700,7 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
   public constructor(params: InMemoryDeviceDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: deviceSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -738,6 +714,7 @@ export function dogSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     name: {
@@ -834,10 +811,7 @@ export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractMongo
   public constructor(params: DogDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: dogSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -853,10 +827,7 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
   public constructor(params: InMemoryDogDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: dogSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -866,8 +837,8 @@ export function embeddedUserSchema(): T.Schema<types.Scalars> {
     e: {
       type: 'embedded',
       schema: () => embeddedUser2Schema(),
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
     },
     user: {
       type: 'relation',
@@ -1017,7 +988,7 @@ export function hotelSchema(): T.Schema<types.Scalars> {
       type: 'embedded',
       schema: () => auditableSchema(),
       required: true,
-      defaultGenerationStrategy: 'middleware',
+      generationStrategy: 'middleware',
     },
     embeddedUser3: {
       type: 'embedded',
@@ -1030,25 +1001,26 @@ export function hotelSchema(): T.Schema<types.Scalars> {
     embeddedUsers: {
       type: 'embedded',
       schema: () => embeddedUserSchema(),
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
     },
     embeddedUsers3: {
       type: 'embedded',
       schema: () => embeddedUser3Schema(),
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
     },
     embeddedUsers4: {
       type: 'embedded',
       schema: () => embeddedUser4Schema(),
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
     },
     id: {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'db',
       required: true,
       alias: '_id',
     },
@@ -1256,10 +1228,7 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMon
   public constructor(params: HotelDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: hotelSchema(),
-      idGeneration: 'db',
-      idScalar: 'ID',
     })
   }
 }
@@ -1275,10 +1244,7 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
   public constructor(params: InMemoryHotelDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: hotelSchema(),
-      idGeneration: 'db',
-      idScalar: 'ID',
     })
   }
 }
@@ -1292,6 +1258,7 @@ export function mockedEntitySchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'MongoID',
       isId: true,
+      generationStrategy: 'db',
       required: true,
       alias: '_id',
     },
@@ -1392,10 +1359,7 @@ export class MockedEntityDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: MockedEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: mockedEntitySchema(),
-      idGeneration: 'db',
-      idScalar: 'MongoID',
     })
   }
 }
@@ -1411,10 +1375,7 @@ export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extend
   public constructor(params: InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: mockedEntitySchema(),
-      idGeneration: 'db',
-      idScalar: 'MongoID',
     })
   }
 }
@@ -1432,6 +1393,7 @@ export function organizationSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     name: {
@@ -1532,10 +1494,7 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: OrganizationDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: organizationSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -1551,10 +1510,7 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
   public constructor(params: InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: organizationSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -1591,6 +1547,7 @@ export function postSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     metadata: {
@@ -1707,10 +1664,7 @@ export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
   public constructor(params: PostDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: postSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -1726,10 +1680,7 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryPostDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: postSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -1772,14 +1723,14 @@ export function userSchema(): T.Schema<types.Scalars> {
     amounts: {
       type: 'scalar',
       scalar: 'Decimal',
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
       alias: 'amounts',
     },
     credentials: {
       type: 'embedded',
       schema: () => usernamePasswordCredentialsSchema(),
-      array: true,
+      isList: true,
     },
     dogs: {
       type: 'relation',
@@ -1788,8 +1739,8 @@ export function userSchema(): T.Schema<types.Scalars> {
       refFrom: 'ownerId',
       refTo: 'id',
       dao: 'dog',
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
       metadata: Object.fromEntries([['test', 'value']]),
     },
     embeddedPost: {
@@ -1808,20 +1759,21 @@ export function userSchema(): T.Schema<types.Scalars> {
       refFrom: 'friendsId',
       refTo: 'id',
       dao: 'user',
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
     },
     friendsId: {
       type: 'scalar',
       scalar: 'ID',
-      arrayElementsRequired: true,
-      array: true,
+      isListElementRequired: true,
+      isList: true,
       alias: 'fIds',
     },
     id: {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
       alias: 'ID',
     },
@@ -2053,10 +2005,7 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: userSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -2072,10 +2021,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
   public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: userSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -2089,16 +2035,16 @@ export function userCollectionSchema(): T.Schema<types.Scalars> {
       refFrom: 'usersId',
       refTo: 'id',
       dao: 'user',
-      arrayElementsRequired: true,
+      isListElementRequired: true,
       required: true,
-      array: true,
+      isList: true,
     },
     usersId: {
       type: 'scalar',
       scalar: 'ID',
-      arrayElementsRequired: true,
+      isListElementRequired: true,
       required: true,
-      array: true,
+      isList: true,
     },
   }
 }

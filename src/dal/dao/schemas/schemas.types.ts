@@ -1,12 +1,19 @@
+import { IdGenerationStrategy } from '../dao.types'
+
 type Decorators = {
-  isId?: boolean
-  array?: boolean
+  isList?: boolean
   required?: boolean
-  arrayElementsRequired?: boolean
+  isListElementRequired?: boolean
   alias?: string
-  defaultGenerationStrategy?: 'middleware' | 'generator'
   metadata?: Record<string, string>
-}
+  isEnum?: boolean
+} & (
+  | {
+      isId: true
+      generationStrategy: IdGenerationStrategy
+    }
+  | { isId?: false; generationStrategy?: 'middleware' | 'generator' }
+)
 export type SchemaField<ScalarsType> = Readonly<
   (
     | { type: 'scalar'; scalar: keyof ScalarsType }

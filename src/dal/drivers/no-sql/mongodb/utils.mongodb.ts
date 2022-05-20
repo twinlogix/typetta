@@ -155,7 +155,7 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField && schemaField.type === 'embedded') {
-      if (schemaField.array) {
+      if (schemaField.isList) {
         return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.schema(), adapters)))]]
       }
       return [[columnName, v === null ? null : adaptUpdate(v, schemaField.schema(), adapters)]]

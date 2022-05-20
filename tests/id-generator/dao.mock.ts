@@ -12,6 +12,7 @@ export function aSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'MongoID',
       isId: true,
+      generationStrategy: 'db',
       required: true,
       alias: '_id',
     },
@@ -93,10 +94,7 @@ export class ADAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
   public constructor(params: ADAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: aSchema(),
-      idGeneration: 'db',
-      idScalar: 'MongoID',
     })
   }
 }
@@ -112,10 +110,7 @@ export class InMemoryADAO<MetadataType, OperationMetadataType> extends T.Abstrac
   public constructor(params: InMemoryADAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: aSchema(),
-      idGeneration: 'db',
-      idScalar: 'MongoID',
     })
   }
 }
@@ -129,6 +124,7 @@ export function bSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     value: {
@@ -204,10 +200,7 @@ export class BDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
   public constructor(params: BDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: bSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -223,10 +216,7 @@ export class InMemoryBDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   public constructor(params: InMemoryBDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: bSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -240,6 +230,7 @@ export function cSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'user',
       required: true,
     },
     value: {
@@ -321,10 +312,7 @@ export class CDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
   public constructor(params: CDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: cSchema(),
-      idGeneration: 'user',
-      idScalar: 'ID',
     })
   }
 }
@@ -340,10 +328,7 @@ export class InMemoryCDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   public constructor(params: InMemoryCDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: cSchema(),
-      idGeneration: 'user',
-      idScalar: 'ID',
     })
   }
 }
@@ -357,6 +342,7 @@ export function dSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'IntAutoInc',
       isId: true,
+      generationStrategy: 'db',
       required: true,
     },
     value: {
@@ -437,10 +423,7 @@ export class DDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
   public constructor(params: DDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: dSchema(),
-      idGeneration: 'db',
-      idScalar: 'IntAutoInc',
     })
   }
 }
@@ -456,10 +439,7 @@ export class InMemoryDDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   public constructor(params: InMemoryDDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: dSchema(),
-      idGeneration: 'db',
-      idScalar: 'IntAutoInc',
     })
   }
 }
@@ -473,6 +453,7 @@ export function eSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'generator',
       required: true,
     },
     value: {
@@ -548,10 +529,7 @@ export class EDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
   public constructor(params: EDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: eSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -567,10 +545,7 @@ export class InMemoryEDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   public constructor(params: InMemoryEDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: eSchema(),
-      idGeneration: 'generator',
-      idScalar: 'ID',
     })
   }
 }
@@ -584,6 +559,7 @@ export function fSchema(): T.Schema<types.Scalars> {
       type: 'scalar',
       scalar: 'ID',
       isId: true,
+      generationStrategy: 'user',
       required: true,
     },
     value: {
@@ -665,10 +641,7 @@ export class FDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
   public constructor(params: FDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: fSchema(),
-      idGeneration: 'user',
-      idScalar: 'ID',
     })
   }
 }
@@ -684,10 +657,7 @@ export class InMemoryFDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   public constructor(params: InMemoryFDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
-      idField: 'id',
       schema: fSchema(),
-      idGeneration: 'user',
-      idScalar: 'ID',
     })
   }
 }

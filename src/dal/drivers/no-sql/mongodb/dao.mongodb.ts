@@ -4,18 +4,19 @@ import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { LogArgs } from '../../../dao/log/log.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
-import { isEmptyProjection, projection } from '../../../dao/projections/projections.utils'
+import { isEmptyProjection } from '../../../dao/projections/projections.utils'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
 import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
 import { Collection, Document, WithId, Filter, FindOptions, OptionalId, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
+import { idInfoFromSchema } from '../../../..'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
   private collection: Collection
 
-  protected constructor({ collection, idGenerator, ...params }: MongoDBDAOParams<T>) {
-    super({ ...params, driverContext: { collection }, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[params.idScalar]?.generate })
+  protected constructor({ collection, idGenerator, schema, ...params }: MongoDBDAOParams<T>) {
+    super({ ...params, driverContext: { collection }, schema, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[idInfoFromSchema(schema).idScalar]?.generate })
     this.collection = collection
   }
 

@@ -1,3 +1,4 @@
+import { IdGenerationStrategy } from '../dao.types'
 import { Schema } from '../schemas/schemas.types'
 import { DAORelation } from './relations.types'
 
@@ -12,7 +13,7 @@ export function daoRelationsFromSchema<ScalarsType>(schema: Schema<ScalarsType>,
     if (fieldSchema.relation === 'inner') {
       const relation: DAORelation = {
         reference: 'inner',
-        type: fieldSchema.array ? '1-n' : '1-1',
+        type: fieldSchema.isList ? '1-n' : '1-1',
         field: path + fieldName,
         refFrom: resolveParentPath(path + fieldSchema.refFrom),
         refTo: resolveParentPath(fieldSchema.refTo),
@@ -23,7 +24,7 @@ export function daoRelationsFromSchema<ScalarsType>(schema: Schema<ScalarsType>,
     } else if (fieldSchema.relation === 'foreign') {
       const relation: DAORelation = {
         reference: 'foreign',
-        type: fieldSchema.array ? '1-n' : '1-1',
+        type: fieldSchema.isList ? '1-n' : '1-1',
         field: path + fieldName,
         refFrom: resolveParentPath(fieldSchema.refFrom),
         refTo: resolveParentPath(path + fieldSchema.refTo),
@@ -34,7 +35,7 @@ export function daoRelationsFromSchema<ScalarsType>(schema: Schema<ScalarsType>,
     } else {
       const relation: DAORelation = {
         reference: 'relation',
-        type: fieldSchema.array ? '1-n' : '1-1',
+        type: fieldSchema.isList ? '1-n' : '1-1',
         field: path + fieldName,
         refThis: {
           refFrom: fieldSchema.refThis.refFrom,
@@ -51,6 +52,18 @@ export function daoRelationsFromSchema<ScalarsType>(schema: Schema<ScalarsType>,
       return [relation]
     }
   })
+}
+
+export function idInfoFromSchema<ScalarsType>(schema: Schema<ScalarsType>): { idField: string; idScalar: keyof ScalarsType; idGeneration: IdGenerationStrategy } {
+  return Object.entries(schema).flatMap(([k, v]) => {
+    if (v.isId) {
+      if (v.type !== 'scalar') {
+        throw new Error('Id can be only scalar')
+      }
+      return [{ idField: k, idScalar: v.isEnum ? 'String' as keyof ScalarsType : v.scalar, idGeneration: v.generationStrategy }]
+    }
+    return []
+  })[0]
 }
 
 // example:

@@ -437,12 +437,14 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
     return node.fields.flatMap((field) => {
       const decorators = [
-        field.isListElementRequired ? 'arrayElementsRequired: true' : null,
+        field.isListElementRequired ? 'isListElementRequired: true' : null,
         field.isID ? 'isId: true' : null,
+        field.isID ? `generationStrategy: '${field.idGenerationStrategy || this.config.defaultIdGenerationStrategy || 'generator'}'` : null,
         field.isRequired ? 'required: true' : null,
-        field.isList ? 'array: true' : null,
+        field.isList ? 'isList: true' : null,
+        field.isEnum ? 'isEnum: true' : null,
         field.alias ? `alias: '${field.alias}'` : null,
-        field.defaultGenerationStrategy ? `defaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : null,
+        field.defaultGenerationStrategy && !field.isID ? `generationStrategy: '${field.defaultGenerationStrategy}'` : null,
         field.schemaMetadata ? `metadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : '',
       ]
         .filter((v) => v != null)
@@ -759,20 +761,17 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   }
 
   private _generateConstructorMethod(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, daoParams: string): string {
-    const idField = getID(node)
-    const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this.config.defaultIdGenerationStrategy || 'generator'}'`
-    const idScalar = `idScalar: '${idField.isEnum ? 'String' : idField.graphqlType}'`
-    const constructorBody = `super({ ${indentMultiline(`\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema(), \n${idGenerator}, \n${idScalar}`)} \n})`
+    const constructorBody = `super({ ${indentMultiline(`\n...params, \nschema: ${toFirstLower(node.name)}Schema()`)} \n})`
     return (
       `
-public static projection<P extends ${node.name}Projection>(p: P) {
-  return p
-}
-public static mergeProjection<P1 extends ${node.name}Projection, P2 extends ${node.name}Projection>(p1: P1, p2: P2): T.SelectProjection<${node.name}Projection, P1, P2> {
-  return T.mergeProjections(p1, p2) as T.SelectProjection<${node.name}Projection, P1, P2>
-}
+      public static projection<P extends ${node.name}Projection>(p: P) {
+        return p
+      }
+      public static mergeProjection<P1 extends ${node.name}Projection, P2 extends ${node.name}Projection>(p1: P1, p2: P2): T.SelectProjection<${node.name}Projection, P1, P2> {
+        return T.mergeProjections(p1, p2) as T.SelectProjection<${node.name}Projection, P1, P2>
+      }
 
-public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n` +
+      public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n` +
       indentMultiline(constructorBody) +
       '\n}'
     )

@@ -80,9 +80,6 @@ export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>
 >
 
 export type DAOParams<T extends DAOGenerics> = {
-  idField: T['idKey']
-  idScalar: T['idScalar']
-  idGeneration: IdGenerationStrategy
   idGenerator?: () => T['idScalar'][T['idScalar']]
   entityManager: AbstractEntityManager<string, string, T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
