@@ -8,15 +8,6 @@ export class ResolverTypettaGenerator extends TypettaGenerator {
   }
 
   public async generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string> {
-    const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
-    const typesMap = new Map<string, TsTypettaGeneratorNode>()
-    nodes.forEach((node) => {
-      if (node.type === 'scalar') {
-        customScalarsMap.set(node.name, node)
-      } else {
-        typesMap.set(node.name, node)
-      }
-    })
     const typeNodes = nodes.flatMap((n) => (n.type === 'type' && n.entity ? [n] : []))
 
     return [

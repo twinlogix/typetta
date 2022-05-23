@@ -14,7 +14,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
     nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
 
     const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
-    nodes.filter((node) => node.type === 'scalar').forEach((type) => customScalarsMap.set(type.name, type as TsTypettaGeneratorScalar))
+    nodes.filter((node) => node.type === 'scalar' && !node.isEnum).forEach((type) => customScalarsMap.set(type.name, type as TsTypettaGeneratorScalar))
 
     this.checkIds(typesMap)
     this.checkReferences(typesMap, (type) => (type.entity ? true : false))
