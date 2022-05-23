@@ -121,6 +121,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
 
   private generateCustomScalars(customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     return Array.from(customScalarsMap.values())
+      .filter(s => !s.isEnum)
       .map((s) => `scalar ${s.name}`)
       .join('\n')
   }
