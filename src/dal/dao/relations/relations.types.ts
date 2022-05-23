@@ -13,8 +13,7 @@ export type DAORelation =
       reference: 'relation'
       field: string
       refThis: { refFrom: string; refTo: string }
-      refOther: { refFrom: string; refTo: string }
+      refOther: { refFrom: string; refTo: string; dao: string }
       relationDao: string
-      entityDao: string
       required: boolean
     }

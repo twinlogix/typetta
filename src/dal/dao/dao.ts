@@ -1,3 +1,4 @@
+import { daoRelationsFromSchema, idInfoFromSchema } from '../..'
 import { equals } from '../../dal/drivers/in-memory/utils.memory'
 import { flattenEmbeddeds, getTraversing, renameLogicalOperators, reversed, setTraversing } from '../../utils/utils'
 import {
@@ -50,31 +51,17 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   private readonly logger?: LogFunction<T['name']>
   protected readonly datasource: string | null
 
-  protected constructor({
-    idField,
-    datasource,
-    idScalar,
-    idGeneration,
-    idGenerator,
-    entityManager,
-    name,
-    logger,
-    pageSize = 50,
-    relations = [],
-    middlewares = [],
-    schema,
-    metadata,
-    driverContext,
-  }: DAOParams<T>) {
+  protected constructor({ datasource, idGenerator, entityManager, name, logger, pageSize = 50, middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.dataLoaderRefs = new Map<string, string[]>()
+    const { idField, idScalar, idGeneration } = idInfoFromSchema(schema)
     this.idField = idField
     this.idScalar = idScalar
+    this.idGeneration = idGeneration
     this.idGenerator = idGenerator
     this.entityManager = entityManager
     this.pageSize = pageSize
-    this.relations = relations
-    this.idGeneration = idGeneration
+    this.relations = daoRelationsFromSchema(schema)
     this.name = name
     this.logger = logger
     this.datasource = datasource
@@ -82,7 +69,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in EntityManager or in DAOParams.`)
     }
     Object.entries(schema)
-      .flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v.scalar] as const] : []))
+      .flatMap(([k, v]) => (v.generationStrategy === 'generator' && !v.isId && v.type === 'scalar' ? [[k, v.scalar] as const] : []))
       .forEach(([key, scalar]) => {
         if (!entityManager.adapters[this._driver()][scalar].generate) {
           throw new Error(`Generator for scalar ${scalar} is needed for generate default fields ${key}. Define one in EntityManager or in DAOParams.`)
@@ -90,7 +77,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       })
     const defaultMiddleware = buildMiddleware<T>({
       beforeInsert: async (params, context) => {
-        const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'generator' && 'scalar' in v ? [[k, v] as const] : []))
+        const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.generationStrategy === 'generator' && v.type === 'scalar' ? [[k, v] as const] : []))
         const record = fieldsToGenerate.reduce((record, [key, schema]) => {
           const generator = this.entityManager.adapters[context.daoDriver][schema.scalar].generate
           if (record[key] == null && generator) {
@@ -101,7 +88,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
           return record
         }, params.record)
-        const fieldsToHave = Object.entries(schema).flatMap(([k, v]) => (v.defaultGenerationStrategy === 'middleware' ? [[k, v] as const] : []))
+        const fieldsToHave = Object.entries(schema).flatMap(([k, v]) => (v.generationStrategy === 'middleware' ? [[k, v] as const] : []))
         fieldsToHave.forEach(([key, schema]) => {
           if (schema.required && record[key] == null) {
             throw new Error(`Fields ${key} should have been generated from a middleware but it is ${record[key]}`)
@@ -175,7 +162,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         },
       },
       ...middlewares,
-      ...(Object.values(schema).some((v) => v.defaultGenerationStrategy) ? [defaultMiddleware] : []),
+      ...(Object.values(schema).some((v) => v.generationStrategy) ? [defaultMiddleware] : []),
     ]
     this.metadata = metadata
     this.driverContext = driverContext
@@ -310,7 +297,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       }
       for (const relation of this.relations) {
         if (relation.reference === 'relation') {
-          this.entityManager.dao(relation.entityDao).clearDataLoader(operationId)
+          this.entityManager.dao(relation.refOther.dao).clearDataLoader(operationId)
           this.entityManager.dao(relation.relationDao).clearDataLoader(operationId)
         } else {
           this.entityManager.dao(relation.dao).clearDataLoader(operationId)
@@ -382,7 +369,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
               .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom))
             if (filterValues.length > 0) {
-              const results = await this.entityManager.dao(relation.entityDao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
+              const results = await this.entityManager.dao(relation.refOther.dao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
               this.setResult(record, relation, results)
             } else {
               this.setResult(record, relation, [])
@@ -454,7 +441,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       return
     }
     const subSchema = reference.schema[subField]
-    if (!('embedded' in subSchema)) {
+    if (!(subSchema.type === 'embedded')) {
       throw new Error('Unreachable')
     }
     if (record[subField] == null) {
@@ -463,10 +450,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
     if (Array.isArray(record[subField])) {
       for (const r of record[subField]) {
-        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded() }, r)
+        this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.schema() }, r)
       }
     } else {
-      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.embedded() }, record[subField])
+      this.setInnerRefResults(results, { ...reference, refFrom: tailRefFrom.join('.'), field: tailField.join('.'), schema: subSchema.schema() }, record[subField])
     }
   }
 
@@ -694,7 +681,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     const relations = Object.fromEntries(
       this.relations.flatMap((r) => {
         if (params.relations && params.relations[r.field]) {
-          const relationDao = this.entityManager.dao(r.reference === 'relation' ? r.entityDao : r.dao)
+          const relationDao = this.entityManager.dao(r.reference === 'relation' ? r.refOther.dao : r.dao)
           return [[r.field, relationDao.mapResolverFindParams(params.relations[r.field])]]
         }
         return []
