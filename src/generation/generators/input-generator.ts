@@ -121,6 +121,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
 
   private generateCustomScalars(customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     return Array.from(customScalarsMap.values())
+      .filter(s => !s.isEnum)
       .map((s) => `scalar ${s.name}`)
       .join('\n')
   }
@@ -131,6 +132,9 @@ export class InputTypettaGenerator extends TypettaGenerator {
         const additionalFields = []
         if (s.isString) {
           additionalFields.push(`contains: ${s.name}`, `startsWith: ${s.name}`, `endsWith: ${s.name}`, `mode: StringFilterMode`)
+        }
+        if (s.isEnum) {
+          additionalFields.push(`contains: String`, `startsWith: String`, `endsWith: String`, `mode: StringFilterMode`)
         }
         if (s.isQuantity) {
           additionalFields.push(`gte: ${s.name}`, `gt: ${s.name}`, `lte: ${s.name}`, `lt: ${s.name}`)

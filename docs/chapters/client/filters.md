@@ -171,6 +171,11 @@ await entityManager.user.findAll({
 })
 ```
 
+To enable comparison operators on custom scalars it is necessary to add the `@quantitative` directive in the scalar GraphQL definition. Example:
+```typescript
+scalar DateTime @quantitative
+```
+
 ## Logical operators
 
 It is possible to combine the conditions built with the previous operators using the most traditional logical operators listed below:
@@ -317,6 +322,11 @@ await entityManager.user.findAll({
     { 'address.street': { $contains: "Piave", mode: "sensitive" } }
   }
 })
+```
+
+To enable string operators on custom scalars it is necessary to add the `@textual` directive in the scalar GraphQL definition. Example:
+```typescript
+scalar Currency @textual
 ```
 
 ## Other operators

@@ -175,11 +175,18 @@ const getValueFromConfig = <T, K extends keyof T>(config: boolean | T | undefine
 }
 
 const getTypeScriptRef = (fromPath: string, toPath: string): string => {
-  return path
-    .relative(path.dirname(fromPath), toPath)
-    .replace(/\.[^/.]+$/, '')
-    .split(path.sep)
-    .join(path.posix.sep)
+  return pathToImport(path.relative(path.dirname(fromPath), toPath))
+}
+
+const pathToImport = (relativePath: string): string => {
+  const currentDirectoryPrefix = path.dirname(relativePath) === '.' ? './' : ''
+  return (
+    currentDirectoryPrefix +
+    relativePath
+      .replace(/\.[^/.]+$/, '')
+      .split(path.sep)
+      .join(path.posix.sep)
+  )
 }
 
 const getGraphQLStepConfig = <K extends keyof GenerateGraphQLOperations>(config: boolean | GenerateGraphQLOperations | undefined, step: K) => {

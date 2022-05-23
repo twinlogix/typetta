@@ -55,4 +55,5 @@ export type TsTypettaGeneratorScalar = {
   name: string
   isString: boolean
   isQuantity: boolean
+  isEnum: boolean
 }
