@@ -26,7 +26,7 @@ const entityManager = new EntityManager({
           },
           compute: async (user) => {
             return {
-              fullName: `${user.fisrtName} ${user.lastName}`,
+              fullName: `${user.firstName} ${user.lastName}`,
             }
           }
         })

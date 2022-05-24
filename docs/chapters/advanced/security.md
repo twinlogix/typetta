@@ -222,7 +222,7 @@ const entityManager = new EntityManager({
         },
         defaultPermissions: PERMISSION.DENY,
       },
-    }
+    },
     defaultPermissions: PERMISSION.DENY
   }
 )
@@ -260,7 +260,7 @@ const entityManager = new EntityManager({
         },
         defaultPermissions: PERMISSION.DENY,
       },
-    }
+    },
     defaultPermissions: PERMISSION.DENY
   }
 )
@@ -305,7 +305,7 @@ const entityManager = new EntityManager({
         },
         defaultPermissions: PERMISSION.DENY,
       },
-    }
+    },
     defaultPermissions: PERMISSION.DENY
   }
 )
@@ -345,7 +345,7 @@ const entityManager = new EntityManager({
         },
         defaultPermissions: PERMISSION.DENY,
       },
-    }
+    },
     defaultPermissions: PERMISSION.DENY
   }
 )
