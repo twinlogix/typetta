@@ -23,7 +23,7 @@ import { LogArgs, LogFunction } from './log/log.types'
 import { BeforeMiddlewareResult, DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
 import { buildMiddleware } from './middlewares/utils/builder'
 import { AnyProjection, GenericProjection, ModelProjection } from './projections/projections.types'
-import { getProjection, infoToProjection, mergeProjections, SelectProjection } from './projections/projections.utils'
+import { getProjection, getProjectionDepth, infoToProjection, mergeProjections, SelectProjection } from './projections/projections.utils'
 import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import DataLoader from 'dataloader'
@@ -143,6 +143,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       {
         before: async (args, context) => {
           if (args.operation === 'find') {
+            if (args.params.maxDepth != null) {
+              const depth = getProjectionDepth<T>((args.params.projection ?? {}) as GenericProjection, this.schema)
+              if (depth > args.params.maxDepth) {
+                throw new Error(`Max depth is ${args.params.maxDepth} but the specified projection reach a depth of ${depth}`)
+              }
+            }
             return {
               continue: true,
               operation: args.operation,
