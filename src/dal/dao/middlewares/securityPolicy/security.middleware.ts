@@ -102,7 +102,7 @@ export function securityPolicy<
       const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
 
       const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
-      const filter = 'filter' in args.params && args.params != null && domainFilters ? { $and: [args.params.filter, domainFilters] } : domainFilters ? domainFilters : 'filter' in args.params ? args.params.filter : undefined
+      const filter = 'filter' in args.params && args.params.filter != null && domainFilters ? { $and: [args.params.filter, domainFilters] } : domainFilters ? domainFilters : 'filter' in args.params ? args.params.filter : undefined
       if (args.operation === 'find') {
         const [contained, invalidFields] = isProjectionContained(crud.read ?? false, args.params.projection ?? true)
         if (!contained) {
