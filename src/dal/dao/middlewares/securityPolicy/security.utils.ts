@@ -56,6 +56,11 @@ export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in s
               )
               return mappedSecurityDomain
             },
+            domainMap: domainMap as
+              | {
+                  [x: string]: keyof DAOGenericsMap[keyof DAOGenericsMap]['model'] | null
+                }
+              | undefined,
             defaultPermission,
           }),
         ] as const

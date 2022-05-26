@@ -24,6 +24,7 @@ export function securityPolicy<
   securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
   securityDomain: (metadata: Exclude<T['operationMetadata'], undefined | null>) => SecurityDomain | undefined
   defaultPermission?: CRUDPermission<T>
+  domainMap?: { [K in keyof Required<SecurityDomain>]: keyof T['model'] | null }
 }): DAOMiddleware<T> {
   type RelatedSecurityContext = {
     domain: SecurityContextPermission[] | true
@@ -99,6 +100,10 @@ export function securityPolicy<
       }
 
       const operationSecurityDomain = (args.params.metadata ? input.securityDomain(args.params.metadata) ?? {} : {}) as SecurityDomain
+      // infer operationSecurityDomain from filter
+      if(input.domainMap && args.params.filter) {
+        
+      }
       const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
 
       const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
