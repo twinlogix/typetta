@@ -149,6 +149,22 @@ test('findOne simple inner association', async () => {
   expect(dog?.owner?.firstName).toBe('FirstName')
 })
 
+test('findOne simple inner association with max depth', async () => {
+  try {
+    await dao.user.findOne({ projection: { friends: { friends: { firstName: true } } }, maxDepth: 2 })
+    fail()
+  } catch (e) {
+    expect((e as Error).message).toBe('Max depth is 2 but the specified projection reach a depth of 3')
+  }
+  try {
+    await dao.user.findOne({ projection: { firstName: true }, maxDepth: 0 })
+    fail()
+  } catch (e) {
+    expect((e as Error).message).toBe('Max depth is 0 but the specified projection reach a depth of 1')
+  }
+  await dao.user.findOne({ projection: { friends: { friends: { firstName: true } } }, maxDepth: 3 })
+})
+
 test('findOne simple foreignRef association', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })

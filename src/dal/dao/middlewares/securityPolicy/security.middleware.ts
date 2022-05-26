@@ -22,7 +22,7 @@ export function securityPolicy<
 >(input: {
   permissions: Permissions<T, Permission>
   securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
-  securityDomain: (metadata: Exclude<T['operationMetadata'], undefined | null>) => SecurityDomain | undefined
+  securityDomain: (metadata: T['operationMetadata'] | undefined) => SecurityDomain | undefined
   defaultPermission?: CRUDPermission<T>
   domainMap?: { [K in keyof Required<SecurityDomain>]: keyof T['model'] | null }
 }): DAOMiddleware<T> {
@@ -99,15 +99,22 @@ export function securityPolicy<
         return
       }
 
-      const operationSecurityDomain = (args.params.metadata ? input.securityDomain(args.params.metadata) ?? {} : {}) as SecurityDomain
       // infer operationSecurityDomain from filter
-      if(input.domainMap && args.params.filter) {
-        
+      if (input.domainMap && args.params.filter) {
+        console.log()
       }
+      const operationSecurityDomain = input.securityDomain(args.params.metadata) ?? ({} as SecurityDomain)
       const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
 
       const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
-      const filter = 'filter' in args.params && domainFilters ? { $and: [args.params.filter, domainFilters] } : domainFilters ? domainFilters : 'filter' in args.params ? args.params.filter : undefined
+      const filter =
+        'filter' in args.params && args.params.filter != null && domainFilters
+          ? { $and: [args.params.filter, domainFilters] }
+          : domainFilters
+          ? domainFilters
+          : 'filter' in args.params
+          ? args.params.filter
+          : undefined
       if (args.operation === 'find') {
         const [contained, invalidFields] = isProjectionContained(crud.read ?? false, args.params.projection ?? true)
         if (!contained) {
