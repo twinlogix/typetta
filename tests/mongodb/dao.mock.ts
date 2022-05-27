@@ -54,7 +54,7 @@ export type AddressSort = Partial<Record<AddressSortKeys, T.SortDirection>>
 export type AddressRawSort = () => M.Sort
 
 export type AddressUpdate = {
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
 }
 export type AddressRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -172,8 +172,8 @@ export type AuditRawSort = () => M.Sort
 
 export type AuditUpdate = {
   changes?: types.Scalars['String'] | null
-  entityId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
+  entityId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
 }
 export type AuditRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -358,9 +358,9 @@ export type CitySort = Partial<Record<CitySortKeys, T.SortDirection>>
 export type CityRawSort = () => M.Sort
 
 export type CityUpdate = {
-  addressId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  addressId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
 }
 export type CityRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -499,10 +499,10 @@ export type DefaultFieldsEntitySort = Partial<Record<DefaultFieldsEntitySortKeys
 export type DefaultFieldsEntityRawSort = () => M.Sort
 
 export type DefaultFieldsEntityUpdate = {
-  creationDate?: types.Scalars['Int']
-  id?: types.Scalars['ID']
-  live?: types.Scalars['Live']
-  name?: types.Scalars['String']
+  creationDate?: types.Scalars['Int'] | null
+  id?: types.Scalars['ID'] | null
+  live?: types.Scalars['Live'] | null
+  name?: types.Scalars['String'] | null
   opt1?: types.Scalars['Live'] | null
   opt2?: types.Scalars['Live'] | null
 }
@@ -634,8 +634,8 @@ export type DeviceSort = Partial<Record<DeviceSortKeys, T.SortDirection>>
 export type DeviceRawSort = () => M.Sort
 
 export type DeviceUpdate = {
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
   userId?: types.Scalars['ID'] | null
 }
 export type DeviceRawUpdate = () => M.UpdateFilter<M.Document>
@@ -761,9 +761,9 @@ export type DogSort = Partial<Record<DogSortKeys, T.SortDirection>>
 export type DogRawSort = () => M.Sort
 
 export type DogUpdate = {
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
-  ownerId?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
+  ownerId?: types.Scalars['ID'] | null
 }
 export type DogRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -1152,13 +1152,13 @@ export type HotelSort = Partial<Record<HotelSortKeys, T.SortDirection>>
 export type HotelRawSort = () => M.Sort
 
 export type HotelUpdate = {
-  audit?: AuditableInsert
-  'audit.createdBy'?: types.Scalars['String']
-  'audit.createdOn'?: types.Scalars['Int']
+  audit?: AuditableInsert | null
+  'audit.createdBy'?: types.Scalars['String'] | null
+  'audit.createdOn'?: types.Scalars['Int'] | null
   'audit.deletedOn'?: types.Scalars['Int'] | null
-  'audit.modifiedBy'?: types.Scalars['String']
-  'audit.modifiedOn'?: types.Scalars['Int']
-  'audit.state'?: types.State
+  'audit.modifiedBy'?: types.Scalars['String'] | null
+  'audit.modifiedOn'?: types.Scalars['Int'] | null
+  'audit.state'?: types.State | null
   embeddedUser3?: EmbeddedUser3Insert | null
   'embeddedUser3.value'?: types.Scalars['Int'] | null
   embeddedUser4?: EmbeddedUser4Insert | null
@@ -1167,11 +1167,11 @@ export type HotelUpdate = {
   embeddedUsers?: EmbeddedUserInsert[] | null
   embeddedUsers3?: EmbeddedUser3Insert[] | null
   embeddedUsers4?: EmbeddedUser4Insert[] | null
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
   userId?: types.Scalars['ID'] | null
   users?: UserCollectionInsert | null
-  'users.usersId'?: types.Scalars['ID'][]
+  'users.usersId'?: types.Scalars['ID'][] | null
 }
 export type HotelRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -1307,9 +1307,9 @@ export type MockedEntitySort = Partial<Record<MockedEntitySortKeys, T.SortDirect
 export type MockedEntityRawSort = never
 
 export type MockedEntityUpdate = {
-  id?: types.Scalars['MongoID']
-  name?: types.Scalars['String']
-  userId?: types.Scalars['ID']
+  id?: types.Scalars['MongoID'] | null
+  name?: types.Scalars['String'] | null
+  userId?: types.Scalars['ID'] | null
 }
 export type MockedEntityRawUpdate = never
 
@@ -1439,9 +1439,9 @@ export type OrganizationRawSort = () => M.Sort
 
 export type OrganizationUpdate = {
   address?: AddressInsert | null
-  'address.id'?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  'address.id'?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
   vatNumber?: types.Scalars['String'] | null
 }
 export type OrganizationRawUpdate = () => M.UpdateFilter<M.Document>
@@ -1604,15 +1604,15 @@ export type PostSort = Partial<Record<PostSortKeys, T.SortDirection>>
 export type PostRawSort = () => M.Sort
 
 export type PostUpdate = {
-  authorId?: types.Scalars['ID']
+  authorId?: types.Scalars['ID'] | null
   body?: types.Scalars['String'] | null
   clicks?: types.Scalars['Int'] | null
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
   metadata?: PostMetadataInsert | null
-  'metadata.region'?: types.Scalars['String']
-  'metadata.visible'?: types.Scalars['Boolean']
-  title?: types.Scalars['String']
-  views?: types.Scalars['Int']
+  'metadata.region'?: types.Scalars['String'] | null
+  'metadata.visible'?: types.Scalars['Boolean'] | null
+  title?: types.Scalars['String'] | null
+  views?: types.Scalars['Int'] | null
 }
 export type PostRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -1928,26 +1928,26 @@ export type UserUpdate = {
   amounts?: types.Scalars['Decimal'][] | null
   credentials?: (null | UsernamePasswordCredentialsInsert)[] | null
   embeddedPost?: PostInsert | null
-  'embeddedPost.authorId'?: types.Scalars['ID']
+  'embeddedPost.authorId'?: types.Scalars['ID'] | null
   'embeddedPost.body'?: types.Scalars['String'] | null
   'embeddedPost.clicks'?: types.Scalars['Int'] | null
-  'embeddedPost.id'?: types.Scalars['ID']
+  'embeddedPost.id'?: types.Scalars['ID'] | null
   'embeddedPost.metadata'?: PostMetadataInsert | null
-  'embeddedPost.metadata.region'?: types.Scalars['String']
-  'embeddedPost.metadata.visible'?: types.Scalars['Boolean']
-  'embeddedPost.title'?: types.Scalars['String']
-  'embeddedPost.views'?: types.Scalars['Int']
+  'embeddedPost.metadata.region'?: types.Scalars['String'] | null
+  'embeddedPost.metadata.visible'?: types.Scalars['Boolean'] | null
+  'embeddedPost.title'?: types.Scalars['String'] | null
+  'embeddedPost.views'?: types.Scalars['Int'] | null
   firstName?: types.Scalars['String'] | null
   friendsId?: types.Scalars['ID'][] | null
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
   int?: types.Scalars['Int'] | null
   lastName?: types.Scalars['String'] | null
-  live?: types.Scalars['Boolean']
+  live?: types.Scalars['Boolean'] | null
   localization?: types.Scalars['Coordinates'] | null
   title?: types.Scalars['LocalizedString'] | null
   usernamePasswordCredentials?: UsernamePasswordCredentialsInsert | null
-  'usernamePasswordCredentials.password'?: types.Scalars['Password']
-  'usernamePasswordCredentials.username'?: types.Scalars['String']
+  'usernamePasswordCredentials.password'?: types.Scalars['Password'] | null
+  'usernamePasswordCredentials.username'?: types.Scalars['String'] | null
 }
 export type UserRawUpdate = () => M.UpdateFilter<M.Document>
 

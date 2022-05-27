@@ -63,10 +63,10 @@ export type HotelRawSort = () => M.Sort
 
 export type HotelUpdate = {
   description?: types.Scalars['String'] | null
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
-  tenantId?: types.Scalars['Int']
-  totalCustomers?: types.Scalars['Int']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
+  tenantId?: types.Scalars['Int'] | null
+  totalCustomers?: types.Scalars['Int'] | null
 }
 export type HotelRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -207,11 +207,11 @@ export type ReservationSort = Partial<Record<ReservationSortKeys, T.SortDirectio
 export type ReservationRawSort = () => M.Sort
 
 export type ReservationUpdate = {
-  hotelId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  roomId?: types.Scalars['ID']
-  tenantId?: types.Scalars['Int']
-  userId?: types.Scalars['ID']
+  hotelId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  roomId?: types.Scalars['ID'] | null
+  tenantId?: types.Scalars['Int'] | null
+  userId?: types.Scalars['ID'] | null
 }
 export type ReservationRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -328,8 +328,8 @@ export type RoleSort = Partial<Record<RoleSortKeys, T.SortDirection>>
 export type RoleRawSort = () => M.Sort
 
 export type RoleUpdate = {
-  code?: types.RoleCode
-  permissions?: (null | types.Permission)[]
+  code?: types.RoleCode | null
+  permissions?: (null | types.Permission)[] | null
 }
 export type RoleRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -478,12 +478,12 @@ export type RoomSort = Partial<Record<RoomSortKeys, T.SortDirection>>
 export type RoomRawSort = () => M.Sort
 
 export type RoomUpdate = {
-  description?: types.Scalars['String']
-  from?: types.Scalars['Date']
-  hotelId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  tenantId?: types.Scalars['Int']
-  to?: types.Scalars['Date']
+  description?: types.Scalars['String'] | null
+  from?: types.Scalars['Date'] | null
+  hotelId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  tenantId?: types.Scalars['Int'] | null
+  to?: types.Scalars['Date'] | null
 }
 export type RoomRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -651,9 +651,9 @@ export type UserSort = Partial<Record<UserSortKeys, T.SortDirection>>
 export type UserRawSort = () => M.Sort
 
 export type UserUpdate = {
-  email?: types.Scalars['Email']
+  email?: types.Scalars['Email'] | null
   firstName?: types.Scalars['String'] | null
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
   lastName?: types.Scalars['String'] | null
   totalPayments?: types.Scalars['Int'] | null
 }
@@ -804,9 +804,9 @@ export type UserRoleRawSort = () => M.Sort
 
 export type UserRoleUpdate = {
   hotelId?: types.Scalars['ID'] | null
-  id?: types.Scalars['ID']
-  refUserId?: types.Scalars['ID']
-  roleCode?: types.RoleCode
+  id?: types.Scalars['ID'] | null
+  refUserId?: types.Scalars['ID'] | null
+  roleCode?: types.RoleCode | null
   tenantId?: types.Scalars['Int'] | null
   userId?: types.Scalars['ID'] | null
 }

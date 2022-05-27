@@ -65,9 +65,9 @@ export type HotelRawSort = () => M.Sort
 export type HotelUpdate = {
   deletionDate?: types.Scalars['Date'] | null
   description?: types.Scalars['String'] | null
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
-  tenantId?: types.Scalars['TenantId']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
+  tenantId?: types.Scalars['TenantId'] | null
 }
 export type HotelRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -212,10 +212,10 @@ export type ReservationRawSort = () => M.Sort
 
 export type ReservationUpdate = {
   deletionDate?: types.Scalars['Date'] | null
-  id?: types.Scalars['ID']
-  roomId?: types.Scalars['ID']
-  tenantId?: types.Scalars['TenantId']
-  userId?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
+  roomId?: types.Scalars['ID'] | null
+  tenantId?: types.Scalars['TenantId'] | null
+  userId?: types.Scalars['ID'] | null
 }
 export type ReservationRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -361,10 +361,10 @@ export type RoomRawSort = () => M.Sort
 
 export type RoomUpdate = {
   deletionDate?: types.Scalars['Date'] | null
-  hotelId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  size?: types.Scalars['String']
-  tenantId?: types.Scalars['TenantId']
+  hotelId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  size?: types.Scalars['String'] | null
+  tenantId?: types.Scalars['TenantId'] | null
 }
 export type RoomRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -477,8 +477,8 @@ export type TenantSort = Partial<Record<TenantSortKeys, T.SortDirection>>
 export type TenantRawSort = () => M.Sort
 
 export type TenantUpdate = {
-  id?: types.Scalars['Int']
-  info?: types.Scalars['String']
+  id?: types.Scalars['Int'] | null
+  info?: types.Scalars['String'] | null
 }
 export type TenantRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -649,14 +649,14 @@ export type UserRawSort = () => M.Sort
 
 export type UserUpdate = {
   credentials?: UsernamePasswordCredentialsInsert | null
-  'credentials.password'?: types.Scalars['Password']
-  'credentials.username'?: types.Scalars['Username']
+  'credentials.password'?: types.Scalars['Password'] | null
+  'credentials.username'?: types.Scalars['Username'] | null
   deletionDate?: types.Scalars['Date'] | null
-  email?: types.Scalars['Email']
+  email?: types.Scalars['Email'] | null
   firstName?: types.Scalars['String'] | null
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
   lastName?: types.Scalars['String'] | null
-  tenantId?: types.Scalars['TenantId']
+  tenantId?: types.Scalars['TenantId'] | null
 }
 export type UserRawUpdate = () => M.UpdateFilter<M.Document>
 
