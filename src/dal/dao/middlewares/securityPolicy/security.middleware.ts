@@ -101,7 +101,7 @@ export function securityPolicy<
       const operationSecurityDomain = input.securityDomain(args.params.metadata) ?? ({} as SecurityDomain)
       const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
 
-      const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
+      const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $and: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
       const filter =
         'filter' in args.params && args.params.filter != null && domainFilters
           ? { $and: [args.params.filter, domainFilters] }

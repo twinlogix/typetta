@@ -244,7 +244,7 @@ test('security test 1', async () => {
     aggregations: { v: { operation: 'count' } },
     metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
   })
-  expect(total.v).toBe(3)
+  expect(total.v).toBe(1)
 
   try {
     await entityManager.reservation.aggregate({
