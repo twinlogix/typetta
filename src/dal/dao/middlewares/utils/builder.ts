@@ -18,6 +18,7 @@ import {
 import { PartialDeep } from 'type-fest'
 
 export type DAOSplitedMiddleware<T extends DAOGenerics> = {
+  name?: string
   beforeFind?: (
     params: FindParams<T>,
     context: MiddlewareContext<T>,
@@ -32,7 +33,11 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
     params: InsertParams<T>,
     context: MiddlewareContext<T>,
   ) => Promise<(Omit<InsertMiddlewareInput<T>, 'operation'> & Continue<true>) | (Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<false>) | void>
-  afterInsert?: (params: InsertParams<T>, insertedRecord: Omit<T['model'], T['insertExcludedFields']>, context: MiddlewareContext<T>) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
+  afterInsert?: (
+    params: InsertParams<T>,
+    insertedRecord: Omit<T['model'], T['insertExcludedFields']>,
+    context: MiddlewareContext<T>,
+  ) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
   beforeUpdate?: (
     params: UpdateParams<T>,
     context: MiddlewareContext<T>,
@@ -62,6 +67,7 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
 
 export function buildMiddleware<T extends DAOGenerics>(m: DAOSplitedMiddleware<T>): DAOMiddleware<T> {
   return {
+    name: m.name,
     before: async (args, context) => {
       if (m.beforeFind && args.operation === 'find') {
         const result = await m.beforeFind(args.params, context)
