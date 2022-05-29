@@ -651,11 +651,16 @@ test('simple update', async () => {
   expect(user2?.firstName).toBe(user.firstName)
   expect(user2?.lastName).toBe('LastName')
 
-  await dao.user.updateOne({ filter: { id: user.id }, changes: { firstName: 'NewFirstName' } })
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { firstName: 'NewFirstName', live: null } })
   const user3 = await dao.user.findOne({ filter: { id: user.id } })
 
   expect(user3?.firstName).toBe('NewFirstName')
-  expect(user3?.lastName).toBe(user3?.lastName)
+  expect(user3?.lastName).toBe(user2?.lastName)
+  expect(user3?.live).toBe(true)
+
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { live: null } })
+  const user4 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user4?.live).toBe(true)
 })
 
 test('update embedded entity', async () => {

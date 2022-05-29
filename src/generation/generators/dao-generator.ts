@@ -671,15 +671,15 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         if (field.type.kind === 'scalar') {
           const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
           const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${baseType})` : baseType}[]` : baseType
-          return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
+          return [`'${fieldName}'?: ${fieldType} | null`]
         } else if (field.type.kind === 'embedded') {
           const embeddedTypeNode = getNode(field.type.embed, typesMap)
           const embeddedType = `${embeddedTypeNode.name}Insert`
           const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}[]` : embeddedType
           if (field.isList) {
-            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
+            return [`'${fieldName}'?: ${fieldType} | null`]
           } else {
-            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
+            return [`'${fieldName}'?: ${fieldType} | null`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
           }
         }
         return []

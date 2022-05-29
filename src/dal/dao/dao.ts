@@ -1,6 +1,6 @@
 import { daoRelationsFromSchema, idInfoFromSchema } from '../..'
 import { equals } from '../../dal/drivers/in-memory/utils.memory'
-import { flattenEmbeddeds, getTraversing, renameLogicalOperators, reversed, setTraversing } from '../../utils/utils'
+import { flattenEmbeddeds, getTraversing, mapObject, renameLogicalOperators, reversed, setTraversing } from '../../utils/utils'
 import {
   MiddlewareContext,
   DAO,
@@ -155,6 +155,27 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
               params: {
                 ...args.params,
                 projection: this.addNeededProjectionForRelations(args.params.projection),
+              },
+            }
+          }
+          if (args.operation === 'update' && typeof args.params.changes !== 'function') {
+            const changes = this.ignoreNullsWhenRequired(args.params.changes)
+            if (Object.keys(changes).length === 0) {
+              return {
+                continue: false,
+                operation: 'update',
+                params: {
+                  ...args.params,
+                  changes: changes,
+                },
+              }
+            }
+            return {
+              continue: true,
+              operation: 'update',
+              params: {
+                ...args.params,
+                changes: changes,
               },
             }
           }
@@ -653,6 +674,27 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           return
         })
     }
+  }
+
+  private ignoreNullsWhenRequired(changes: T['update']): T['update'] {
+    function isNullAndRequired(schema: Schema<T['scalars']>, key: string, value: string): boolean {
+      if (value !== null) {
+        return false
+      }
+      if (key in schema && schema[key].required && value === null) {
+        return true
+      }
+      const [hk, ...tk] = key.split('.')
+      if (hk in schema) {
+        const schemaField = schema[hk]
+        if (schemaField.type === 'embedded') {
+          return isNullAndRequired(schemaField.schema(), tk.join('.'), value)
+        }
+      }
+      return false
+    }
+    const newChanges = mapObject(changes, ([k, v]) => (isNullAndRequired(this.schema, k, v) ? [] : [[k, v]]))
+    return newChanges
   }
 
   // -----------------------------------------------------------------------
