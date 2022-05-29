@@ -3,7 +3,7 @@ import { DAOMiddleware } from '../middlewares.types'
 import { securityPolicy } from './security.middleware'
 import { EntityManagerSecurtyPolicy } from './security.types'
 
-export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in string]: DAOGenerics }, OperationMetadataType, Permissions extends string, SecurityDomain extends object>(
+export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in string]: DAOGenerics }, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>>(
   contextPolicy: EntityManagerSecurtyPolicy<DAOGenericsMap, OperationMetadataType, Permissions, SecurityDomain>,
 ): { middlewares: { [K in keyof DAOGenericsMap]?: DAOMiddleware<DAOGenericsMap[K]> }; others?: DAOMiddleware<DAOGenericsMap[keyof DAOGenericsMap]> } {
   const context = contextPolicy.context

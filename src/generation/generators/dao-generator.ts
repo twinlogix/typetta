@@ -269,7 +269,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
         : ''
 
     const entityManagerParamsExport = `
-export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {\n${indentMultiline(
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {\n${indentMultiline(
       `${metadata}${middlewares}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${loggerParams}${securityPolicyParam}`,
     )}\n}`
 
@@ -344,7 +344,7 @@ this.params = params`,
     ].join('\n\n')
 
     const entityManagerExport =
-      `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<${
+      `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> extends T.AbstractEntityManager<${
         mongoSourcesLiteral || 'never'
       }, ${sqlSourcesLiteral || 'never'}, types.Scalars, MetadataType>  {\n\n` +
       indentMultiline(declarations) +

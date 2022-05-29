@@ -1,5 +1,5 @@
 import { Coordinates } from '../../src'
-import { LocalizedString } from '../../src'
+import { LocalizedString } from '../types'
 import { BigNumber } from 'bignumber.js'
 
 export type Maybe<T> = T | null
