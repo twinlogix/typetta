@@ -282,25 +282,25 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     try {
       query = queryBuilder()
       if ('skipReason' in query) {
-        this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
+        await this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
         return skipDefault as Awaited<R>
       }
       const result = await query
       const records = transform ? await transform(result) : undefined
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.knexLog({ duration, operation, level: 'query', query, date: finish })
+      await this.knexLog({ duration, operation, level: 'query', query, date: finish })
       return records as Awaited<R>
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
+      await this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
       throw error
     }
   }
 
-  private knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }) {
-    this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
+  private async knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }): Promise<void> {
+    await this.log(() => this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 
   protected _driver(): Exclude<LogArgs<string>['driver'], undefined> {

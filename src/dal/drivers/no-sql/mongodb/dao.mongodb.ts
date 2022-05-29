@@ -239,24 +239,24 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
         const result = await promiseGenerator()
         const finish = new Date()
         const duration = finish.getTime() - start.getTime()
-        this.mongoLog({ duration, operation, level: 'query', query: queryGenerator, date: finish })
+        await this.mongoLog({ duration, operation, level: 'query', query: queryGenerator, date: finish })
         return result
       } catch (error: unknown) {
         const finish = new Date()
         const duration = finish.getTime() - start.getTime()
-        this.mongoLog({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
+        await this.mongoLog({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
         throw error
       }
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.mongoLog({ error, duration, operation, level: 'error', date: finish })
+      await this.mongoLog({ error, duration, operation, level: 'error', date: finish })
       throw error
     }
   }
 
-  private mongoLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }) {
-    this.log(this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
+  private async mongoLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }): Promise<void> {
+    await this.log(() => this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
   }
 
   protected _driver(): 'mongo' | 'knex' {

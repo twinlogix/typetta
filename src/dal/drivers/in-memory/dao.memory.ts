@@ -248,10 +248,6 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
   }
 
-  private allocMemory(n: number): (T['model'] | null)[] {
-    return Array(n).fill(null)
-  }
-
   private generateRecordWithId(): Partial<Record<T['idKey'], T['model'][T['idKey']]>> {
     if (this.idGeneration === 'db') {
       if (!this.mockIdSpecification?.generate) {
