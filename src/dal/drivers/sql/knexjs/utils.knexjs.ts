@@ -56,7 +56,9 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             // prettier-ignore
             switch (fk) {
               case 'exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
-              case 'eq': builder.where(columnName, av()); break
+              case 'eq': 
+                if(vr.mode && vr.mode === 'insensitive') { builder.whereILike(columnName, av()) }
+                else { builder.where(columnName, av()) } break
               case 'gte': builder.where(columnName, '>=', av()); break
               case 'gt': builder.where(columnName, '>', av()); break
               case 'lte': builder.where(columnName, '<=', av()); break
@@ -65,21 +67,21 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case 'in': builder.whereIn(columnName, avs()); break
               case 'nin': builder.not.whereIn(columnName, avs()); break
               case 'contains': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `%${fv}%`)
                 } else {
                   builder.whereILike(columnName, `%${fv}%`)
                 }
                 break
               case 'startsWith': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `${fv}%`)
                 } else {
                   builder.whereILike(columnName, `${fv}%`)
                 }
                 break
               case 'endsWith': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `%${fv}`)
                 } else {
                   builder.whereILike(columnName, `%${fv}`)

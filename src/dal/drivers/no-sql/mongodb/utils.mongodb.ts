@@ -96,6 +96,12 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
       const filter = value as Record<string, unknown>
       const mappedFilter = mapObject(filter, ([fk, fv]) => {
         if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
+          if (fk === 'eq' && 'mode' in filter && filter.mode === 'insensitive') {
+            return [
+              ['$options', 'i'],
+              ['$regex', `^${modelValueToDbValue(fv as Scalar, schemaField, adapter)}$`],
+            ]
+          }
           return [[`$${fk}`, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
@@ -110,6 +116,7 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
         return [[fk, fv]]
       })
       const $options = 'mode' in filter && filter.mode === 'sensitive' ? '' : 'i'
+      // TODO: should filter.startsWith, filter.contains, filter.endsWith pass through adapter?
       const stringFilter =
         'contains' in filter && 'startsWith' in filter && 'endsWith' in filter
           ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains}).*(?<=${filter.endsWith}$)`) }

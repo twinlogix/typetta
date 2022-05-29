@@ -54,7 +54,7 @@ export type AddressSort = Partial<Record<AddressSortKeys, T.SortDirection>>
 export type AddressRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AddressUpdate = {
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
 }
 export type AddressRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -198,7 +198,7 @@ export type AuthorSort = Partial<Record<AuthorSortKeys, T.SortDirection>>
 export type AuthorRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AuthorUpdate = {
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
 }
 export type AuthorRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -312,9 +312,9 @@ export type AuthorBookSort = Partial<Record<AuthorBookSortKeys, T.SortDirection>
 export type AuthorBookRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type AuthorBookUpdate = {
-  authorId?: types.Scalars['ID']
-  bookId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
+  authorId?: types.Scalars['ID'] | null
+  bookId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
 }
 export type AuthorBookRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -444,7 +444,7 @@ export type BookSort = Partial<Record<BookSortKeys, T.SortDirection>>
 export type BookRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type BookUpdate = {
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
 }
 export type BookRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -560,9 +560,9 @@ export type CitySort = Partial<Record<CitySortKeys, T.SortDirection>>
 export type CityRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type CityUpdate = {
-  addressId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  addressId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
 }
 export type CityRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -701,10 +701,10 @@ export type DefaultFieldsEntitySort = Partial<Record<DefaultFieldsEntitySortKeys
 export type DefaultFieldsEntityRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DefaultFieldsEntityUpdate = {
-  creationDate?: types.Scalars['Int']
-  id?: types.Scalars['ID']
-  live?: types.Scalars['Live']
-  name?: types.Scalars['String']
+  creationDate?: types.Scalars['Int'] | null
+  id?: types.Scalars['ID'] | null
+  live?: types.Scalars['Live'] | null
+  name?: types.Scalars['String'] | null
   opt1?: types.Scalars['Live'] | null
   opt2?: types.Scalars['Live'] | null
 }
@@ -836,8 +836,8 @@ export type DeviceSort = Partial<Record<DeviceSortKeys, T.SortDirection>>
 export type DeviceRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DeviceUpdate = {
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
   userId?: types.Scalars['ID'] | null
 }
 export type DeviceRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -963,9 +963,9 @@ export type DogSort = Partial<Record<DogSortKeys, T.SortDirection>>
 export type DogRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DogUpdate = {
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
-  ownerId?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
+  ownerId?: types.Scalars['ID'] | null
 }
 export type DogRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -1081,9 +1081,9 @@ export type FriendsSort = Partial<Record<FriendsSortKeys, T.SortDirection>>
 export type FriendsRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FriendsUpdate = {
-  from?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  to?: types.Scalars['ID']
+  from?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  to?: types.Scalars['ID'] | null
 }
 export type FriendsRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -1211,9 +1211,9 @@ export type OrganizationRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex
 
 export type OrganizationUpdate = {
   address?: AddressInsert | null
-  'address.id'?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  'address.id'?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
   vatNumber?: types.Scalars['String'] | null
 }
 export type OrganizationRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -1468,12 +1468,12 @@ export type UserUpdate = {
   credentials?: UsernamePasswordCredentialsInsert | null
   'credentials.another'?: AnotherInsert | null
   'credentials.another.test'?: types.Scalars['String'] | null
-  'credentials.password'?: types.Scalars['Password']
-  'credentials.username'?: types.Scalars['String']
+  'credentials.password'?: types.Scalars['Password'] | null
+  'credentials.username'?: types.Scalars['String'] | null
   firstName?: types.Scalars['String'] | null
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
   lastName?: types.Scalars['String'] | null
-  live?: types.Scalars['Boolean']
+  live?: types.Scalars['Boolean'] | null
   localization?: types.Scalars['Coordinates'] | null
   title?: types.Scalars['LocalizedString'] | null
 }
@@ -1590,7 +1590,7 @@ export type UsernamePasswordCredentialsInsert = {
   username: types.Scalars['String']
 }
 
-export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
   middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: {
@@ -1614,12 +1614,12 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
 
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<
-  never,
-  'default',
-  types.Scalars,
-  MetadataType
-> {
+export class EntityManager<
+  MetadataType = never,
+  OperationMetadataType = never,
+  Permissions extends string = never,
+  SecurityDomain extends Record<string, unknown> = never,
+> extends T.AbstractEntityManager<never, 'default', types.Scalars, MetadataType> {
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined
   private _author: AuthorDAO<MetadataType, OperationMetadataType> | undefined
   private _authorBook: AuthorBookDAO<MetadataType, OperationMetadataType> | undefined

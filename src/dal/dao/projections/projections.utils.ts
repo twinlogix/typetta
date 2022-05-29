@@ -1,3 +1,5 @@
+import { DAOGenerics } from '../dao.types'
+import { Schema } from '../schemas/schemas.types'
 import { GenericProjection, IntersectGenericProjection, MergeGenericProjection } from './projections.types'
 import { FieldNode, getNamedType, GraphQLInterfaceType, GraphQLNamedType, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema, GraphQLType, GraphQLUnionType } from 'graphql'
 import { PartialDeep } from 'type-fest'
@@ -279,4 +281,22 @@ export function isEmptyProjection(p: PartialDeep<GenericProjection> | undefined)
     return false
   }
   return Object.values(p).filter((v) => v !== undefined && !isEmptyProjection(v)).length === 0
+}
+
+export function getProjectionDepth<T extends DAOGenerics>(projection: GenericProjection, schema: Schema<T['scalars']>): number {
+  if (projection === true) {
+    return 1
+  }
+  if (projection === false) {
+    return 0
+  }
+  const depth = Object.entries(projection).reduce((p, [k, v]) => {
+    const schemaField = schema[k]
+    if (schemaField.type === 'relation') {
+      return Math.max(p, getProjectionDepth(v, schemaField.schema()))
+    } else {
+      return p
+    }
+  }, 0)
+  return 1 + depth
 }

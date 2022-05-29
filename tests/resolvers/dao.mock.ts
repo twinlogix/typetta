@@ -56,10 +56,10 @@ export type LikeSort = Partial<Record<LikeSortKeys, T.SortDirection>>
 export type LikeRawSort = never
 
 export type LikeUpdate = {
-  creationDate?: types.Scalars['Date']
-  id?: types.Scalars['ID']
-  postId?: types.Scalars['ID']
-  userId?: types.Scalars['ID']
+  creationDate?: types.Scalars['Date'] | null
+  id?: types.Scalars['ID'] | null
+  postId?: types.Scalars['ID'] | null
+  userId?: types.Scalars['ID'] | null
 }
 export type LikeRawUpdate = never
 
@@ -249,13 +249,13 @@ export type PostSort = Partial<Record<PostSortKeys, T.SortDirection>>
 export type PostRawSort = never
 
 export type PostUpdate = {
-  content?: types.Scalars['String']
-  creationDate?: types.Scalars['Date']
-  id?: types.Scalars['ID']
+  content?: types.Scalars['String'] | null
+  creationDate?: types.Scalars['Date'] | null
+  id?: types.Scalars['ID'] | null
   metadata?: MetadataInsert | null
   'metadata.tags'?: types.Scalars['String'][] | null
   'metadata.views'?: types.Scalars['Int'] | null
-  userId?: types.Scalars['ID']
+  userId?: types.Scalars['ID'] | null
 }
 export type PostRawUpdate = never
 
@@ -425,9 +425,9 @@ export type UserRawSort = never
 
 export type UserUpdate = {
   birthDate?: types.Scalars['Date'] | null
-  firstName?: types.Scalars['String']
-  id?: types.Scalars['ID']
-  lastName?: types.Scalars['String']
+  firstName?: types.Scalars['String'] | null
+  id?: types.Scalars['ID'] | null
+  lastName?: types.Scalars['String'] | null
 }
 export type UserRawUpdate = never
 
@@ -497,7 +497,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
-export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
   middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: {
@@ -512,12 +512,12 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
 
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<
-  never,
-  never,
-  types.Scalars,
-  MetadataType
-> {
+export class EntityManager<
+  MetadataType = never,
+  OperationMetadataType = never,
+  Permissions extends string = never,
+  SecurityDomain extends Record<string, unknown> = never,
+> extends T.AbstractEntityManager<never, never, types.Scalars, MetadataType> {
   private _like: LikeDAO<MetadataType, OperationMetadataType> | undefined
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined

@@ -119,12 +119,21 @@ test('simple findAll', async () => {
 })
 
 test('simple findOne', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const u = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: '1FirstName', lastName: 'LastName', live: true } })
 
-  const user = await dao.user.findOne({})
+  const user = await dao.user.findOne({ filter: { id: u.id } })
   expect(user).toBeDefined()
   expect(user?.firstName).toBe('FirstName')
   expect(user?.lastName).toBe('LastName')
+
+  const user2 = await dao.user.findOne({ filter: { firstName: { eq: 'firstname' } } })
+  expect(user2).toBe(null)
+  const user3 = await dao.user.findOne({ filter: { firstName: { eq: 'firstname', mode: 'insensitive' } } })
+  expect(user3).toBeDefined()
+  expect(user3?.firstName).toBe('FirstName')
+  expect(user3?.lastName).toBe('LastName')
 })
 
 test('simple findOne multiple filter', async () => {
@@ -147,6 +156,22 @@ test('findOne simple inner association', async () => {
   const dog = await dao.dog.findOne({ projection: { owner: { firstName: true } } })
   expect(dog?.owner).toBeDefined()
   expect(dog?.owner?.firstName).toBe('FirstName')
+})
+
+test('findOne simple inner association with max depth', async () => {
+  try {
+    await dao.user.findOne({ projection: { friends: { friends: { firstName: true } } }, maxDepth: 2 })
+    fail()
+  } catch (e) {
+    expect((e as Error).message).toBe('Max depth is 2 but the specified projection reach a depth of 3')
+  }
+  try {
+    await dao.user.findOne({ projection: { firstName: true }, maxDepth: 0 })
+    fail()
+  } catch (e) {
+    expect((e as Error).message).toBe('Max depth is 0 but the specified projection reach a depth of 1')
+  }
+  await dao.user.findOne({ projection: { friends: { friends: { firstName: true } } }, maxDepth: 3 })
 })
 
 test('findOne simple foreignRef association', async () => {
@@ -635,11 +660,16 @@ test('simple update', async () => {
   expect(user2?.firstName).toBe(user.firstName)
   expect(user2?.lastName).toBe('LastName')
 
-  await dao.user.updateOne({ filter: { id: user.id }, changes: { firstName: 'NewFirstName' } })
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { firstName: 'NewFirstName', live: null } })
   const user3 = await dao.user.findOne({ filter: { id: user.id } })
 
   expect(user3?.firstName).toBe('NewFirstName')
-  expect(user3?.lastName).toBe(user3?.lastName)
+  expect(user3?.lastName).toBe(user2?.lastName)
+  expect(user3?.live).toBe(true)
+
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { live: null } })
+  const user4 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user4?.live).toBe(true)
 })
 
 test('update embedded entity', async () => {

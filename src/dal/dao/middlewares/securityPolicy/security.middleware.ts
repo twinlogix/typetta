@@ -22,7 +22,7 @@ export function securityPolicy<
 >(input: {
   permissions: Permissions<T, Permission>
   securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
-  securityDomain: (metadata: Exclude<T['operationMetadata'], undefined | null>) => SecurityDomain | undefined
+  securityDomain: (metadata: T['operationMetadata']) => SecurityDomain | undefined
   defaultPermission?: CRUDPermission<T>
 }): DAOMiddleware<T> {
   type RelatedSecurityContext = {
@@ -98,11 +98,18 @@ export function securityPolicy<
         return
       }
 
-      const operationSecurityDomain = (args.params.metadata ? input.securityDomain(args.params.metadata) ?? {} : {}) as SecurityDomain
+      const operationSecurityDomain = input.securityDomain(args.params.metadata) ?? ({} as SecurityDomain)
       const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
 
-      const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
-      const filter = 'filter' in args.params && domainFilters ? { $and: [args.params.filter, domainFilters] } : domainFilters ? domainFilters : 'filter' in args.params ? args.params.filter : undefined
+      const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $and: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
+      const filter =
+        'filter' in args.params && args.params.filter != null && domainFilters
+          ? { $and: [args.params.filter, domainFilters] }
+          : domainFilters
+          ? domainFilters
+          : 'filter' in args.params
+          ? args.params.filter
+          : undefined
       if (args.operation === 'find') {
         const [contained, invalidFields] = isProjectionContained(crud.read ?? false, args.params.projection ?? true)
         if (!contained) {

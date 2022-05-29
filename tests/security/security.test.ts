@@ -1,11 +1,11 @@
 import { SecurityPolicyReadError, SecurityPolicyWriteError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
+import { inMemoryMongoDb } from '../utils'
 import { EntityManager, UserRoleParam } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
-import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 
@@ -42,7 +42,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           domain: {
             hotelId: 'id',
             tenantId: 'tenantId',
-            userId: null,
+            //userId: null,
           },
           permissions: {
             MANAGE_HOTEL: PERMISSION.ALLOW,
@@ -61,7 +61,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           domain: {
             hotelId: 'hotelId',
             tenantId: 'tenantId',
-            userId: null,
+            //userId: null,
           },
           permissions: {
             MANAGE_ROOM: { create: true },
@@ -71,7 +71,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
       defaultPermission: {
         read: { id: true },
       },
-      operationDomain: (metadata) => metadata.securityDomain,
+      operationDomain: (metadata) => metadata?.securityDomain,
     },
   })
 }
@@ -146,7 +146,11 @@ test('security test 1', async () => {
   const entityManager = await createSecureEntityManager(user.id)
 
   try {
-    await entityManager.hotel.findAll({ projection: { id: true, name: true }, filter: { name: { startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
+    await entityManager.hotel.findAll({
+      projection: { id: true, name: true },
+      filter: { name: { startsWith: 'AHotel' } },
+      metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } },
+    })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -240,7 +244,7 @@ test('security test 1', async () => {
     aggregations: { v: { operation: 'count' } },
     metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
   })
-  expect(total.v).toBe(3)
+  expect(total.v).toBe(1)
 
   try {
     await entityManager.reservation.aggregate({

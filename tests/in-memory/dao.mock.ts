@@ -53,7 +53,7 @@ export type AddressSort = Partial<Record<AddressSortKeys, T.SortDirection>>
 export type AddressRawSort = never
 
 export type AddressUpdate = {
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
 }
 export type AddressRawUpdate = never
 
@@ -171,8 +171,8 @@ export type AuditRawSort = never
 
 export type AuditUpdate = {
   changes?: types.Scalars['String'] | null
-  entityId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
+  entityId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
 }
 export type AuditRawUpdate = never
 
@@ -357,9 +357,9 @@ export type CitySort = Partial<Record<CitySortKeys, T.SortDirection>>
 export type CityRawSort = never
 
 export type CityUpdate = {
-  addressId?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  addressId?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
 }
 export type CityRawUpdate = never
 
@@ -498,10 +498,10 @@ export type DefaultFieldsEntitySort = Partial<Record<DefaultFieldsEntitySortKeys
 export type DefaultFieldsEntityRawSort = never
 
 export type DefaultFieldsEntityUpdate = {
-  creationDate?: types.Scalars['Int']
-  id?: types.Scalars['ID']
-  live?: types.Scalars['Live']
-  name?: types.Scalars['String']
+  creationDate?: types.Scalars['Int'] | null
+  id?: types.Scalars['ID'] | null
+  live?: types.Scalars['Live'] | null
+  name?: types.Scalars['String'] | null
   opt1?: types.Scalars['Live'] | null
   opt2?: types.Scalars['Live'] | null
 }
@@ -633,8 +633,8 @@ export type DeviceSort = Partial<Record<DeviceSortKeys, T.SortDirection>>
 export type DeviceRawSort = never
 
 export type DeviceUpdate = {
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
   userId?: types.Scalars['ID'] | null
 }
 export type DeviceRawUpdate = never
@@ -760,9 +760,9 @@ export type DogSort = Partial<Record<DogSortKeys, T.SortDirection>>
 export type DogRawSort = never
 
 export type DogUpdate = {
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
-  ownerId?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
+  ownerId?: types.Scalars['ID'] | null
 }
 export type DogRawUpdate = never
 
@@ -895,15 +895,15 @@ export type HotelSort = Partial<Record<HotelSortKeys, T.SortDirection>>
 export type HotelRawSort = never
 
 export type HotelUpdate = {
-  audit?: AuditableInsert
-  'audit.createdBy'?: types.Scalars['String']
-  'audit.createdOn'?: types.Scalars['Int']
+  audit?: AuditableInsert | null
+  'audit.createdBy'?: types.Scalars['String'] | null
+  'audit.createdOn'?: types.Scalars['Int'] | null
   'audit.deletedOn'?: types.Scalars['Int'] | null
-  'audit.modifiedBy'?: types.Scalars['String']
-  'audit.modifiedOn'?: types.Scalars['Int']
-  'audit.state'?: types.State
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  'audit.modifiedBy'?: types.Scalars['String'] | null
+  'audit.modifiedOn'?: types.Scalars['Int'] | null
+  'audit.state'?: types.State | null
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
 }
 export type HotelRawUpdate = never
 
@@ -1032,9 +1032,9 @@ export type MockedEntitySort = Partial<Record<MockedEntitySortKeys, T.SortDirect
 export type MockedEntityRawSort = never
 
 export type MockedEntityUpdate = {
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
-  userId?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
+  userId?: types.Scalars['ID'] | null
 }
 export type MockedEntityRawUpdate = never
 
@@ -1164,9 +1164,9 @@ export type OrganizationRawSort = never
 
 export type OrganizationUpdate = {
   address?: AddressInsert | null
-  'address.id'?: types.Scalars['ID']
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  'address.id'?: types.Scalars['ID'] | null
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
   vatNumber?: types.Scalars['String'] | null
 }
 export type OrganizationRawUpdate = never
@@ -1329,15 +1329,15 @@ export type PostSort = Partial<Record<PostSortKeys, T.SortDirection>>
 export type PostRawSort = never
 
 export type PostUpdate = {
-  authorId?: types.Scalars['ID']
+  authorId?: types.Scalars['ID'] | null
   body?: types.Scalars['String'] | null
   clicks?: types.Scalars['Int'] | null
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
   metadata?: PostMetadataInsert | null
-  'metadata.region'?: types.Scalars['String']
-  'metadata.visible'?: types.Scalars['Boolean']
-  title?: types.Scalars['String']
-  views?: types.Scalars['Int']
+  'metadata.region'?: types.Scalars['String'] | null
+  'metadata.visible'?: types.Scalars['Boolean'] | null
+  title?: types.Scalars['String'] | null
+  views?: types.Scalars['Int'] | null
 }
 export type PostRawUpdate = never
 
@@ -1476,8 +1476,8 @@ export type PostTypeSort = Partial<Record<PostTypeSortKeys, T.SortDirection>>
 export type PostTypeRawSort = never
 
 export type PostTypeUpdate = {
-  id?: types.Scalars['ID']
-  name?: types.Scalars['String']
+  id?: types.Scalars['ID'] | null
+  name?: types.Scalars['String'] | null
 }
 export type PostTypeRawUpdate = never
 
@@ -1755,25 +1755,25 @@ export type UserUpdate = {
   amounts?: types.Scalars['Decimal'][] | null
   credentials?: (null | UsernamePasswordCredentialsInsert)[] | null
   embeddedPost?: PostInsert | null
-  'embeddedPost.authorId'?: types.Scalars['ID']
+  'embeddedPost.authorId'?: types.Scalars['ID'] | null
   'embeddedPost.body'?: types.Scalars['String'] | null
   'embeddedPost.clicks'?: types.Scalars['Int'] | null
-  'embeddedPost.id'?: types.Scalars['ID']
+  'embeddedPost.id'?: types.Scalars['ID'] | null
   'embeddedPost.metadata'?: PostMetadataInsert | null
-  'embeddedPost.metadata.region'?: types.Scalars['String']
-  'embeddedPost.metadata.visible'?: types.Scalars['Boolean']
-  'embeddedPost.title'?: types.Scalars['String']
-  'embeddedPost.views'?: types.Scalars['Int']
+  'embeddedPost.metadata.region'?: types.Scalars['String'] | null
+  'embeddedPost.metadata.visible'?: types.Scalars['Boolean'] | null
+  'embeddedPost.title'?: types.Scalars['String'] | null
+  'embeddedPost.views'?: types.Scalars['Int'] | null
   firstName?: types.Scalars['String'] | null
   friendsId?: types.Scalars['ID'][] | null
-  id?: types.Scalars['ID']
+  id?: types.Scalars['ID'] | null
   lastName?: types.Scalars['String'] | null
-  live?: types.Scalars['Boolean']
+  live?: types.Scalars['Boolean'] | null
   localization?: types.Scalars['Coordinates'] | null
   title?: types.Scalars['LocalizedString'] | null
   usernamePasswordCredentials?: UsernamePasswordCredentialsInsert | null
-  'usernamePasswordCredentials.password'?: types.Scalars['Password']
-  'usernamePasswordCredentials.username'?: types.Scalars['String']
+  'usernamePasswordCredentials.password'?: types.Scalars['Password'] | null
+  'usernamePasswordCredentials.username'?: types.Scalars['String'] | null
 }
 export type UserRawUpdate = never
 
@@ -1879,7 +1879,7 @@ export type UsernamePasswordCredentialsInsert = {
   username: types.Scalars['String']
 }
 
-export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
   middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: {
@@ -1903,12 +1903,12 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
 
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<
-  never,
-  never,
-  types.Scalars,
-  MetadataType
-> {
+export class EntityManager<
+  MetadataType = never,
+  OperationMetadataType = never,
+  Permissions extends string = never,
+  SecurityDomain extends Record<string, unknown> = never,
+> extends T.AbstractEntityManager<never, never, types.Scalars, MetadataType> {
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined
   private _audit: AuditDAO<MetadataType, OperationMetadataType> | undefined
   private _city: CityDAO<MetadataType, OperationMetadataType> | undefined

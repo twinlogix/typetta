@@ -11,7 +11,7 @@ generates:
         Date: Date
         Decimal: bignumber.js#BigNumber
         Coordinates: ../../src#Coordinates
-        LocalizedString: ../../src#LocalizedString
+        LocalizedString: ../types#LocalizedString
         JSON: any
         Password: string
         Live: boolean

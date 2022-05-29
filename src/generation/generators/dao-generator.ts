@@ -269,7 +269,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
         : ''
 
     const entityManagerParamsExport = `
-export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {\n${indentMultiline(
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {\n${indentMultiline(
       `${metadata}${middlewares}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${loggerParams}${securityPolicyParam}`,
     )}\n}`
 
@@ -344,7 +344,7 @@ this.params = params`,
     ].join('\n\n')
 
     const entityManagerExport =
-      `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<${
+      `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> extends T.AbstractEntityManager<${
         mongoSourcesLiteral || 'never'
       }, ${sqlSourcesLiteral || 'never'}, types.Scalars, MetadataType>  {\n\n` +
       indentMultiline(declarations) +
@@ -671,15 +671,15 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         if (field.type.kind === 'scalar') {
           const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
           const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${baseType})` : baseType}[]` : baseType
-          return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
+          return [`'${fieldName}'?: ${fieldType} | null`]
         } else if (field.type.kind === 'embedded') {
           const embeddedTypeNode = getNode(field.type.embed, typesMap)
           const embeddedType = `${embeddedTypeNode.name}Insert`
           const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}[]` : embeddedType
           if (field.isList) {
-            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
+            return [`'${fieldName}'?: ${fieldType} | null`]
           } else {
-            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
+            return [`'${fieldName}'?: ${fieldType} | null`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
           }
         }
         return []

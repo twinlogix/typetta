@@ -44,8 +44,8 @@ export type ASort = Partial<Record<ASortKeys, T.SortDirection>>
 export type ARawSort = () => M.Sort
 
 export type AUpdate = {
-  id?: types.Scalars['MongoID']
-  value?: types.Scalars['Int']
+  id?: types.Scalars['MongoID'] | null
+  value?: types.Scalars['Int'] | null
 }
 export type ARawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -155,8 +155,8 @@ export type BSort = Partial<Record<BSortKeys, T.SortDirection>>
 export type BRawSort = () => M.Sort
 
 export type BUpdate = {
-  id?: types.Scalars['ID']
-  value?: types.Scalars['Int']
+  id?: types.Scalars['ID'] | null
+  value?: types.Scalars['Int'] | null
 }
 export type BRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -261,8 +261,8 @@ export type CSort = Partial<Record<CSortKeys, T.SortDirection>>
 export type CRawSort = () => M.Sort
 
 export type CUpdate = {
-  id?: types.Scalars['ID']
-  value?: types.Scalars['Int']
+  id?: types.Scalars['ID'] | null
+  value?: types.Scalars['Int'] | null
 }
 export type CRawUpdate = () => M.UpdateFilter<M.Document>
 
@@ -373,8 +373,8 @@ export type DSort = Partial<Record<DSortKeys, T.SortDirection>>
 export type DRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type DUpdate = {
-  id?: types.Scalars['IntAutoInc']
-  value?: types.Scalars['Int']
+  id?: types.Scalars['IntAutoInc'] | null
+  value?: types.Scalars['Int'] | null
 }
 export type DRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -484,8 +484,8 @@ export type ESort = Partial<Record<ESortKeys, T.SortDirection>>
 export type ERawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type EUpdate = {
-  id?: types.Scalars['ID']
-  value?: types.Scalars['Int']
+  id?: types.Scalars['ID'] | null
+  value?: types.Scalars['Int'] | null
 }
 export type ERawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -590,8 +590,8 @@ export type FSort = Partial<Record<FSortKeys, T.SortDirection>>
 export type FRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
 export type FUpdate = {
-  id?: types.Scalars['ID']
-  value?: types.Scalars['Int']
+  id?: types.Scalars['ID'] | null
+  value?: types.Scalars['Int'] | null
 }
 export type FRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
 
@@ -662,7 +662,7 @@ export class InMemoryFDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 }
 
-export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
   middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: {
@@ -682,12 +682,12 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
 
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
 
-export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<
-  'a' | 'default',
-  'default',
-  types.Scalars,
-  MetadataType
-> {
+export class EntityManager<
+  MetadataType = never,
+  OperationMetadataType = never,
+  Permissions extends string = never,
+  SecurityDomain extends Record<string, unknown> = never,
+> extends T.AbstractEntityManager<'a' | 'default', 'default', types.Scalars, MetadataType> {
   private _a: ADAO<MetadataType, OperationMetadataType> | undefined
   private _b: BDAO<MetadataType, OperationMetadataType> | undefined
   private _c: CDAO<MetadataType, OperationMetadataType> | undefined

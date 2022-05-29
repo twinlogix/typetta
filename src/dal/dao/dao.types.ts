@@ -5,7 +5,6 @@ import { AbstractEntityManager } from '../entity-manager'
 import { LogFunction } from './log/log.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection, ModelProjection } from './projections/projections.types'
-import { DAORelation } from './relations/relations.types'
 import { Schema } from './schemas/schemas.types'
 import { GraphQLResolveInfo } from 'graphql'
 import { Knex } from 'knex'
@@ -28,6 +27,7 @@ export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<Fil
   sorts?: T['sort']
   operationId?: string
   relationParents?: { field: string; schema: Schema<T['scalars']> }[]
+  maxDepth?: number
 }
 
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
