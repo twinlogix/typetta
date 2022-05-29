@@ -29,7 +29,7 @@ export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in s
                         const mappedAtom = Object.fromEntries(
                           Object.entries(atom).flatMap(([k, v]) => {
                             const key = k as keyof SecurityDomain
-                            return domainMap[key] !== null ? [[domainMap[key], v]] : []
+                            return domainMap[key] != null ? [[domainMap[key], v]] : []
                           }),
                         )
                         return Object.keys(mappedAtom).length > 0 ? [mappedAtom] : []
@@ -51,7 +51,7 @@ export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in s
               const mappedSecurityDomain = Object.fromEntries(
                 Object.entries(securityDomain).flatMap(([k, v]) => {
                   const key = k as keyof SecurityDomain
-                  return domainMap[key] !== null ? [[domainMap[key], v]] : []
+                  return domainMap[key] != null ? [[domainMap[key], v]] : []
                 }),
               )
               return mappedSecurityDomain

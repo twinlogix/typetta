@@ -42,7 +42,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           domain: {
             hotelId: 'id',
             tenantId: 'tenantId',
-            userId: null,
+            //userId: null,
           },
           permissions: {
             MANAGE_HOTEL: PERMISSION.ALLOW,
@@ -61,7 +61,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           domain: {
             hotelId: 'hotelId',
             tenantId: 'tenantId',
-            userId: null,
+            //userId: null,
           },
           permissions: {
             MANAGE_ROOM: { create: true },
