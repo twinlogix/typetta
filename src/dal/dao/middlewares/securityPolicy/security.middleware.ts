@@ -86,6 +86,7 @@ export function securityPolicy<
   }
 
   return {
+    name: 'Typetta - Security',
     before: async (args, context) => {
       const relatedSecurityContext = getRelatedSecurityContext(context)
 
