@@ -54,6 +54,11 @@ export type AbstractASTElement<Entities extends string, Scalars extends string> 
     isExcluded: boolean
   } & ({ isId: false; generationStrategy: 'undefined' | 'middleware' | 'generator' } | { isId: true; generationStrategy: 'undefined' | 'user' | 'db' | 'generator' })
 }
+
 export type AbstractAST<Entities extends string, Scalars extends string> = {
   [K in Entities]: AbstractASTElement<Entities, Scalars>
 }
+
+export type EmbeddedFields<Entity extends string, AST extends AbstractAST<string, string>> = {
+  [Field in keyof AST[Entity]]: AST[Entity][Field]['type'] extends 'embedded' ? Field : never
+}[keyof AST[Entity]]
