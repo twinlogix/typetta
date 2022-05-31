@@ -149,7 +149,6 @@ type EmbeddedUser {
 type EmbeddedUser2 {
   userId: ID!
   user: User! @innerRef
-  e: EmbeddedUser2
 }
 
 type EmbeddedUser3 {

@@ -205,6 +205,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
   private _generateAST(nodes: TsTypettaGeneratorNode[]): string {
     function generateASTNodes(field: TsTypettaGeneratorField): string {
       const decorators = `
+      node: 'Entity',
       isList: ${field.isList}, 
       astName: '${field.graphqlType}', 
       isRequired: ${field.isRequired}, 
