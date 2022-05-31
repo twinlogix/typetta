@@ -3,9 +3,31 @@ import * as types from './models.mock'
 import { Knex } from 'knex'
 import * as M from 'mongodb'
 
-export type AAST = {
-  id: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'MongoID'; isRequired: true; isListElementRequired: false }
-  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
+export type AST = {
+  A: {
+    id: { type: 'scalar'; isList: false; astName: 'MongoID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+    value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  B: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  C: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
+    value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  D: {
+    id: { type: 'scalar'; isList: false; astName: 'IntAutoInc'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+    value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  E: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  F: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
+    value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
 }
 
 export type AExcludedFields = never
@@ -125,11 +147,6 @@ export class InMemoryADAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 }
 
-export type BAST = {
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
-}
-
 export type BExcludedFields = never
 
 export type BEmbeddedFields = never
@@ -239,11 +256,6 @@ export class InMemoryBDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       schema: bSchema(),
     })
   }
-}
-
-export type CAST = {
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
 }
 
 export type CExcludedFields = never
@@ -363,11 +375,6 @@ export class InMemoryCDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 }
 
-export type DAST = {
-  id: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'IntAutoInc'; isRequired: true; isListElementRequired: false }
-  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
-}
-
 export type DExcludedFields = never
 
 export type DEmbeddedFields = never
@@ -484,11 +491,6 @@ export class InMemoryDDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 }
 
-export type EAST = {
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
-}
-
 export type EExcludedFields = never
 
 export type EEmbeddedFields = never
@@ -598,11 +600,6 @@ export class InMemoryEDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       schema: eSchema(),
     })
   }
-}
-
-export type FAST = {
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
 }
 
 export type FExcludedFields = never
