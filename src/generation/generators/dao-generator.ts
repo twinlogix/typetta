@@ -23,9 +23,10 @@ export class TsTypettaGenerator extends TypettaGenerator {
       throw new Error('At least one entity is required for code generation. (@entity)')
     }
     const definitions = [...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation').flatMap((node) => this.generateDefinition(node, typesMap, customScalarsMap))
+    const scalars = this._generateScalars([...customScalarsMap.values()])
     const ast = this._generateAST([...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation'))
     const exports = this.generateExports(typesMap, customScalarsMap)
-    return [ast, imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
+    return [scalars, ast, imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
   }
 
   private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
@@ -202,6 +203,20 @@ export class TsTypettaGenerator extends TypettaGenerator {
     }
   }
 
+  private _generateScalars(scalars: TsTypettaGeneratorScalar[]): string {
+    const defaultScalars: TsTypettaGeneratorScalar[] = [
+      { isEnum: false, isQuantity: false, isString: false, name: 'ID', type: 'scalar' },
+      { isEnum: false, isQuantity: false, isString: true, name: 'String', type: 'scalar' },
+      { isEnum: false, isQuantity: false, isString: false, name: 'Boolean', type: 'scalar' },
+      { isEnum: false, isQuantity: true, isString: false, name: 'Int', type: 'scalar' },
+      { isEnum: false, isQuantity: true, isString: false, name: 'Float', type: 'scalar' },
+    ]
+    return `export type Scalars = {
+      ${[...defaultScalars, ...scalars].map((s) => {
+        return `${s.name}: { type: types.Scalars['${s.name}'], isTextual: ${s.isString}, isQuantitative: ${s.isQuantity} }`
+      })}
+    }`
+  }
   private _generateAST(nodes: TsTypettaGeneratorNode[]): string {
     function generateASTNodes(field: TsTypettaGeneratorField): string {
       const decorators = `
@@ -476,9 +491,9 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       ${embeddedFields
         .map((f) => {
           const baseType = `${f.graphqlType}RetrieveAll`
-          const fieldType = f.isList ? f.isListElementRequired ? `${baseType}[]` : `types.Maybe<${baseType}>[]` : baseType
+          const fieldType = f.isList ? (f.isListElementRequired ? `${baseType}[]` : `types.Maybe<${baseType}>[]`) : baseType
           const requiredFieldType = f.isRequired ? fieldType : `types.Maybe<${fieldType}>`
-          return `${f.name}${f.isRequired ? '': '?'}: ${requiredFieldType}`
+          return `${f.name}${f.isRequired ? '' : '?'}: ${requiredFieldType}`
         })
         .join('\n')}
     }`

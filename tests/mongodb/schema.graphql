@@ -1,6 +1,6 @@
 scalar Coordinates @geopoint
 scalar LocalizedString
-scalar Decimal
+scalar Decimal @quantitative
 scalar Password
 scalar JSON
 scalar Live

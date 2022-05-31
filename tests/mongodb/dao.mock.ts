@@ -1,18 +1,25 @@
 import * as T from '../../src'
+import { ExpandRecursively, Filter, FlattenEmbeddedFilter } from '../../src'
 import * as types from './models.mock'
 import * as M from 'mongodb'
-import { EmbeddedFields, ExpandRecursively, GenerateModel, Project, Projection } from '../../src'
 
-type A = EmbeddedFields<'User', AST>
-type LOL = GenerateModel<'User', AST, types.Scalars, 'relation'>
-type P = Projection<'User', AST>
-type ASD1 = Project<'User', AST, types.Scalars, {}>
-type ASD2 = Project<'User', AST, types.Scalars, undefined>
-type ASD3 = Project<'User', AST, types.Scalars, true>
-type ASD4 = Project<'User', AST, types.Scalars, P>
-type ASD = Project<'User', AST, types.Scalars, { id: true }>
+type A = Filter<'User', AST, Scalars>
+const a: A = { "embeddedPost.id": "" }
 
-const a: ASD = 1 as any
+export type Scalars = {
+  ID: { type: types.Scalars['ID']; isTextual: false; isQuantitative: false }
+  String: { type: types.Scalars['String']; isTextual: true; isQuantitative: false }
+  Boolean: { type: types.Scalars['Boolean']; isTextual: false; isQuantitative: false }
+  Int: { type: types.Scalars['Int']; isTextual: false; isQuantitative: true }
+  Float: { type: types.Scalars['Float']; isTextual: false; isQuantitative: true }
+  Coordinates: { type: types.Scalars['Coordinates']; isTextual: false; isQuantitative: false }
+  Decimal: { type: types.Scalars['Decimal']; isTextual: false; isQuantitative: true }
+  JSON: { type: types.Scalars['JSON']; isTextual: false; isQuantitative: false }
+  Live: { type: types.Scalars['Live']; isTextual: false; isQuantitative: false }
+  LocalizedString: { type: types.Scalars['LocalizedString']; isTextual: false; isQuantitative: false }
+  MongoID: { type: types.Scalars['MongoID']; isTextual: false; isQuantitative: false }
+  Password: { type: types.Scalars['Password']; isTextual: false; isQuantitative: false }
+}
 
 export type AST = {
   Address: {
@@ -311,7 +318,7 @@ export type AST = {
   }
   User: {
     amount: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-    amounts: { type: 'scalar'; node: 'Entity'; isList: true; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    amounts: { type: 'scalar'; node: 'Entity'; isList: true; astName: 'Decimal'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     credentials: {
       type: 'embedded'
       node: 'Entity'
@@ -2270,8 +2277,8 @@ export function userSchema(): T.Schema<types.Scalars> {
 }
 
 type UserFilterFields = {
-  amount?: types.Scalars['Decimal'] | null | T.EqualityOperators<types.Scalars['Decimal']> | T.ElementOperators
-  amounts?: types.Scalars['Decimal'][] | null | T.EqualityOperators<types.Scalars['Decimal'][]> | T.ElementOperators
+  amount?: types.Scalars['Decimal'] | null | T.EqualityOperators<types.Scalars['Decimal']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Decimal']>
+  amounts?: types.Scalars['Decimal'][] | null | T.EqualityOperators<types.Scalars['Decimal'][]> | T.ElementOperators | T.QuantityOperators<types.Scalars['Decimal'][]>
   'credentials.password'?: types.Scalars['Password'] | null | T.EqualityOperators<types.Scalars['Password']> | T.ElementOperators
   'credentials.username'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
   'embeddedPost.authorId'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
