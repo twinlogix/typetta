@@ -52,15 +52,18 @@ export class TsTypettaGenerator extends TypettaGenerator {
       })
   }
 
-  private checkReferences(typesMap: Map<string, TsTypettaGeneratorNode>, filter: (type: TsTypettaGeneratorNode) => boolean, parents: TsTypettaGeneratorNode[] = []) {
+  private checkReferences(typesMap: Map<string, TsTypettaGeneratorNode>, filter: (type: TsTypettaGeneratorNode) => boolean, parents: TsTypettaGeneratorNode[] = [], visited: string[] = []) {
     Array.from(typesMap.values())
       .filter(filter)
       .forEach((type) => {
         const errorPrefix = `(Type: ${type.name}${parents.length > 0 ? `, Parents: ${parents.map((v) => v.name).join('<-')}` : ''})`
+        if (visited.includes(type.name)) {
+          return
+        }
         type.fields.forEach((field) => {
           if (field.type.kind === 'embedded') {
             const type2Name = field.type.embed
-            this.checkReferences(typesMap, (t) => t.name === type2Name, [type, ...parents])
+            this.checkReferences(typesMap, (t) => t.name === type2Name, [type, ...parents], [...visited, type.name])
           } else if (field.type.kind === 'innerRef') {
             const refType = findNode(field.type.innerRef, typesMap)
             if (!refType) {
@@ -419,9 +422,14 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       .filter((n) => n.type.kind === 'innerRef' || n.type.kind === 'foreignRef' || n.type.kind === 'relationEntityRef')
       .map((n) => `'${n.name}'`)
       .join(' | ')
+    const embeddedFields = node.fields
+      .filter((n) => n.type.kind === 'embedded')
+      .map((n) => `'${n.name}'`)
+      .join(' | ')
     const daoExludedFields = `export type ${node.name}ExcludedFields = ${exludedFields ? exludedFields : 'never'}`
     const daoRelationFields = `export type ${node.name}RelationFields = ${relationsFields ? relationsFields : 'never'}`
-    return [daoExludedFields, daoRelationFields].join('\n')
+    const daoEmbeddedFields = `export type ${node.name}EmbeddedFields = ${embeddedFields ? embeddedFields : 'never'}`
+    return [daoExludedFields, daoRelationFields, daoEmbeddedFields].join('\n')
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -546,7 +554,16 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     return [daoFilterFields, daoFilter, daoRawFilter].join('\n')
   }
 
-  public _generateDAOFilterFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>, path = ''): string[] {
+  public _generateDAOFilterFields(
+    node: TsTypettaGeneratorNode,
+    typesMap: Map<string, TsTypettaGeneratorNode>,
+    customScalarsMap: Map<string, TsTypettaGeneratorScalar>,
+    path = '',
+    visited: string[] = [],
+  ): string[] {
+    if (visited.includes(node.name)) {
+      throw new Error(`Recursive embedded are not supported, please use a reference in this cases (entity ${node.name}, path: ${path})`)
+    }
     return node.fields
       .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {
@@ -560,7 +577,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
           return [`'${fieldName}'?: ${fieldType} | null | T.EqualityOperators<${fieldType}> | T.ElementOperators` + stringOperators + quantityOperators]
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
-          return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.')
+          return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.', [...visited, node.name])
         }
         return []
       })
@@ -613,8 +630,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
           return `${field.name}?: ${linkedType.name}Projection | boolean`
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
-          const embeddedProjection = indentMultiline(this._generateDAOProjectionFields(embeddedType, typesMap))
-          return `${field.name}?: {\n${embeddedProjection}\n} | boolean`
+          return `${field.name}?: ${embeddedType.name}Projection | boolean`
         }
       })
       .join('\n')
