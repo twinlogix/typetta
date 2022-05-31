@@ -1,5 +1,5 @@
 import { TypeScriptTypettaPluginConfig } from '../config'
-import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from '../types'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from '../types'
 import { findField, findID, findNode, getID, getNode, removeParentPath, toFirstLower } from '../utils'
 import { DEFAULT_SCALARS, indentMultiline } from '@graphql-codegen/visitor-plugin-common'
 
@@ -23,8 +23,9 @@ export class TsTypettaGenerator extends TypettaGenerator {
       throw new Error('At least one entity is required for code generation. (@entity)')
     }
     const definitions = [...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation').flatMap((node) => this.generateDefinition(node, typesMap, customScalarsMap))
+    const ast = this._generateAST([...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation'))
     const exports = this.generateExports(typesMap, customScalarsMap)
-    return [imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
+    return [ast, imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
   }
 
   private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
@@ -194,6 +195,39 @@ export class TsTypettaGenerator extends TypettaGenerator {
       const daoInsert = this._generateDAOInsert(node)
       return [daoSchema, daoProjection, daoInsert].join('\n\n')
     }
+  }
+
+  private _generateAST(nodes: TsTypettaGeneratorNode[]): string {
+    function generateASTNodes(field: TsTypettaGeneratorField): string {
+      const decorators = `
+      isList: ${field.isList}, 
+      astName: '${field.graphqlType}', 
+      isRequired: ${field.isRequired}, 
+      isListElementRequired: ${field.isListElementRequired},
+      isExcluded: ${field.isExcluded},
+      isId: ${field.isID},
+      generationStrategy: '${field.isID ? field.idGenerationStrategy ?? field.defaultGenerationStrategy : field.defaultGenerationStrategy}'`
+
+      if (field.type.kind === 'embedded') {
+        return `${field.name}: { type: 'embedded', ${decorators} }`
+      } else if (field.type.kind === 'scalar') {
+        return `${field.name}: { type: 'scalar', ${decorators} }`
+      } else if (field.type.kind === 'foreignRef') {
+        return `${field.name}: { type: 'relation', relation: 'foreign', ${decorators} }`
+      } else if (field.type.kind === 'innerRef') {
+        return `${field.name}: { type: 'relation', relation: 'inner', ${decorators} }`
+      } else if (field.type.kind === 'relationEntityRef') {
+        return `${field.name}: { type: 'relation', relation: 'relationEntity', ${decorators} }`
+      }
+      return `${field.name}: { ${decorators} }`
+    }
+    return `export type AST = {
+    ${nodes
+      .map((node) => {
+        return `${node.name}: { ${node.fields.map((f) => generateASTNodes(f)).join(',\n')} }`
+      })
+      .join(',\n')}
+  }`
   }
 
   public generateExports(typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string[] {

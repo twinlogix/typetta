@@ -2,6 +2,155 @@ import * as T from '../../src'
 import * as types from './models.mock'
 import * as M from 'mongodb'
 
+export type AST = {
+  Address: {
+    cities: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'City'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'generator' }
+  }
+  Audit: {
+    changes: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    entityId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'db' }
+  }
+  Auditable: {
+    createdBy: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    createdOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    deletedOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    modifiedBy: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    modifiedOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    state: { type: 'scalar'; isList: false; astName: 'State'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    versions: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'Audit'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  City: {
+    addressId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    computedAddressName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isID: false; generationStrategy: 'undefined' }
+    computedName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isID: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  DefaultFieldsEntity: {
+    creationDate: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'middleware' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'user' }
+    live: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    opt1: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'middleware' }
+    opt2: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'generator' }
+  }
+  Device: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  Dog: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    owner: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    ownerId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  EmbeddedUser: {
+    e: { type: 'embedded'; isList: true; astName: 'EmbeddedUser2'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  EmbeddedUser2: {
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  EmbeddedUser3: {
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  EmbeddedUser4: {
+    e: { type: 'embedded'; isList: false; astName: 'EmbeddedUser5'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  EmbeddedUser5: { userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' } }
+  Hotel: {
+    audit: { type: 'embedded'; isList: false; astName: 'Auditable'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'middleware' }
+    embeddedUser3: { type: 'embedded'; isList: false; astName: 'EmbeddedUser3'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    embeddedUser4: { type: 'embedded'; isList: false; astName: 'EmbeddedUser4'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    embeddedUsers: { type: 'embedded'; isList: true; astName: 'EmbeddedUser'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    embeddedUsers3: { type: 'embedded'; isList: true; astName: 'EmbeddedUser3'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    embeddedUsers4: { type: 'embedded'; isList: true; astName: 'EmbeddedUser4'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'db' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    users: { type: 'embedded'; isList: false; astName: 'UserCollection'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  MockedEntity: {
+    id: { type: 'scalar'; isList: false; astName: 'MongoID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'db' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  Organization: {
+    address: { type: 'embedded'; isList: false; astName: 'Address'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    computedName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isID: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    vatNumber: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  Post: {
+    author: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    authorId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    body: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    clicks: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'generator' }
+    metadata: { type: 'embedded'; isList: false; astName: 'PostMetadata'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    title: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    views: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  PostMetadata: {
+    region: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    visible: { type: 'scalar'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  User: {
+    amount: { type: 'scalar'; isList: false; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    amounts: { type: 'scalar'; isList: true; astName: 'Decimal'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    credentials: {
+      type: 'embedded'
+      isList: true
+      astName: 'UsernamePasswordCredentials'
+      isRequired: false
+      isListElementRequired: false
+      isExcluded: false
+      isID: false
+      generationStrategy: 'undefined'
+    }
+    dogs: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'Dog'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    embeddedPost: { type: 'embedded'; isList: false; astName: 'Post'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    firstName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    friends: { type: 'relation'; relation: 'inner'; isList: true; astName: 'User'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    friendsId: { type: 'scalar'; isList: true; astName: 'ID'; isRequired: false; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: true; generationStrategy: 'generator' }
+    int: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    lastName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    live: { type: 'scalar'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    localization: { type: 'scalar'; isList: false; astName: 'Coordinates'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    title: { type: 'scalar'; isList: false; astName: 'LocalizedString'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    usernamePasswordCredentials: {
+      type: 'embedded'
+      isList: false
+      astName: 'UsernamePasswordCredentials'
+      isRequired: false
+      isListElementRequired: false
+      isExcluded: false
+      isID: false
+      generationStrategy: 'undefined'
+    }
+  }
+  UserCollection: {
+    users: { type: 'relation'; relation: 'inner'; isList: true; astName: 'User'; isRequired: true; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    usersId: { type: 'scalar'; isList: true; astName: 'ID'; isRequired: true; isListElementRequired: true; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+  UsernamePasswordCredentials: {
+    password: { type: 'scalar'; isList: false; astName: 'Password'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+    username: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isID: false; generationStrategy: 'undefined' }
+  }
+}
+
 export type AddressExcludedFields = never
 export type AddressRelationFields = 'cities'
 

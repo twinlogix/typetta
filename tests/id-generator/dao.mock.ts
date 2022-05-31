@@ -3,6 +3,11 @@ import * as types from './models.mock'
 import { Knex } from 'knex'
 import * as M from 'mongodb'
 
+export type AAST = {
+  id: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'MongoID'; isRequired: true; isListElementRequired: false }
+  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
+}
+
 export type AExcludedFields = never
 export type ARelationFields = never
 
@@ -115,6 +120,11 @@ export class InMemoryADAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 }
 
+export type BAST = {
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
+}
+
 export type BExcludedFields = never
 export type BRelationFields = never
 
@@ -219,6 +229,11 @@ export class InMemoryBDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       schema: bSchema(),
     })
   }
+}
+
+export type CAST = {
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
 }
 
 export type CExcludedFields = never
@@ -333,6 +348,11 @@ export class InMemoryCDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 }
 
+export type DAST = {
+  id: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'IntAutoInc'; isRequired: true; isListElementRequired: false }
+  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
+}
+
 export type DExcludedFields = never
 export type DRelationFields = never
 
@@ -444,6 +464,11 @@ export class InMemoryDDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 }
 
+export type EAST = {
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
+}
+
 export type EExcludedFields = never
 export type ERelationFields = never
 
@@ -548,6 +573,11 @@ export class InMemoryEDAO<MetadataType, OperationMetadataType> extends T.Abstrac
       schema: eSchema(),
     })
   }
+}
+
+export type FAST = {
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  value: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
 }
 
 export type FExcludedFields = never

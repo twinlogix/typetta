@@ -45,3 +45,15 @@ export type SchemaField<ScalarsType> = Readonly<
 >
 
 export type Schema<ScalarsType> = Readonly<{ [key: string]: SchemaField<ScalarsType> }>
+
+export type AbstractASTElement<Entities extends string, Scalars extends string> = {
+  [K in string]: ({ type: 'relation'; relation: 'foreign' | 'inner' | 'relationEntity'; astName: Entities } | { type: 'scalar'; astName: Scalars } | { type: 'embedded'; astName: Entities }) & {
+    isList: boolean
+    isRequired: boolean
+    isListElementRequired: boolean
+    isExcluded: boolean
+  } & ({ isId: false; generationStrategy: 'undefined' | 'middleware' | 'generator' } | { isId: true; generationStrategy: 'undefined' | 'user' | 'db' | 'generator' })
+}
+export type AbstractAST<Entities extends string, Scalars extends string> = {
+  [K in Entities]: AbstractASTElement<Entities, Scalars>
+}

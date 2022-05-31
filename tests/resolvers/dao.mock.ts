@@ -1,6 +1,13 @@
 import * as T from '../../src'
 import * as types from './models.mock'
 
+export type LikeAST = {
+  creationDate: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Date'; isRequired: true; isListElementRequired: false }
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  postId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  userId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+}
+
 export type LikeExcludedFields = never
 export type LikeRelationFields = never
 
@@ -129,6 +136,11 @@ export class InMemoryLikeDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
+export type MetadataAST = {
+  tags: { kind: 'scalar'; scalar: 'string'; isList: true; graphQL: 'String'; isRequired: false; isListElementRequired: true }
+  views: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: false; isListElementRequired: false }
+}
+
 export function metadataSchema(): T.Schema<types.Scalars> {
   return {
     tags: {
@@ -153,6 +165,15 @@ export type MetadataParam<P extends MetadataProjection> = T.ParamProjection<type
 export type MetadataInsert = {
   tags?: null | types.Scalars['String'][]
   views?: null | types.Scalars['Int']
+}
+
+export type PostAST = {
+  content: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
+  creationDate: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Date'; isRequired: true; isListElementRequired: false }
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  likes: { kind: 'relation'; relationType: 'entity'; relation: 'Like'; isList: true; graphQL: 'User'; isRequired: true; isListElementRequired: true }
+  metadata: { kind: 'embedded'; embedded: 'Metadata'; isList: false; graphQL: 'Metadata'; isRequired: false; isListElementRequired: false }
+  userId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
 }
 
 export type PostExcludedFields = never
@@ -324,6 +345,15 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
       schema: postSchema(),
     })
   }
+}
+
+export type UserAST = {
+  birthDate: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Date'; isRequired: false; isListElementRequired: false }
+  firstName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  lastName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
+  likes: { kind: 'relation'; relationType: 'entity'; relation: 'Like'; isList: true; graphQL: 'Post'; isRequired: true; isListElementRequired: true }
+  posts: { kind: 'relation'; relationType: 'foreign'; relation: 'Post'; isList: true; graphQL: 'Post'; isRequired: false; isListElementRequired: true }
 }
 
 export type UserExcludedFields = never

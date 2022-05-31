@@ -2,6 +2,14 @@ import * as T from '../../src'
 import * as types from './models.mock'
 import * as M from 'mongodb'
 
+export type HotelAST = {
+  deletionDate: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Date'; isRequired: false; isListElementRequired: false }
+  description: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
+  tenantId: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'TenantId'; isRequired: true; isListElementRequired: false }
+}
+
 export type HotelExcludedFields = never
 export type HotelRelationFields = never
 
@@ -138,6 +146,15 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
       schema: hotelSchema(),
     })
   }
+}
+
+export type ReservationAST = {
+  deletionDate: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Date'; isRequired: false; isListElementRequired: false }
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  room: { kind: 'relation'; relationType: 'inner'; relation: 'Room'; isList: false; graphQL: 'Room'; isRequired: false; isListElementRequired: false }
+  roomId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  tenantId: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'TenantId'; isRequired: true; isListElementRequired: false }
+  userId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
 }
 
 export type ReservationExcludedFields = never
@@ -286,6 +303,15 @@ export class InMemoryReservationDAO<MetadataType, OperationMetadataType> extends
       schema: reservationSchema(),
     })
   }
+}
+
+export type RoomAST = {
+  deletionDate: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Date'; isRequired: false; isListElementRequired: false }
+  hotel: { kind: 'relation'; relationType: 'inner'; relation: 'Hotel'; isList: false; graphQL: 'Hotel'; isRequired: true; isListElementRequired: false }
+  hotelId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  size: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
+  tenantId: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'TenantId'; isRequired: true; isListElementRequired: false }
 }
 
 export type RoomExcludedFields = never
@@ -437,6 +463,11 @@ export class InMemoryRoomDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
+export type TenantAST = {
+  id: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
+  info: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
+}
+
 export type TenantExcludedFields = never
 export type TenantRelationFields = never
 
@@ -547,6 +578,17 @@ export class InMemoryTenantDAO<MetadataType, OperationMetadataType> extends T.Ab
       schema: tenantSchema(),
     })
   }
+}
+
+export type UserAST = {
+  credentials: { kind: 'embedded'; embedded: 'UsernamePasswordCredentials'; isList: false; graphQL: 'UsernamePasswordCredentials'; isRequired: false; isListElementRequired: false }
+  deletionDate: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Date'; isRequired: false; isListElementRequired: false }
+  email: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Email'; isRequired: true; isListElementRequired: false }
+  firstName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
+  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+  lastName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
+  reservations: { kind: 'relation'; relationType: 'foreign'; relation: 'Reservation'; isList: true; graphQL: 'Reservation'; isRequired: true; isListElementRequired: false }
+  tenantId: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'TenantId'; isRequired: true; isListElementRequired: false }
 }
 
 export type UserExcludedFields = never
@@ -729,6 +771,11 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
       schema: userSchema(),
     })
   }
+}
+
+export type UsernamePasswordCredentialsAST = {
+  password: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Password'; isRequired: true; isListElementRequired: false }
+  username: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Username'; isRequired: true; isListElementRequired: false }
 }
 
 export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
