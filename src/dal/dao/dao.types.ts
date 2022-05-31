@@ -140,6 +140,8 @@ export type DAOGenerics<
   RawUpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   RelationsFields extends keyof ModelType = any,
+  EmbeddedFields extends keyof ModelType = any,
+  RetrieveAll extends object = any,
   MetadataType = any,
   OperationMetadataType = any,
   DriverContextType = any,
@@ -171,6 +173,8 @@ export type DAOGenerics<
   update: PureUpdateType | RawUpdateType
   exludedFields: ExcludedFields
   relationFields: RelationsFields
+  embeddedFields: EmbeddedFields
+  retrieveAll: RetrieveAll
   insertExcludedFields: ExcludedFields | RelationsFields
   metadata: MetadataType
   operationMetadata: OperationMetadataType

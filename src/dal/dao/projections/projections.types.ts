@@ -76,7 +76,7 @@ type Selector<ProjectionType extends Record<string, unknown>, P extends AnyProje
  */
 export type ModelProjection<T extends DAOGenerics, P extends AnyProjection<T['projection']> | GraphQLResolveInfo> = Selector<T['projection'], P> extends infer S
   ? S extends 'all'
-    ? Omit<T['model'], T['relationFields']> & { __projection: 'all' }
+    ? T['retrieveAll'] & { __projection: 'all' }
     : S extends 'specific'
     ? P extends T['projection']
       ? Expand<StaticModelProjection<T['model'], T['projection'], P>>

@@ -4,7 +4,7 @@
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { CityProjection, EntityManager, UserDAO, UserProjection } from './dao.mock'
+import { CityProjection, EntityManager, UserDAO, UserProjection, UserRetrieveAll } from './dao.mock'
 import { Scalars, State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -294,14 +294,14 @@ test('safe find', async () => {
 
   // Whole object
   const response4 = await dao.user.findOne({ projection: true })
-  typeAssert<Test<typeof response4, (User & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response4, (UserRetrieveAll & { __projection: 'all' }) | null>>()
   expect(response4).toBeDefined()
   expect(response4?.firstName).toBe('FirstName')
   expect(response4?.live).toBe(true)
 
   // No projection
   const response5 = await dao.user.findOne({})
-  typeAssert<Test<typeof response5, (User & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response5, (UserRetrieveAll & { __projection: 'all' }) | null>>()
   expect(response5).toBeDefined()
   expect(response5?.firstName).toBe('FirstName')
   expect(response5?.live).toBe(true)
@@ -313,7 +313,7 @@ test('safe find', async () => {
 
   // All undefined projection
   const response9 = await dao.user.findOne()
-  typeAssert<Test<typeof response9, (User & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response9, (UserRetrieveAll & { __projection: 'all' }) | null>>()
   expect(response9).toBeDefined()
 
   // Info to projection
@@ -468,6 +468,23 @@ test('find with start and limit', async () => {
   expect(response5.length).toBe(2)
   expect(response5[0].firstName).toBe('8')
   expect(response5[1].firstName).toBe('9')
+})
+
+test('find with embedded that have inner refs', async () => {
+  await dao.user.insertOne({
+    record: {
+      id: '123',
+      firstName: 'FirstName',
+      embeddedUser: {
+        userId: '123',
+      },
+      live: true,
+    },
+  })
+
+  const user = await dao.user.findOne({})
+  expect(user?.embeddedUser?.userId).toBe('123')
+  expect((user?.embeddedUser as Record<string, unknown>)?.user).toBe(undefined)
 })
 
 // ------------------------------------------------------------------------

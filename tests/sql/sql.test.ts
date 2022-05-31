@@ -529,6 +529,28 @@ test('find with start and limit', async () => {
   expect(response5[1].firstName).toBe('9')
 })
 
+test('find with embedded that have inner refs', async () => {
+  await dao.user.insertOne({
+    record: {
+      id: 'abc',
+      firstName: 'FirstName',
+      embeddedDog: {
+        name: 'dog',
+        ownerId: 'abc',
+      },
+      live: true,
+    },
+  })
+
+  const user = await dao.user.findOne({})
+  expect(user?.embeddedDog?.ownerId).toBe('abc')
+  expect(user?.embeddedDog?.name).toBe('dog')
+  expect((user?.embeddedDog as Record<string, unknown>)?.owner).toBe(undefined)
+
+  const user2 = await dao.user.findOne({ projection: { live: true, embeddedDog: true } })
+  console.log(user2?.embeddedDog?.owner?.embeddedDog?.owner) //TODO: this should not be possible
+})
+
 test('simple insert', async () => {
   const response1 = await dao.user.findAll({})
   expect(response1.length).toBe(0)

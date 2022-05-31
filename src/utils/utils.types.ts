@@ -2,14 +2,6 @@ export type DeepReadonly<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>
 }
 
-export type Truetizer<P> = P extends true
-  ? true
-  : P extends object
-  ? {
-      [K in keyof P]: P[K] extends object ? Truetizer<P[K]> : never | P[K] | true
-    }
-  : never /* | true*/
-
 /**
  * Expands object types recursively.
  */

@@ -20,6 +20,8 @@ export type KnexJsDAOGenerics<
   RawUpdateType = any,
   ExcludedFields extends keyof ModelType = any,
   RelationsFields extends keyof ModelType = any,
+  EmbeddedFields extends keyof ModelType = any,
+  RetrieveAll extends object = any,
   MetadataType = any,
   OperationMetadataType = any,
   ScalarsType extends DefaultModelScalars = any,
@@ -40,6 +42,8 @@ export type KnexJsDAOGenerics<
   RawUpdateType,
   ExcludedFields,
   RelationsFields,
+  EmbeddedFields,
+  RetrieveAll,
   MetadataType,
   OperationMetadataType,
   {

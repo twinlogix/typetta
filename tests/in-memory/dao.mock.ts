@@ -1,13 +1,133 @@
 import * as T from '../../src'
 import * as types from './models.mock'
 
-export type AddressAST = {
-  cities: { kind: 'relation'; relationType: 'foreign'; relation: 'City'; isList: true; graphQL: 'City'; isRequired: false; isListElementRequired: true }
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
+export type AST = {
+  Address: {
+    cities: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'City'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+  }
+  Audit: {
+    changes: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    entityId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+  }
+  Auditable: {
+    createdBy: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    createdOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    deletedOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    modifiedBy: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    modifiedOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    state: { type: 'scalar'; isList: false; astName: 'State'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    versions: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'Audit'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  City: {
+    addressId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    computedAddressName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+    computedName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  DefaultFieldsEntity: {
+    creationDate: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
+    live: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    opt1: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
+    opt2: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
+  }
+  Device: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  Dog: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    owner: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    ownerId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  Hotel: {
+    audit: { type: 'embedded'; isList: false; astName: 'Auditable'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  MockedEntity: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  Organization: {
+    address: { type: 'embedded'; isList: false; astName: 'Address'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    computedName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    vatNumber: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  Post: {
+    author: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    authorId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    body: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    clicks: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    metadata: { type: 'embedded'; isList: false; astName: 'PostMetadata'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    title: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    views: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  PostMetadata: {
+    region: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    visible: { type: 'scalar'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  PostType: {
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
+    name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
+  User: {
+    amount: { type: 'scalar'; isList: false; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    amounts: { type: 'scalar'; isList: true; astName: 'Decimal'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    credentials: {
+      type: 'embedded'
+      isList: true
+      astName: 'UsernamePasswordCredentials'
+      isRequired: false
+      isListElementRequired: false
+      isExcluded: false
+      isId: false
+      generationStrategy: 'undefined'
+    }
+    dogs: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'Dog'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    embeddedPost: { type: 'embedded'; isList: false; astName: 'Post'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    firstName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    friends: { type: 'relation'; relation: 'inner'; isList: true; astName: 'User'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    friendsId: { type: 'scalar'; isList: true; astName: 'ID'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    lastName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    live: { type: 'scalar'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    localization: { type: 'scalar'; isList: false; astName: 'Coordinates'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    title: { type: 'scalar'; isList: false; astName: 'LocalizedString'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    usernamePasswordCredentials: {
+      type: 'embedded'
+      isList: false
+      astName: 'UsernamePasswordCredentials'
+      isRequired: false
+      isListElementRequired: false
+      isExcluded: false
+      isId: false
+      generationStrategy: 'undefined'
+    }
+  }
+  UsernamePasswordCredentials: {
+    password: { type: 'scalar'; isList: false; astName: 'Password'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    username: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+  }
 }
 
 export type AddressExcludedFields = never
+
+export type AddressEmbeddedFields = never
 export type AddressRelationFields = 'cities'
+export type AddressRetrieveAll = Omit<types.Address, AddressRelationFields | AddressEmbeddedFields> & {}
 
 export function addressSchema(): T.Schema<types.Scalars> {
   return {
@@ -81,6 +201,8 @@ type AddressDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGene
   AddressRawUpdate,
   AddressExcludedFields,
   AddressRelationFields,
+  AddressEmbeddedFields,
+  AddressRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -128,14 +250,11 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
   }
 }
 
-export type AuditAST = {
-  changes: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
-  entityId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-}
-
 export type AuditExcludedFields = never
+
+export type AuditEmbeddedFields = never
 export type AuditRelationFields = never
+export type AuditRetrieveAll = Omit<types.Audit, AuditRelationFields | AuditEmbeddedFields> & {}
 
 export function auditSchema(): T.Schema<types.Scalars> {
   return {
@@ -207,6 +326,8 @@ type AuditDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneri
   AuditRawUpdate,
   AuditExcludedFields,
   AuditRelationFields,
+  AuditEmbeddedFields,
+  AuditRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -254,15 +375,9 @@ export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends T.Abs
   }
 }
 
-export type AuditableAST = {
-  createdBy: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  createdOn: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
-  deletedOn: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: false; isListElementRequired: false }
-  modifiedBy: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  modifiedOn: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
-  state: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'State'; isRequired: true; isListElementRequired: false }
-  versions: { kind: 'relation'; relationType: 'foreign'; relation: 'Audit'; isList: true; graphQL: 'Audit'; isRequired: true; isListElementRequired: false }
-}
+export type AuditableEmbeddedFields = never
+export type AuditableRelationFields = 'versions'
+export type AuditableRetrieveAll = Omit<types.Auditable, AuditableRelationFields | AuditableEmbeddedFields> & {}
 
 export function auditableSchema(): T.Schema<types.Scalars> {
   return {
@@ -329,16 +444,11 @@ export type AuditableInsert = {
   state: types.State
 }
 
-export type CityAST = {
-  addressId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  computedAddressName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
-  computedName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-}
-
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
+
+export type CityEmbeddedFields = never
 export type CityRelationFields = never
+export type CityRetrieveAll = Omit<types.City, CityRelationFields | CityEmbeddedFields> & {}
 
 export function citySchema(): T.Schema<types.Scalars> {
   return {
@@ -413,6 +523,8 @@ type CityDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   CityRawUpdate,
   CityExcludedFields,
   CityRelationFields,
+  CityEmbeddedFields,
+  CityRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -457,17 +569,11 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
-export type DefaultFieldsEntityAST = {
-  creationDate: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  live: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Live'; isRequired: true; isListElementRequired: false }
-  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  opt1: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Live'; isRequired: false; isListElementRequired: false }
-  opt2: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Live'; isRequired: false; isListElementRequired: false }
-}
-
 export type DefaultFieldsEntityExcludedFields = never
+
+export type DefaultFieldsEntityEmbeddedFields = never
 export type DefaultFieldsEntityRelationFields = never
+export type DefaultFieldsEntityRetrieveAll = Omit<types.DefaultFieldsEntity, DefaultFieldsEntityRelationFields | DefaultFieldsEntityEmbeddedFields> & {}
 
 export function defaultFieldsEntitySchema(): T.Schema<types.Scalars> {
   return {
@@ -569,6 +675,8 @@ type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = T.InM
   DefaultFieldsEntityRawUpdate,
   DefaultFieldsEntityExcludedFields,
   DefaultFieldsEntityRelationFields,
+  DefaultFieldsEntityEmbeddedFields,
+  DefaultFieldsEntityRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -616,15 +724,11 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
   }
 }
 
-export type DeviceAST = {
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  user: { kind: 'relation'; relationType: 'inner'; relation: 'User'; isList: false; graphQL: 'User'; isRequired: false; isListElementRequired: false }
-  userId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: false; isListElementRequired: false }
-}
-
 export type DeviceExcludedFields = never
+
+export type DeviceEmbeddedFields = never
 export type DeviceRelationFields = 'user'
+export type DeviceRetrieveAll = Omit<types.Device, DeviceRelationFields | DeviceEmbeddedFields> & {}
 
 export function deviceSchema(): T.Schema<types.Scalars> {
   return {
@@ -705,6 +809,8 @@ type DeviceDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGener
   DeviceRawUpdate,
   DeviceExcludedFields,
   DeviceRelationFields,
+  DeviceEmbeddedFields,
+  DeviceRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -749,15 +855,11 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
   }
 }
 
-export type DogAST = {
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  owner: { kind: 'relation'; relationType: 'inner'; relation: 'User'; isList: false; graphQL: 'User'; isRequired: false; isListElementRequired: false }
-  ownerId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-}
-
 export type DogExcludedFields = never
+
+export type DogEmbeddedFields = never
 export type DogRelationFields = 'owner'
+export type DogRetrieveAll = Omit<types.Dog, DogRelationFields | DogEmbeddedFields> & {}
 
 export function dogSchema(): T.Schema<types.Scalars> {
   return {
@@ -839,6 +941,8 @@ type DogDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics
   DogRawUpdate,
   DogExcludedFields,
   DogRelationFields,
+  DogEmbeddedFields,
+  DogRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -883,14 +987,13 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
   }
 }
 
-export type HotelAST = {
-  audit: { kind: 'embedded'; embedded: 'Auditable'; isList: false; graphQL: 'Auditable'; isRequired: true; isListElementRequired: false }
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-}
-
 export type HotelExcludedFields = never
+
+export type HotelEmbeddedFields = 'audit'
 export type HotelRelationFields = never
+export type HotelRetrieveAll = Omit<types.Hotel, HotelRelationFields | HotelEmbeddedFields> & {
+  audit: AuditableRetrieveAll
+}
 
 export function hotelSchema(): T.Schema<types.Scalars> {
   return {
@@ -932,17 +1035,7 @@ export type HotelRawFilter = never
 export type HotelRelations = Record<never, string>
 
 export type HotelProjection = {
-  audit?:
-    | {
-        createdBy?: boolean
-        createdOn?: boolean
-        deletedOn?: boolean
-        modifiedBy?: boolean
-        modifiedOn?: boolean
-        state?: boolean
-        versions?: AuditProjection | boolean
-      }
-    | boolean
+  audit?: AuditableProjection | boolean
   id?: boolean
   name?: boolean
 }
@@ -985,6 +1078,8 @@ type HotelDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneri
   HotelRawUpdate,
   HotelExcludedFields,
   HotelRelationFields,
+  HotelEmbeddedFields,
+  HotelRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1032,15 +1127,11 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
   }
 }
 
-export type MockedEntityAST = {
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  user: { kind: 'relation'; relationType: 'inner'; relation: 'User'; isList: false; graphQL: 'User'; isRequired: true; isListElementRequired: false }
-  userId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-}
-
 export type MockedEntityExcludedFields = never
+
+export type MockedEntityEmbeddedFields = never
 export type MockedEntityRelationFields = 'user'
+export type MockedEntityRetrieveAll = Omit<types.MockedEntity, MockedEntityRelationFields | MockedEntityEmbeddedFields> & {}
 
 export function mockedEntitySchema(): T.Schema<types.Scalars> {
   return {
@@ -1123,6 +1214,8 @@ type MockedEntityDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDA
   MockedEntityRawUpdate,
   MockedEntityExcludedFields,
   MockedEntityRelationFields,
+  MockedEntityEmbeddedFields,
+  MockedEntityRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1170,16 +1263,13 @@ export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extend
   }
 }
 
-export type OrganizationAST = {
-  address: { kind: 'embedded'; embedded: 'Address'; isList: false; graphQL: 'Address'; isRequired: false; isListElementRequired: false }
-  computedName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  vatNumber: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
-}
-
 export type OrganizationExcludedFields = 'computedName'
+
+export type OrganizationEmbeddedFields = 'address'
 export type OrganizationRelationFields = never
+export type OrganizationRetrieveAll = Omit<types.Organization, OrganizationRelationFields | OrganizationEmbeddedFields> & {
+  address?: types.Maybe<AddressRetrieveAll>
+}
 
 export function organizationSchema(): T.Schema<types.Scalars> {
   return {
@@ -1218,12 +1308,7 @@ export type OrganizationRawFilter = never
 export type OrganizationRelations = Record<never, string>
 
 export type OrganizationProjection = {
-  address?:
-    | {
-        cities?: CityProjection | boolean
-        id?: boolean
-      }
-    | boolean
+  address?: AddressProjection | boolean
   computedName?: boolean
   id?: boolean
   name?: boolean
@@ -1266,6 +1351,8 @@ type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDA
   OrganizationRawUpdate,
   OrganizationExcludedFields,
   OrganizationRelationFields,
+  OrganizationEmbeddedFields,
+  OrganizationRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1313,19 +1400,13 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
   }
 }
 
-export type PostAST = {
-  author: { kind: 'relation'; relationType: 'inner'; relation: 'User'; isList: false; graphQL: 'User'; isRequired: true; isListElementRequired: false }
-  authorId: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  body: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
-  clicks: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: false; isListElementRequired: false }
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  metadata: { kind: 'embedded'; embedded: 'PostMetadata'; isList: false; graphQL: 'PostMetadata'; isRequired: false; isListElementRequired: false }
-  title: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  views: { kind: 'scalar'; scalar: 'number'; isList: false; graphQL: 'Int'; isRequired: true; isListElementRequired: false }
-}
-
 export type PostExcludedFields = never
+
+export type PostEmbeddedFields = 'metadata'
 export type PostRelationFields = 'author'
+export type PostRetrieveAll = Omit<types.Post, PostRelationFields | PostEmbeddedFields> & {
+  metadata?: types.Maybe<PostMetadataRetrieveAll>
+}
 
 export function postSchema(): T.Schema<types.Scalars> {
   return {
@@ -1397,12 +1478,7 @@ export type PostProjection = {
   body?: boolean
   clicks?: boolean
   id?: boolean
-  metadata?:
-    | {
-        region?: boolean
-        visible?: boolean
-      }
-    | boolean
+  metadata?: PostMetadataProjection | boolean
   title?: boolean
   views?: boolean
 }
@@ -1450,6 +1526,8 @@ type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   PostRawUpdate,
   PostExcludedFields,
   PostRelationFields,
+  PostEmbeddedFields,
+  PostRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1494,10 +1572,9 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
-export type PostMetadataAST = {
-  region: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-  visible: { kind: 'scalar'; scalar: 'boolean'; isList: false; graphQL: 'Boolean'; isRequired: true; isListElementRequired: false }
-}
+export type PostMetadataEmbeddedFields = never
+export type PostMetadataRelationFields = never
+export type PostMetadataRetrieveAll = Omit<types.PostMetadata, PostMetadataRelationFields | PostMetadataEmbeddedFields> & {}
 
 export function postMetadataSchema(): T.Schema<types.Scalars> {
   return {
@@ -1525,13 +1602,11 @@ export type PostMetadataInsert = {
   visible: types.Scalars['Boolean']
 }
 
-export type PostTypeAST = {
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  name: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-}
-
 export type PostTypeExcludedFields = never
+
+export type PostTypeEmbeddedFields = never
 export type PostTypeRelationFields = never
+export type PostTypeRetrieveAll = Omit<types.PostType, PostTypeRelationFields | PostTypeEmbeddedFields> & {}
 
 export function postTypeSchema(): T.Schema<types.Scalars> {
   return {
@@ -1595,6 +1670,8 @@ type PostTypeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGen
   PostTypeRawUpdate,
   PostTypeExcludedFields,
   PostTypeRelationFields,
+  PostTypeEmbeddedFields,
+  PostTypeRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1642,25 +1719,15 @@ export class InMemoryPostTypeDAO<MetadataType, OperationMetadataType> extends T.
   }
 }
 
-export type UserAST = {
-  amount: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Decimal'; isRequired: false; isListElementRequired: false }
-  amounts: { kind: 'scalar'; scalar: 'any'; isList: true; graphQL: 'Decimal'; isRequired: false; isListElementRequired: true }
-  credentials: { kind: 'embedded'; embedded: 'UsernamePasswordCredentials'; isList: true; graphQL: 'UsernamePasswordCredentials'; isRequired: false; isListElementRequired: false }
-  dogs: { kind: 'relation'; relationType: 'foreign'; relation: 'Dog'; isList: true; graphQL: 'Dog'; isRequired: false; isListElementRequired: true }
-  embeddedPost: { kind: 'embedded'; embedded: 'Post'; isList: false; graphQL: 'Post'; isRequired: false; isListElementRequired: false }
-  firstName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
-  friends: { kind: 'relation'; relationType: 'inner'; relation: 'User'; isList: true; graphQL: 'User'; isRequired: false; isListElementRequired: true }
-  friendsId: { kind: 'scalar'; scalar: 'string'; isList: true; graphQL: 'ID'; isRequired: false; isListElementRequired: true }
-  id: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'ID'; isRequired: true; isListElementRequired: false }
-  lastName: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: false; isListElementRequired: false }
-  live: { kind: 'scalar'; scalar: 'boolean'; isList: false; graphQL: 'Boolean'; isRequired: true; isListElementRequired: false }
-  localization: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Coordinates'; isRequired: false; isListElementRequired: false }
-  title: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'LocalizedString'; isRequired: false; isListElementRequired: false }
-  usernamePasswordCredentials: { kind: 'embedded'; embedded: 'UsernamePasswordCredentials'; isList: false; graphQL: 'UsernamePasswordCredentials'; isRequired: false; isListElementRequired: false }
-}
-
 export type UserExcludedFields = never
+
+export type UserEmbeddedFields = 'credentials' | 'embeddedPost' | 'usernamePasswordCredentials'
 export type UserRelationFields = 'dogs' | 'friends'
+export type UserRetrieveAll = Omit<types.User, UserRelationFields | UserEmbeddedFields> & {
+  credentials?: types.Maybe<types.Maybe<UsernamePasswordCredentialsRetrieveAll>[]>
+  embeddedPost?: types.Maybe<PostRetrieveAll>
+  usernamePasswordCredentials?: types.Maybe<UsernamePasswordCredentialsRetrieveAll>
+}
 
 export function userSchema(): T.Schema<types.Scalars> {
   return {
@@ -1795,30 +1862,9 @@ export type UserRelations = {
 export type UserProjection = {
   amount?: boolean
   amounts?: boolean
-  credentials?:
-    | {
-        password?: boolean
-        username?: boolean
-      }
-    | boolean
+  credentials?: UsernamePasswordCredentialsProjection | boolean
   dogs?: DogProjection | boolean
-  embeddedPost?:
-    | {
-        author?: UserProjection | boolean
-        authorId?: boolean
-        body?: boolean
-        clicks?: boolean
-        id?: boolean
-        metadata?:
-          | {
-              region?: boolean
-              visible?: boolean
-            }
-          | boolean
-        title?: boolean
-        views?: boolean
-      }
-    | boolean
+  embeddedPost?: PostProjection | boolean
   firstName?: boolean
   friends?: UserProjection | boolean
   friendsId?: boolean
@@ -1827,12 +1873,7 @@ export type UserProjection = {
   live?: boolean
   localization?: boolean
   title?: boolean
-  usernamePasswordCredentials?:
-    | {
-        password?: boolean
-        username?: boolean
-      }
-    | boolean
+  usernamePasswordCredentials?: UsernamePasswordCredentialsProjection | boolean
 }
 export type UserParam<P extends UserProjection> = T.ParamProjection<types.User, UserProjection, P>
 
@@ -1918,6 +1959,8 @@ type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   UserRawUpdate,
   UserExcludedFields,
   UserRelationFields,
+  UserEmbeddedFields,
+  UserRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1962,10 +2005,9 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
-export type UsernamePasswordCredentialsAST = {
-  password: { kind: 'scalar'; scalar: 'any'; isList: false; graphQL: 'Password'; isRequired: true; isListElementRequired: false }
-  username: { kind: 'scalar'; scalar: 'string'; isList: false; graphQL: 'String'; isRequired: true; isListElementRequired: false }
-}
+export type UsernamePasswordCredentialsEmbeddedFields = never
+export type UsernamePasswordCredentialsRelationFields = never
+export type UsernamePasswordCredentialsRetrieveAll = Omit<types.UsernamePasswordCredentials, UsernamePasswordCredentialsRelationFields | UsernamePasswordCredentialsEmbeddedFields> & {}
 
 export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
   return {

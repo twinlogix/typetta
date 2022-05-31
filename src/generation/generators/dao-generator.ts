@@ -53,15 +53,18 @@ export class TsTypettaGenerator extends TypettaGenerator {
       })
   }
 
-  private checkReferences(typesMap: Map<string, TsTypettaGeneratorNode>, filter: (type: TsTypettaGeneratorNode) => boolean, parents: TsTypettaGeneratorNode[] = []) {
+  private checkReferences(typesMap: Map<string, TsTypettaGeneratorNode>, filter: (type: TsTypettaGeneratorNode) => boolean, parents: TsTypettaGeneratorNode[] = [], visited: string[] = []) {
     Array.from(typesMap.values())
       .filter(filter)
       .forEach((type) => {
         const errorPrefix = `(Type: ${type.name}${parents.length > 0 ? `, Parents: ${parents.map((v) => v.name).join('<-')}` : ''})`
+        if (visited.includes(type.name)) {
+          return
+        }
         type.fields.forEach((field) => {
           if (field.type.kind === 'embedded') {
             const type2Name = field.type.embed
-            this.checkReferences(typesMap, (t) => t.name === type2Name, [type, ...parents])
+            this.checkReferences(typesMap, (t) => t.name === type2Name, [type, ...parents], [...visited, type.name])
           } else if (field.type.kind === 'innerRef') {
             const refType = findNode(field.type.innerRef, typesMap)
             if (!refType) {
@@ -179,6 +182,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     if (node.entity) {
       const daoExcluded = this._generateDAOExludedFields(node)
+      const daoRetrieveAll = this._generateDAORetrieveAllType(node)
       const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
       const daoRelations = this._generateDAORelations(node)
@@ -188,12 +192,13 @@ export class TsTypettaGenerator extends TypettaGenerator {
       const daoInsert = this._generateDAOInsert(node)
       const daoParams = this._generateDAOParams(node)
       const dao = this._generateDAO(node, typesMap)
-      return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
+      return [daoExcluded, daoRetrieveAll, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
+      const daoRetrieveAll = this._generateDAORetrieveAllType(node)
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoInsert = this._generateDAOInsert(node)
-      return [daoSchema, daoProjection, daoInsert].join('\n\n')
+      return [daoRetrieveAll, daoSchema, daoProjection, daoInsert].join('\n\n')
     }
   }
 
@@ -449,13 +454,34 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       .filter((n) => n.isExcluded)
       .map((n) => `'${n.name}'`)
       .join(' | ')
+    const daoExludedFields = `export type ${node.name}ExcludedFields = ${exludedFields ? exludedFields : 'never'}`
+    return daoExludedFields
+  }
+
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- EXCLUDED ------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
+  public _generateDAORetrieveAllType(node: TsTypettaGeneratorNode): string {
     const relationsFields = node.fields
       .filter((n) => n.type.kind === 'innerRef' || n.type.kind === 'foreignRef' || n.type.kind === 'relationEntityRef')
       .map((n) => `'${n.name}'`)
       .join(' | ')
-    const daoExludedFields = `export type ${node.name}ExcludedFields = ${exludedFields ? exludedFields : 'never'}`
+    const embeddedFields = node.fields.filter((n) => n.type.kind === 'embedded')
+    const embeddedFieldsName = embeddedFields.map((n) => `'${n.name}'`).join(' | ')
     const daoRelationFields = `export type ${node.name}RelationFields = ${relationsFields ? relationsFields : 'never'}`
-    return [daoExludedFields, daoRelationFields].join('\n')
+    const daoEmbeddedFields = `export type ${node.name}EmbeddedFields = ${embeddedFieldsName ? embeddedFieldsName : 'never'}`
+    const retrieveAllType = `export type ${node.name}RetrieveAll = Omit<types.${node.name}, ${node.name}RelationFields | ${node.name}EmbeddedFields> & {
+      ${embeddedFields
+        .map((f) => {
+          const baseType = `${f.graphqlType}RetrieveAll`
+          const fieldType = f.isList ? f.isListElementRequired ? `${baseType}[]` : `types.Maybe<${baseType}>[]` : baseType
+          const requiredFieldType = f.isRequired ? fieldType : `types.Maybe<${fieldType}>`
+          return `${f.name}${f.isRequired ? '': '?'}: ${requiredFieldType}`
+        })
+        .join('\n')}
+    }`
+    return [daoEmbeddedFields, daoRelationFields, retrieveAllType].join('\n')
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -580,7 +606,16 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     return [daoFilterFields, daoFilter, daoRawFilter].join('\n')
   }
 
-  public _generateDAOFilterFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>, path = ''): string[] {
+  public _generateDAOFilterFields(
+    node: TsTypettaGeneratorNode,
+    typesMap: Map<string, TsTypettaGeneratorNode>,
+    customScalarsMap: Map<string, TsTypettaGeneratorScalar>,
+    path = '',
+    visited: string[] = [],
+  ): string[] {
+    if (visited.includes(node.name)) {
+      throw new Error(`Recursive embedded are not supported, please use a reference in this cases (entity ${node.name}, path: ${path})`)
+    }
     return node.fields
       .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
       .map((field) => {
@@ -594,7 +629,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
           return [`'${fieldName}'?: ${fieldType} | null | T.EqualityOperators<${fieldType}> | T.ElementOperators` + stringOperators + quantityOperators]
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
-          return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.')
+          return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.', [...visited, node.name])
         }
         return []
       })
@@ -647,8 +682,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
           return `${field.name}?: ${linkedType.name}Projection | boolean`
         } else if (field.type.kind === 'embedded') {
           const embeddedType = getNode(field.type.embed, typesMap)
-          const embeddedProjection = indentMultiline(this._generateDAOProjectionFields(embeddedType, typesMap))
-          return `${field.name}?: {\n${embeddedProjection}\n} | boolean`
+          return `${field.name}?: ${embeddedType.name}Projection | boolean`
         }
       })
       .join('\n')
@@ -765,7 +799,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       idField.isEnum ? 'String' : idField.graphqlType
     }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${
       node.name
-    }RawUpdate, ${node.name}ExcludedFields, ${node.name}RelationFields, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(
+    }RawUpdate, ${node.name}ExcludedFields, ${node.name}RelationFields, ${node.name}EmbeddedFields, ${node.name}RetrieveAll, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(
       node.name,
     )}', EntityManager<MetadataType, OperationMetadataType>>`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
