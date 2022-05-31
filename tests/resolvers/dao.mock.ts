@@ -2,7 +2,10 @@ import * as T from '../../src'
 import * as types from './models.mock'
 
 export type LikeExcludedFields = never
+
+export type LikeEmbeddedFields = never
 export type LikeRelationFields = never
+export type LikeRetrieveAll = Omit<types.Like, LikeRelationFields | LikeEmbeddedFields> & {}
 
 export function likeSchema(): T.Schema<types.Scalars> {
   return {
@@ -85,6 +88,8 @@ type LikeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   LikeRawUpdate,
   LikeExcludedFields,
   LikeRelationFields,
+  LikeEmbeddedFields,
+  LikeRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -129,6 +134,10 @@ export class InMemoryLikeDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
+export type MetadataEmbeddedFields = never
+export type MetadataRelationFields = never
+export type MetadataRetrieveAll = Omit<types.Metadata, MetadataRelationFields | MetadataEmbeddedFields> & {}
+
 export function metadataSchema(): T.Schema<types.Scalars> {
   return {
     tags: {
@@ -156,7 +165,12 @@ export type MetadataInsert = {
 }
 
 export type PostExcludedFields = never
+
+export type PostEmbeddedFields = 'metadata'
 export type PostRelationFields = 'likes'
+export type PostRetrieveAll = Omit<types.Post, PostRelationFields | PostEmbeddedFields> & {
+  metadata?: types.Maybe<MetadataRetrieveAll>
+}
 
 export function postSchema(): T.Schema<types.Scalars> {
   return {
@@ -234,12 +248,7 @@ export type PostProjection = {
   creationDate?: boolean
   id?: boolean
   likes?: UserProjection | boolean
-  metadata?:
-    | {
-        tags?: boolean
-        views?: boolean
-      }
-    | boolean
+  metadata?: MetadataProjection | boolean
   userId?: boolean
 }
 export type PostParam<P extends PostProjection> = T.ParamProjection<types.Post, PostProjection, P>
@@ -282,6 +291,8 @@ type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   PostRawUpdate,
   PostExcludedFields,
   PostRelationFields,
+  PostEmbeddedFields,
+  PostRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -327,7 +338,10 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
 }
 
 export type UserExcludedFields = never
+
+export type UserEmbeddedFields = never
 export type UserRelationFields = 'likes' | 'posts'
+export type UserRetrieveAll = Omit<types.User, UserRelationFields | UserEmbeddedFields> & {}
 
 export function userSchema(): T.Schema<types.Scalars> {
   return {
@@ -453,6 +467,8 @@ type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   UserRawUpdate,
   UserExcludedFields,
   UserRelationFields,
+  UserEmbeddedFields,
+  UserRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,

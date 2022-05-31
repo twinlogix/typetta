@@ -181,6 +181,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     if (node.entity) {
       const daoExcluded = this._generateDAOExludedFields(node)
+      const daoRetrieveAll = this._generateDAORetrieveAllType(node)
       const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
       const daoRelations = this._generateDAORelations(node)
@@ -190,12 +191,13 @@ export class TsTypettaGenerator extends TypettaGenerator {
       const daoInsert = this._generateDAOInsert(node)
       const daoParams = this._generateDAOParams(node)
       const dao = this._generateDAO(node, typesMap)
-      return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
+      return [daoExcluded, daoRetrieveAll, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
+      const daoRetrieveAll = this._generateDAORetrieveAllType(node)
       const daoProjection = this._generateDAOProjection(node, typesMap)
       const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoInsert = this._generateDAOInsert(node)
-      return [daoSchema, daoProjection, daoInsert].join('\n\n')
+      return [daoRetrieveAll, daoSchema, daoProjection, daoInsert].join('\n\n')
     }
   }
 
@@ -418,18 +420,34 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       .filter((n) => n.isExcluded)
       .map((n) => `'${n.name}'`)
       .join(' | ')
+    const daoExludedFields = `export type ${node.name}ExcludedFields = ${exludedFields ? exludedFields : 'never'}`
+    return daoExludedFields
+  }
+
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- EXCLUDED ------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
+  public _generateDAORetrieveAllType(node: TsTypettaGeneratorNode): string {
     const relationsFields = node.fields
       .filter((n) => n.type.kind === 'innerRef' || n.type.kind === 'foreignRef' || n.type.kind === 'relationEntityRef')
       .map((n) => `'${n.name}'`)
       .join(' | ')
-    const embeddedFields = node.fields
-      .filter((n) => n.type.kind === 'embedded')
-      .map((n) => `'${n.name}'`)
-      .join(' | ')
-    const daoExludedFields = `export type ${node.name}ExcludedFields = ${exludedFields ? exludedFields : 'never'}`
+    const embeddedFields = node.fields.filter((n) => n.type.kind === 'embedded')
+    const embeddedFieldsName = embeddedFields.map((n) => `'${n.name}'`).join(' | ')
     const daoRelationFields = `export type ${node.name}RelationFields = ${relationsFields ? relationsFields : 'never'}`
-    const daoEmbeddedFields = `export type ${node.name}EmbeddedFields = ${embeddedFields ? embeddedFields : 'never'}`
-    return [daoExludedFields, daoRelationFields, daoEmbeddedFields].join('\n')
+    const daoEmbeddedFields = `export type ${node.name}EmbeddedFields = ${embeddedFieldsName ? embeddedFieldsName : 'never'}`
+    const retrieveAllType = `export type ${node.name}RetrieveAll = Omit<types.${node.name}, ${node.name}RelationFields | ${node.name}EmbeddedFields> & {
+      ${embeddedFields
+        .map((f) => {
+          const baseType = `${f.graphqlType}RetrieveAll`
+          const fieldType = f.isList ? f.isListElementRequired ? `${baseType}[]` : `types.Maybe<${baseType}>[]` : baseType
+          const requiredFieldType = f.isRequired ? fieldType : `types.Maybe<${fieldType}>`
+          return `${f.name}${f.isRequired ? '': '?'}: ${requiredFieldType}`
+        })
+        .join('\n')}
+    }`
+    return [daoEmbeddedFields, daoRelationFields, retrieveAllType].join('\n')
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -747,7 +765,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       idField.isEnum ? 'String' : idField.graphqlType
     }', ${node.name}Filter, ${node.name}RawFilter, ${node.name}Relations, ${node.name}Projection, ${node.name}Sort, ${node.name}RawSort, ${node.name}Insert, ${node.name}Update, ${
       node.name
-    }RawUpdate, ${node.name}ExcludedFields, ${node.name}RelationFields, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(
+    }RawUpdate, ${node.name}ExcludedFields, ${node.name}RelationFields, ${node.name}EmbeddedFields, ${node.name}RetrieveAll, MetadataType, OperationMetadataType, types.Scalars, '${toFirstLower(
       node.name,
     )}', EntityManager<MetadataType, OperationMetadataType>>`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${

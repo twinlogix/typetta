@@ -4,7 +4,10 @@ import { Knex } from 'knex'
 import * as M from 'mongodb'
 
 export type AExcludedFields = never
+
+export type AEmbeddedFields = never
 export type ARelationFields = never
+export type ARetrieveAll = Omit<types.A, ARelationFields | AEmbeddedFields> & {}
 
 export function aSchema(): T.Schema<types.Scalars> {
   return {
@@ -68,6 +71,8 @@ type ADAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
   ARawUpdate,
   AExcludedFields,
   ARelationFields,
+  AEmbeddedFields,
+  ARetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -116,7 +121,10 @@ export class InMemoryADAO<MetadataType, OperationMetadataType> extends T.Abstrac
 }
 
 export type BExcludedFields = never
+
+export type BEmbeddedFields = never
 export type BRelationFields = never
+export type BRetrieveAll = Omit<types.B, BRelationFields | BEmbeddedFields> & {}
 
 export function bSchema(): T.Schema<types.Scalars> {
   return {
@@ -180,6 +188,8 @@ type BDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
   BRawUpdate,
   BExcludedFields,
   BRelationFields,
+  BEmbeddedFields,
+  BRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -222,7 +232,10 @@ export class InMemoryBDAO<MetadataType, OperationMetadataType> extends T.Abstrac
 }
 
 export type CExcludedFields = never
+
+export type CEmbeddedFields = never
 export type CRelationFields = never
+export type CRetrieveAll = Omit<types.C, CRelationFields | CEmbeddedFields> & {}
 
 export function cSchema(): T.Schema<types.Scalars> {
   return {
@@ -286,6 +299,8 @@ type CDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
   CRawUpdate,
   CExcludedFields,
   CRelationFields,
+  CEmbeddedFields,
+  CRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -334,7 +349,10 @@ export class InMemoryCDAO<MetadataType, OperationMetadataType> extends T.Abstrac
 }
 
 export type DExcludedFields = never
+
+export type DEmbeddedFields = never
 export type DRelationFields = never
+export type DRetrieveAll = Omit<types.D, DRelationFields | DEmbeddedFields> & {}
 
 export function dSchema(): T.Schema<types.Scalars> {
   return {
@@ -397,6 +415,8 @@ type DDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
   DRawUpdate,
   DExcludedFields,
   DRelationFields,
+  DEmbeddedFields,
+  DRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -445,7 +465,10 @@ export class InMemoryDDAO<MetadataType, OperationMetadataType> extends T.Abstrac
 }
 
 export type EExcludedFields = never
+
+export type EEmbeddedFields = never
 export type ERelationFields = never
+export type ERetrieveAll = Omit<types.E, ERelationFields | EEmbeddedFields> & {}
 
 export function eSchema(): T.Schema<types.Scalars> {
   return {
@@ -509,6 +532,8 @@ type EDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
   ERawUpdate,
   EExcludedFields,
   ERelationFields,
+  EEmbeddedFields,
+  ERetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -551,7 +576,10 @@ export class InMemoryEDAO<MetadataType, OperationMetadataType> extends T.Abstrac
 }
 
 export type FExcludedFields = never
+
+export type FEmbeddedFields = never
 export type FRelationFields = never
+export type FRetrieveAll = Omit<types.F, FRelationFields | FEmbeddedFields> & {}
 
 export function fSchema(): T.Schema<types.Scalars> {
   return {
@@ -615,6 +643,8 @@ type FDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
   FRawUpdate,
   FExcludedFields,
   FRelationFields,
+  FEmbeddedFields,
+  FRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,

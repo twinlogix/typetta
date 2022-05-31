@@ -2,7 +2,10 @@ import * as T from '../../src'
 import * as types from './models.mock'
 
 export type AddressExcludedFields = never
+
+export type AddressEmbeddedFields = never
 export type AddressRelationFields = 'cities'
+export type AddressRetrieveAll = Omit<types.Address, AddressRelationFields | AddressEmbeddedFields> & {}
 
 export function addressSchema(): T.Schema<types.Scalars> {
   return {
@@ -76,6 +79,8 @@ type AddressDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGene
   AddressRawUpdate,
   AddressExcludedFields,
   AddressRelationFields,
+  AddressEmbeddedFields,
+  AddressRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -124,7 +129,10 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
 }
 
 export type AuditExcludedFields = never
+
+export type AuditEmbeddedFields = never
 export type AuditRelationFields = never
+export type AuditRetrieveAll = Omit<types.Audit, AuditRelationFields | AuditEmbeddedFields> & {}
 
 export function auditSchema(): T.Schema<types.Scalars> {
   return {
@@ -196,6 +204,8 @@ type AuditDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneri
   AuditRawUpdate,
   AuditExcludedFields,
   AuditRelationFields,
+  AuditEmbeddedFields,
+  AuditRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -242,6 +252,10 @@ export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends T.Abs
     })
   }
 }
+
+export type AuditableEmbeddedFields = never
+export type AuditableRelationFields = 'versions'
+export type AuditableRetrieveAll = Omit<types.Auditable, AuditableRelationFields | AuditableEmbeddedFields> & {}
 
 export function auditableSchema(): T.Schema<types.Scalars> {
   return {
@@ -309,7 +323,10 @@ export type AuditableInsert = {
 }
 
 export type CityExcludedFields = 'computedAddressName' | 'computedName'
+
+export type CityEmbeddedFields = never
 export type CityRelationFields = never
+export type CityRetrieveAll = Omit<types.City, CityRelationFields | CityEmbeddedFields> & {}
 
 export function citySchema(): T.Schema<types.Scalars> {
   return {
@@ -384,6 +401,8 @@ type CityDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   CityRawUpdate,
   CityExcludedFields,
   CityRelationFields,
+  CityEmbeddedFields,
+  CityRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -429,7 +448,10 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
 }
 
 export type DefaultFieldsEntityExcludedFields = never
+
+export type DefaultFieldsEntityEmbeddedFields = never
 export type DefaultFieldsEntityRelationFields = never
+export type DefaultFieldsEntityRetrieveAll = Omit<types.DefaultFieldsEntity, DefaultFieldsEntityRelationFields | DefaultFieldsEntityEmbeddedFields> & {}
 
 export function defaultFieldsEntitySchema(): T.Schema<types.Scalars> {
   return {
@@ -531,6 +553,8 @@ type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = T.InM
   DefaultFieldsEntityRawUpdate,
   DefaultFieldsEntityExcludedFields,
   DefaultFieldsEntityRelationFields,
+  DefaultFieldsEntityEmbeddedFields,
+  DefaultFieldsEntityRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -579,7 +603,10 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
 }
 
 export type DeviceExcludedFields = never
+
+export type DeviceEmbeddedFields = never
 export type DeviceRelationFields = 'user'
+export type DeviceRetrieveAll = Omit<types.Device, DeviceRelationFields | DeviceEmbeddedFields> & {}
 
 export function deviceSchema(): T.Schema<types.Scalars> {
   return {
@@ -660,6 +687,8 @@ type DeviceDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGener
   DeviceRawUpdate,
   DeviceExcludedFields,
   DeviceRelationFields,
+  DeviceEmbeddedFields,
+  DeviceRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -705,7 +734,10 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
 }
 
 export type DogExcludedFields = never
+
+export type DogEmbeddedFields = never
 export type DogRelationFields = 'owner'
+export type DogRetrieveAll = Omit<types.Dog, DogRelationFields | DogEmbeddedFields> & {}
 
 export function dogSchema(): T.Schema<types.Scalars> {
   return {
@@ -787,6 +819,8 @@ type DogDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics
   DogRawUpdate,
   DogExcludedFields,
   DogRelationFields,
+  DogEmbeddedFields,
+  DogRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -832,7 +866,12 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
 }
 
 export type HotelExcludedFields = never
+
+export type HotelEmbeddedFields = 'audit'
 export type HotelRelationFields = never
+export type HotelRetrieveAll = Omit<types.Hotel, HotelRelationFields | HotelEmbeddedFields> & {
+  audit: AuditableRetrieveAll
+}
 
 export function hotelSchema(): T.Schema<types.Scalars> {
   return {
@@ -874,17 +913,7 @@ export type HotelRawFilter = never
 export type HotelRelations = Record<never, string>
 
 export type HotelProjection = {
-  audit?:
-    | {
-        createdBy?: boolean
-        createdOn?: boolean
-        deletedOn?: boolean
-        modifiedBy?: boolean
-        modifiedOn?: boolean
-        state?: boolean
-        versions?: AuditProjection | boolean
-      }
-    | boolean
+  audit?: AuditableProjection | boolean
   id?: boolean
   name?: boolean
 }
@@ -927,6 +956,8 @@ type HotelDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneri
   HotelRawUpdate,
   HotelExcludedFields,
   HotelRelationFields,
+  HotelEmbeddedFields,
+  HotelRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -975,7 +1006,10 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
 }
 
 export type MockedEntityExcludedFields = never
+
+export type MockedEntityEmbeddedFields = never
 export type MockedEntityRelationFields = 'user'
+export type MockedEntityRetrieveAll = Omit<types.MockedEntity, MockedEntityRelationFields | MockedEntityEmbeddedFields> & {}
 
 export function mockedEntitySchema(): T.Schema<types.Scalars> {
   return {
@@ -1058,6 +1092,8 @@ type MockedEntityDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDA
   MockedEntityRawUpdate,
   MockedEntityExcludedFields,
   MockedEntityRelationFields,
+  MockedEntityEmbeddedFields,
+  MockedEntityRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1106,7 +1142,12 @@ export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extend
 }
 
 export type OrganizationExcludedFields = 'computedName'
+
+export type OrganizationEmbeddedFields = 'address'
 export type OrganizationRelationFields = never
+export type OrganizationRetrieveAll = Omit<types.Organization, OrganizationRelationFields | OrganizationEmbeddedFields> & {
+  address?: types.Maybe<AddressRetrieveAll>
+}
 
 export function organizationSchema(): T.Schema<types.Scalars> {
   return {
@@ -1145,12 +1186,7 @@ export type OrganizationRawFilter = never
 export type OrganizationRelations = Record<never, string>
 
 export type OrganizationProjection = {
-  address?:
-    | {
-        cities?: CityProjection | boolean
-        id?: boolean
-      }
-    | boolean
+  address?: AddressProjection | boolean
   computedName?: boolean
   id?: boolean
   name?: boolean
@@ -1193,6 +1229,8 @@ type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDA
   OrganizationRawUpdate,
   OrganizationExcludedFields,
   OrganizationRelationFields,
+  OrganizationEmbeddedFields,
+  OrganizationRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1241,7 +1279,12 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
 }
 
 export type PostExcludedFields = never
+
+export type PostEmbeddedFields = 'metadata'
 export type PostRelationFields = 'author'
+export type PostRetrieveAll = Omit<types.Post, PostRelationFields | PostEmbeddedFields> & {
+  metadata?: types.Maybe<PostMetadataRetrieveAll>
+}
 
 export function postSchema(): T.Schema<types.Scalars> {
   return {
@@ -1313,12 +1356,7 @@ export type PostProjection = {
   body?: boolean
   clicks?: boolean
   id?: boolean
-  metadata?:
-    | {
-        region?: boolean
-        visible?: boolean
-      }
-    | boolean
+  metadata?: PostMetadataProjection | boolean
   title?: boolean
   views?: boolean
 }
@@ -1366,6 +1404,8 @@ type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   PostRawUpdate,
   PostExcludedFields,
   PostRelationFields,
+  PostEmbeddedFields,
+  PostRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1410,6 +1450,10 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
+export type PostMetadataEmbeddedFields = never
+export type PostMetadataRelationFields = never
+export type PostMetadataRetrieveAll = Omit<types.PostMetadata, PostMetadataRelationFields | PostMetadataEmbeddedFields> & {}
+
 export function postMetadataSchema(): T.Schema<types.Scalars> {
   return {
     region: {
@@ -1437,7 +1481,10 @@ export type PostMetadataInsert = {
 }
 
 export type PostTypeExcludedFields = never
+
+export type PostTypeEmbeddedFields = never
 export type PostTypeRelationFields = never
+export type PostTypeRetrieveAll = Omit<types.PostType, PostTypeRelationFields | PostTypeEmbeddedFields> & {}
 
 export function postTypeSchema(): T.Schema<types.Scalars> {
   return {
@@ -1501,6 +1548,8 @@ type PostTypeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGen
   PostTypeRawUpdate,
   PostTypeExcludedFields,
   PostTypeRelationFields,
+  PostTypeEmbeddedFields,
+  PostTypeRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1549,7 +1598,14 @@ export class InMemoryPostTypeDAO<MetadataType, OperationMetadataType> extends T.
 }
 
 export type UserExcludedFields = never
+
+export type UserEmbeddedFields = 'credentials' | 'embeddedPost' | 'usernamePasswordCredentials'
 export type UserRelationFields = 'dogs' | 'friends'
+export type UserRetrieveAll = Omit<types.User, UserRelationFields | UserEmbeddedFields> & {
+  credentials?: types.Maybe<types.Maybe<UsernamePasswordCredentialsRetrieveAll>[]>
+  embeddedPost?: types.Maybe<PostRetrieveAll>
+  usernamePasswordCredentials?: types.Maybe<UsernamePasswordCredentialsRetrieveAll>
+}
 
 export function userSchema(): T.Schema<types.Scalars> {
   return {
@@ -1684,30 +1740,9 @@ export type UserRelations = {
 export type UserProjection = {
   amount?: boolean
   amounts?: boolean
-  credentials?:
-    | {
-        password?: boolean
-        username?: boolean
-      }
-    | boolean
+  credentials?: UsernamePasswordCredentialsProjection | boolean
   dogs?: DogProjection | boolean
-  embeddedPost?:
-    | {
-        author?: UserProjection | boolean
-        authorId?: boolean
-        body?: boolean
-        clicks?: boolean
-        id?: boolean
-        metadata?:
-          | {
-              region?: boolean
-              visible?: boolean
-            }
-          | boolean
-        title?: boolean
-        views?: boolean
-      }
-    | boolean
+  embeddedPost?: PostProjection | boolean
   firstName?: boolean
   friends?: UserProjection | boolean
   friendsId?: boolean
@@ -1716,12 +1751,7 @@ export type UserProjection = {
   live?: boolean
   localization?: boolean
   title?: boolean
-  usernamePasswordCredentials?:
-    | {
-        password?: boolean
-        username?: boolean
-      }
-    | boolean
+  usernamePasswordCredentials?: UsernamePasswordCredentialsProjection | boolean
 }
 export type UserParam<P extends UserProjection> = T.ParamProjection<types.User, UserProjection, P>
 
@@ -1807,6 +1837,8 @@ type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGeneric
   UserRawUpdate,
   UserExcludedFields,
   UserRelationFields,
+  UserEmbeddedFields,
+  UserRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -1850,6 +1882,10 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
+
+export type UsernamePasswordCredentialsEmbeddedFields = never
+export type UsernamePasswordCredentialsRelationFields = never
+export type UsernamePasswordCredentialsRetrieveAll = Omit<types.UsernamePasswordCredentials, UsernamePasswordCredentialsRelationFields | UsernamePasswordCredentialsEmbeddedFields> & {}
 
 export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
   return {

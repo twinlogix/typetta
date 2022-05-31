@@ -3,7 +3,10 @@ import * as types from './models.mock'
 import * as M from 'mongodb'
 
 export type HotelExcludedFields = never
+
+export type HotelEmbeddedFields = never
 export type HotelRelationFields = never
+export type HotelRetrieveAll = Omit<types.Hotel, HotelRelationFields | HotelEmbeddedFields> & {}
 
 export function hotelSchema(): T.Schema<types.Scalars> {
   return {
@@ -93,6 +96,8 @@ type HotelDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGeneric
   HotelRawUpdate,
   HotelExcludedFields,
   HotelRelationFields,
+  HotelEmbeddedFields,
+  HotelRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -138,7 +143,10 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
 }
 
 export type ReservationExcludedFields = never
+
+export type ReservationEmbeddedFields = never
 export type ReservationRelationFields = 'room'
+export type ReservationRetrieveAll = Omit<types.Reservation, ReservationRelationFields | ReservationEmbeddedFields> & {}
 
 export function reservationSchema(): T.Schema<types.Scalars> {
   return {
@@ -238,6 +246,8 @@ type ReservationDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOG
   ReservationRawUpdate,
   ReservationExcludedFields,
   ReservationRelationFields,
+  ReservationEmbeddedFields,
+  ReservationRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -286,7 +296,10 @@ export class InMemoryReservationDAO<MetadataType, OperationMetadataType> extends
 }
 
 export type RoleExcludedFields = never
+
+export type RoleEmbeddedFields = never
 export type RoleRelationFields = never
+export type RoleRetrieveAll = Omit<types.Role, RoleRelationFields | RoleEmbeddedFields> & {}
 
 export function roleSchema(): T.Schema<types.Scalars> {
   return {
@@ -353,6 +366,8 @@ type RoleDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics
   RoleRawUpdate,
   RoleExcludedFields,
   RoleRelationFields,
+  RoleEmbeddedFields,
+  RoleRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -401,7 +416,10 @@ export class InMemoryRoleDAO<MetadataType, OperationMetadataType> extends T.Abst
 }
 
 export type RoomExcludedFields = never
+
+export type RoomEmbeddedFields = never
 export type RoomRelationFields = 'hotel'
+export type RoomRetrieveAll = Omit<types.Room, RoomRelationFields | RoomEmbeddedFields> & {}
 
 export function roomSchema(): T.Schema<types.Scalars> {
   return {
@@ -511,6 +529,8 @@ type RoomDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics
   RoomRawUpdate,
   RoomExcludedFields,
   RoomRelationFields,
+  RoomEmbeddedFields,
+  RoomRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -556,7 +576,10 @@ export class InMemoryRoomDAO<MetadataType, OperationMetadataType> extends T.Abst
 }
 
 export type UserExcludedFields = never
+
+export type UserEmbeddedFields = never
 export type UserRelationFields = 'reservations' | 'roles'
+export type UserRetrieveAll = Omit<types.User, UserRelationFields | UserEmbeddedFields> & {}
 
 export function userSchema(): T.Schema<types.Scalars> {
   return {
@@ -682,6 +705,8 @@ type UserDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics
   UserRawUpdate,
   UserExcludedFields,
   UserRelationFields,
+  UserEmbeddedFields,
+  UserRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
@@ -727,7 +752,10 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
 }
 
 export type UserRoleExcludedFields = never
+
+export type UserRoleEmbeddedFields = never
 export type UserRoleRelationFields = 'role'
+export type UserRoleRetrieveAll = Omit<types.UserRole, UserRoleRelationFields | UserRoleEmbeddedFields> & {}
 
 export function userRoleSchema(): T.Schema<types.Scalars> {
   return {
@@ -835,6 +863,8 @@ type UserRoleDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGene
   UserRoleRawUpdate,
   UserRoleExcludedFields,
   UserRoleRelationFields,
+  UserRoleEmbeddedFields,
+  UserRoleRetrieveAll,
   MetadataType,
   OperationMetadataType,
   types.Scalars,
