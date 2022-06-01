@@ -5,9 +5,9 @@ import { DefaultMongoDBScalars, mongoDbAdapters, MongoDBDataTypeAdapterMap } fro
 import { DefaultKnexJsScalars, knexJsAdapters, KnexJSDataTypeAdapterMap } from './sql/knexjs/adapters.knexjs'
 
 type Drivers = 'both' | 'mongo' | 'knex'
-export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends DefaultModelScalars, D extends Drivers> = Omit<
+export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends AbstractScalars, D extends Drivers> = Omit<
   {
-    [key in keyof ModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key], unknown, unknown, D>
+    [key in keyof ModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key]['type'], unknown, unknown, D>
   },
   keyof DefaultModelScalars
 > & {

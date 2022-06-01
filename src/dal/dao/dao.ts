@@ -216,7 +216,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.schema = schema
   }
 
-  async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]> {
+  async findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]> {
     return this.logOperation('findAll', params, async () => {
       const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findAll')
@@ -230,12 +230,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     })
   }
 
-  async findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindOneParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P> | null> {
+  async findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P> | null> {
     const results = await this.findAll({ ...params, limit: 1 })
     return results.length > 0 ? results[0] : null
   }
 
-  async findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
+  async findPage<P extends AnyProjection<T['projection']>>(
     params: FindParams<T, P> = {},
   ): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P>[] }> {
     return this.logOperation('findPage', params, async () => {

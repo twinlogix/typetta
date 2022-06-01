@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { OmitNever } from '../../../utils/utils.types'
+import { Difference, OmitNever } from '../../../utils/utils.types'
 import { SortDirection } from '../sorts/sorts.types'
 import { GraphQLResolveInfo } from 'graphql'
 import { PartialDeep } from 'type-fest'
@@ -80,7 +80,14 @@ export type GenerateModel<Entity extends string, AST extends AbstractSyntaxTree,
   AST
 >
 
-type DecorateModel<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = DecorateModelWithOptional<DecorateModelWithArray<Model, Entity, AST>, Entity, AST>
+type DecorateModel<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = DecorateModelWithOptional<
+  NotRequiredFields<Entity, AST>,
+  DecorateModelWithArray<Model, Entity, AST>
+>
+type DecorateModelInsert<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = DecorateModelWithOptional<
+  NotRequiredFields<Entity, AST> | OptionalInsertFields<Entity, AST>,
+  DecorateModelWithArray<Model, Entity, AST>
+>
 type DecorateModelWithArray<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = {
   [K in keyof Model]: K extends keyof AST[Entity]['fields']
     ? AST[Entity]['fields'][K]['isList'] extends true
@@ -88,21 +95,13 @@ type DecorateModelWithArray<Model extends Record<string, unknown>, Entity extend
       : Model[K]
     : never
 }
-type DecorateModelWithOptional<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = {
-  [K in keyof Model & NotRequiredFields<Entity, AST>]?: Model[K] | null
+type DecorateModelWithOptional<OptionalFields, Model extends Record<string, unknown>> = {
+  [K in keyof Model & OptionalFields]?: Model[K] | null
 } & {
-  [K in keyof Model & RequiredFields<Entity, AST>]: Model[K]
+  [K in Difference<keyof Model, OptionalFields>]: Model[K]
 } extends infer O
   ? O
   : never
-
-/*export type Filter2<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = OmitNever<{
-  [K in keyof AST[Entity]['fields']]: AST[Entity]['fields'][K]['type'] extends 'scalar'
-    ? Scalars[AST[Entity]['fields'][K]['astName']]['type'] | { eq: Scalars[AST[Entity]['fields'][K]['astName']]['type'] } //TODO finish
-    : AST[Entity]['fields'][K]['type'] extends 'embedded'
-    ? Filter2<AST[Entity]['fields'][K]['astName'], AST, Scalars>
-    : never
-}>*/
 
 export type Filter<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = {
   [K in RecursiveScalarKeys<Entity, AST>]?: FieldFromPath<Entity, AST, Scalars, K> extends { astName: infer ASTName; isList: infer IsList }
@@ -119,6 +118,26 @@ export type Filter<Entity extends string, AST extends AbstractSyntaxTree, Scalar
       : never
     : never
 }
+
+export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = DecorateModelInsert<
+  OmitNever<{
+    [K in keyof AST[Entity]['fields']]: AST[Entity]['fields'][K] extends { type: infer Type; isExcluded: infer IsExcluded; generationStrategy: infer GenerationStrategy; astName: infer ASTName }
+      ? ASTName extends string
+        ? IsExcluded extends true
+          ? never
+          : GenerationStrategy extends 'db'
+          ? never
+          : Type extends 'scalar'
+          ? Scalars[ASTName]['type']
+          : Type extends 'embedded'
+          ? Insert<ASTName, AST, Scalars>
+          : never
+        : never
+      : never
+  }>,
+  Entity,
+  AST
+>
 
 export type Update<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = Partial<
   OmitNever<{
@@ -144,7 +163,7 @@ export type Update<Entity extends string, AST extends AbstractSyntaxTree, Scalar
         : never
       : never
   }>
->
+> //TODO: include whole embedded
 
 export type SortElement<Entity extends string, AST extends AbstractSyntaxTree> = {
   [K in RecursiveScalarKeys<Entity, AST>]?: SortDirection
@@ -186,25 +205,19 @@ export type RequiredFields<Entity extends string, AST extends AbstractSyntaxTree
   [K in keyof AST[Entity]['fields']]: AST[Entity]['fields'][K]['isRequired'] extends true ? K : never
 }[keyof AST[Entity]['fields']]
 
-export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = DecorateModel<
-  OmitNever<{
-    [K in keyof AST[Entity]['fields']]: AST[Entity]['fields'][K] extends { type: infer Type; isExcluded: infer IsExcluded; generationStrategy: infer GenerationStrategy; astName: infer ASTName }
-      ? ASTName extends string
-        ? IsExcluded extends true
-          ? never
-          : GenerationStrategy extends 'db'
-          ? never
-          : Type extends 'scalar'
-          ? Scalars[ASTName]['type']
-          : Type extends 'embedded'
-          ? Insert<ASTName, AST, Scalars>
-          : never
-        : never
+export type OptionalInsertFields<Entity extends string, AST extends AbstractSyntaxTree> = {
+  [K in keyof AST[Entity]['fields']]: AST[Entity]['fields'][K] extends { isId: infer IsId; generationStrategy: infer GenerationStrategy }
+    ? IsId extends true
+      ? GenerationStrategy extends 'user'
+        ? never
+        : K
+      : GenerationStrategy extends 'middleware'
+      ? K
+      : GenerationStrategy extends 'generator'
+      ? K
       : never
-  }>,
-  Entity,
-  AST
->
+    : never
+}[keyof AST[Entity]['fields']]
 
 //TODO: remove under
 const user: GenerateModel<'User', AST, Scalars, 'relation'> = {
@@ -249,7 +262,7 @@ const filter: Filter<'User', AST, Scalars> = {
 }
 const insert: Insert<'User', AST, Scalars> = {
   live: true,
-  id: ''
+  id: '',
 }
 const update: Update<'User', AST, Scalars> = {
   'credentials.password': 'asd',
@@ -797,4 +810,3 @@ export type AST = {
     driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
   }
 }
-

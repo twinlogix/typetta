@@ -81,3 +81,5 @@ export type DeepRequired<T> = Required<{
 }>
 
 export type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] }
+
+export type Difference<A, B> = A extends B ? never : A

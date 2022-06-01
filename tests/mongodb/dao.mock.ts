@@ -34,7 +34,7 @@ export type AST = {
       }
       id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   Audit: {
     fields: {
@@ -42,7 +42,7 @@ export type AST = {
       entityId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   Auditable: {
     fields: {
@@ -95,7 +95,7 @@ export type AST = {
       id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
       name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   DefaultFieldsEntity: {
     fields: {
@@ -106,7 +106,7 @@ export type AST = {
       opt1: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
       opt2: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   Device: {
     fields: {
@@ -126,7 +126,7 @@ export type AST = {
       }
       userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   Dog: {
     fields: {
@@ -146,7 +146,7 @@ export type AST = {
       }
       ownerId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   EmbeddedUser: {
     fields: {
@@ -300,7 +300,7 @@ export type AST = {
         generationStrategy: 'undefined'
       }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   MockedEntity: {
     fields: {
@@ -340,7 +340,7 @@ export type AST = {
       name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       vatNumber: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   Post: {
     fields: {
@@ -374,7 +374,7 @@ export type AST = {
       title: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       views: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   PostMetadata: {
     fields: {
@@ -484,7 +484,7 @@ export type AST = {
         generationStrategy: 'undefined'
       }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
   }
   UserCollection: {
     fields: {
@@ -558,6 +558,12 @@ export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit
 >
 
 export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Address', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Address', AST>, P2 extends T.Projection<'Address', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Address', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Address', AST>, P1, P2>
+  }
   public constructor(params: AddressDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -567,6 +573,12 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractM
 }
 
 export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Address', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Address', AST>, P2 extends T.Projection<'Address', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Address', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Address', AST>, P1, P2>
+  }
   public constructor(params: InMemoryAddressDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -608,6 +620,12 @@ export type InMemoryAuditDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class AuditDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Audit', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Audit', AST>, P2 extends T.Projection<'Audit', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Audit', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Audit', AST>, P1, P2>
+  }
   public constructor(params: AuditDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -617,6 +635,12 @@ export class AuditDAO<MetadataType, OperationMetadataType> extends T.AbstractMon
 }
 
 export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Audit', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Audit', AST>, P2 extends T.Projection<'Audit', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Audit', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Audit', AST>, P1, P2>
+  }
   public constructor(params: InMemoryAuditDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -700,6 +724,12 @@ export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'City', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'City', AST>, P2 extends T.Projection<'City', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'City', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'City', AST>, P1, P2>
+  }
   public constructor(params: CityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -709,6 +739,12 @@ export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
 }
 
 export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'City', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'City', AST>, P2 extends T.Projection<'City', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'City', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'City', AST>, P1, P2>
+  }
   public constructor(params: InMemoryCityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -774,6 +810,15 @@ export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadata
 >
 
 export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'DefaultFieldsEntity', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'DefaultFieldsEntity', AST>, P2 extends T.Projection<'DefaultFieldsEntity', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'DefaultFieldsEntity', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'DefaultFieldsEntity', AST>, P1, P2>
+  }
   public constructor(params: DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -783,6 +828,15 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
 }
 
 export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'DefaultFieldsEntity', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'DefaultFieldsEntity', AST>, P2 extends T.Projection<'DefaultFieldsEntity', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'DefaultFieldsEntity', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'DefaultFieldsEntity', AST>, P1, P2>
+  }
   public constructor(params: InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -828,6 +882,12 @@ export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Device', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Device', AST>, P2 extends T.Projection<'Device', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Device', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Device', AST>, P1, P2>
+  }
   public constructor(params: DeviceDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -837,6 +897,12 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractMo
 }
 
 export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Device', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Device', AST>, P2 extends T.Projection<'Device', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Device', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Device', AST>, P1, P2>
+  }
   public constructor(params: InMemoryDeviceDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -883,6 +949,12 @@ export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Dog', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Dog', AST>, P2 extends T.Projection<'Dog', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Dog', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Dog', AST>, P1, P2>
+  }
   public constructor(params: DogDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -892,6 +964,12 @@ export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractMongo
 }
 
 export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Dog', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Dog', AST>, P2 extends T.Projection<'Dog', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Dog', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Dog', AST>, P1, P2>
+  }
   public constructor(params: InMemoryDogDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1056,6 +1134,12 @@ export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Hotel', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Hotel', AST>, P2 extends T.Projection<'Hotel', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Hotel', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Hotel', AST>, P1, P2>
+  }
   public constructor(params: HotelDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1065,6 +1149,12 @@ export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMon
 }
 
 export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Hotel', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Hotel', AST>, P2 extends T.Projection<'Hotel', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Hotel', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Hotel', AST>, P1, P2>
+  }
   public constructor(params: InMemoryHotelDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1123,6 +1213,15 @@ export type InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType> =
 >
 
 export class MockedEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'MockedEntity', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'MockedEntity', AST>, P2 extends T.Projection<'MockedEntity', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'MockedEntity', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'MockedEntity', AST>, P1, P2>
+  }
   public constructor(params: MockedEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1132,6 +1231,15 @@ export class MockedEntityDAO<MetadataType, OperationMetadataType> extends T.Abst
 }
 
 export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<MockedEntityDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'MockedEntity', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'MockedEntity', AST>, P2 extends T.Projection<'MockedEntity', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'MockedEntity', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'MockedEntity', AST>, P1, P2>
+  }
   public constructor(params: InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1183,6 +1291,15 @@ export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> =
 >
 
 export class OrganizationDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Organization', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Organization', AST>, P2 extends T.Projection<'Organization', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'Organization', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Organization', AST>, P1, P2>
+  }
   public constructor(params: OrganizationDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1192,6 +1309,15 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends T.Abst
 }
 
 export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Organization', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Organization', AST>, P2 extends T.Projection<'Organization', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'Organization', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Organization', AST>, P1, P2>
+  }
   public constructor(params: InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1257,6 +1383,12 @@ export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Post', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Post', AST>, P2 extends T.Projection<'Post', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Post', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Post', AST>, P1, P2>
+  }
   public constructor(params: PostDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1266,6 +1398,12 @@ export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
 }
 
 export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Post', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Post', AST>, P2 extends T.Projection<'Post', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Post', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Post', AST>, P1, P2>
+  }
   public constructor(params: InMemoryPostDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1393,6 +1531,12 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'User', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'User', AST>, P2 extends T.Projection<'User', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'User', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'User', AST>, P1, P2>
+  }
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1402,6 +1546,12 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMong
 }
 
 export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'User', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'User', AST>, P2 extends T.Projection<'User', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'User', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'User', AST>, P1, P2>
+  }
   public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,

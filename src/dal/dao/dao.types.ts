@@ -9,6 +9,7 @@ import {
   GenerateModel,
   IdFields,
   Insert,
+  LogicalOperators,
   Project,
   Projection,
   QuantityOperators,
@@ -51,7 +52,7 @@ export type Relations<Entity extends string, AST extends AbstractSyntaxTree, Sca
 >
 
 export type FilterParams<T extends DAOGenerics> = {
-  filter?: T['filter']
+  filter?: T['filter'] | LogicalOperators<T['filter']>
   relations?: T['relations']
 } & OperationParams<T>
 

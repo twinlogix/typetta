@@ -1,62 +1,100 @@
 import * as T from '../../src'
 import * as types from './models.mock'
 
+export type Scalars = {
+  ID: { type: types.Scalars['ID']; isTextual: false; isQuantitative: false }
+  String: { type: types.Scalars['String']; isTextual: true; isQuantitative: false }
+  Boolean: { type: types.Scalars['Boolean']; isTextual: false; isQuantitative: false }
+  Int: { type: types.Scalars['Int']; isTextual: false; isQuantitative: true }
+  Float: { type: types.Scalars['Float']; isTextual: false; isQuantitative: true }
+  Date: { type: types.Scalars['Date']; isTextual: false; isQuantitative: false }
+}
+
 export type AST = {
   Like: {
-    creationDate: { type: 'scalar'; isList: false; astName: 'Date'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
-    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-    postId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    fields: {
+      creationDate: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Date'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
+      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      postId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
   }
   Metadata: {
-    tags: { type: 'scalar'; isList: true; astName: 'String'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-    views: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    fields: {
+      tags: { type: 'scalar'; node: 'Entity'; isList: true; astName: 'String'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      views: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
   }
   Post: {
-    content: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-    creationDate: { type: 'scalar'; isList: false; astName: 'Date'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
-    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-    likes: {
-      type: 'relation'
-      relation: 'relationEntity'
-      isList: true
-      astName: 'User'
-      isRequired: true
-      isListElementRequired: true
-      isExcluded: false
-      isId: false
-      generationStrategy: 'undefined'
+    fields: {
+      content: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      creationDate: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Date'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
+      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      likes: {
+        type: 'relation'
+        relation: 'relationEntity'
+        node: 'Entity'
+        isList: true
+        astName: 'User'
+        isRequired: true
+        isListElementRequired: true
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      metadata: {
+        type: 'embedded'
+        node: 'Entity'
+        isList: false
+        astName: 'Metadata'
+        isRequired: false
+        isListElementRequired: false
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    metadata: { type: 'embedded'; isList: false; astName: 'Metadata'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-    userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
   }
   User: {
-    birthDate: { type: 'scalar'; isList: false; astName: 'Date'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-    firstName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-    id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-    lastName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-    likes: {
-      type: 'relation'
-      relation: 'relationEntity'
-      isList: true
-      astName: 'Post'
-      isRequired: true
-      isListElementRequired: true
-      isExcluded: false
-      isId: false
-      generationStrategy: 'undefined'
+    fields: {
+      birthDate: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Date'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      firstName: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      lastName: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      likes: {
+        type: 'relation'
+        relation: 'relationEntity'
+        node: 'Entity'
+        isList: true
+        astName: 'Post'
+        isRequired: true
+        isListElementRequired: true
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      posts: {
+        type: 'relation'
+        relation: 'foreign'
+        node: 'Entity'
+        isList: true
+        astName: 'Post'
+        isRequired: false
+        isListElementRequired: true
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
     }
-    posts: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'Post'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
   }
 }
 
-export type LikeExcludedFields = never
-
-export type LikeEmbeddedFields = never
-export type LikeRelationFields = never
-export type LikeRetrieveAll = Omit<types.Like, LikeRelationFields | LikeEmbeddedFields> & {}
-
-export function likeSchema(): T.Schema<types.Scalars> {
+export function likeSchema(): T.Schema<Scalars> {
   return {
     creationDate: {
       type: 'scalar',
@@ -84,67 +122,7 @@ export function likeSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type LikeFilterFields = {
-  creationDate?: types.Scalars['Date'] | null | T.EqualityOperators<types.Scalars['Date']> | T.ElementOperators
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  postId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  userId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type LikeFilter = LikeFilterFields & T.LogicalOperators<LikeFilterFields | LikeRawFilter>
-export type LikeRawFilter = never
-
-export type LikeRelations = Record<never, string>
-
-export type LikeProjection = {
-  creationDate?: boolean
-  id?: boolean
-  postId?: boolean
-  userId?: boolean
-}
-export type LikeParam<P extends LikeProjection> = T.ParamProjection<types.Like, LikeProjection, P>
-
-export type LikeSortKeys = 'creationDate' | 'id' | 'postId' | 'userId'
-export type LikeSort = Partial<Record<LikeSortKeys, T.SortDirection>>
-export type LikeRawSort = never
-
-export type LikeUpdate = {
-  creationDate?: types.Scalars['Date'] | null
-  id?: types.Scalars['ID'] | null
-  postId?: types.Scalars['ID'] | null
-  userId?: types.Scalars['ID'] | null
-}
-export type LikeRawUpdate = never
-
-export type LikeInsert = {
-  creationDate?: null | types.Scalars['Date']
-  id?: null | types.Scalars['ID']
-  postId: types.Scalars['ID']
-  userId: types.Scalars['ID']
-}
-
-type LikeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
-  types.Like,
-  'id',
-  'ID',
-  LikeFilter,
-  LikeRawFilter,
-  LikeRelations,
-  LikeProjection,
-  LikeSort,
-  LikeRawSort,
-  LikeInsert,
-  LikeUpdate,
-  LikeRawUpdate,
-  LikeExcludedFields,
-  LikeRelationFields,
-  LikeEmbeddedFields,
-  LikeRetrieveAll,
-  MetadataType,
-  OperationMetadataType,
-  types.Scalars,
-  'like',
-  EntityManager<MetadataType, OperationMetadataType>
->
+type LikeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<'Like', AST, Scalars, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>
 export type LikeDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<LikeDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 export type InMemoryLikeDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.InMemoryDAOParams<LikeDAOGenerics<MetadataType, OperationMetadataType>>,
@@ -152,13 +130,12 @@ export type InMemoryLikeDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class LikeDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<LikeDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends LikeProjection>(p: P) {
+  public static projection<P extends T.Projection<'Like', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends LikeProjection, P2 extends LikeProjection>(p1: P1, p2: P2): T.SelectProjection<LikeProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<LikeProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Like', AST>, P2 extends T.Projection<'Like', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Like', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Like', AST>, P1, P2>
   }
-
   public constructor(params: LikeDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -168,13 +145,12 @@ export class LikeDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
 }
 
 export class InMemoryLikeDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<LikeDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends LikeProjection>(p: P) {
+  public static projection<P extends T.Projection<'Like', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends LikeProjection, P2 extends LikeProjection>(p1: P1, p2: P2): T.SelectProjection<LikeProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<LikeProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Like', AST>, P2 extends T.Projection<'Like', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Like', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Like', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryLikeDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -183,11 +159,7 @@ export class InMemoryLikeDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
-export type MetadataEmbeddedFields = never
-export type MetadataRelationFields = never
-export type MetadataRetrieveAll = Omit<types.Metadata, MetadataRelationFields | MetadataEmbeddedFields> & {}
-
-export function metadataSchema(): T.Schema<types.Scalars> {
+export function metadataSchema(): T.Schema<Scalars> {
   return {
     tags: {
       type: 'scalar',
@@ -202,26 +174,7 @@ export function metadataSchema(): T.Schema<types.Scalars> {
   }
 }
 
-export type MetadataProjection = {
-  tags?: boolean
-  views?: boolean
-}
-export type MetadataParam<P extends MetadataProjection> = T.ParamProjection<types.Metadata, MetadataProjection, P>
-
-export type MetadataInsert = {
-  tags?: null | types.Scalars['String'][]
-  views?: null | types.Scalars['Int']
-}
-
-export type PostExcludedFields = never
-
-export type PostEmbeddedFields = 'metadata'
-export type PostRelationFields = 'likes'
-export type PostRetrieveAll = Omit<types.Post, PostRelationFields | PostEmbeddedFields> & {
-  metadata?: types.Maybe<MetadataRetrieveAll>
-}
-
-export function postSchema(): T.Schema<types.Scalars> {
+export function postSchema(): T.Schema<Scalars> {
   return {
     content: {
       type: 'scalar',
@@ -271,83 +224,7 @@ export function postSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type PostFilterFields = {
-  content?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  creationDate?: types.Scalars['Date'] | null | T.EqualityOperators<types.Scalars['Date']> | T.ElementOperators
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  'metadata.tags'?: types.Scalars['String'][] | null | T.EqualityOperators<types.Scalars['String'][]> | T.ElementOperators | T.StringOperators
-  'metadata.views'?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
-  userId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type PostFilter = PostFilterFields & T.LogicalOperators<PostFilterFields | PostRawFilter>
-export type PostRawFilter = never
-
-export type PostRelations = {
-  likes?: {
-    filter?: UserFilter
-    sorts?: UserSort[] | UserRawSort
-    skip?: number
-    limit?: number
-    relations?: UserRelations
-  }
-}
-
-export type PostProjection = {
-  content?: boolean
-  creationDate?: boolean
-  id?: boolean
-  likes?: UserProjection | boolean
-  metadata?: MetadataProjection | boolean
-  userId?: boolean
-}
-export type PostParam<P extends PostProjection> = T.ParamProjection<types.Post, PostProjection, P>
-
-export type PostSortKeys = 'content' | 'creationDate' | 'id' | 'metadata.tags' | 'metadata.views' | 'userId'
-export type PostSort = Partial<Record<PostSortKeys, T.SortDirection>>
-export type PostRawSort = never
-
-export type PostUpdate = {
-  content?: types.Scalars['String'] | null
-  creationDate?: types.Scalars['Date'] | null
-  id?: types.Scalars['ID'] | null
-  metadata?: MetadataInsert | null
-  'metadata.tags'?: types.Scalars['String'][] | null
-  'metadata.views'?: types.Scalars['Int'] | null
-  userId?: types.Scalars['ID'] | null
-}
-export type PostRawUpdate = never
-
-export type PostInsert = {
-  content: types.Scalars['String']
-  creationDate?: null | types.Scalars['Date']
-  id?: null | types.Scalars['ID']
-  metadata?: null | MetadataInsert
-  userId: types.Scalars['ID']
-}
-
-type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
-  types.Post,
-  'id',
-  'ID',
-  PostFilter,
-  PostRawFilter,
-  PostRelations,
-  PostProjection,
-  PostSort,
-  PostRawSort,
-  PostInsert,
-  PostUpdate,
-  PostRawUpdate,
-  PostExcludedFields,
-  PostRelationFields,
-  PostEmbeddedFields,
-  PostRetrieveAll,
-  MetadataType,
-  OperationMetadataType,
-  types.Scalars,
-  'post',
-  EntityManager<MetadataType, OperationMetadataType>
->
+type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<'Post', AST, Scalars, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>
 export type PostDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.InMemoryDAOParams<PostDAOGenerics<MetadataType, OperationMetadataType>>,
@@ -355,13 +232,12 @@ export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends PostProjection>(p: P) {
+  public static projection<P extends T.Projection<'Post', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends PostProjection, P2 extends PostProjection>(p1: P1, p2: P2): T.SelectProjection<PostProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<PostProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Post', AST>, P2 extends T.Projection<'Post', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Post', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Post', AST>, P1, P2>
   }
-
   public constructor(params: PostDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -371,13 +247,12 @@ export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
 }
 
 export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends PostProjection>(p: P) {
+  public static projection<P extends T.Projection<'Post', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends PostProjection, P2 extends PostProjection>(p1: P1, p2: P2): T.SelectProjection<PostProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<PostProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Post', AST>, P2 extends T.Projection<'Post', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Post', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Post', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryPostDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -386,13 +261,7 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
   }
 }
 
-export type UserExcludedFields = never
-
-export type UserEmbeddedFields = never
-export type UserRelationFields = 'likes' | 'posts'
-export type UserRetrieveAll = Omit<types.User, UserRelationFields | UserEmbeddedFields> & {}
-
-export function userSchema(): T.Schema<types.Scalars> {
+export function userSchema(): T.Schema<Scalars> {
   return {
     birthDate: {
       type: 'scalar',
@@ -446,84 +315,7 @@ export function userSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type UserFilterFields = {
-  birthDate?: types.Scalars['Date'] | null | T.EqualityOperators<types.Scalars['Date']> | T.ElementOperators
-  firstName?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  lastName?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-}
-export type UserFilter = UserFilterFields & T.LogicalOperators<UserFilterFields | UserRawFilter>
-export type UserRawFilter = never
-
-export type UserRelations = {
-  likes?: {
-    filter?: PostFilter
-    sorts?: PostSort[] | PostRawSort
-    skip?: number
-    limit?: number
-    relations?: PostRelations
-  }
-  posts?: {
-    filter?: PostFilter
-    sorts?: PostSort[] | PostRawSort
-    skip?: number
-    limit?: number
-    relations?: PostRelations
-  }
-}
-
-export type UserProjection = {
-  birthDate?: boolean
-  firstName?: boolean
-  id?: boolean
-  lastName?: boolean
-  likes?: PostProjection | boolean
-  posts?: PostProjection | boolean
-}
-export type UserParam<P extends UserProjection> = T.ParamProjection<types.User, UserProjection, P>
-
-export type UserSortKeys = 'birthDate' | 'firstName' | 'id' | 'lastName'
-export type UserSort = Partial<Record<UserSortKeys, T.SortDirection>>
-export type UserRawSort = never
-
-export type UserUpdate = {
-  birthDate?: types.Scalars['Date'] | null
-  firstName?: types.Scalars['String'] | null
-  id?: types.Scalars['ID'] | null
-  lastName?: types.Scalars['String'] | null
-}
-export type UserRawUpdate = never
-
-export type UserInsert = {
-  birthDate?: null | types.Scalars['Date']
-  firstName: types.Scalars['String']
-  id?: null | types.Scalars['ID']
-  lastName: types.Scalars['String']
-}
-
-type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
-  types.User,
-  'id',
-  'ID',
-  UserFilter,
-  UserRawFilter,
-  UserRelations,
-  UserProjection,
-  UserSort,
-  UserRawSort,
-  UserInsert,
-  UserUpdate,
-  UserRawUpdate,
-  UserExcludedFields,
-  UserRelationFields,
-  UserEmbeddedFields,
-  UserRetrieveAll,
-  MetadataType,
-  OperationMetadataType,
-  types.Scalars,
-  'user',
-  EntityManager<MetadataType, OperationMetadataType>
->
+type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<'User', AST, Scalars, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>,
@@ -531,13 +323,12 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends UserProjection>(p: P) {
+  public static projection<P extends T.Projection<'User', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): T.SelectProjection<UserProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<UserProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'User', AST>, P2 extends T.Projection<'User', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'User', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'User', AST>, P1, P2>
   }
-
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -547,13 +338,12 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMe
 }
 
 export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends UserProjection>(p: P) {
+  public static projection<P extends T.Projection<'User', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): T.SelectProjection<UserProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<UserProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'User', AST>, P2 extends T.Projection<'User', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'User', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'User', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -570,8 +360,8 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
-  scalars?: T.UserInputDriverDataTypeAdapterMap<types.Scalars, 'knex'>
-  log?: T.LogInput<'like' | 'post' | 'user'>
+  scalars?: T.UserInputDriverDataTypeAdapterMap<Scalars, 'knex'>
+  log?: T.LogInput<'Like' | 'Post' | 'User'>
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 
@@ -582,7 +372,7 @@ export class EntityManager<
   OperationMetadataType = never,
   Permissions extends string = never,
   SecurityDomain extends Record<string, unknown> = never,
-> extends T.AbstractEntityManager<never, never, types.Scalars, MetadataType> {
+> extends T.AbstractEntityManager<never, never, Scalars, MetadataType> {
   private _like: LikeDAO<MetadataType, OperationMetadataType> | undefined
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
@@ -593,7 +383,7 @@ export class EntityManager<
 
   private middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
 
-  private logger?: T.LogFunction<'like' | 'post' | 'user'>
+  private logger?: T.LogFunction<'Like' | 'Post' | 'User'>
 
   get like(): LikeDAO<MetadataType, OperationMetadataType> {
     if (!this._like) {
@@ -603,7 +393,7 @@ export class EntityManager<
         metadata: this.metadata,
         ...this.overrides?.like,
         middlewares: [...(this.overrides?.like?.middlewares || []), ...(selectMiddleware('like', this.middlewares) as T.DAOMiddleware<LikeDAOGenerics<MetadataType, OperationMetadataType>>[])],
-        name: 'like',
+        name: 'Like',
         logger: this.logger,
       })
     }
@@ -617,7 +407,7 @@ export class EntityManager<
         metadata: this.metadata,
         ...this.overrides?.post,
         middlewares: [...(this.overrides?.post?.middlewares || []), ...(selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[])],
-        name: 'post',
+        name: 'Post',
         logger: this.logger,
       })
     }
@@ -631,7 +421,7 @@ export class EntityManager<
         metadata: this.metadata,
         ...this.overrides?.user,
         middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
-        name: 'user',
+        name: 'User',
         logger: this.logger,
       })
     }

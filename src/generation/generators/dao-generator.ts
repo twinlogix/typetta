@@ -234,7 +234,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
     return `export type AST = {
     ${nodes
       .map((node) => {
-        return `${node.name}: { fields: { ${node.fields.map((f) => generateASTNodes(f)).join(',\n')} }, driverSpecification: { rawFilter: never, rawUpdate: never, rawSorts: never } }`
+        return `${node.name}: { fields: { ${node.fields.map((f) => generateASTNodes(f)).join(',\n')} }, driverSpecification: { rawFilter: ${node.entity?.type === 'mongo' ? '() => M.Filter<M.Document>' : 'never'}, rawUpdate: never, rawSorts: never } }`
       })
       .join(',\n')}
   }`
@@ -830,6 +830,12 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     const constructorBody = `super({ ${indentMultiline(`\n...params, \nschema: ${toFirstLower(node.name)}Schema()`)} \n})`
     return (
       `
+      public static projection<P extends T.Projection<'${node.name}', AST>>(p: P) {
+        return p
+      }
+      public static mergeProjection<P1 extends T.Projection<'${node.name}', AST>, P2 extends T.Projection<'${node.name}', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'${node.name}', AST>, P1, P2> {
+        return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'${node.name}', AST>, P1, P2>
+      }
       public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n` +
       indentMultiline(constructorBody) +
       '\n}'
