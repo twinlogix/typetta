@@ -33,11 +33,7 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
     params: InsertParams<T>,
     context: MiddlewareContext<T>,
   ) => Promise<(Omit<InsertMiddlewareInput<T>, 'operation'> & Continue<true>) | (Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<false>) | void>
-  afterInsert?: (
-    params: InsertParams<T>,
-    insertedRecord: Omit<T['model'], T['insertExcludedFields']>,
-    context: MiddlewareContext<T>,
-  ) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
+  afterInsert?: (params: InsertParams<T>, insertedRecord: T['model'], context: MiddlewareContext<T>) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
   beforeUpdate?: (
     params: UpdateParams<T>,
     context: MiddlewareContext<T>,

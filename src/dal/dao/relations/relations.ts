@@ -1,8 +1,9 @@
 import { IdGenerationStrategy } from '../dao.types'
+import { AbstractScalars } from '../schemas/ast.types'
 import { Schema } from '../schemas/schemas.types'
 import { DAORelation } from './relations.types'
 
-export function daoRelationsFromSchema<ScalarsType>(schema: Schema<ScalarsType>, path = ''): DAORelation[] {
+export function daoRelationsFromSchema<Scalars  extends AbstractScalars>(schema: Schema<Scalars>, path = ''): DAORelation[] {
   return Object.entries(schema).flatMap(([fieldName, fieldSchema]) => {
     if (fieldSchema.type === 'embedded') {
       return daoRelationsFromSchema(fieldSchema.schema(), path + fieldName + '.')
@@ -54,13 +55,13 @@ export function daoRelationsFromSchema<ScalarsType>(schema: Schema<ScalarsType>,
   })
 }
 
-export function idInfoFromSchema<ScalarsType>(schema: Schema<ScalarsType>): { idField: string; idScalar: keyof ScalarsType; idGeneration: IdGenerationStrategy } {
+export function idInfoFromSchema<Scalars extends AbstractScalars>(schema: Schema<Scalars>): { idField: string; idScalar: keyof Scalars; idGeneration: IdGenerationStrategy } {
   return Object.entries(schema).flatMap(([k, v]) => {
     if (v.isId) {
       if (v.type !== 'scalar') {
         throw new Error('Id can be only scalar')
       }
-      return [{ idField: k, idScalar: v.isEnum ? 'String' as keyof ScalarsType : v.scalar, idGeneration: v.generationStrategy }]
+      return [{ idField: k, idScalar: v.isEnum ? 'String' as keyof Scalars : v.scalar, idGeneration: v.generationStrategy }]
     }
     return []
   })[0]

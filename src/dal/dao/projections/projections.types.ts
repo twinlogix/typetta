@@ -1,10 +1,7 @@
 import { Expand, OmitUndefinedAndNeverKeys } from '../../../utils/utils.types'
-import { DAOGenerics } from '../dao.types'
-import { GraphQLResolveInfo } from 'graphql'
-import { PartialDeep, Primitive } from 'type-fest'
-import { PartialObjectDeep } from 'type-fest/source/partial-deep'
+import { Primitive } from 'type-fest'
 
-export type AnyProjection<ProjectionType extends object> = true | undefined | PartialObjectDeep<ProjectionType>
+export type AnyProjection<ProjectionType extends object> = true | undefined | ProjectionType
 
 /**
  * Generic definition of projection.
@@ -56,7 +53,7 @@ export type IntersectGenericProjection<T1 extends GenericProjection, T2 extends 
           : never
       }>
     >
-
+/*
 type Selector<ProjectionType extends Record<string, unknown>, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = Record<string, unknown> extends Required<P>
   ? 'empty'
   : [true] extends [P]
@@ -68,12 +65,13 @@ type Selector<ProjectionType extends Record<string, unknown>, P extends AnyProje
   : P extends GraphQLResolveInfo
   ? 'unknown'
   : 'specific'
-
+*/
 /**
  * Given a model M and a projection P returns the mapepd model to the projection.
  * If a StaticProjection was given the projection information is carried at compilation time by this type.
  * It is used as return type in all the finds operations.
  */
+/*
 export type ModelProjection<T extends DAOGenerics, P extends AnyProjection<T['projection']> | GraphQLResolveInfo> = Selector<T['projection'], P> extends infer S
   ? S extends 'all'
     ? T['retrieveAll'] & { __projection: 'all' }
@@ -85,7 +83,7 @@ export type ModelProjection<T extends DAOGenerics, P extends AnyProjection<T['pr
     ? PartialDeep<T['model']> & { __projection: 'unknown' }
     : { __projection: 'empty' }
   : never
-
+*/
 /**
  * Given a model M and a StaticProjection P returns the mapepd model to the projection.
  * It should be used as projector in function parameters.

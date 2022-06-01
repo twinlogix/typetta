@@ -1,3 +1,4 @@
+import { AbstractScalars } from '../..'
 import { DataTypeAdapter, DefaultModelScalars, identityAdapter } from './drivers.types'
 import { inMemoryAdapters, InMemoryDataTypeAdapterMap } from './in-memory/adapters.memory'
 import { DefaultMongoDBScalars, mongoDbAdapters, MongoDBDataTypeAdapterMap } from './no-sql/mongodb/adapters.mongodb'
@@ -13,7 +14,7 @@ export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends Defau
   [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key], DefaultMongoDBScalars[key], DefaultKnexJsScalars[key], D>
 }
 
-export type DriverDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = {
+export type DriverDataTypeAdapterMap<ModelScalars extends AbstractScalars> = {
   knex: KnexJSDataTypeAdapterMap<ModelScalars>
   mongo: MongoDBDataTypeAdapterMap<ModelScalars>
   memory: InMemoryDataTypeAdapterMap<ModelScalars>

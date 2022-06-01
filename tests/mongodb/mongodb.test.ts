@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock, Projection } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { CityProjection, EntityManager, UserDAO, UserProjection, UserRetrieveAll } from './dao.mock'
+import { AST, EntityManager, UserDAO } from './dao.mock'
 import { Scalars, State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -272,9 +272,10 @@ test('safe find', async () => {
   expect(response2?.live).toBe(true)
 
   // Dynamic projection
-  const proj: UserProjection = { firstName: true, live: true }
+  const proj: Projection<'User', AST> = { firstName: true, live: true }
   const response3 = await dao.user.findOne({ projection: proj })
-  typeAssert<Test<typeof response3, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
+  const r = response3?.__projection
+  typeAssert<Test<typeof r, 'unknown' | undefined>>()
   expect(response3).toBeDefined()
   expect(response3?.firstName).toBe('FirstName')
   expect(response3?.live).toBe(true)

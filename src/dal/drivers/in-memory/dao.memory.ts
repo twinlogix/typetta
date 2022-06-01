@@ -136,7 +136,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['model']> {
     const record = deepMerge(params.record, this.generateRecordWithId())
     const t = transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
     const id = t[this.schema[this.idField].alias ?? this.idField]
@@ -205,7 +205,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
       if (filterKeys.includes(this.idField)) {
         if (typeof idFilter === 'object' && idFilterKeys.includes('in')) {
-          const indexes = (idFilter['in'] as T['idType'][]).map((id) => this.stateManager.getIdIndex(id)).flatMap((i) => (i === undefined ? [] : [i]))
+          const indexes = (idFilter['in'] as T['idFields'][]).map((id) => this.stateManager.getIdIndex(id)).flatMap((i) => (i === undefined ? [] : [i]))
           return [...new Set(indexes)]
         } else if (typeof idFilter === 'object' && idFilterKeys.includes('eq')) {
           const index = this.stateManager.getIdIndex(idFilter['eq'])
@@ -248,7 +248,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
   }
 
-  private generateRecordWithId(): Partial<Record<T['idKey'], T['model'][T['idKey']]>> {
+  private generateRecordWithId(): Partial<Record<T['idFields'], T['model'][T['idFields']]>> {
     if (this.idGeneration === 'db') {
       if (!this.mockIdSpecification?.generate) {
         throw new Error('UNREACHABLE')

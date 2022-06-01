@@ -1,58 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AbstractEntityManager, DAOGenerics, DAOParams, OmitIfKnown } from '../../..'
+import { AbstractEntityManager, AbstractScalars, AbstractSyntaxTree, DAOGenerics, DAOParams } from '../../..'
 import { DefaultModelScalars } from '../drivers.types'
 
 export type InMemoryDAOGenerics<
-  ModelType extends object = any,
-  IDKey extends keyof OmitIfKnown<ModelType, ExcludedFields> = any,
-  IDScalar extends keyof ScalarsType = any,
-  PureFilterType = any,
-  RawFilterType = any,
-  RelationsType = any,
-  ProjectionType extends object = any,
-  PureSortType = any,
-  RawSortType = any,
-  InsertType extends object = any,
-  PureUpdateType = any,
-  RawUpdateType = any,
-  ExcludedFields extends keyof ModelType = any,
-  RelationsFields extends keyof ModelType = any,
-  EmbeddedFields extends keyof ModelType = any,
-  RetrieveAll extends object = any,
+  Entity extends string = any,
+  AST extends AbstractSyntaxTree = any,
+  Scalars extends AbstractScalars<keyof DefaultModelScalars> = any,
   MetadataType = any,
   OperationMetadataType = any,
-  ScalarsType extends DefaultModelScalars = any,
-  NameType extends string = any,
-  EntityManager extends AbstractEntityManager<string, string, ScalarsType, MetadataType> = AbstractEntityManager<string, string, ScalarsType, MetadataType>,
-> = DAOGenerics<
-  ModelType,
-  IDKey,
-  IDScalar,
-  PureFilterType,
-  RawFilterType,
-  RelationsType,
-  ProjectionType,
-  PureSortType,
-  RawSortType,
-  InsertType,
-  PureUpdateType,
-  RawUpdateType,
-  ExcludedFields,
-  RelationsFields,
-  EmbeddedFields,
-  RetrieveAll,
-  MetadataType,
-  OperationMetadataType,
-  Record<never, never>,
-  ScalarsType,
-  unknown,
-  unknown,
-  unknown,
-  unknown,
-  unknown,
-  unknown,
-  NameType,
-  EntityManager
->
+  EntityManager extends AbstractEntityManager<string, string, Scalars, MetadataType> = AbstractEntityManager<string, string, Scalars, MetadataType>,
+> = DAOGenerics<Entity, AST, Scalars, MetadataType, OperationMetadataType, Record<never, never>, unknown, unknown, unknown, unknown, unknown, unknown, EntityManager>
 
 export type InMemoryDAOParams<T extends DAOGenerics> = Omit<DAOParams<T>, 'driverContext'>

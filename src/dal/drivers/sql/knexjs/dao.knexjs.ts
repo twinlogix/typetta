@@ -192,7 +192,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['model']> {
     return this.runQuery(
       'insertOne',
       () => {
@@ -205,9 +205,9 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         const inserted = records[0]
         if (typeof inserted === 'number') {
           const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] ?? inserted } as T['filter'], options: params.options, limit: 1 })
-          return insertedRetrieved[0] as Omit<T['model'], T['insertExcludedFields']>
+          return insertedRetrieved[0]
         }
-        return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
+        return this.dbToModel(inserted)
       },
     )
   }
@@ -272,7 +272,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private async runQuery<R = undefined>(
-    operation: LogArgs<T['name']>['operation'],
+    operation: LogArgs<T['entity']>['operation'],
     queryBuilder: () => Knex.QueryBuilder<any, any> | { skipReason: string },
     transform?: (result: any) => R,
     skipDefault?: Awaited<R>,
@@ -299,7 +299,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     }
   }
 
-  private async knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }): Promise<void> {
+  private async knexLog(args: Pick<LogArgs<T['entity']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }): Promise<void> {
     await this.log(() => this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 
