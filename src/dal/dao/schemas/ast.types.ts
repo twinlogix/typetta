@@ -61,16 +61,10 @@ export type GenerateModel<Entity extends string, AST extends AbstractSyntaxTree,
   AST
 >
 
-type DecorateModel<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = DecorateModelWithRequired<DecorateModelWithArray<Model, Entity, AST>, Entity, AST>
-type DecorateModelOpt<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = DecorateModelWithOptional<DecorateModelWithArray<Model, Entity, AST>, Entity, AST>
+type DecorateModel<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = DecorateModelWithOptional<DecorateModelWithArray<Model, Entity, AST>, Entity, AST>
 type DecorateModelWithArray<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = {
   [K in keyof Model]: K extends keyof AST[Entity] ? (AST[Entity][K]['isList'] extends true ? (AST[Entity][K]['isListElementRequired'] extends true ? Model[K] : Model[K] | null)[] : Model[K]) : never
 }
-type DecorateModelWithRequired<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = {
-  [K in keyof Model]: K extends keyof AST[Entity] ? (AST[Entity][K]['isRequired'] extends true ? Model[K] : never) : never
-} extends infer O
-  ? O
-  : never
 type DecorateModelWithOptional<Model extends Record<string, unknown>, Entity extends string, AST extends AbstractSyntaxTree> = {
   [K in keyof Model & NotRequiredFields<Entity, AST>]?: Model[K] | null
 } & {
@@ -88,9 +82,19 @@ type DecorateModelWithOptional<Model extends Record<string, unknown>, Entity ext
 }>*/
 
 export type Filter<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = {
-  [K in RecursiveScalarKeys<Entity, AST>]?: ScalarFromPath<Entity, AST, Scalars, K> extends infer S
-    ? S extends ScalarsElement
-      ? S['type'] | { eq?: S['type'] } | (S['isQuantitative'] extends true ? { gt?: S['type']; lt?: S['type'] } : never) //TODO
+  [K in RecursiveScalarKeys<Entity, AST>]?: FieldFromPath<Entity, AST, Scalars, K> extends { astName: infer ASTName; isList: infer IsList }
+    ? ASTName extends string
+      ? Scalars[ASTName] extends { type: infer T; isQuantitative: infer IsQuantitative; isTextual: infer IsTextual }
+        ? IsList extends true
+          ?
+              | (T | null | (T | null)[])
+              | { eq?: T | null | (T | null)[]; in?: ((T | null)[] | T)[]; ne?: T | null | (T | null)[]; nin?: ((T | null)[] | T)[]; exists?: boolean }
+          :
+              | T
+              | { eq?: T | null; in?: T[]; ne?: T | null; nin?: T[]; exists?: boolean }
+              | (IsQuantitative extends true ? { gt?: T; lt?: T; gte?: T; lte?: T } : never)
+              | (IsTextual extends true ? { contains?: T; startsWith?: T; endsWith?: T; mode?: 'sensitive' | 'insensitive' } : never)
+        : never
       : never
     : never
 }
@@ -124,8 +128,6 @@ export type Update<Entity extends string, AST extends AbstractSyntaxTree, Scalar
 export type SortElement<Entity extends string, AST extends AbstractSyntaxTree> = {
   [K in RecursiveScalarKeys<Entity, AST>]?: SortDirection
 }
-
-type ScalarFromPath<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, Path> = Scalars[FieldFromPath<Entity, AST, Scalars, Path>['astName']]
 
 type FieldFromPath<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, Path> = Path extends `${infer R}.${infer T}`
   ? FieldFromPath<AST[Entity][R]['astName'], AST, Scalars, T>
@@ -163,7 +165,7 @@ export type RequiredFields<Entity extends string, AST extends AbstractSyntaxTree
   [K in keyof AST[Entity]]: AST[Entity][K]['isRequired'] extends true ? K : never
 }[keyof AST[Entity]]
 
-export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = DecorateModelOpt<
+export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = DecorateModel<
   OmitNever<{
     [K in keyof AST[Entity]]: AST[Entity][K] extends { type: infer Type; isExcluded: infer IsExcluded; generationStrategy: infer GenerationStrategy; astName: infer ASTName }
       ? ASTName extends string
@@ -184,28 +186,55 @@ export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalar
 >
 
 //TODO: remove under
-type A = EmbeddedFields<'User', AST>
-type LOL = GenerateModel<'User', AST, Scalars, 'relation'>
-type P = Projection<'User', AST>
-type ASD1 = Project<'User', AST, Scalars, Record<string, never>>
-type ASD2 = Project<'User', AST, Scalars, undefined>
-type ASD3 = Project<'User', AST, Scalars, true>
-type ASD4 = Project<'User', AST, Scalars, P>
-type ASD = Project<'User', AST, Scalars, { id: true }>
-type Ids = IdFields<'User', AST>
-type FK = RecursiveScalarKeys<'User', AST>
-const f: Filter<'User', AST, Scalars> = {
-  'usernamePasswordCredentials.password': {},
+const user: GenerateModel<'User', AST, Scalars, 'relation'> = {
+  id: '',
+  live: true,
+}
+const proj: Projection<'User', AST> = {
+  amount: true,
+  friends: { embeddedUser: true },
+}
+const projUser1: Project<'User', AST, Scalars, { id: true; amount: true; friends: { firstName: true }; embeddedUser: { userId: true } }> = {
+  __projection: null as any,
+  id: '',
+  amount: 1,
+  embeddedUser: { __projection: null as any, userId: '' },
+  friends: [{ __projection: null as any, firstName: '' }],
+}
+const projUser2: Project<'User', AST, Scalars, Record<string, never>> = {
+  __projection: 'empty',
+}
+const projUser3: Project<'User', AST, Scalars, typeof proj> = {
+  __projection: 'unknown',
+}
+const projUser4: Project<'User', AST, Scalars, true> = {
+  __projection: 'all',
+  id: '',
+  live: true,
+}
+const projUser5: Project<'User', AST, Scalars, undefined> = {
+  __projection: 'all',
+  id: '',
+  live: true,
+}
+const filter: Filter<'User', AST, Scalars> = {
+  'usernamePasswordCredentials.password': { nin: ['a', 'b'] },
   'embeddedPost.metadata.visible': { eq: true },
   amount: { gt: 3 },
+  amounts: { in: [[1, 2, null]] },
 }
-const s: SortElement<'User', AST> = {
+const insert: Insert<'User', AST, Scalars> = {
+  live: true,
+}
+const update: Update<'User', AST, Scalars> = {
+  'credentials.password': 'asd',
+}
+const sort: SortElement<'User', AST> = {
   'credentials.password': 'asc',
   'embeddedPost.metadata.region': 'asc',
 }
-const p: Projection<'User', AST> = {}
-type Ins = Insert<'User', AST, Scalars>
-type Upd = Update<'User', AST, Scalars>
+
+console.log(user, proj, projUser1, projUser2, projUser3, projUser4, projUser5, filter, sort, insert, update)
 
 export type AST = {
   Address: {
@@ -631,13 +660,13 @@ export type TypesScalars = {
   Boolean: boolean
   Int: number
   Float: number
-  Coordinates: any
+  Coordinates: string
   Decimal: number
-  JSON: any
+  JSON: string
   Live: boolean
-  LocalizedString: any
-  MongoID: any
-  Password: any
+  LocalizedString: string
+  MongoID: string
+  Password: string
 }
 type Scalars = {
   ID: { type: TypesScalars['ID']; isTextual: false; isQuantitative: false }
@@ -651,5 +680,5 @@ type Scalars = {
   Live: { type: TypesScalars['Live']; isTextual: false; isQuantitative: false }
   LocalizedString: { type: TypesScalars['LocalizedString']; isTextual: false; isQuantitative: false }
   MongoID: { type: TypesScalars['MongoID']; isTextual: false; isQuantitative: false }
-  Password: { type: TypesScalars['Password']; isTextual: false; isQuantitative: false }
+  Password: { type: TypesScalars['Password']; isTextual: true; isQuantitative: false }
 }
