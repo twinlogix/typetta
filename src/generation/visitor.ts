@@ -7,7 +7,7 @@ import { FieldTypeType, TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypet
 import { toFirstLower } from './utils'
 import { getBaseTypeNode, ParsedConfig, BaseVisitor, buildScalars, DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
 import autoBind from 'auto-bind'
-import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isEnumType } from 'graphql'
+import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefinitionNode, FieldDefinitionNode, Kind, ValueNode, isObjectType, isEnumType, EnumTypeDefinitionNode } from 'graphql'
 
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
@@ -244,6 +244,17 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
       name: node.name.value,
       isQuantity: this._getDirectiveFromAstNode(node, Directives.QUANTITY_SCALAR) ? true : false,
       isString: this._getDirectiveFromAstNode(node, Directives.STRING_SCALAR) ? true : false,
+      isEnum: false,
+    }
+  }
+
+  EnumTypeDefinition(node: EnumTypeDefinitionNode): TsTypettaGeneratorScalar {
+    return {
+      type: 'scalar',
+      name: node.name.value,
+      isQuantity: false,
+      isString: false,
+      isEnum: true,
     }
   }
 }

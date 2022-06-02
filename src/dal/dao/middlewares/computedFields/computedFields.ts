@@ -12,6 +12,7 @@ export function computedField<T extends DAOGenerics, P1 extends AnyProjection<T[
   compute: (record: ModelProjection<T, P1>, params: FindParams<T>) => Promise<PartialDeep<T['model']>>
 }): DAOMiddleware<T> {
   return {
+    name: 'Typetta - Computed field',
     before: projectionDependency<T>(options).before,
     after: async (args) => {
       if (args.operation === 'find') {

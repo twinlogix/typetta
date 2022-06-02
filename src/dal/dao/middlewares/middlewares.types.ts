@@ -67,6 +67,7 @@ export type BeforeMiddlewareResult<T extends DAOGenerics> = (MiddlewareInput<T> 
 export type AfterMiddlewareResult<T extends DAOGenerics> = Continue<boolean> & MiddlewareOutput<T>
 
 export type DAOMiddleware<T extends DAOGenerics> = {
+  name?: string
   before?: <G extends MiddlewareInput<T>>(args: G, context: MiddlewareContext<T>) => Promise<BeforeMiddlewareResult<T> | void>
   after?: (args: MiddlewareOutput<T>, context: MiddlewareContext<T>) => Promise<AfterMiddlewareResult<T> | void>
 }

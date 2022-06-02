@@ -11,6 +11,7 @@ export function audit<T extends DAOGenerics>(
   ) => { changes: T['update']; insert: PartialDeep<T['insert']> },
 ): DAOMiddleware<T> {
   return buildMiddleware({
+    name: 'Typetta - Audit',
     beforeInsert: async (params, context) => {
       return {
         continue: true,
