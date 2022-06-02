@@ -15,47 +15,44 @@ export type Scalars = {
   LocalizedString: { type: types.Scalars['LocalizedString']; isTextual: false; isQuantitative: false }
   MongoID: { type: types.Scalars['MongoID']; isTextual: false; isQuantitative: false }
   Password: { type: types.Scalars['Password']; isTextual: false; isQuantitative: false }
+  State: { type: types.State; isTextual: false; isQuantitative: false }
 }
 
 export type AST = {
   Address: {
     fields: {
-      cities: {
-        type: 'relation'
-        relation: 'foreign'
-        node: 'Entity'
-        isList: true
-        astName: 'City'
-        isRequired: false
-        isListElementRequired: true
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      cities: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'City'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   Audit: {
     fields: {
-      changes: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      entityId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+      changes: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      entityId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   Auditable: {
     fields: {
-      createdBy: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      createdOn: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      deletedOn: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      modifiedBy: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      modifiedOn: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      state: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'State'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      createdBy: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      createdOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      deletedOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      modifiedBy: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      modifiedOn: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      state: { type: 'scalar'; isList: false; astName: 'State'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       versions: {
         type: 'relation'
         relation: 'foreign'
-        node: 'Entity'
         isList: true
         astName: 'Audit'
         isRequired: true
@@ -65,331 +62,200 @@ export type AST = {
         generationStrategy: 'undefined'
       }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
   City: {
     fields: {
-      addressId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      computedAddressName: {
-        type: 'scalar'
-        node: 'Entity'
-        isList: false
-        astName: 'String'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: true
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      computedName: {
-        type: 'scalar'
-        node: 'Entity'
-        isList: false
-        astName: 'String'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: true
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-      name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      addressId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      computedAddressName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+      computedName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   DefaultFieldsEntity: {
     fields: {
-      creationDate: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
-      live: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Live'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
-      name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      opt1: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
-      opt2: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
+      creationDate: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
+      live: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      opt1: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
+      opt2: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   Device: {
     fields: {
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-      name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      user: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   Dog: {
     fields: {
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-      name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      owner: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      ownerId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      owner: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      ownerId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   EmbeddedUser: {
     fields: {
-      e: { type: 'embedded'; node: 'Entity'; isList: true; astName: 'EmbeddedUser2'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      user: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: true
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      e: { type: 'embedded'; isList: true; astName: 'EmbeddedUser2'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
   EmbeddedUser2: {
     fields: {
-      user: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: true
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
   EmbeddedUser3: {
     fields: {
-      user: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      value: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
   EmbeddedUser4: {
     fields: {
-      e: { type: 'embedded'; node: 'Entity'; isList: false; astName: 'EmbeddedUser5'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      user: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
+      e: { type: 'embedded'; isList: false; astName: 'EmbeddedUser5'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
   EmbeddedUser5: {
-    fields: {
-      userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    fields: { userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' } }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
   }
   Hotel: {
     fields: {
-      audit: { type: 'embedded'; node: 'Entity'; isList: false; astName: 'Auditable'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
-      embeddedUser3: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: false
-        astName: 'EmbeddedUser3'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      embeddedUser4: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: false
-        astName: 'EmbeddedUser4'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      embeddedUsers: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: true
-        astName: 'EmbeddedUser'
-        isRequired: false
-        isListElementRequired: true
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      embeddedUsers3: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: true
-        astName: 'EmbeddedUser3'
-        isRequired: false
-        isListElementRequired: true
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      embeddedUsers4: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: true
-        astName: 'EmbeddedUser4'
-        isRequired: false
-        isListElementRequired: true
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
-      name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      users: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: false
-        astName: 'UserCollection'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
+      audit: { type: 'embedded'; isList: false; astName: 'Auditable'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
+      embeddedUser3: { type: 'embedded'; isList: false; astName: 'EmbeddedUser3'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      embeddedUser4: { type: 'embedded'; isList: false; astName: 'EmbeddedUser4'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      embeddedUsers: { type: 'embedded'; isList: true; astName: 'EmbeddedUser'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      embeddedUsers3: { type: 'embedded'; isList: true; astName: 'EmbeddedUser3'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      embeddedUsers4: { type: 'embedded'; isList: true; astName: 'EmbeddedUser4'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      users: { type: 'embedded'; isList: false; astName: 'UserCollection'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   MockedEntity: {
     fields: {
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'MongoID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
-      name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      user: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: true
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      userId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'MongoID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
   Organization: {
     fields: {
-      address: { type: 'embedded'; node: 'Entity'; isList: false; astName: 'Address'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      computedName: {
-        type: 'scalar'
-        node: 'Entity'
-        isList: false
-        astName: 'String'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: true
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-      name: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      vatNumber: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      address: { type: 'embedded'; isList: false; astName: 'Address'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      computedName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      vatNumber: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   Post: {
     fields: {
-      author: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: true
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      authorId: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      body: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      clicks: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-      metadata: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: false
-        astName: 'PostMetadata'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      title: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      views: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      author: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      authorId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      body: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      clicks: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      metadata: { type: 'embedded'; isList: false; astName: 'PostMetadata'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      title: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      views: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   PostMetadata: {
     fields: {
-      region: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      visible: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      region: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      visible: { type: 'scalar'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
   User: {
     fields: {
-      amount: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      amounts: { type: 'scalar'; node: 'Entity'; isList: true; astName: 'Decimal'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      amount: { type: 'scalar'; isList: false; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      amounts: { type: 'scalar'; isList: true; astName: 'Decimal'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       credentials: {
         type: 'embedded'
-        node: 'Entity'
         isList: true
         astName: 'UsernamePasswordCredentials'
         isRequired: false
@@ -398,83 +264,20 @@ export type AST = {
         isId: false
         generationStrategy: 'undefined'
       }
-      dogs: {
-        type: 'relation'
-        relation: 'foreign'
-        node: 'Entity'
-        isList: true
-        astName: 'Dog'
-        isRequired: false
-        isListElementRequired: true
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      embeddedPost: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: false
-        astName: 'Post'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      embeddedUser: {
-        type: 'embedded'
-        node: 'Entity'
-        isList: false
-        astName: 'EmbeddedUser2'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      firstName: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      friends: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: true
-        astName: 'User'
-        isRequired: false
-        isListElementRequired: true
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      friendsId: { type: 'scalar'; node: 'Entity'; isList: true; astName: 'ID'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      id: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
-      int: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      lastName: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      live: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      localization: {
-        type: 'scalar'
-        node: 'Entity'
-        isList: false
-        astName: 'Coordinates'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      title: {
-        type: 'scalar'
-        node: 'Entity'
-        isList: false
-        astName: 'LocalizedString'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
+      dogs: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'Dog'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      embeddedPost: { type: 'embedded'; isList: false; astName: 'Post'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      embeddedUser: { type: 'embedded'; isList: false; astName: 'EmbeddedUser2'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      firstName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      friends: { type: 'relation'; relation: 'inner'; isList: true; astName: 'User'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      friendsId: { type: 'scalar'; isList: true; astName: 'ID'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      int: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      lastName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      live: { type: 'scalar'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      localization: { type: 'scalar'; isList: false; astName: 'Coordinates'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      title: { type: 'scalar'; isList: false; astName: 'LocalizedString'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       usernamePasswordCredentials: {
         type: 'embedded'
-        node: 'Entity'
         isList: false
         astName: 'UsernamePasswordCredentials'
         isRequired: false
@@ -484,44 +287,34 @@ export type AST = {
         generationStrategy: 'undefined'
       }
     }
-    driverSpecification: { rawFilter: () => M.Filter<M.Document>; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
   }
   UserCollection: {
     fields: {
-      users: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: true
-        astName: 'User'
-        isRequired: true
-        isListElementRequired: true
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      usersId: { type: 'scalar'; node: 'Entity'; isList: true; astName: 'ID'; isRequired: true; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      users: { type: 'relation'; relation: 'inner'; isList: true; astName: 'User'; isRequired: true; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      usersId: { type: 'scalar'; isList: true; astName: 'ID'; isRequired: true; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
   UsernamePasswordCredentials: {
     fields: {
-      password: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'Password'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
-      user: {
-        type: 'relation'
-        relation: 'inner'
-        node: 'Entity'
-        isList: false
-        astName: 'User'
-        isRequired: false
-        isListElementRequired: false
-        isExcluded: false
-        isId: false
-        generationStrategy: 'undefined'
-      }
-      username: { type: 'scalar'; node: 'Entity'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      password: { type: 'scalar'; isList: false; astName: 'Password'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      username: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
-    driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
   }
 }
 
@@ -586,7 +379,6 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
     })
   }
 }
-
 export function auditSchema(): T.Schema<Scalars> {
   return {
     changes: {
@@ -648,7 +440,6 @@ export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends T.Abs
     })
   }
 }
-
 export function auditableSchema(): T.Schema<Scalars> {
   return {
     createdBy: {
@@ -693,7 +484,6 @@ export function auditableSchema(): T.Schema<Scalars> {
     },
   }
 }
-
 export function citySchema(): T.Schema<Scalars> {
   return {
     addressId: {
@@ -752,7 +542,6 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-
 export function defaultFieldsEntitySchema(): T.Schema<Scalars> {
   return {
     creationDate: {
@@ -844,7 +633,6 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
     })
   }
 }
-
 export function deviceSchema(): T.Schema<Scalars> {
   return {
     id: {
@@ -910,7 +698,6 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
     })
   }
 }
-
 export function dogSchema(): T.Schema<Scalars> {
   return {
     id: {
@@ -977,7 +764,6 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
     })
   }
 }
-
 export function embeddedUserSchema(): T.Schema<Scalars> {
   return {
     e: {
@@ -1002,7 +788,6 @@ export function embeddedUserSchema(): T.Schema<Scalars> {
     },
   }
 }
-
 export function embeddedUser2Schema(): T.Schema<Scalars> {
   return {
     user: {
@@ -1021,7 +806,6 @@ export function embeddedUser2Schema(): T.Schema<Scalars> {
     },
   }
 }
-
 export function embeddedUser3Schema(): T.Schema<Scalars> {
   return {
     user: {
@@ -1038,7 +822,6 @@ export function embeddedUser3Schema(): T.Schema<Scalars> {
     },
   }
 }
-
 export function embeddedUser4Schema(): T.Schema<Scalars> {
   return {
     e: {
@@ -1055,7 +838,6 @@ export function embeddedUser4Schema(): T.Schema<Scalars> {
     },
   }
 }
-
 export function embeddedUser5Schema(): T.Schema<Scalars> {
   return {
     userId: {
@@ -1064,7 +846,6 @@ export function embeddedUser5Schema(): T.Schema<Scalars> {
     },
   }
 }
-
 export function hotelSchema(): T.Schema<Scalars> {
   return {
     audit: {
@@ -1162,7 +943,6 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
     })
   }
 }
-
 export function mockedEntitySchema(): T.Schema<Scalars> {
   return {
     id: {
@@ -1247,7 +1027,6 @@ export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extend
     })
   }
 }
-
 export function organizationSchema(): T.Schema<Scalars> {
   return {
     address: {
@@ -1325,7 +1104,6 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
     })
   }
 }
-
 export function postSchema(): T.Schema<Scalars> {
   return {
     author: {
@@ -1411,7 +1189,6 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-
 export function postMetadataSchema(): T.Schema<Scalars> {
   return {
     region: {
@@ -1426,7 +1203,6 @@ export function postMetadataSchema(): T.Schema<Scalars> {
     },
   }
 }
-
 export function userSchema(): T.Schema<Scalars> {
   return {
     amount: {
@@ -1559,7 +1335,6 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-
 export function userCollectionSchema(): T.Schema<Scalars> {
   return {
     users: {
@@ -1582,7 +1357,6 @@ export function userCollectionSchema(): T.Schema<Scalars> {
     },
   }
 }
-
 export function usernamePasswordCredentialsSchema(): T.Schema<Scalars> {
   return {
     password: {
@@ -1629,9 +1403,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'User'>
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
-
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
-
 export class EntityManager<
   MetadataType = never,
   OperationMetadataType = never,
@@ -1987,7 +1759,21 @@ export class EntityManager<
     super({
       ...params,
       scalars: params.scalars
-        ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, ['Coordinates', 'Decimal', 'JSON', 'Live', 'LocalizedString', 'MongoID', 'Password', 'ID', 'String', 'Boolean', 'Int', 'Float'])
+        ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [
+            'Coordinates',
+            'Decimal',
+            'JSON',
+            'Live',
+            'LocalizedString',
+            'MongoID',
+            'Password',
+            'State',
+            'ID',
+            'String',
+            'Boolean',
+            'Int',
+            'Float',
+          ])
         : undefined,
     })
     this.overrides = params.overrides

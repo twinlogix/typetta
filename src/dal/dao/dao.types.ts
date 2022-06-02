@@ -52,7 +52,7 @@ export type Relations<Entity extends string, AST extends AbstractSyntaxTree, Sca
 >
 
 export type FilterParams<T extends DAOGenerics> = {
-  filter?: T['filter'] | LogicalOperators<T['filter']>
+  filter?: T['filter'] & LogicalOperators<T['filter']> 
   relations?: T['relations']
 } & OperationParams<T>
 

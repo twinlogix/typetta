@@ -216,7 +216,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.schema = schema
   }
 
-  async findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]> {
+  async findAll<P extends AnyProjection<T['projection']> = true>(params: FindParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]> {
     return this.logOperation('findAll', params, async () => {
       const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findAll')

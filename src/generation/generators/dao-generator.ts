@@ -13,20 +13,25 @@ export class TsTypettaGenerator extends TypettaGenerator {
     nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
 
     const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
-    nodes.filter((node) => node.type === 'scalar' && !node.isEnum).forEach((type) => customScalarsMap.set(type.name, type as TsTypettaGeneratorScalar))
+    nodes.filter((node) => node.type === 'scalar').forEach((type) => customScalarsMap.set(type.name, type as TsTypettaGeneratorScalar))
 
     this.checkIds(typesMap)
     this.checkReferences(typesMap, (type) => (type.entity ? true : false))
     this.checkArrayInSqlEntities(typesMap)
-    const imports = this.generateImports(typesMap)
+
     if (!Array.from(typesMap.values()).some((v) => v.entity?.type)) {
       throw new Error('At least one entity is required for code generation. (@entity)')
     }
-    const definitions = [...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation').flatMap((node) => this.generateDefinition(node, typesMap))
-    const scalars = this._generateScalars([...customScalarsMap.values()])
-    const ast = this._generateAST([...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation'))
-    const exports = this.generateExports(typesMap, customScalarsMap)
-    return [scalars, ast, imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
+
+    const imports = this.generateImports(typesMap).join('\n')
+    const scalars = this.generateScalars([...customScalarsMap.values()])
+    const ast = this.generateAST([...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation'))
+    const daos = [...typesMap.values()]
+      .filter((node) => node.name !== 'Query' && node.name !== 'Mutation')
+      .flatMap((node) => this.generateDAOs(node, typesMap))
+      .join('\n')
+    const entityManager = this.generateEntityManager(typesMap, customScalarsMap)
+    return [imports, scalars, ast, daos, entityManager].join('\n\n')
   }
 
   private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
@@ -180,19 +185,23 @@ export class TsTypettaGenerator extends TypettaGenerator {
     return [...commonImports, ...(hasSQLEntities ? [knexImports] : []), ...(hasMongoDBEntites ? [mongodbImports] : [])]
   }
 
-  public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+  public generateDAOs(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     if (node.entity) {
-      const daoSchema = this._generateDAOSchema(node, typesMap)
-      const daoParams = this._generateDAOParams(node)
-      const dao = this._generateDAO(node, typesMap)
+      const daoSchema = this.generateDAOSchema(node, typesMap)
+      const daoParams = this.generateDAOParams(node)
+      const dao = this.generateDAO(node, typesMap)
       return [daoSchema, daoParams, dao].join('\n\n')
     } else {
-      const daoSchema = this._generateDAOSchema(node, typesMap)
+      const daoSchema = this.generateDAOSchema(node, typesMap)
       return [daoSchema].join('\n\n')
     }
   }
 
-  private _generateScalars(scalars: TsTypettaGeneratorScalar[]): string {
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- SCALARS -------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
+  private generateScalars(scalars: TsTypettaGeneratorScalar[]): string {
     const defaultScalars: TsTypettaGeneratorScalar[] = [
       { isEnum: false, isQuantity: false, isString: false, name: 'ID', type: 'scalar' },
       { isEnum: false, isQuantity: false, isString: true, name: 'String', type: 'scalar' },
@@ -202,14 +211,18 @@ export class TsTypettaGenerator extends TypettaGenerator {
     ]
     return `export type Scalars = {
       ${[...defaultScalars, ...scalars].map((s) => {
-        return `${s.name}: { type: types.Scalars['${s.name}'], isTextual: ${s.isString}, isQuantitative: ${s.isQuantity} }`
-      })}
+        return `${s.name}: { type: ${s.isEnum ? `types.${s.name}` : `types.Scalars['${s.name}']`}, isTextual: ${s.isString}, isQuantitative: ${s.isQuantity} }`
+      })},
     }`
   }
-  private _generateAST(nodes: TsTypettaGeneratorNode[]): string {
+
+  // ---------------------------------------------------------------------------------------------------------
+  // ----------------------------------------------- AST -----------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------
+
+  private generateAST(nodes: TsTypettaGeneratorNode[]): string {
     function generateASTNodes(field: TsTypettaGeneratorField): string {
       const decorators = `
-      node: 'Entity',
       isList: ${field.isList}, 
       astName: '${field.graphqlType}', 
       isRequired: ${field.isRequired}, 
@@ -234,13 +247,19 @@ export class TsTypettaGenerator extends TypettaGenerator {
     return `export type AST = {
     ${nodes
       .map((node) => {
-        return `${node.name}: { fields: { ${node.fields.map((f) => generateASTNodes(f)).join(',\n')} }, driverSpecification: { rawFilter: ${node.entity?.type === 'mongo' ? '() => M.Filter<M.Document>' : 'never'}, rawUpdate: never, rawSorts: never } }`
+        return `${node.name}: {
+          fields: { ${node.fields.map((f) => generateASTNodes(f)).join(',\n')} }, 
+          driverSpecification: { 
+            rawFilter: ${node.entity?.type === 'mongo' ? '() => M.Filter<M.Document>' : 'never'}, 
+            rawUpdate: ${node.entity?.type === 'mongo' ? '() => M.UpdateFilter<M.Document>' : 'never'}, 
+            rawSorts: ${node.entity?.type === 'mongo' ? '() => M.Sort' : 'never'} }
+          }`
       })
       .join(',\n')}
   }`
   }
 
-  public generateExports(typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string[] {
+  public generateEntityManager(typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     const sqlSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'sql' ? [type.entity.source] : [])))]
     const mongoSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'mongo' ? [type.entity.source] : [])))]
     const hasMongoDBEntites = mongoSources.length > 0
@@ -447,59 +466,20 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   )
 }
 `
-    return [[entityManagerParamsExport, entityManagerMiddleware, entityManagerExport, utilsCode].join('\n\n')]
-  }
-
-  // ---------------------------------------------------------------------------------------------------------
-  // ----------------------------------------------- EXCLUDED ------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------------
-
-  public _generateDAOExludedFields(node: TsTypettaGeneratorNode): string {
-    const exludedFields = node.fields
-      .filter((n) => n.isExcluded)
-      .map((n) => `'${n.name}'`)
-      .join(' | ')
-    const daoExludedFields = `export type ${node.name}ExcludedFields = ${exludedFields ? exludedFields : 'never'}`
-    return daoExludedFields
-  }
-
-  // ---------------------------------------------------------------------------------------------------------
-  // ----------------------------------------------- EXCLUDED ------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------------
-
-  public _generateDAORetrieveAllType(node: TsTypettaGeneratorNode): string {
-    const relationsFields = node.fields
-      .filter((n) => n.type.kind === 'innerRef' || n.type.kind === 'foreignRef' || n.type.kind === 'relationEntityRef')
-      .map((n) => `'${n.name}'`)
-      .join(' | ')
-    const embeddedFields = node.fields.filter((n) => n.type.kind === 'embedded')
-    const embeddedFieldsName = embeddedFields.map((n) => `'${n.name}'`).join(' | ')
-    const daoRelationFields = `export type ${node.name}RelationFields = ${relationsFields ? relationsFields : 'never'}`
-    const daoEmbeddedFields = `export type ${node.name}EmbeddedFields = ${embeddedFieldsName ? embeddedFieldsName : 'never'}`
-    const retrieveAllType = `export type ${node.name}RetrieveAll = Omit<types.${node.name}, ${node.name}RelationFields | ${node.name}EmbeddedFields> & {
-      ${embeddedFields
-        .map((f) => {
-          const baseType = `${f.graphqlType}RetrieveAll`
-          const fieldType = f.isList ? (f.isListElementRequired ? `${baseType}[]` : `types.Maybe<${baseType}>[]`) : baseType
-          const requiredFieldType = f.isRequired ? fieldType : `types.Maybe<${fieldType}>`
-          return `${f.name}${f.isRequired ? '' : '?'}: ${requiredFieldType}`
-        })
-        .join('\n')}
-    }`
-    return [daoEmbeddedFields, daoRelationFields, retrieveAllType].join('\n')
+    return [[entityManagerParamsExport, entityManagerMiddleware, entityManagerExport, utilsCode].join('\n')].join('\n')
   }
 
   // ---------------------------------------------------------------------------------------------------------
   // ----------------------------------------------- SCHEMA --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'))
+  public generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    const daoSchemaBody = indentMultiline(this.generateDAOSchemaFields(node, typesMap).join(',\n'))
     const daoSchema = `export function ${toFirstLower(node.name)}Schema(): T.Schema<Scalars> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
     return daoSchema
   }
 
-  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+  public generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
     return node.fields.flatMap((field) => {
       const decorators = [
         field.isListElementRequired ? 'isListElementRequired: true' : null,
@@ -597,204 +577,10 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   }
 
   // ---------------------------------------------------------------------------------------------------------
-  // ----------------------------------------------- FILTER --------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------------
-
-  public _generateDAOFilter(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
-    const daoFilterFieldsBody = indentMultiline(this._generateDAOFilterFields(node, typesMap, customScalarsMap).join(',\n'))
-    const daoFilterFields = `type ${node.name}FilterFields = {\n` + daoFilterFieldsBody + `\n}`
-    const daoRawFilter = `export type ${node.name}RawFilter = ${
-      node.entity?.type === 'mongo' ? '() => M.Filter<M.Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
-    }`
-    const daoFilter = `export type ${node.name}Filter = ${node.name}FilterFields & T.LogicalOperators<${node.name}FilterFields | ${node.name}RawFilter>`
-
-    return [daoFilterFields, daoFilter, daoRawFilter].join('\n')
-  }
-
-  public _generateDAOFilterFields(
-    node: TsTypettaGeneratorNode,
-    typesMap: Map<string, TsTypettaGeneratorNode>,
-    customScalarsMap: Map<string, TsTypettaGeneratorScalar>,
-    path = '',
-    visited: string[] = [],
-  ): string[] {
-    if (visited.includes(node.name)) {
-      throw new Error(`Recursive embedded are not supported, please use a reference in this cases (entity ${node.name}, path: ${path})`)
-    }
-    return node.fields
-      .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
-      .map((field) => {
-        let fieldName = path
-        if (field.type.kind === 'scalar') {
-          fieldName += field.name
-          const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
-          const fieldType = field.isList ? `${baseType}[]` : baseType
-          const quantityOperators = field.graphqlType === 'Int' || field.graphqlType === 'Float' || customScalarsMap.get(field.graphqlType)?.isQuantity ? ` | T.QuantityOperators<${fieldType}>` : ''
-          const stringOperators = field.graphqlType === 'String' || customScalarsMap.get(field.graphqlType)?.isString || field.isEnum ? ` | T.StringOperators` : ''
-          return [`'${fieldName}'?: ${fieldType} | null | T.EqualityOperators<${fieldType}> | T.ElementOperators` + stringOperators + quantityOperators]
-        } else if (field.type.kind === 'embedded') {
-          const embeddedType = getNode(field.type.embed, typesMap)
-          return this._generateDAOFilterFields(embeddedType, typesMap, customScalarsMap, path + field.name + '.', [...visited, node.name])
-        }
-        return []
-      })
-      .reduce((a, c) => [...a, ...c], [])
-  }
-
-  // ---------------------------------------------------------------------------------------------------------
-  // --------------------------------------------- RELATIONS -------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------------
-
-  public _generateDAORelations(node: TsTypettaGeneratorNode): string[] {
-    const relationsBody = node.fields.flatMap((field) => {
-      if (field.isList && (field.type.kind === 'innerRef' || field.type.kind === 'foreignRef' || field.type.kind === 'relationEntityRef') && !field.isExcluded) {
-        const nodeName = field.type.kind === 'innerRef' ? field.type.innerRef : field.type.kind === 'foreignRef' ? field.type.foreignRef : field.type.destRef
-        const body = [`filter?: ${nodeName}Filter`, `sorts?: ${nodeName}Sort[] | ${nodeName}RawSort`, 'skip?: number', 'limit?: number', `relations?: ${nodeName}Relations`]
-          .map((v) => `    ${v}`)
-          .join('\n')
-        return `  ${field.name}?: {\n${body}\n  }`
-      } else {
-        return []
-      }
-    })
-    return [`export type ${node.name}Relations = ${relationsBody.length > 0 ? `{\n${relationsBody.join('\n')}\n}` : 'Record<never, string>'}`]
-  }
-
-  // ---------------------------------------------------------------------------------------------------------
-  // --------------------------------------------- PROJECTION ------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------------
-
-  public _generateDAOProjection(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoProjectionBody = indentMultiline(this._generateDAOProjectionFields(node, typesMap))
-    const daoProjection = `export type ${node.name}Projection = {\n` + daoProjectionBody + `\n}`
-    const daoParams = `export type ${node.name}Param<P extends ${node.name}Projection> = T.ParamProjection<types.${node.name}, ${node.name}Projection, P>`
-    return [daoProjection, daoParams].join('\n')
-  }
-
-  public _generateDAOProjectionFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    return node.fields
-      .map((field) => {
-        if (field.type.kind === 'scalar') {
-          return `${field.name}?: boolean`
-        } else if (field.type.kind === 'innerRef') {
-          const linkedType = getNode(field.type.innerRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean`
-        } else if (field.type.kind === 'foreignRef') {
-          const linkedType = getNode(field.type.foreignRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean`
-        } else if (field.type.kind === 'relationEntityRef') {
-          const linkedType = getNode(field.type.destRef, typesMap)
-          return `${field.name}?: ${linkedType.name}Projection | boolean`
-        } else if (field.type.kind === 'embedded') {
-          const embeddedType = getNode(field.type.embed, typesMap)
-          return `${field.name}?: ${embeddedType.name}Projection | boolean`
-        }
-      })
-      .join('\n')
-  }
-
-  // ---------------------------------------------------------------------------------------------------------
-  // ------------------------------------------------ SORT ---------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------------
-  public _generateDAOSort(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoSortFields = this._generateDAOSortFields(node, typesMap).join(' | ')
-    const daoSortKeys = `export type ${node.name}SortKeys = ${daoSortFields}`
-    const daoSort = `export type ${node.name}Sort = Partial<Record<${node.name}SortKeys, T.SortDirection>>`
-    const daoRawSort = `export type ${node.name}RawSort = ${
-      node.entity?.type === 'mongo' ? '() => M.Sort' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
-    }`
-    return `${daoSortKeys}\n${daoSort}\n${daoRawSort}`
-  }
-
-  public _generateDAOSortFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path = ''): string[] {
-    return node.fields
-      .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
-      .map((field) => {
-        let fieldName = path
-        if (field.type.kind === 'scalar') {
-          fieldName += field.name
-          return [`'${fieldName}'`]
-        } else if (field.type.kind === 'embedded') {
-          const embeddedType = getNode(field.type.embed, typesMap)
-          return this._generateDAOSortFields(embeddedType, typesMap, path + field.name + '.')
-        }
-        return []
-      })
-      .reduce((a, c) => [...a, ...c], [])
-  }
-
-  // ---------------------------------------------------------------------------------------------------------
-  // ----------------------------------------------- UPDATE --------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------------
-
-  public _generateDAOUpdate(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
-    const daoUpdateFieldsBody = indentMultiline(this._generateDAOUpdateFields(node, typesMap).join(',\n'))
-    const daoRawUpdate = `export type ${node.name}RawUpdate = ${
-      node.entity?.type === 'mongo' ? '() => M.UpdateFilter<M.Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
-    }`
-    const daoUpdate = `export type ${node.name}Update = {\n` + daoUpdateFieldsBody + `\n}`
-    return [daoUpdate, daoRawUpdate].join('\n')
-  }
-
-  public _generateDAOUpdateFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path = ''): string[] {
-    return node.fields
-      .filter((field) => (field.type.kind === 'scalar' || field.type.kind === 'embedded') && !field.isExcluded)
-      .map((field) => {
-        const fieldName = path + field.name
-        if (field.type.kind === 'scalar') {
-          const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
-          const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${baseType})` : baseType}[]` : baseType
-          return [`'${fieldName}'?: ${fieldType} | null`]
-        } else if (field.type.kind === 'embedded') {
-          const embeddedTypeNode = getNode(field.type.embed, typesMap)
-          const embeddedType = `${embeddedTypeNode.name}Insert`
-          const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}[]` : embeddedType
-          if (field.isList) {
-            return [`'${fieldName}'?: ${fieldType} | null`]
-          } else {
-            return [`'${fieldName}'?: ${fieldType} | null`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
-          }
-        }
-        return []
-      })
-      .reduce((a, c) => [...a, ...c], [])
-  }
-
-  // ---------------------------------------------------------------------------------------------------------
-  // ----------------------------------------------- INSERT --------------------------------------------------
-  // ---------------------------------------------------------------------------------------------------------
-
-  public _generateDAOInsert(node: TsTypettaGeneratorNode): string {
-    const daoInsertBody = indentMultiline(this._generateDAOInsertFields(node))
-    const daoInsert = `export type ${node.name}Insert = {\n` + daoInsertBody + `\n}`
-    return daoInsert
-  }
-
-  public _generateDAOInsertFields(node: TsTypettaGeneratorNode): string {
-    return node.fields
-      .flatMap((field) => {
-        if ((field.isID && field.idGenerationStrategy === 'db') || field.isExcluded) {
-          return []
-        }
-        const required = (field.isID && field.idGenerationStrategy === 'user') || (!field.isID && field.isRequired && !field.defaultGenerationStrategy)
-        if (field.type.kind === 'scalar') {
-          const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
-          return [`${field.name}${required ? ':' : '?: null |'} ${field.isList && !field.isListElementRequired ? `(null | ${baseType})` : baseType}${field.isList ? '[]' : ''},`]
-        }
-        if (field.type.kind === 'embedded') {
-          const embeddedType = `${field.type.embed}Insert`
-          return [`${field.name}${required ? ':' : '?: null |'} ${field.isList && !field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}${field.isList ? '[]' : ''},`]
-        }
-        return []
-      })
-      .join('\n')
-  }
-
-  // ---------------------------------------------------------------------------------------------------------
   // ----------------------------------------------- PARAMS --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOParams(node: TsTypettaGeneratorNode): string {
+  public generateDAOParams(node: TsTypettaGeneratorNode): string {
     const dbDAOGenerics =
       node.entity?.type === 'sql' ? 'T.KnexJsDAOGenerics' : node.entity?.type === 'mongo' ? 'T.MongoDBDAOGenerics' : node.entity?.type === 'memory' ? 'T.InMemoryDAOGenerics' : 'T.DAOGenerics'
     const dbDAOParams =
@@ -815,7 +601,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   // ------------------------------------------------ DAO ----------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAO(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+  public generateDAO(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoName =
       node.entity?.type === 'sql' ? 'T.AbstractKnexJsDAO' : node.entity?.type === 'mongo' ? 'T.AbstractMongoDBDAO' : node.entity?.type === 'memory' ? 'T.AbstractInMemoryDAO' : 'AbstractDAO'
     const daoBody = indentMultiline('\n' + this._generateConstructorMethod(node, typesMap, `${node.name}DAOParams`) + '\n')
