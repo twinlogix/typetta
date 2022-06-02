@@ -352,7 +352,7 @@ Here's another example of a field with metadata that has more than one key.
 ```typescript
 type SomeType @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
-  someField: Date @schema(metadata: [{ key: "keyOne", value: true }, { key: "keyTwo", value: [ "one", "2" , "three" ]}])
+  someField: Date @schema(metadata: [{ key: "keyOne", value: true }, { key: "keyTwo", value: [ "one", 2, "three", false ]}])
 }
 ```
 
@@ -373,7 +373,7 @@ And the schema resulting from it:
     scalar: 'Date',
     metadata: {
       'keyOne': 'true',
-      'keyTwo': 'one,2,three',
+      'keyTwo': 'one,2,three,false',
     },
   },
 }
@@ -381,10 +381,10 @@ And the schema resulting from it:
 
 This example also shows how arrays values are saved as comma separated values within in a string. In fact, every value is stored as a string in the metadata. 
 
-Additionally, you can only makes fields that are level deep for the metadata. Therefore the following doesn't work:
+Additionally, you can only makes fields that are level deep for the metadata. Any data stored deeper will get lost. Therefore the following doesn't work:
 
 ```typescript
 // Doesn't work!
-@schema(metadata: [{ key: "keyOne", value: { key: "nestedKey", value: true } }, { key: "keyTwo", value: [ "one", "2" , "three" ]}])
+@schema(metadata: [{ key: "keyOne", value: { key: "nestedKey", value: true } }])
 ```
 
