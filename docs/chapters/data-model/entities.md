@@ -317,7 +317,7 @@ type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
-  dateOfBirth: Date! @schema(metadata: [{"addDays": "1"}])
+  dateOfBirth: Date! @schema(metadata: [{ key: "addDays", value: "1" }])
 }
 ```
 
@@ -346,3 +346,45 @@ And the schema resulting from it:
 ```
 
 Now you can easily implement a middleware that, reading that schema, increment all the fields containing the `addDays` metadata by `n` days before insertion.
+
+Here's another example of a field with metadata that has more than one key.
+
+```typescript
+type SomeType @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  someField: Date @schema(metadata: [{ key: "keyOne", value: true }, { key: "keyTwo", value: [ "one", "2" , "three" ]}])
+}
+```
+
+And the schema resulting from it:
+
+```typescript
+{
+  id: {
+    type: 'scalar',
+    scalar: 'ID',
+    isId: true,
+    generationStrategy: 'db',
+    required: true,
+    alias: '_id',
+  },
+  someField: {
+    type: 'scalar',
+    scalar: 'Date',
+    metadata: {
+      'keyOne': 'true',
+      'keyTwo': 'one,2,three',
+    },
+  },
+}
+```
+
+This example also shows how arrays values are saved as comma separated values within in a string. In fact, every value is stored as a string in the metadata. 
+
+Additionally, you can only makes fields that are level deep for the metadata. Therefore the following doesn't work:
+
+```typescript
+// Doesn't work!
+@schema(metadata: [{ key: "keyOne", value: { key: "nestedKey", value: true } }, { key: "keyTwo", value: [ "one", "2" , "three" ]}])
+```
+
