@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isEmptyProjection, LogArgs } from '../../../..'
+import { idInfoFromSchema, isEmptyProjection, LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterNullFields, filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
@@ -30,8 +30,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private tableName: string
   private knex: Knex<any, unknown[]>
 
-  protected constructor({ tableName, knex, idGenerator, ...params }: KnexJsDAOParams<T>) {
-    super({ ...params, driverContext: { tableName, knex }, idGenerator: idGenerator ?? params.entityManager.adapters.knex[params.idScalar]?.generate })
+  protected constructor({ tableName, knex, idGenerator, schema, ...params }: KnexJsDAOParams<T>) {
+    super({ ...params, driverContext: { tableName, knex }, schema, idGenerator: idGenerator ?? params.entityManager.adapters.knex[idInfoFromSchema(schema).idScalar]?.generate })
     this.tableName = tableName
     this.knex = knex
   }
@@ -252,16 +252,16 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   public async createTable(typeMap: Partial<Record<keyof T['scalars'], { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string }): Promise<void> {
     await this.knex.schema.createTable(this.tableName, (table) => {
       Object.entries(this.schema).forEach(([key, schemaField]) => {
-        if ('scalar' in schemaField) {
+        if (schemaField.type === 'scalar') {
           const specificType = typeMap[schemaField.scalar] ?? defaultType
-          const cb = table.specificType(schemaField.alias || key, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
+          const cb = table.specificType(schemaField.alias || key, schemaField.isList ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
           if (!schemaField.required) {
             cb.nullable()
           }
-        } else if ('embedded' in schemaField) {
-          embeddedScalars(schemaField.alias || key, schemaField.embedded()).forEach(([subKey, subSchemaField]) => {
+        } else if (schemaField.type === 'embedded') {
+          embeddedScalars(schemaField.alias || key, schemaField.schema()).forEach(([subKey, subSchemaField]) => {
             const specificType = typeMap[subSchemaField.scalar] ?? defaultType
-            const cb = table.specificType(subKey, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
+            const cb = table.specificType(subKey, schemaField.isList ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
             if (!subSchemaField.required) {
               cb.nullable()
             }
@@ -282,25 +282,25 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     try {
       query = queryBuilder()
       if ('skipReason' in query) {
-        this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
+        await this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
         return skipDefault as Awaited<R>
       }
       const result = await query
       const records = transform ? await transform(result) : undefined
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.knexLog({ duration, operation, level: 'query', query, date: finish })
+      await this.knexLog({ duration, operation, level: 'query', query, date: finish })
       return records as Awaited<R>
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
+      await this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
       throw error
     }
   }
 
-  private knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }) {
-    this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
+  private async knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }): Promise<void> {
+    await this.log(() => this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 
   protected _driver(): Exclude<LogArgs<string>['driver'], undefined> {

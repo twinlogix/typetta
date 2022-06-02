@@ -23,7 +23,7 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   if (c.length === 0) {
     return n
   } else {
-    return schemaField && 'embedded' in schemaField ? concatEmbeddedNames(n, modelNameToDbName(c.join('.'), schemaField.embedded())) : k + '.' + c.join('.')
+    return schemaField && schemaField.type === 'embedded' ? concatEmbeddedNames(n, modelNameToDbName(c.join('.'), schemaField.schema())) : k + '.' + c.join('.')
   }
 }
 
@@ -39,11 +39,11 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
   Object.entries(filter).forEach(([k, v]) => {
     const schemaField = getSchemaFieldTraversing(k, schema)
     if (schemaField) {
-      if (schemaField.array) {
+      if (schemaField.isList) {
         throw new Error(`Array filtering not supported on sql entity. (field: ${k})`)
       }
       const columnName = modelNameToDbName(k, schema)
-      if ('scalar' in schemaField) {
+      if (schemaField.type === 'scalar') {
         if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
           const adapter = adapters[schemaField.scalar]
           if (!adapter) {
@@ -56,7 +56,9 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             // prettier-ignore
             switch (fk) {
               case 'exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
-              case 'eq': builder.where(columnName, av()); break
+              case 'eq': 
+                if(vr.mode && vr.mode === 'insensitive') { builder.whereILike(columnName, av()) }
+                else { builder.where(columnName, av()) } break
               case 'gte': builder.where(columnName, '>=', av()); break
               case 'gt': builder.where(columnName, '>', av()); break
               case 'lte': builder.where(columnName, '<=', av()); break
@@ -65,21 +67,21 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case 'in': builder.whereIn(columnName, avs()); break
               case 'nin': builder.not.whereIn(columnName, avs()); break
               case 'contains': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `%${fv}%`)
                 } else {
                   builder.whereILike(columnName, `%${fv}%`)
                 }
                 break
               case 'startsWith': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `${fv}%`)
                 } else {
                   builder.whereILike(columnName, `${fv}%`)
                 }
                 break
               case 'endsWith': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `%${fv}`)
                 } else {
                   builder.whereILike(columnName, `%${fv}`)
@@ -168,10 +170,10 @@ export function buildSelect<TRecord, TResult, ScalarsType>(
   function embeddedColumns(prefix: string, s: Schema<ScalarsType>, proj: GenericProjection): string[] {
     return Object.entries(s).flatMap(([k, v]) => {
       if (proj === true || (typeof proj === 'object' && k in proj)) {
-        if ('embedded' in v) {
-          return embeddedColumns(concatEmbeddedNames(prefix, v.alias || k), v.embedded(), proj === true ? proj : proj[k])
+        if (v.type === 'embedded') {
+          return embeddedColumns(concatEmbeddedNames(prefix, v.alias || k), v.schema(), proj === true ? proj : proj[k])
         }
-        if ('relation' in v) {
+        if (v.type === 'relation') {
           return []
         }
         return concatEmbeddedNames(prefix, v.alias || k)
@@ -189,9 +191,9 @@ export function buildSelect<TRecord, TResult, ScalarsType>(
       Object.entries(projection).flatMap(([k, v]) => {
         if (k in schema) {
           const schemaField = schema[k]
-          if ('embedded' in schemaField) {
-            return embeddedColumns(schemaField.alias || k, schemaField.embedded(), v)
-          } else if('scalar' in schemaField) {
+          if (schemaField.type === 'embedded') {
+            return embeddedColumns(schemaField.alias || k, schemaField.schema(), v)
+          } else if (schemaField.type === 'scalar') {
             return [schemaField.alias || k]
           } else {
             return []
@@ -215,12 +217,12 @@ export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuil
 }
 
 export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
-  function flat(prefix: string, schemaFiled: { embedded: () => Schema<ScalarsType> }, value: any): [string, unknown][] {
-    return Object.entries(schemaFiled.embedded()).flatMap(([k, subSchemaField]) => {
+  function flat(prefix: string, schemaFiled: { schema: () => Schema<ScalarsType> }, value: any): [string, unknown][] {
+    return Object.entries(schemaFiled.schema()).flatMap(([k, subSchemaField]) => {
       const key = subSchemaField.alias ?? k
       if (key in value) {
         const name = concatEmbeddedNames(prefix, key)
-        if ('embedded' in subSchemaField) {
+        if (subSchemaField.type === 'embedded') {
           return flat(name, subSchemaField, value[key])
         } else {
           return [[name, value[key]]]
@@ -231,7 +233,7 @@ export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, ob
   }
   return Object.entries(schema).reduce((result, [k, schemaFiled]) => {
     const name = schemaFiled.alias || k
-    if ('embedded' in schemaFiled && name in object) {
+    if (schemaFiled.type === 'embedded' && name in object) {
       const flatted = { ...result, ...Object.fromEntries(flat(name, schemaFiled, object[name])) }
       delete flatted[name]
       return flatted
@@ -241,12 +243,12 @@ export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, ob
 }
 
 export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
-  function unflat(prefix: string, schemaFiled: { embedded: () => Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
-    const res = Object.entries(schemaFiled.embedded()).reduce(
+  function unflat(prefix: string, schemaFiled: { schema: () => Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
+    const res = Object.entries(schemaFiled.schema()).reduce(
       ([record, oldToDelete], [k, subSchemaField]) => {
         const name = concatEmbeddedNames(prefix, subSchemaField.alias ?? k)
         const subName = subSchemaField.alias ?? k
-        if ('embedded' in subSchemaField) {
+        if (subSchemaField.type === 'embedded') {
           const [obj, newToDelete] = unflat(name, subSchemaField, value, oldToDelete)
           if (newToDelete.length > 0) {
             return [{ ...(record ?? {}), [subName]: obj }, newToDelete] as [object, string[]]
@@ -263,7 +265,7 @@ export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, 
     return res
   }
   return Object.entries(schema).reduce((result, [k, schemaFiled]) => {
-    if ('embedded' in schemaFiled) {
+    if (schemaFiled.type === 'embedded') {
       const [obj, toDelete] = unflat(schemaFiled.alias ?? k, schemaFiled, object)
       //if every key of embedded is null the emedded was not inserted
       if (toDelete.every((k) => object[k] === null) && !schemaFiled.required) {
@@ -290,10 +292,10 @@ function concatEmbeddedNames(prefix: string, name: string) {
 
 export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<ScalarsType>): [string, { scalar: keyof ScalarsType } & { array?: boolean; required?: boolean; alias?: string }][] {
   return Object.entries(schema).flatMap(([key, schemaField]) => {
-    if ('embedded' in schemaField) {
-      return embeddedScalars(concatEmbeddedNames(prefix, schemaField.alias || key), schemaField.embedded())
+    if (schemaField.type === 'embedded') {
+      return embeddedScalars(concatEmbeddedNames(prefix, schemaField.alias || key), schemaField.schema())
     }
-    if ('relation' in schemaField) {
+    if (schemaField.type === 'relation') {
       return []
     }
     return [[concatEmbeddedNames(prefix, schemaField.alias || key), schemaField]]
@@ -313,11 +315,11 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
     if (v === undefined) return []
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
-    if (schemaField && 'scalar' in schemaField) {
+    if (schemaField && schemaField.type === 'scalar') {
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
-    } else if (schemaField && 'embedded' in schemaField) {
-      const adapted = adaptUpdate({ update: v, schema: schemaField.embedded(), adapters })
+    } else if (schemaField && schemaField.type === 'embedded') {
+      const adapted = adaptUpdate({ update: v, schema: schemaField.schema(), adapters })
       return Object.entries(adapted).map(([sk, sv]) => {
         return [concatEmbeddedNames(columnName, sk), sv]
       })

@@ -1,10 +1,166 @@
-import { DAORelation } from '../../dal/dao/relations/relations.types'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from '../types'
-import { getID, getNode, indentMultiline, resolveParentPath, toFirstLower } from '../utils'
-import { TsTypettaAbstractGenerator } from './abstractGenerator'
-import { DEFAULT_SCALARS } from '@graphql-codegen/visitor-plugin-common'
+import { TypeScriptTypettaPluginConfig } from '../config'
+import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from '../types'
+import { findField, findID, findNode, getID, getNode, removeParentPath, toFirstLower } from '../utils'
+import { DEFAULT_SCALARS, indentMultiline } from '@graphql-codegen/visitor-plugin-common'
 
-export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
+export class TsTypettaGenerator extends TypettaGenerator {
+  constructor(config: TypeScriptTypettaPluginConfig) {
+    super(config)
+  }
+
+  public async generate(nodes: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[]): Promise<string> {
+    const typesMap = new Map<string, TsTypettaGeneratorNode>()
+    nodes.filter((node) => node.type === 'type').forEach((type) => typesMap.set(type.name, type as TsTypettaGeneratorNode))
+
+    const customScalarsMap = new Map<string, TsTypettaGeneratorScalar>()
+    nodes.filter((node) => node.type === 'scalar' && !node.isEnum).forEach((type) => customScalarsMap.set(type.name, type as TsTypettaGeneratorScalar))
+
+    this.checkIds(typesMap)
+    this.checkReferences(typesMap, (type) => (type.entity ? true : false))
+    this.checkArrayInSqlEntities(typesMap)
+    const imports = this.generateImports(typesMap)
+    if (!Array.from(typesMap.values()).some((v) => v.entity?.type)) {
+      throw new Error('At least one entity is required for code generation. (@entity)')
+    }
+    const definitions = [...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation').flatMap((node) => this.generateDefinition(node, typesMap, customScalarsMap))
+    const exports = this.generateExports(typesMap, customScalarsMap)
+    return [imports.join('\n'), definitions.join('\n\n\n\n'), exports.join('\n\n')].join('\n\n')
+  }
+
+  private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
+    Array.from(typesMap.values())
+      .filter((type) => type.entity)
+      .forEach((type) => {
+        const id = findID(type)
+        if (!id) {
+          throw new Error(`Type ${type.name} requires an @id field being a @entity.`)
+        }
+      })
+  }
+
+  private checkArrayInSqlEntities(typesMap: Map<string, TsTypettaGeneratorNode>) {
+    Array.from(typesMap.values())
+      .filter((type) => type.entity?.type === 'sql')
+      .forEach((type) => {
+        type.fields.forEach((f) => {
+          if ((typeof f.type === 'string' || 'embedded' in f.type) && f.isList) {
+            console.warn(
+              `Type ${type.name} is an sql entity and have an array field: ${f.name}. Plain field or embedded field are not supported as array, the only way to define an array is through references (@foreignRef or @relationEntityRef).`,
+            )
+          }
+        })
+      })
+  }
+
+  private checkReferences(typesMap: Map<string, TsTypettaGeneratorNode>, filter: (type: TsTypettaGeneratorNode) => boolean, parents: TsTypettaGeneratorNode[] = []) {
+    Array.from(typesMap.values())
+      .filter(filter)
+      .forEach((type) => {
+        const errorPrefix = `(Type: ${type.name}${parents.length > 0 ? `, Parents: ${parents.map((v) => v.name).join('<-')}` : ''})`
+        type.fields.forEach((field) => {
+          if (field.type.kind === 'embedded') {
+            const type2Name = field.type.embed
+            this.checkReferences(typesMap, (t) => t.name === type2Name, [type, ...parents])
+          } else if (field.type.kind === 'innerRef') {
+            const refType = findNode(field.type.innerRef, typesMap)
+            if (!refType) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a inner reference to ${field.type.innerRef} that cannot be resolved.`)
+            }
+            if (!refType.entity) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a inner reference to ${field.type.innerRef} that isn't an entity.`)
+            }
+            const refFrom = field.type.refFrom ?? field.name + 'Id'
+            const refFromField = findField(type, refFrom, typesMap, parents)
+            if (!refFromField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a inner reference to ${field.type.innerRef} with refFrom = '${refFrom}' that cannot be resolved.`)
+            }
+            const refTo = field.type.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refToField = findField(refType, refTo, typesMap, parents)
+            if (!refToField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a inner reference to ${field.type.innerRef} with refTo = '${refTo}' that cannot be resolved.`)
+            }
+            if (refFromField.field.graphqlType !== refToField.field.graphqlType) {
+              throw new Error(
+                `${errorPrefix} Field '${refFromField.root.name}.${removeParentPath(refFrom)}: ${refFromField.field.graphqlType}' has a inner reference to '${refToField.root.name}.${removeParentPath(
+                  refTo,
+                )}: ${refToField.field.graphqlType}' but they have different scalar type.`,
+              )
+            }
+          } else if (field.type.kind === 'foreignRef') {
+            const refType = findNode(field.type.foreignRef, typesMap)
+            if (!refType) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a foreign reference to ${field.type.foreignRef} that cannot be resolved.`)
+            }
+            const refFrom = field.type.refFrom ?? `${toFirstLower(type.name)}Id`
+            const refFromField = findField(refType, refFrom, typesMap, parents)
+            if (!refFromField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a foreign reference to ${field.type.foreignRef} with refFrom = '${field.type.refFrom}' that cannot be resolved.`)
+            }
+            const refTo = field.type.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refToField = findField(type, refTo, typesMap, parents)
+            if (!refToField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} has a foreign reference to ${field.type.foreignRef} with refTo = '${field.type.refTo}' that cannot be resolved.`)
+            }
+            if (refFromField.field.graphqlType !== refToField.field.graphqlType) {
+              throw new Error(
+                `${errorPrefix} Field '${refFromField.root.name}.${removeParentPath(refFrom)}: ${refFromField.field.graphqlType}' has a foreign reference to '${
+                  refToField.root.name
+                }.${removeParentPath(refTo)}: ${refToField.field.graphqlType}' but they have different scalar type.`,
+              )
+            }
+          } else if (field.type.kind === 'relationEntityRef') {
+            const refType = findNode(field.type.entity, typesMap)
+            const sourceRefType = findNode(field.type.sourceRef, typesMap)
+            const destRefType = findNode(field.type.destRef, typesMap)
+            if (!sourceRefType || !destRefType) {
+              throw new Error('Unreachable')
+            }
+            if (!refType) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.entity} that cannot be resolved.`)
+            }
+
+            // Ref this check (source type)
+            const refThisRefFrom = field.type.refThis?.refFrom ?? `${toFirstLower(field.type.sourceRef)}Id`
+            const refThisRefFromField = findField(refType, refThisRefFrom, typesMap, parents)
+            if (!refThisRefFromField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.entity} with refThis.refFrom = '${refThisRefFrom}' that cannot be resolved.`)
+            }
+            const refThisRefTo = field.type.refThis?.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refThisRefToField = findField(sourceRefType, refThisRefTo, typesMap, parents)
+            if (!refThisRefToField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.sourceRef} with refThis.refTo = '${refThisRefTo}' that cannot be resolved.`)
+            }
+            if (refThisRefToField.field.graphqlType !== refThisRefFromField.field.graphqlType) {
+              throw new Error(
+                `${errorPrefix} Field '${refThisRefFromField.root.name}.${removeParentPath(refThisRefFrom)}: ${refThisRefFromField.field.graphqlType}' is related to '${
+                  refThisRefToField.root.name
+                }.${removeParentPath(refThisRefTo)}: ${refThisRefToField.field.graphqlType}' but they have different scalar type.`,
+              )
+            }
+
+            // Ref other check (dest type)
+            const refOtherRefFrom = field.type.refOther?.refFrom ?? `${toFirstLower(field.type.destRef)}Id`
+            const refOtherRefFromField = findField(refType, refOtherRefFrom, typesMap, parents)
+            if (!refOtherRefFromField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.entity} with refOther.refFrom = '${refOtherRefFrom}' that cannot be resolved.`)
+            }
+            const refOtherRefTo = field.type.refOther?.refTo ?? type.fields.find((f) => f.isID)?.name ?? 'id'
+            const refOtherRefToField = findField(destRefType, refOtherRefTo, typesMap, parents)
+            if (!refOtherRefToField.field) {
+              throw new Error(`${errorPrefix} Field ${field.name} is related to ${field.type.destRef} with refOther.refTo = '${refOtherRefTo}' that cannot be resolved.`)
+            }
+            if (refOtherRefToField.field.graphqlType !== refOtherRefFromField.field.graphqlType) {
+              throw new Error(
+                `${errorPrefix} Field '${refOtherRefFromField.root.name}.${removeParentPath(refOtherRefFrom)}: ${refOtherRefFromField.field.graphqlType}' is related to '${
+                  refOtherRefToField.root.name
+                }.${removeParentPath(refOtherRefTo)}: ${refThisRefToField.field.graphqlType}' but they have different scalar type.`,
+              )
+            }
+          }
+        })
+      })
+  }
+
   public generateImports(typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
     const sqlSources = [...new Set([...typesMap.values()].flatMap((type) => (type.entity?.type === 'sql' ? [type.entity.source] : [])))]
     const hasSQLEntities = sqlSources.length > 0
@@ -14,7 +170,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
 
     const knexImports = "import { Knex } from 'knex'"
     const mongodbImports = "import * as M from 'mongodb'"
-    const commonImports = [`import * as T from '${this._config.typettaImport || '@twinlogix/typetta'}'`, `import * as types from '${this._config.tsTypesImport || '@twinlogix/typetta'}'`]
+    const commonImports = [`import * as T from '${this.config.typettaImport || '@twinlogix/typetta'}'`, `import * as types from '${this.config.tsTypesImport || '@twinlogix/typetta'}'`]
 
     return [...commonImports, ...(hasSQLEntities ? [knexImports] : []), ...(hasMongoDBEntites ? [mongodbImports] : [])]
   }
@@ -22,7 +178,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
   public generateDefinition(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     if (node.entity) {
       const daoExcluded = this._generateDAOExludedFields(node)
-      const daoSchema = this._generateDAOSchema(node)
+      const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoFilter = this._generateDAOFilter(node, typesMap, customScalarsMap)
       const daoRelations = this._generateDAORelations(node)
       const daoProjection = this._generateDAOProjection(node, typesMap)
@@ -34,7 +190,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
       return [daoExcluded, daoSchema, daoFilter, daoRelations, daoProjection, daoSort, daoUpdate, daoInsert, daoParams, dao].join('\n\n')
     } else {
       const daoProjection = this._generateDAOProjection(node, typesMap)
-      const daoSchema = this._generateDAOSchema(node)
+      const daoSchema = this._generateDAOSchema(node, typesMap)
       const daoInsert = this._generateDAOInsert(node)
       return [daoSchema, daoProjection, daoInsert].join('\n\n')
     }
@@ -113,7 +269,7 @@ export class TsTypettaDAOGenerator extends TsTypettaAbstractGenerator {
         : ''
 
     const entityManagerParamsExport = `
-export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {\n${indentMultiline(
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {\n${indentMultiline(
       `${metadata}${middlewares}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${loggerParams}${securityPolicyParam}`,
     )}\n}`
 
@@ -188,7 +344,7 @@ this.params = params`,
     ].join('\n\n')
 
     const entityManagerExport =
-      `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<${
+      `export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> extends T.AbstractEntityManager<${
         mongoSourcesLiteral || 'never'
       }, ${sqlSourcesLiteral || 'never'}, types.Scalars, MetadataType>  {\n\n` +
       indentMultiline(declarations) +
@@ -197,10 +353,6 @@ this.params = params`,
     const entityManagerMiddleware = `type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>`
 
     const utilsCode = `
-//--------------------------------------------------------------------------------
-//------------------------------------- UTILS ------------------------------------
-//--------------------------------------------------------------------------------
-
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {
 ${Array.from(typesMap.values())
@@ -276,28 +428,107 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   // ----------------------------------------------- SCHEMA --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
-  public _generateDAOSchema(node: TsTypettaGeneratorNode): string {
-    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node).join(',\n'))
+  public _generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
+    const daoSchemaBody = indentMultiline(this._generateDAOSchemaFields(node, typesMap).join(',\n'))
     const daoSchema = `export function ${toFirstLower(node.name)}Schema(): T.Schema<types.Scalars> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
     return daoSchema
   }
 
-  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode): string[] {
-    return node.fields
-      .map((field) => {
-        const decorators = `${field.isRequired ? ', \nrequired: true' : ''}${field.isList ? ', \narray: true' : ''}${field.alias ? `, \nalias: '${field.alias}'` : ''}${
-          field.defaultGenerationStrategy ? `, \ndefaultGenerationStrategy: '${field.defaultGenerationStrategy}'` : ''
-        }${field.schemaMetadata ? `, \nmetadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : ''}`
-        if (field.type.kind === 'scalar' && !field.isExcluded) {
-          return [`  '${field.name}': {\n${indentMultiline(`scalar: '${field.isEnum ? 'String' : field.graphqlType}'${decorators}`, 2)}\n  }`]
-        } else if (field.type.kind === 'embedded' && !field.isExcluded) {
-          return [`  '${field.name}': { embedded: () => ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
-        } else if (field.type.kind === 'innerRef' || field.type.kind === 'foreignRef' || field.type.kind === 'relationEntityRef') {
-          return [`  '${field.name}': { relation: () => ${toFirstLower(field.graphqlType)}Schema()${decorators.split('\n').join('')} }`]
-        }
-        return []
-      })
-      .reduce((a, c) => [...a, ...c], [])
+  public _generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+    return node.fields.flatMap((field) => {
+      const decorators = [
+        field.isListElementRequired ? 'isListElementRequired: true' : null,
+        field.isID ? 'isId: true' : null,
+        field.isID ? `generationStrategy: '${field.idGenerationStrategy || this.config.defaultIdGenerationStrategy || 'generator'}'` : null,
+        field.isRequired ? 'required: true' : null,
+        field.isList ? 'isList: true' : null,
+        field.isEnum ? 'isEnum: true' : null,
+        field.alias ? `alias: '${field.alias}'` : null,
+        field.defaultGenerationStrategy && !field.isID ? `generationStrategy: '${field.defaultGenerationStrategy}'` : null,
+        field.schemaMetadata ? `metadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : '',
+      ]
+        .filter((v) => v != null)
+        .join(',')
+      if (field.type.kind === 'scalar' && !field.isExcluded) {
+        const scalar = field.isEnum ? 'String' : field.graphqlType
+        return [
+          `'${field.name}': {
+            type: 'scalar',
+            scalar: '${scalar}',
+            ${decorators}
+          }`,
+        ]
+      } else if (field.type.kind === 'embedded' && !field.isExcluded) {
+        const schema = toFirstLower(field.graphqlType)
+        return [
+          `'${field.name}': {
+            type: 'embedded',
+            schema: () => ${schema}Schema(),
+            ${decorators}
+          }`,
+        ]
+      } else if (field.type.kind === 'innerRef') {
+        const dao = toFirstLower(field.type.innerRef)
+        const schema = toFirstLower(field.graphqlType)
+        const linkedType = getNode(field.type.innerRef, typesMap)
+        const refFrom = field.type.refFrom ?? field.name + 'Id'
+        const refTo = field.type.refTo ?? getID(linkedType).name
+        return [
+          `'${field.name}': {
+              type: 'relation',
+              relation: 'inner',
+              schema: () => ${schema}Schema(),
+              refFrom: '${refFrom}',
+              refTo: '${refTo}',
+              dao: '${dao}',
+              ${decorators}
+            }`,
+        ]
+      } else if (field.type.kind === 'foreignRef') {
+        const dao = toFirstLower(field.type.foreignRef)
+        const schema = toFirstLower(field.graphqlType)
+        const refFrom = field.type.refFrom ?? `${toFirstLower(node.name)}Id`
+        const refTo = field.type.refTo ?? getID(node).name
+        return [
+          `'${field.name}':{
+              type: 'relation',
+              relation: 'foreign',
+              schema: () => ${schema}Schema(),
+              refFrom: '${refFrom}',
+              refTo: '${refTo}',
+              dao: '${dao}',
+              ${decorators}
+            }`,
+        ]
+      } else if (field.type.kind === 'relationEntityRef') {
+        const schema = toFirstLower(field.graphqlType)
+        const refThisRefFrom = field.type.refThis?.refFrom ?? toFirstLower(field.type.sourceRef) + 'Id'
+        const refThisRefTo = field.type.refThis?.refTo ?? getID(node).name
+        const refOtherRefFrom = field.type.refOther?.refFrom ?? toFirstLower(field.type.destRef) + 'Id'
+        const refOtherRefTo = field.type.refOther?.refTo ?? getID(node).name
+        const relationDao = toFirstLower(field.type.entity)
+        const entityDao = toFirstLower(field.type.destRef)
+        return [
+          `'${field.name}': { 
+               type: 'relation',
+               relation: 'relationEntity',
+               schema: () => ${schema}Schema(),
+               refThis: {
+                 refFrom: '${refThisRefFrom}',
+                 refTo: '${refThisRefTo}'
+               },
+               refOther: {
+                 refFrom: '${refOtherRefFrom}',
+                 refTo: '${refOtherRefTo}',
+                 dao: '${entityDao}'
+               },
+               relationEntity: { schema: () => ${toFirstLower(field.type.entity)}Schema(), dao: '${relationDao}' },
+               ${decorators}
+            }`,
+        ]
+      }
+      return []
+    })
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -440,15 +671,15 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         if (field.type.kind === 'scalar') {
           const baseType = field.isEnum ? `types.${field.graphqlType}` : `types.Scalars['${field.graphqlType}']`
           const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${baseType})` : baseType}[]` : baseType
-          return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
+          return [`'${fieldName}'?: ${fieldType} | null`]
         } else if (field.type.kind === 'embedded') {
           const embeddedTypeNode = getNode(field.type.embed, typesMap)
           const embeddedType = `${embeddedTypeNode.name}Insert`
           const fieldType = field.isList ? `${!field.isListElementRequired ? `(null | ${embeddedType})` : embeddedType}[]` : embeddedType
           if (field.isList) {
-            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`]
+            return [`'${fieldName}'?: ${fieldType} | null`]
           } else {
-            return [`'${fieldName}'?: ${fieldType}${field.isRequired ? '' : ' | null'}`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
+            return [`'${fieldName}'?: ${fieldType} | null`, ...this._generateDAOUpdateFields(embeddedTypeNode, typesMap, path + field.name + '.')]
           }
         }
         return []
@@ -530,82 +761,19 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   }
 
   private _generateConstructorMethod(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, daoParams: string): string {
-    const idField = getID(node)
-    const generatedRelations = `[\n${indentMultiline(this._generateRelations(node, typesMap).join(',\n'))}\n]`
-    const relations = `relations: T.overrideRelations(\n${indentMultiline(`${generatedRelations}`)}\n)`
-    const idGenerator = `idGeneration: '${idField.idGenerationStrategy || this._config.defaultIdGenerationStrategy || 'generator'}'`
-    const idScalar = `idScalar: '${idField.isEnum ? 'String' : idField.graphqlType}'`
-    const constructorBody = `super({ ${indentMultiline(
-      `\n...params, \nidField: '${idField.name}', \nschema: ${toFirstLower(node.name)}Schema(), \n${relations}, \n${idGenerator}, \n${idScalar}`,
-    )} \n})`
+    const constructorBody = `super({ ${indentMultiline(`\n...params, \nschema: ${toFirstLower(node.name)}Schema()`)} \n})`
     return (
       `
-public static projection<P extends ${node.name}Projection>(p: P) {
-  return p
-}
-public static mergeProjection<P1 extends ${node.name}Projection, P2 extends ${node.name}Projection>(p1: P1, p2: P2): T.SelectProjection<${node.name}Projection, P1, P2> {
-  return T.mergeProjections(p1, p2) as T.SelectProjection<${node.name}Projection, P1, P2>
-}
+      public static projection<P extends ${node.name}Projection>(p: P) {
+        return p
+      }
+      public static mergeProjection<P1 extends ${node.name}Projection, P2 extends ${node.name}Projection>(p1: P1, p2: P2): T.SelectProjection<${node.name}Projection, P1, P2> {
+        return T.mergeProjections(p1, p2) as T.SelectProjection<${node.name}Projection, P1, P2>
+      }
 
-public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n` +
+      public constructor(params: ${daoParams}<MetadataType, OperationMetadataType>){\n` +
       indentMultiline(constructorBody) +
       '\n}'
     )
-  }
-
-  private _generateRelations(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path = ''): string[] {
-    return node.fields
-      .map((field) => {
-        return this._generateRelation(field, node, typesMap, path)
-      })
-      .reduce((a, c) => [...a, ...c], [])
-  }
-
-  private _generateRelation(field: TsTypettaGeneratorField, node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>, path = ''): string[] {
-    const type: DAORelation['type'] = field.isList ? '1-n' : '1-1'
-    if (field.type.kind === 'innerRef') {
-      const linkedType = getNode(field.type.innerRef, typesMap)
-      const reference: DAORelation['reference'] = 'inner'
-      const refField = path + field.name
-      const refFrom = field.type.refFrom ? path + field.type.refFrom : path + field.name + 'Id'
-      const refTo = field.type.refTo ? field.type.refTo : getID(linkedType).name
-      const dao = toFirstLower(field.type.innerRef)
-      return [
-        `{ type: '${type}', reference: '${reference}', field: '${refField}', refFrom: '${resolveParentPath(refFrom)}', refTo: '${resolveParentPath(refTo)}', dao: '${dao}', required: ${
-          field.isRequired
-        } }`,
-      ]
-    } else if (field.type.kind === 'foreignRef') {
-      const reference: DAORelation['reference'] = 'foreign'
-      const refField = path + field.name
-      const refFrom = field.type.refFrom ?? `${toFirstLower(node.name)}Id`
-      const refTo = path + (field.type.refTo ? field.type.refTo : getID(node).name)
-      const dao = toFirstLower(field.type.foreignRef)
-      return [
-        `{ type: '${type}', reference: '${reference}', field: '${refField}', refFrom: '${resolveParentPath(refFrom)}', refTo: '${resolveParentPath(refTo)}', dao: '${dao}', required: ${
-          field.isRequired
-        } }`,
-      ]
-    } else if (field.type.kind === 'relationEntityRef') {
-      const reference: DAORelation['reference'] = 'relation'
-      const refField = path + field.name
-      const refThisRefFrom = field.type.refThis?.refFrom ?? toFirstLower(field.type.sourceRef) + 'Id'
-      const refThisRefTo = field.type.refThis?.refTo ?? getID(node).name
-      const refOtherRefFrom = field.type.refOther?.refFrom ?? toFirstLower(field.type.destRef) + 'Id'
-      const refOtherRefTo = field.type.refOther?.refTo ?? getID(node).name
-      const relationDao = toFirstLower(field.type.entity)
-      const entityDao = toFirstLower(field.type.destRef)
-      return [
-        `{ type: '${type}', reference: '${reference}', field: '${refField}', relationDao: '${relationDao}', entityDao: '${entityDao}', refThis: { refFrom: '${resolveParentPath(
-          refThisRefFrom,
-        )}', refTo: '${resolveParentPath(refThisRefTo)}' }, refOther: { refFrom: '${resolveParentPath(refOtherRefFrom)}', refTo: '${resolveParentPath(refOtherRefTo)}' }, required: ${
-          field.isRequired
-        } }`,
-      ]
-    } else if (field.type.kind === 'embedded') {
-      const embeddedType = getNode(field.type.embed, typesMap)
-      return this._generateRelations(embeddedType, typesMap, path + field.name + '.')
-    }
-    return []
   }
 }

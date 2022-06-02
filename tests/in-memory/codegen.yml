@@ -25,3 +25,6 @@ generates:
       defaultIdGenerationStrategy: 'generator'
     plugins:
       - lib/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

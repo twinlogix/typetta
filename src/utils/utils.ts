@@ -15,7 +15,7 @@ export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schem
       throw new Error('Unreachable')
     }
     const schemaField = schema[k]
-    return schemaField && 'embedded' in schemaField ? getSchemaFieldTraversing(c.join('.'), schemaField.embedded()) : null
+    return schemaField && schemaField.type === 'embedded' ? getSchemaFieldTraversing(c.join('.'), schemaField.schema()) : null
   }
 }
 
@@ -25,7 +25,7 @@ export function modelValueToDbValue<ScalarsType>(
   adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
 ): unknown {
   if (adapter.validate) {
-    if (schemaField.array) {
+    if (schemaField.isList) {
       for (const v of value as ScalarsType[keyof ScalarsType][]) {
         const validation = adapter.validate(v)
         if (validation !== true) {
@@ -39,7 +39,7 @@ export function modelValueToDbValue<ScalarsType>(
       }
     }
   }
-  return schemaField.array ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
+  return schemaField.isList ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
 }
 
 export function* reversed<T>(array: T[]): Iterable<T> {
@@ -186,11 +186,11 @@ export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>
   }
   return mapObject(obj, ([k, v]) => {
     const field = schema[k]
-    if ('embedded' in field) {
+    if (field.type === 'embedded') {
       if (!v) {
         return [[`${prefix}${k}`, v]]
       }
-      return Object.entries(flattenEmbeddeds(v as T, field.embedded(), `${prefix}${k}.`))
+      return Object.entries(flattenEmbeddeds(v as T, field.schema(), `${prefix}${k}.`))
     }
     return [[`${prefix}${k}`, v]]
   }) as FlattenEmbeddedFilter<T>
