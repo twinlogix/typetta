@@ -189,8 +189,9 @@ export class TsTypettaGenerator extends TypettaGenerator {
     if (node.entity) {
       const daoSchema = this.generateDAOSchema(node, typesMap)
       const daoParams = this.generateDAOParams(node)
+      const utilsType = this.generateUtillsType(node)
       const dao = this.generateDAO(node, typesMap)
-      return [daoSchema, daoParams, dao].join('\n\n')
+      return [daoSchema, daoParams, utilsType, dao].join('\n\n')
     } else {
       const daoSchema = this.generateDAOSchema(node, typesMap)
       return [daoSchema].join('\n\n')
@@ -599,6 +600,16 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
     return [daoGenerics, daoParams, inMemoryDaoParams].join('\n')
+  }
+
+  private generateUtillsType(node: TsTypettaGeneratorNode): string {
+    return `
+    export type ${node.name}Insert = T.Insert<'${node.name}', AST, Scalars>
+    export type ${node.name}Projection = T.Projection<'${node.name}', AST>
+    export type ${node.name}Params<P extends ${node.name}Projection> = T.Params<'${node.name}', AST, Scalars, P>
+    export type ${node.name}Update = T.Update<'${node.name}', AST, Scalars>
+    export type ${node.name}Filter = T.Filter<'${node.name}', AST, Scalars>
+    export type ${node.name}SortElement = T.SortElement<'${node.name}', AST>`
   }
 
   // ---------------------------------------------------------------------------------------------------------

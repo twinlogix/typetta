@@ -4,7 +4,7 @@ import { Knex } from 'knex'
 
 export type Scalars = {
   ID: { type: types.Scalars['ID']; isTextual: false; isQuantitative: false }
-  String: { type: string; isTextual: true; isQuantitative: false }
+  String: { type: types.Scalars['String']; isTextual: true; isQuantitative: false }
   Boolean: { type: types.Scalars['Boolean']; isTextual: false; isQuantitative: false }
   Int: { type: types.Scalars['Int']; isTextual: false; isQuantitative: true }
   Float: { type: types.Scalars['Float']; isTextual: false; isQuantitative: true }
@@ -266,6 +266,13 @@ export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type AddressInsert = T.Insert<'Address', AST, Scalars>
+export type AddressProjection = T.Projection<'Address', AST>
+export type AddressParams<P extends AddressProjection> = T.Params<'Address', AST, Scalars, P>
+export type AddressUpdate = T.Update<'Address', AST, Scalars>
+export type AddressFilter = T.Filter<'Address', AST, Scalars>
+export type AddressSortElement = T.SortElement<'Address', AST>
+
 export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Address', AST>>(p: P) {
     return p
@@ -339,6 +346,13 @@ export type InMemoryAuthorDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type AuthorInsert = T.Insert<'Author', AST, Scalars>
+export type AuthorProjection = T.Projection<'Author', AST>
+export type AuthorParams<P extends AuthorProjection> = T.Params<'Author', AST, Scalars, P>
+export type AuthorUpdate = T.Update<'Author', AST, Scalars>
+export type AuthorFilter = T.Filter<'Author', AST, Scalars>
+export type AuthorSortElement = T.SortElement<'Author', AST>
+
 export class AuthorDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Author', AST>>(p: P) {
     return p
@@ -407,6 +421,13 @@ export type InMemoryAuthorBookDAOParams<MetadataType, OperationMetadataType> = O
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type AuthorBookInsert = T.Insert<'AuthorBook', AST, Scalars>
+export type AuthorBookProjection = T.Projection<'AuthorBook', AST>
+export type AuthorBookParams<P extends AuthorBookProjection> = T.Params<'AuthorBook', AST, Scalars, P>
+export type AuthorBookUpdate = T.Update<'AuthorBook', AST, Scalars>
+export type AuthorBookFilter = T.Filter<'AuthorBook', AST, Scalars>
+export type AuthorBookSortElement = T.SortElement<'AuthorBook', AST>
+
 export class AuthorBookDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'AuthorBook', AST>>(p: P) {
     return p
@@ -471,6 +492,13 @@ export type InMemoryBookDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type BookInsert = T.Insert<'Book', AST, Scalars>
+export type BookProjection = T.Projection<'Book', AST>
+export type BookParams<P extends BookProjection> = T.Params<'Book', AST, Scalars, P>
+export type BookUpdate = T.Update<'Book', AST, Scalars>
+export type BookFilter = T.Filter<'Book', AST, Scalars>
+export type BookSortElement = T.SortElement<'Book', AST>
+
 export class BookDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Book', AST>>(p: P) {
     return p
@@ -528,6 +556,13 @@ export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.InMemoryDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>,
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
+
+export type CityInsert = T.Insert<'City', AST, Scalars>
+export type CityProjection = T.Projection<'City', AST>
+export type CityParams<P extends CityProjection> = T.Params<'City', AST, Scalars, P>
+export type CityUpdate = T.Update<'City', AST, Scalars>
+export type CityFilter = T.Filter<'City', AST, Scalars>
+export type CitySortElement = T.SortElement<'City', AST>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'City', AST>>(p: P) {
@@ -614,6 +649,13 @@ export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadata
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type DefaultFieldsEntityInsert = T.Insert<'DefaultFieldsEntity', AST, Scalars>
+export type DefaultFieldsEntityProjection = T.Projection<'DefaultFieldsEntity', AST>
+export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = T.Params<'DefaultFieldsEntity', AST, Scalars, P>
+export type DefaultFieldsEntityUpdate = T.Update<'DefaultFieldsEntity', AST, Scalars>
+export type DefaultFieldsEntityFilter = T.Filter<'DefaultFieldsEntity', AST, Scalars>
+export type DefaultFieldsEntitySortElement = T.SortElement<'DefaultFieldsEntity', AST>
+
 export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'DefaultFieldsEntity', AST>>(p: P) {
     return p
@@ -685,6 +727,13 @@ export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type DeviceInsert = T.Insert<'Device', AST, Scalars>
+export type DeviceProjection = T.Projection<'Device', AST>
+export type DeviceParams<P extends DeviceProjection> = T.Params<'Device', AST, Scalars, P>
+export type DeviceUpdate = T.Update<'Device', AST, Scalars>
+export type DeviceFilter = T.Filter<'Device', AST, Scalars>
+export type DeviceSortElement = T.SortElement<'Device', AST>
+
 export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Device', AST>>(p: P) {
     return p
@@ -751,6 +800,13 @@ export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type DogInsert = T.Insert<'Dog', AST, Scalars>
+export type DogProjection = T.Projection<'Dog', AST>
+export type DogParams<P extends DogProjection> = T.Params<'Dog', AST, Scalars, P>
+export type DogUpdate = T.Update<'Dog', AST, Scalars>
+export type DogFilter = T.Filter<'Dog', AST, Scalars>
+export type DogSortElement = T.SortElement<'Dog', AST>
+
 export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Dog', AST>>(p: P) {
     return p
@@ -808,6 +864,13 @@ export type InMemoryFriendsDAOParams<MetadataType, OperationMetadataType> = Omit
   T.InMemoryDAOParams<FriendsDAOGenerics<MetadataType, OperationMetadataType>>,
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
+
+export type FriendsInsert = T.Insert<'Friends', AST, Scalars>
+export type FriendsProjection = T.Projection<'Friends', AST>
+export type FriendsParams<P extends FriendsProjection> = T.Params<'Friends', AST, Scalars, P>
+export type FriendsUpdate = T.Update<'Friends', AST, Scalars>
+export type FriendsFilter = T.Filter<'Friends', AST, Scalars>
+export type FriendsSortElement = T.SortElement<'Friends', AST>
 
 export class FriendsDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Friends', AST>>(p: P) {
@@ -879,6 +942,13 @@ export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> =
   T.InMemoryDAOParams<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>,
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
+
+export type OrganizationInsert = T.Insert<'Organization', AST, Scalars>
+export type OrganizationProjection = T.Projection<'Organization', AST>
+export type OrganizationParams<P extends OrganizationProjection> = T.Params<'Organization', AST, Scalars, P>
+export type OrganizationUpdate = T.Update<'Organization', AST, Scalars>
+export type OrganizationFilter = T.Filter<'Organization', AST, Scalars>
+export type OrganizationSortElement = T.SortElement<'Organization', AST>
 
 export class OrganizationDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Organization', AST>>(p: P) {
@@ -1019,6 +1089,13 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>,
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
+
+export type UserInsert = T.Insert<'User', AST, Scalars>
+export type UserProjection = T.Projection<'User', AST>
+export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
+export type UserUpdate = T.Update<'User', AST, Scalars>
+export type UserFilter = T.Filter<'User', AST, Scalars>
+export type UserSortElement = T.SortElement<'User', AST>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'User', AST>>(p: P) {

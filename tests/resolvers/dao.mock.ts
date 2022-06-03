@@ -122,6 +122,13 @@ export type InMemoryLikeDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type LikeInsert = T.Insert<'Like', AST, Scalars>
+export type LikeProjection = T.Projection<'Like', AST>
+export type LikeParams<P extends LikeProjection> = T.Params<'Like', AST, Scalars, P>
+export type LikeUpdate = T.Update<'Like', AST, Scalars>
+export type LikeFilter = T.Filter<'Like', AST, Scalars>
+export type LikeSortElement = T.SortElement<'Like', AST>
+
 export class LikeDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<LikeDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Like', AST>>(p: P) {
     return p
@@ -222,6 +229,13 @@ export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type PostInsert = T.Insert<'Post', AST, Scalars>
+export type PostProjection = T.Projection<'Post', AST>
+export type PostParams<P extends PostProjection> = T.Params<'Post', AST, Scalars, P>
+export type PostUpdate = T.Update<'Post', AST, Scalars>
+export type PostFilter = T.Filter<'Post', AST, Scalars>
+export type PostSortElement = T.SortElement<'Post', AST>
+
 export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Post', AST>>(p: P) {
     return p
@@ -311,6 +325,13 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.InMemoryDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>,
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
+
+export type UserInsert = T.Insert<'User', AST, Scalars>
+export type UserProjection = T.Projection<'User', AST>
+export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
+export type UserUpdate = T.Update<'User', AST, Scalars>
+export type UserFilter = T.Filter<'User', AST, Scalars>
+export type UserSortElement = T.SortElement<'User', AST>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'User', AST>>(p: P) {
