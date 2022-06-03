@@ -267,6 +267,7 @@ export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit
 >
 
 export type AddressInsert = T.Insert<'Address', AST, Scalars>
+export type AddressInsertResult = T.GenerateModel<'Address', AST, Scalars, 'relation'>
 export type AddressProjection = T.Projection<'Address', AST>
 export type AddressParams<P extends AddressProjection> = T.Params<'Address', AST, Scalars, P>
 export type AddressUpdate = T.Update<'Address', AST, Scalars>
@@ -347,6 +348,7 @@ export type InMemoryAuthorDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type AuthorInsert = T.Insert<'Author', AST, Scalars>
+export type AuthorInsertResult = T.GenerateModel<'Author', AST, Scalars, 'relation'>
 export type AuthorProjection = T.Projection<'Author', AST>
 export type AuthorParams<P extends AuthorProjection> = T.Params<'Author', AST, Scalars, P>
 export type AuthorUpdate = T.Update<'Author', AST, Scalars>
@@ -422,6 +424,7 @@ export type InMemoryAuthorBookDAOParams<MetadataType, OperationMetadataType> = O
 >
 
 export type AuthorBookInsert = T.Insert<'AuthorBook', AST, Scalars>
+export type AuthorBookInsertResult = T.GenerateModel<'AuthorBook', AST, Scalars, 'relation'>
 export type AuthorBookProjection = T.Projection<'AuthorBook', AST>
 export type AuthorBookParams<P extends AuthorBookProjection> = T.Params<'AuthorBook', AST, Scalars, P>
 export type AuthorBookUpdate = T.Update<'AuthorBook', AST, Scalars>
@@ -493,6 +496,7 @@ export type InMemoryBookDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type BookInsert = T.Insert<'Book', AST, Scalars>
+export type BookInsertResult = T.GenerateModel<'Book', AST, Scalars, 'relation'>
 export type BookProjection = T.Projection<'Book', AST>
 export type BookParams<P extends BookProjection> = T.Params<'Book', AST, Scalars, P>
 export type BookUpdate = T.Update<'Book', AST, Scalars>
@@ -558,6 +562,7 @@ export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type CityInsert = T.Insert<'City', AST, Scalars>
+export type CityInsertResult = T.GenerateModel<'City', AST, Scalars, 'relation'>
 export type CityProjection = T.Projection<'City', AST>
 export type CityParams<P extends CityProjection> = T.Params<'City', AST, Scalars, P>
 export type CityUpdate = T.Update<'City', AST, Scalars>
@@ -650,6 +655,7 @@ export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadata
 >
 
 export type DefaultFieldsEntityInsert = T.Insert<'DefaultFieldsEntity', AST, Scalars>
+export type DefaultFieldsEntityInsertResult = T.GenerateModel<'DefaultFieldsEntity', AST, Scalars, 'relation'>
 export type DefaultFieldsEntityProjection = T.Projection<'DefaultFieldsEntity', AST>
 export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = T.Params<'DefaultFieldsEntity', AST, Scalars, P>
 export type DefaultFieldsEntityUpdate = T.Update<'DefaultFieldsEntity', AST, Scalars>
@@ -728,6 +734,7 @@ export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type DeviceInsert = T.Insert<'Device', AST, Scalars>
+export type DeviceInsertResult = T.GenerateModel<'Device', AST, Scalars, 'relation'>
 export type DeviceProjection = T.Projection<'Device', AST>
 export type DeviceParams<P extends DeviceProjection> = T.Params<'Device', AST, Scalars, P>
 export type DeviceUpdate = T.Update<'Device', AST, Scalars>
@@ -801,6 +808,7 @@ export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type DogInsert = T.Insert<'Dog', AST, Scalars>
+export type DogInsertResult = T.GenerateModel<'Dog', AST, Scalars, 'relation'>
 export type DogProjection = T.Projection<'Dog', AST>
 export type DogParams<P extends DogProjection> = T.Params<'Dog', AST, Scalars, P>
 export type DogUpdate = T.Update<'Dog', AST, Scalars>
@@ -866,6 +874,7 @@ export type InMemoryFriendsDAOParams<MetadataType, OperationMetadataType> = Omit
 >
 
 export type FriendsInsert = T.Insert<'Friends', AST, Scalars>
+export type FriendsInsertResult = T.GenerateModel<'Friends', AST, Scalars, 'relation'>
 export type FriendsProjection = T.Projection<'Friends', AST>
 export type FriendsParams<P extends FriendsProjection> = T.Params<'Friends', AST, Scalars, P>
 export type FriendsUpdate = T.Update<'Friends', AST, Scalars>
@@ -944,6 +953,7 @@ export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> =
 >
 
 export type OrganizationInsert = T.Insert<'Organization', AST, Scalars>
+export type OrganizationInsertResult = T.GenerateModel<'Organization', AST, Scalars, 'relation'>
 export type OrganizationProjection = T.Projection<'Organization', AST>
 export type OrganizationParams<P extends OrganizationProjection> = T.Params<'Organization', AST, Scalars, P>
 export type OrganizationUpdate = T.Update<'Organization', AST, Scalars>
@@ -1091,6 +1101,7 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type UserInsert = T.Insert<'User', AST, Scalars>
+export type UserInsertResult = T.GenerateModel<'User', AST, Scalars, 'relation'>
 export type UserProjection = T.Projection<'User', AST>
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
 export type UserUpdate = T.Update<'User', AST, Scalars>

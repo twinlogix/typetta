@@ -351,6 +351,7 @@ export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit
 >
 
 export type AddressInsert = T.Insert<'Address', AST, Scalars>
+export type AddressInsertResult = T.GenerateModel<'Address', AST, Scalars, 'relation'>
 export type AddressProjection = T.Projection<'Address', AST>
 export type AddressParams<P extends AddressProjection> = T.Params<'Address', AST, Scalars, P>
 export type AddressUpdate = T.Update<'Address', AST, Scalars>
@@ -419,6 +420,7 @@ export type InMemoryAuditDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type AuditInsert = T.Insert<'Audit', AST, Scalars>
+export type AuditInsertResult = T.GenerateModel<'Audit', AST, Scalars, 'relation'>
 export type AuditProjection = T.Projection<'Audit', AST>
 export type AuditParams<P extends AuditProjection> = T.Params<'Audit', AST, Scalars, P>
 export type AuditUpdate = T.Update<'Audit', AST, Scalars>
@@ -528,6 +530,7 @@ export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type CityInsert = T.Insert<'City', AST, Scalars>
+export type CityInsertResult = T.GenerateModel<'City', AST, Scalars, 'relation'>
 export type CityProjection = T.Projection<'City', AST>
 export type CityParams<P extends CityProjection> = T.Params<'City', AST, Scalars, P>
 export type CityUpdate = T.Update<'City', AST, Scalars>
@@ -620,6 +623,7 @@ export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadata
 >
 
 export type DefaultFieldsEntityInsert = T.Insert<'DefaultFieldsEntity', AST, Scalars>
+export type DefaultFieldsEntityInsertResult = T.GenerateModel<'DefaultFieldsEntity', AST, Scalars, 'relation'>
 export type DefaultFieldsEntityProjection = T.Projection<'DefaultFieldsEntity', AST>
 export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = T.Params<'DefaultFieldsEntity', AST, Scalars, P>
 export type DefaultFieldsEntityUpdate = T.Update<'DefaultFieldsEntity', AST, Scalars>
@@ -698,6 +702,7 @@ export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type DeviceInsert = T.Insert<'Device', AST, Scalars>
+export type DeviceInsertResult = T.GenerateModel<'Device', AST, Scalars, 'relation'>
 export type DeviceProjection = T.Projection<'Device', AST>
 export type DeviceParams<P extends DeviceProjection> = T.Params<'Device', AST, Scalars, P>
 export type DeviceUpdate = T.Update<'Device', AST, Scalars>
@@ -771,6 +776,7 @@ export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type DogInsert = T.Insert<'Dog', AST, Scalars>
+export type DogInsertResult = T.GenerateModel<'Dog', AST, Scalars, 'relation'>
 export type DogProjection = T.Projection<'Dog', AST>
 export type DogParams<P extends DogProjection> = T.Params<'Dog', AST, Scalars, P>
 export type DogUpdate = T.Update<'Dog', AST, Scalars>
@@ -957,6 +963,7 @@ export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type HotelInsert = T.Insert<'Hotel', AST, Scalars>
+export type HotelInsertResult = T.GenerateModel<'Hotel', AST, Scalars, 'relation'>
 export type HotelProjection = T.Projection<'Hotel', AST>
 export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, Scalars, P>
 export type HotelUpdate = T.Update<'Hotel', AST, Scalars>
@@ -1042,6 +1049,7 @@ export type InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType> =
 >
 
 export type MockedEntityInsert = T.Insert<'MockedEntity', AST, Scalars>
+export type MockedEntityInsertResult = T.GenerateModel<'MockedEntity', AST, Scalars, 'relation'>
 export type MockedEntityProjection = T.Projection<'MockedEntity', AST>
 export type MockedEntityParams<P extends MockedEntityProjection> = T.Params<'MockedEntity', AST, Scalars, P>
 export type MockedEntityUpdate = T.Update<'MockedEntity', AST, Scalars>
@@ -1126,6 +1134,7 @@ export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> =
 >
 
 export type OrganizationInsert = T.Insert<'Organization', AST, Scalars>
+export type OrganizationInsertResult = T.GenerateModel<'Organization', AST, Scalars, 'relation'>
 export type OrganizationProjection = T.Projection<'Organization', AST>
 export type OrganizationParams<P extends OrganizationProjection> = T.Params<'Organization', AST, Scalars, P>
 export type OrganizationUpdate = T.Update<'Organization', AST, Scalars>
@@ -1224,6 +1233,7 @@ export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type PostInsert = T.Insert<'Post', AST, Scalars>
+export type PostInsertResult = T.GenerateModel<'Post', AST, Scalars, 'relation'>
 export type PostProjection = T.Projection<'Post', AST>
 export type PostParams<P extends PostProjection> = T.Params<'Post', AST, Scalars, P>
 export type PostUpdate = T.Update<'Post', AST, Scalars>
@@ -1377,6 +1387,7 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type UserInsert = T.Insert<'User', AST, Scalars>
+export type UserInsertResult = T.GenerateModel<'User', AST, Scalars, 'relation'>
 export type UserProjection = T.Projection<'User', AST>
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
 export type UserUpdate = T.Update<'User', AST, Scalars>

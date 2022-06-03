@@ -605,6 +605,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   private generateUtillsType(node: TsTypettaGeneratorNode): string {
     return `
     export type ${node.name}Insert = T.Insert<'${node.name}', AST, Scalars>
+    export type ${node.name}InsertResult = T.GenerateModel<'${node.name}', AST, Scalars, 'relation'>
     export type ${node.name}Projection = T.Projection<'${node.name}', AST>
     export type ${node.name}Params<P extends ${node.name}Projection> = T.Params<'${node.name}', AST, Scalars, P>
     export type ${node.name}Update = T.Update<'${node.name}', AST, Scalars>

@@ -123,6 +123,7 @@ export type InMemoryLikeDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type LikeInsert = T.Insert<'Like', AST, Scalars>
+export type LikeInsertResult = T.GenerateModel<'Like', AST, Scalars, 'relation'>
 export type LikeProjection = T.Projection<'Like', AST>
 export type LikeParams<P extends LikeProjection> = T.Params<'Like', AST, Scalars, P>
 export type LikeUpdate = T.Update<'Like', AST, Scalars>
@@ -230,6 +231,7 @@ export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type PostInsert = T.Insert<'Post', AST, Scalars>
+export type PostInsertResult = T.GenerateModel<'Post', AST, Scalars, 'relation'>
 export type PostProjection = T.Projection<'Post', AST>
 export type PostParams<P extends PostProjection> = T.Params<'Post', AST, Scalars, P>
 export type PostUpdate = T.Update<'Post', AST, Scalars>
@@ -327,6 +329,7 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type UserInsert = T.Insert<'User', AST, Scalars>
+export type UserInsertResult = T.GenerateModel<'User', AST, Scalars, 'relation'>
 export type UserProjection = T.Projection<'User', AST>
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
 export type UserUpdate = T.Update<'User', AST, Scalars>

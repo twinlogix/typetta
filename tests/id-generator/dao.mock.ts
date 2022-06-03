@@ -113,6 +113,7 @@ export type InMemoryADAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type AInsert = T.Insert<'A', AST, Scalars>
+export type AInsertResult = T.GenerateModel<'A', AST, Scalars, 'relation'>
 export type AProjection = T.Projection<'A', AST>
 export type AParams<P extends AProjection> = T.Params<'A', AST, Scalars, P>
 export type AUpdate = T.Update<'A', AST, Scalars>
@@ -170,6 +171,7 @@ export type BDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOP
 export type InMemoryBDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export type BInsert = T.Insert<'B', AST, Scalars>
+export type BInsertResult = T.GenerateModel<'B', AST, Scalars, 'relation'>
 export type BProjection = T.Projection<'B', AST>
 export type BParams<P extends BProjection> = T.Params<'B', AST, Scalars, P>
 export type BUpdate = T.Update<'B', AST, Scalars>
@@ -233,6 +235,7 @@ export type InMemoryCDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type CInsert = T.Insert<'C', AST, Scalars>
+export type CInsertResult = T.GenerateModel<'C', AST, Scalars, 'relation'>
 export type CProjection = T.Projection<'C', AST>
 export type CParams<P extends CProjection> = T.Params<'C', AST, Scalars, P>
 export type CUpdate = T.Update<'C', AST, Scalars>
@@ -296,6 +299,7 @@ export type InMemoryDDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type DInsert = T.Insert<'D', AST, Scalars>
+export type DInsertResult = T.GenerateModel<'D', AST, Scalars, 'relation'>
 export type DProjection = T.Projection<'D', AST>
 export type DParams<P extends DProjection> = T.Params<'D', AST, Scalars, P>
 export type DUpdate = T.Update<'D', AST, Scalars>
@@ -353,6 +357,7 @@ export type EDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOPa
 export type InMemoryEDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export type EInsert = T.Insert<'E', AST, Scalars>
+export type EInsertResult = T.GenerateModel<'E', AST, Scalars, 'relation'>
 export type EProjection = T.Projection<'E', AST>
 export type EParams<P extends EProjection> = T.Params<'E', AST, Scalars, P>
 export type EUpdate = T.Update<'E', AST, Scalars>
@@ -416,6 +421,7 @@ export type InMemoryFDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type FInsert = T.Insert<'F', AST, Scalars>
+export type FInsertResult = T.GenerateModel<'F', AST, Scalars, 'relation'>
 export type FProjection = T.Projection<'F', AST>
 export type FParams<P extends FProjection> = T.Params<'F', AST, Scalars, P>
 export type FUpdate = T.Update<'F', AST, Scalars>

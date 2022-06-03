@@ -166,6 +166,7 @@ export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type HotelInsert = T.Insert<'Hotel', AST, Scalars>
+export type HotelInsertResult = T.GenerateModel<'Hotel', AST, Scalars, 'relation'>
 export type HotelProjection = T.Projection<'Hotel', AST>
 export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, Scalars, P>
 export type HotelUpdate = T.Update<'Hotel', AST, Scalars>
@@ -259,6 +260,7 @@ export type InMemoryReservationDAOParams<MetadataType, OperationMetadataType> = 
 >
 
 export type ReservationInsert = T.Insert<'Reservation', AST, Scalars>
+export type ReservationInsertResult = T.GenerateModel<'Reservation', AST, Scalars, 'relation'>
 export type ReservationProjection = T.Projection<'Reservation', AST>
 export type ReservationParams<P extends ReservationProjection> = T.Params<'Reservation', AST, Scalars, P>
 export type ReservationUpdate = T.Update<'Reservation', AST, Scalars>
@@ -331,6 +333,7 @@ export type InMemoryRoleDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type RoleInsert = T.Insert<'Role', AST, Scalars>
+export type RoleInsertResult = T.GenerateModel<'Role', AST, Scalars, 'relation'>
 export type RoleProjection = T.Projection<'Role', AST>
 export type RoleParams<P extends RoleProjection> = T.Params<'Role', AST, Scalars, P>
 export type RoleUpdate = T.Update<'Role', AST, Scalars>
@@ -420,6 +423,7 @@ export type InMemoryRoomDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type RoomInsert = T.Insert<'Room', AST, Scalars>
+export type RoomInsertResult = T.GenerateModel<'Room', AST, Scalars, 'relation'>
 export type RoomProjection = T.Projection<'Room', AST>
 export type RoomParams<P extends RoomProjection> = T.Params<'Room', AST, Scalars, P>
 export type RoomUpdate = T.Update<'Room', AST, Scalars>
@@ -513,6 +517,7 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type UserInsert = T.Insert<'User', AST, Scalars>
+export type UserInsertResult = T.GenerateModel<'User', AST, Scalars, 'relation'>
 export type UserProjection = T.Projection<'User', AST>
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
 export type UserUpdate = T.Update<'User', AST, Scalars>
@@ -604,6 +609,7 @@ export type InMemoryUserRoleDAOParams<MetadataType, OperationMetadataType> = Omi
 >
 
 export type UserRoleInsert = T.Insert<'UserRole', AST, Scalars>
+export type UserRoleInsertResult = T.GenerateModel<'UserRole', AST, Scalars, 'relation'>
 export type UserRoleProjection = T.Projection<'UserRole', AST>
 export type UserRoleParams<P extends UserRoleProjection> = T.Params<'UserRole', AST, Scalars, P>
 export type UserRoleUpdate = T.Update<'UserRole', AST, Scalars>
