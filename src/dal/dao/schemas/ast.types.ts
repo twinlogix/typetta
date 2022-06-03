@@ -138,11 +138,11 @@ export type Filter<Entity extends string, AST extends AbstractSyntaxTree, Scalar
   [K in RecursiveScalarKeys<Entity, AST>]?: FieldFromPath<Entity, AST, K> extends { astName: infer ASTName; isList: infer IsList }
     ? Scalars[ASTName & string] extends { type: infer T; isQuantitative: infer IsQuantitative; isTextual: infer IsTextual }
       ? IsList extends true
-        ? (T | null | (T | null)[]) | { eq?: T | null | (T | null)[]; in?: ((T | null)[] | T)[] | null; ne?: T | null | (T | null)[]; nin?: ((T | null)[] | T)[] | null; exists?: boolean }
+        ? (T | null | (T | null)[]) | { eq?: T | null | (T | null)[]; in?: ((T | null)[] | T)[] | null; ne?: T | null | (T | null)[]; nin?: ((T | null)[] | T)[] | null; exists?: boolean | null }
         :
             | T
             | null
-            | { eq?: T | null; in?: T[] | null; ne?: T | null; nin?: T[] | null; exists?: boolean }
+            | { eq?: T | null; in?: T[] | null; ne?: T | null; nin?: T[] | null; exists?: boolean | null }
             | (IsQuantitative extends true ? { gt?: T; lt?: T; gte?: T; lte?: T } : never)
             | (IsTextual extends true ? { contains?: T; startsWith?: T; endsWith?: T; mode?: 'sensitive' | 'insensitive' } : never)
       : never

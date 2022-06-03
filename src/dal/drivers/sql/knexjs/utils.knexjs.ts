@@ -55,7 +55,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             const avs = () => (fv as any[]).map((fve) => adapter.modelToDB(fve) as any)
             // prettier-ignore
             switch (fk) {
-              case 'exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
+              case 'exists': fv == null ? null : fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
               case 'eq': 
                 if(vr.mode && vr.mode === 'insensitive') { builder.whereILike(columnName, av()) }
                 else { builder.where(columnName, av()) } break
@@ -207,7 +207,11 @@ export function buildSelect<TRecord, TResult, Scalars extends AbstractScalars>(
   return builder
 }
 
-export function buildSort<TRecord, TResult, Scalars extends AbstractScalars>(builder: Knex.QueryBuilder<TRecord, TResult>, sort: AbstractSort[], schema: Schema<Scalars>): Knex.QueryBuilder<TRecord, TResult> {
+export function buildSort<TRecord, TResult, Scalars extends AbstractScalars>(
+  builder: Knex.QueryBuilder<TRecord, TResult>,
+  sort: AbstractSort[],
+  schema: Schema<Scalars>,
+): Knex.QueryBuilder<TRecord, TResult> {
   sort.forEach((s) => {
     Object.entries(s).forEach(([sortKey, sortDirection]) => {
       builder.orderBy(modelNameToDbName(sortKey, schema), sortDirection)
@@ -290,7 +294,10 @@ function concatEmbeddedNames(prefix: string, name: string) {
   return prefix + '_' + name
 }
 
-export function embeddedScalars<Scalars extends AbstractScalars>(prefix: string, schema: Schema<Scalars>): [string, { scalar: keyof Scalars } & { array?: boolean; required?: boolean; alias?: string }][] {
+export function embeddedScalars<Scalars extends AbstractScalars>(
+  prefix: string,
+  schema: Schema<Scalars>,
+): [string, { scalar: keyof Scalars } & { array?: boolean; required?: boolean; alias?: string }][] {
   return Object.entries(schema).flatMap(([key, schemaField]) => {
     if (schemaField.type === 'embedded') {
       return embeddedScalars(concatEmbeddedNames(prefix, schemaField.alias || key), schemaField.schema())

@@ -1,3 +1,4 @@
+import { AbstractScalars } from '../../../..'
 import {
   getSchemaFieldTraversing,
   mapObject,
@@ -15,9 +16,12 @@ import { identityAdapter } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document, SortDirection } from 'mongodb'
-import { AbstractScalars } from '../../../..'
 
-export function adaptProjection<ProjectionType extends object, Scalars extends AbstractScalars>(projection: AnyProjection<ProjectionType>, schema: Schema<Scalars>, defaultTrue?: true): AnyProjection<ProjectionType> {
+export function adaptProjection<ProjectionType extends object, Scalars extends AbstractScalars>(
+  projection: AnyProjection<ProjectionType>,
+  schema: Schema<Scalars>,
+  defaultTrue?: true,
+): AnyProjection<ProjectionType> {
   if (projection === true || projection === undefined) {
     return defaultTrue
   }
@@ -56,11 +60,7 @@ export function modelNameToDbName<Scalars extends AbstractScalars>(name: string,
   }
 }
 
-export function adaptFilter<Scalars extends AbstractScalars, T extends DAOGenerics>(
-  filter: T['filter'],
-  schema: Schema<Scalars>,
-  adapters: MongoDBDataTypeAdapterMap<Scalars>,
-): Filter<Document> {
+export function adaptFilter<Scalars extends AbstractScalars, T extends DAOGenerics>(filter: T['filter'], schema: Schema<Scalars>, adapters: MongoDBDataTypeAdapterMap<Scalars>): Filter<Document> {
   if (typeof filter === 'function') {
     return filter()
   }
@@ -112,6 +112,9 @@ function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Scalars[k
           return []
         }
         if (fk === 'exists') {
+          if (fv == null) {
+            return []
+          }
           return [[`$${fk}`, fv]]
         }
         return [[fk, fv]]
@@ -173,7 +176,7 @@ export function adaptUpdate<Scalars extends AbstractScalars, UpdateType>(update:
   })
 }
 
-export function adaptSorts<SortType, Scalars  extends AbstractScalars>(sort: SortType[], schema: Schema<Scalars>): [string, SortDirection][] {
+export function adaptSorts<SortType, Scalars extends AbstractScalars>(sort: SortType[], schema: Schema<Scalars>): [string, SortDirection][] {
   return sort.flatMap((s) => {
     return Object.entries(s).map(([k, v]) => {
       if (k === '$textScore') {
