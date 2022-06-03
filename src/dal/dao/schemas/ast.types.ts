@@ -138,11 +138,11 @@ export type Filter<Entity extends string, AST extends AbstractSyntaxTree, Scalar
   [K in RecursiveScalarKeys<Entity, AST>]?: FieldFromPath<Entity, AST, K> extends { astName: infer ASTName; isList: infer IsList }
     ? Scalars[ASTName & string] extends { type: infer T; isQuantitative: infer IsQuantitative; isTextual: infer IsTextual }
       ? IsList extends true
-        ? (T | null | (T | null)[]) | { eq?: T | null | (T | null)[]; in?: ((T | null)[] | T)[]; ne?: T | null | (T | null)[]; nin?: ((T | null)[] | T)[]; exists?: boolean }
+        ? (T | null | (T | null)[]) | { eq?: T | null | (T | null)[]; in?: ((T | null)[] | T)[] | null; ne?: T | null | (T | null)[]; nin?: ((T | null)[] | T)[] | null; exists?: boolean }
         :
             | T
             | null
-            | { eq?: T | null; in?: T[]; ne?: T | null; nin?: T[]; exists?: boolean }
+            | { eq?: T | null; in?: T[] | null; ne?: T | null; nin?: T[] | null; exists?: boolean }
             | (IsQuantitative extends true ? { gt?: T; lt?: T; gte?: T; lte?: T } : never)
             | (IsTextual extends true ? { contains?: T; startsWith?: T; endsWith?: T; mode?: 'sensitive' | 'insensitive' } : never)
       : never
@@ -167,6 +167,24 @@ export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalar
   AST
 >
 
+type UpdateEmbeddedModel<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = DecorateModel<
+  OmitNever<{
+    [Field in keyof AST[Entity]['fields']]: AST[Entity]['fields'][Field] extends { type: infer Type; astName: infer ASTName; isExcluded: infer IsExluded }
+      ? IsExluded extends true
+        ? never
+        : ASTName extends string
+        ? Type extends 'relation'
+          ? never
+          : Type extends 'scalar'
+          ? Scalars[ASTName]['type']
+          : UpdateEmbeddedModel<ASTName, AST, Scalars>
+        : never
+      : never
+  }>,
+  Entity,
+  AST
+>
+
 export type Update<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = Partial<
   OmitNever<
     {
@@ -175,8 +193,11 @@ export type Update<Entity extends string, AST extends AbstractSyntaxTree, Scalar
         generationStrategy: infer GenerationStrategy
         isList: infer IsList
         isListElementRequired: infer IsListElementRequired
+        isExcluded: infer IsExluded
       }
-        ? ASTName extends keyof Scalars
+        ? IsExluded extends true
+          ? never
+          : ASTName extends keyof Scalars
           ? Scalars[ASTName]['type'] extends infer T
             ? GenerationStrategy extends 'db'
               ? never
@@ -194,7 +215,7 @@ export type Update<Entity extends string, AST extends AbstractSyntaxTree, Scalar
         isList: infer IsList
         isListElementRequired: infer IsListElementRequired
       }
-        ? GenerateModel<ASTName & string, AST, Scalars, 'relation'> extends infer T
+        ? UpdateEmbeddedModel<ASTName & string, AST, Scalars> extends infer T
           ? IsList extends true
             ? IsListElementRequired extends true
               ? T[] | null
