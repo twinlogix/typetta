@@ -4,8 +4,8 @@ import { EntityManager } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import { Db, Decimal128, MongoClient } from 'mongodb'
-import { v4 as uuidv4 } from 'uuid'
 import { MongoMemoryServer } from 'mongodb-memory-server'
+import { v4 as uuidv4 } from 'uuid'
 
 jest.setTimeout(20000)
 
@@ -52,7 +52,7 @@ beforeEach(async () => {
     middlewares: [
       computedField({
         fieldsProjection: { value: true },
-        requiredProjection: { value: true },
+        requiredProjection: { value: true } as const,
         compute: async (r) => {
           return { value: r.value * 10 }
         },
@@ -85,7 +85,7 @@ beforeEach(async () => {
     overrides: {
       b: {
         idGenerator: () => {
-          return 'entity_b' + uuidv4()
+          return { id: 'entity_b' + uuidv4() }
         },
       },
     },

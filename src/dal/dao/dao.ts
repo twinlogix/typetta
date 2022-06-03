@@ -203,7 +203,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             return {
               continue: true,
               operation: args.operation,
-              params: { ...args.params, record: { ...args.params.record, [context.idField]: this.idGenerator() } },
+              params: { ...args.params, record: { ...args.params.record, ...this.idGenerator() } },
             }
           }
         },
@@ -216,7 +216,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.schema = schema
   }
 
-  async findAll<P extends AnyProjection<T['projection']> = true>(params: FindParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]> {
+  async findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo = true>(params: FindParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]> {
     return this.logOperation('findAll', params, async () => {
       const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findAll')
@@ -230,14 +230,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     })
   }
 
-  async findOne<P extends AnyProjection<T['projection']>>(params: FindOneParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P> | null> {
+  async findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo = true>(params: FindOneParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P> | null> {
     const results = await this.findAll({ ...params, limit: 1 })
     return results.length > 0 ? results[0] : null
   }
 
-  async findPage<P extends AnyProjection<T['projection']>>(
-    params: FindParams<T, P> = {},
-  ): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P>[] }> {
+  async findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo = true>(params: FindParams<T, P> = {}): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P>[] }> {
     return this.logOperation('findPage', params, async () => {
       const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findPage')
@@ -657,10 +655,11 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private infoToProjection<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P>): FindParams<T, P> {
-    if (params.info && params.projection == null) {
+    if (params.projection && typeof params.projection === 'object' && (typeof params.projection.path === 'object' || typeof params.projection.schema === 'object')) {
+      const info = params.projection as GraphQLResolveInfo
       return {
         ...params,
-        projection: infoToProjection(params.info, undefined, params.info.fieldNodes[0], getNamedType(params.info.returnType), params.info.schema) as P,
+        projection: infoToProjection(info, undefined, info.fieldNodes[0], getNamedType(info.returnType), info.schema) as P,
       }
     }
     return params

@@ -52,7 +52,7 @@ export type Project<
   : P extends true | undefined
   ? GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
   : DecorateModel<
-      {
+      OmitNever<{
         [K in keyof P]: K extends keyof AST[Entity]['fields']
           ? AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
             ? ASTName extends string
@@ -65,10 +65,35 @@ export type Project<
               : never
             : never
           : never
-      },
+      }>,
       Entity,
       AST
     > & { __projection: P }
+
+export type Params<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P extends Projection<Entity, AST> | true> = P extends Record<string, never>
+  ? { __projection: 'empty' }
+  : [Projection<Entity, AST>] extends [P]
+  ? PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
+  : P extends true
+  ? GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
+  : DecorateModel<
+      OmitNever<{
+        [K in keyof P]: K extends keyof AST[Entity]['fields']
+          ? AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
+            ? ASTName extends string
+              ? P[K] extends true
+                ? Type extends 'scalar'
+                  ? Scalars[ASTName]['type']
+                  : GenerateModel<ASTName, AST, Scalars, 'relation'>
+                : //@ts-ignore
+                  Project<ASTName, AST, Scalars, P[K]>
+              : never
+            : never
+          : never
+      }>,
+      Entity,
+      AST
+    > & { __projection?: P }
 
 export type GenerateModel<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, ExcludedType extends string = never> = DecorateModel<
   OmitNever<{
@@ -122,9 +147,6 @@ export type Filter<Entity extends string, AST extends AbstractSyntaxTree, Scalar
       : never
     : never
 }
-
-type F = Filter<'Hotel', AST, Scalars>
-const f:F = {"audit.state": undefined}
 
 export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = DecorateModelInsert<
   OmitNever<{
@@ -246,6 +268,7 @@ export type OptionalInsertFields<Entity extends string, AST extends AbstractSynt
 }[keyof AST[Entity]['fields']]
 
 //TODO: remove under
+/*
 const user: GenerateModel<'User', AST, Scalars, 'relation'> = {
   id: '',
   live: true,
@@ -297,8 +320,6 @@ const sort: SortElement<'User', AST> = {
   'credentials.password': 'asc',
   'embeddedPost.metadata.region': 'asc',
 }
-
-console.log(user, proj, projUser1, projUser2, projUser3, projUser4, projUser5, projUser6, filter, sort, insert, update)
 
 export type ScalarsMap = {
   ID: string
@@ -836,3 +857,4 @@ export type AST = {
     driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
   }
 }
+*/

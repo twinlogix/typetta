@@ -11,7 +11,7 @@ export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends Abstr
   },
   keyof DefaultModelScalars
 > & {
-  [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key], DefaultMongoDBScalars[key], DefaultKnexJsScalars[key], D>
+  [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key]['type'], DefaultMongoDBScalars[key]['type'], DefaultKnexJsScalars[key]['type'], D>
 }
 
 export type DriverDataTypeAdapterMap<ModelScalars extends AbstractScalars> = {

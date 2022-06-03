@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Coordinates, defaultValueMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { LocalizedString } from '../types'
-import { EntityManager } from './dao.mock'
-import { Scalars } from './models.mock'
+import { EntityManager, Scalars } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -547,8 +546,8 @@ test('find with embedded that have inner refs', async () => {
   expect(user?.embeddedDog?.name).toBe('dog')
   expect((user?.embeddedDog as Record<string, unknown>)?.owner).toBe(undefined)
 
-  const user2 = await dao.user.findOne({ projection: { live: true, embeddedDog: true } })
-  console.log(user2?.embeddedDog?.owner?.embeddedDog?.owner) //TODO: this should not be possible
+  //const user2 = await dao.user.findOne({ projection: { live: true, embeddedDog: true } })
+  //console.log(user2?.embeddedDog?.owner?.embeddedDog?.owner) //this should not be possible
 })
 
 test('simple insert', async () => {

@@ -52,13 +52,12 @@ export type Relations<Entity extends string, AST extends AbstractSyntaxTree, Sca
 >
 
 export type FilterParams<T extends DAOGenerics> = {
-  filter?: T['filter'] & LogicalOperators<T['filter']> 
+  filter?: T['filter'] & LogicalOperators<T['filter']>
   relations?: T['relations']
 } & OperationParams<T>
 
 export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<FilterParams<T>, 'options'> & {
   projection?: P
-  info?: GraphQLResolveInfo
   options?: T['driverFindOptions']
   skip?: number
   sorts?: T['sort']
@@ -148,9 +147,9 @@ export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 export type DefaultGenerationStrategy = 'middleware' | 'generator'
 
 export interface DAO<T extends DAOGenerics> {
-  findAll<P extends AnyProjection<T['projection']>>(params?: FindParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]>
-  findOne<P extends AnyProjection<T['projection']>>(params?: FindOneParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P> | null>
-  findPage<P extends AnyProjection<T['projection']>>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P>[] }>
+  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]>
+  findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P> | null>
+  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
   aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>

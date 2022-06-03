@@ -250,9 +250,13 @@ export class TsTypettaGenerator extends TypettaGenerator {
         return `${node.name}: {
           fields: { ${node.fields.map((f) => generateASTNodes(f)).join(',\n')} }, 
           driverSpecification: { 
-            rawFilter: ${node.entity?.type === 'mongo' ? '() => M.Filter<M.Document>' : 'never'}, 
-            rawUpdate: ${node.entity?.type === 'mongo' ? '() => M.UpdateFilter<M.Document>' : 'never'}, 
-            rawSorts: ${node.entity?.type === 'mongo' ? '() => M.Sort' : 'never'} }
+            rawFilter: ${
+              node.entity?.type === 'mongo' ? '() => M.Filter<M.Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+            }, 
+            rawUpdate: ${
+              node.entity?.type === 'mongo' ? '() => M.UpdateFilter<M.Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
+            }, 
+            rawSorts: ${node.entity?.type === 'mongo' ? '() => M.Sort' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'} }
           }`
       })
       .join(',\n')}
