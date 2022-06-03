@@ -24,14 +24,14 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     this.stateManager = new InMemoryStateManager(this.mockIdSpecification, params.name)
   }
 
-  protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
+  protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['insertResult']>[]> {
     const unorderedResults = [...this.entities(params.filter)].map((v) => v.record)
     const results = (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? unorderedResults.length))
     return results.map((r) => _.cloneDeep(r))
     // projection are ignored since there is no performance advance
   }
 
-  protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
+  protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['insertResult']>[] }> {
     return {
       records: await this._findAll(params),
       totalCount: await this._count(params),
@@ -131,12 +131,12 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     })
 
     const filteredResult = args?.having ? unorderedResults.filter((r) => filterEntity(r, args.having)) : unorderedResults
-    const sorted = args?.sorts ? sort<T['model']>(filteredResult, args.sorts) : filteredResult
+    const sorted = args?.sorts ? sort<T['insertResult']>(filteredResult, args.sorts) : filteredResult
     const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? sorted.length))
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<T['model']> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['insertResult']> {
     const record = deepMerge(params.record, this.generateRecordWithId())
     const t = transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
     const id = t[this.schema[this.idField].alias ?? this.idField]
@@ -224,7 +224,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
     return null
   }
-  private *entities(filter: T['filter'] = undefined, transform = true): Iterable<{ record: T['model']; index: number }> {
+  private *entities(filter: T['filter'] = undefined, transform = true): Iterable<{ record: T['insertResult']; index: number }> {
     const indexes = this.getIndexes(filter)
     if (indexes) {
       for (const index of indexes) {
@@ -248,7 +248,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
   }
 
-  private generateRecordWithId(): Partial<Record<T['idFields'], T['model'][T['idFields']]>> {
+  private generateRecordWithId(): Partial<Record<T['idFields'], T['insertResult'][T['idFields']]>> {
     if (this.idGeneration === 'db') {
       if (!this.mockIdSpecification?.generate) {
         throw new Error('UNREACHABLE')

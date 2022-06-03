@@ -590,7 +590,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       node.entity?.type === 'sql' ? 'T.KnexJsDAOGenerics' : node.entity?.type === 'mongo' ? 'T.MongoDBDAOGenerics' : node.entity?.type === 'memory' ? 'T.InMemoryDAOGenerics' : 'T.DAOGenerics'
     const dbDAOParams =
       node.entity?.type === 'sql' ? 'T.KnexJsDAOParams' : node.entity?.type === 'mongo' ? 'T.MongoDBDAOParams' : node.entity?.type === 'memory' ? 'T.InMemoryDAOParams' : 'T.DAOParams'
-    const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<'${node.name}', AST, Scalars, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>`
+    const daoGenerics = `type ${node.name}DAOGenerics<MetadataType, OperationMetadataType> = ${dbDAOGenerics}<'${node.name}', AST, Scalars, ${node.name}CachedTypes, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>`
     const daoParams = `export type ${node.name}DAOParams<MetadataType, OperationMetadataType> = Omit<${dbDAOParams}<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>, ${
       node.fields.find((f) => f.isID)?.idGenerationStrategy !== 'generator' ? "'idGenerator' | " : ''
     }'idField' | 'schema' | 'idScalar' | 'idGeneration'>`
@@ -604,13 +604,16 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
 
   private generateUtillsType(node: TsTypettaGeneratorNode): string {
     return `
+    export type ${node.name}IdFields = T.IdFields<'${node.name}', AST>
     export type ${node.name}Insert = T.Insert<'${node.name}', AST, Scalars>
     export type ${node.name}InsertResult = T.GenerateModel<'${node.name}', AST, Scalars, 'relation'>
     export type ${node.name}Projection = T.Projection<'${node.name}', AST>
-    export type ${node.name}Params<P extends ${node.name}Projection> = T.Params<'${node.name}', AST, Scalars, P>
     export type ${node.name}Update = T.Update<'${node.name}', AST, Scalars>
     export type ${node.name}Filter = T.Filter<'${node.name}', AST, Scalars>
-    export type ${node.name}SortElement = T.SortElement<'${node.name}', AST>`
+    export type ${node.name}SortElement = T.SortElement<'${node.name}', AST>
+    export type ${node.name}RelationsFindParams = T.RelationsFindParams<'${node.name}', AST, Scalars>
+    export type ${node.name}Params<P extends ${node.name}Projection> = T.Params<'${node.name}', AST, Scalars, P>
+    export type ${node.name}CachedTypes = T.CachedTypes<${node.name}IdFields, ${node.name}Insert, ${node.name}InsertResult, ${node.name}Projection, ${node.name}Update, ${node.name}Filter, ${node.name}SortElement, ${node.name}RelationsFindParams>`
   }
 
   // ---------------------------------------------------------------------------------------------------------

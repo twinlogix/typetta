@@ -141,6 +141,7 @@ export type Filter<Entity extends string, AST extends AbstractSyntaxTree, Scalar
         ? (T | null | (T | null)[]) | { eq?: T | null | (T | null)[]; in?: ((T | null)[] | T)[]; ne?: T | null | (T | null)[]; nin?: ((T | null)[] | T)[]; exists?: boolean }
         :
             | T
+            | null
             | { eq?: T | null; in?: T[]; ne?: T | null; nin?: T[]; exists?: boolean }
             | (IsQuantitative extends true ? { gt?: T; lt?: T; gte?: T; lte?: T } : never)
             | (IsTextual extends true ? { contains?: T; startsWith?: T; endsWith?: T; mode?: 'sensitive' | 'insensitive' } : never)

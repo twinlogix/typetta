@@ -41,7 +41,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected readonly relations: DAORelation[]
   protected readonly middlewares: DAOMiddleware<T>[]
   protected readonly pageSize: number
-  protected readonly dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>
+  protected readonly dataLoaders: Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['insertResult']>[]>>
   protected readonly dataLoaderRefs: Map<string, string[]>
   protected readonly metadata?: T['metadata']
   protected readonly driverContext: T['driverContext']
@@ -51,7 +51,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected readonly datasource: string | null
 
   protected constructor({ datasource, idGenerator, entityManager, name, logger, pageSize = 50, middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
-    this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
+    this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['insertResult']>[]>>()
     this.dataLoaderRefs = new Map<string, string[]>()
     const { idField, idScalar, idGeneration } = idInfoFromSchema(schema)
     this.idField = idField
@@ -303,7 +303,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     const hasKeyF = (record: Project<T['entity'], T['ast'], T['scalars'], P>, key: T['filter'][K]) => getTraversing(record, filterKey as string).some((v) => equals(v, key))
     const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { in: values } }))
     if (!this.dataLoaders.has(hash)) {
-      const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
+      const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['insertResult']>[]>(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
         async (keys) => {
@@ -381,12 +381,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   private async resolveRelations(
-    records: PartialDeep<T['model']>[],
+    records: PartialDeep<T['insertResult']>[],
     projections?: AnyProjection<T['projection']>,
     relations?: T['relations'],
     operationId?: string,
     relationParents?: FindParams<T>['relationParents'],
-  ): Promise<PartialDeep<T['model']>[]> {
+  ): Promise<PartialDeep<T['insertResult']>[]> {
     if (projections === undefined || projections === true) {
       return records
     }
@@ -443,7 +443,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return records
   }
 
-  private setResult(record: PartialDeep<T['model']>, relation: DAORelation, results: unknown[]) {
+  private setResult(record: PartialDeep<T['insertResult']>, relation: DAORelation, results: unknown[]) {
     if (relation.type === '1-n') {
       setTraversing(record, relation.field, results)
     } else {
@@ -470,7 +470,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   private setInnerRefResults(
     results: _.Dictionary<unknown>,
     reference: { refFrom: string; field: string; ref?: Record<string, unknown>; schema: Schema<T['scalars']>; required: boolean },
-    record: PartialDeep<T['model']>,
+    record: PartialDeep<T['insertResult']>,
   ) {
     const [subRefFrom, ...tailRefFrom] = reference.refFrom.split('.')
     const [subField, ...tailField] = reference.field.split('.')
@@ -520,7 +520,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return await this.loadAll(params, filterKey, values)
   }
 
-  async insertOne(params: InsertParams<T>): Promise<T['model']> {
+  async insertOne(params: InsertParams<T>): Promise<T['insertResult']> {
     return this.logOperation('insertOne', params, async () => {
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params }, 'insertOne')
       const insertedRecord = beforeResults.continue ? await this._insertOne(beforeResults.params) : beforeResults.insertedRecord
@@ -738,12 +738,12 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   // -----------------------------------------------------------------------
   // ------------------------------ ABSTRACTS ------------------------------
   // -----------------------------------------------------------------------
-  protected abstract _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]>
-  protected abstract _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }>
+  protected abstract _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['insertResult']>[]>
+  protected abstract _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['insertResult']>[] }>
   protected abstract _exists(params: FilterParams<T>): Promise<boolean>
   protected abstract _count(params: FilterParams<T>): Promise<number>
   protected abstract _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
-  protected abstract _insertOne(params: InsertParams<T>): Promise<T['model']>
+  protected abstract _insertOne(params: InsertParams<T>): Promise<T['insertResult']>
   protected abstract _updateOne(params: UpdateParams<T>): Promise<void>
   protected abstract _updateAll(params: UpdateParams<T>): Promise<void>
   protected abstract _replaceOne(params: ReplaceParams<T>): Promise<void>
@@ -781,8 +781,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
   }
   get resolvers(): {
-    read: (params: Record<string, unknown>, info: GraphQLResolveInfo) => Promise<PartialDeep<T['model']>[]>
-    create: (params: InsertParams<T>, info: GraphQLResolveInfo) => Promise<PartialDeep<T['model']>>
+    read: (params: Record<string, unknown>, info: GraphQLResolveInfo) => Promise<PartialDeep<T['insertResult']>[]>
+    create: (params: InsertParams<T>, info: GraphQLResolveInfo) => Promise<PartialDeep<T['insertResult']>>
     update: (params: Record<string, Record<string, unknown>>) => Promise<boolean>
     delete: (params: Record<string, Record<string, unknown>>) => Promise<boolean>
   } {

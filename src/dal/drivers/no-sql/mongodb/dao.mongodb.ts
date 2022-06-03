@@ -20,11 +20,11 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     this.collection = collection
   }
 
-  private dbsToModels(objects: WithId<Document>[]): PartialDeep<T['model']>[] {
+  private dbsToModels(objects: WithId<Document>[]): PartialDeep<T['insertResult']>[] {
     return objects.map((o) => this.dbToModel(o))
   }
 
-  private dbToModel(object: WithId<Document>): PartialDeep<T['model']> {
+  private dbToModel(object: WithId<Document>): PartialDeep<T['insertResult']> {
     return transformObject(this.entityManager.adapters.mongo, 'dbToModel', object, this.schema)
   }
 
@@ -55,7 +55,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return { $set: set }
   }
 
-  protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
+  protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['insertResult']>[]> {
     return this.runQuery('findAll', async () => {
       const filter = this.buildFilter(params.filter)
       const projection = isEmptyProjection(params.projection) ? { [this.schema[this.idField].alias ?? this.idField]: true } : this.buildProjection(params.projection)
@@ -75,7 +75,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     })
   }
 
-  protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
+  protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['insertResult']>[] }> {
     const totalCount = await this._count(params)
     const records = await this._findAll(params)
     return { totalCount, records }
@@ -170,7 +170,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     })
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<T['model']> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['insertResult']> {
     return this.runQuery('insertOne', async () => {
       const record = this.modelToDb(filterUndefiendFields(params.record))
       const options = params.options ?? {}

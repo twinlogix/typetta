@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AbstractScalars, AbstractSyntaxTree } from '../../../..'
+import { AbstractScalars, AbstractSyntaxTree, CachedTypes } from '../../../..'
 import { DAOGenerics, DAOParams } from '../../../dao/dao.types'
 import { AbstractEntityManager } from '../../../entity-manager'
 import { DefaultModelScalars } from '../../drivers.types'
@@ -9,6 +9,7 @@ export type KnexJsDAOGenerics<
   Entity extends string = any,
   AST extends AbstractSyntaxTree = any,
   Scalars extends AbstractScalars<keyof DefaultModelScalars> = any,
+  Types extends CachedTypes = any,
   MetadataType = any,
   OperationMetadataType = any,
   EntityManager extends AbstractEntityManager<string, string, Scalars, MetadataType> = AbstractEntityManager<string, string, Scalars, MetadataType>,
@@ -16,6 +17,7 @@ export type KnexJsDAOGenerics<
   Entity,
   AST,
   Scalars,
+  Types,
   MetadataType,
   OperationMetadataType,
   {

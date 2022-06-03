@@ -40,11 +40,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return this.knex(this.tableName)
   }
 
-  private dbsToModels(objects: any[]): PartialDeep<T['model']>[] {
+  private dbsToModels(objects: any[]): PartialDeep<T['insertResult']>[] {
     return objects.map((o) => this.dbToModel(o))
   }
 
-  private dbToModel(object: any): PartialDeep<T['model']> {
+  private dbToModel(object: any): PartialDeep<T['insertResult']> {
     const unflatted = unflatEmbdeddedFields(this.schema, object)
     //Remove null fields
     for (const key of Object.keys(this.schema)) {
@@ -57,7 +57,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return transformObject(this.entityManager.adapters.knex, 'dbToModel', unflatted, this.schema)
   }
 
-  private modelToDb(object: PartialDeep<T['model']>): any {
+  private modelToDb(object: PartialDeep<T['insertResult']>): any {
     const transformed = transformObject(this.entityManager.adapters.knex, 'modelToDB', object, this.schema)
     return flatEmbdeddedFields(this.schema, transformed)
   }
@@ -96,7 +96,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return adaptUpdate({ update: changes, schema: this.schema, adapters: this.entityManager.adapters.knex })
   }
 
-  private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
+  private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['insertResult']>[]> {
     return this.runQuery(
       'findAll',
       () => {
@@ -119,7 +119,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return this.getRecords(params)
   }
 
-  protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['model']>[] }> {
+  protected async _findPage<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<{ totalCount: number; records: PartialDeep<T['insertResult']>[] }> {
     const totalCount = await this._count({ ...params })
     if (totalCount === 0) {
       return { totalCount, records: [] }
@@ -192,11 +192,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<T['model']> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['insertResult']> {
     return this.runQuery(
       'insertOne',
       () => {
-        const r = filterNullFields<PartialDeep<T['model']>>(filterUndefiendFields<PartialDeep<T['model']>>(params.record))
+        const r = filterNullFields<PartialDeep<T['insertResult']>>(filterUndefiendFields<PartialDeep<T['insertResult']>>(params.record))
         const record = this.modelToDb(r)
         const query = this.qb().insert(record, '*')
         return this.buildTransaction(params.options, query)

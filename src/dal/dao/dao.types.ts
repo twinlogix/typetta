@@ -6,17 +6,12 @@ import {
   EqualityOperators,
   Expand,
   Filter,
-  GenerateModel,
-  IdFields,
-  Insert,
   LogicalOperators,
   Project,
-  Projection,
   QuantityOperators,
   SortDirection,
   SortElement,
   TypeTraversal,
-  Update,
 } from '../..'
 import { OmitNever } from '../../utils/utils.types'
 import { AbstractEntityManager } from '../entity-manager'
@@ -33,7 +28,7 @@ export type OperationParams<T extends DAOGenerics> = {
   options?: T['driverFilterOptions']
 }
 
-export type Relations<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = Partial<
+export type RelationsFindParams<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = Partial<
   OmitNever<{
     [K in keyof AST[Entity]['fields']]: AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
       ? ASTName extends string
@@ -43,7 +38,7 @@ export type Relations<Entity extends string, AST extends AbstractSyntaxTree, Sca
               sorts?: SortElement<ASTName, AST>[] | AST[Entity]['driverSpecification']['rawSorts']
               skip?: number
               limit?: number
-              relations?: Relations<ASTName, AST, Scalars>
+              relations?: RelationsFindParams<ASTName, AST, Scalars>
             }
           : never
         : never
@@ -52,7 +47,7 @@ export type Relations<Entity extends string, AST extends AbstractSyntaxTree, Sca
 >
 
 export type FilterParams<T extends DAOGenerics> = {
-  filter?: T['filter'] & LogicalOperators<T['filter']>
+  filter?: T['filter']
   relations?: T['relations']
 } & OperationParams<T>
 
@@ -162,10 +157,21 @@ export interface DAO<T extends DAOGenerics> {
 }
 
 type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N
+export type CachedTypes<IdFields = any, Insert = any, InsertResult = any, Projection = any, Update = any, Filter = any, SortElement = any, RelationsFindParams = any> = {
+  idFields: IdFields
+  insert: Insert
+  insertResult: InsertResult
+  projection: Projection
+  update: Update
+  filter: Filter
+  sortElement: SortElement
+  relationsFindParams: RelationsFindParams
+}
 export type DAOGenerics<
   Entity extends string = any,
   AST extends AbstractSyntaxTree = any,
   Scalars extends AbstractScalars<keyof DefaultModelScalars> = any,
+  Types extends CachedTypes = any,
   MetadataType = any,
   OperationMetadataType = any,
   DriverContextType = any,
@@ -179,20 +185,20 @@ export type DAOGenerics<
 > = {
   ast: AST
   entity: Entity
-  idFields: IfAny<AST, any, IdFields<Entity, AST>>
-  model: IfAny<AST, any, GenerateModel<Entity, AST, Scalars, 'relation'>>
-  pureFilter: IfAny<AST, any, Filter<Entity, AST, Scalars>>
-  filter: IfAny<AST, any, Filter<Entity, AST, Scalars> | AST[Entity]['driverSpecification']['rawFilter']>
+  idFields: IfAny<AST, any, Types['idFields']>
+  insertResult: IfAny<AST, any, Types['insertResult']>
+  pureFilter: IfAny<AST, any, Types['filter']>
+  filter: IfAny<AST, any, (Types['filter'] | AST[Entity]['driverSpecification']['rawFilter']) & LogicalOperators<Types['filter'] | AST[Entity]['driverSpecification']['rawFilter']>>
   rawFilter: IfAny<AST, any, AST[Entity]['driverSpecification']['rawFilter']>
-  projection: IfAny<AST, any, Projection<Entity, AST>>
-  pureSort: IfAny<AST, any, SortElement<Entity, AST>>
+  projection: IfAny<AST, any, Types['projection']>
+  pureSort: IfAny<AST, any, Types['sortElement']>
   rawSort: IfAny<AST, any, AST[Entity]['driverSpecification']['rawSorts']>
-  sort: IfAny<AST, any, SortElement<Entity, AST>[] | AST[Entity]['driverSpecification']['rawSorts']>
-  insert: IfAny<AST, any, Insert<Entity, AST, Scalars>>
-  pureUpdate: IfAny<AST, any, Update<Entity, AST, Scalars>>
+  sort: IfAny<AST, any, Types['sortElement'][] | AST[Entity]['driverSpecification']['rawSorts']>
+  insert: IfAny<AST, any, Types['insert']>
+  pureUpdate: IfAny<AST, any, Types['update']>
   rawUpdate: IfAny<AST, any, AST[Entity]['driverSpecification']['rawUpdate']>
-  update: IfAny<AST, any, Update<Entity, AST, Scalars> | AST[Entity]['driverSpecification']['rawUpdate']>
-  relations: IfAny<AST, any, Relations<Entity, AST, Scalars>>
+  update: IfAny<AST, any, Types['update'] | AST[Entity]['driverSpecification']['rawUpdate']>
+  relations: IfAny<AST, any, Types['relationsFindParams']>
   //exludedFields: ExcludedFields
   //relationFields: RelationsFields
   //embeddedFields: EmbeddedFields

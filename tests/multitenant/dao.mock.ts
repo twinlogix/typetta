@@ -152,7 +152,15 @@ export function hotelSchema(): T.Schema<Scalars> {
   }
 }
 
-type HotelDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<'Hotel', AST, Scalars, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>
+type HotelDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'Hotel',
+  AST,
+  Scalars,
+  HotelCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
 export type HotelDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.MongoDBDAOParams<HotelDAOGenerics<MetadataType, OperationMetadataType>>,
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
@@ -162,13 +170,16 @@ export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type HotelIdFields = T.IdFields<'Hotel', AST>
 export type HotelInsert = T.Insert<'Hotel', AST, Scalars>
 export type HotelInsertResult = T.GenerateModel<'Hotel', AST, Scalars, 'relation'>
 export type HotelProjection = T.Projection<'Hotel', AST>
-export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, Scalars, P>
 export type HotelUpdate = T.Update<'Hotel', AST, Scalars>
 export type HotelFilter = T.Filter<'Hotel', AST, Scalars>
 export type HotelSortElement = T.SortElement<'Hotel', AST>
+export type HotelRelationsFindParams = T.RelationsFindParams<'Hotel', AST, Scalars>
+export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, Scalars, P>
+export type HotelCachedTypes = T.CachedTypes<HotelIdFields, HotelInsert, HotelInsertResult, HotelProjection, HotelUpdate, HotelFilter, HotelSortElement, HotelRelationsFindParams>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Hotel', AST>>(p: P) {
@@ -244,6 +255,7 @@ type ReservationDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOG
   'Reservation',
   AST,
   Scalars,
+  ReservationCachedTypes,
   MetadataType,
   OperationMetadataType,
   EntityManager<MetadataType, OperationMetadataType>
@@ -257,13 +269,25 @@ export type InMemoryReservationDAOParams<MetadataType, OperationMetadataType> = 
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type ReservationIdFields = T.IdFields<'Reservation', AST>
 export type ReservationInsert = T.Insert<'Reservation', AST, Scalars>
 export type ReservationInsertResult = T.GenerateModel<'Reservation', AST, Scalars, 'relation'>
 export type ReservationProjection = T.Projection<'Reservation', AST>
-export type ReservationParams<P extends ReservationProjection> = T.Params<'Reservation', AST, Scalars, P>
 export type ReservationUpdate = T.Update<'Reservation', AST, Scalars>
 export type ReservationFilter = T.Filter<'Reservation', AST, Scalars>
 export type ReservationSortElement = T.SortElement<'Reservation', AST>
+export type ReservationRelationsFindParams = T.RelationsFindParams<'Reservation', AST, Scalars>
+export type ReservationParams<P extends ReservationProjection> = T.Params<'Reservation', AST, Scalars, P>
+export type ReservationCachedTypes = T.CachedTypes<
+  ReservationIdFields,
+  ReservationInsert,
+  ReservationInsertResult,
+  ReservationProjection,
+  ReservationUpdate,
+  ReservationFilter,
+  ReservationSortElement,
+  ReservationRelationsFindParams
+>
 
 export class ReservationDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<ReservationDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Reservation', AST>>(p: P) {
@@ -342,7 +366,15 @@ export function roomSchema(): T.Schema<Scalars> {
   }
 }
 
-type RoomDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<'Room', AST, Scalars, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>
+type RoomDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'Room',
+  AST,
+  Scalars,
+  RoomCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
 export type RoomDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.MongoDBDAOParams<RoomDAOGenerics<MetadataType, OperationMetadataType>>,
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
@@ -352,13 +384,16 @@ export type InMemoryRoomDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type RoomIdFields = T.IdFields<'Room', AST>
 export type RoomInsert = T.Insert<'Room', AST, Scalars>
 export type RoomInsertResult = T.GenerateModel<'Room', AST, Scalars, 'relation'>
 export type RoomProjection = T.Projection<'Room', AST>
-export type RoomParams<P extends RoomProjection> = T.Params<'Room', AST, Scalars, P>
 export type RoomUpdate = T.Update<'Room', AST, Scalars>
 export type RoomFilter = T.Filter<'Room', AST, Scalars>
 export type RoomSortElement = T.SortElement<'Room', AST>
+export type RoomRelationsFindParams = T.RelationsFindParams<'Room', AST, Scalars>
+export type RoomParams<P extends RoomProjection> = T.Params<'Room', AST, Scalars, P>
+export type RoomCachedTypes = T.CachedTypes<RoomIdFields, RoomInsert, RoomInsertResult, RoomProjection, RoomUpdate, RoomFilter, RoomSortElement, RoomRelationsFindParams>
 
 export class RoomDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Room', AST>>(p: P) {
@@ -406,7 +441,15 @@ export function tenantSchema(): T.Schema<Scalars> {
   }
 }
 
-type TenantDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<'Tenant', AST, Scalars, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>
+type TenantDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'Tenant',
+  AST,
+  Scalars,
+  TenantCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
 export type TenantDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.MongoDBDAOParams<TenantDAOGenerics<MetadataType, OperationMetadataType>>,
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
@@ -416,13 +459,16 @@ export type InMemoryTenantDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type TenantIdFields = T.IdFields<'Tenant', AST>
 export type TenantInsert = T.Insert<'Tenant', AST, Scalars>
 export type TenantInsertResult = T.GenerateModel<'Tenant', AST, Scalars, 'relation'>
 export type TenantProjection = T.Projection<'Tenant', AST>
-export type TenantParams<P extends TenantProjection> = T.Params<'Tenant', AST, Scalars, P>
 export type TenantUpdate = T.Update<'Tenant', AST, Scalars>
 export type TenantFilter = T.Filter<'Tenant', AST, Scalars>
 export type TenantSortElement = T.SortElement<'Tenant', AST>
+export type TenantRelationsFindParams = T.RelationsFindParams<'Tenant', AST, Scalars>
+export type TenantParams<P extends TenantProjection> = T.Params<'Tenant', AST, Scalars, P>
+export type TenantCachedTypes = T.CachedTypes<TenantIdFields, TenantInsert, TenantInsertResult, TenantProjection, TenantUpdate, TenantFilter, TenantSortElement, TenantRelationsFindParams>
 
 export class TenantDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<TenantDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Tenant', AST>>(p: P) {
@@ -504,7 +550,15 @@ export function userSchema(): T.Schema<Scalars> {
   }
 }
 
-type UserDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<'User', AST, Scalars, MetadataType, OperationMetadataType, EntityManager<MetadataType, OperationMetadataType>>
+type UserDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'User',
+  AST,
+  Scalars,
+  UserCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<
   T.MongoDBDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>,
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
@@ -514,13 +568,16 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type UserIdFields = T.IdFields<'User', AST>
 export type UserInsert = T.Insert<'User', AST, Scalars>
 export type UserInsertResult = T.GenerateModel<'User', AST, Scalars, 'relation'>
 export type UserProjection = T.Projection<'User', AST>
-export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
 export type UserUpdate = T.Update<'User', AST, Scalars>
 export type UserFilter = T.Filter<'User', AST, Scalars>
 export type UserSortElement = T.SortElement<'User', AST>
+export type UserRelationsFindParams = T.RelationsFindParams<'User', AST, Scalars>
+export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
+export type UserCachedTypes = T.CachedTypes<UserIdFields, UserInsert, UserInsertResult, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'User', AST>>(p: P) {
