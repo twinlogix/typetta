@@ -1,7 +1,7 @@
 import * as T from '../../src'
 import * as types from './models.mock'
 
-export type Scalars = {
+export type ScalarsSpecification = {
   ID: { type: types.Scalars['ID']; isTextual: false; isQuantitative: false }
   String: { type: types.Scalars['String']; isTextual: true; isQuantitative: false }
   Boolean: { type: types.Scalars['Boolean']; isTextual: false; isQuantitative: false }
@@ -87,7 +87,7 @@ export type AST = {
   }
 }
 
-export function likeSchema(): T.Schema<Scalars> {
+export function likeSchema(): T.Schema<ScalarsSpecification> {
   return {
     creationDate: {
       type: 'scalar',
@@ -118,7 +118,7 @@ export function likeSchema(): T.Schema<Scalars> {
 type LikeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Like',
   AST,
-  Scalars,
+  ScalarsSpecification,
   LikeCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -131,14 +131,14 @@ export type InMemoryLikeDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type LikeIdFields = T.IdFields<'Like', AST>
-export type LikeInsert = T.Insert<'Like', AST, Scalars>
-export type LikeInsertResult = T.GenerateModel<'Like', AST, Scalars, 'relation'>
+export type LikeInsert = T.Insert<'Like', AST, ScalarsSpecification>
+export type LikeInsertResult = T.GenerateModel<'Like', AST, ScalarsSpecification, 'relation'>
 export type LikeProjection = T.Projection<'Like', AST>
-export type LikeUpdate = T.Update<'Like', AST, Scalars>
-export type LikeFilter = T.Filter<'Like', AST, Scalars>
+export type LikeUpdate = T.Update<'Like', AST, ScalarsSpecification>
+export type LikeFilter = T.Filter<'Like', AST, ScalarsSpecification>
 export type LikeSortElement = T.SortElement<'Like', AST>
-export type LikeRelationsFindParams = T.RelationsFindParams<'Like', AST, Scalars>
-export type LikeParams<P extends LikeProjection> = T.Params<'Like', AST, Scalars, P>
+export type LikeRelationsFindParams = T.RelationsFindParams<'Like', AST, ScalarsSpecification>
+export type LikeParams<P extends LikeProjection> = T.Params<'Like', AST, ScalarsSpecification, P>
 export type LikeCachedTypes = T.CachedTypes<LikeIdFields, LikeInsert, LikeInsertResult, LikeProjection, LikeUpdate, LikeFilter, LikeSortElement, LikeRelationsFindParams>
 
 export class LikeDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<LikeDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -170,7 +170,7 @@ export class InMemoryLikeDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-export function metadataSchema(): T.Schema<Scalars> {
+export function metadataSchema(): T.Schema<ScalarsSpecification> {
   return {
     tags: {
       type: 'scalar',
@@ -184,7 +184,7 @@ export function metadataSchema(): T.Schema<Scalars> {
     },
   }
 }
-export function postSchema(): T.Schema<Scalars> {
+export function postSchema(): T.Schema<ScalarsSpecification> {
   return {
     content: {
       type: 'scalar',
@@ -237,7 +237,7 @@ export function postSchema(): T.Schema<Scalars> {
 type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Post',
   AST,
-  Scalars,
+  ScalarsSpecification,
   PostCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -250,14 +250,14 @@ export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type PostIdFields = T.IdFields<'Post', AST>
-export type PostInsert = T.Insert<'Post', AST, Scalars>
-export type PostInsertResult = T.GenerateModel<'Post', AST, Scalars, 'relation'>
+export type PostInsert = T.Insert<'Post', AST, ScalarsSpecification>
+export type PostInsertResult = T.GenerateModel<'Post', AST, ScalarsSpecification, 'relation'>
 export type PostProjection = T.Projection<'Post', AST>
-export type PostUpdate = T.Update<'Post', AST, Scalars>
-export type PostFilter = T.Filter<'Post', AST, Scalars>
+export type PostUpdate = T.Update<'Post', AST, ScalarsSpecification>
+export type PostFilter = T.Filter<'Post', AST, ScalarsSpecification>
 export type PostSortElement = T.SortElement<'Post', AST>
-export type PostRelationsFindParams = T.RelationsFindParams<'Post', AST, Scalars>
-export type PostParams<P extends PostProjection> = T.Params<'Post', AST, Scalars, P>
+export type PostRelationsFindParams = T.RelationsFindParams<'Post', AST, ScalarsSpecification>
+export type PostParams<P extends PostProjection> = T.Params<'Post', AST, ScalarsSpecification, P>
 export type PostCachedTypes = T.CachedTypes<PostIdFields, PostInsert, PostInsertResult, PostProjection, PostUpdate, PostFilter, PostSortElement, PostRelationsFindParams>
 
 export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -289,7 +289,7 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-export function userSchema(): T.Schema<Scalars> {
+export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     birthDate: {
       type: 'scalar',
@@ -346,7 +346,7 @@ export function userSchema(): T.Schema<Scalars> {
 type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'User',
   AST,
-  Scalars,
+  ScalarsSpecification,
   UserCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -359,14 +359,14 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type UserIdFields = T.IdFields<'User', AST>
-export type UserInsert = T.Insert<'User', AST, Scalars>
-export type UserInsertResult = T.GenerateModel<'User', AST, Scalars, 'relation'>
+export type UserInsert = T.Insert<'User', AST, ScalarsSpecification>
+export type UserInsertResult = T.GenerateModel<'User', AST, ScalarsSpecification, 'relation'>
 export type UserProjection = T.Projection<'User', AST>
-export type UserUpdate = T.Update<'User', AST, Scalars>
-export type UserFilter = T.Filter<'User', AST, Scalars>
+export type UserUpdate = T.Update<'User', AST, ScalarsSpecification>
+export type UserFilter = T.Filter<'User', AST, ScalarsSpecification>
 export type UserSortElement = T.SortElement<'User', AST>
-export type UserRelationsFindParams = T.RelationsFindParams<'User', AST, Scalars>
-export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
+export type UserRelationsFindParams = T.RelationsFindParams<'User', AST, ScalarsSpecification>
+export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
 export type UserCachedTypes = T.CachedTypes<UserIdFields, UserInsert, UserInsertResult, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -407,7 +407,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
-  scalars?: T.UserInputDriverDataTypeAdapterMap<Scalars, 'knex'>
+  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
   log?: T.LogInput<'Like' | 'Post' | 'User'>
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
@@ -417,7 +417,7 @@ export class EntityManager<
   OperationMetadataType = never,
   Permissions extends string = never,
   SecurityDomain extends Record<string, unknown> = never,
-> extends T.AbstractEntityManager<never, never, Scalars, MetadataType> {
+> extends T.AbstractEntityManager<never, never, ScalarsSpecification, MetadataType> {
   private _like: LikeDAO<MetadataType, OperationMetadataType> | undefined
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined

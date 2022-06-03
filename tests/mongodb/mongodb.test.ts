@@ -4,7 +4,7 @@
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock, Projection } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { AST, EntityManager, Scalars, UserDAO } from './dao.mock'
+import { AST, EntityManager, ScalarsSpecification, UserDAO } from './dao.mock'
 import { State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -21,7 +21,7 @@ let connection: MongoClient
 let db: Db
 type EntityManagerType = EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }>
 let dao: EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }>
-const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
+const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'> = {
   ID: {
     generate: () => uuidv4(),
     dbToModel: (id: unknown) => {

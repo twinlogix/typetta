@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Coordinates, defaultValueMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { LocalizedString } from '../types'
-import { EntityManager, Scalars } from './dao.mock'
+import { EntityManager, ScalarsSpecification } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -32,7 +32,7 @@ const config: Knex.Config = {
   },
 }
 
-const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'knex'> = {
+const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'> = {
   LocalizedString: {
     dbToModel: (o: unknown) => JSON.parse(o as string),
     modelToDB: (o: LocalizedString) => JSON.stringify(o),

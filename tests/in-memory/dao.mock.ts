@@ -1,7 +1,7 @@
 import * as T from '../../src'
 import * as types from './models.mock'
 
-export type Scalars = {
+export type ScalarsSpecification = {
   ID: { type: types.Scalars['ID']; isTextual: false; isQuantitative: false }
   String: { type: types.Scalars['String']; isTextual: true; isQuantitative: false }
   Boolean: { type: types.Scalars['Boolean']; isTextual: false; isQuantitative: false }
@@ -253,7 +253,7 @@ export type AST = {
   }
 }
 
-export function addressSchema(): T.Schema<Scalars> {
+export function addressSchema(): T.Schema<ScalarsSpecification> {
   return {
     cities: {
       type: 'relation',
@@ -278,7 +278,7 @@ export function addressSchema(): T.Schema<Scalars> {
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Address',
   AST,
-  Scalars,
+  ScalarsSpecification,
   AddressCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -294,14 +294,14 @@ export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit
 >
 
 export type AddressIdFields = T.IdFields<'Address', AST>
-export type AddressInsert = T.Insert<'Address', AST, Scalars>
-export type AddressInsertResult = T.GenerateModel<'Address', AST, Scalars, 'relation'>
+export type AddressInsert = T.Insert<'Address', AST, ScalarsSpecification>
+export type AddressInsertResult = T.GenerateModel<'Address', AST, ScalarsSpecification, 'relation'>
 export type AddressProjection = T.Projection<'Address', AST>
-export type AddressUpdate = T.Update<'Address', AST, Scalars>
-export type AddressFilter = T.Filter<'Address', AST, Scalars>
+export type AddressUpdate = T.Update<'Address', AST, ScalarsSpecification>
+export type AddressFilter = T.Filter<'Address', AST, ScalarsSpecification>
 export type AddressSortElement = T.SortElement<'Address', AST>
-export type AddressRelationsFindParams = T.RelationsFindParams<'Address', AST, Scalars>
-export type AddressParams<P extends AddressProjection> = T.Params<'Address', AST, Scalars, P>
+export type AddressRelationsFindParams = T.RelationsFindParams<'Address', AST, ScalarsSpecification>
+export type AddressParams<P extends AddressProjection> = T.Params<'Address', AST, ScalarsSpecification, P>
 export type AddressCachedTypes = T.CachedTypes<AddressIdFields, AddressInsert, AddressInsertResult, AddressProjection, AddressUpdate, AddressFilter, AddressSortElement, AddressRelationsFindParams>
 
 export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -333,7 +333,7 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
     })
   }
 }
-export function auditSchema(): T.Schema<Scalars> {
+export function auditSchema(): T.Schema<ScalarsSpecification> {
   return {
     changes: {
       type: 'scalar',
@@ -358,7 +358,7 @@ export function auditSchema(): T.Schema<Scalars> {
 type AuditDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Audit',
   AST,
-  Scalars,
+  ScalarsSpecification,
   AuditCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -374,14 +374,14 @@ export type InMemoryAuditDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type AuditIdFields = T.IdFields<'Audit', AST>
-export type AuditInsert = T.Insert<'Audit', AST, Scalars>
-export type AuditInsertResult = T.GenerateModel<'Audit', AST, Scalars, 'relation'>
+export type AuditInsert = T.Insert<'Audit', AST, ScalarsSpecification>
+export type AuditInsertResult = T.GenerateModel<'Audit', AST, ScalarsSpecification, 'relation'>
 export type AuditProjection = T.Projection<'Audit', AST>
-export type AuditUpdate = T.Update<'Audit', AST, Scalars>
-export type AuditFilter = T.Filter<'Audit', AST, Scalars>
+export type AuditUpdate = T.Update<'Audit', AST, ScalarsSpecification>
+export type AuditFilter = T.Filter<'Audit', AST, ScalarsSpecification>
 export type AuditSortElement = T.SortElement<'Audit', AST>
-export type AuditRelationsFindParams = T.RelationsFindParams<'Audit', AST, Scalars>
-export type AuditParams<P extends AuditProjection> = T.Params<'Audit', AST, Scalars, P>
+export type AuditRelationsFindParams = T.RelationsFindParams<'Audit', AST, ScalarsSpecification>
+export type AuditParams<P extends AuditProjection> = T.Params<'Audit', AST, ScalarsSpecification, P>
 export type AuditCachedTypes = T.CachedTypes<AuditIdFields, AuditInsert, AuditInsertResult, AuditProjection, AuditUpdate, AuditFilter, AuditSortElement, AuditRelationsFindParams>
 
 export class AuditDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -413,7 +413,7 @@ export class InMemoryAuditDAO<MetadataType, OperationMetadataType> extends T.Abs
     })
   }
 }
-export function auditableSchema(): T.Schema<Scalars> {
+export function auditableSchema(): T.Schema<ScalarsSpecification> {
   return {
     createdBy: {
       type: 'scalar',
@@ -457,7 +457,7 @@ export function auditableSchema(): T.Schema<Scalars> {
     },
   }
 }
-export function citySchema(): T.Schema<Scalars> {
+export function citySchema(): T.Schema<ScalarsSpecification> {
   return {
     addressId: {
       type: 'scalar',
@@ -482,7 +482,7 @@ export function citySchema(): T.Schema<Scalars> {
 type CityDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'City',
   AST,
-  Scalars,
+  ScalarsSpecification,
   CityCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -495,14 +495,14 @@ export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type CityIdFields = T.IdFields<'City', AST>
-export type CityInsert = T.Insert<'City', AST, Scalars>
-export type CityInsertResult = T.GenerateModel<'City', AST, Scalars, 'relation'>
+export type CityInsert = T.Insert<'City', AST, ScalarsSpecification>
+export type CityInsertResult = T.GenerateModel<'City', AST, ScalarsSpecification, 'relation'>
 export type CityProjection = T.Projection<'City', AST>
-export type CityUpdate = T.Update<'City', AST, Scalars>
-export type CityFilter = T.Filter<'City', AST, Scalars>
+export type CityUpdate = T.Update<'City', AST, ScalarsSpecification>
+export type CityFilter = T.Filter<'City', AST, ScalarsSpecification>
 export type CitySortElement = T.SortElement<'City', AST>
-export type CityRelationsFindParams = T.RelationsFindParams<'City', AST, Scalars>
-export type CityParams<P extends CityProjection> = T.Params<'City', AST, Scalars, P>
+export type CityRelationsFindParams = T.RelationsFindParams<'City', AST, ScalarsSpecification>
+export type CityParams<P extends CityProjection> = T.Params<'City', AST, ScalarsSpecification, P>
 export type CityCachedTypes = T.CachedTypes<CityIdFields, CityInsert, CityInsertResult, CityProjection, CityUpdate, CityFilter, CitySortElement, CityRelationsFindParams>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -534,7 +534,7 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-export function defaultFieldsEntitySchema(): T.Schema<Scalars> {
+export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
   return {
     creationDate: {
       type: 'scalar',
@@ -576,7 +576,7 @@ export function defaultFieldsEntitySchema(): T.Schema<Scalars> {
 type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'DefaultFieldsEntity',
   AST,
-  Scalars,
+  ScalarsSpecification,
   DefaultFieldsEntityCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -592,14 +592,14 @@ export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadata
 >
 
 export type DefaultFieldsEntityIdFields = T.IdFields<'DefaultFieldsEntity', AST>
-export type DefaultFieldsEntityInsert = T.Insert<'DefaultFieldsEntity', AST, Scalars>
-export type DefaultFieldsEntityInsertResult = T.GenerateModel<'DefaultFieldsEntity', AST, Scalars, 'relation'>
+export type DefaultFieldsEntityInsert = T.Insert<'DefaultFieldsEntity', AST, ScalarsSpecification>
+export type DefaultFieldsEntityInsertResult = T.GenerateModel<'DefaultFieldsEntity', AST, ScalarsSpecification, 'relation'>
 export type DefaultFieldsEntityProjection = T.Projection<'DefaultFieldsEntity', AST>
-export type DefaultFieldsEntityUpdate = T.Update<'DefaultFieldsEntity', AST, Scalars>
-export type DefaultFieldsEntityFilter = T.Filter<'DefaultFieldsEntity', AST, Scalars>
+export type DefaultFieldsEntityUpdate = T.Update<'DefaultFieldsEntity', AST, ScalarsSpecification>
+export type DefaultFieldsEntityFilter = T.Filter<'DefaultFieldsEntity', AST, ScalarsSpecification>
 export type DefaultFieldsEntitySortElement = T.SortElement<'DefaultFieldsEntity', AST>
-export type DefaultFieldsEntityRelationsFindParams = T.RelationsFindParams<'DefaultFieldsEntity', AST, Scalars>
-export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = T.Params<'DefaultFieldsEntity', AST, Scalars, P>
+export type DefaultFieldsEntityRelationsFindParams = T.RelationsFindParams<'DefaultFieldsEntity', AST, ScalarsSpecification>
+export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = T.Params<'DefaultFieldsEntity', AST, ScalarsSpecification, P>
 export type DefaultFieldsEntityCachedTypes = T.CachedTypes<
   DefaultFieldsEntityIdFields,
   DefaultFieldsEntityInsert,
@@ -646,7 +646,7 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
     })
   }
 }
-export function deviceSchema(): T.Schema<Scalars> {
+export function deviceSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -678,7 +678,7 @@ export function deviceSchema(): T.Schema<Scalars> {
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Device',
   AST,
-  Scalars,
+  ScalarsSpecification,
   DeviceCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -691,14 +691,14 @@ export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type DeviceIdFields = T.IdFields<'Device', AST>
-export type DeviceInsert = T.Insert<'Device', AST, Scalars>
-export type DeviceInsertResult = T.GenerateModel<'Device', AST, Scalars, 'relation'>
+export type DeviceInsert = T.Insert<'Device', AST, ScalarsSpecification>
+export type DeviceInsertResult = T.GenerateModel<'Device', AST, ScalarsSpecification, 'relation'>
 export type DeviceProjection = T.Projection<'Device', AST>
-export type DeviceUpdate = T.Update<'Device', AST, Scalars>
-export type DeviceFilter = T.Filter<'Device', AST, Scalars>
+export type DeviceUpdate = T.Update<'Device', AST, ScalarsSpecification>
+export type DeviceFilter = T.Filter<'Device', AST, ScalarsSpecification>
 export type DeviceSortElement = T.SortElement<'Device', AST>
-export type DeviceRelationsFindParams = T.RelationsFindParams<'Device', AST, Scalars>
-export type DeviceParams<P extends DeviceProjection> = T.Params<'Device', AST, Scalars, P>
+export type DeviceRelationsFindParams = T.RelationsFindParams<'Device', AST, ScalarsSpecification>
+export type DeviceParams<P extends DeviceProjection> = T.Params<'Device', AST, ScalarsSpecification, P>
 export type DeviceCachedTypes = T.CachedTypes<DeviceIdFields, DeviceInsert, DeviceInsertResult, DeviceProjection, DeviceUpdate, DeviceFilter, DeviceSortElement, DeviceRelationsFindParams>
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -730,7 +730,7 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
     })
   }
 }
-export function dogSchema(): T.Schema<Scalars> {
+export function dogSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -763,7 +763,7 @@ export function dogSchema(): T.Schema<Scalars> {
 type DogDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Dog',
   AST,
-  Scalars,
+  ScalarsSpecification,
   DogCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -776,14 +776,14 @@ export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type DogIdFields = T.IdFields<'Dog', AST>
-export type DogInsert = T.Insert<'Dog', AST, Scalars>
-export type DogInsertResult = T.GenerateModel<'Dog', AST, Scalars, 'relation'>
+export type DogInsert = T.Insert<'Dog', AST, ScalarsSpecification>
+export type DogInsertResult = T.GenerateModel<'Dog', AST, ScalarsSpecification, 'relation'>
 export type DogProjection = T.Projection<'Dog', AST>
-export type DogUpdate = T.Update<'Dog', AST, Scalars>
-export type DogFilter = T.Filter<'Dog', AST, Scalars>
+export type DogUpdate = T.Update<'Dog', AST, ScalarsSpecification>
+export type DogFilter = T.Filter<'Dog', AST, ScalarsSpecification>
 export type DogSortElement = T.SortElement<'Dog', AST>
-export type DogRelationsFindParams = T.RelationsFindParams<'Dog', AST, Scalars>
-export type DogParams<P extends DogProjection> = T.Params<'Dog', AST, Scalars, P>
+export type DogRelationsFindParams = T.RelationsFindParams<'Dog', AST, ScalarsSpecification>
+export type DogParams<P extends DogProjection> = T.Params<'Dog', AST, ScalarsSpecification, P>
 export type DogCachedTypes = T.CachedTypes<DogIdFields, DogInsert, DogInsertResult, DogProjection, DogUpdate, DogFilter, DogSortElement, DogRelationsFindParams>
 
 export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -815,7 +815,7 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
     })
   }
 }
-export function hotelSchema(): T.Schema<Scalars> {
+export function hotelSchema(): T.Schema<ScalarsSpecification> {
   return {
     audit: {
       type: 'embedded',
@@ -842,7 +842,7 @@ export function hotelSchema(): T.Schema<Scalars> {
 type HotelDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Hotel',
   AST,
-  Scalars,
+  ScalarsSpecification,
   HotelCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -858,14 +858,14 @@ export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type HotelIdFields = T.IdFields<'Hotel', AST>
-export type HotelInsert = T.Insert<'Hotel', AST, Scalars>
-export type HotelInsertResult = T.GenerateModel<'Hotel', AST, Scalars, 'relation'>
+export type HotelInsert = T.Insert<'Hotel', AST, ScalarsSpecification>
+export type HotelInsertResult = T.GenerateModel<'Hotel', AST, ScalarsSpecification, 'relation'>
 export type HotelProjection = T.Projection<'Hotel', AST>
-export type HotelUpdate = T.Update<'Hotel', AST, Scalars>
-export type HotelFilter = T.Filter<'Hotel', AST, Scalars>
+export type HotelUpdate = T.Update<'Hotel', AST, ScalarsSpecification>
+export type HotelFilter = T.Filter<'Hotel', AST, ScalarsSpecification>
 export type HotelSortElement = T.SortElement<'Hotel', AST>
-export type HotelRelationsFindParams = T.RelationsFindParams<'Hotel', AST, Scalars>
-export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, Scalars, P>
+export type HotelRelationsFindParams = T.RelationsFindParams<'Hotel', AST, ScalarsSpecification>
+export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, ScalarsSpecification, P>
 export type HotelCachedTypes = T.CachedTypes<HotelIdFields, HotelInsert, HotelInsertResult, HotelProjection, HotelUpdate, HotelFilter, HotelSortElement, HotelRelationsFindParams>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -897,7 +897,7 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
     })
   }
 }
-export function mockedEntitySchema(): T.Schema<Scalars> {
+export function mockedEntitySchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -932,7 +932,7 @@ export function mockedEntitySchema(): T.Schema<Scalars> {
 type MockedEntityDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'MockedEntity',
   AST,
-  Scalars,
+  ScalarsSpecification,
   MockedEntityCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -948,14 +948,14 @@ export type InMemoryMockedEntityDAOParams<MetadataType, OperationMetadataType> =
 >
 
 export type MockedEntityIdFields = T.IdFields<'MockedEntity', AST>
-export type MockedEntityInsert = T.Insert<'MockedEntity', AST, Scalars>
-export type MockedEntityInsertResult = T.GenerateModel<'MockedEntity', AST, Scalars, 'relation'>
+export type MockedEntityInsert = T.Insert<'MockedEntity', AST, ScalarsSpecification>
+export type MockedEntityInsertResult = T.GenerateModel<'MockedEntity', AST, ScalarsSpecification, 'relation'>
 export type MockedEntityProjection = T.Projection<'MockedEntity', AST>
-export type MockedEntityUpdate = T.Update<'MockedEntity', AST, Scalars>
-export type MockedEntityFilter = T.Filter<'MockedEntity', AST, Scalars>
+export type MockedEntityUpdate = T.Update<'MockedEntity', AST, ScalarsSpecification>
+export type MockedEntityFilter = T.Filter<'MockedEntity', AST, ScalarsSpecification>
 export type MockedEntitySortElement = T.SortElement<'MockedEntity', AST>
-export type MockedEntityRelationsFindParams = T.RelationsFindParams<'MockedEntity', AST, Scalars>
-export type MockedEntityParams<P extends MockedEntityProjection> = T.Params<'MockedEntity', AST, Scalars, P>
+export type MockedEntityRelationsFindParams = T.RelationsFindParams<'MockedEntity', AST, ScalarsSpecification>
+export type MockedEntityParams<P extends MockedEntityProjection> = T.Params<'MockedEntity', AST, ScalarsSpecification, P>
 export type MockedEntityCachedTypes = T.CachedTypes<
   MockedEntityIdFields,
   MockedEntityInsert,
@@ -1002,7 +1002,7 @@ export class InMemoryMockedEntityDAO<MetadataType, OperationMetadataType> extend
     })
   }
 }
-export function organizationSchema(): T.Schema<Scalars> {
+export function organizationSchema(): T.Schema<ScalarsSpecification> {
   return {
     address: {
       type: 'embedded',
@@ -1030,7 +1030,7 @@ export function organizationSchema(): T.Schema<Scalars> {
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Organization',
   AST,
-  Scalars,
+  ScalarsSpecification,
   OrganizationCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -1046,14 +1046,14 @@ export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> =
 >
 
 export type OrganizationIdFields = T.IdFields<'Organization', AST>
-export type OrganizationInsert = T.Insert<'Organization', AST, Scalars>
-export type OrganizationInsertResult = T.GenerateModel<'Organization', AST, Scalars, 'relation'>
+export type OrganizationInsert = T.Insert<'Organization', AST, ScalarsSpecification>
+export type OrganizationInsertResult = T.GenerateModel<'Organization', AST, ScalarsSpecification, 'relation'>
 export type OrganizationProjection = T.Projection<'Organization', AST>
-export type OrganizationUpdate = T.Update<'Organization', AST, Scalars>
-export type OrganizationFilter = T.Filter<'Organization', AST, Scalars>
+export type OrganizationUpdate = T.Update<'Organization', AST, ScalarsSpecification>
+export type OrganizationFilter = T.Filter<'Organization', AST, ScalarsSpecification>
 export type OrganizationSortElement = T.SortElement<'Organization', AST>
-export type OrganizationRelationsFindParams = T.RelationsFindParams<'Organization', AST, Scalars>
-export type OrganizationParams<P extends OrganizationProjection> = T.Params<'Organization', AST, Scalars, P>
+export type OrganizationRelationsFindParams = T.RelationsFindParams<'Organization', AST, ScalarsSpecification>
+export type OrganizationParams<P extends OrganizationProjection> = T.Params<'Organization', AST, ScalarsSpecification, P>
 export type OrganizationCachedTypes = T.CachedTypes<
   OrganizationIdFields,
   OrganizationInsert,
@@ -1100,7 +1100,7 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
     })
   }
 }
-export function postSchema(): T.Schema<Scalars> {
+export function postSchema(): T.Schema<ScalarsSpecification> {
   return {
     author: {
       type: 'relation',
@@ -1152,7 +1152,7 @@ export function postSchema(): T.Schema<Scalars> {
 type PostDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'Post',
   AST,
-  Scalars,
+  ScalarsSpecification,
   PostCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -1165,14 +1165,14 @@ export type InMemoryPostDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type PostIdFields = T.IdFields<'Post', AST>
-export type PostInsert = T.Insert<'Post', AST, Scalars>
-export type PostInsertResult = T.GenerateModel<'Post', AST, Scalars, 'relation'>
+export type PostInsert = T.Insert<'Post', AST, ScalarsSpecification>
+export type PostInsertResult = T.GenerateModel<'Post', AST, ScalarsSpecification, 'relation'>
 export type PostProjection = T.Projection<'Post', AST>
-export type PostUpdate = T.Update<'Post', AST, Scalars>
-export type PostFilter = T.Filter<'Post', AST, Scalars>
+export type PostUpdate = T.Update<'Post', AST, ScalarsSpecification>
+export type PostFilter = T.Filter<'Post', AST, ScalarsSpecification>
 export type PostSortElement = T.SortElement<'Post', AST>
-export type PostRelationsFindParams = T.RelationsFindParams<'Post', AST, Scalars>
-export type PostParams<P extends PostProjection> = T.Params<'Post', AST, Scalars, P>
+export type PostRelationsFindParams = T.RelationsFindParams<'Post', AST, ScalarsSpecification>
+export type PostParams<P extends PostProjection> = T.Params<'Post', AST, ScalarsSpecification, P>
 export type PostCachedTypes = T.CachedTypes<PostIdFields, PostInsert, PostInsertResult, PostProjection, PostUpdate, PostFilter, PostSortElement, PostRelationsFindParams>
 
 export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -1204,7 +1204,7 @@ export class InMemoryPostDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-export function postMetadataSchema(): T.Schema<Scalars> {
+export function postMetadataSchema(): T.Schema<ScalarsSpecification> {
   return {
     region: {
       type: 'scalar',
@@ -1218,7 +1218,7 @@ export function postMetadataSchema(): T.Schema<Scalars> {
     },
   }
 }
-export function postTypeSchema(): T.Schema<Scalars> {
+export function postTypeSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -1238,7 +1238,7 @@ export function postTypeSchema(): T.Schema<Scalars> {
 type PostTypeDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'PostType',
   AST,
-  Scalars,
+  ScalarsSpecification,
   PostTypeCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -1254,14 +1254,14 @@ export type InMemoryPostTypeDAOParams<MetadataType, OperationMetadataType> = Omi
 >
 
 export type PostTypeIdFields = T.IdFields<'PostType', AST>
-export type PostTypeInsert = T.Insert<'PostType', AST, Scalars>
-export type PostTypeInsertResult = T.GenerateModel<'PostType', AST, Scalars, 'relation'>
+export type PostTypeInsert = T.Insert<'PostType', AST, ScalarsSpecification>
+export type PostTypeInsertResult = T.GenerateModel<'PostType', AST, ScalarsSpecification, 'relation'>
 export type PostTypeProjection = T.Projection<'PostType', AST>
-export type PostTypeUpdate = T.Update<'PostType', AST, Scalars>
-export type PostTypeFilter = T.Filter<'PostType', AST, Scalars>
+export type PostTypeUpdate = T.Update<'PostType', AST, ScalarsSpecification>
+export type PostTypeFilter = T.Filter<'PostType', AST, ScalarsSpecification>
 export type PostTypeSortElement = T.SortElement<'PostType', AST>
-export type PostTypeRelationsFindParams = T.RelationsFindParams<'PostType', AST, Scalars>
-export type PostTypeParams<P extends PostTypeProjection> = T.Params<'PostType', AST, Scalars, P>
+export type PostTypeRelationsFindParams = T.RelationsFindParams<'PostType', AST, ScalarsSpecification>
+export type PostTypeParams<P extends PostTypeProjection> = T.Params<'PostType', AST, ScalarsSpecification, P>
 export type PostTypeCachedTypes = T.CachedTypes<
   PostTypeIdFields,
   PostTypeInsert,
@@ -1302,7 +1302,7 @@ export class InMemoryPostTypeDAO<MetadataType, OperationMetadataType> extends T.
     })
   }
 }
-export function userSchema(): T.Schema<Scalars> {
+export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     amount: {
       type: 'scalar',
@@ -1392,7 +1392,7 @@ export function userSchema(): T.Schema<Scalars> {
 type UserDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
   'User',
   AST,
-  Scalars,
+  ScalarsSpecification,
   UserCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -1405,14 +1405,14 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type UserIdFields = T.IdFields<'User', AST>
-export type UserInsert = T.Insert<'User', AST, Scalars>
-export type UserInsertResult = T.GenerateModel<'User', AST, Scalars, 'relation'>
+export type UserInsert = T.Insert<'User', AST, ScalarsSpecification>
+export type UserInsertResult = T.GenerateModel<'User', AST, ScalarsSpecification, 'relation'>
 export type UserProjection = T.Projection<'User', AST>
-export type UserUpdate = T.Update<'User', AST, Scalars>
-export type UserFilter = T.Filter<'User', AST, Scalars>
+export type UserUpdate = T.Update<'User', AST, ScalarsSpecification>
+export type UserFilter = T.Filter<'User', AST, ScalarsSpecification>
 export type UserSortElement = T.SortElement<'User', AST>
-export type UserRelationsFindParams = T.RelationsFindParams<'User', AST, Scalars>
-export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
+export type UserRelationsFindParams = T.RelationsFindParams<'User', AST, ScalarsSpecification>
+export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
 export type UserCachedTypes = T.CachedTypes<UserIdFields, UserInsert, UserInsertResult, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -1444,7 +1444,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-export function usernamePasswordCredentialsSchema(): T.Schema<Scalars> {
+export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecification> {
   return {
     password: {
       type: 'scalar',
@@ -1478,7 +1478,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     postType?: Pick<Partial<PostTypeDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
-  scalars?: T.UserInputDriverDataTypeAdapterMap<Scalars, 'knex'>
+  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
   log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'User'>
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
@@ -1488,7 +1488,7 @@ export class EntityManager<
   OperationMetadataType = never,
   Permissions extends string = never,
   SecurityDomain extends Record<string, unknown> = never,
-> extends T.AbstractEntityManager<never, never, Scalars, MetadataType> {
+> extends T.AbstractEntityManager<never, never, ScalarsSpecification, MetadataType> {
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined
   private _audit: AuditDAO<MetadataType, OperationMetadataType> | undefined
   private _city: CityDAO<MetadataType, OperationMetadataType> | undefined

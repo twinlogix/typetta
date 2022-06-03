@@ -1,7 +1,7 @@
-import { Params, SecurityPolicyReadError } from '../../src'
+import { SecurityPolicyReadError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
 import { inMemoryMongoDb } from '../utils'
-import { AST, EntityManager, Scalars } from './dao.mock'
+import { EntityManager, UserRoleParams } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -79,7 +79,7 @@ async function createSecureEntityManager(userId: string): Promise<SecureEntityMa
   if (!user) {
     throw new Error('User does not exists')
   }
-  function createSecurityContext(roles: Params<'UserRole', AST, Scalars, { role: { permissions: true } }>[]): SecurityContext {
+  function createSecurityContext(roles: UserRoleParams<{ role: { permissions: true } }>[]): SecurityContext {
     return Array.from(new Set(roles.flatMap((r) => r.role.permissions.flatMap((v) => (v ? [v] : [])))).values())
   }
   const securityContext = createSecurityContext(user.roles)

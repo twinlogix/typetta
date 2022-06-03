@@ -2,7 +2,7 @@ import * as T from '../../src'
 import * as types from './models.mock'
 import * as M from 'mongodb'
 
-export type Scalars = {
+export type ScalarsSpecification = {
   ID: { type: types.Scalars['ID']; isTextual: false; isQuantitative: false }
   String: { type: types.Scalars['String']; isTextual: true; isQuantitative: false }
   Boolean: { type: types.Scalars['Boolean']; isTextual: false; isQuantitative: false }
@@ -120,7 +120,7 @@ export type AST = {
   }
 }
 
-export function hotelSchema(): T.Schema<Scalars> {
+export function hotelSchema(): T.Schema<ScalarsSpecification> {
   return {
     deletionDate: {
       type: 'scalar',
@@ -155,7 +155,7 @@ export function hotelSchema(): T.Schema<Scalars> {
 type HotelDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
   'Hotel',
   AST,
-  Scalars,
+  ScalarsSpecification,
   HotelCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -171,14 +171,14 @@ export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type HotelIdFields = T.IdFields<'Hotel', AST>
-export type HotelInsert = T.Insert<'Hotel', AST, Scalars>
-export type HotelInsertResult = T.GenerateModel<'Hotel', AST, Scalars, 'relation'>
+export type HotelInsert = T.Insert<'Hotel', AST, ScalarsSpecification>
+export type HotelInsertResult = T.GenerateModel<'Hotel', AST, ScalarsSpecification, 'relation'>
 export type HotelProjection = T.Projection<'Hotel', AST>
-export type HotelUpdate = T.Update<'Hotel', AST, Scalars>
-export type HotelFilter = T.Filter<'Hotel', AST, Scalars>
+export type HotelUpdate = T.Update<'Hotel', AST, ScalarsSpecification>
+export type HotelFilter = T.Filter<'Hotel', AST, ScalarsSpecification>
 export type HotelSortElement = T.SortElement<'Hotel', AST>
-export type HotelRelationsFindParams = T.RelationsFindParams<'Hotel', AST, Scalars>
-export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, Scalars, P>
+export type HotelRelationsFindParams = T.RelationsFindParams<'Hotel', AST, ScalarsSpecification>
+export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, ScalarsSpecification, P>
 export type HotelCachedTypes = T.CachedTypes<HotelIdFields, HotelInsert, HotelInsertResult, HotelProjection, HotelUpdate, HotelFilter, HotelSortElement, HotelRelationsFindParams>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -210,7 +210,7 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
     })
   }
 }
-export function reservationSchema(): T.Schema<Scalars> {
+export function reservationSchema(): T.Schema<ScalarsSpecification> {
   return {
     deletionDate: {
       type: 'scalar',
@@ -254,7 +254,7 @@ export function reservationSchema(): T.Schema<Scalars> {
 type ReservationDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
   'Reservation',
   AST,
-  Scalars,
+  ScalarsSpecification,
   ReservationCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -270,14 +270,14 @@ export type InMemoryReservationDAOParams<MetadataType, OperationMetadataType> = 
 >
 
 export type ReservationIdFields = T.IdFields<'Reservation', AST>
-export type ReservationInsert = T.Insert<'Reservation', AST, Scalars>
-export type ReservationInsertResult = T.GenerateModel<'Reservation', AST, Scalars, 'relation'>
+export type ReservationInsert = T.Insert<'Reservation', AST, ScalarsSpecification>
+export type ReservationInsertResult = T.GenerateModel<'Reservation', AST, ScalarsSpecification, 'relation'>
 export type ReservationProjection = T.Projection<'Reservation', AST>
-export type ReservationUpdate = T.Update<'Reservation', AST, Scalars>
-export type ReservationFilter = T.Filter<'Reservation', AST, Scalars>
+export type ReservationUpdate = T.Update<'Reservation', AST, ScalarsSpecification>
+export type ReservationFilter = T.Filter<'Reservation', AST, ScalarsSpecification>
 export type ReservationSortElement = T.SortElement<'Reservation', AST>
-export type ReservationRelationsFindParams = T.RelationsFindParams<'Reservation', AST, Scalars>
-export type ReservationParams<P extends ReservationProjection> = T.Params<'Reservation', AST, Scalars, P>
+export type ReservationRelationsFindParams = T.RelationsFindParams<'Reservation', AST, ScalarsSpecification>
+export type ReservationParams<P extends ReservationProjection> = T.Params<'Reservation', AST, ScalarsSpecification, P>
 export type ReservationCachedTypes = T.CachedTypes<
   ReservationIdFields,
   ReservationInsert,
@@ -324,7 +324,7 @@ export class InMemoryReservationDAO<MetadataType, OperationMetadataType> extends
     })
   }
 }
-export function roomSchema(): T.Schema<Scalars> {
+export function roomSchema(): T.Schema<ScalarsSpecification> {
   return {
     deletionDate: {
       type: 'scalar',
@@ -369,7 +369,7 @@ export function roomSchema(): T.Schema<Scalars> {
 type RoomDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
   'Room',
   AST,
-  Scalars,
+  ScalarsSpecification,
   RoomCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -385,14 +385,14 @@ export type InMemoryRoomDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type RoomIdFields = T.IdFields<'Room', AST>
-export type RoomInsert = T.Insert<'Room', AST, Scalars>
-export type RoomInsertResult = T.GenerateModel<'Room', AST, Scalars, 'relation'>
+export type RoomInsert = T.Insert<'Room', AST, ScalarsSpecification>
+export type RoomInsertResult = T.GenerateModel<'Room', AST, ScalarsSpecification, 'relation'>
 export type RoomProjection = T.Projection<'Room', AST>
-export type RoomUpdate = T.Update<'Room', AST, Scalars>
-export type RoomFilter = T.Filter<'Room', AST, Scalars>
+export type RoomUpdate = T.Update<'Room', AST, ScalarsSpecification>
+export type RoomFilter = T.Filter<'Room', AST, ScalarsSpecification>
 export type RoomSortElement = T.SortElement<'Room', AST>
-export type RoomRelationsFindParams = T.RelationsFindParams<'Room', AST, Scalars>
-export type RoomParams<P extends RoomProjection> = T.Params<'Room', AST, Scalars, P>
+export type RoomRelationsFindParams = T.RelationsFindParams<'Room', AST, ScalarsSpecification>
+export type RoomParams<P extends RoomProjection> = T.Params<'Room', AST, ScalarsSpecification, P>
 export type RoomCachedTypes = T.CachedTypes<RoomIdFields, RoomInsert, RoomInsertResult, RoomProjection, RoomUpdate, RoomFilter, RoomSortElement, RoomRelationsFindParams>
 
 export class RoomDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -424,7 +424,7 @@ export class InMemoryRoomDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-export function tenantSchema(): T.Schema<Scalars> {
+export function tenantSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -444,7 +444,7 @@ export function tenantSchema(): T.Schema<Scalars> {
 type TenantDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
   'Tenant',
   AST,
-  Scalars,
+  ScalarsSpecification,
   TenantCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -460,14 +460,14 @@ export type InMemoryTenantDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type TenantIdFields = T.IdFields<'Tenant', AST>
-export type TenantInsert = T.Insert<'Tenant', AST, Scalars>
-export type TenantInsertResult = T.GenerateModel<'Tenant', AST, Scalars, 'relation'>
+export type TenantInsert = T.Insert<'Tenant', AST, ScalarsSpecification>
+export type TenantInsertResult = T.GenerateModel<'Tenant', AST, ScalarsSpecification, 'relation'>
 export type TenantProjection = T.Projection<'Tenant', AST>
-export type TenantUpdate = T.Update<'Tenant', AST, Scalars>
-export type TenantFilter = T.Filter<'Tenant', AST, Scalars>
+export type TenantUpdate = T.Update<'Tenant', AST, ScalarsSpecification>
+export type TenantFilter = T.Filter<'Tenant', AST, ScalarsSpecification>
 export type TenantSortElement = T.SortElement<'Tenant', AST>
-export type TenantRelationsFindParams = T.RelationsFindParams<'Tenant', AST, Scalars>
-export type TenantParams<P extends TenantProjection> = T.Params<'Tenant', AST, Scalars, P>
+export type TenantRelationsFindParams = T.RelationsFindParams<'Tenant', AST, ScalarsSpecification>
+export type TenantParams<P extends TenantProjection> = T.Params<'Tenant', AST, ScalarsSpecification, P>
 export type TenantCachedTypes = T.CachedTypes<TenantIdFields, TenantInsert, TenantInsertResult, TenantProjection, TenantUpdate, TenantFilter, TenantSortElement, TenantRelationsFindParams>
 
 export class TenantDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<TenantDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -499,7 +499,7 @@ export class InMemoryTenantDAO<MetadataType, OperationMetadataType> extends T.Ab
     })
   }
 }
-export function userSchema(): T.Schema<Scalars> {
+export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     credentials: {
       type: 'embedded',
@@ -553,7 +553,7 @@ export function userSchema(): T.Schema<Scalars> {
 type UserDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
   'User',
   AST,
-  Scalars,
+  ScalarsSpecification,
   UserCachedTypes,
   MetadataType,
   OperationMetadataType,
@@ -569,14 +569,14 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type UserIdFields = T.IdFields<'User', AST>
-export type UserInsert = T.Insert<'User', AST, Scalars>
-export type UserInsertResult = T.GenerateModel<'User', AST, Scalars, 'relation'>
+export type UserInsert = T.Insert<'User', AST, ScalarsSpecification>
+export type UserInsertResult = T.GenerateModel<'User', AST, ScalarsSpecification, 'relation'>
 export type UserProjection = T.Projection<'User', AST>
-export type UserUpdate = T.Update<'User', AST, Scalars>
-export type UserFilter = T.Filter<'User', AST, Scalars>
+export type UserUpdate = T.Update<'User', AST, ScalarsSpecification>
+export type UserFilter = T.Filter<'User', AST, ScalarsSpecification>
 export type UserSortElement = T.SortElement<'User', AST>
-export type UserRelationsFindParams = T.RelationsFindParams<'User', AST, Scalars>
-export type UserParams<P extends UserProjection> = T.Params<'User', AST, Scalars, P>
+export type UserRelationsFindParams = T.RelationsFindParams<'User', AST, ScalarsSpecification>
+export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
 export type UserCachedTypes = T.CachedTypes<UserIdFields, UserInsert, UserInsertResult, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -608,7 +608,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-export function usernamePasswordCredentialsSchema(): T.Schema<Scalars> {
+export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecification> {
   return {
     password: {
       type: 'scalar',
@@ -634,7 +634,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   }
   mongodb: Record<'default', M.Db | 'mock'>
-  scalars?: T.UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'>
+  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
   log?: T.LogInput<'Hotel' | 'Reservation' | 'Room' | 'Tenant' | 'User'>
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
@@ -644,7 +644,7 @@ export class EntityManager<
   OperationMetadataType = never,
   Permissions extends string = never,
   SecurityDomain extends Record<string, unknown> = never,
-> extends T.AbstractEntityManager<'default', never, Scalars, MetadataType> {
+> extends T.AbstractEntityManager<'default', never, ScalarsSpecification, MetadataType> {
   private _hotel: HotelDAO<MetadataType, OperationMetadataType> | undefined
   private _reservation: ReservationDAO<MetadataType, OperationMetadataType> | undefined
   private _room: RoomDAO<MetadataType, OperationMetadataType> | undefined

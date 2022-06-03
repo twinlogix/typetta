@@ -1,6 +1,5 @@
 import { defaultValueMiddleware, mock } from '../../src'
 import { EntityManager } from './dao.mock'
-import { User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import sha256 from 'sha256'
 import { v4 as uuidv4 } from 'uuid'
