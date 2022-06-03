@@ -605,15 +605,16 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   private generateUtillsType(node: TsTypettaGeneratorNode): string {
     return `
     export type ${node.name}IdFields = T.IdFields<'${node.name}', AST>
-    export type ${node.name}Insert = T.Insert<'${node.name}', AST, ScalarsSpecification>
-    export type ${node.name}InsertResult = T.GenerateModel<'${node.name}', AST, ScalarsSpecification, 'relation'>
-    export type ${node.name}Projection = T.Projection<'${node.name}', AST>
-    export type ${node.name}Update = T.Update<'${node.name}', AST, ScalarsSpecification>
-    export type ${node.name}Filter = T.Filter<'${node.name}', AST, ScalarsSpecification>
-    export type ${node.name}SortElement = T.SortElement<'${node.name}', AST>
-    export type ${node.name}RelationsFindParams = T.RelationsFindParams<'${node.name}', AST, ScalarsSpecification>
+    export interface ${node.name}Model extends types.${node.name} {}
+    export interface ${node.name}Insert extends T.Insert<'${node.name}', AST, ScalarsSpecification> {}
+    export interface ${node.name}PlainModel extends T.GenerateModel<'${node.name}', AST, ScalarsSpecification, 'relation'> {}
+    export interface ${node.name}Projection extends T.Projection<'${node.name}', AST> {}
+    export interface ${node.name}Update extends T.Update<'${node.name}', AST, ScalarsSpecification> {}
+    export interface ${node.name}Filter extends T.Filter<'${node.name}', AST, ScalarsSpecification> {}
+    export interface ${node.name}SortElement extends T.SortElement<'${node.name}', AST> {}
+    export interface ${node.name}RelationsFindParams extends T.RelationsFindParams<'${node.name}', AST, ScalarsSpecification> {}
     export type ${node.name}Params<P extends ${node.name}Projection> = T.Params<'${node.name}', AST, ScalarsSpecification, P>
-    export type ${node.name}CachedTypes = T.CachedTypes<${node.name}IdFields, ${node.name}Insert, ${node.name}InsertResult, ${node.name}Projection, ${node.name}Update, ${node.name}Filter, ${node.name}SortElement, ${node.name}RelationsFindParams>`
+    export type ${node.name}CachedTypes = T.CachedTypes<${node.name}IdFields, ${node.name}Model, ${node.name}Insert, ${node.name}PlainModel, ${node.name}Projection, ${node.name}Update, ${node.name}Filter, ${node.name}SortElement, ${node.name}RelationsFindParams>`
   }
 
   // ---------------------------------------------------------------------------------------------------------

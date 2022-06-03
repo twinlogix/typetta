@@ -2,7 +2,7 @@ import { DAOGenerics } from '../../dao.types'
 import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from './builder'
 
-export function defaultValueMiddleware<T extends DAOGenerics, K extends keyof T['insertResult']>(field: K, value: (metadata: T['metadata'] | undefined) => T['insertResult'][K]): DAOMiddleware<T> {
+export function defaultValueMiddleware<T extends DAOGenerics, K extends keyof T['plainModel']>(field: K, value: (metadata: T['metadata'] | undefined) => T['plainModel'][K]): DAOMiddleware<T> {
   return buildMiddleware({
     name: 'Typetta - Default value',
     beforeInsert: async (params, context) => {

@@ -25,7 +25,7 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
   ) => Promise<(Omit<FindMiddlewareInput<T>, 'operation'> & Continue<true>) | (Omit<FindMiddlewareOutput<T>, 'operation'> & Continue<false>) | void>
   afterFind?: (
     params: FindParams<T>,
-    records: PartialDeep<T['insertResult']>[],
+    records: PartialDeep<T['model']>[],
     totalCount: number | undefined,
     context: MiddlewareContext<T>,
   ) => Promise<(Omit<FindMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
@@ -33,7 +33,7 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
     params: InsertParams<T>,
     context: MiddlewareContext<T>,
   ) => Promise<(Omit<InsertMiddlewareInput<T>, 'operation'> & Continue<true>) | (Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<false>) | void>
-  afterInsert?: (params: InsertParams<T>, insertedRecord: T['insertResult'], context: MiddlewareContext<T>) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
+  afterInsert?: (params: InsertParams<T>, insertedRecord: T['plainModel'], context: MiddlewareContext<T>) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
   beforeUpdate?: (
     params: UpdateParams<T>,
     context: MiddlewareContext<T>,

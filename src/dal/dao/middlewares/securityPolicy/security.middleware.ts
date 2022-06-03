@@ -17,8 +17,8 @@ export function securityPolicy<
   Permission extends string,
   T extends DAOGenerics,
   SecurityDomainKeys extends string,
-  SecurityContextPermission extends { [K in SecurityDomainKeys]?: T['insertResult'][K] | true },
-  SecurityDomain extends { [K in SecurityDomainKeys]?: T['insertResult'][K][] },
+  SecurityContextPermission extends { [K in SecurityDomainKeys]?: T['plainModel'][K] | true },
+  SecurityDomain extends { [K in SecurityDomainKeys]?: T['plainModel'][K][] },
 >(input: {
   permissions: Permissions<T, Permission>
   securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
@@ -47,7 +47,7 @@ export function securityPolicy<
     const noDomainCrud = relatedSecurityContext.flatMap((rsc) => (rsc.domain === true ? [rsc.crud] : []))
     const withDomainCrud = Object.entries(operationSecurityDomain).map(([k, v]) => {
       const domainKey = k as SecurityDomainKeys
-      const domainValues = v as T['insertResult'][SecurityDomainKeys][]
+      const domainValues = v as T['plainModel'][SecurityDomainKeys][]
       const cruds = domainValues.map((domainValue) => {
         const cruds = relatedSecurityContext.flatMap((rsc) =>
           rsc.domain === true ||
@@ -62,7 +62,7 @@ export function securityPolicy<
               atomKeys
                 .filter((atomKey) => atomKey !== domainKey)
                 .every((atomKey) => {
-                  const domains: T['insertResult'][SecurityDomainKeys][] = operationSecurityDomain[atomKey] ?? []
+                  const domains: T['plainModel'][SecurityDomainKeys][] = operationSecurityDomain[atomKey] ?? []
                   return domains.some((dv) => (typeof dv === 'object' && 'equals' in dv && typeof dv.equals === 'function' ? dv.equals(atom[atomKey]) : atom[atomKey] === dv))
                 })
             )

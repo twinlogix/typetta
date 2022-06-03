@@ -20,9 +20,9 @@ export type DAOSecurityPolicy<T extends DAOGenerics, Permissions extends string,
   defaultPermissions?: CRUDPermission<T>
 } & ([SecurityDomain] extends [never]
   ? { domain?: never }
-  : keyof Required<SecurityDomain> extends keyof T['insertResult']
-  ? { domain?: { [K in keyof Required<SecurityDomain>]: keyof T['insertResult'] | null } }
-  : { domain: { [K in keyof Required<SecurityDomain>]?: keyof T['insertResult'] | null } })
+  : keyof Required<SecurityDomain> extends keyof T['plainModel']
+  ? { domain?: { [K in keyof Required<SecurityDomain>]: keyof T['plainModel'] | null } }
+  : { domain: { [K in keyof Required<SecurityDomain>]?: keyof T['plainModel'] | null } })
 
 export type EntityManagerSecurtyPolicy<DAOGenericsMap extends { [K in string]: DAOGenerics }, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   applySecurity?: boolean

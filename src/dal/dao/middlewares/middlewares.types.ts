@@ -16,14 +16,14 @@ export type MiddlewareInput<T extends DAOGenerics> =
   | ReplaceMiddlewareInput<T>
   | DeleteMiddlewareInput<T>
 
-export type FindMiddlewareOutput<T extends DAOGenerics> = { operation: 'find'; params: FindParams<T>; records: PartialDeep<T['insertResult']>[]; totalCount?: number }
+export type FindMiddlewareOutput<T extends DAOGenerics> = { operation: 'find'; params: FindParams<T>; records: PartialDeep<T['model']>[]; totalCount?: number }
 export type AggregateMiddlewareOutput<T extends DAOGenerics> = {
   operation: 'aggregate'
   params: AggregateParams<T>
   args?: AggregatePostProcessing<T, AggregateParams<T>>
   result: AggregateResults<T, AggregateParams<T>>
 }
-export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; insertedRecord: T['insertResult'] }
+export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; insertedRecord: T['plainModel'] }
 export type UpdateMiddlewareOutput<T extends DAOGenerics> = { operation: 'update'; params: UpdateParams<T> }
 export type ReplaceMiddlewareOutput<T extends DAOGenerics> = { operation: 'replace'; params: ReplaceParams<T> }
 export type DeleteMiddlewareOutput<T extends DAOGenerics> = { operation: 'delete'; params: DeleteParams<T> }

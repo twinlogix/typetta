@@ -4,7 +4,7 @@
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock, Projection } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { AST, EntityManager, ScalarsSpecification, UserDAO } from './dao.mock'
+import { AST, EntityManager, ScalarsSpecification, UserDAO, UserPlainModel } from './dao.mock'
 import { State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -295,14 +295,14 @@ test('safe find', async () => {
 
   // Whole object
   const response4 = await dao.user.findOne({ projection: true })
-  //typeAssert<Test<typeof response4, (UserRetrieveAll & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response4, (UserPlainModel & { __projection: 'all' }) | null>>()
   expect(response4).toBeDefined()
   expect(response4?.firstName).toBe('FirstName')
   expect(response4?.live).toBe(true)
 
   // No projection
   const response5 = await dao.user.findOne({})
-  //typeAssert<Test<typeof response5, (UserRetrieveAll & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response5, (UserPlainModel & { __projection: 'all' }) | null>>()
   expect(response5).toBeDefined()
   expect(response5?.firstName).toBe('FirstName')
   expect(response5?.live).toBe(true)
@@ -314,7 +314,7 @@ test('safe find', async () => {
 
   // All undefined projection
   const response9 = await dao.user.findOne()
-  //typeAssert<Test<typeof response9, (UserRetrieveAll & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response9, (UserPlainModel & { __projection: 'all' }) | null>>()
   expect(response9).toBeDefined()
 
   // Info to projection

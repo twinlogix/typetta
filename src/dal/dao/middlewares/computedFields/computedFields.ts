@@ -10,7 +10,7 @@ import { PartialDeep } from 'type-fest'
 export function computedField<T extends DAOGenerics, P1 extends AnyProjection<T['projection']>, P2 extends AnyProjection<T['projection']>>(options: {
   fieldsProjection: P2
   requiredProjection: P1
-  compute: (record: Project<T['entity'], T['ast'], T['scalars'], P1>, params: FindParams<T>) => Promise<PartialDeep<T['insertResult']>>
+  compute: (record: Project<T['entity'], T['ast'], T['scalars'], P1>, params: FindParams<T>) => Promise<PartialDeep<T['model']>>
 }): DAOMiddleware<T> {
   return {
     name: 'Typetta - Computed field',

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Difference, OmitNever } from '../../../utils/utils.types'
+import { CachedTypes } from '../dao.types'
 import { SortDirection } from '../sorts/sorts.types'
 import { GraphQLResolveInfo } from 'graphql'
 import { PartialDeep } from 'type-fest'
@@ -43,14 +44,23 @@ export type Project<
   AST extends AbstractSyntaxTree,
   Scalars extends AbstractScalars,
   P extends Projection<Entity, AST> | true | undefined | GraphQLResolveInfo,
-> = P extends Record<string, never>
+  Cache extends CachedTypes | null = null,
+> = 0 extends 1 & Cache
+  ? any
+  : P extends Record<string, never>
   ? { __projection: 'empty' }
   : [Projection<Entity, AST>] extends [P]
-  ? PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
+  ? Cache extends { model: infer Model }
+    ? PartialDeep<Model> & { __projection: 'unknown' }
+    : PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
   : P extends GraphQLResolveInfo
-  ? PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
+  ? Cache extends { model: infer Model }
+    ? PartialDeep<Model> & { __projection: 'unknown' }
+    : PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
   : P extends true | undefined
-  ? GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
+  ? Cache extends { insertResult: infer InsertResult }
+    ? InsertResult & { __projection: 'all' }
+    : GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
   : DecorateModel<
       OmitNever<{
         [K in keyof P]: K extends keyof AST[Entity]['fields']
@@ -290,7 +300,7 @@ export type OptionalInsertFields<Entity extends string, AST extends AbstractSynt
 }[keyof AST[Entity]['fields']]
 
 //TODO: remove under
-/*
+
 const user: GenerateModel<'User', AST, Scalars, 'relation'> = {
   id: '',
   live: true,
@@ -879,4 +889,3 @@ export type AST = {
     driverSpecification: { rawFilter: never; rawUpdate: never; rawSorts: never }
   }
 }
-*/

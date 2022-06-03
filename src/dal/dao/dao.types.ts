@@ -13,7 +13,7 @@ import {
   SortElement,
   TypeTraversal,
 } from '../..'
-import { OmitNever } from '../../utils/utils.types'
+import { OmitNever, IfAny } from '../../utils/utils.types'
 import { AbstractEntityManager } from '../entity-manager'
 import { LogFunction } from './log/log.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
@@ -111,7 +111,7 @@ export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>
 >
 
 export type DAOParams<T extends DAOGenerics> = {
-  idGenerator?: () => Required<{ [K in T['idFields']]: K extends keyof T['insert'] ? T['insert'][K] : never }>
+  idGenerator?: () => OmitNever<{ [K in T['idFields']]: K extends keyof T['insert'] ? T['insert'][K] : never }>
   entityManager: AbstractEntityManager<string, string, T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
   metadata?: T['metadata']
@@ -142,9 +142,9 @@ export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 export type DefaultGenerationStrategy = 'middleware' | 'generator'
 
 export interface DAO<T extends DAOGenerics> {
-  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P>[]>
-  findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P> | null>
-  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P>[] }>
+  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]>
+  findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']> | null>
+  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
   aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
@@ -156,11 +156,11 @@ export interface DAO<T extends DAOGenerics> {
   deleteAll(params: DeleteParams<T>): Promise<void>
 }
 
-type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N
-export type CachedTypes<IdFields = any, Insert = any, InsertResult = any, Projection = any, Update = any, Filter = any, SortElement = any, RelationsFindParams = any> = {
+export type CachedTypes<IdFields = any, Model = any, Insert = any, PlainModel = any, Projection = any, Update = any, Filter = any, SortElement = any, RelationsFindParams = any> = {
   idFields: IdFields
+  model: Model
   insert: Insert
-  insertResult: InsertResult
+  plainModel: PlainModel
   projection: Projection
   update: Update
   filter: Filter
@@ -186,7 +186,9 @@ export type DAOGenerics<
   ast: AST
   entity: Entity
   idFields: IfAny<AST, any, Types['idFields']>
-  insertResult: IfAny<AST, any, Types['insertResult']>
+  types: Types
+  model: Types['model']
+  plainModel: IfAny<AST, any, Types['plainModel']>
   pureFilter: IfAny<AST, any, Types['filter']>
   filter: IfAny<AST, any, (Types['filter'] | AST[Entity]['driverSpecification']['rawFilter']) & LogicalOperators<Types['filter'] | AST[Entity]['driverSpecification']['rawFilter']>>
   rawFilter: IfAny<AST, any, AST[Entity]['driverSpecification']['rawFilter']>

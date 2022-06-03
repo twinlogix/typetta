@@ -174,15 +174,16 @@ export type InMemoryHotelDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type HotelIdFields = T.IdFields<'Hotel', AST>
-export type HotelInsert = T.Insert<'Hotel', AST, ScalarsSpecification>
-export type HotelInsertResult = T.GenerateModel<'Hotel', AST, ScalarsSpecification, 'relation'>
-export type HotelProjection = T.Projection<'Hotel', AST>
-export type HotelUpdate = T.Update<'Hotel', AST, ScalarsSpecification>
-export type HotelFilter = T.Filter<'Hotel', AST, ScalarsSpecification>
-export type HotelSortElement = T.SortElement<'Hotel', AST>
-export type HotelRelationsFindParams = T.RelationsFindParams<'Hotel', AST, ScalarsSpecification>
+export interface HotelModel extends types.Hotel {}
+export interface HotelInsert extends T.Insert<'Hotel', AST, ScalarsSpecification> {}
+export interface HotelPlainModel extends T.GenerateModel<'Hotel', AST, ScalarsSpecification, 'relation'> {}
+export interface HotelProjection extends T.Projection<'Hotel', AST> {}
+export interface HotelUpdate extends T.Update<'Hotel', AST, ScalarsSpecification> {}
+export interface HotelFilter extends T.Filter<'Hotel', AST, ScalarsSpecification> {}
+export interface HotelSortElement extends T.SortElement<'Hotel', AST> {}
+export interface HotelRelationsFindParams extends T.RelationsFindParams<'Hotel', AST, ScalarsSpecification> {}
 export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, ScalarsSpecification, P>
-export type HotelCachedTypes = T.CachedTypes<HotelIdFields, HotelInsert, HotelInsertResult, HotelProjection, HotelUpdate, HotelFilter, HotelSortElement, HotelRelationsFindParams>
+export type HotelCachedTypes = T.CachedTypes<HotelIdFields, HotelModel, HotelInsert, HotelPlainModel, HotelProjection, HotelUpdate, HotelFilter, HotelSortElement, HotelRelationsFindParams>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Hotel', AST>>(p: P) {
@@ -272,18 +273,20 @@ export type InMemoryReservationDAOParams<MetadataType, OperationMetadataType> = 
 >
 
 export type ReservationIdFields = T.IdFields<'Reservation', AST>
-export type ReservationInsert = T.Insert<'Reservation', AST, ScalarsSpecification>
-export type ReservationInsertResult = T.GenerateModel<'Reservation', AST, ScalarsSpecification, 'relation'>
-export type ReservationProjection = T.Projection<'Reservation', AST>
-export type ReservationUpdate = T.Update<'Reservation', AST, ScalarsSpecification>
-export type ReservationFilter = T.Filter<'Reservation', AST, ScalarsSpecification>
-export type ReservationSortElement = T.SortElement<'Reservation', AST>
-export type ReservationRelationsFindParams = T.RelationsFindParams<'Reservation', AST, ScalarsSpecification>
+export interface ReservationModel extends types.Reservation {}
+export interface ReservationInsert extends T.Insert<'Reservation', AST, ScalarsSpecification> {}
+export interface ReservationPlainModel extends T.GenerateModel<'Reservation', AST, ScalarsSpecification, 'relation'> {}
+export interface ReservationProjection extends T.Projection<'Reservation', AST> {}
+export interface ReservationUpdate extends T.Update<'Reservation', AST, ScalarsSpecification> {}
+export interface ReservationFilter extends T.Filter<'Reservation', AST, ScalarsSpecification> {}
+export interface ReservationSortElement extends T.SortElement<'Reservation', AST> {}
+export interface ReservationRelationsFindParams extends T.RelationsFindParams<'Reservation', AST, ScalarsSpecification> {}
 export type ReservationParams<P extends ReservationProjection> = T.Params<'Reservation', AST, ScalarsSpecification, P>
 export type ReservationCachedTypes = T.CachedTypes<
   ReservationIdFields,
+  ReservationModel,
   ReservationInsert,
-  ReservationInsertResult,
+  ReservationPlainModel,
   ReservationProjection,
   ReservationUpdate,
   ReservationFilter,
@@ -365,15 +368,16 @@ export type InMemoryRoleDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type RoleIdFields = T.IdFields<'Role', AST>
-export type RoleInsert = T.Insert<'Role', AST, ScalarsSpecification>
-export type RoleInsertResult = T.GenerateModel<'Role', AST, ScalarsSpecification, 'relation'>
-export type RoleProjection = T.Projection<'Role', AST>
-export type RoleUpdate = T.Update<'Role', AST, ScalarsSpecification>
-export type RoleFilter = T.Filter<'Role', AST, ScalarsSpecification>
-export type RoleSortElement = T.SortElement<'Role', AST>
-export type RoleRelationsFindParams = T.RelationsFindParams<'Role', AST, ScalarsSpecification>
+export interface RoleModel extends types.Role {}
+export interface RoleInsert extends T.Insert<'Role', AST, ScalarsSpecification> {}
+export interface RolePlainModel extends T.GenerateModel<'Role', AST, ScalarsSpecification, 'relation'> {}
+export interface RoleProjection extends T.Projection<'Role', AST> {}
+export interface RoleUpdate extends T.Update<'Role', AST, ScalarsSpecification> {}
+export interface RoleFilter extends T.Filter<'Role', AST, ScalarsSpecification> {}
+export interface RoleSortElement extends T.SortElement<'Role', AST> {}
+export interface RoleRelationsFindParams extends T.RelationsFindParams<'Role', AST, ScalarsSpecification> {}
 export type RoleParams<P extends RoleProjection> = T.Params<'Role', AST, ScalarsSpecification, P>
-export type RoleCachedTypes = T.CachedTypes<RoleIdFields, RoleInsert, RoleInsertResult, RoleProjection, RoleUpdate, RoleFilter, RoleSortElement, RoleRelationsFindParams>
+export type RoleCachedTypes = T.CachedTypes<RoleIdFields, RoleModel, RoleInsert, RolePlainModel, RoleProjection, RoleUpdate, RoleFilter, RoleSortElement, RoleRelationsFindParams>
 
 export class RoleDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<RoleDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Role', AST>>(p: P) {
@@ -466,15 +470,16 @@ export type InMemoryRoomDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type RoomIdFields = T.IdFields<'Room', AST>
-export type RoomInsert = T.Insert<'Room', AST, ScalarsSpecification>
-export type RoomInsertResult = T.GenerateModel<'Room', AST, ScalarsSpecification, 'relation'>
-export type RoomProjection = T.Projection<'Room', AST>
-export type RoomUpdate = T.Update<'Room', AST, ScalarsSpecification>
-export type RoomFilter = T.Filter<'Room', AST, ScalarsSpecification>
-export type RoomSortElement = T.SortElement<'Room', AST>
-export type RoomRelationsFindParams = T.RelationsFindParams<'Room', AST, ScalarsSpecification>
+export interface RoomModel extends types.Room {}
+export interface RoomInsert extends T.Insert<'Room', AST, ScalarsSpecification> {}
+export interface RoomPlainModel extends T.GenerateModel<'Room', AST, ScalarsSpecification, 'relation'> {}
+export interface RoomProjection extends T.Projection<'Room', AST> {}
+export interface RoomUpdate extends T.Update<'Room', AST, ScalarsSpecification> {}
+export interface RoomFilter extends T.Filter<'Room', AST, ScalarsSpecification> {}
+export interface RoomSortElement extends T.SortElement<'Room', AST> {}
+export interface RoomRelationsFindParams extends T.RelationsFindParams<'Room', AST, ScalarsSpecification> {}
 export type RoomParams<P extends RoomProjection> = T.Params<'Room', AST, ScalarsSpecification, P>
-export type RoomCachedTypes = T.CachedTypes<RoomIdFields, RoomInsert, RoomInsertResult, RoomProjection, RoomUpdate, RoomFilter, RoomSortElement, RoomRelationsFindParams>
+export type RoomCachedTypes = T.CachedTypes<RoomIdFields, RoomModel, RoomInsert, RoomPlainModel, RoomProjection, RoomUpdate, RoomFilter, RoomSortElement, RoomRelationsFindParams>
 
 export class RoomDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'Room', AST>>(p: P) {
@@ -571,15 +576,16 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type UserIdFields = T.IdFields<'User', AST>
-export type UserInsert = T.Insert<'User', AST, ScalarsSpecification>
-export type UserInsertResult = T.GenerateModel<'User', AST, ScalarsSpecification, 'relation'>
-export type UserProjection = T.Projection<'User', AST>
-export type UserUpdate = T.Update<'User', AST, ScalarsSpecification>
-export type UserFilter = T.Filter<'User', AST, ScalarsSpecification>
-export type UserSortElement = T.SortElement<'User', AST>
-export type UserRelationsFindParams = T.RelationsFindParams<'User', AST, ScalarsSpecification>
+export interface UserModel extends types.User {}
+export interface UserInsert extends T.Insert<'User', AST, ScalarsSpecification> {}
+export interface UserPlainModel extends T.GenerateModel<'User', AST, ScalarsSpecification, 'relation'> {}
+export interface UserProjection extends T.Projection<'User', AST> {}
+export interface UserUpdate extends T.Update<'User', AST, ScalarsSpecification> {}
+export interface UserFilter extends T.Filter<'User', AST, ScalarsSpecification> {}
+export interface UserSortElement extends T.SortElement<'User', AST> {}
+export interface UserRelationsFindParams extends T.RelationsFindParams<'User', AST, ScalarsSpecification> {}
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
-export type UserCachedTypes = T.CachedTypes<UserIdFields, UserInsert, UserInsertResult, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
+export type UserCachedTypes = T.CachedTypes<UserIdFields, UserModel, UserInsert, UserPlainModel, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'User', AST>>(p: P) {
@@ -674,18 +680,20 @@ export type InMemoryUserRoleDAOParams<MetadataType, OperationMetadataType> = Omi
 >
 
 export type UserRoleIdFields = T.IdFields<'UserRole', AST>
-export type UserRoleInsert = T.Insert<'UserRole', AST, ScalarsSpecification>
-export type UserRoleInsertResult = T.GenerateModel<'UserRole', AST, ScalarsSpecification, 'relation'>
-export type UserRoleProjection = T.Projection<'UserRole', AST>
-export type UserRoleUpdate = T.Update<'UserRole', AST, ScalarsSpecification>
-export type UserRoleFilter = T.Filter<'UserRole', AST, ScalarsSpecification>
-export type UserRoleSortElement = T.SortElement<'UserRole', AST>
-export type UserRoleRelationsFindParams = T.RelationsFindParams<'UserRole', AST, ScalarsSpecification>
+export interface UserRoleModel extends types.UserRole {}
+export interface UserRoleInsert extends T.Insert<'UserRole', AST, ScalarsSpecification> {}
+export interface UserRolePlainModel extends T.GenerateModel<'UserRole', AST, ScalarsSpecification, 'relation'> {}
+export interface UserRoleProjection extends T.Projection<'UserRole', AST> {}
+export interface UserRoleUpdate extends T.Update<'UserRole', AST, ScalarsSpecification> {}
+export interface UserRoleFilter extends T.Filter<'UserRole', AST, ScalarsSpecification> {}
+export interface UserRoleSortElement extends T.SortElement<'UserRole', AST> {}
+export interface UserRoleRelationsFindParams extends T.RelationsFindParams<'UserRole', AST, ScalarsSpecification> {}
 export type UserRoleParams<P extends UserRoleProjection> = T.Params<'UserRole', AST, ScalarsSpecification, P>
 export type UserRoleCachedTypes = T.CachedTypes<
   UserRoleIdFields,
+  UserRoleModel,
   UserRoleInsert,
-  UserRoleInsertResult,
+  UserRolePlainModel,
   UserRoleProjection,
   UserRoleUpdate,
   UserRoleFilter,

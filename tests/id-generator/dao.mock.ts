@@ -121,15 +121,16 @@ export type InMemoryADAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type AIdFields = T.IdFields<'A', AST>
-export type AInsert = T.Insert<'A', AST, ScalarsSpecification>
-export type AInsertResult = T.GenerateModel<'A', AST, ScalarsSpecification, 'relation'>
-export type AProjection = T.Projection<'A', AST>
-export type AUpdate = T.Update<'A', AST, ScalarsSpecification>
-export type AFilter = T.Filter<'A', AST, ScalarsSpecification>
-export type ASortElement = T.SortElement<'A', AST>
-export type ARelationsFindParams = T.RelationsFindParams<'A', AST, ScalarsSpecification>
+export interface AModel extends types.A {}
+export interface AInsert extends T.Insert<'A', AST, ScalarsSpecification> {}
+export interface APlainModel extends T.GenerateModel<'A', AST, ScalarsSpecification, 'relation'> {}
+export interface AProjection extends T.Projection<'A', AST> {}
+export interface AUpdate extends T.Update<'A', AST, ScalarsSpecification> {}
+export interface AFilter extends T.Filter<'A', AST, ScalarsSpecification> {}
+export interface ASortElement extends T.SortElement<'A', AST> {}
+export interface ARelationsFindParams extends T.RelationsFindParams<'A', AST, ScalarsSpecification> {}
 export type AParams<P extends AProjection> = T.Params<'A', AST, ScalarsSpecification, P>
-export type ACachedTypes = T.CachedTypes<AIdFields, AInsert, AInsertResult, AProjection, AUpdate, AFilter, ASortElement, ARelationsFindParams>
+export type ACachedTypes = T.CachedTypes<AIdFields, AModel, AInsert, APlainModel, AProjection, AUpdate, AFilter, ASortElement, ARelationsFindParams>
 
 export class ADAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'A', AST>>(p: P) {
@@ -190,15 +191,16 @@ export type BDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOP
 export type InMemoryBDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export type BIdFields = T.IdFields<'B', AST>
-export type BInsert = T.Insert<'B', AST, ScalarsSpecification>
-export type BInsertResult = T.GenerateModel<'B', AST, ScalarsSpecification, 'relation'>
-export type BProjection = T.Projection<'B', AST>
-export type BUpdate = T.Update<'B', AST, ScalarsSpecification>
-export type BFilter = T.Filter<'B', AST, ScalarsSpecification>
-export type BSortElement = T.SortElement<'B', AST>
-export type BRelationsFindParams = T.RelationsFindParams<'B', AST, ScalarsSpecification>
+export interface BModel extends types.B {}
+export interface BInsert extends T.Insert<'B', AST, ScalarsSpecification> {}
+export interface BPlainModel extends T.GenerateModel<'B', AST, ScalarsSpecification, 'relation'> {}
+export interface BProjection extends T.Projection<'B', AST> {}
+export interface BUpdate extends T.Update<'B', AST, ScalarsSpecification> {}
+export interface BFilter extends T.Filter<'B', AST, ScalarsSpecification> {}
+export interface BSortElement extends T.SortElement<'B', AST> {}
+export interface BRelationsFindParams extends T.RelationsFindParams<'B', AST, ScalarsSpecification> {}
 export type BParams<P extends BProjection> = T.Params<'B', AST, ScalarsSpecification, P>
-export type BCachedTypes = T.CachedTypes<BIdFields, BInsert, BInsertResult, BProjection, BUpdate, BFilter, BSortElement, BRelationsFindParams>
+export type BCachedTypes = T.CachedTypes<BIdFields, BModel, BInsert, BPlainModel, BProjection, BUpdate, BFilter, BSortElement, BRelationsFindParams>
 
 export class BDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'B', AST>>(p: P) {
@@ -265,15 +267,16 @@ export type InMemoryCDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type CIdFields = T.IdFields<'C', AST>
-export type CInsert = T.Insert<'C', AST, ScalarsSpecification>
-export type CInsertResult = T.GenerateModel<'C', AST, ScalarsSpecification, 'relation'>
-export type CProjection = T.Projection<'C', AST>
-export type CUpdate = T.Update<'C', AST, ScalarsSpecification>
-export type CFilter = T.Filter<'C', AST, ScalarsSpecification>
-export type CSortElement = T.SortElement<'C', AST>
-export type CRelationsFindParams = T.RelationsFindParams<'C', AST, ScalarsSpecification>
+export interface CModel extends types.C {}
+export interface CInsert extends T.Insert<'C', AST, ScalarsSpecification> {}
+export interface CPlainModel extends T.GenerateModel<'C', AST, ScalarsSpecification, 'relation'> {}
+export interface CProjection extends T.Projection<'C', AST> {}
+export interface CUpdate extends T.Update<'C', AST, ScalarsSpecification> {}
+export interface CFilter extends T.Filter<'C', AST, ScalarsSpecification> {}
+export interface CSortElement extends T.SortElement<'C', AST> {}
+export interface CRelationsFindParams extends T.RelationsFindParams<'C', AST, ScalarsSpecification> {}
 export type CParams<P extends CProjection> = T.Params<'C', AST, ScalarsSpecification, P>
-export type CCachedTypes = T.CachedTypes<CIdFields, CInsert, CInsertResult, CProjection, CUpdate, CFilter, CSortElement, CRelationsFindParams>
+export type CCachedTypes = T.CachedTypes<CIdFields, CModel, CInsert, CPlainModel, CProjection, CUpdate, CFilter, CSortElement, CRelationsFindParams>
 
 export class CDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'C', AST>>(p: P) {
@@ -340,15 +343,16 @@ export type InMemoryDDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type DIdFields = T.IdFields<'D', AST>
-export type DInsert = T.Insert<'D', AST, ScalarsSpecification>
-export type DInsertResult = T.GenerateModel<'D', AST, ScalarsSpecification, 'relation'>
-export type DProjection = T.Projection<'D', AST>
-export type DUpdate = T.Update<'D', AST, ScalarsSpecification>
-export type DFilter = T.Filter<'D', AST, ScalarsSpecification>
-export type DSortElement = T.SortElement<'D', AST>
-export type DRelationsFindParams = T.RelationsFindParams<'D', AST, ScalarsSpecification>
+export interface DModel extends types.D {}
+export interface DInsert extends T.Insert<'D', AST, ScalarsSpecification> {}
+export interface DPlainModel extends T.GenerateModel<'D', AST, ScalarsSpecification, 'relation'> {}
+export interface DProjection extends T.Projection<'D', AST> {}
+export interface DUpdate extends T.Update<'D', AST, ScalarsSpecification> {}
+export interface DFilter extends T.Filter<'D', AST, ScalarsSpecification> {}
+export interface DSortElement extends T.SortElement<'D', AST> {}
+export interface DRelationsFindParams extends T.RelationsFindParams<'D', AST, ScalarsSpecification> {}
 export type DParams<P extends DProjection> = T.Params<'D', AST, ScalarsSpecification, P>
-export type DCachedTypes = T.CachedTypes<DIdFields, DInsert, DInsertResult, DProjection, DUpdate, DFilter, DSortElement, DRelationsFindParams>
+export type DCachedTypes = T.CachedTypes<DIdFields, DModel, DInsert, DPlainModel, DProjection, DUpdate, DFilter, DSortElement, DRelationsFindParams>
 
 export class DDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'D', AST>>(p: P) {
@@ -409,15 +413,16 @@ export type EDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOPa
 export type InMemoryEDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
 export type EIdFields = T.IdFields<'E', AST>
-export type EInsert = T.Insert<'E', AST, ScalarsSpecification>
-export type EInsertResult = T.GenerateModel<'E', AST, ScalarsSpecification, 'relation'>
-export type EProjection = T.Projection<'E', AST>
-export type EUpdate = T.Update<'E', AST, ScalarsSpecification>
-export type EFilter = T.Filter<'E', AST, ScalarsSpecification>
-export type ESortElement = T.SortElement<'E', AST>
-export type ERelationsFindParams = T.RelationsFindParams<'E', AST, ScalarsSpecification>
+export interface EModel extends types.E {}
+export interface EInsert extends T.Insert<'E', AST, ScalarsSpecification> {}
+export interface EPlainModel extends T.GenerateModel<'E', AST, ScalarsSpecification, 'relation'> {}
+export interface EProjection extends T.Projection<'E', AST> {}
+export interface EUpdate extends T.Update<'E', AST, ScalarsSpecification> {}
+export interface EFilter extends T.Filter<'E', AST, ScalarsSpecification> {}
+export interface ESortElement extends T.SortElement<'E', AST> {}
+export interface ERelationsFindParams extends T.RelationsFindParams<'E', AST, ScalarsSpecification> {}
 export type EParams<P extends EProjection> = T.Params<'E', AST, ScalarsSpecification, P>
-export type ECachedTypes = T.CachedTypes<EIdFields, EInsert, EInsertResult, EProjection, EUpdate, EFilter, ESortElement, ERelationsFindParams>
+export type ECachedTypes = T.CachedTypes<EIdFields, EModel, EInsert, EPlainModel, EProjection, EUpdate, EFilter, ESortElement, ERelationsFindParams>
 
 export class EDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'E', AST>>(p: P) {
@@ -484,15 +489,16 @@ export type InMemoryFDAOParams<MetadataType, OperationMetadataType> = Omit<
 >
 
 export type FIdFields = T.IdFields<'F', AST>
-export type FInsert = T.Insert<'F', AST, ScalarsSpecification>
-export type FInsertResult = T.GenerateModel<'F', AST, ScalarsSpecification, 'relation'>
-export type FProjection = T.Projection<'F', AST>
-export type FUpdate = T.Update<'F', AST, ScalarsSpecification>
-export type FFilter = T.Filter<'F', AST, ScalarsSpecification>
-export type FSortElement = T.SortElement<'F', AST>
-export type FRelationsFindParams = T.RelationsFindParams<'F', AST, ScalarsSpecification>
+export interface FModel extends types.F {}
+export interface FInsert extends T.Insert<'F', AST, ScalarsSpecification> {}
+export interface FPlainModel extends T.GenerateModel<'F', AST, ScalarsSpecification, 'relation'> {}
+export interface FProjection extends T.Projection<'F', AST> {}
+export interface FUpdate extends T.Update<'F', AST, ScalarsSpecification> {}
+export interface FFilter extends T.Filter<'F', AST, ScalarsSpecification> {}
+export interface FSortElement extends T.SortElement<'F', AST> {}
+export interface FRelationsFindParams extends T.RelationsFindParams<'F', AST, ScalarsSpecification> {}
 export type FParams<P extends FProjection> = T.Params<'F', AST, ScalarsSpecification, P>
-export type FCachedTypes = T.CachedTypes<FIdFields, FInsert, FInsertResult, FProjection, FUpdate, FFilter, FSortElement, FRelationsFindParams>
+export type FCachedTypes = T.CachedTypes<FIdFields, FModel, FInsert, FPlainModel, FProjection, FUpdate, FFilter, FSortElement, FRelationsFindParams>
 
 export class FDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {
   public static projection<P extends T.Projection<'F', AST>>(p: P) {

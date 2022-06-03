@@ -77,10 +77,10 @@ export type ModelProjection<T extends DAOGenerics, P extends AnyProjection<T['pr
     ? T['retrieveAll'] & { __projection: 'all' }
     : S extends 'specific'
     ? P extends T['projection']
-      ? Expand<StaticModelProjection<T['insertResult'], T['projection'], P>>
+      ? Expand<StaticModelProjection<T['plainModel'], T['projection'], P>>
       : never
     : S extends 'unknown'
-    ? PartialDeep<T['insertResult']> & { __projection: 'unknown' }
+    ? PartialDeep<T['plainModel']> & { __projection: 'unknown' }
     : { __projection: 'empty' }
   : never
 */
