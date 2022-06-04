@@ -121,8 +121,6 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       const sort = args?.sorts
         ? [
             {
-              // eslint-disable-next-line
-              // @ts-ignore
               $sort: args.sorts.reduce<object>((p, s) => {
                 const [k, v] = Object.entries(s)[0]
                 return {

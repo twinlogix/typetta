@@ -39,13 +39,7 @@ export type Projection<Entity extends string, AST extends AbstractSyntaxTree> =
       [Field in keyof AST[Entity]['fields']]?: true | (AST[Entity]['fields'][Field]['type'] extends 'embedded' | 'relation' ? Projection<AST[Entity]['fields'][Field]['astName'], AST> : never)
     }
 
-export type Project<
-  Entity extends string,
-  AST extends AbstractSyntaxTree,
-  Scalars extends AbstractScalars,
-  P extends Projection<Entity, AST> | true | undefined | GraphQLResolveInfo,
-  Cache extends CachedTypes | null = null,
-> = 0 extends 1 & Cache
+export type Project<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P, Cache extends CachedTypes | null = null> = 0 extends 1 & Cache
   ? any
   : P extends Record<string, never>
   ? { __projection: 'empty' }
@@ -70,8 +64,7 @@ export type Project<
                 ? Type extends 'scalar'
                   ? Scalars[ASTName]['type']
                   : GenerateModel<ASTName, AST, Scalars, 'relation'>
-                : //@ts-ignore
-                  Project<ASTName, AST, Scalars, P[K]>
+                : Project<ASTName, AST, Scalars, P[K]>
               : never
             : never
           : never
@@ -80,7 +73,7 @@ export type Project<
       AST
     > & { __projection: P }
 
-export type Params<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P extends Projection<Entity, AST> | true> = P extends Record<string, never>
+export type Params<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P> = P extends Record<string, never>
   ? { __projection: 'empty' }
   : [Projection<Entity, AST>] extends [P]
   ? PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
@@ -95,8 +88,7 @@ export type Params<Entity extends string, AST extends AbstractSyntaxTree, Scalar
                 ? Type extends 'scalar'
                   ? Scalars[ASTName]['type']
                   : GenerateModel<ASTName, AST, Scalars, 'relation'>
-                : //@ts-ignore
-                  Project<ASTName, AST, Scalars, P[K]>
+                : Params<ASTName, AST, Scalars, P[K]>
               : never
             : never
           : never

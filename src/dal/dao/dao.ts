@@ -78,8 +78,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       beforeInsert: async (params, context) => {
         const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.generationStrategy === 'generator' && v.type === 'scalar' ? [[k, v] as const] : []))
         const record = fieldsToGenerate.reduce((record, [key, schema]) => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore
           const generator = this.entityManager.adapters[context.daoDriver][schema.scalar].generate
           if (record[key] == null && generator) {
             return {
@@ -295,24 +293,18 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       (params.operationId ?? '') +
       filterKey +
       '-' +
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      objectHash(params.projection || null, { respectType: false, unorderedArrays: true }) +
-      objectHash(params.sorts || null, { respectType: false, unorderedArrays: true }) +
-      objectHash(params.metadata || null, { respectType: false, unorderedArrays: true }) +
-      objectHash(params.options || null, { respectType: false, unorderedArrays: true }) +
-      objectHash(params.relations || null, { respectType: false, unorderedArrays: true })
+      objectHash({ sort: params.sorts, projection: params.projection, metadata: params.metadata, relations: params.relations, maxDepth: params.maxDepth } || null, {
+        respectType: false,
+      })
     const hasKeyF = (record: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>, key: T['filter'][K]) => getTraversing(record, filterKey as string).some((v) => equals(v, key))
     const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { in: values } }))
     if (!this.dataLoaders.has(hash)) {
       const newDataLoader = new DataLoader<T['filter'][K], PartialDeep<T['model']>[]>(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
         async (keys) => {
           const proj = _.cloneDeep(params.projection)
           setTraversing(proj, filterKey as string, true)
           const records = await this.findAll({ ...params, projection: proj, filter: buildFilterF(filterKey, keys) })
-          return keys.map((key) => records.filter((r) => hasKeyF(r, key)))
+          return keys.map((key) => records.filter((r) => hasKeyF(r, key))) as PartialDeep<T['model']>[]
         },
         {
           maxBatchSize: this.pageSize,

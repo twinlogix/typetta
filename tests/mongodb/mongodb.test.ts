@@ -4,7 +4,7 @@
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock, Projection } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { AST, EntityManager, ScalarsSpecification, UserDAO, UserPlainModel } from './dao.mock'
+import { AST, EntityManager, ScalarsSpecification, UserDAO, UserParams, UserPlainModel } from './dao.mock'
 import { State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -260,7 +260,7 @@ test('safe find', async () => {
   expect(response[0].live).toBe(true)
 
   // Static projection
-  const response1 = await dao.user.findOne({ filter: { id: 'u2' }, projection: { live: true } })
+  const response1 = await dao.user.findOne({ filter: { id: 'u2' }, projection: UserDAO.projection({ live: true }) })
   typeAssert<Test<typeof response1, { live: boolean; __projection: { live: true } } | null>>()
   expect(response1).toBe(null)
 
