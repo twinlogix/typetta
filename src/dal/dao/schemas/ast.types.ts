@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Difference, OmitNever } from '../../../utils/utils.types'
 import { CachedTypes } from '../dao.types'
+import { AnyProjection } from '../projections/projections.types'
 import { SortDirection } from '../sorts/sorts.types'
 import { GraphQLResolveInfo } from 'graphql'
 import { PartialDeep } from 'type-fest'
@@ -39,39 +40,49 @@ export type Projection<Entity extends string, AST extends AbstractSyntaxTree> =
       [Field in keyof AST[Entity]['fields']]?: true | (AST[Entity]['fields'][Field]['type'] extends 'embedded' | 'relation' ? Projection<AST[Entity]['fields'][Field]['astName'], AST> : never)
     }
 
+type Selector<ProjectionType extends Record<string, unknown>, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = Record<string, unknown> extends Required<P>
+  ? 'empty'
+  : [true] extends [P]
+  ? 'all'
+  : P extends undefined
+  ? 'all'
+  : [ProjectionType] extends [P]
+  ? 'unknown'
+  : P extends GraphQLResolveInfo
+  ? 'unknown'
+  : 'specific'
+
 export type Project<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P, Cache extends CachedTypes | null = null> = 0 extends 1 & Cache
   ? any
-  : P extends Record<string, never>
-  ? { __projection: 'empty' }
-  : [Projection<Entity, AST>] extends [P]
-  ? Cache extends { model: infer Model }
-    ? PartialDeep<Model> & { __projection: 'unknown' }
-    : PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
-  : P extends GraphQLResolveInfo
-  ? Cache extends { model: infer Model }
-    ? PartialDeep<Model> & { __projection: 'unknown' }
-    : PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
-  : P extends true | undefined
-  ? Cache extends { insertResult: infer InsertResult }
-    ? InsertResult & { __projection: 'all' }
-    : GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
-  : DecorateModel<
-      OmitNever<{
-        [K in keyof P]: K extends keyof AST[Entity]['fields']
-          ? AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
-            ? ASTName extends string
-              ? P[K] extends true
-                ? Type extends 'scalar'
-                  ? Scalars[ASTName]['type']
-                  : GenerateModel<ASTName, AST, Scalars, 'relation'>
-                : Project<ASTName, AST, Scalars, P[K]>
+  : Selector<Projection<Entity, AST>, P> extends infer S
+  ? S extends 'empty'
+    ? { __projection: 'empty' }
+    : S extends 'unknown'
+    ? Cache extends { model: infer Model }
+      ? PartialDeep<Model> & { __projection: 'unknown' }
+      : PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
+    : S extends 'all'
+    ? Cache extends { insertResult: infer InsertResult }
+      ? InsertResult & { __projection: 'all' }
+      : GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
+    : DecorateModel<
+        OmitNever<{
+          [K in keyof P]: K extends keyof AST[Entity]['fields']
+            ? AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
+              ? ASTName extends string
+                ? P[K] extends true
+                  ? Type extends 'scalar'
+                    ? Scalars[ASTName]['type']
+                    : GenerateModel<ASTName, AST, Scalars, 'relation'>
+                  : Project<ASTName, AST, Scalars, P[K]>
+                : never
               : never
             : never
-          : never
-      }>,
-      Entity,
-      AST
-    > & { __projection: P }
+        }>,
+        Entity,
+        AST
+      > & { __projection: P }
+  : never
 
 export type Params<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P> = P extends Record<string, never>
   ? { __projection: 'empty' }
