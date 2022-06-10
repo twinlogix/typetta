@@ -59,6 +59,8 @@ type User @entity @sql {
   bestFriend: User @innerRef
 
   friends: [User] @relationEntityRef(entity: "Friends", refThis: { refFrom: "from" }, refOther: { refFrom: "to" })
+
+  embeddedDog: Dog
 }
 
 type Friends @entity @sql {

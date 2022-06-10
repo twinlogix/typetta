@@ -2,7 +2,7 @@ import { InMemoryDAOGenerics } from './dao.memory.types'
 import { MockIdSpecification } from './utils.memory'
 
 type InMemoryState<T extends InMemoryDAOGenerics> = {
-  idIndex: Map<T['idType'] | string, number>
+  idIndex: Map<T['idFields'] | string, number>
   emptyIndexes: number[]
   memory: ({ [key: string]: unknown } | null)[]
 }

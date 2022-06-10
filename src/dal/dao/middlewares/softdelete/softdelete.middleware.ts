@@ -4,6 +4,7 @@ import { buildMiddleware } from '../utils/builder'
 
 export function softDelete<T extends DAOGenerics>(input: (args: MiddlewareInput<T>, context: MiddlewareContext<T>) => { filter?: T['filter']; changes?: T['update'] } | void): DAOMiddleware<T> {
   return buildMiddleware({
+    name: 'Typetta - Soft delete',
     beforeDelete: async (params, context) => {
       const i = input({ operation: 'delete', params }, context)
       if (!i || !i.changes) {

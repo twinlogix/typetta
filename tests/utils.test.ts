@@ -12,8 +12,9 @@ import {
   intersectProjections,
   isEmptyProjection,
   setTraversing,
+  Projection,
 } from '../src'
-import { UserProjection } from './mongodb/dao.mock'
+import { AST } from './mongodb/dao.mock'
 import { ApolloServer } from 'apollo-server'
 import { createTestClient } from 'apollo-server-testing'
 import { getNamedType, GraphQLResolveInfo } from 'graphql'
@@ -407,6 +408,7 @@ test('intersectProgections test', () => {
   typeAssert<typeof m22>()
 })
 
+type UserProjection = Projection<'User', AST>
 test('mergeStaticProjection', () => {
   const proj: UserProjection = { firstName: true, live: true }
   const p1 = projection<UserProjection>().merge({ amount: true }, { live: true })

@@ -3,7 +3,7 @@ import { DAOMiddleware } from '../middlewares.types'
 import { buildMiddleware } from '../utils/builder'
 
 const ERROR_PREFIX = '[Tenant Middleware] '
-export function tenantSecurityPolicy<T extends DAOGenerics, TenantIdKey extends keyof T['model'] & keyof T['metadata']>(args: {
+export function tenantSecurityPolicy<T extends DAOGenerics, TenantIdKey extends keyof T['plainModel'] & keyof T['metadata']>(args: {
   tenantKey: TenantIdKey
   rawOperations?: 'forbidden' | 'warning' | 'allowed'
 }): DAOMiddleware<T> {

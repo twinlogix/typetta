@@ -1,6 +1,7 @@
-import { DriverDataTypeAdapterMap } from './drivers/drivers.adapters'
+import { AbstractScalars } from '..'
 import { AbstractDAO } from './dao/dao'
 import { DAOGenerics, TransactionData } from './dao/dao.types'
+import { DriverDataTypeAdapterMap } from './drivers/drivers.adapters'
 import { DefaultModelScalars } from './drivers/drivers.types'
 import { inMemoryAdapters } from './drivers/in-memory/adapters.memory'
 import { mongoDbAdapters } from './drivers/no-sql/mongodb/adapters.mongodb'
@@ -8,21 +9,26 @@ import { knexJsAdapters } from './drivers/sql/knexjs/adapters.knexjs'
 import { Knex } from 'knex'
 import { ClientSession } from 'mongodb'
 
-export abstract class AbstractEntityManager<MongoDBDatasources extends string, KnexDataSources extends string, ScalarsType extends DefaultModelScalars = DefaultModelScalars, MetadataType = unknown> {
+export abstract class AbstractEntityManager<
+  MongoDBDatasources extends string,
+  KnexDataSources extends string,
+  Scalars extends AbstractScalars<keyof DefaultModelScalars> = DefaultModelScalars,
+  MetadataType = unknown,
+> {
   public Transaction: this & { __transaction_enabled__: true } = this as this & { __transaction_enabled__: true }
 
-  public adapters: DriverDataTypeAdapterMap<ScalarsType>
+  public adapters: DriverDataTypeAdapterMap<Scalars>
   public metadata?: MetadataType
   private transactionData: TransactionData<MongoDBDatasources, KnexDataSources> | null = null
 
-  public constructor(args?: { scalars?: DriverDataTypeAdapterMap<ScalarsType>; metadata?: MetadataType; idGenerators?: { [K in keyof ScalarsType]?: () => ScalarsType[K] } }) {
+  public constructor(args?: { scalars?: DriverDataTypeAdapterMap<Scalars>; metadata?: MetadataType; idGenerators?: { [K in keyof Scalars]?: () => Scalars[K] } }) {
     this.adapters = args?.scalars
       ? args.scalars
       : ({
           knex: knexJsAdapters,
           mongo: mongoDbAdapters,
           memory: inMemoryAdapters,
-        } as DriverDataTypeAdapterMap<ScalarsType>)
+        } as DriverDataTypeAdapterMap<Scalars>)
     this.metadata = args?.metadata
   }
 

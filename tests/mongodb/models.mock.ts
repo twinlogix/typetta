@@ -176,6 +176,7 @@ export type User = {
   credentials?: Maybe<Array<Maybe<UsernamePasswordCredentials>>>
   dogs?: Maybe<Array<Dog>>
   embeddedPost?: Maybe<Post>
+  embeddedUser?: Maybe<EmbeddedUser2>
   firstName?: Maybe<Scalars['String']>
   friends?: Maybe<Array<User>>
   friendsId?: Maybe<Array<Scalars['ID']>>

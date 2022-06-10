@@ -2,10 +2,242 @@ import * as T from '../../src'
 import * as types from './models.mock'
 import { Knex } from 'knex'
 
-export type AddressExcludedFields = never
-export type AddressRelationFields = 'cities'
+export type ScalarsSpecification = {
+  ID: { type: types.Scalars['ID']; isTextual: false; isQuantitative: false }
+  String: { type: types.Scalars['String']; isTextual: true; isQuantitative: false }
+  Boolean: { type: types.Scalars['Boolean']; isTextual: false; isQuantitative: false }
+  Int: { type: types.Scalars['Int']; isTextual: false; isQuantitative: true }
+  Float: { type: types.Scalars['Float']; isTextual: false; isQuantitative: true }
+  Coordinates: { type: types.Scalars['Coordinates']; isTextual: false; isQuantitative: false }
+  Decimal: { type: types.Scalars['Decimal']; isTextual: false; isQuantitative: false }
+  JSON: { type: types.Scalars['JSON']; isTextual: false; isQuantitative: false }
+  Live: { type: types.Scalars['Live']; isTextual: false; isQuantitative: false }
+  LocalizedString: { type: types.Scalars['LocalizedString']; isTextual: false; isQuantitative: false }
+  Password: { type: types.Scalars['Password']; isTextual: false; isQuantitative: false }
+}
 
-export function addressSchema(): T.Schema<types.Scalars> {
+export type AST = {
+  Address: {
+    fields: {
+      cities: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'City'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  Another: {
+    fields: { test: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' } }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
+  }
+  Author: {
+    fields: {
+      books: {
+        type: 'relation'
+        relation: 'relationEntity'
+        isList: true
+        astName: 'Book'
+        isRequired: false
+        isListElementRequired: false
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  AuthorBook: {
+    fields: {
+      authorId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      bookId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  Book: {
+    fields: {
+      authors: {
+        type: 'relation'
+        relation: 'relationEntity'
+        isList: true
+        astName: 'Author'
+        isRequired: false
+        isListElementRequired: false
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  City: {
+    fields: {
+      addressId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      computedAddressName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+      computedName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  DefaultFieldsEntity: {
+    fields: {
+      creationDate: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
+      live: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      opt1: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
+      opt2: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  Device: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  Dog: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      owner: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      ownerId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  Friends: {
+    fields: {
+      from: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      to: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  Organization: {
+    fields: {
+      address: { type: 'embedded'; isList: false; astName: 'Address'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      computedName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: true; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      vatNumber: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  User: {
+    fields: {
+      amount: { type: 'scalar'; isList: false; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      amounts: { type: 'scalar'; isList: true; astName: 'Decimal'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      bestFriend: {
+        type: 'relation'
+        relation: 'inner'
+        isList: false
+        astName: 'User'
+        isRequired: false
+        isListElementRequired: false
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      bestFriendId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      credentials: {
+        type: 'embedded'
+        isList: false
+        astName: 'UsernamePasswordCredentials'
+        isRequired: false
+        isListElementRequired: false
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      dogs: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'Dog'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      embeddedDog: { type: 'embedded'; isList: false; astName: 'Dog'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      firstName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      friends: {
+        type: 'relation'
+        relation: 'relationEntity'
+        isList: true
+        astName: 'User'
+        isRequired: false
+        isListElementRequired: false
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      lastName: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      live: { type: 'scalar'; isList: false; astName: 'Boolean'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      localization: { type: 'scalar'; isList: false; astName: 'Coordinates'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      title: { type: 'scalar'; isList: false; astName: 'LocalizedString'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  UsernamePasswordCredentials: {
+    fields: {
+      another: { type: 'embedded'; isList: false; astName: 'Another'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      password: { type: 'scalar'; isList: false; astName: 'Password'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      username: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
+  }
+}
+
+export function addressSchema(): T.Schema<ScalarsSpecification> {
   return {
     cities: {
       type: 'relation',
@@ -27,60 +259,13 @@ export function addressSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type AddressFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type AddressFilter = AddressFilterFields & T.LogicalOperators<AddressFilterFields | AddressRawFilter>
-export type AddressRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AddressRelations = {
-  cities?: {
-    filter?: CityFilter
-    sorts?: CitySort[] | CityRawSort
-    skip?: number
-    limit?: number
-    relations?: CityRelations
-  }
-}
-
-export type AddressProjection = {
-  cities?: CityProjection | boolean
-  id?: boolean
-}
-export type AddressParam<P extends AddressProjection> = T.ParamProjection<types.Address, AddressProjection, P>
-
-export type AddressSortKeys = 'id'
-export type AddressSort = Partial<Record<AddressSortKeys, T.SortDirection>>
-export type AddressRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AddressUpdate = {
-  id?: types.Scalars['ID'] | null
-}
-export type AddressRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AddressInsert = {
-  id?: null | types.Scalars['ID']
-}
-
 type AddressDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.Address,
-  'id',
-  'ID',
-  AddressFilter,
-  AddressRawFilter,
-  AddressRelations,
-  AddressProjection,
-  AddressSort,
-  AddressRawSort,
-  AddressInsert,
-  AddressUpdate,
-  AddressRawUpdate,
-  AddressExcludedFields,
-  AddressRelationFields,
+  'Address',
+  AST,
+  ScalarsSpecification,
+  AddressCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'address',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type AddressDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<AddressDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
@@ -89,14 +274,35 @@ export type InMemoryAddressDAOParams<MetadataType, OperationMetadataType> = Omit
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type AddressIdFields = T.IdFields<'Address', AST>
+export interface AddressModel extends types.Address {}
+export interface AddressInsert extends T.Insert<'Address', AST, ScalarsSpecification> {}
+export interface AddressPlainModel extends T.GenerateModel<'Address', AST, ScalarsSpecification, 'relation'> {}
+export interface AddressProjection extends T.Projection<'Address', AST> {}
+export interface AddressUpdate extends T.Update<'Address', AST, ScalarsSpecification> {}
+export interface AddressFilter extends T.Filter<'Address', AST, ScalarsSpecification> {}
+export interface AddressSortElement extends T.SortElement<'Address', AST> {}
+export interface AddressRelationsFindParams extends T.RelationsFindParams<'Address', AST, ScalarsSpecification> {}
+export type AddressParams<P extends AddressProjection> = T.Params<'Address', AST, ScalarsSpecification, P>
+export type AddressCachedTypes = T.CachedTypes<
+  AddressIdFields,
+  AddressModel,
+  AddressInsert,
+  AddressPlainModel,
+  AddressProjection,
+  AddressUpdate,
+  AddressFilter,
+  AddressSortElement,
+  AddressRelationsFindParams
+>
+
 export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends AddressProjection>(p: P) {
+  public static projection<P extends T.Projection<'Address', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): T.SelectProjection<AddressProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<AddressProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Address', AST>, P2 extends T.Projection<'Address', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Address', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Address', AST>, P1, P2>
   }
-
   public constructor(params: AddressDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -106,13 +312,12 @@ export class AddressDAO<MetadataType, OperationMetadataType> extends T.AbstractK
 }
 
 export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AddressDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends AddressProjection>(p: P) {
+  public static projection<P extends T.Projection<'Address', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AddressProjection, P2 extends AddressProjection>(p1: P1, p2: P2): T.SelectProjection<AddressProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<AddressProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Address', AST>, P2 extends T.Projection<'Address', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Address', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Address', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryAddressDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -120,8 +325,7 @@ export class InMemoryAddressDAO<MetadataType, OperationMetadataType> extends T.A
     })
   }
 }
-
-export function anotherSchema(): T.Schema<types.Scalars> {
+export function anotherSchema(): T.Schema<ScalarsSpecification> {
   return {
     test: {
       type: 'scalar',
@@ -130,20 +334,7 @@ export function anotherSchema(): T.Schema<types.Scalars> {
     },
   }
 }
-
-export type AnotherProjection = {
-  test?: boolean
-}
-export type AnotherParam<P extends AnotherProjection> = T.ParamProjection<types.Another, AnotherProjection, P>
-
-export type AnotherInsert = {
-  test?: null | types.Scalars['String']
-}
-
-export type AuthorExcludedFields = never
-export type AuthorRelationFields = 'books'
-
-export function authorSchema(): T.Schema<types.Scalars> {
+export function authorSchema(): T.Schema<ScalarsSpecification> {
   return {
     books: {
       type: 'relation',
@@ -171,60 +362,13 @@ export function authorSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type AuthorFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type AuthorFilter = AuthorFilterFields & T.LogicalOperators<AuthorFilterFields | AuthorRawFilter>
-export type AuthorRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AuthorRelations = {
-  books?: {
-    filter?: BookFilter
-    sorts?: BookSort[] | BookRawSort
-    skip?: number
-    limit?: number
-    relations?: BookRelations
-  }
-}
-
-export type AuthorProjection = {
-  books?: BookProjection | boolean
-  id?: boolean
-}
-export type AuthorParam<P extends AuthorProjection> = T.ParamProjection<types.Author, AuthorProjection, P>
-
-export type AuthorSortKeys = 'id'
-export type AuthorSort = Partial<Record<AuthorSortKeys, T.SortDirection>>
-export type AuthorRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AuthorUpdate = {
-  id?: types.Scalars['ID'] | null
-}
-export type AuthorRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AuthorInsert = {
-  id?: null | types.Scalars['ID']
-}
-
 type AuthorDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.Author,
-  'id',
-  'ID',
-  AuthorFilter,
-  AuthorRawFilter,
-  AuthorRelations,
-  AuthorProjection,
-  AuthorSort,
-  AuthorRawSort,
-  AuthorInsert,
-  AuthorUpdate,
-  AuthorRawUpdate,
-  AuthorExcludedFields,
-  AuthorRelationFields,
+  'Author',
+  AST,
+  ScalarsSpecification,
+  AuthorCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'author',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type AuthorDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<AuthorDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
@@ -233,14 +377,25 @@ export type InMemoryAuthorDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type AuthorIdFields = T.IdFields<'Author', AST>
+export interface AuthorModel extends types.Author {}
+export interface AuthorInsert extends T.Insert<'Author', AST, ScalarsSpecification> {}
+export interface AuthorPlainModel extends T.GenerateModel<'Author', AST, ScalarsSpecification, 'relation'> {}
+export interface AuthorProjection extends T.Projection<'Author', AST> {}
+export interface AuthorUpdate extends T.Update<'Author', AST, ScalarsSpecification> {}
+export interface AuthorFilter extends T.Filter<'Author', AST, ScalarsSpecification> {}
+export interface AuthorSortElement extends T.SortElement<'Author', AST> {}
+export interface AuthorRelationsFindParams extends T.RelationsFindParams<'Author', AST, ScalarsSpecification> {}
+export type AuthorParams<P extends AuthorProjection> = T.Params<'Author', AST, ScalarsSpecification, P>
+export type AuthorCachedTypes = T.CachedTypes<AuthorIdFields, AuthorModel, AuthorInsert, AuthorPlainModel, AuthorProjection, AuthorUpdate, AuthorFilter, AuthorSortElement, AuthorRelationsFindParams>
+
 export class AuthorDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends AuthorProjection>(p: P) {
+  public static projection<P extends T.Projection<'Author', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AuthorProjection, P2 extends AuthorProjection>(p1: P1, p2: P2): T.SelectProjection<AuthorProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<AuthorProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Author', AST>, P2 extends T.Projection<'Author', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Author', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Author', AST>, P1, P2>
   }
-
   public constructor(params: AuthorDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -250,13 +405,12 @@ export class AuthorDAO<MetadataType, OperationMetadataType> extends T.AbstractKn
 }
 
 export class InMemoryAuthorDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends AuthorProjection>(p: P) {
+  public static projection<P extends T.Projection<'Author', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AuthorProjection, P2 extends AuthorProjection>(p1: P1, p2: P2): T.SelectProjection<AuthorProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<AuthorProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Author', AST>, P2 extends T.Projection<'Author', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Author', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Author', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryAuthorDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -264,11 +418,7 @@ export class InMemoryAuthorDAO<MetadataType, OperationMetadataType> extends T.Ab
     })
   }
 }
-
-export type AuthorBookExcludedFields = never
-export type AuthorBookRelationFields = never
-
-export function authorBookSchema(): T.Schema<types.Scalars> {
+export function authorBookSchema(): T.Schema<ScalarsSpecification> {
   return {
     authorId: {
       type: 'scalar',
@@ -290,59 +440,13 @@ export function authorBookSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type AuthorBookFilterFields = {
-  authorId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  bookId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type AuthorBookFilter = AuthorBookFilterFields & T.LogicalOperators<AuthorBookFilterFields | AuthorBookRawFilter>
-export type AuthorBookRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AuthorBookRelations = Record<never, string>
-
-export type AuthorBookProjection = {
-  authorId?: boolean
-  bookId?: boolean
-  id?: boolean
-}
-export type AuthorBookParam<P extends AuthorBookProjection> = T.ParamProjection<types.AuthorBook, AuthorBookProjection, P>
-
-export type AuthorBookSortKeys = 'authorId' | 'bookId' | 'id'
-export type AuthorBookSort = Partial<Record<AuthorBookSortKeys, T.SortDirection>>
-export type AuthorBookRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AuthorBookUpdate = {
-  authorId?: types.Scalars['ID'] | null
-  bookId?: types.Scalars['ID'] | null
-  id?: types.Scalars['ID'] | null
-}
-export type AuthorBookRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type AuthorBookInsert = {
-  authorId: types.Scalars['ID']
-  bookId: types.Scalars['ID']
-  id?: null | types.Scalars['ID']
-}
-
 type AuthorBookDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.AuthorBook,
-  'id',
-  'ID',
-  AuthorBookFilter,
-  AuthorBookRawFilter,
-  AuthorBookRelations,
-  AuthorBookProjection,
-  AuthorBookSort,
-  AuthorBookRawSort,
-  AuthorBookInsert,
-  AuthorBookUpdate,
-  AuthorBookRawUpdate,
-  AuthorBookExcludedFields,
-  AuthorBookRelationFields,
+  'AuthorBook',
+  AST,
+  ScalarsSpecification,
+  AuthorBookCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'authorBook',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type AuthorBookDAOParams<MetadataType, OperationMetadataType> = Omit<
@@ -354,14 +458,35 @@ export type InMemoryAuthorBookDAOParams<MetadataType, OperationMetadataType> = O
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type AuthorBookIdFields = T.IdFields<'AuthorBook', AST>
+export interface AuthorBookModel extends types.AuthorBook {}
+export interface AuthorBookInsert extends T.Insert<'AuthorBook', AST, ScalarsSpecification> {}
+export interface AuthorBookPlainModel extends T.GenerateModel<'AuthorBook', AST, ScalarsSpecification, 'relation'> {}
+export interface AuthorBookProjection extends T.Projection<'AuthorBook', AST> {}
+export interface AuthorBookUpdate extends T.Update<'AuthorBook', AST, ScalarsSpecification> {}
+export interface AuthorBookFilter extends T.Filter<'AuthorBook', AST, ScalarsSpecification> {}
+export interface AuthorBookSortElement extends T.SortElement<'AuthorBook', AST> {}
+export interface AuthorBookRelationsFindParams extends T.RelationsFindParams<'AuthorBook', AST, ScalarsSpecification> {}
+export type AuthorBookParams<P extends AuthorBookProjection> = T.Params<'AuthorBook', AST, ScalarsSpecification, P>
+export type AuthorBookCachedTypes = T.CachedTypes<
+  AuthorBookIdFields,
+  AuthorBookModel,
+  AuthorBookInsert,
+  AuthorBookPlainModel,
+  AuthorBookProjection,
+  AuthorBookUpdate,
+  AuthorBookFilter,
+  AuthorBookSortElement,
+  AuthorBookRelationsFindParams
+>
+
 export class AuthorBookDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends AuthorBookProjection>(p: P) {
+  public static projection<P extends T.Projection<'AuthorBook', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AuthorBookProjection, P2 extends AuthorBookProjection>(p1: P1, p2: P2): T.SelectProjection<AuthorBookProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<AuthorBookProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'AuthorBook', AST>, P2 extends T.Projection<'AuthorBook', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'AuthorBook', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'AuthorBook', AST>, P1, P2>
   }
-
   public constructor(params: AuthorBookDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -371,13 +496,12 @@ export class AuthorBookDAO<MetadataType, OperationMetadataType> extends T.Abstra
 }
 
 export class InMemoryAuthorBookDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends AuthorBookProjection>(p: P) {
+  public static projection<P extends T.Projection<'AuthorBook', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AuthorBookProjection, P2 extends AuthorBookProjection>(p1: P1, p2: P2): T.SelectProjection<AuthorBookProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<AuthorBookProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'AuthorBook', AST>, P2 extends T.Projection<'AuthorBook', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'AuthorBook', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'AuthorBook', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryAuthorBookDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -385,11 +509,7 @@ export class InMemoryAuthorBookDAO<MetadataType, OperationMetadataType> extends 
     })
   }
 }
-
-export type BookExcludedFields = never
-export type BookRelationFields = 'authors'
-
-export function bookSchema(): T.Schema<types.Scalars> {
+export function bookSchema(): T.Schema<ScalarsSpecification> {
   return {
     authors: {
       type: 'relation',
@@ -417,60 +537,13 @@ export function bookSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type BookFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type BookFilter = BookFilterFields & T.LogicalOperators<BookFilterFields | BookRawFilter>
-export type BookRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type BookRelations = {
-  authors?: {
-    filter?: AuthorFilter
-    sorts?: AuthorSort[] | AuthorRawSort
-    skip?: number
-    limit?: number
-    relations?: AuthorRelations
-  }
-}
-
-export type BookProjection = {
-  authors?: AuthorProjection | boolean
-  id?: boolean
-}
-export type BookParam<P extends BookProjection> = T.ParamProjection<types.Book, BookProjection, P>
-
-export type BookSortKeys = 'id'
-export type BookSort = Partial<Record<BookSortKeys, T.SortDirection>>
-export type BookRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type BookUpdate = {
-  id?: types.Scalars['ID'] | null
-}
-export type BookRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type BookInsert = {
-  id?: null | types.Scalars['ID']
-}
-
 type BookDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.Book,
-  'id',
-  'ID',
-  BookFilter,
-  BookRawFilter,
-  BookRelations,
-  BookProjection,
-  BookSort,
-  BookRawSort,
-  BookInsert,
-  BookUpdate,
-  BookRawUpdate,
-  BookExcludedFields,
-  BookRelationFields,
+  'Book',
+  AST,
+  ScalarsSpecification,
+  BookCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'book',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type BookDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<BookDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
@@ -479,14 +552,25 @@ export type InMemoryBookDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type BookIdFields = T.IdFields<'Book', AST>
+export interface BookModel extends types.Book {}
+export interface BookInsert extends T.Insert<'Book', AST, ScalarsSpecification> {}
+export interface BookPlainModel extends T.GenerateModel<'Book', AST, ScalarsSpecification, 'relation'> {}
+export interface BookProjection extends T.Projection<'Book', AST> {}
+export interface BookUpdate extends T.Update<'Book', AST, ScalarsSpecification> {}
+export interface BookFilter extends T.Filter<'Book', AST, ScalarsSpecification> {}
+export interface BookSortElement extends T.SortElement<'Book', AST> {}
+export interface BookRelationsFindParams extends T.RelationsFindParams<'Book', AST, ScalarsSpecification> {}
+export type BookParams<P extends BookProjection> = T.Params<'Book', AST, ScalarsSpecification, P>
+export type BookCachedTypes = T.CachedTypes<BookIdFields, BookModel, BookInsert, BookPlainModel, BookProjection, BookUpdate, BookFilter, BookSortElement, BookRelationsFindParams>
+
 export class BookDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends BookProjection>(p: P) {
+  public static projection<P extends T.Projection<'Book', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends BookProjection, P2 extends BookProjection>(p1: P1, p2: P2): T.SelectProjection<BookProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<BookProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Book', AST>, P2 extends T.Projection<'Book', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Book', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Book', AST>, P1, P2>
   }
-
   public constructor(params: BookDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -496,13 +580,12 @@ export class BookDAO<MetadataType, OperationMetadataType> extends T.AbstractKnex
 }
 
 export class InMemoryBookDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends BookProjection>(p: P) {
+  public static projection<P extends T.Projection<'Book', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends BookProjection, P2 extends BookProjection>(p1: P1, p2: P2): T.SelectProjection<BookProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<BookProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Book', AST>, P2 extends T.Projection<'Book', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Book', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Book', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryBookDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -510,11 +593,7 @@ export class InMemoryBookDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-
-export type CityExcludedFields = 'computedAddressName' | 'computedName'
-export type CityRelationFields = never
-
-export function citySchema(): T.Schema<types.Scalars> {
+export function citySchema(): T.Schema<ScalarsSpecification> {
   return {
     addressId: {
       type: 'scalar',
@@ -536,61 +615,13 @@ export function citySchema(): T.Schema<types.Scalars> {
   }
 }
 
-type CityFilterFields = {
-  addressId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  name?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-}
-export type CityFilter = CityFilterFields & T.LogicalOperators<CityFilterFields | CityRawFilter>
-export type CityRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type CityRelations = Record<never, string>
-
-export type CityProjection = {
-  addressId?: boolean
-  computedAddressName?: boolean
-  computedName?: boolean
-  id?: boolean
-  name?: boolean
-}
-export type CityParam<P extends CityProjection> = T.ParamProjection<types.City, CityProjection, P>
-
-export type CitySortKeys = 'addressId' | 'id' | 'name'
-export type CitySort = Partial<Record<CitySortKeys, T.SortDirection>>
-export type CityRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type CityUpdate = {
-  addressId?: types.Scalars['ID'] | null
-  id?: types.Scalars['ID'] | null
-  name?: types.Scalars['String'] | null
-}
-export type CityRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type CityInsert = {
-  addressId: types.Scalars['ID']
-  id?: null | types.Scalars['ID']
-  name: types.Scalars['String']
-}
-
 type CityDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.City,
-  'id',
-  'ID',
-  CityFilter,
-  CityRawFilter,
-  CityRelations,
-  CityProjection,
-  CitySort,
-  CityRawSort,
-  CityInsert,
-  CityUpdate,
-  CityRawUpdate,
-  CityExcludedFields,
-  CityRelationFields,
+  'City',
+  AST,
+  ScalarsSpecification,
+  CityCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'city',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type CityDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<CityDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
@@ -599,14 +630,25 @@ export type InMemoryCityDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type CityIdFields = T.IdFields<'City', AST>
+export interface CityModel extends types.City {}
+export interface CityInsert extends T.Insert<'City', AST, ScalarsSpecification> {}
+export interface CityPlainModel extends T.GenerateModel<'City', AST, ScalarsSpecification, 'relation'> {}
+export interface CityProjection extends T.Projection<'City', AST> {}
+export interface CityUpdate extends T.Update<'City', AST, ScalarsSpecification> {}
+export interface CityFilter extends T.Filter<'City', AST, ScalarsSpecification> {}
+export interface CitySortElement extends T.SortElement<'City', AST> {}
+export interface CityRelationsFindParams extends T.RelationsFindParams<'City', AST, ScalarsSpecification> {}
+export type CityParams<P extends CityProjection> = T.Params<'City', AST, ScalarsSpecification, P>
+export type CityCachedTypes = T.CachedTypes<CityIdFields, CityModel, CityInsert, CityPlainModel, CityProjection, CityUpdate, CityFilter, CitySortElement, CityRelationsFindParams>
+
 export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends CityProjection>(p: P) {
+  public static projection<P extends T.Projection<'City', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): T.SelectProjection<CityProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<CityProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'City', AST>, P2 extends T.Projection<'City', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'City', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'City', AST>, P1, P2>
   }
-
   public constructor(params: CityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -616,13 +658,12 @@ export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractKnex
 }
 
 export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends CityProjection>(p: P) {
+  public static projection<P extends T.Projection<'City', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends CityProjection, P2 extends CityProjection>(p1: P1, p2: P2): T.SelectProjection<CityProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<CityProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'City', AST>, P2 extends T.Projection<'City', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'City', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'City', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryCityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -630,11 +671,7 @@ export class InMemoryCityDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-
-export type DefaultFieldsEntityExcludedFields = never
-export type DefaultFieldsEntityRelationFields = never
-
-export function defaultFieldsEntitySchema(): T.Schema<types.Scalars> {
+export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
   return {
     creationDate: {
       type: 'scalar',
@@ -673,71 +710,13 @@ export function defaultFieldsEntitySchema(): T.Schema<types.Scalars> {
   }
 }
 
-type DefaultFieldsEntityFilterFields = {
-  creationDate?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  live?: types.Scalars['Live'] | null | T.EqualityOperators<types.Scalars['Live']> | T.ElementOperators
-  name?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  opt1?: types.Scalars['Live'] | null | T.EqualityOperators<types.Scalars['Live']> | T.ElementOperators
-  opt2?: types.Scalars['Live'] | null | T.EqualityOperators<types.Scalars['Live']> | T.ElementOperators
-}
-export type DefaultFieldsEntityFilter = DefaultFieldsEntityFilterFields & T.LogicalOperators<DefaultFieldsEntityFilterFields | DefaultFieldsEntityRawFilter>
-export type DefaultFieldsEntityRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DefaultFieldsEntityRelations = Record<never, string>
-
-export type DefaultFieldsEntityProjection = {
-  creationDate?: boolean
-  id?: boolean
-  live?: boolean
-  name?: boolean
-  opt1?: boolean
-  opt2?: boolean
-}
-export type DefaultFieldsEntityParam<P extends DefaultFieldsEntityProjection> = T.ParamProjection<types.DefaultFieldsEntity, DefaultFieldsEntityProjection, P>
-
-export type DefaultFieldsEntitySortKeys = 'creationDate' | 'id' | 'live' | 'name' | 'opt1' | 'opt2'
-export type DefaultFieldsEntitySort = Partial<Record<DefaultFieldsEntitySortKeys, T.SortDirection>>
-export type DefaultFieldsEntityRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DefaultFieldsEntityUpdate = {
-  creationDate?: types.Scalars['Int'] | null
-  id?: types.Scalars['ID'] | null
-  live?: types.Scalars['Live'] | null
-  name?: types.Scalars['String'] | null
-  opt1?: types.Scalars['Live'] | null
-  opt2?: types.Scalars['Live'] | null
-}
-export type DefaultFieldsEntityRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DefaultFieldsEntityInsert = {
-  creationDate?: null | types.Scalars['Int']
-  id: types.Scalars['ID']
-  live?: null | types.Scalars['Live']
-  name: types.Scalars['String']
-  opt1?: null | types.Scalars['Live']
-  opt2?: null | types.Scalars['Live']
-}
-
 type DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.DefaultFieldsEntity,
-  'id',
-  'ID',
-  DefaultFieldsEntityFilter,
-  DefaultFieldsEntityRawFilter,
-  DefaultFieldsEntityRelations,
-  DefaultFieldsEntityProjection,
-  DefaultFieldsEntitySort,
-  DefaultFieldsEntityRawSort,
-  DefaultFieldsEntityInsert,
-  DefaultFieldsEntityUpdate,
-  DefaultFieldsEntityRawUpdate,
-  DefaultFieldsEntityExcludedFields,
-  DefaultFieldsEntityRelationFields,
+  'DefaultFieldsEntity',
+  AST,
+  ScalarsSpecification,
+  DefaultFieldsEntityCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'defaultFieldsEntity',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType> = Omit<
@@ -749,14 +728,38 @@ export type InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadata
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type DefaultFieldsEntityIdFields = T.IdFields<'DefaultFieldsEntity', AST>
+export interface DefaultFieldsEntityModel extends types.DefaultFieldsEntity {}
+export interface DefaultFieldsEntityInsert extends T.Insert<'DefaultFieldsEntity', AST, ScalarsSpecification> {}
+export interface DefaultFieldsEntityPlainModel extends T.GenerateModel<'DefaultFieldsEntity', AST, ScalarsSpecification, 'relation'> {}
+export interface DefaultFieldsEntityProjection extends T.Projection<'DefaultFieldsEntity', AST> {}
+export interface DefaultFieldsEntityUpdate extends T.Update<'DefaultFieldsEntity', AST, ScalarsSpecification> {}
+export interface DefaultFieldsEntityFilter extends T.Filter<'DefaultFieldsEntity', AST, ScalarsSpecification> {}
+export interface DefaultFieldsEntitySortElement extends T.SortElement<'DefaultFieldsEntity', AST> {}
+export interface DefaultFieldsEntityRelationsFindParams extends T.RelationsFindParams<'DefaultFieldsEntity', AST, ScalarsSpecification> {}
+export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = T.Params<'DefaultFieldsEntity', AST, ScalarsSpecification, P>
+export type DefaultFieldsEntityCachedTypes = T.CachedTypes<
+  DefaultFieldsEntityIdFields,
+  DefaultFieldsEntityModel,
+  DefaultFieldsEntityInsert,
+  DefaultFieldsEntityPlainModel,
+  DefaultFieldsEntityProjection,
+  DefaultFieldsEntityUpdate,
+  DefaultFieldsEntityFilter,
+  DefaultFieldsEntitySortElement,
+  DefaultFieldsEntityRelationsFindParams
+>
+
 export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
+  public static projection<P extends T.Projection<'DefaultFieldsEntity', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): T.SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<DefaultFieldsEntityProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'DefaultFieldsEntity', AST>, P2 extends T.Projection<'DefaultFieldsEntity', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'DefaultFieldsEntity', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'DefaultFieldsEntity', AST>, P1, P2>
   }
-
   public constructor(params: DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -766,13 +769,15 @@ export class DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends
 }
 
 export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends DefaultFieldsEntityProjection>(p: P) {
+  public static projection<P extends T.Projection<'DefaultFieldsEntity', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DefaultFieldsEntityProjection, P2 extends DefaultFieldsEntityProjection>(p1: P1, p2: P2): T.SelectProjection<DefaultFieldsEntityProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<DefaultFieldsEntityProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'DefaultFieldsEntity', AST>, P2 extends T.Projection<'DefaultFieldsEntity', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'DefaultFieldsEntity', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'DefaultFieldsEntity', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryDefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -780,11 +785,7 @@ export class InMemoryDefaultFieldsEntityDAO<MetadataType, OperationMetadataType>
     })
   }
 }
-
-export type DeviceExcludedFields = never
-export type DeviceRelationFields = 'user'
-
-export function deviceSchema(): T.Schema<types.Scalars> {
+export function deviceSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -813,60 +814,13 @@ export function deviceSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type DeviceFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  name?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  userId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type DeviceFilter = DeviceFilterFields & T.LogicalOperators<DeviceFilterFields | DeviceRawFilter>
-export type DeviceRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DeviceRelations = Record<never, string>
-
-export type DeviceProjection = {
-  id?: boolean
-  name?: boolean
-  user?: UserProjection | boolean
-  userId?: boolean
-}
-export type DeviceParam<P extends DeviceProjection> = T.ParamProjection<types.Device, DeviceProjection, P>
-
-export type DeviceSortKeys = 'id' | 'name' | 'userId'
-export type DeviceSort = Partial<Record<DeviceSortKeys, T.SortDirection>>
-export type DeviceRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DeviceUpdate = {
-  id?: types.Scalars['ID'] | null
-  name?: types.Scalars['String'] | null
-  userId?: types.Scalars['ID'] | null
-}
-export type DeviceRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DeviceInsert = {
-  id?: null | types.Scalars['ID']
-  name: types.Scalars['String']
-  userId?: null | types.Scalars['ID']
-}
-
 type DeviceDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.Device,
-  'id',
-  'ID',
-  DeviceFilter,
-  DeviceRawFilter,
-  DeviceRelations,
-  DeviceProjection,
-  DeviceSort,
-  DeviceRawSort,
-  DeviceInsert,
-  DeviceUpdate,
-  DeviceRawUpdate,
-  DeviceExcludedFields,
-  DeviceRelationFields,
+  'Device',
+  AST,
+  ScalarsSpecification,
+  DeviceCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'device',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type DeviceDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<DeviceDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
@@ -875,14 +829,25 @@ export type InMemoryDeviceDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type DeviceIdFields = T.IdFields<'Device', AST>
+export interface DeviceModel extends types.Device {}
+export interface DeviceInsert extends T.Insert<'Device', AST, ScalarsSpecification> {}
+export interface DevicePlainModel extends T.GenerateModel<'Device', AST, ScalarsSpecification, 'relation'> {}
+export interface DeviceProjection extends T.Projection<'Device', AST> {}
+export interface DeviceUpdate extends T.Update<'Device', AST, ScalarsSpecification> {}
+export interface DeviceFilter extends T.Filter<'Device', AST, ScalarsSpecification> {}
+export interface DeviceSortElement extends T.SortElement<'Device', AST> {}
+export interface DeviceRelationsFindParams extends T.RelationsFindParams<'Device', AST, ScalarsSpecification> {}
+export type DeviceParams<P extends DeviceProjection> = T.Params<'Device', AST, ScalarsSpecification, P>
+export type DeviceCachedTypes = T.CachedTypes<DeviceIdFields, DeviceModel, DeviceInsert, DevicePlainModel, DeviceProjection, DeviceUpdate, DeviceFilter, DeviceSortElement, DeviceRelationsFindParams>
+
 export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends DeviceProjection>(p: P) {
+  public static projection<P extends T.Projection<'Device', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): T.SelectProjection<DeviceProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<DeviceProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Device', AST>, P2 extends T.Projection<'Device', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Device', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Device', AST>, P1, P2>
   }
-
   public constructor(params: DeviceDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -892,13 +857,12 @@ export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractKn
 }
 
 export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends DeviceProjection>(p: P) {
+  public static projection<P extends T.Projection<'Device', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DeviceProjection, P2 extends DeviceProjection>(p1: P1, p2: P2): T.SelectProjection<DeviceProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<DeviceProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Device', AST>, P2 extends T.Projection<'Device', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Device', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Device', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryDeviceDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -906,11 +870,7 @@ export class InMemoryDeviceDAO<MetadataType, OperationMetadataType> extends T.Ab
     })
   }
 }
-
-export type DogExcludedFields = never
-export type DogRelationFields = 'owner'
-
-export function dogSchema(): T.Schema<types.Scalars> {
+export function dogSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -940,60 +900,13 @@ export function dogSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type DogFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  name?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  ownerId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type DogFilter = DogFilterFields & T.LogicalOperators<DogFilterFields | DogRawFilter>
-export type DogRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DogRelations = Record<never, string>
-
-export type DogProjection = {
-  id?: boolean
-  name?: boolean
-  owner?: UserProjection | boolean
-  ownerId?: boolean
-}
-export type DogParam<P extends DogProjection> = T.ParamProjection<types.Dog, DogProjection, P>
-
-export type DogSortKeys = 'id' | 'name' | 'ownerId'
-export type DogSort = Partial<Record<DogSortKeys, T.SortDirection>>
-export type DogRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DogUpdate = {
-  id?: types.Scalars['ID'] | null
-  name?: types.Scalars['String'] | null
-  ownerId?: types.Scalars['ID'] | null
-}
-export type DogRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DogInsert = {
-  id?: null | types.Scalars['ID']
-  name: types.Scalars['String']
-  ownerId: types.Scalars['ID']
-}
-
 type DogDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.Dog,
-  'id',
-  'ID',
-  DogFilter,
-  DogRawFilter,
-  DogRelations,
-  DogProjection,
-  DogSort,
-  DogRawSort,
-  DogInsert,
-  DogUpdate,
-  DogRawUpdate,
-  DogExcludedFields,
-  DogRelationFields,
+  'Dog',
+  AST,
+  ScalarsSpecification,
+  DogCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'dog',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type DogDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<DogDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
@@ -1002,14 +915,25 @@ export type InMemoryDogDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type DogIdFields = T.IdFields<'Dog', AST>
+export interface DogModel extends types.Dog {}
+export interface DogInsert extends T.Insert<'Dog', AST, ScalarsSpecification> {}
+export interface DogPlainModel extends T.GenerateModel<'Dog', AST, ScalarsSpecification, 'relation'> {}
+export interface DogProjection extends T.Projection<'Dog', AST> {}
+export interface DogUpdate extends T.Update<'Dog', AST, ScalarsSpecification> {}
+export interface DogFilter extends T.Filter<'Dog', AST, ScalarsSpecification> {}
+export interface DogSortElement extends T.SortElement<'Dog', AST> {}
+export interface DogRelationsFindParams extends T.RelationsFindParams<'Dog', AST, ScalarsSpecification> {}
+export type DogParams<P extends DogProjection> = T.Params<'Dog', AST, ScalarsSpecification, P>
+export type DogCachedTypes = T.CachedTypes<DogIdFields, DogModel, DogInsert, DogPlainModel, DogProjection, DogUpdate, DogFilter, DogSortElement, DogRelationsFindParams>
+
 export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends DogProjection>(p: P) {
+  public static projection<P extends T.Projection<'Dog', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): T.SelectProjection<DogProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<DogProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Dog', AST>, P2 extends T.Projection<'Dog', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Dog', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Dog', AST>, P1, P2>
   }
-
   public constructor(params: DogDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1019,13 +943,12 @@ export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJ
 }
 
 export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends DogProjection>(p: P) {
+  public static projection<P extends T.Projection<'Dog', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DogProjection, P2 extends DogProjection>(p1: P1, p2: P2): T.SelectProjection<DogProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<DogProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Dog', AST>, P2 extends T.Projection<'Dog', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Dog', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Dog', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryDogDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1033,11 +956,7 @@ export class InMemoryDogDAO<MetadataType, OperationMetadataType> extends T.Abstr
     })
   }
 }
-
-export type FriendsExcludedFields = never
-export type FriendsRelationFields = never
-
-export function friendsSchema(): T.Schema<types.Scalars> {
+export function friendsSchema(): T.Schema<ScalarsSpecification> {
   return {
     from: {
       type: 'scalar',
@@ -1059,59 +978,13 @@ export function friendsSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type FriendsFilterFields = {
-  from?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  to?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-}
-export type FriendsFilter = FriendsFilterFields & T.LogicalOperators<FriendsFilterFields | FriendsRawFilter>
-export type FriendsRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type FriendsRelations = Record<never, string>
-
-export type FriendsProjection = {
-  from?: boolean
-  id?: boolean
-  to?: boolean
-}
-export type FriendsParam<P extends FriendsProjection> = T.ParamProjection<types.Friends, FriendsProjection, P>
-
-export type FriendsSortKeys = 'from' | 'id' | 'to'
-export type FriendsSort = Partial<Record<FriendsSortKeys, T.SortDirection>>
-export type FriendsRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type FriendsUpdate = {
-  from?: types.Scalars['ID'] | null
-  id?: types.Scalars['ID'] | null
-  to?: types.Scalars['ID'] | null
-}
-export type FriendsRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type FriendsInsert = {
-  from: types.Scalars['ID']
-  id?: null | types.Scalars['ID']
-  to: types.Scalars['ID']
-}
-
 type FriendsDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.Friends,
-  'id',
-  'ID',
-  FriendsFilter,
-  FriendsRawFilter,
-  FriendsRelations,
-  FriendsProjection,
-  FriendsSort,
-  FriendsRawSort,
-  FriendsInsert,
-  FriendsUpdate,
-  FriendsRawUpdate,
-  FriendsExcludedFields,
-  FriendsRelationFields,
+  'Friends',
+  AST,
+  ScalarsSpecification,
+  FriendsCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'friends',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type FriendsDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<FriendsDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
@@ -1120,14 +993,35 @@ export type InMemoryFriendsDAOParams<MetadataType, OperationMetadataType> = Omit
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type FriendsIdFields = T.IdFields<'Friends', AST>
+export interface FriendsModel extends types.Friends {}
+export interface FriendsInsert extends T.Insert<'Friends', AST, ScalarsSpecification> {}
+export interface FriendsPlainModel extends T.GenerateModel<'Friends', AST, ScalarsSpecification, 'relation'> {}
+export interface FriendsProjection extends T.Projection<'Friends', AST> {}
+export interface FriendsUpdate extends T.Update<'Friends', AST, ScalarsSpecification> {}
+export interface FriendsFilter extends T.Filter<'Friends', AST, ScalarsSpecification> {}
+export interface FriendsSortElement extends T.SortElement<'Friends', AST> {}
+export interface FriendsRelationsFindParams extends T.RelationsFindParams<'Friends', AST, ScalarsSpecification> {}
+export type FriendsParams<P extends FriendsProjection> = T.Params<'Friends', AST, ScalarsSpecification, P>
+export type FriendsCachedTypes = T.CachedTypes<
+  FriendsIdFields,
+  FriendsModel,
+  FriendsInsert,
+  FriendsPlainModel,
+  FriendsProjection,
+  FriendsUpdate,
+  FriendsFilter,
+  FriendsSortElement,
+  FriendsRelationsFindParams
+>
+
 export class FriendsDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends FriendsProjection>(p: P) {
+  public static projection<P extends T.Projection<'Friends', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends FriendsProjection, P2 extends FriendsProjection>(p1: P1, p2: P2): T.SelectProjection<FriendsProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<FriendsProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Friends', AST>, P2 extends T.Projection<'Friends', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Friends', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Friends', AST>, P1, P2>
   }
-
   public constructor(params: FriendsDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1137,13 +1031,12 @@ export class FriendsDAO<MetadataType, OperationMetadataType> extends T.AbstractK
 }
 
 export class InMemoryFriendsDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<FriendsDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends FriendsProjection>(p: P) {
+  public static projection<P extends T.Projection<'Friends', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends FriendsProjection, P2 extends FriendsProjection>(p1: P1, p2: P2): T.SelectProjection<FriendsProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<FriendsProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Friends', AST>, P2 extends T.Projection<'Friends', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Friends', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Friends', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryFriendsDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1151,11 +1044,7 @@ export class InMemoryFriendsDAO<MetadataType, OperationMetadataType> extends T.A
     })
   }
 }
-
-export type OrganizationExcludedFields = 'computedName'
-export type OrganizationRelationFields = never
-
-export function organizationSchema(): T.Schema<types.Scalars> {
+export function organizationSchema(): T.Schema<ScalarsSpecification> {
   return {
     address: {
       type: 'embedded',
@@ -1180,70 +1069,13 @@ export function organizationSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type OrganizationFilterFields = {
-  'address.id'?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  name?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  vatNumber?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-}
-export type OrganizationFilter = OrganizationFilterFields & T.LogicalOperators<OrganizationFilterFields | OrganizationRawFilter>
-export type OrganizationRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type OrganizationRelations = Record<never, string>
-
-export type OrganizationProjection = {
-  address?:
-    | {
-        cities?: CityProjection | boolean
-        id?: boolean
-      }
-    | boolean
-  computedName?: boolean
-  id?: boolean
-  name?: boolean
-  vatNumber?: boolean
-}
-export type OrganizationParam<P extends OrganizationProjection> = T.ParamProjection<types.Organization, OrganizationProjection, P>
-
-export type OrganizationSortKeys = 'address.id' | 'id' | 'name' | 'vatNumber'
-export type OrganizationSort = Partial<Record<OrganizationSortKeys, T.SortDirection>>
-export type OrganizationRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type OrganizationUpdate = {
-  address?: AddressInsert | null
-  'address.id'?: types.Scalars['ID'] | null
-  id?: types.Scalars['ID'] | null
-  name?: types.Scalars['String'] | null
-  vatNumber?: types.Scalars['String'] | null
-}
-export type OrganizationRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type OrganizationInsert = {
-  address?: null | AddressInsert
-  id?: null | types.Scalars['ID']
-  name: types.Scalars['String']
-  vatNumber?: null | types.Scalars['String']
-}
-
 type OrganizationDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.Organization,
-  'id',
-  'ID',
-  OrganizationFilter,
-  OrganizationRawFilter,
-  OrganizationRelations,
-  OrganizationProjection,
-  OrganizationSort,
-  OrganizationRawSort,
-  OrganizationInsert,
-  OrganizationUpdate,
-  OrganizationRawUpdate,
-  OrganizationExcludedFields,
-  OrganizationRelationFields,
+  'Organization',
+  AST,
+  ScalarsSpecification,
+  OrganizationCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'organization',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type OrganizationDAOParams<MetadataType, OperationMetadataType> = Omit<
@@ -1255,14 +1087,38 @@ export type InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType> =
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type OrganizationIdFields = T.IdFields<'Organization', AST>
+export interface OrganizationModel extends types.Organization {}
+export interface OrganizationInsert extends T.Insert<'Organization', AST, ScalarsSpecification> {}
+export interface OrganizationPlainModel extends T.GenerateModel<'Organization', AST, ScalarsSpecification, 'relation'> {}
+export interface OrganizationProjection extends T.Projection<'Organization', AST> {}
+export interface OrganizationUpdate extends T.Update<'Organization', AST, ScalarsSpecification> {}
+export interface OrganizationFilter extends T.Filter<'Organization', AST, ScalarsSpecification> {}
+export interface OrganizationSortElement extends T.SortElement<'Organization', AST> {}
+export interface OrganizationRelationsFindParams extends T.RelationsFindParams<'Organization', AST, ScalarsSpecification> {}
+export type OrganizationParams<P extends OrganizationProjection> = T.Params<'Organization', AST, ScalarsSpecification, P>
+export type OrganizationCachedTypes = T.CachedTypes<
+  OrganizationIdFields,
+  OrganizationModel,
+  OrganizationInsert,
+  OrganizationPlainModel,
+  OrganizationProjection,
+  OrganizationUpdate,
+  OrganizationFilter,
+  OrganizationSortElement,
+  OrganizationRelationsFindParams
+>
+
 export class OrganizationDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends OrganizationProjection>(p: P) {
+  public static projection<P extends T.Projection<'Organization', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): T.SelectProjection<OrganizationProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<OrganizationProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Organization', AST>, P2 extends T.Projection<'Organization', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'Organization', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Organization', AST>, P1, P2>
   }
-
   public constructor(params: OrganizationDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1272,13 +1128,15 @@ export class OrganizationDAO<MetadataType, OperationMetadataType> extends T.Abst
 }
 
 export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<OrganizationDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends OrganizationProjection>(p: P) {
+  public static projection<P extends T.Projection<'Organization', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends OrganizationProjection, P2 extends OrganizationProjection>(p1: P1, p2: P2): T.SelectProjection<OrganizationProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<OrganizationProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'Organization', AST>, P2 extends T.Projection<'Organization', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'Organization', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Organization', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryOrganizationDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1286,11 +1144,7 @@ export class InMemoryOrganizationDAO<MetadataType, OperationMetadataType> extend
     })
   }
 }
-
-export type UserExcludedFields = never
-export type UserRelationFields = 'bestFriend' | 'dogs' | 'friends'
-
-export function userSchema(): T.Schema<types.Scalars> {
+export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     amount: {
       type: 'scalar',
@@ -1330,6 +1184,10 @@ export function userSchema(): T.Schema<types.Scalars> {
       dao: 'dog',
       isListElementRequired: true,
       isList: true,
+    },
+    embeddedDog: {
+      type: 'embedded',
+      schema: () => dogSchema(),
     },
     firstName: {
       type: 'scalar',
@@ -1384,133 +1242,13 @@ export function userSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type UserFilterFields = {
-  amount?: types.Scalars['Decimal'] | null | T.EqualityOperators<types.Scalars['Decimal']> | T.ElementOperators
-  amounts?: types.Scalars['Decimal'][] | null | T.EqualityOperators<types.Scalars['Decimal'][]> | T.ElementOperators
-  bestFriendId?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  'credentials.another.test'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  'credentials.password'?: types.Scalars['Password'] | null | T.EqualityOperators<types.Scalars['Password']> | T.ElementOperators
-  'credentials.username'?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  firstName?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  lastName?: types.Scalars['String'] | null | T.EqualityOperators<types.Scalars['String']> | T.ElementOperators | T.StringOperators
-  live?: types.Scalars['Boolean'] | null | T.EqualityOperators<types.Scalars['Boolean']> | T.ElementOperators
-  localization?: types.Scalars['Coordinates'] | null | T.EqualityOperators<types.Scalars['Coordinates']> | T.ElementOperators
-  title?: types.Scalars['LocalizedString'] | null | T.EqualityOperators<types.Scalars['LocalizedString']> | T.ElementOperators
-}
-export type UserFilter = UserFilterFields & T.LogicalOperators<UserFilterFields | UserRawFilter>
-export type UserRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type UserRelations = {
-  dogs?: {
-    filter?: DogFilter
-    sorts?: DogSort[] | DogRawSort
-    skip?: number
-    limit?: number
-    relations?: DogRelations
-  }
-  friends?: {
-    filter?: UserFilter
-    sorts?: UserSort[] | UserRawSort
-    skip?: number
-    limit?: number
-    relations?: UserRelations
-  }
-}
-
-export type UserProjection = {
-  amount?: boolean
-  amounts?: boolean
-  bestFriend?: UserProjection | boolean
-  bestFriendId?: boolean
-  credentials?:
-    | {
-        another?:
-          | {
-              test?: boolean
-            }
-          | boolean
-        password?: boolean
-        username?: boolean
-      }
-    | boolean
-  dogs?: DogProjection | boolean
-  firstName?: boolean
-  friends?: UserProjection | boolean
-  id?: boolean
-  lastName?: boolean
-  live?: boolean
-  localization?: boolean
-  title?: boolean
-}
-export type UserParam<P extends UserProjection> = T.ParamProjection<types.User, UserProjection, P>
-
-export type UserSortKeys =
-  | 'amount'
-  | 'amounts'
-  | 'bestFriendId'
-  | 'credentials.another.test'
-  | 'credentials.password'
-  | 'credentials.username'
-  | 'firstName'
-  | 'id'
-  | 'lastName'
-  | 'live'
-  | 'localization'
-  | 'title'
-export type UserSort = Partial<Record<UserSortKeys, T.SortDirection>>
-export type UserRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type UserUpdate = {
-  amount?: types.Scalars['Decimal'] | null
-  amounts?: types.Scalars['Decimal'][] | null
-  bestFriendId?: types.Scalars['ID'] | null
-  credentials?: UsernamePasswordCredentialsInsert | null
-  'credentials.another'?: AnotherInsert | null
-  'credentials.another.test'?: types.Scalars['String'] | null
-  'credentials.password'?: types.Scalars['Password'] | null
-  'credentials.username'?: types.Scalars['String'] | null
-  firstName?: types.Scalars['String'] | null
-  id?: types.Scalars['ID'] | null
-  lastName?: types.Scalars['String'] | null
-  live?: types.Scalars['Boolean'] | null
-  localization?: types.Scalars['Coordinates'] | null
-  title?: types.Scalars['LocalizedString'] | null
-}
-export type UserRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type UserInsert = {
-  amount?: null | types.Scalars['Decimal']
-  amounts?: null | types.Scalars['Decimal'][]
-  bestFriendId?: null | types.Scalars['ID']
-  credentials?: null | UsernamePasswordCredentialsInsert
-  firstName?: null | types.Scalars['String']
-  id?: null | types.Scalars['ID']
-  lastName?: null | types.Scalars['String']
-  live: types.Scalars['Boolean']
-  localization?: null | types.Scalars['Coordinates']
-  title?: null | types.Scalars['LocalizedString']
-}
-
 type UserDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.User,
-  'id',
-  'ID',
-  UserFilter,
-  UserRawFilter,
-  UserRelations,
-  UserProjection,
-  UserSort,
-  UserRawSort,
-  UserInsert,
-  UserUpdate,
-  UserRawUpdate,
-  UserExcludedFields,
-  UserRelationFields,
+  'User',
+  AST,
+  ScalarsSpecification,
+  UserCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'user',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type UserDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<UserDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
@@ -1519,14 +1257,25 @@ export type InMemoryUserDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type UserIdFields = T.IdFields<'User', AST>
+export interface UserModel extends types.User {}
+export interface UserInsert extends T.Insert<'User', AST, ScalarsSpecification> {}
+export interface UserPlainModel extends T.GenerateModel<'User', AST, ScalarsSpecification, 'relation'> {}
+export interface UserProjection extends T.Projection<'User', AST> {}
+export interface UserUpdate extends T.Update<'User', AST, ScalarsSpecification> {}
+export interface UserFilter extends T.Filter<'User', AST, ScalarsSpecification> {}
+export interface UserSortElement extends T.SortElement<'User', AST> {}
+export interface UserRelationsFindParams extends T.RelationsFindParams<'User', AST, ScalarsSpecification> {}
+export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
+export type UserCachedTypes = T.CachedTypes<UserIdFields, UserModel, UserInsert, UserPlainModel, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
+
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends UserProjection>(p: P) {
+  public static projection<P extends T.Projection<'User', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): T.SelectProjection<UserProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<UserProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'User', AST>, P2 extends T.Projection<'User', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'User', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'User', AST>, P1, P2>
   }
-
   public constructor(params: UserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1536,13 +1285,12 @@ export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractKnex
 }
 
 export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends UserProjection>(p: P) {
+  public static projection<P extends T.Projection<'User', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends UserProjection, P2 extends UserProjection>(p1: P1, p2: P2): T.SelectProjection<UserProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<UserProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'User', AST>, P2 extends T.Projection<'User', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'User', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'User', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryUserDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -1550,8 +1298,7 @@ export class InMemoryUserDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
-
-export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
+export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecification> {
   return {
     another: {
       type: 'embedded',
@@ -1573,23 +1320,6 @@ export function usernamePasswordCredentialsSchema(): T.Schema<types.Scalars> {
   }
 }
 
-export type UsernamePasswordCredentialsProjection = {
-  another?:
-    | {
-        test?: boolean
-      }
-    | boolean
-  password?: boolean
-  username?: boolean
-}
-export type UsernamePasswordCredentialsParam<P extends UsernamePasswordCredentialsProjection> = T.ParamProjection<types.UsernamePasswordCredentials, UsernamePasswordCredentialsProjection, P>
-
-export type UsernamePasswordCredentialsInsert = {
-  another?: null | AnotherInsert
-  password: types.Scalars['Password']
-  username: types.Scalars['String']
-}
-
 export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
   middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
@@ -1607,19 +1337,17 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
   knex: Record<'default', Knex | 'mock'>
-  scalars?: T.UserInputDriverDataTypeAdapterMap<types.Scalars, 'knex'>
-  log?: T.LogInput<'address' | 'author' | 'authorBook' | 'book' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>
+  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
+  log?: T.LogInput<'Address' | 'Author' | 'AuthorBook' | 'Book' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Friends' | 'Organization' | 'User'>
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
-
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
-
 export class EntityManager<
   MetadataType = never,
   OperationMetadataType = never,
   Permissions extends string = never,
   SecurityDomain extends Record<string, unknown> = never,
-> extends T.AbstractEntityManager<never, 'default', types.Scalars, MetadataType> {
+> extends T.AbstractEntityManager<never, 'default', ScalarsSpecification, MetadataType> {
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined
   private _author: AuthorDAO<MetadataType, OperationMetadataType> | undefined
   private _authorBook: AuthorBookDAO<MetadataType, OperationMetadataType> | undefined
@@ -1639,7 +1367,7 @@ export class EntityManager<
 
   private middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
 
-  private logger?: T.LogFunction<'address' | 'author' | 'authorBook' | 'book' | 'city' | 'defaultFieldsEntity' | 'device' | 'dog' | 'friends' | 'organization' | 'user'>
+  private logger?: T.LogFunction<'Address' | 'Author' | 'AuthorBook' | 'Book' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Friends' | 'Organization' | 'User'>
 
   get address(): AddressDAO<MetadataType, OperationMetadataType> {
     if (!this._address) {
@@ -1655,7 +1383,7 @@ export class EntityManager<
                 ...(this.overrides?.address?.middlewares || []),
                 ...(selectMiddleware('address', this.middlewares) as T.DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'address',
+              name: 'Address',
               logger: this.logger,
             }) as unknown as AddressDAO<MetadataType, OperationMetadataType>)
           : new AddressDAO({
@@ -1669,7 +1397,7 @@ export class EntityManager<
                 ...(this.overrides?.address?.middlewares || []),
                 ...(selectMiddleware('address', this.middlewares) as T.DAOMiddleware<AddressDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'address',
+              name: 'Address',
               logger: this.logger,
             })
     }
@@ -1689,7 +1417,7 @@ export class EntityManager<
                 ...(this.overrides?.author?.middlewares || []),
                 ...(selectMiddleware('author', this.middlewares) as T.DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'author',
+              name: 'Author',
               logger: this.logger,
             }) as unknown as AuthorDAO<MetadataType, OperationMetadataType>)
           : new AuthorDAO({
@@ -1703,7 +1431,7 @@ export class EntityManager<
                 ...(this.overrides?.author?.middlewares || []),
                 ...(selectMiddleware('author', this.middlewares) as T.DAOMiddleware<AuthorDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'author',
+              name: 'Author',
               logger: this.logger,
             })
     }
@@ -1723,7 +1451,7 @@ export class EntityManager<
                 ...(this.overrides?.authorBook?.middlewares || []),
                 ...(selectMiddleware('authorBook', this.middlewares) as T.DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'authorBook',
+              name: 'AuthorBook',
               logger: this.logger,
             }) as unknown as AuthorBookDAO<MetadataType, OperationMetadataType>)
           : new AuthorBookDAO({
@@ -1737,7 +1465,7 @@ export class EntityManager<
                 ...(this.overrides?.authorBook?.middlewares || []),
                 ...(selectMiddleware('authorBook', this.middlewares) as T.DAOMiddleware<AuthorBookDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'authorBook',
+              name: 'AuthorBook',
               logger: this.logger,
             })
     }
@@ -1754,7 +1482,7 @@ export class EntityManager<
               metadata: this.metadata,
               ...this.overrides?.book,
               middlewares: [...(this.overrides?.book?.middlewares || []), ...(selectMiddleware('book', this.middlewares) as T.DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'book',
+              name: 'Book',
               logger: this.logger,
             }) as unknown as BookDAO<MetadataType, OperationMetadataType>)
           : new BookDAO({
@@ -1765,7 +1493,7 @@ export class EntityManager<
               knex: db,
               tableName: 'books',
               middlewares: [...(this.overrides?.book?.middlewares || []), ...(selectMiddleware('book', this.middlewares) as T.DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'book',
+              name: 'Book',
               logger: this.logger,
             })
     }
@@ -1782,7 +1510,7 @@ export class EntityManager<
               metadata: this.metadata,
               ...this.overrides?.city,
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'city',
+              name: 'City',
               logger: this.logger,
             }) as unknown as CityDAO<MetadataType, OperationMetadataType>)
           : new CityDAO({
@@ -1793,7 +1521,7 @@ export class EntityManager<
               knex: db,
               tableName: 'citys',
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'city',
+              name: 'City',
               logger: this.logger,
             })
     }
@@ -1813,7 +1541,7 @@ export class EntityManager<
                 ...(this.overrides?.defaultFieldsEntity?.middlewares || []),
                 ...(selectMiddleware('defaultFieldsEntity', this.middlewares) as T.DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'defaultFieldsEntity',
+              name: 'DefaultFieldsEntity',
               logger: this.logger,
             }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>)
           : new DefaultFieldsEntityDAO({
@@ -1827,7 +1555,7 @@ export class EntityManager<
                 ...(this.overrides?.defaultFieldsEntity?.middlewares || []),
                 ...(selectMiddleware('defaultFieldsEntity', this.middlewares) as T.DAOMiddleware<DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'defaultFieldsEntity',
+              name: 'DefaultFieldsEntity',
               logger: this.logger,
             })
     }
@@ -1847,7 +1575,7 @@ export class EntityManager<
                 ...(this.overrides?.device?.middlewares || []),
                 ...(selectMiddleware('device', this.middlewares) as T.DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'device',
+              name: 'Device',
               logger: this.logger,
             }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>)
           : new DeviceDAO({
@@ -1861,7 +1589,7 @@ export class EntityManager<
                 ...(this.overrides?.device?.middlewares || []),
                 ...(selectMiddleware('device', this.middlewares) as T.DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'device',
+              name: 'Device',
               logger: this.logger,
             })
     }
@@ -1878,7 +1606,7 @@ export class EntityManager<
               metadata: this.metadata,
               ...this.overrides?.dog,
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'dog',
+              name: 'Dog',
               logger: this.logger,
             }) as unknown as DogDAO<MetadataType, OperationMetadataType>)
           : new DogDAO({
@@ -1889,7 +1617,7 @@ export class EntityManager<
               knex: db,
               tableName: 'dogs',
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'dog',
+              name: 'Dog',
               logger: this.logger,
             })
     }
@@ -1909,7 +1637,7 @@ export class EntityManager<
                 ...(this.overrides?.friends?.middlewares || []),
                 ...(selectMiddleware('friends', this.middlewares) as T.DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'friends',
+              name: 'Friends',
               logger: this.logger,
             }) as unknown as FriendsDAO<MetadataType, OperationMetadataType>)
           : new FriendsDAO({
@@ -1923,7 +1651,7 @@ export class EntityManager<
                 ...(this.overrides?.friends?.middlewares || []),
                 ...(selectMiddleware('friends', this.middlewares) as T.DAOMiddleware<FriendsDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'friends',
+              name: 'Friends',
               logger: this.logger,
             })
     }
@@ -1943,7 +1671,7 @@ export class EntityManager<
                 ...(this.overrides?.organization?.middlewares || []),
                 ...(selectMiddleware('organization', this.middlewares) as T.DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'organization',
+              name: 'Organization',
               logger: this.logger,
             }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>)
           : new OrganizationDAO({
@@ -1957,7 +1685,7 @@ export class EntityManager<
                 ...(this.overrides?.organization?.middlewares || []),
                 ...(selectMiddleware('organization', this.middlewares) as T.DAOMiddleware<OrganizationDAOGenerics<MetadataType, OperationMetadataType>>[]),
               ],
-              name: 'organization',
+              name: 'Organization',
               logger: this.logger,
             })
     }
@@ -1974,7 +1702,7 @@ export class EntityManager<
               metadata: this.metadata,
               ...this.overrides?.user,
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'user',
+              name: 'User',
               logger: this.logger,
             }) as unknown as UserDAO<MetadataType, OperationMetadataType>)
           : new UserDAO({
@@ -1985,7 +1713,7 @@ export class EntityManager<
               knex: db,
               tableName: 'users',
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'user',
+              name: 'User',
               logger: this.logger,
             })
     }
@@ -2058,7 +1786,7 @@ export class EntityManager<
   }
 
   public async createTables(args: {
-    typeMap?: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>
+    typeMap?: Partial<Record<keyof ScalarsSpecification, { singleType: string; arrayType?: string }>>
     defaultType: { singleType: string; arrayType?: string }
   }): Promise<void> {
     this.address.createTable(args.typeMap ?? {}, args.defaultType)
