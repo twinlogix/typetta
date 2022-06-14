@@ -334,6 +334,9 @@ export function anotherSchema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface AnotherModel extends types.Another {}
+export interface AnotherPlainModel extends T.GenerateModel<'Another', AST, ScalarsSpecification, 'relation'> {}
 export function authorSchema(): T.Schema<ScalarsSpecification> {
   return {
     books: {
@@ -1319,6 +1322,9 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
     },
   }
 }
+
+export interface UsernamePasswordCredentialsModel extends types.UsernamePasswordCredentials {}
+export interface UsernamePasswordCredentialsPlainModel extends T.GenerateModel<'UsernamePasswordCredentials', AST, ScalarsSpecification, 'relation'> {}
 
 export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType

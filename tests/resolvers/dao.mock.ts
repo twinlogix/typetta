@@ -185,6 +185,9 @@ export function metadataSchema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface MetadataModel extends types.Metadata {}
+export interface MetadataPlainModel extends T.GenerateModel<'Metadata', AST, ScalarsSpecification, 'relation'> {}
 export function postSchema(): T.Schema<ScalarsSpecification> {
   return {
     content: {

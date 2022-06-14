@@ -534,6 +534,9 @@ export function auditableSchema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface AuditableModel extends types.Auditable {}
+export interface AuditablePlainModel extends T.GenerateModel<'Auditable', AST, ScalarsSpecification, 'relation'> {}
 export function citySchema(): T.Schema<ScalarsSpecification> {
   return {
     addressId: {
@@ -921,6 +924,9 @@ export function embeddedUserSchema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface EmbeddedUserModel extends types.EmbeddedUser {}
+export interface EmbeddedUserPlainModel extends T.GenerateModel<'EmbeddedUser', AST, ScalarsSpecification, 'relation'> {}
 export function embeddedUser2Schema(): T.Schema<ScalarsSpecification> {
   return {
     user: {
@@ -939,6 +945,9 @@ export function embeddedUser2Schema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface EmbeddedUser2Model extends types.EmbeddedUser2 {}
+export interface EmbeddedUser2PlainModel extends T.GenerateModel<'EmbeddedUser2', AST, ScalarsSpecification, 'relation'> {}
 export function embeddedUser3Schema(): T.Schema<ScalarsSpecification> {
   return {
     user: {
@@ -955,6 +964,9 @@ export function embeddedUser3Schema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface EmbeddedUser3Model extends types.EmbeddedUser3 {}
+export interface EmbeddedUser3PlainModel extends T.GenerateModel<'EmbeddedUser3', AST, ScalarsSpecification, 'relation'> {}
 export function embeddedUser4Schema(): T.Schema<ScalarsSpecification> {
   return {
     e: {
@@ -971,6 +983,9 @@ export function embeddedUser4Schema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface EmbeddedUser4Model extends types.EmbeddedUser4 {}
+export interface EmbeddedUser4PlainModel extends T.GenerateModel<'EmbeddedUser4', AST, ScalarsSpecification, 'relation'> {}
 export function embeddedUser5Schema(): T.Schema<ScalarsSpecification> {
   return {
     userId: {
@@ -979,6 +994,9 @@ export function embeddedUser5Schema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface EmbeddedUser5Model extends types.EmbeddedUser5 {}
+export interface EmbeddedUser5PlainModel extends T.GenerateModel<'EmbeddedUser5', AST, ScalarsSpecification, 'relation'> {}
 export function hotelSchema(): T.Schema<ScalarsSpecification> {
   return {
     audit: {
@@ -1422,6 +1440,9 @@ export function postMetadataSchema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface PostMetadataModel extends types.PostMetadata {}
+export interface PostMetadataPlainModel extends T.GenerateModel<'PostMetadata', AST, ScalarsSpecification, 'relation'> {}
 export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     amount: {
@@ -1596,6 +1617,9 @@ export function userCollectionSchema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface UserCollectionModel extends types.UserCollection {}
+export interface UserCollectionPlainModel extends T.GenerateModel<'UserCollection', AST, ScalarsSpecification, 'relation'> {}
 export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecification> {
   return {
     password: {
@@ -1620,6 +1644,9 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
     },
   }
 }
+
+export interface UsernamePasswordCredentialsModel extends types.UsernamePasswordCredentials {}
+export interface UsernamePasswordCredentialsPlainModel extends T.GenerateModel<'UsernamePasswordCredentials', AST, ScalarsSpecification, 'relation'> {}
 
 export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType

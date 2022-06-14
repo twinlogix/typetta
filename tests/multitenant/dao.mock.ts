@@ -629,6 +629,9 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
   }
 }
 
+export interface UsernamePasswordCredentialsModel extends types.UsernamePasswordCredentials {}
+export interface UsernamePasswordCredentialsPlainModel extends T.GenerateModel<'UsernamePasswordCredentials', AST, ScalarsSpecification, 'relation'> {}
+
 export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
   middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]

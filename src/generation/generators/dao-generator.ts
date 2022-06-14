@@ -189,12 +189,13 @@ export class TsTypettaGenerator extends TypettaGenerator {
     if (node.entity) {
       const daoSchema = this.generateDAOSchema(node, typesMap)
       const daoParams = this.generateDAOParams(node)
-      const utilsType = this.generateUtillsType(node)
+      const utilsType = this.generateEntityUtilsType(node)
       const dao = this.generateDAO(node, typesMap)
       return [daoSchema, daoParams, utilsType, dao].join('\n\n')
     } else {
       const daoSchema = this.generateDAOSchema(node, typesMap)
-      return [daoSchema].join('\n\n')
+      const utilsType = this.generateUtilsType(node)
+      return [daoSchema, utilsType].join('\n\n')
     }
   }
 
@@ -602,7 +603,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     return [daoGenerics, daoParams, inMemoryDaoParams].join('\n')
   }
 
-  private generateUtillsType(node: TsTypettaGeneratorNode): string {
+  private generateEntityUtilsType(node: TsTypettaGeneratorNode): string {
     return `
     export type ${node.name}IdFields = T.IdFields<'${node.name}', AST>
     export interface ${node.name}Model extends types.${node.name} {}
@@ -615,6 +616,12 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     export interface ${node.name}RelationsFindParams extends T.RelationsFindParams<'${node.name}', AST, ScalarsSpecification> {}
     export type ${node.name}Params<P extends ${node.name}Projection> = T.Params<'${node.name}', AST, ScalarsSpecification, P>
     export type ${node.name}CachedTypes = T.CachedTypes<${node.name}IdFields, ${node.name}Model, ${node.name}Insert, ${node.name}PlainModel, ${node.name}Projection, ${node.name}Update, ${node.name}Filter, ${node.name}SortElement, ${node.name}RelationsFindParams>`
+  }
+
+  private generateUtilsType(node: TsTypettaGeneratorNode): string {
+    return `
+    export interface ${node.name}Model extends types.${node.name} {}
+    export interface ${node.name}PlainModel extends T.GenerateModel<'${node.name}', AST, ScalarsSpecification, 'relation'> {}`
   }
 
   // ---------------------------------------------------------------------------------------------------------

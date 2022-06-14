@@ -469,6 +469,9 @@ export function auditableSchema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface AuditableModel extends types.Auditable {}
+export interface AuditablePlainModel extends T.GenerateModel<'Auditable', AST, ScalarsSpecification, 'relation'> {}
 export function citySchema(): T.Schema<ScalarsSpecification> {
   return {
     addressId: {
@@ -1241,6 +1244,9 @@ export function postMetadataSchema(): T.Schema<ScalarsSpecification> {
     },
   }
 }
+
+export interface PostMetadataModel extends types.PostMetadata {}
+export interface PostMetadataPlainModel extends T.GenerateModel<'PostMetadata', AST, ScalarsSpecification, 'relation'> {}
 export function postTypeSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
@@ -1486,6 +1492,9 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
     },
   }
 }
+
+export interface UsernamePasswordCredentialsModel extends types.UsernamePasswordCredentials {}
+export interface UsernamePasswordCredentialsPlainModel extends T.GenerateModel<'UsernamePasswordCredentials', AST, ScalarsSpecification, 'relation'> {}
 
 export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
