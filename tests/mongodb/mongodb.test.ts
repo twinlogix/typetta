@@ -136,7 +136,7 @@ test('simple findOne', async () => {
   expect(user3?.lastName).toBe('LastName')
 })
 
-test('simple resolveOne', async () => {
+test('simple resolveRelations', async () => {
   const u1 = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   const u2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName', live: true } })
   const results = await dao.user.resolveRelations({
