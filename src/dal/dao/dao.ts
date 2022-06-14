@@ -382,7 +382,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     const operationId = uuidv4()
     const res = await this.internalResolveRelations((Array.isArray(params.input) ? params.input : [params.input]) as PartialDeep<T['model']>[], params.projection, params.relations, operationId)
     this.clearDataLoader(operationId)
-    return res as I extends Array<unknown> ? Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] : Project<T['entity'], T['ast'], T['scalars'], P, T['types']>
+    return (Array.isArray(params.input) ? res : res[0]) as I extends Array<unknown>
+      ? Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]
+      : Project<T['entity'], T['ast'], T['scalars'], P, T['types']>
   }
 
   private async internalResolveRelations(
