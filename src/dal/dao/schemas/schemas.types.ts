@@ -1,4 +1,5 @@
 import { IdGenerationStrategy } from '../dao.types'
+import { AbstractScalars } from './ast.types'
 
 type Decorators = {
   isList?: boolean
@@ -14,19 +15,19 @@ type Decorators = {
     }
   | { isId?: false; generationStrategy?: 'middleware' | 'generator' }
 )
-export type SchemaField<ScalarsType> = Readonly<
+export type SchemaField<Scalars extends AbstractScalars> = Readonly<
   (
-    | { type: 'scalar'; scalar: keyof ScalarsType }
-    | { type: 'embedded'; schema: () => Schema<ScalarsType> }
+    | { type: 'scalar'; scalar: keyof Scalars }
+    | { type: 'embedded'; schema: () => Schema<Scalars> }
     | (
-        | { type: 'relation'; relation: 'inner'; schema: () => Schema<ScalarsType>; refFrom: string; refTo: string; dao: string }
-        | { type: 'relation'; relation: 'foreign'; schema: () => Schema<ScalarsType>; refFrom: string; refTo: string; dao: string }
+        | { type: 'relation'; relation: 'inner'; schema: () => Schema<Scalars>; refFrom: string; refTo: string; dao: string }
+        | { type: 'relation'; relation: 'foreign'; schema: () => Schema<Scalars>; refFrom: string; refTo: string; dao: string }
         | {
             type: 'relation'
             relation: 'relationEntity'
-            schema: () => Schema<ScalarsType>
+            schema: () => Schema<Scalars>
             relationEntity: {
-              schema: () => Schema<ScalarsType>
+              schema: () => Schema<Scalars>
               dao: string
             }
             refThis: {
@@ -44,4 +45,4 @@ export type SchemaField<ScalarsType> = Readonly<
     Decorators
 >
 
-export type Schema<ScalarsType> = Readonly<{ [key: string]: SchemaField<ScalarsType> }>
+export type Schema<Scalars extends AbstractScalars> = Readonly<{ [key: string]: SchemaField<Scalars> }>

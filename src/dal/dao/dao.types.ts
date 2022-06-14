@@ -1,10 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DefaultModelScalars, EqualityOperators, Expand, QuantityOperators, SortDirection, TypeTraversal } from '../..'
-import { OmitIfKnown } from '../../utils/utils.types'
+import {
+  AbstractScalars,
+  AbstractSyntaxTree,
+  DefaultModelScalars,
+  EqualityOperators,
+  Expand,
+  Filter,
+  LogicalOperators,
+  Project,
+  QuantityOperators,
+  SortDirection,
+  SortElement,
+  TypeTraversal,
+} from '../..'
+import { OmitNever, IfAny } from '../../utils/utils.types'
 import { AbstractEntityManager } from '../entity-manager'
 import { LogFunction } from './log/log.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
-import { AnyProjection, ModelProjection } from './projections/projections.types'
+import { AnyProjection } from './projections/projections.types'
 import { Schema } from './schemas/schemas.types'
 import { GraphQLResolveInfo } from 'graphql'
 import { Knex } from 'knex'
@@ -14,6 +27,24 @@ export type OperationParams<T extends DAOGenerics> = {
   metadata?: T['operationMetadata']
   options?: T['driverFilterOptions']
 }
+
+export type RelationsFindParams<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = Partial<
+  OmitNever<{
+    [K in keyof AST[Entity]['fields']]: AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
+      ? ASTName extends string
+        ? Type extends 'relation'
+          ? {
+              filter?: Filter<ASTName, AST, Scalars> | AST[Entity]['driverSpecification']['rawFilter']
+              sorts?: SortElement<ASTName, AST>[] | AST[Entity]['driverSpecification']['rawSorts']
+              skip?: number
+              limit?: number
+              relations?: RelationsFindParams<ASTName, AST, Scalars>
+            }
+          : never
+        : never
+      : never
+  }>
+>
 
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
@@ -74,35 +105,35 @@ export type AggregateResults<T extends DAOGenerics, A extends AggregateParams<T>
     ? {
         [K in keyof A['aggregations']]: A['aggregations'][K]['operation'] extends 'count' ? number : number | null
       }
-    : ({ [K in keyof A['by']]: K extends string ? TypeTraversal<T['model'], K> : K extends keyof T['model'] ? T['model'][K] : never } & {
+    : ({ [K in keyof A['by']]: K extends string ? TypeTraversal<T['insert'], K> : K extends keyof T['insert'] ? T['insert'][K] : never } & {
         [K in keyof A['aggregations']]: A['aggregations'][K]['operation'] extends 'count' ? number : number | null
       })[]
 >
 
 export type DAOParams<T extends DAOGenerics> = {
-  idGenerator?: () => T['idScalar'][T['idScalar']]
+  idGenerator?: () => OmitNever<{ [K in T['idFields']]: K extends keyof T['insert'] ? T['insert'][K] : never }>
   entityManager: AbstractEntityManager<string, string, T['scalars'], T['metadata']>
   schema: Schema<T['scalars']>
   metadata?: T['metadata']
   driverContext: T['driverContext']
   pageSize?: number
   middlewares?: DAOMiddleware<T>[]
-  logger?: LogFunction<T['name']>
-  name: T['name']
+  logger?: LogFunction<T['entity']>
+  name: T['entity']
   datasource: string | null
 }
 
 export type DriverType = 'mongo' | 'knex' | 'memory'
 
 export type MiddlewareContext<T extends DAOGenerics> = {
-  daoName: T['name']
+  daoName: T['entity']
   daoDriver: DriverType
   schema: Schema<T['scalars']>
-  idField: T['idKey']
+  idField: T['idFields']
   driver: T['driverContext']
   metadata?: T['metadata']
   specificOperation: 'findAll' | 'findOne' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'replaceAll' | 'deleteOne' | 'deleteAll' | 'aggregate' | 'count' | 'exists' | 'findPage'
-  logger?: LogFunction<T['name']>
+  logger?: LogFunction<T['entity']>
   dao: DAO<T>
   entityManager: T['entityManager']
 }
@@ -111,13 +142,13 @@ export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 export type DefaultGenerationStrategy = 'middleware' | 'generator'
 
 export interface DAO<T extends DAOGenerics> {
-  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<ModelProjection<T, P>[]>
-  findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<ModelProjection<T, P> | null>
-  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: ModelProjection<T, P>[] }>
+  findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]>
+  findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']> | null>
+  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
   aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
-  insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>>
+  insertOne(params: InsertParams<T>): Promise<T['insert']>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>
   replaceOne(params: ReplaceParams<T>): Promise<void>
@@ -125,58 +156,58 @@ export interface DAO<T extends DAOGenerics> {
   deleteAll(params: DeleteParams<T>): Promise<void>
 }
 
+export type CachedTypes<IdFields = any, Model = any, Insert = any, PlainModel = any, Projection = any, Update = any, Filter = any, SortElement = any, RelationsFindParams = any> = {
+  idFields: IdFields
+  model: Model
+  insert: Insert
+  plainModel: PlainModel
+  projection: Projection
+  update: Update
+  filter: Filter
+  sortElement: SortElement
+  relationsFindParams: RelationsFindParams
+}
 export type DAOGenerics<
-  ModelType extends object = any,
-  IDKey extends keyof OmitIfKnown<ModelType, ExcludedFields> = any,
-  IDScalar extends keyof ScalarsType = any,
-  PureFilterType = any,
-  RawFilterType = any,
-  RelationsType = any,
-  ProjectionType extends object = any,
-  PureSortType = any,
-  RawSortType = any,
-  InsertType extends object = any,
-  PureUpdateType = any,
-  RawUpdateType = any,
-  ExcludedFields extends keyof ModelType = any,
-  RelationsFields extends keyof ModelType = any,
+  Entity extends string = any,
+  AST extends AbstractSyntaxTree = any,
+  Scalars extends AbstractScalars<keyof DefaultModelScalars> = any,
+  Types extends CachedTypes = any,
   MetadataType = any,
   OperationMetadataType = any,
   DriverContextType = any,
-  ScalarsType extends DefaultModelScalars = any,
   DriverFilterOptions = any,
   DriverFindOptions = any,
   DriverInsertOptions = any,
   DriverUpdateOptions = any,
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
-  NameType extends string = any,
-  EntityManager extends AbstractEntityManager<string, string, ScalarsType, MetadataType> = AbstractEntityManager<string, string, ScalarsType, MetadataType>,
+  EntityManager extends AbstractEntityManager<string, string, Scalars, MetadataType> = AbstractEntityManager<string, string, Scalars, MetadataType>,
 > = {
-  model: ModelType
-  idKey: IDKey
-  idScalar: IDScalar
-  idType: ModelType[IDKey]
-  pureFilter: PureFilterType
-  rawFilter: RawFilterType
-  filter: PureFilterType | RawFilterType
-  relations: RelationsType
-  projection: ProjectionType
-  pureSort: PureSortType
-  rawSort: RawSortType
-  sort: PureSortType[] | RawSortType
-  insert: InsertType
-  pureUpdate: PureUpdateType
-  rawUpdate: RawUpdateType
-  update: PureUpdateType | RawUpdateType
-  exludedFields: ExcludedFields
-  relationFields: RelationsFields
-  insertExcludedFields: ExcludedFields | RelationsFields
+  ast: AST
+  entity: Entity
+  idFields: IfAny<AST, any, Types['idFields']>
+  types: Types
+  model: Types['model']
+  plainModel: IfAny<AST, any, Types['plainModel']>
+  pureFilter: IfAny<AST, any, Types['filter']>
+  filter: IfAny<AST, any, (Types['filter'] | AST[Entity]['driverSpecification']['rawFilter']) & LogicalOperators<Types['filter'] | AST[Entity]['driverSpecification']['rawFilter']>>
+  rawFilter: IfAny<AST, any, AST[Entity]['driverSpecification']['rawFilter']>
+  projection: IfAny<AST, any, Types['projection']>
+  pureSort: IfAny<AST, any, Types['sortElement']>
+  rawSort: IfAny<AST, any, AST[Entity]['driverSpecification']['rawSorts']>
+  sort: IfAny<AST, any, Types['sortElement'][] | AST[Entity]['driverSpecification']['rawSorts']>
+  insert: IfAny<AST, any, Types['insert']>
+  pureUpdate: IfAny<AST, any, Types['update']>
+  rawUpdate: IfAny<AST, any, AST[Entity]['driverSpecification']['rawUpdate']>
+  update: IfAny<AST, any, Types['update'] | AST[Entity]['driverSpecification']['rawUpdate']>
+  relations: IfAny<AST, any, Types['relationsFindParams']>
+  //exludedFields: ExcludedFields
+  //relationFields: RelationsFields
+  //embeddedFields: EmbeddedFields
   metadata: MetadataType
   operationMetadata: OperationMetadataType
   driverContext: DriverContextType
-  scalars: ScalarsType
-  name: NameType
+  scalars: Scalars
   entityManager: EntityManager
 
   driverFilterOptions: DriverFilterOptions

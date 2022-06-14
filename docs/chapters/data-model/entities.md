@@ -382,9 +382,3 @@ And the schema resulting from it:
 This example also shows how arrays values are saved as comma separated values within in a string. In fact, every value is stored as a string in the metadata. 
 
 Additionally, you can only makes fields that are level deep for the metadata. Any data stored deeper will get lost. Therefore the following doesn't work:
-
-```typescript
-// Doesn't work!
-@schema(metadata: [{ key: "keyOne", value: { key: "nestedKey", value: true } }])
-```
-

@@ -1,6 +1,5 @@
 import { defaultValueMiddleware, mock } from '../../src'
 import { EntityManager } from './dao.mock'
-import { User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import sha256 from 'sha256'
 import { v4 as uuidv4 } from 'uuid'
@@ -644,7 +643,7 @@ test('insert embedded with inner refs', async () => {
 // ------------------------------ REPLACE ---------------------------------
 // ------------------------------------------------------------------------
 test('simple replace', async () => {
-  const user: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
   await dao.user.replaceOne({ filter: { id: user.id }, replace: { id: user.id, firstName: 'FirstName 1', live: true } })
   const user1 = await dao.user.findOne({ filter: { id: user.id } })
 
@@ -656,7 +655,7 @@ test('simple replace', async () => {
 // ------------------------------ DELETE ----------------------------------
 // ------------------------------------------------------------------------
 test('simple delete', async () => {
-  const user: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
 
   const user1 = await dao.user.findOne({ filter: { id: user.id } })
   expect(user1).toBeDefined()
@@ -696,7 +695,7 @@ test('simple delete', async () => {
 // --------------------------- GEOJSON FIELD ------------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve geojson field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, localization: { latitude: 1.111, longitude: 2.222 } } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, localization: { latitude: 1.111, longitude: 2.222 } } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, localization: true } })
   expect(user).toBeDefined()
@@ -730,7 +729,7 @@ test('insert and retrieve decimal field 2', async () => {
 })
 
 test('update and retrieve decimal field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amount: true } })
   expect(user).toBeDefined()
@@ -744,7 +743,7 @@ test('update and retrieve decimal field', async () => {
 })
 
 test('insert and retrieve decimal array field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amounts: [new BigNumber(1.02), new BigNumber(2.223)] } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amounts: [new BigNumber(1.02), new BigNumber(2.223)] } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amounts: true } })
   expect(user).toBeDefined()
@@ -757,7 +756,7 @@ test('insert and retrieve decimal array field', async () => {
 // ---------------------- LOCALIZED STRING FIELD --------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve localized string field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, title: true } })
   expect(user).toBeDefined()

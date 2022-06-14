@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     //"allowSyntheticDefaultImports": true,
     "strict": true,
-    "noErrorTruncation": true,
+    "noErrorTruncation": false,
     "paths": {
       "*": [
         "node_modules/*"

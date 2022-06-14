@@ -134,7 +134,7 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
         }
         if (hasKeys(f, ['exists'])) {
           const eo = f as ElementOperators
-          return eo.exists === true ? value !== undefined : value === undefined
+          return eo.exists == null ? true : eo.exists === true ? value !== undefined : value === undefined
         }
         if (hasKeys(f, ['contains', 'startsWith', 'endsWith'])) {
           const so = f as StringOperators
