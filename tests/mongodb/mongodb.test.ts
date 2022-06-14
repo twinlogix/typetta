@@ -136,6 +136,23 @@ test('simple findOne', async () => {
   expect(user3?.lastName).toBe('LastName')
 })
 
+test('simple resolveOne', async () => {
+  const u1 = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const u2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName', live: true } })
+  const results = await dao.user.resolveOne({
+    input: { id: '', live: true, friendsId: [u1.id, u2.id] },
+    projection: { friends: { firstName: true }, live: true },
+    relations: {
+      friends: {
+        filter: { firstName: 'FirstName' },
+      },
+    },
+  })
+  expect(results.friends?.length).toBe(1)
+  expect((results.friends ?? [])[0].firstName).toBe('FirstName')
+  expect(results.live).toBe(true)
+})
+
 test('simple findOne multiple filter', async () => {
   await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
   await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
@@ -838,7 +855,6 @@ test('simple replace', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
   await dao.user.replaceOne({ filter: { id: user.id }, replace: { id: user.id, firstName: 'FirstName 1', live: true } })
   const user1 = await dao.user.findOne({ filter: { id: user.id } })
-
   expect(user1).toBeDefined()
   expect(user1?.firstName).toBe('FirstName 1')
 })

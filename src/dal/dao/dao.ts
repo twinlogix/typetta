@@ -374,6 +374,25 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return dbProjections
   }
 
+  public async resolveOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: {
+    input: T['plainModel']
+    projection: P
+    relations?: T['relations']
+  }): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>> {
+    return (await this.resolveAll({ ...params, input: [params.input] }))[0]
+  }
+
+  public async resolveAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: {
+    input: T['plainModel'][]
+    projection: P
+    relations?: T['relations']
+  }): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]> {
+    const operationId = uuidv4()
+    const res = await this.resolveRelations(params.input, params.projection, params.relations, operationId)
+    this.clearDataLoader(operationId)
+    return res as Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]
+  }
+
   private async resolveRelations(
     records: PartialDeep<T['model']>[],
     projections?: AnyProjection<T['projection']>,
