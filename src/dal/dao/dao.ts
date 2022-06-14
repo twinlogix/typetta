@@ -219,8 +219,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findAll')
       const records = beforeResults.continue ? await this._findAll(beforeResults.params) : beforeResults.records
-      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId, params.relationParents)
-      const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors }, beforeResults.middlewareIndex, 'findAll')
+      const resolvedRecords = await this.internalResolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId, params.relationParents)
+      const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecords }, beforeResults.middlewareIndex, 'findAll')
       if (isRootOperation) {
         this.clearDataLoader(operationId)
       }
@@ -240,8 +240,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const [isRootOperation, operationId] = params.operationId ? [false, params.operationId] : [true, uuidv4()]
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'find', params: this.infoToProjection({ ...params, operationId }) }, 'findPage')
       const { totalCount, records } = beforeResults.continue ? await this._findPage(beforeResults.params) : { records: beforeResults.records, totalCount: beforeResults.totalCount ?? 0 }
-      const resolvedRecors = await this.resolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId, params.relationParents)
-      const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecors, totalCount }, beforeResults.middlewareIndex, 'findPage')
+      const resolvedRecords = await this.internalResolveRelations(records, beforeResults.params.projection, beforeResults.params.relations, beforeResults.params.operationId, params.relationParents)
+      const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecords, totalCount }, beforeResults.middlewareIndex, 'findPage')
       if (isRootOperation) {
         this.clearDataLoader(operationId)
       }
@@ -374,7 +374,18 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return dbProjections
   }
 
-  private async resolveRelations(
+  public async resolveRelations<I extends T['plainModel'] | T['plainModel'][], P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: {
+    input: I
+    projection: P
+    relations?: T['relations']
+  }): Promise<I extends Array<unknown> ? Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] : Project<T['entity'], T['ast'], T['scalars'], P, T['types']>> {
+    const operationId = uuidv4()
+    const res = await this.internalResolveRelations((Array.isArray(params.input) ? params.input : [params.input]) as PartialDeep<T['model']>[], params.projection, params.relations, operationId)
+    this.clearDataLoader(operationId)
+    return res as I extends Array<unknown> ? Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] : Project<T['entity'], T['ast'], T['scalars'], P, T['types']>
+  }
+
+  private async internalResolveRelations(
     records: PartialDeep<T['model']>[],
     projections?: AnyProjection<T['projection']>,
     relations?: T['relations'],
