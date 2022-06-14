@@ -139,7 +139,7 @@ test('simple findOne', async () => {
 test('simple resolveOne', async () => {
   const u1 = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   const u2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName', live: true } })
-  const results = await dao.user.resolveOne({
+  const results = await dao.user.resolveRelations({
     input: { id: '', live: true, friendsId: [u1.id, u2.id] },
     projection: { friends: { firstName: true }, live: true },
     relations: {
