@@ -799,16 +799,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       },
       create: async (params, info) => {
         const inserted = await this.insertOne(params)
-        const entry = await this.findOne({
-          filter: {
-            [this.info.idField]: inserted[this.info.idField],
-          },
-          projection: info,
-        })
-        if (!entry) {
-          throw new Error('Unreachable')
-        }
-        return entry as PartialDeep<T['model']>
+        return this.resolveRelations({ input: inserted, projection: info }) as PartialDeep<T['model']>
       },
       update: async (params) => {
         await this.updateAll({
