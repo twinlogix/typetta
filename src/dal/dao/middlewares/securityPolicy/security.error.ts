@@ -39,8 +39,14 @@ export class SecurityPolicyReadError extends SecurityPolicyError {
   public requestedProjection: GenericProjection
   public unauthorizedProjection: GenericProjection
   public permissions: [string, unknown][]
-  public operationDomains: unknown
-  constructor(args: { permissions: [string, unknown][]; operationDomains: unknown; requestedProjection: GenericProjection; allowedProjection: GenericProjection; unauthorizedProjection: GenericProjection }) {
+  public operationDomains: unknown[]
+  constructor(args: {
+    permissions: [string, unknown][]
+    operationDomains: unknown[]
+    requestedProjection: GenericProjection
+    allowedProjection: GenericProjection
+    unauthorizedProjection: GenericProjection
+  }) {
     super(`Unauthorized access to restricted fields.`)
     this.allowedProjection = args.allowedProjection
     this.requestedProjection = args.requestedProjection

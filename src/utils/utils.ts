@@ -177,6 +177,10 @@ export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [str
   return Object.fromEntries(Object.entries(obj).flatMap(([k, v]) => f([k, v as T[keyof T]])))
 }
 
+export function hasKeys(i: unknown, keys: string[]): boolean {
+  return i && typeof i === 'object' && keys.some((k) => k in i && typeof (i as Record<string, unknown>)[k] !== 'function') ? true : false
+}
+
 type FlattenEmbeddedFilter<T> = {
   [K in RecursiveKeyOfLeaf<DeepRequired<T>>]?: TypeTraversal<T, K>
 }
@@ -204,4 +208,21 @@ export function renameLogicalOperators<T extends Record<string, unknown>, D exte
     if (k === 'nor_' || k === '$nor') return [['$nor', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]
     return [[k, v]]
   }) as D['pureFilter']
+}
+
+export function intersection<T>(values: T[][], equals: (l: T, r: T) => boolean): T[] {
+  if (values.length === 0) {
+    return []
+  }
+  const [head, ...tail] = values
+  return tail.reduce((p, c) => {
+    return p.filter((x) => {
+      for (const x2 of c) {
+        if (equals(x, x2)) {
+          return true
+        }
+        return false
+      }
+    })
+  }, head)
 }

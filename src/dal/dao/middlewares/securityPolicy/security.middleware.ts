@@ -4,6 +4,7 @@ import { isProjectionContained } from '../../projections/projections.utils'
 import { DAOMiddleware } from '../middlewares.types'
 import { SecurityPolicyDeleteError, SecurityPolicyReadError, SecurityPolicyUpdateError, SecurityPolicyWriteError } from './security.error'
 import { PERMISSION, CRUDPermission } from './security.policy'
+import { inferOperationSecurityDomain } from './security.utils'
 
 type SecurityContext<Permission extends string, SecurityContextPermission> = {
   [Kp in Permission]?: SecurityContextPermission[]
@@ -22,9 +23,9 @@ export function securityPolicy<
 >(input: {
   permissions: Permissions<T, Permission>
   securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
-  securityDomain: (metadata: T['operationMetadata'] | undefined) => SecurityDomain | undefined
+  securityDomains: (metadata: T['operationMetadata'] | undefined) => SecurityDomain[] | undefined
   defaultPermission?: CRUDPermission<T>
-  domainMap?: { [K in keyof Required<SecurityDomain>]: keyof T['model'] | null }
+  domainMap?: { [K in keyof Required<SecurityDomain>]?: keyof T['model'] | null }
 }): DAOMiddleware<T> {
   type RelatedSecurityContext = {
     domain: SecurityContextPermission[] | true
@@ -101,13 +102,27 @@ export function securityPolicy<
       }
 
       // infer operationSecurityDomain from filter
-      if (input.domainMap && args.params.filter) {
-        console.log()
-      }
-      const operationSecurityDomain = input.securityDomain(args.params.metadata) ?? ({} as SecurityDomain)
-      const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
+      const inferredOperationSecurityDomain = () =>
+        input.domainMap && args.params.filter
+          ? inferOperationSecurityDomain(
+              Object.entries(input.domainMap)
+                .filter((v) => v[1] != null)
+                .map((v) => v[1] as string),
+              args.params.filter,
+            )
+          : [{} as SecurityDomain]
+      const givenOperationSecurityDomains = input.securityDomains(args.params.metadata)
+      const operationSecurityDomains = givenOperationSecurityDomains ?? (inferredOperationSecurityDomain() as SecurityDomain[])
+      const policies = operationSecurityDomains.map((opd) => getCrudPolicy(opd, relatedSecurityContext))
+      const crud = PERMISSION.and(policies)
 
-      const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $and: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
+      const isValidFilter = givenOperationSecurityDomains ? givenOperationSecurityDomains.some((osd) => Object.keys(osd).length > 0) : false
+      const domainFiltersOr = givenOperationSecurityDomains
+        ? givenOperationSecurityDomains.map((osd) => ({
+            $and: Object.entries(osd).map(([k, v]) => ({ [k]: { in: v } })),
+          }))
+        : null
+      const domainFilters = domainFiltersOr ? (domainFiltersOr.length > 0 ? (isValidFilter ? { $or: domainFiltersOr } : null) : { [context.idField]: null }) : null
       const filter =
         'filter' in args.params && args.params.filter != null && domainFilters
           ? { $and: [args.params.filter, domainFilters] }
@@ -124,7 +139,7 @@ export function securityPolicy<
             requestedProjection: args.params.projection ?? true,
             unauthorizedProjection: invalidFields,
             permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]),
-            operationDomains: operationSecurityDomain,
+            operationDomains: operationSecurityDomains,
           })
         }
 
@@ -144,7 +159,7 @@ export function securityPolicy<
             requestedProjection: projection,
             unauthorizedProjection: invalidFields,
             permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]),
-            operationDomains: operationSecurityDomain,
+            operationDomains: operationSecurityDomains,
           })
         }
         return { continue: true, operation: 'aggregate', params: { ...args.params, filter } }
@@ -152,21 +167,21 @@ export function securityPolicy<
 
       if (args.operation === 'update') {
         if (!crud.update) {
-          throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomain })
+          throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomains })
         }
         return { continue: true, operation: 'update', params: { ...args.params, filter } }
       }
 
       if (args.operation === 'replace') {
         if (!crud.update) {
-          throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomain })
+          throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomains })
         }
         return { continue: true, operation: 'replace', params: { ...args.params, filter } }
       }
 
       if (args.operation === 'delete') {
         if (!crud.delete) {
-          throw new SecurityPolicyDeleteError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomain })
+          throw new SecurityPolicyDeleteError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomains })
         }
         return { continue: true, operation: 'delete', params: { ...args.params, filter } }
       }
