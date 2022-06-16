@@ -5,6 +5,7 @@ import { DAOMiddleware } from '../middlewares.types'
 
 export function projectionDependency<T extends DAOGenerics>(options: { fieldsProjection: AnyProjection<T['projection']>; requiredProjection: AnyProjection<T['projection']> }): DAOMiddleware<T> {
   return {
+    name: 'Typetta - Projection dependency',
     before: async (args) => {
       if (args.operation === 'find') {
         if (isProjectionIntersected(args.params.projection ? (args.params.projection as GenericProjection) : true, options.fieldsProjection ? (options.fieldsProjection as GenericProjection) : true)) {

@@ -1,12 +1,14 @@
+import { AbstractScalars } from '../..'
+
 export type DefaultModelScalars = {
-  String: string
-  Boolean: boolean
-  Int: number
-  Float: number
+  String: { type: string; isTextual: true; isQuantitative: false }
+  Boolean: { type: boolean; isTextual: false; isQuantitative: false }
+  Int: { type: number; isTextual: false; isQuantitative: true }
+  Float: { type: number; isTextual: false; isQuantitative: true }
 }
 
-export type DataTypeAdapterMap<ModelScalars extends object, DBScalars extends object> = {
-  [key in keyof ModelScalars]: DBScalars extends Record<key, unknown> ? DataTypeAdapter<ModelScalars[key], DBScalars[key]> : DataTypeAdapter<ModelScalars[key], unknown>
+export type DataTypeAdapterMap<ModelScalars extends AbstractScalars, DBScalars extends AbstractScalars> = {
+  [K in keyof ModelScalars]: K extends keyof DBScalars ? DataTypeAdapter<ModelScalars[K]['type'], DBScalars[K]['type']> : DataTypeAdapter<ModelScalars[K]['type'], unknown>
 }
 
 export type DataTypeAdapter<ModelType, DBType> = {

@@ -1,5 +1,6 @@
+import { AbstractScalars } from '..'
 import { Schema } from '../dal/dao/schemas/schemas.types'
-import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../dal/drivers/drivers.types'
+import { DataTypeAdapterMap, identityAdapter } from '../dal/drivers/drivers.types'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './types'
 
 export function toFirstLower(typeName: string): string {
@@ -92,7 +93,7 @@ export function indentMultiline(str: string, count = 1): string {
  * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
  * @returns a new transformed object
  */
-export function transformObject<From extends { [key: string]: any }, To, ModelScalars extends DefaultModelScalars, DBScalars extends object>(
+export function transformObject<From extends { [key: string]: unknown }, To, ModelScalars extends AbstractScalars, DBScalars extends AbstractScalars>(
   adapters: DataTypeAdapterMap<ModelScalars, DBScalars>,
   direction: 'dbToModel' | 'modelToDB',
   object: From,
@@ -117,7 +118,7 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
           const validator = adapter.validate
           const mapper =
             validator && isModelToDB
-              ? (data: ModelScalars[keyof ModelScalars]) => {
+              ? (data: ModelScalars[keyof ModelScalars]['type']) => {
                   const validation = validator(data)
                   if (validation === true) {
                     return adapter.modelToDB(data)
@@ -134,7 +135,7 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
           if (Array.isArray(value) && schemaField.isList) {
             result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.schema()))
           } else {
-            result[destName] = transformObject(adapters, direction, value, schemaField.schema())
+            result[destName] = transformObject(adapters, direction, value as { [key: string]: unknown }, schemaField.schema())
           }
         }
       }

@@ -1,5 +1,5 @@
 import { Coordinates } from '../../src'
-import { LocalizedString } from '../../src'
+import { LocalizedString } from '../types'
 import { BigNumber } from 'bignumber.js'
 
 export type Maybe<T> = T | null
@@ -111,6 +111,7 @@ export type User = {
   bestFriendId?: Maybe<Scalars['ID']>
   credentials?: Maybe<UsernamePasswordCredentials>
   dogs?: Maybe<Array<Dog>>
+  embeddedDog?: Maybe<Dog>
   firstName?: Maybe<Scalars['String']>
   friends?: Maybe<Array<Maybe<User>>>
   id: Scalars['ID']

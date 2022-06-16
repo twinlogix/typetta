@@ -1,3 +1,4 @@
+import { AbstractScalars } from '..'
 import { DAOGenerics } from '../dal/dao/dao.types'
 import { Schema, SchemaField } from '../dal/dao/schemas/schemas.types'
 import { DataTypeAdapter } from '../dal/drivers/drivers.types'
@@ -5,7 +6,7 @@ import { DeepRequired, RecursiveKeyOfLeaf, TypeTraversal } from './utils.types'
 import { isPlainObject } from 'is-plain-object'
 import knex, { Knex } from 'knex'
 
-export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schema<ScalarsType>): SchemaField<ScalarsType> | null {
+export function getSchemaFieldTraversing<Scalars extends AbstractScalars>(key: string, schema: Schema<Scalars>): SchemaField<Scalars> | null {
   const c = key.split('.')
   if (c.length === 1) {
     return c[0] in schema ? schema[c[0]] : null
@@ -19,27 +20,27 @@ export function getSchemaFieldTraversing<ScalarsType>(key: string, schema: Schem
   }
 }
 
-export function modelValueToDbValue<ScalarsType>(
-  value: ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][],
-  schemaField: SchemaField<ScalarsType>,
-  adapter: DataTypeAdapter<ScalarsType[keyof ScalarsType], any>,
+export function modelValueToDbValue<Scalars extends AbstractScalars>(
+  value: Scalars[keyof Scalars]['type'] | Scalars[keyof Scalars]['type'][],
+  schemaField: SchemaField<Scalars>,
+  adapter: DataTypeAdapter<Scalars[keyof Scalars]['type'], unknown>,
 ): unknown {
   if (adapter.validate) {
     if (schemaField.isList) {
-      for (const v of value as ScalarsType[keyof ScalarsType][]) {
+      for (const v of value as Scalars[keyof Scalars]['type'][]) {
         const validation = adapter.validate(v)
         if (validation !== true) {
           throw validation
         }
       }
     } else {
-      const validation = adapter.validate(value as ScalarsType[keyof ScalarsType])
+      const validation = adapter.validate(value as Scalars[keyof Scalars])
       if (validation !== true) {
         throw validation
       }
     }
   }
-  return schemaField.isList ? (value as ScalarsType[keyof ScalarsType][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as ScalarsType[keyof ScalarsType])
+  return schemaField.isList ? (value as Scalars[keyof Scalars]['type'][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as Scalars[keyof Scalars]['type'])
 }
 
 export function* reversed<T>(array: T[]): Iterable<T> {
@@ -180,7 +181,7 @@ type FlattenEmbeddedFilter<T> = {
   [K in RecursiveKeyOfLeaf<DeepRequired<T>>]?: TypeTraversal<T, K>
 }
 
-export function flattenEmbeddeds<T extends Record<string, unknown>, ScalarsType>(obj: T, schema: Schema<ScalarsType>, prefix = ''): FlattenEmbeddedFilter<T> {
+export function flattenEmbeddeds<T extends Record<string, unknown>, Scalars extends AbstractScalars>(obj: T, schema: Schema<Scalars>, prefix = ''): FlattenEmbeddedFilter<T> {
   if (!obj) {
     return obj
   }

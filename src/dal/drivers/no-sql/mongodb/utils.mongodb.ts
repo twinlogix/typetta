@@ -1,3 +1,4 @@
+import { AbstractScalars } from '../../../..'
 import {
   getSchemaFieldTraversing,
   mapObject,
@@ -11,16 +12,20 @@ import {
 import { DAOGenerics } from '../../../dao/dao.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { Schema, SchemaField } from '../../../dao/schemas/schemas.types'
-import { DefaultModelScalars, identityAdapter } from '../../drivers.types'
+import { identityAdapter } from '../../drivers.types'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDataTypeAdapterMap } from './adapters.mongodb'
 import { Filter, Document, SortDirection } from 'mongodb'
 
-export function adaptProjection<ProjectionType extends object, ScalarsType>(projection: AnyProjection<ProjectionType>, schema: Schema<ScalarsType>, defaultTrue?: true): AnyProjection<ProjectionType> {
+export function adaptProjection<ProjectionType extends object, Scalars extends AbstractScalars>(
+  projection: AnyProjection<ProjectionType>,
+  schema: Schema<Scalars>,
+  defaultTrue?: true,
+): AnyProjection<ProjectionType> {
   if (projection === true || projection === undefined) {
     return defaultTrue
   }
-  return mapObject(projection, ([k, v]) => {
+  return mapObject(projection as Record<string, unknown>, ([k, v]) => {
     if (k in schema) {
       const schemaField = schema[k]
       const name = schemaField.alias ?? k
@@ -43,7 +48,7 @@ export function adaptProjection<ProjectionType extends object, ScalarsType>(proj
   }) as AnyProjection<ProjectionType>
 }
 
-export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {
+export function modelNameToDbName<Scalars extends AbstractScalars>(name: string, schema: Schema<Scalars>): string {
   const c = name.split('.')
   const k = c.shift() ?? name
   const schemaField = schema[k]
@@ -55,11 +60,7 @@ export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<Scal
   }
 }
 
-export function adaptFilter<ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
-  filter: T['filter'],
-  schema: Schema<ScalarsType>,
-  adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
-): Filter<Document> {
+export function adaptFilter<Scalars extends AbstractScalars, T extends DAOGenerics>(filter: T['filter'], schema: Schema<Scalars>, adapters: MongoDBDataTypeAdapterMap<Scalars>): Filter<Document> {
   if (typeof filter === 'function') {
     return filter()
   }
@@ -81,10 +82,10 @@ export function adaptFilter<ScalarsType extends DefaultModelScalars, T extends D
   })
 }
 
-function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][]>(
+function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Scalars[keyof Scalars]['type'] | Scalars[keyof Scalars]['type'][]>(
   value: unknown,
-  adapters: MongoDBDataTypeAdapterMap<ScalarsType>,
-  schemaField: SchemaField<ScalarsType>,
+  adapters: MongoDBDataTypeAdapterMap<Scalars>,
+  schemaField: SchemaField<Scalars>,
 ): unknown {
   if (schemaField.type === 'scalar') {
     // filter on scalar type
@@ -96,6 +97,12 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
       const filter = value as Record<string, unknown>
       const mappedFilter = mapObject(filter, ([fk, fv]) => {
         if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
+          if (fk === 'eq' && 'mode' in filter && filter.mode === 'insensitive') {
+            return [
+              ['$options', 'i'],
+              ['$regex', `^${modelValueToDbValue(fv as Scalar, schemaField, adapter)}$`],
+            ]
+          }
           return [[`$${fk}`, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
@@ -105,11 +112,15 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
           return []
         }
         if (fk === 'exists') {
+          if (fv == null) {
+            return []
+          }
           return [[`$${fk}`, fv]]
         }
         return [[fk, fv]]
       })
       const $options = 'mode' in filter && filter.mode === 'sensitive' ? '' : 'i'
+      // TODO: should filter.startsWith, filter.contains, filter.endsWith pass through adapter?
       const stringFilter =
         'contains' in filter && 'startsWith' in filter && 'endsWith' in filter
           ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains}).*(?<=${filter.endsWith}$)`) }
@@ -141,8 +152,8 @@ function adaptToSchema<ScalarsType extends DefaultModelScalars, Scalar extends S
   }
 }
 
-export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>(update: UpdateType, schema: Schema<ScalarsType>, adapters: MongoDBDataTypeAdapterMap<ScalarsType>): Document {
-  return mapObject(update as unknown as Record<string, ScalarsType[keyof ScalarsType] | ScalarsType[keyof ScalarsType][]>, ([k, v]) => {
+export function adaptUpdate<Scalars extends AbstractScalars, UpdateType>(update: UpdateType, schema: Schema<Scalars>, adapters: MongoDBDataTypeAdapterMap<Scalars>): Document {
+  return mapObject(update as unknown as Record<string, Scalars[keyof Scalars]['type'] | Scalars[keyof Scalars]['type'][]>, ([k, v]) => {
     if (v === undefined) {
       return []
     }
@@ -156,7 +167,7 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
       return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField && schemaField.type === 'embedded') {
       if (schemaField.isList) {
-        return [[columnName, (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.schema(), adapters)))]]
+        return [[columnName, v === null ? null : (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.schema(), adapters)))]]
       }
       return [[columnName, v === null ? null : adaptUpdate(v, schemaField.schema(), adapters)]]
     } else {
@@ -165,7 +176,7 @@ export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>
   })
 }
 
-export function adaptSorts<SortType, ScalarsType>(sort: SortType[], schema: Schema<ScalarsType>): [string, SortDirection][] {
+export function adaptSorts<SortType, Scalars extends AbstractScalars>(sort: SortType[], schema: Schema<Scalars>): [string, SortDirection][] {
   return sort.flatMap((s) => {
     return Object.entries(s).map(([k, v]) => {
       if (k === '$textScore') {

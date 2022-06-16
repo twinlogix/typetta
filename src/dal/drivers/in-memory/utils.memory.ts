@@ -113,7 +113,12 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
         const value = getByPath(entity, key)
         if (hasKeys(f, ['eq', 'in', 'ne', 'nin'])) {
           const eo = f as EqualityOperators<unknown>
-          const eqResult = eo.eq != null ? equals(value, eo.eq) : true
+          const eqResult =
+            eo.eq != null
+              ? (f as Record<string, unknown>).mode === 'insensitive' && typeof value === 'string' && typeof eo.eq === 'string'
+                ? equals(value.toLocaleLowerCase(), eo.eq.toLocaleLowerCase())
+                : equals(value, eo.eq)
+              : true
           const neResult = eo.ne != null ? !equals(value, eo.ne) : true
           const inResult = eo.in ? eo.in.some((v) => equals(value, v)) : true
           const ninResult = eo.nin ? eo.nin.every((v) => !equals(value, v)) : true
@@ -129,7 +134,7 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
         }
         if (hasKeys(f, ['exists'])) {
           const eo = f as ElementOperators
-          return eo.exists === true ? value !== undefined : value === undefined
+          return eo.exists == null ? true : eo.exists === true ? value !== undefined : value === undefined
         }
         if (hasKeys(f, ['contains', 'startsWith', 'endsWith'])) {
           const so = f as StringOperators

@@ -23,7 +23,7 @@ export type AggregateMiddlewareOutput<T extends DAOGenerics> = {
   args?: AggregatePostProcessing<T, AggregateParams<T>>
   result: AggregateResults<T, AggregateParams<T>>
 }
-export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; insertedRecord: Omit<T['model'], T['insertExcludedFields']> }
+export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; insertedRecord: T['plainModel'] }
 export type UpdateMiddlewareOutput<T extends DAOGenerics> = { operation: 'update'; params: UpdateParams<T> }
 export type ReplaceMiddlewareOutput<T extends DAOGenerics> = { operation: 'replace'; params: ReplaceParams<T> }
 export type DeleteMiddlewareOutput<T extends DAOGenerics> = { operation: 'delete'; params: DeleteParams<T> }
@@ -67,6 +67,7 @@ export type BeforeMiddlewareResult<T extends DAOGenerics> = (MiddlewareInput<T> 
 export type AfterMiddlewareResult<T extends DAOGenerics> = Continue<boolean> & MiddlewareOutput<T>
 
 export type DAOMiddleware<T extends DAOGenerics> = {
+  name?: string
   before?: <G extends MiddlewareInput<T>>(args: G, context: MiddlewareContext<T>) => Promise<BeforeMiddlewareResult<T> | void>
   after?: (args: MiddlewareOutput<T>, context: MiddlewareContext<T>) => Promise<AfterMiddlewareResult<T> | void>
 }

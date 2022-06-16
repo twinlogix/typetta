@@ -115,7 +115,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
+  protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     return this.getRecords(params)
   }
 
@@ -192,11 +192,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     return this.runQuery(
       'insertOne',
       () => {
-        const r = filterNullFields<PartialDeep<T['model']>>(filterUndefiendFields<PartialDeep<T['model']>>(params.record))
+        const r = filterNullFields<PartialDeep<T['plainModel']>>(filterUndefiendFields<PartialDeep<T['plainModel']>>(params.record))
         const record = this.modelToDb(r)
         const query = this.qb().insert(record, '*')
         return this.buildTransaction(params.options, query)
@@ -205,9 +205,9 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         const inserted = records[0]
         if (typeof inserted === 'number') {
           const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] ?? inserted } as T['filter'], options: params.options, limit: 1 })
-          return insertedRetrieved[0] as Omit<T['model'], T['insertExcludedFields']>
+          return insertedRetrieved[0]
         }
-        return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
+        return this.dbToModel(inserted)
       },
     )
   }
@@ -272,7 +272,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private async runQuery<R = undefined>(
-    operation: LogArgs<T['name']>['operation'],
+    operation: LogArgs<T['entity']>['operation'],
     queryBuilder: () => Knex.QueryBuilder<any, any> | { skipReason: string },
     transform?: (result: any) => R,
     skipDefault?: Awaited<R>,
@@ -282,25 +282,25 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     try {
       query = queryBuilder()
       if ('skipReason' in query) {
-        this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
+        await this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
         return skipDefault as Awaited<R>
       }
       const result = await query
       const records = transform ? await transform(result) : undefined
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.knexLog({ duration, operation, level: 'query', query, date: finish })
+      await this.knexLog({ duration, operation, level: 'query', query, date: finish })
       return records as Awaited<R>
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
+      await this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
       throw error
     }
   }
 
-  private knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }) {
-    this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
+  private async knexLog(args: Pick<LogArgs<T['entity']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }): Promise<void> {
+    await this.log(() => this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 
   protected _driver(): Exclude<LogArgs<string>['driver'], undefined> {

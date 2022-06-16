@@ -1,7 +1,7 @@
 import { SecurityPolicyReadError, SecurityPolicyWriteError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
 import { inMemoryMongoDb } from '../utils'
-import { EntityManager, UserRoleParam } from './dao.mock'
+import { EntityManager, UserRoleParams } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
@@ -42,7 +42,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           domain: {
             hotelId: 'id',
             tenantId: 'tenantId',
-            userId: null,
+            //userId: null,
           },
           permissions: {
             MANAGE_HOTEL: PERMISSION.ALLOW,
@@ -61,7 +61,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           domain: {
             hotelId: 'hotelId',
             tenantId: 'tenantId',
-            userId: null,
+            //userId: null,
           },
           permissions: {
             MANAGE_ROOM: { create: true },
@@ -81,7 +81,7 @@ async function createSecureEntityManager(userId: string): Promise<SecureEntityMa
   if (!user) {
     throw new Error('User does not exists')
   }
-  function createSecurityContext(roles: UserRoleParam<{ role: { permissions: true }; hotelId: true; userId: true; tenantId: true }>[]): SecurityContext {
+  function createSecurityContext(roles: UserRoleParams<{ role: { permissions: true }; hotelId: true; userId: true; tenantId: true }>[]): SecurityContext {
     return Object.values(Permission).reduce((permissions, key) => {
       const domains = roles.flatMap((v) => {
         if (v.role.permissions.includes(key as Permission)) {
@@ -244,7 +244,7 @@ test('security test 1', async () => {
     aggregations: { v: { operation: 'count' } },
     metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
   })
-  expect(total.v).toBe(3)
+  expect(total.v).toBe(1)
 
   try {
     await entityManager.reservation.aggregate({

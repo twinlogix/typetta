@@ -17,8 +17,8 @@ export function securityPolicy<
   Permission extends string,
   T extends DAOGenerics,
   SecurityDomainKeys extends string,
-  SecurityContextPermission extends { [K in SecurityDomainKeys]?: T['model'][K] | true },
-  SecurityDomain extends { [K in SecurityDomainKeys]?: T['model'][K][] },
+  SecurityContextPermission extends { [K in SecurityDomainKeys]?: T['plainModel'][K] | true },
+  SecurityDomain extends { [K in SecurityDomainKeys]?: T['plainModel'][K][] },
 >(input: {
   permissions: Permissions<T, Permission>
   securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
@@ -48,7 +48,7 @@ export function securityPolicy<
     const noDomainCrud = relatedSecurityContext.flatMap((rsc) => (rsc.domain === true ? [rsc.crud] : []))
     const withDomainCrud = Object.entries(operationSecurityDomain).map(([k, v]) => {
       const domainKey = k as SecurityDomainKeys
-      const domainValues = v as T['model'][SecurityDomainKeys][]
+      const domainValues = v as T['plainModel'][SecurityDomainKeys][]
       const cruds = domainValues.map((domainValue) => {
         const cruds = relatedSecurityContext.flatMap((rsc) =>
           rsc.domain === true ||
@@ -63,7 +63,7 @@ export function securityPolicy<
               atomKeys
                 .filter((atomKey) => atomKey !== domainKey)
                 .every((atomKey) => {
-                  const domains: T['model'][SecurityDomainKeys][] = operationSecurityDomain[atomKey] ?? []
+                  const domains: T['plainModel'][SecurityDomainKeys][] = operationSecurityDomain[atomKey] ?? []
                   return domains.some((dv) => (typeof dv === 'object' && 'equals' in dv && typeof dv.equals === 'function' ? dv.equals(atom[atomKey]) : atom[atomKey] === dv))
                 })
             )
@@ -87,6 +87,7 @@ export function securityPolicy<
   }
 
   return {
+    name: 'Typetta - Security',
     before: async (args, context) => {
       const relatedSecurityContext = getRelatedSecurityContext(context)
 
@@ -106,7 +107,7 @@ export function securityPolicy<
       const operationSecurityDomain = input.securityDomain(args.params.metadata) ?? ({} as SecurityDomain)
       const crud = getCrudPolicy(operationSecurityDomain, relatedSecurityContext)
 
-      const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $or: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
+      const domainFilters = operationSecurityDomain && Object.keys(operationSecurityDomain).length > 0 ? { $and: Object.entries(operationSecurityDomain).map(([k, v]) => ({ [k]: { in: v } })) } : null
       const filter =
         'filter' in args.params && args.params.filter != null && domainFilters
           ? { $and: [args.params.filter, domainFilters] }

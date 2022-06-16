@@ -1,3 +1,4 @@
+import { idInfoFromSchema } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
@@ -10,7 +11,6 @@ import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
 import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
 import { Collection, Document, WithId, Filter, FindOptions, OptionalId, SortDirection } from 'mongodb'
 import { PartialDeep } from 'type-fest'
-import { idInfoFromSchema } from '../../../..'
 
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
   private collection: Collection
@@ -121,8 +121,6 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       const sort = args?.sorts
         ? [
             {
-              // eslint-disable-next-line
-              // @ts-ignore
               $sort: args.sorts.reduce<object>((p, s) => {
                 const [k, v] = Object.entries(s)[0]
                 return {
@@ -170,7 +168,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     })
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     return this.runQuery('insertOne', async () => {
       const record = this.modelToDb(filterUndefiendFields(params.record))
       const options = params.options ?? {}
@@ -181,7 +179,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
           if (!inserted) {
             throw new Error(`One just inserted document with id ${result.insertedId.toHexString()} was not retrieved correctly.`)
           }
-          return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
+          return this.dbToModel(inserted)
         },
         () => `collection.insertOne(${JSON.stringify(record)})`,
       ]
@@ -231,7 +229,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     })
   }
 
-  private async runQuery<R>(operation: LogArgs<T['name']>['operation'], body: () => Promise<[() => Promise<R>, () => string]>): Promise<R> {
+  private async runQuery<R>(operation: LogArgs<T['entity']>['operation'], body: () => Promise<[() => Promise<R>, () => string]>): Promise<R> {
     const start = new Date()
     try {
       const [promiseGenerator, queryGenerator] = await body()
@@ -239,24 +237,24 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
         const result = await promiseGenerator()
         const finish = new Date()
         const duration = finish.getTime() - start.getTime()
-        this.mongoLog({ duration, operation, level: 'query', query: queryGenerator, date: finish })
+        await this.mongoLog({ duration, operation, level: 'query', query: queryGenerator, date: finish })
         return result
       } catch (error: unknown) {
         const finish = new Date()
         const duration = finish.getTime() - start.getTime()
-        this.mongoLog({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
+        await this.mongoLog({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
         throw error
       }
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.mongoLog({ error, duration, operation, level: 'error', date: finish })
+      await this.mongoLog({ error, duration, operation, level: 'error', date: finish })
       throw error
     }
   }
 
-  private mongoLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }) {
-    this.log(this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
+  private async mongoLog(args: Pick<LogArgs<T['entity']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }): Promise<void> {
+    await this.log(() => this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
   }
 
   protected _driver(): 'mongo' | 'knex' {

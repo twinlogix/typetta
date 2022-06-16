@@ -1,4 +1,4 @@
-import { AggregatePostProcessing } from '../../../..'
+import { AbstractScalars, AggregatePostProcessing } from '../../../..'
 import { getSchemaFieldTraversing, mapObject, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { AggregateParams, DAOGenerics } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators, LogicalOperators } from '../../../dao/filters/filters.types'
@@ -15,7 +15,7 @@ export type AbstractFilter = {
 
 export type AbstractSort = { [key: string]: SortDirection }
 
-export function modelNameToDbName<ScalarsType>(name: string, schema: Schema<ScalarsType>): string {
+export function modelNameToDbName<Scalars extends AbstractScalars>(name: string, schema: Schema<Scalars>): string {
   const c = name.split('.')
   const k = c.shift() ?? name
   const schemaField = schema[k]
@@ -55,8 +55,10 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             const avs = () => (fv as any[]).map((fve) => adapter.modelToDB(fve) as any)
             // prettier-ignore
             switch (fk) {
-              case 'exists': fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
-              case 'eq': builder.where(columnName, av()); break
+              case 'exists': fv == null ? null : fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
+              case 'eq': 
+                if(vr.mode && vr.mode === 'insensitive') { builder.whereILike(columnName, av()) }
+                else { builder.where(columnName, av()) } break
               case 'gte': builder.where(columnName, '>=', av()); break
               case 'gt': builder.where(columnName, '>', av()); break
               case 'lte': builder.where(columnName, '<=', av()); break
@@ -65,21 +67,21 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case 'in': builder.whereIn(columnName, avs()); break
               case 'nin': builder.not.whereIn(columnName, avs()); break
               case 'contains': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `%${fv}%`)
                 } else {
                   builder.whereILike(columnName, `%${fv}%`)
                 }
                 break
               case 'startsWith': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `${fv}%`)
                 } else {
                   builder.whereILike(columnName, `${fv}%`)
                 }
                 break
               case 'endsWith': 
-                if(vr.mode && vr.mode === 'sensitive'){
+                if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `%${fv}`)
                 } else {
                   builder.whereILike(columnName, `%${fv}`)
@@ -160,12 +162,12 @@ export function buildHavingConditions<TRecord, TResult>(
   return builder
 }
 
-export function buildSelect<TRecord, TResult, ScalarsType>(
+export function buildSelect<TRecord, TResult, Scalars extends AbstractScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   projection: GenericProjection,
-  schema: Schema<ScalarsType>,
+  schema: Schema<Scalars>,
 ): Knex.QueryBuilder<TRecord, TResult> {
-  function embeddedColumns(prefix: string, s: Schema<ScalarsType>, proj: GenericProjection): string[] {
+  function embeddedColumns(prefix: string, s: Schema<Scalars>, proj: GenericProjection): string[] {
     return Object.entries(s).flatMap(([k, v]) => {
       if (proj === true || (typeof proj === 'object' && k in proj)) {
         if (v.type === 'embedded') {
@@ -205,7 +207,11 @@ export function buildSelect<TRecord, TResult, ScalarsType>(
   return builder
 }
 
-export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuilder<TRecord, TResult>, sort: AbstractSort[], schema: Schema<ScalarsType>): Knex.QueryBuilder<TRecord, TResult> {
+export function buildSort<TRecord, TResult, Scalars extends AbstractScalars>(
+  builder: Knex.QueryBuilder<TRecord, TResult>,
+  sort: AbstractSort[],
+  schema: Schema<Scalars>,
+): Knex.QueryBuilder<TRecord, TResult> {
   sort.forEach((s) => {
     Object.entries(s).forEach(([sortKey, sortDirection]) => {
       builder.orderBy(modelNameToDbName(sortKey, schema), sortDirection)
@@ -214,8 +220,8 @@ export function buildSort<TRecord, TResult, ScalarsType>(builder: Knex.QueryBuil
   return builder
 }
 
-export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
-  function flat(prefix: string, schemaFiled: { schema: () => Schema<ScalarsType> }, value: any): [string, unknown][] {
+export function flatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Schema<Scalars>, object: any) {
+  function flat(prefix: string, schemaFiled: { schema: () => Schema<Scalars> }, value: any): [string, unknown][] {
     return Object.entries(schemaFiled.schema()).flatMap(([k, subSchemaField]) => {
       const key = subSchemaField.alias ?? k
       if (key in value) {
@@ -240,8 +246,8 @@ export function flatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, ob
   }, object)
 }
 
-export function unflatEmbdeddedFields<ScalarsType>(schema: Schema<ScalarsType>, object: any) {
-  function unflat(prefix: string, schemaFiled: { schema: () => Schema<ScalarsType> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
+export function unflatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Schema<Scalars>, object: any) {
+  function unflat(prefix: string, schemaFiled: { schema: () => Schema<Scalars> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
     const res = Object.entries(schemaFiled.schema()).reduce(
       ([record, oldToDelete], [k, subSchemaField]) => {
         const name = concatEmbeddedNames(prefix, subSchemaField.alias ?? k)
@@ -288,7 +294,10 @@ function concatEmbeddedNames(prefix: string, name: string) {
   return prefix + '_' + name
 }
 
-export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<ScalarsType>): [string, { scalar: keyof ScalarsType } & { array?: boolean; required?: boolean; alias?: string }][] {
+export function embeddedScalars<Scalars extends AbstractScalars>(
+  prefix: string,
+  schema: Schema<Scalars>,
+): [string, { scalar: keyof Scalars } & { array?: boolean; required?: boolean; alias?: string }][] {
   return Object.entries(schema).flatMap(([key, schemaField]) => {
     if (schemaField.type === 'embedded') {
       return embeddedScalars(concatEmbeddedNames(prefix, schemaField.alias || key), schemaField.schema())
@@ -300,7 +309,7 @@ export function embeddedScalars<ScalarsType>(prefix: string, schema: Schema<Scal
   })
 }
 
-export function adaptUpdate<ScalarsType extends DefaultModelScalars, UpdateType>({
+export function adaptUpdate<ScalarsType extends AbstractScalars, UpdateType>({
   update,
   schema,
   adapters,

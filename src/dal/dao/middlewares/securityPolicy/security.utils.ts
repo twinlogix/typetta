@@ -3,7 +3,7 @@ import { DAOMiddleware } from '../middlewares.types'
 import { securityPolicy } from './security.middleware'
 import { EntityManagerSecurtyPolicy } from './security.types'
 
-export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in string]: DAOGenerics }, OperationMetadataType, Permissions extends string, SecurityDomain extends object>(
+export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in string]: DAOGenerics }, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>>(
   contextPolicy: EntityManagerSecurtyPolicy<DAOGenericsMap, OperationMetadataType, Permissions, SecurityDomain>,
 ): { middlewares: { [K in keyof DAOGenericsMap]?: DAOMiddleware<DAOGenericsMap[K]> }; others?: DAOMiddleware<DAOGenericsMap[keyof DAOGenericsMap]> } {
   const context = contextPolicy.context
@@ -29,7 +29,7 @@ export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in s
                         const mappedAtom = Object.fromEntries(
                           Object.entries(atom).flatMap(([k, v]) => {
                             const key = k as keyof SecurityDomain
-                            return domainMap[key] !== null ? [[domainMap[key], v]] : []
+                            return domainMap[key] != null ? [[domainMap[key], v]] : []
                           }),
                         )
                         return Object.keys(mappedAtom).length > 0 ? [mappedAtom] : []
@@ -51,7 +51,7 @@ export function createSecurityPolicyMiddlewares<DAOGenericsMap extends { [K in s
               const mappedSecurityDomain = Object.fromEntries(
                 Object.entries(securityDomain).flatMap(([k, v]) => {
                   const key = k as keyof SecurityDomain
-                  return domainMap[key] !== null ? [[domainMap[key], v]] : []
+                  return domainMap[key] != null ? [[domainMap[key], v]] : []
                 }),
               )
               return mappedSecurityDomain

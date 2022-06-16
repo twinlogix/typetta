@@ -20,17 +20,17 @@ beforeEach(async () => {
       user: {
         idGenerator: () => {
           idCounter = idCounter + 1
-          return 'user_' + idCounter
+          return { id: 'user_' + idCounter }
         },
         middlewares: [
           computedField({
             fieldsProjection: { averageViewsPerPost: true },
-            requiredProjection: { totalPostsViews: true, posts: {} },
+            requiredProjection: { totalPostsViews: true, posts: {} } as const,
             compute: async (u) => ({ averageViewsPerPost: (u.totalPostsViews || 0) / (u.posts?.length || 1) }),
           }),
           computedField({
             fieldsProjection: { totalPostsViews: true },
-            requiredProjection: { posts: { views: true } },
+            requiredProjection: { posts: { views: true } } as const,
             compute: async (u) => ({
               totalPostsViews: u.posts?.map((p) => p.views).reduce((p, c) => p + c, 0) || 0,
             }),
@@ -40,12 +40,12 @@ beforeEach(async () => {
       post: {
         idGenerator: () => {
           idCounter = idCounter + 1
-          return 'post_' + idCounter
+          return { id: 'post_' + idCounter }
         },
       },
       tag: {
         idGenerator: () => {
-          return 'tag_' + idCounter
+          return { id: 'tag_' + idCounter }
         },
       },
     },
@@ -119,14 +119,12 @@ test('Demo', async () => {
       'credentials.username': 'Pippo',
     },
     projection: {
-      firstName: false,
       averageViewsPerPost: true,
       posts: {
         title: true,
         author: {
           firstName: true,
         },
-        tagsId: true,
         tags: true,
       },
     },

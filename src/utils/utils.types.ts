@@ -2,14 +2,6 @@ export type DeepReadonly<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>
 }
 
-export type Truetizer<P> = P extends true
-  ? true
-  : P extends object
-  ? {
-      [K in keyof P]: P[K] extends object ? Truetizer<P[K]> : never | P[K] | true
-    }
-  : never /* | true*/
-
 /**
  * Expands object types recursively.
  */
@@ -87,3 +79,9 @@ export type OmitIfKnown<T, K extends keyof T> = [K] extends [any] ? any : Omit<T
 export type DeepRequired<T> = Required<{
   [K in keyof T]: Required<DeepRequired<T[K]>>
 }>
+
+export type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] }
+
+export type Difference<A, B> = A extends B ? never : A
+
+export type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N

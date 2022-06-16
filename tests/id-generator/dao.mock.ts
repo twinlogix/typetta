@@ -3,10 +3,88 @@ import * as types from './models.mock'
 import { Knex } from 'knex'
 import * as M from 'mongodb'
 
-export type AExcludedFields = never
-export type ARelationFields = never
+export type ScalarsSpecification = {
+  ID: { type: types.Scalars['ID']; isTextual: false; isQuantitative: false }
+  String: { type: types.Scalars['String']; isTextual: true; isQuantitative: false }
+  Boolean: { type: types.Scalars['Boolean']; isTextual: false; isQuantitative: false }
+  Int: { type: types.Scalars['Int']; isTextual: false; isQuantitative: true }
+  Float: { type: types.Scalars['Float']; isTextual: false; isQuantitative: true }
+  Decimal: { type: types.Scalars['Decimal']; isTextual: false; isQuantitative: false }
+  IntAutoInc: { type: types.Scalars['IntAutoInc']; isTextual: false; isQuantitative: false }
+  JSON: { type: types.Scalars['JSON']; isTextual: false; isQuantitative: false }
+  MongoID: { type: types.Scalars['MongoID']; isTextual: false; isQuantitative: false }
+}
 
-export function aSchema(): T.Schema<types.Scalars> {
+export type AST = {
+  A: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'MongoID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+      value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
+  }
+  B: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
+  }
+  C: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
+      value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
+  }
+  D: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'IntAutoInc'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+      value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  E: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+  F: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'user' }
+      value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+      rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
+    }
+  }
+}
+
+export function aSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -24,54 +102,13 @@ export function aSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type AFilterFields = {
-  id?: types.Scalars['MongoID'] | null | T.EqualityOperators<types.Scalars['MongoID']> | T.ElementOperators
-  value?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
-}
-export type AFilter = AFilterFields & T.LogicalOperators<AFilterFields | ARawFilter>
-export type ARawFilter = () => M.Filter<M.Document>
-
-export type ARelations = Record<never, string>
-
-export type AProjection = {
-  id?: boolean
-  value?: boolean
-}
-export type AParam<P extends AProjection> = T.ParamProjection<types.A, AProjection, P>
-
-export type ASortKeys = 'id' | 'value'
-export type ASort = Partial<Record<ASortKeys, T.SortDirection>>
-export type ARawSort = () => M.Sort
-
-export type AUpdate = {
-  id?: types.Scalars['MongoID']
-  value?: types.Scalars['Int']
-}
-export type ARawUpdate = () => M.UpdateFilter<M.Document>
-
-export type AInsert = {
-  value: types.Scalars['Int']
-}
-
 type ADAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
-  types.A,
-  'id',
-  'MongoID',
-  AFilter,
-  ARawFilter,
-  ARelations,
-  AProjection,
-  ASort,
-  ARawSort,
-  AInsert,
-  AUpdate,
-  ARawUpdate,
-  AExcludedFields,
-  ARelationFields,
+  'A',
+  AST,
+  ScalarsSpecification,
+  ACachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'a',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type ADAOParams<MetadataType, OperationMetadataType> = Omit<
@@ -83,14 +120,25 @@ export type InMemoryADAOParams<MetadataType, OperationMetadataType> = Omit<
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type AIdFields = T.IdFields<'A', AST>
+export interface AModel extends types.A {}
+export interface AInsert extends T.Insert<'A', AST, ScalarsSpecification> {}
+export interface APlainModel extends T.GenerateModel<'A', AST, ScalarsSpecification, 'relation'> {}
+export interface AProjection extends T.Projection<'A', AST> {}
+export interface AUpdate extends T.Update<'A', AST, ScalarsSpecification> {}
+export interface AFilter extends T.Filter<'A', AST, ScalarsSpecification> {}
+export interface ASortElement extends T.SortElement<'A', AST> {}
+export interface ARelationsFindParams extends T.RelationsFindParams<'A', AST, ScalarsSpecification> {}
+export type AParams<P extends AProjection> = T.Params<'A', AST, ScalarsSpecification, P>
+export type ACachedTypes = T.CachedTypes<AIdFields, AModel, AInsert, APlainModel, AProjection, AUpdate, AFilter, ASortElement, ARelationsFindParams>
+
 export class ADAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends AProjection>(p: P) {
+  public static projection<P extends T.Projection<'A', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AProjection, P2 extends AProjection>(p1: P1, p2: P2): T.SelectProjection<AProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<AProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'A', AST>, P2 extends T.Projection<'A', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'A', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'A', AST>, P1, P2>
   }
-
   public constructor(params: ADAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -100,13 +148,12 @@ export class ADAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
 }
 
 export class InMemoryADAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends AProjection>(p: P) {
+  public static projection<P extends T.Projection<'A', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends AProjection, P2 extends AProjection>(p1: P1, p2: P2): T.SelectProjection<AProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<AProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'A', AST>, P2 extends T.Projection<'A', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'A', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'A', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryADAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -114,11 +161,7 @@ export class InMemoryADAO<MetadataType, OperationMetadataType> extends T.Abstrac
     })
   }
 }
-
-export type BExcludedFields = never
-export type BRelationFields = never
-
-export function bSchema(): T.Schema<types.Scalars> {
+export function bSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -135,68 +178,37 @@ export function bSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type BFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  value?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
-}
-export type BFilter = BFilterFields & T.LogicalOperators<BFilterFields | BRawFilter>
-export type BRawFilter = () => M.Filter<M.Document>
-
-export type BRelations = Record<never, string>
-
-export type BProjection = {
-  id?: boolean
-  value?: boolean
-}
-export type BParam<P extends BProjection> = T.ParamProjection<types.B, BProjection, P>
-
-export type BSortKeys = 'id' | 'value'
-export type BSort = Partial<Record<BSortKeys, T.SortDirection>>
-export type BRawSort = () => M.Sort
-
-export type BUpdate = {
-  id?: types.Scalars['ID']
-  value?: types.Scalars['Int']
-}
-export type BRawUpdate = () => M.UpdateFilter<M.Document>
-
-export type BInsert = {
-  id?: null | types.Scalars['ID']
-  value: types.Scalars['Int']
-}
-
 type BDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
-  types.B,
-  'id',
-  'ID',
-  BFilter,
-  BRawFilter,
-  BRelations,
-  BProjection,
-  BSort,
-  BRawSort,
-  BInsert,
-  BUpdate,
-  BRawUpdate,
-  BExcludedFields,
-  BRelationFields,
+  'B',
+  AST,
+  ScalarsSpecification,
+  BCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'b',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type BDAOParams<MetadataType, OperationMetadataType> = Omit<T.MongoDBDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 export type InMemoryBDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<BDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
+export type BIdFields = T.IdFields<'B', AST>
+export interface BModel extends types.B {}
+export interface BInsert extends T.Insert<'B', AST, ScalarsSpecification> {}
+export interface BPlainModel extends T.GenerateModel<'B', AST, ScalarsSpecification, 'relation'> {}
+export interface BProjection extends T.Projection<'B', AST> {}
+export interface BUpdate extends T.Update<'B', AST, ScalarsSpecification> {}
+export interface BFilter extends T.Filter<'B', AST, ScalarsSpecification> {}
+export interface BSortElement extends T.SortElement<'B', AST> {}
+export interface BRelationsFindParams extends T.RelationsFindParams<'B', AST, ScalarsSpecification> {}
+export type BParams<P extends BProjection> = T.Params<'B', AST, ScalarsSpecification, P>
+export type BCachedTypes = T.CachedTypes<BIdFields, BModel, BInsert, BPlainModel, BProjection, BUpdate, BFilter, BSortElement, BRelationsFindParams>
+
 export class BDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends BProjection>(p: P) {
+  public static projection<P extends T.Projection<'B', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends BProjection, P2 extends BProjection>(p1: P1, p2: P2): T.SelectProjection<BProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<BProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'B', AST>, P2 extends T.Projection<'B', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'B', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'B', AST>, P1, P2>
   }
-
   public constructor(params: BDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -206,13 +218,12 @@ export class BDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
 }
 
 export class InMemoryBDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends BProjection>(p: P) {
+  public static projection<P extends T.Projection<'B', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends BProjection, P2 extends BProjection>(p1: P1, p2: P2): T.SelectProjection<BProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<BProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'B', AST>, P2 extends T.Projection<'B', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'B', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'B', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryBDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -220,11 +231,7 @@ export class InMemoryBDAO<MetadataType, OperationMetadataType> extends T.Abstrac
     })
   }
 }
-
-export type CExcludedFields = never
-export type CRelationFields = never
-
-export function cSchema(): T.Schema<types.Scalars> {
+export function cSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -241,55 +248,13 @@ export function cSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type CFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  value?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
-}
-export type CFilter = CFilterFields & T.LogicalOperators<CFilterFields | CRawFilter>
-export type CRawFilter = () => M.Filter<M.Document>
-
-export type CRelations = Record<never, string>
-
-export type CProjection = {
-  id?: boolean
-  value?: boolean
-}
-export type CParam<P extends CProjection> = T.ParamProjection<types.C, CProjection, P>
-
-export type CSortKeys = 'id' | 'value'
-export type CSort = Partial<Record<CSortKeys, T.SortDirection>>
-export type CRawSort = () => M.Sort
-
-export type CUpdate = {
-  id?: types.Scalars['ID']
-  value?: types.Scalars['Int']
-}
-export type CRawUpdate = () => M.UpdateFilter<M.Document>
-
-export type CInsert = {
-  id: types.Scalars['ID']
-  value: types.Scalars['Int']
-}
-
 type CDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
-  types.C,
-  'id',
-  'ID',
-  CFilter,
-  CRawFilter,
-  CRelations,
-  CProjection,
-  CSort,
-  CRawSort,
-  CInsert,
-  CUpdate,
-  CRawUpdate,
-  CExcludedFields,
-  CRelationFields,
+  'C',
+  AST,
+  ScalarsSpecification,
+  CCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'c',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type CDAOParams<MetadataType, OperationMetadataType> = Omit<
@@ -301,14 +266,25 @@ export type InMemoryCDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type CIdFields = T.IdFields<'C', AST>
+export interface CModel extends types.C {}
+export interface CInsert extends T.Insert<'C', AST, ScalarsSpecification> {}
+export interface CPlainModel extends T.GenerateModel<'C', AST, ScalarsSpecification, 'relation'> {}
+export interface CProjection extends T.Projection<'C', AST> {}
+export interface CUpdate extends T.Update<'C', AST, ScalarsSpecification> {}
+export interface CFilter extends T.Filter<'C', AST, ScalarsSpecification> {}
+export interface CSortElement extends T.SortElement<'C', AST> {}
+export interface CRelationsFindParams extends T.RelationsFindParams<'C', AST, ScalarsSpecification> {}
+export type CParams<P extends CProjection> = T.Params<'C', AST, ScalarsSpecification, P>
+export type CCachedTypes = T.CachedTypes<CIdFields, CModel, CInsert, CPlainModel, CProjection, CUpdate, CFilter, CSortElement, CRelationsFindParams>
+
 export class CDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends CProjection>(p: P) {
+  public static projection<P extends T.Projection<'C', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends CProjection, P2 extends CProjection>(p1: P1, p2: P2): T.SelectProjection<CProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<CProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'C', AST>, P2 extends T.Projection<'C', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'C', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'C', AST>, P1, P2>
   }
-
   public constructor(params: CDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -318,13 +294,12 @@ export class CDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDB
 }
 
 export class InMemoryCDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends CProjection>(p: P) {
+  public static projection<P extends T.Projection<'C', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends CProjection, P2 extends CProjection>(p1: P1, p2: P2): T.SelectProjection<CProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<CProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'C', AST>, P2 extends T.Projection<'C', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'C', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'C', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryCDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -332,11 +307,7 @@ export class InMemoryCDAO<MetadataType, OperationMetadataType> extends T.Abstrac
     })
   }
 }
-
-export type DExcludedFields = never
-export type DRelationFields = never
-
-export function dSchema(): T.Schema<types.Scalars> {
+export function dSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -353,54 +324,13 @@ export function dSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type DFilterFields = {
-  id?: types.Scalars['IntAutoInc'] | null | T.EqualityOperators<types.Scalars['IntAutoInc']> | T.ElementOperators
-  value?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
-}
-export type DFilter = DFilterFields & T.LogicalOperators<DFilterFields | DRawFilter>
-export type DRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DRelations = Record<never, string>
-
-export type DProjection = {
-  id?: boolean
-  value?: boolean
-}
-export type DParam<P extends DProjection> = T.ParamProjection<types.D, DProjection, P>
-
-export type DSortKeys = 'id' | 'value'
-export type DSort = Partial<Record<DSortKeys, T.SortDirection>>
-export type DRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DUpdate = {
-  id?: types.Scalars['IntAutoInc']
-  value?: types.Scalars['Int']
-}
-export type DRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type DInsert = {
-  value: types.Scalars['Int']
-}
-
 type DDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.D,
-  'id',
-  'IntAutoInc',
-  DFilter,
-  DRawFilter,
-  DRelations,
-  DProjection,
-  DSort,
-  DRawSort,
-  DInsert,
-  DUpdate,
-  DRawUpdate,
-  DExcludedFields,
-  DRelationFields,
+  'D',
+  AST,
+  ScalarsSpecification,
+  DCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'd',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type DDAOParams<MetadataType, OperationMetadataType> = Omit<
@@ -412,14 +342,25 @@ export type InMemoryDDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type DIdFields = T.IdFields<'D', AST>
+export interface DModel extends types.D {}
+export interface DInsert extends T.Insert<'D', AST, ScalarsSpecification> {}
+export interface DPlainModel extends T.GenerateModel<'D', AST, ScalarsSpecification, 'relation'> {}
+export interface DProjection extends T.Projection<'D', AST> {}
+export interface DUpdate extends T.Update<'D', AST, ScalarsSpecification> {}
+export interface DFilter extends T.Filter<'D', AST, ScalarsSpecification> {}
+export interface DSortElement extends T.SortElement<'D', AST> {}
+export interface DRelationsFindParams extends T.RelationsFindParams<'D', AST, ScalarsSpecification> {}
+export type DParams<P extends DProjection> = T.Params<'D', AST, ScalarsSpecification, P>
+export type DCachedTypes = T.CachedTypes<DIdFields, DModel, DInsert, DPlainModel, DProjection, DUpdate, DFilter, DSortElement, DRelationsFindParams>
+
 export class DDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends DProjection>(p: P) {
+  public static projection<P extends T.Projection<'D', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DProjection, P2 extends DProjection>(p1: P1, p2: P2): T.SelectProjection<DProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<DProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'D', AST>, P2 extends T.Projection<'D', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'D', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'D', AST>, P1, P2>
   }
-
   public constructor(params: DDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -429,13 +370,12 @@ export class DDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
 }
 
 export class InMemoryDDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends DProjection>(p: P) {
+  public static projection<P extends T.Projection<'D', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends DProjection, P2 extends DProjection>(p1: P1, p2: P2): T.SelectProjection<DProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<DProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'D', AST>, P2 extends T.Projection<'D', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'D', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'D', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryDDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -443,11 +383,7 @@ export class InMemoryDDAO<MetadataType, OperationMetadataType> extends T.Abstrac
     })
   }
 }
-
-export type EExcludedFields = never
-export type ERelationFields = never
-
-export function eSchema(): T.Schema<types.Scalars> {
+export function eSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -464,68 +400,37 @@ export function eSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type EFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  value?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
-}
-export type EFilter = EFilterFields & T.LogicalOperators<EFilterFields | ERawFilter>
-export type ERawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type ERelations = Record<never, string>
-
-export type EProjection = {
-  id?: boolean
-  value?: boolean
-}
-export type EParam<P extends EProjection> = T.ParamProjection<types.E, EProjection, P>
-
-export type ESortKeys = 'id' | 'value'
-export type ESort = Partial<Record<ESortKeys, T.SortDirection>>
-export type ERawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type EUpdate = {
-  id?: types.Scalars['ID']
-  value?: types.Scalars['Int']
-}
-export type ERawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type EInsert = {
-  id?: null | types.Scalars['ID']
-  value: types.Scalars['Int']
-}
-
 type EDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.E,
-  'id',
-  'ID',
-  EFilter,
-  ERawFilter,
-  ERelations,
-  EProjection,
-  ESort,
-  ERawSort,
-  EInsert,
-  EUpdate,
-  ERawUpdate,
-  EExcludedFields,
-  ERelationFields,
+  'E',
+  AST,
+  ScalarsSpecification,
+  ECachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'e',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type EDAOParams<MetadataType, OperationMetadataType> = Omit<T.KnexJsDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 export type InMemoryEDAOParams<MetadataType, OperationMetadataType> = Omit<T.InMemoryDAOParams<EDAOGenerics<MetadataType, OperationMetadataType>>, 'idField' | 'schema' | 'idScalar' | 'idGeneration'>
 
+export type EIdFields = T.IdFields<'E', AST>
+export interface EModel extends types.E {}
+export interface EInsert extends T.Insert<'E', AST, ScalarsSpecification> {}
+export interface EPlainModel extends T.GenerateModel<'E', AST, ScalarsSpecification, 'relation'> {}
+export interface EProjection extends T.Projection<'E', AST> {}
+export interface EUpdate extends T.Update<'E', AST, ScalarsSpecification> {}
+export interface EFilter extends T.Filter<'E', AST, ScalarsSpecification> {}
+export interface ESortElement extends T.SortElement<'E', AST> {}
+export interface ERelationsFindParams extends T.RelationsFindParams<'E', AST, ScalarsSpecification> {}
+export type EParams<P extends EProjection> = T.Params<'E', AST, ScalarsSpecification, P>
+export type ECachedTypes = T.CachedTypes<EIdFields, EModel, EInsert, EPlainModel, EProjection, EUpdate, EFilter, ESortElement, ERelationsFindParams>
+
 export class EDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends EProjection>(p: P) {
+  public static projection<P extends T.Projection<'E', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends EProjection, P2 extends EProjection>(p1: P1, p2: P2): T.SelectProjection<EProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<EProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'E', AST>, P2 extends T.Projection<'E', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'E', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'E', AST>, P1, P2>
   }
-
   public constructor(params: EDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -535,13 +440,12 @@ export class EDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
 }
 
 export class InMemoryEDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends EProjection>(p: P) {
+  public static projection<P extends T.Projection<'E', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends EProjection, P2 extends EProjection>(p1: P1, p2: P2): T.SelectProjection<EProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<EProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'E', AST>, P2 extends T.Projection<'E', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'E', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'E', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryEDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -549,11 +453,7 @@ export class InMemoryEDAO<MetadataType, OperationMetadataType> extends T.Abstrac
     })
   }
 }
-
-export type FExcludedFields = never
-export type FRelationFields = never
-
-export function fSchema(): T.Schema<types.Scalars> {
+export function fSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {
       type: 'scalar',
@@ -570,55 +470,13 @@ export function fSchema(): T.Schema<types.Scalars> {
   }
 }
 
-type FFilterFields = {
-  id?: types.Scalars['ID'] | null | T.EqualityOperators<types.Scalars['ID']> | T.ElementOperators
-  value?: types.Scalars['Int'] | null | T.EqualityOperators<types.Scalars['Int']> | T.ElementOperators | T.QuantityOperators<types.Scalars['Int']>
-}
-export type FFilter = FFilterFields & T.LogicalOperators<FFilterFields | FRawFilter>
-export type FRawFilter = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type FRelations = Record<never, string>
-
-export type FProjection = {
-  id?: boolean
-  value?: boolean
-}
-export type FParam<P extends FProjection> = T.ParamProjection<types.F, FProjection, P>
-
-export type FSortKeys = 'id' | 'value'
-export type FSort = Partial<Record<FSortKeys, T.SortDirection>>
-export type FRawSort = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type FUpdate = {
-  id?: types.Scalars['ID']
-  value?: types.Scalars['Int']
-}
-export type FRawUpdate = (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
-
-export type FInsert = {
-  id: types.Scalars['ID']
-  value: types.Scalars['Int']
-}
-
 type FDAOGenerics<MetadataType, OperationMetadataType> = T.KnexJsDAOGenerics<
-  types.F,
-  'id',
-  'ID',
-  FFilter,
-  FRawFilter,
-  FRelations,
-  FProjection,
-  FSort,
-  FRawSort,
-  FInsert,
-  FUpdate,
-  FRawUpdate,
-  FExcludedFields,
-  FRelationFields,
+  'F',
+  AST,
+  ScalarsSpecification,
+  FCachedTypes,
   MetadataType,
   OperationMetadataType,
-  types.Scalars,
-  'f',
   EntityManager<MetadataType, OperationMetadataType>
 >
 export type FDAOParams<MetadataType, OperationMetadataType> = Omit<
@@ -630,14 +488,25 @@ export type InMemoryFDAOParams<MetadataType, OperationMetadataType> = Omit<
   'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
 >
 
+export type FIdFields = T.IdFields<'F', AST>
+export interface FModel extends types.F {}
+export interface FInsert extends T.Insert<'F', AST, ScalarsSpecification> {}
+export interface FPlainModel extends T.GenerateModel<'F', AST, ScalarsSpecification, 'relation'> {}
+export interface FProjection extends T.Projection<'F', AST> {}
+export interface FUpdate extends T.Update<'F', AST, ScalarsSpecification> {}
+export interface FFilter extends T.Filter<'F', AST, ScalarsSpecification> {}
+export interface FSortElement extends T.SortElement<'F', AST> {}
+export interface FRelationsFindParams extends T.RelationsFindParams<'F', AST, ScalarsSpecification> {}
+export type FParams<P extends FProjection> = T.Params<'F', AST, ScalarsSpecification, P>
+export type FCachedTypes = T.CachedTypes<FIdFields, FModel, FInsert, FPlainModel, FProjection, FUpdate, FFilter, FSortElement, FRelationsFindParams>
+
 export class FDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends FProjection>(p: P) {
+  public static projection<P extends T.Projection<'F', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends FProjection, P2 extends FProjection>(p1: P1, p2: P2): T.SelectProjection<FProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<FProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'F', AST>, P2 extends T.Projection<'F', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'F', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'F', AST>, P1, P2>
   }
-
   public constructor(params: FDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -647,13 +516,12 @@ export class FDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsD
 }
 
 export class InMemoryFDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {
-  public static projection<P extends FProjection>(p: P) {
+  public static projection<P extends T.Projection<'F', AST>>(p: P) {
     return p
   }
-  public static mergeProjection<P1 extends FProjection, P2 extends FProjection>(p1: P1, p2: P2): T.SelectProjection<FProjection, P1, P2> {
-    return T.mergeProjections(p1, p2) as T.SelectProjection<FProjection, P1, P2>
+  public static mergeProjection<P1 extends T.Projection<'F', AST>, P2 extends T.Projection<'F', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'F', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'F', AST>, P1, P2>
   }
-
   public constructor(params: InMemoryFDAOParams<MetadataType, OperationMetadataType>) {
     super({
       ...params,
@@ -662,7 +530,7 @@ export class InMemoryFDAO<MetadataType, OperationMetadataType> extends T.Abstrac
   }
 }
 
-export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends object> = {
+export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
   middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: {
@@ -675,19 +543,17 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   }
   mongodb: Record<'a' | 'default', M.Db | 'mock'>
   knex: Record<'default', Knex | 'mock'>
-  scalars?: T.UserInputDriverDataTypeAdapterMap<types.Scalars, 'both'>
-  log?: T.LogInput<'a' | 'b' | 'c' | 'd' | 'e' | 'f'>
+  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'both'>
+  log?: T.LogInput<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
-
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
-
-export class EntityManager<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends object = never> extends T.AbstractEntityManager<
-  'a' | 'default',
-  'default',
-  types.Scalars,
-  MetadataType
-> {
+export class EntityManager<
+  MetadataType = never,
+  OperationMetadataType = never,
+  Permissions extends string = never,
+  SecurityDomain extends Record<string, unknown> = never,
+> extends T.AbstractEntityManager<'a' | 'default', 'default', ScalarsSpecification, MetadataType> {
   private _a: ADAO<MetadataType, OperationMetadataType> | undefined
   private _b: BDAO<MetadataType, OperationMetadataType> | undefined
   private _c: CDAO<MetadataType, OperationMetadataType> | undefined
@@ -703,7 +569,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
 
   private middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
 
-  private logger?: T.LogFunction<'a' | 'b' | 'c' | 'd' | 'e' | 'f'>
+  private logger?: T.LogFunction<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>
 
   get a(): ADAO<MetadataType, OperationMetadataType> {
     if (!this._a) {
@@ -716,7 +582,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               metadata: this.metadata,
               ...this.overrides?.a,
               middlewares: [...(this.overrides?.a?.middlewares || []), ...(selectMiddleware('a', this.middlewares) as T.DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'a',
+              name: 'A',
               logger: this.logger,
             }) as unknown as ADAO<MetadataType, OperationMetadataType>)
           : new ADAO({
@@ -726,7 +592,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               ...this.overrides?.a,
               collection: db.collection('as'),
               middlewares: [...(this.overrides?.a?.middlewares || []), ...(selectMiddleware('a', this.middlewares) as T.DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'a',
+              name: 'A',
               logger: this.logger,
             })
     }
@@ -743,7 +609,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               metadata: this.metadata,
               ...this.overrides?.b,
               middlewares: [...(this.overrides?.b?.middlewares || []), ...(selectMiddleware('b', this.middlewares) as T.DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'b',
+              name: 'B',
               logger: this.logger,
             }) as unknown as BDAO<MetadataType, OperationMetadataType>)
           : new BDAO({
@@ -753,7 +619,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               ...this.overrides?.b,
               collection: db.collection('bs'),
               middlewares: [...(this.overrides?.b?.middlewares || []), ...(selectMiddleware('b', this.middlewares) as T.DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'b',
+              name: 'B',
               logger: this.logger,
             })
     }
@@ -770,7 +636,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               metadata: this.metadata,
               ...this.overrides?.c,
               middlewares: [...(this.overrides?.c?.middlewares || []), ...(selectMiddleware('c', this.middlewares) as T.DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'c',
+              name: 'C',
               logger: this.logger,
             }) as unknown as CDAO<MetadataType, OperationMetadataType>)
           : new CDAO({
@@ -780,7 +646,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               ...this.overrides?.c,
               collection: db.collection('cs'),
               middlewares: [...(this.overrides?.c?.middlewares || []), ...(selectMiddleware('c', this.middlewares) as T.DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'c',
+              name: 'C',
               logger: this.logger,
             })
     }
@@ -797,7 +663,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               metadata: this.metadata,
               ...this.overrides?.d,
               middlewares: [...(this.overrides?.d?.middlewares || []), ...(selectMiddleware('d', this.middlewares) as T.DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'd',
+              name: 'D',
               logger: this.logger,
             }) as unknown as DDAO<MetadataType, OperationMetadataType>)
           : new DDAO({
@@ -808,7 +674,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               knex: db,
               tableName: 'ds',
               middlewares: [...(this.overrides?.d?.middlewares || []), ...(selectMiddleware('d', this.middlewares) as T.DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'd',
+              name: 'D',
               logger: this.logger,
             })
     }
@@ -825,7 +691,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               metadata: this.metadata,
               ...this.overrides?.e,
               middlewares: [...(this.overrides?.e?.middlewares || []), ...(selectMiddleware('e', this.middlewares) as T.DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'e',
+              name: 'E',
               logger: this.logger,
             }) as unknown as EDAO<MetadataType, OperationMetadataType>)
           : new EDAO({
@@ -836,7 +702,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               knex: db,
               tableName: 'es',
               middlewares: [...(this.overrides?.e?.middlewares || []), ...(selectMiddleware('e', this.middlewares) as T.DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'e',
+              name: 'E',
               logger: this.logger,
             })
     }
@@ -853,7 +719,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               metadata: this.metadata,
               ...this.overrides?.f,
               middlewares: [...(this.overrides?.f?.middlewares || []), ...(selectMiddleware('f', this.middlewares) as T.DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'f',
+              name: 'F',
               logger: this.logger,
             }) as unknown as FDAO<MetadataType, OperationMetadataType>)
           : new FDAO({
@@ -864,7 +730,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
               knex: db,
               tableName: 'fs',
               middlewares: [...(this.overrides?.f?.middlewares || []), ...(selectMiddleware('f', this.middlewares) as T.DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[])],
-              name: 'f',
+              name: 'F',
               logger: this.logger,
             })
     }
@@ -926,7 +792,7 @@ export class EntityManager<MetadataType = never, OperationMetadataType = never, 
   }
 
   public async createTables(args: {
-    typeMap?: Partial<Record<keyof types.Scalars, { singleType: string; arrayType?: string }>>
+    typeMap?: Partial<Record<keyof ScalarsSpecification, { singleType: string; arrayType?: string }>>
     defaultType: { singleType: string; arrayType?: string }
   }): Promise<void> {
     this.d.createTable(args.typeMap ?? {}, args.defaultType)
