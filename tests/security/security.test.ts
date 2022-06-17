@@ -14,7 +14,7 @@ type OperationSecurityDomain = { [K in keyof SecurityDomain]: SecurityDomain[K][
 type SecurityContext = {
   [K in Permission]?: SecurityDomain[]
 }
-type SecureEntityManager = EntityManager<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>
+type SecureEntityManager = EntityManager<never, { securityDomains: OperationSecurityDomain[] }, Permission, SecurityDomain>
 let unsafeDao: SecureEntityManager
 let mongodb: {
   replSet: MongoMemoryReplSet
@@ -23,7 +23,7 @@ let mongodb: {
 }
 
 function createDao(securityContext: SecurityContext | undefined, db: Db) {
-  return new EntityManager<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>({
+  return new EntityManager<never, { securityDomains: OperationSecurityDomain[] }, Permission, SecurityDomain>({
     mongodb: {
       default: db,
     },
@@ -71,7 +71,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
       defaultPermission: {
         read: { id: true },
       },
-      operationDomain: (metadata) => metadata?.securityDomain,
+      operationDomain: (metadata) => metadata?.securityDomains,
     },
   })
 }
@@ -145,11 +145,58 @@ test('security test 1', async () => {
 
   const entityManager = await createSecureEntityManager(user.id)
 
+  const res1 = await entityManager.hotel.findAll({
+    projection: { id: true, name: true },
+    metadata: { securityDomains: [] },
+  })
+  expect(res1.length).toBe(0)
+
+  const res2 = await entityManager.hotel.findAll({
+    projection: { tenantId: true },
+    metadata: { securityDomains: [{}] },
+  })
+  expect(res2.length).toBe(6)
+
+  const res3 = await entityManager.hotel.findAll({
+    projection: { id: true, tenantId: true },
+    metadata: { securityDomains: [{ hotelId: ['h1'], tenantId: [1] }, { hotelId: ['h3'] }] },
+  })
+  expect(res3.length).toBe(2)
+
+  const res4 = await entityManager.hotel.findAll({
+    projection: { id: true, tenantId: true, description: true },
+    filter: { $and: [{ id: 'h1' }, { tenantId: 1 }], $or: [{ id: 'h1', tenantId: 1 }, { id: 'h3' }] },
+  })
+  expect(res4.length).toBe(1)
+
+  const res5 = await entityManager.hotel.findAll({
+    projection: { tenantId: true },
+    filter: { name: { startsWith: 'AHotel' } },
+  })
+  expect(res5.length).toBe(5)
+
+  const res6 = await entityManager.hotel.findAll({
+    projection: { tenantId: true },
+    filter: () => ({ name: 'AHotel 1' }),
+  })
+  expect(res6.length).toBe(1)
+
+  const res7 = await entityManager.hotel.findAll({
+    projection: { tenantId: true, id: true },
+    filter: { $and: [{ id: 'h1' }, () => ({ name: 'AHotel 1' })] },
+  })
+  expect(res7.length).toBe(1)
+
+  const res8 = await entityManager.hotel.findAll({
+    projection: { tenantId: true },
+    filter: { $or: [{ id: 'h1' }, () => ({ name: 'AHotel 1' })] },
+  })
+  expect(res8.length).toBe(1)
+
   try {
     await entityManager.hotel.findAll({
       projection: { id: true, name: true },
-      filter: { name: { startsWith: 'AHotel' } },
-      metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } },
+      filter: { name: { startsWith: 'AHotel' }, id: { in: ['h1', 'h2', 'h3'] }, tenantId: { in: [2, 10] } },
     })
     fail()
   } catch (error: unknown) {
@@ -163,8 +210,7 @@ test('security test 1', async () => {
   try {
     await entityManager.hotel.findAll({
       projection: { id: true, name: true, totalCustomers: true },
-      filter: { name: { startsWith: 'AHotel' } },
-      metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
+      filter: { name: { startsWith: 'AHotel' }, id: { in: ['h1', 'h2', 'h3'] }, tenantId: { in: [4, 2] } },
     })
     fail()
   } catch (error: unknown) {
@@ -177,7 +223,10 @@ test('security test 1', async () => {
   }
 
   try {
-    await entityManager.hotel.findAll({ projection: { id: true, name: true, totalCustomers: true }, filter: { name: { startsWith: 'AHotel' } } })
+    await entityManager.hotel.findAll({
+      projection: { id: true, name: true, totalCustomers: true },
+      filter: { name: { startsWith: 'AHotel' } },
+    })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -191,24 +240,41 @@ test('security test 1', async () => {
 
   const hotels = await entityManager.hotel.findAll({
     projection: { id: true, name: true, totalCustomers: true },
-    filter: { name: { startsWith: 'AHotel' } },
-    metadata: { securityDomain: { hotelId: ['h1', 'h2'] } },
+    filter: { name: { startsWith: 'AHotel' }, id: { in: ['h1', 'h2'] } },
   })
   expect(hotels.length).toBe(2)
 
   const hotels2 = await entityManager.hotel.findAll({
     projection: { id: true },
-    metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'] } },
+    metadata: { securityDomains: [{ hotelId: ['h1', 'h2', 'h3'] }] },
   })
   expect(hotels2.length).toBe(3)
+
+  const hotels3 = await entityManager.hotel.findAll({
+    projection: { id: true, name: true, totalCustomers: true },
+    filter: { $and: [{ name: { startsWith: 'AHotel' }, id: 'h1' }, () => ({ id: 'h1' })] },
+  })
+  expect(hotels3.length).toBe(1)
+
+  const hotels4 = await entityManager.hotel.findAll({
+    projection: { id: true, name: true, totalCustomers: true },
+    filter: { name: { startsWith: 'AHotel' }, id: 'h1', tenantId: 1, $and: [{ id: { in: ['h1', 'h2'] } }, { id: 'h1' }] },
+  })
+  expect(hotels4.length).toBe(1)
+
+  const hotels5 = await entityManager.hotel.findAll({
+    projection: { id: true, name: true, totalCustomers: true },
+    filter: { name: { startsWith: 'AHotel' }, id: 'h1', $and: [{ id: { in: ['h3', 'h4'] } }, { id: 'h5' }] },
+  })
+  expect(hotels5.length).toBe(0)
 
   try {
     await entityManager.hotel.aggregate({
       by: {
         name: true,
       },
+      filter: { id: { in: ['h1', 'h2', 'h3'] }, tenantId: { in: [4, 2] } },
       aggregations: { v: { operation: 'sum', field: 'totalCustomers' } },
-      metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
     })
     fail()
   } catch (error: unknown) {
@@ -227,7 +293,7 @@ test('security test 1', async () => {
         totalCustomers: true,
       },
       aggregations: { v: { operation: 'count' } },
-      metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
+      metadata: { securityDomains: [{ hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] }] },
     })
     fail()
   } catch (error: unknown) {
@@ -242,7 +308,7 @@ test('security test 1', async () => {
 
   const total = await entityManager.hotel.aggregate({
     aggregations: { v: { operation: 'count' } },
-    metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
+    filter: { id: { in: ['h1', 'h2', 'h3'] }, tenantId: { in: [4, 2] } },
   })
   expect(total.v).toBe(1)
 
@@ -316,7 +382,7 @@ test('security test 3', async () => {
   const entityManager = await createSecureEntityManager(user.id)
 
   try {
-    await entityManager.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomain: { hotelId: ['none'] } } })
+    await entityManager.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomains: [{ hotelId: ['none'] }] } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -341,7 +407,7 @@ test('security test 4', async () => {
 
   const entityManager = await createSecureEntityManager(user.id)
 
-  await entityManager.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomain: { hotelId: ['h1'] } } })
+  await entityManager.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomains: [{ hotelId: ['h1'] }] } })
   await entityManager.hotel.findAll({ projection: { id: true, name: true } })
 })
 
