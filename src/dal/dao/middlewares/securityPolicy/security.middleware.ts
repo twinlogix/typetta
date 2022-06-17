@@ -1,3 +1,4 @@
+import { equals } from '../../../..'
 import { setTraversing } from '../../../../utils/utils'
 import { DAOGenerics } from '../../dao.types'
 import { isProjectionContained } from '../../projections/projections.utils'
@@ -45,40 +46,42 @@ export function securityPolicy<
     })
   }
 
-  function getCrudPolicy(operationSecurityDomain: SecurityDomain, relatedSecurityContext: RelatedSecurityContext) {
-    const noDomainCrud = relatedSecurityContext.flatMap((rsc) => (rsc.domain === true ? [rsc.crud] : []))
-    const withDomainCrud = Object.entries(operationSecurityDomain).map(([k, v]) => {
-      const domainKey = k as SecurityDomainKeys
-      const domainValues = v as T['plainModel'][SecurityDomainKeys][]
-      const cruds = domainValues.map((domainValue) => {
-        const cruds = relatedSecurityContext.flatMap((rsc) =>
-          rsc.domain === true ||
-          rsc.domain.some((atom) => {
-            const atomKeys = Object.keys(atom) as SecurityDomainKeys[]
-            if (!atomKeys.includes(domainKey)) {
-              return false
-            }
-            const match = typeof domainValue === 'object' && 'equals' in domainValue && typeof domainValue.equals === 'function' ? domainValue.equals(atom[domainKey]) : atom[domainKey] === domainValue
-            return (
-              match &&
-              atomKeys
-                .filter((atomKey) => atomKey !== domainKey)
-                .every((atomKey) => {
-                  const domains: T['plainModel'][SecurityDomainKeys][] = operationSecurityDomain[atomKey] ?? []
-                  return domains.some((dv) => (typeof dv === 'object' && 'equals' in dv && typeof dv.equals === 'function' ? dv.equals(atom[atomKey]) : atom[atomKey] === dv))
-                })
-            )
-          })
-            ? [rsc.crud]
-            : [],
-        )
-        return PERMISSION.or(cruds)
+  function getCrudPolicy(operationSecurityDomains: SecurityDomain[], relatedSecurityContext: RelatedSecurityContext): CRUDPermission<T> {
+    const cruds = operationSecurityDomains.map((operationSecurityDomain) => {
+      const noDomainCrud = relatedSecurityContext.flatMap((rsc) => (rsc.domain === true ? [rsc.crud] : []))
+      const withDomainCrud = Object.entries(operationSecurityDomain).map(([k, v]) => {
+        const domainKey = k as SecurityDomainKeys
+        const domainValues = v as T['plainModel'][SecurityDomainKeys][]
+        const cruds = domainValues.map((domainValue) => {
+          const cruds = relatedSecurityContext.flatMap((rsc) =>
+            rsc.domain === true ||
+            rsc.domain.some((atom) => {
+              const atomKeys = Object.keys(atom) as SecurityDomainKeys[]
+              if (!atomKeys.includes(domainKey)) {
+                return false
+              }
+              return (
+                equals(atom[domainKey], domainValue) &&
+                atomKeys
+                  .filter((atomKey) => atomKey !== domainKey)
+                  .every((atomKey) => {
+                    const domains: T['plainModel'][SecurityDomainKeys][] = operationSecurityDomain[atomKey] ?? []
+                    return domains.some((dv) => equals(atom[atomKey], dv))
+                  })
+              )
+            })
+              ? [rsc.crud]
+              : [],
+          )
+          return PERMISSION.or(cruds)
+        })
+        return PERMISSION.and(cruds)
       })
-      return PERMISSION.and(cruds)
+      const finalCruds = [...withDomainCrud, ...noDomainCrud, ...(input.defaultPermission ? [input.defaultPermission] : [])]
+      const crud = finalCruds.length > 0 ? PERMISSION.or(finalCruds) : PERMISSION.DENY
+      return crud
     })
-    const finalCruds = [...withDomainCrud, ...noDomainCrud, ...(input.defaultPermission ? [input.defaultPermission] : [])]
-    const crud = finalCruds.length > 0 ? PERMISSION.or(finalCruds) : PERMISSION.DENY
-    return crud
+    return PERMISSION.and(cruds)
   }
 
   function isContained(container: { [key: string]: unknown }, contained: { [key: string]: unknown }): boolean {
@@ -113,8 +116,7 @@ export function securityPolicy<
           : [{} as SecurityDomain]
       const givenOperationSecurityDomains = input.securityDomains(args.params.metadata)
       const operationSecurityDomains = givenOperationSecurityDomains ?? (inferredOperationSecurityDomain() as SecurityDomain[])
-      const policies = operationSecurityDomains.map((opd) => getCrudPolicy(opd, relatedSecurityContext))
-      const crud = PERMISSION.and(policies)
+      const crud = getCrudPolicy(operationSecurityDomains, relatedSecurityContext)
 
       const isValidFilter = givenOperationSecurityDomains ? givenOperationSecurityDomains.some((osd) => Object.keys(osd).length > 0) : false
       const domainFiltersOr = givenOperationSecurityDomains

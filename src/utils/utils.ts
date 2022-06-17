@@ -221,8 +221,8 @@ export function intersection<T>(values: T[][], equals: (l: T, r: T) => boolean):
         if (equals(x, x2)) {
           return true
         }
-        return false
       }
+      return false
     })
   }, head)
 }

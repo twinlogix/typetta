@@ -4,7 +4,7 @@ import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators
 import { IN_MEMORY_STATE } from './state.memory'
 import { ObjectId } from 'mongodb'
 
-type AbstractFilterFields = {
+export type AbstractFilterFields = {
   [K in string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators
 }
 type Filter<FilterFields extends AbstractFilterFields> = LogicalOperators<FilterFields> & FilterFields

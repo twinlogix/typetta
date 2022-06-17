@@ -1,5 +1,5 @@
 import { hasKeys, intersection } from '../../../../utils/utils'
-import { equals } from '../../../drivers/in-memory/utils.memory'
+import { AbstractFilterFields, equals } from '../../../drivers/in-memory/utils.memory'
 import { DAOGenerics } from '../../dao.types'
 import { EqualityOperators, LogicalOperators } from '../../filters/filters.types'
 import { DAOMiddleware } from '../middlewares.types'
@@ -91,9 +91,6 @@ export function createSecurityPolicyMiddlewares<
 
 export function intersectSecurityDomains(domainKeys: string[], securityDomains: Record<string, unknown[]>[]): Record<string, unknown[]> {
   const result = domainKeys.flatMap((key) => {
-    if (!key) {
-      return []
-    }
     if (securityDomains.every((sd) => !sd[key])) {
       return []
     }
@@ -105,7 +102,7 @@ export function intersectSecurityDomains(domainKeys: string[], securityDomains: 
   return Object.fromEntries(result)
 }
 
-export function inferOperationSecurityDomain(domainKeys: string[], filter: unknown): Record<string, unknown[]>[] {
+export function inferOperationSecurityDomain(domainKeys: string[], filter: AbstractFilterFields): Record<string, unknown[]>[] {
   if (typeof filter === 'function') {
     return [{}]
   }
@@ -130,14 +127,11 @@ export function inferOperationSecurityDomain(domainKeys: string[], filter: unkno
   }
   function extractFromPlain(filter: Record<string, unknown>): [string, unknown[]][] {
     return domainKeys.flatMap((key) => {
-      if (!key) {
+      const result = extractValue(filter[key])
+      if (result.length === 0) {
         return []
       }
-      const result: [string, unknown[]] = [key, extractValue(filter[key])]
-      if (result[1].length === 0) {
-        return []
-      }
-      return [result]
+      return [[key, result]]
     })
   }
 

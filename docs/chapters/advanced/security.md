@@ -364,15 +364,30 @@ const posts = dao.post.findAll({
 });
 ```
 
-To perform the `findAll` operation without restricting the request to some fields, you must restrict the request to the `security domain` `userId = 2`. To do this, Typetta uses the metadata operation mechanism that allows you to specify additional data for the request:
+To perform the `findAll` operation without restricting the request to some fields, you must restrict the request to the `security domain` `userId = 2`. To do this, you just need to use the filter:
 ```typescript
 const posts = dao.post.findAll({
-  metadata: {
-    userId: [2]
+  filter: {
+    userId: 2
   }
 });
 ```
 This request does not generate any error and, on the contrary, it returns all the posts of user 2 and, of these posts, all the fields allowed by the `VIEW_POSTS` `permission`.
+Typetta infers the operation security domains from the given filter. While using the driver specific filter Typetta cannot infer any operation security domains, anyways you can force them by using the operation metadata:
+```typescript
+const entityManager = new EntityManager({
+  security: {
+    // ... other configurations
+    operationDomain: (metadata) => metadata?.securityDomains,
+  }
+)
+const posts = dao.post.findAll({
+  filter: () => ({
+    // some db specific logic
+  }),
+  metadata: { securityDomains: [{ userId: 2 }] }
+});
+```
 
 ## Implementation notes
 Typetta's security layer is fully implemented through the [middlewares](../client/middlewares.md) mechanism, of which it is a prime example.
