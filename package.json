@@ -76,7 +76,7 @@
     "@graphql-codegen/typescript-resolvers": "2.6.4",
     "@graphql-codegen/visitor-plugin-common": "2.8.0",
     "chalk": "4.1.2",
-    "commander": "9.2.0",
+    "commander": "9.3.0",
     "dataloader": "2.1.0",
     "dedent": "0.7.0",
     "graphql": "15.8.0",
