@@ -132,6 +132,7 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
     description: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -139,21 +140,25 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     totalCustomers: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -220,6 +225,7 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -227,6 +233,7 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     room: {
       type: 'relation',
@@ -235,21 +242,25 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'roomId',
       refTo: 'id',
       dao: 'room',
+      directives: {},
     },
     roomId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -338,6 +349,7 @@ export function roleSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'user',
       required: true,
       isEnum: true,
+      directives: {},
     },
     permissions: {
       type: 'scalar',
@@ -345,6 +357,7 @@ export function roleSchema(): T.Schema<ScalarsSpecification> {
       required: true,
       isList: true,
       isEnum: true,
+      directives: {},
     },
   }
 }
@@ -414,11 +427,13 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     from: {
       type: 'scalar',
       scalar: 'Date',
       required: true,
+      directives: {},
     },
     hotel: {
       type: 'relation',
@@ -428,11 +443,13 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
       refTo: 'id',
       dao: 'hotel',
       required: true,
+      directives: {},
     },
     hotelId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -440,16 +457,19 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     to: {
       type: 'scalar',
       scalar: 'Date',
       required: true,
+      directives: {},
     },
   }
 }
@@ -516,10 +536,12 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'Email',
       required: true,
+      directives: {},
     },
     firstName: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -527,10 +549,12 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     lastName: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     reservations: {
       type: 'relation',
@@ -541,6 +565,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'reservation',
       required: true,
       isList: true,
+      directives: {},
     },
     roles: {
       type: 'relation',
@@ -552,10 +577,12 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       required: true,
       isList: true,
+      directives: {},
     },
     totalPayments: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
   }
 }
@@ -621,6 +648,7 @@ export function userRoleSchema(): T.Schema<ScalarsSpecification> {
     hotelId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -629,11 +657,13 @@ export function userRoleSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     refUserId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     role: {
       type: 'relation',
@@ -643,20 +673,24 @@ export function userRoleSchema(): T.Schema<ScalarsSpecification> {
       refTo: 'code',
       dao: 'role',
       required: true,
+      directives: {},
     },
     roleCode: {
       type: 'scalar',
       scalar: 'String',
       required: true,
       isEnum: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
   }
 }

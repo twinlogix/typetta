@@ -93,11 +93,13 @@ export function aSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -169,11 +171,13 @@ export function bSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -239,11 +243,13 @@ export function cSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -315,11 +321,13 @@ export function dSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'db',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -391,11 +399,13 @@ export function eSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -461,11 +471,13 @@ export function fSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }

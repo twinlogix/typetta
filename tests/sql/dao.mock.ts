@@ -248,6 +248,7 @@ export function addressSchema(): T.Schema<ScalarsSpecification> {
       dao: 'city',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -255,6 +256,7 @@ export function addressSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -331,6 +333,7 @@ export function anotherSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       alias: 't',
+      directives: {},
     },
   }
 }
@@ -354,6 +357,7 @@ export function authorSchema(): T.Schema<ScalarsSpecification> {
       },
       relationEntity: { schema: () => authorBookSchema(), dao: 'authorBook' },
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -361,6 +365,7 @@ export function authorSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -427,11 +432,13 @@ export function authorBookSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     bookId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -439,6 +446,7 @@ export function authorBookSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -529,6 +537,7 @@ export function bookSchema(): T.Schema<ScalarsSpecification> {
       },
       relationEntity: { schema: () => authorBookSchema(), dao: 'authorBook' },
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -536,6 +545,7 @@ export function bookSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -602,6 +612,7 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -609,11 +620,13 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
   }
 }
@@ -681,6 +694,7 @@ export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
       scalar: 'Int',
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -688,27 +702,32 @@ export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     live: {
       type: 'scalar',
       scalar: 'Live',
       required: true,
       generationStrategy: 'generator',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     opt1: {
       type: 'scalar',
       scalar: 'Live',
       generationStrategy: 'middleware',
+      directives: {},
     },
     opt2: {
       type: 'scalar',
       scalar: 'Live',
       generationStrategy: 'generator',
+      directives: {},
     },
   }
 }
@@ -796,11 +815,13 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     user: {
       type: 'relation',
@@ -809,10 +830,12 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'userId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
   }
 }
@@ -881,11 +904,13 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     owner: {
       type: 'relation',
@@ -894,11 +919,13 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'ownerId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     ownerId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -965,6 +992,7 @@ export function friendsSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -972,11 +1000,13 @@ export function friendsSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     to: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1052,6 +1082,7 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
     address: {
       type: 'embedded',
       schema: () => addressSchema(),
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1059,15 +1090,18 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     vatNumber: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
   }
 }
@@ -1153,6 +1187,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'Decimal',
       alias: 'value',
+      directives: {},
     },
     amounts: {
       type: 'scalar',
@@ -1160,6 +1195,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       isList: true,
       alias: 'values',
+      directives: {},
     },
     bestFriend: {
       type: 'relation',
@@ -1168,15 +1204,18 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'bestFriendId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     bestFriendId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
     credentials: {
       type: 'embedded',
       schema: () => usernamePasswordCredentialsSchema(),
       alias: 'cred',
+      directives: {},
     },
     dogs: {
       type: 'relation',
@@ -1187,15 +1226,18 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'dog',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     embeddedDog: {
       type: 'embedded',
       schema: () => dogSchema(),
+      directives: {},
     },
     firstName: {
       type: 'scalar',
       scalar: 'String',
       alias: 'name',
+      directives: {},
     },
     friends: {
       type: 'relation',
@@ -1212,6 +1254,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       },
       relationEntity: { schema: () => friendsSchema(), dao: 'friends' },
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1220,27 +1263,32 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'generator',
       required: true,
       alias: 'ID',
+      directives: {},
     },
     lastName: {
       type: 'scalar',
       scalar: 'String',
       alias: 'surname',
+      directives: {},
     },
     live: {
       type: 'scalar',
       scalar: 'Boolean',
       required: true,
       alias: 'active',
+      directives: {},
     },
     localization: {
       type: 'scalar',
       scalar: 'Coordinates',
       alias: 'l',
+      directives: {},
     },
     title: {
       type: 'scalar',
       scalar: 'LocalizedString',
       alias: 't',
+      directives: {},
     },
   }
 }
@@ -1307,18 +1355,21 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
       type: 'embedded',
       schema: () => anotherSchema(),
       alias: 'a',
+      directives: {},
     },
     password: {
       type: 'scalar',
       scalar: 'Password',
       required: true,
       alias: 'pass',
+      directives: {},
     },
     username: {
       type: 'scalar',
       scalar: 'String',
       required: true,
       alias: 'user',
+      directives: {},
     },
   }
 }

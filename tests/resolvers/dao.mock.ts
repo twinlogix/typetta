@@ -94,6 +94,7 @@ export function likeSchema(): T.Schema<ScalarsSpecification> {
       scalar: 'Date',
       required: true,
       generationStrategy: 'generator',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -101,16 +102,19 @@ export function likeSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     postId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -178,10 +182,12 @@ export function metadataSchema(): T.Schema<ScalarsSpecification> {
       scalar: 'String',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     views: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
   }
 }
@@ -194,12 +200,14 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     creationDate: {
       type: 'scalar',
       scalar: 'Date',
       required: true,
       generationStrategy: 'generator',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -207,6 +215,7 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     likes: {
       type: 'relation',
@@ -225,15 +234,18 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       required: true,
       isList: true,
+      directives: {},
     },
     metadata: {
       type: 'embedded',
       schema: () => metadataSchema(),
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -299,11 +311,13 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     birthDate: {
       type: 'scalar',
       scalar: 'Date',
+      directives: {},
     },
     firstName: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -311,11 +325,13 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     lastName: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     likes: {
       type: 'relation',
@@ -334,6 +350,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       required: true,
       isList: true,
+      directives: {},
     },
     posts: {
       type: 'relation',
@@ -344,6 +361,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'post',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
   }
 }

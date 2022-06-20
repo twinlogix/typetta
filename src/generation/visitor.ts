@@ -171,6 +171,8 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
       const schemaDirective = this._getDirectiveFromAstNode(field, Directives.SCHEMA)
       const schemaMetadata = schemaDirective ? this._getDirectiveArgValue<{ key: string; value: string }[]>(schemaDirective, 'metadata') ?? [] : undefined
 
+      const customDirectives = field.directives?.filter((d) => d.name.value && !Object.values(Directives).includes(d.name.value)) ?? []
+
       const fieldAttribute: TsTypettaGeneratorField = {
         name: field.name.value,
         graphqlType: graphqlType.name.value,
@@ -187,6 +189,7 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
         isEnum: isEnumType(schemaType),
         alias,
         schemaMetadata,
+        customDirectives,
       }
       if (fieldAttribute.isID && !fieldAttribute.isRequired) {
         throw new Error(`Field '${field.name.value}' has @id directive, it must be a required field (!).`)

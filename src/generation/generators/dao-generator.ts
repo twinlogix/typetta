@@ -2,6 +2,7 @@ import { TypeScriptTypettaPluginConfig } from '../config'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from '../types'
 import { findField, findID, findNode, getID, getNode, removeParentPath, toFirstLower } from '../utils'
 import { DEFAULT_SCALARS, indentMultiline } from '@graphql-codegen/visitor-plugin-common'
+import { Kind, ValueNode } from 'graphql'
 
 export class TsTypettaGenerator extends TypettaGenerator {
   constructor(config: TypeScriptTypettaPluginConfig) {
@@ -375,7 +376,9 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
                 node.entity?.type === 'mongo' ? `const db = this.mongodb.${node.entity.source}` : node.entity?.type === 'sql' ? `const db = this.knex.${node.entity.source}` : ''
               }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ entityManager: this, datasource: null, metadata: this.metadata, ...this.overrides?.${toFirstLower(
                 node.name,
-              )}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger, awaitLog: this.params.awaitLog }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
+              )}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger, awaitLog: this.params.awaitLog }) as unknown as ${
+                node.name
+              }DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
         const entityManagerGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(entityManagerInit)}\n}\nreturn this._${toFirstLower(node.name)}`
         return `get ${toFirstLower(node.name)}(): ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(entityManagerGet)}\n}`
       })
@@ -486,6 +489,33 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   }
 
   public generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+    function resolveNodeValue(valueNode: ValueNode): unknown {
+      switch (valueNode.kind) {
+        case Kind.INT:
+          return Number(valueNode.value)
+        case Kind.STRING:
+          return valueNode.value
+        case Kind.FLOAT:
+          return Number(valueNode.value)
+        case Kind.BOOLEAN:
+          return valueNode.value
+        case Kind.ENUM:
+          return valueNode.value
+        case Kind.LIST:
+          return valueNode.values.map((v) => resolveNodeValue(v))
+        case Kind.NULL:
+          return null
+        case Kind.OBJECT:
+          return valueNode.fields.reduce((prev, f) => {
+            return {
+              ...prev,
+              [f.name.value]: resolveNodeValue(f.value),
+            }
+          }, {})
+        default:
+          return 'UNKNOWN VALUE NODE KIND'
+      }
+    }
     return node.fields.flatMap((field) => {
       const decorators = [
         field.isListElementRequired ? 'isListElementRequired: true' : null,
@@ -496,7 +526,8 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         field.isEnum ? 'isEnum: true' : null,
         field.alias ? `alias: '${field.alias}'` : null,
         field.defaultGenerationStrategy && !field.isID ? `generationStrategy: '${field.defaultGenerationStrategy}'` : null,
-        field.schemaMetadata ? `metadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : '',
+        field.schemaMetadata ? `metadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : null,
+        `directives: { ${field.customDirectives.map((d) => `'${d.name.value}': { ${d.arguments?.map((a) => `'${a.name.value}': ${JSON.stringify(resolveNodeValue(a.value))}`)} }`).join(',')} }`,
       ]
         .filter((v) => v != null)
         .join(',')

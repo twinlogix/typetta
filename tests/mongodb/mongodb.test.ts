@@ -969,7 +969,9 @@ test('middleware 1', async () => {
         middlewares: [
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
           {
-            before: async (args) => {
+            before: async (args, context) => {
+              expect(context.schema.live.directives.custom.str).toBe('123')
+              expect(context.schema.live.directives.custom.o).toStrictEqual({ a: 123 })
               if (args.operation === 'insert') {
                 if (args.params.record.id === 'u1' && args.params.record.firstName === 'Mario') {
                   throw new Error('is Mario')
@@ -1237,7 +1239,7 @@ test('middleware change reulst in after', async () => {
   })
   const inserted = await entityManager2.user.insertOne({ record: { live: true } })
   expect(inserted.live).toBe(false)
-  const found = await entityManager2.user.findOne({ filter: { id: inserted.id }})
+  const found = await entityManager2.user.findOne({ filter: { id: inserted.id } })
   expect(found?.live).toBe(true)
 })
 
