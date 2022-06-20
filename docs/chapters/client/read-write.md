@@ -152,9 +152,9 @@ The return of this query is the following object:
 
 ## Resolve Relations
 
-The [resolveRelations](/typedoc/classes/AbstractDAO.html#resolveRelations){:target="_blank"} API allows you resolves some of the relations of a given input. It accepts the return of an insert operation, and resolves the relations based on the projection. It's useful when, after an insert, we want to return the entity within a GraphQL resolver.
+The [resolveRelations](/typedoc/classes/AbstractDAO.html#resolveRelations){:target="_blank"} API allows you to resolve some of the relations of a given input. It accepts partial entity and resolves the relations based on the given projection. It's mainly useful when, after an insert, you want to return an entity within a GraphQL resolver.
 
-Below is an example of a relations resolution:
+Following an example of relations resolution:
 ```typescript
 const user = await entityManager.user.insertOne({
   record: {

@@ -373,7 +373,7 @@ const posts = dao.post.findAll({
 });
 ```
 This request does not generate any error and, on the contrary, it returns all the posts of user 2 and, of these posts, all the fields allowed by the `VIEW_POSTS` `permission`.
-Typetta infers the operation security domains from the given filter. While using the driver specific filter Typetta cannot infer any operation security domains, anyways you can force them by using the operation metadata:
+Typetta infers the operation security domains from the given filter. If you use any driver specific filter, Typetta cannot automatically infer the relative operation security domain, anyways you can explicitly specify it inside the operation metadata as following:
 ```typescript
 const entityManager = new EntityManager({
   security: {
