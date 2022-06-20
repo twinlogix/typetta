@@ -14,5 +14,4 @@ export const Directives = {
   DEFAULT: 'default',
   QUANTITY_SCALAR: 'quantitative',
   STRING_SCALAR: 'textual',
-  SCHEMA: 'schema',
 }

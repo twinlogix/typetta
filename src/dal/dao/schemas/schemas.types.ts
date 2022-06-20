@@ -6,7 +6,6 @@ type Decorators = {
   required?: boolean
   isListElementRequired?: boolean
   alias?: string
-  metadata?: Record<string, string>
   directives: Record<string, Record<string, unknown>>
   isEnum?: boolean
 } & (

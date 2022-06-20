@@ -1540,8 +1540,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'dog',
       isListElementRequired: true,
       isList: true,
-      metadata: Object.fromEntries([['test', 'value']]),
-      directives: {},
+      directives: { schema: { metadata: [{ key: 'test', value: 'value' }] } },
     },
     embeddedPost: {
       type: 'embedded',

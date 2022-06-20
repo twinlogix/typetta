@@ -1936,7 +1936,7 @@ test('Schema metadata', async () => {
               const field = (params.relationParents ?? [])[0].field
               expect(field).toBe('dogs')
               const schema = (params.relationParents ?? [])[0].schema
-              expect(schema[field].metadata?.test).toBe('value')
+              expect(schema[field].directives.schema).toStrictEqual({ metadata: [{ key: 'test', value: 'value' }] })
               middlewareExecuted = true
             },
           }),

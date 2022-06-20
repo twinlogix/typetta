@@ -168,9 +168,6 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
         throw new Error(`@default and @id directives of field '${field.name.value}' are incompatible.`)
       }
 
-      const schemaDirective = this._getDirectiveFromAstNode(field, Directives.SCHEMA)
-      const schemaMetadata = schemaDirective ? this._getDirectiveArgValue<{ key: string; value: string }[]>(schemaDirective, 'metadata') ?? [] : undefined
-
       const customDirectives = field.directives?.filter((d) => d.name.value && !Object.values(Directives).includes(d.name.value)) ?? []
 
       const fieldAttribute: TsTypettaGeneratorField = {
@@ -188,7 +185,6 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
         defaultGenerationStrategy,
         isEnum: isEnumType(schemaType),
         alias,
-        schemaMetadata,
         customDirectives,
       }
       if (fieldAttribute.isID && !fieldAttribute.isRequired) {

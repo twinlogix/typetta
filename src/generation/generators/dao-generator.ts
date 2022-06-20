@@ -526,7 +526,6 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         field.isEnum ? 'isEnum: true' : null,
         field.alias ? `alias: '${field.alias}'` : null,
         field.defaultGenerationStrategy && !field.isID ? `generationStrategy: '${field.defaultGenerationStrategy}'` : null,
-        field.schemaMetadata ? `metadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : null,
         `directives: { ${field.customDirectives.map((d) => `'${d.name.value}': { ${d.arguments?.map((a) => `'${a.name.value}': ${JSON.stringify(resolveNodeValue(a.value))}`)} }`).join(',')} }`,
       ]
         .filter((v) => v != null)
