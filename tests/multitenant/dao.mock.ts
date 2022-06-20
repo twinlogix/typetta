@@ -645,6 +645,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
   log?: T.LogInput<'Hotel' | 'Reservation' | 'Room' | 'Tenant' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -685,6 +686,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as HotelDAO<MetadataType, OperationMetadataType>)
           : new HotelDAO({
               entityManager: this,
@@ -698,6 +700,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._hotel
@@ -718,6 +721,7 @@ export class EntityManager<
               ],
               name: 'Reservation',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as ReservationDAO<MetadataType, OperationMetadataType>)
           : new ReservationDAO({
               entityManager: this,
@@ -731,6 +735,7 @@ export class EntityManager<
               ],
               name: 'Reservation',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._reservation
@@ -748,6 +753,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.room?.middlewares || []), ...(selectMiddleware('room', this.middlewares) as T.DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Room',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as RoomDAO<MetadataType, OperationMetadataType>)
           : new RoomDAO({
               entityManager: this,
@@ -758,6 +764,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.room?.middlewares || []), ...(selectMiddleware('room', this.middlewares) as T.DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Room',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._room
@@ -778,6 +785,7 @@ export class EntityManager<
               ],
               name: 'Tenant',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as TenantDAO<MetadataType, OperationMetadataType>)
           : new TenantDAO({
               entityManager: this,
@@ -791,6 +799,7 @@ export class EntityManager<
               ],
               name: 'Tenant',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._tenant
@@ -808,6 +817,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as UserDAO<MetadataType, OperationMetadataType>)
           : new UserDAO({
               entityManager: this,
@@ -818,6 +828,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._user

@@ -1667,6 +1667,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
   log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -1713,6 +1714,7 @@ export class EntityManager<
               ],
               name: 'Address',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AddressDAO<MetadataType, OperationMetadataType>)
           : new AddressDAO({
               entityManager: this,
@@ -1726,6 +1728,7 @@ export class EntityManager<
               ],
               name: 'Address',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._address
@@ -1746,6 +1749,7 @@ export class EntityManager<
               ],
               name: 'Audit',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AuditDAO<MetadataType, OperationMetadataType>)
           : new AuditDAO({
               entityManager: this,
@@ -1759,6 +1763,7 @@ export class EntityManager<
               ],
               name: 'Audit',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._audit
@@ -1776,6 +1781,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'City',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as CityDAO<MetadataType, OperationMetadataType>)
           : new CityDAO({
               entityManager: this,
@@ -1786,6 +1792,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'City',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._city
@@ -1806,6 +1813,7 @@ export class EntityManager<
               ],
               name: 'DefaultFieldsEntity',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>)
           : new DefaultFieldsEntityDAO({
               entityManager: this,
@@ -1819,6 +1827,7 @@ export class EntityManager<
               ],
               name: 'DefaultFieldsEntity',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._defaultFieldsEntity
@@ -1839,6 +1848,7 @@ export class EntityManager<
               ],
               name: 'Device',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>)
           : new DeviceDAO({
               entityManager: this,
@@ -1852,6 +1862,7 @@ export class EntityManager<
               ],
               name: 'Device',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._device
@@ -1869,6 +1880,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Dog',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DogDAO<MetadataType, OperationMetadataType>)
           : new DogDAO({
               entityManager: this,
@@ -1879,6 +1891,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Dog',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._dog
@@ -1899,6 +1912,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as HotelDAO<MetadataType, OperationMetadataType>)
           : new HotelDAO({
               entityManager: this,
@@ -1912,6 +1926,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._hotel
@@ -1929,6 +1944,7 @@ export class EntityManager<
         ],
         name: 'MockedEntity',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._mockedEntity
@@ -1949,6 +1965,7 @@ export class EntityManager<
               ],
               name: 'Organization',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>)
           : new OrganizationDAO({
               entityManager: this,
@@ -1962,6 +1979,7 @@ export class EntityManager<
               ],
               name: 'Organization',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._organization
@@ -1979,6 +1997,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.post?.middlewares || []), ...(selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Post',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as PostDAO<MetadataType, OperationMetadataType>)
           : new PostDAO({
               entityManager: this,
@@ -1989,6 +2008,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.post?.middlewares || []), ...(selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Post',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._post
@@ -2006,6 +2026,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as UserDAO<MetadataType, OperationMetadataType>)
           : new UserDAO({
               entityManager: this,
@@ -2016,6 +2037,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._user

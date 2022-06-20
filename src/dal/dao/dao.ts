@@ -48,9 +48,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected readonly schema: Schema<T['scalars']>
   protected readonly idGenerator?: DAOParams<T>['idGenerator']
   private readonly logger?: LogFunction<T['entity']>
+  private readonly awaitLog: boolean
   protected readonly datasource: string | null
 
-  protected constructor({ datasource, idGenerator, entityManager, name, logger, pageSize = 50, middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
+  protected constructor({ datasource, idGenerator, entityManager, name, logger, awaitLog, pageSize = 50, middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.dataLoaderRefs = new Map<string, string[]>()
     const { idField, idScalar, idGeneration } = idInfoFromSchema(schema)
@@ -62,6 +63,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.relations = daoRelationsFromSchema(schema)
     this.name = name
     this.logger = logger
+    this.awaitLog = awaitLog ?? true
     this.datasource = datasource
     if (this.idGeneration === 'generator' && !this.idGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in EntityManager or in DAOParams.`)
@@ -703,8 +705,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   protected async log(args: () => LogArgs<T['entity']>): Promise<void> {
     if (this.logger) {
-      const awaitLog = true // TODO: add a configuration for this
-      if (awaitLog) {
+      if (this.awaitLog) {
         try {
           await this.logger(args())
         } catch {

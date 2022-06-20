@@ -293,7 +293,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
     const mongoDBParams = hasMongoDBEntites ? `,\nmongodb: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
     const adaptersParams = `,\nscalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, '${hasMongoDBEntites && hasSQLEntities ? 'both' : hasMongoDBEntites ? 'mongo' : 'knex'}'>`
-    const loggerParams = `,\nlog?: T.LogInput<${daoNamesType}>`
+    const loggerParams = `,\nlog?: T.LogInput<${daoNamesType}>,\nawaitLog?: boolean`
     const securityPolicyParam = ',\nsecurity?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>'
     const dbsInputParam =
       hasMongoDBEntites && hasSQLEntities
@@ -367,7 +367,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
         )}', this.middlewares) as T.DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
         const normalDaoInstance = `new ${node.name}DAO({ entityManager: this, datasource: ${datasource}, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
-        )}${entityManagerImplementationInit}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger })`
+        )}${entityManagerImplementationInit}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger, awaitLog: this.params.awaitLog })`
         const entityManagerInit =
           node.entity?.type === 'memory'
             ? `this._${toFirstLower(node.name)} = ${normalDaoInstance}`
@@ -375,7 +375,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
                 node.entity?.type === 'mongo' ? `const db = this.mongodb.${node.entity.source}` : node.entity?.type === 'sql' ? `const db = this.knex.${node.entity.source}` : ''
               }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ entityManager: this, datasource: null, metadata: this.metadata, ...this.overrides?.${toFirstLower(
                 node.name,
-              )}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
+              )}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger, awaitLog: this.params.awaitLog }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
         const entityManagerGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(entityManagerInit)}\n}\nreturn this._${toFirstLower(node.name)}`
         return `get ${toFirstLower(node.name)}(): ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(entityManagerGet)}\n}`
       })

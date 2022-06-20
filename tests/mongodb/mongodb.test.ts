@@ -1153,6 +1153,94 @@ test('middleware options', async () => {
   await entityManager2.user.insertOne({ record: { live: true }, metadata: { m3: 'yes' } })
 })
 
+test('middleware error 1', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            before: async () => {
+              return {
+                operation: 'update',
+                continue: false,
+                params: { changes: {}, filter: {} },
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  try {
+    await entityManager2.user.insertOne({ record: { live: true } })
+  } catch (error) {
+    expect((error as Error).message).toBe("Invalid operation. Expecting 'insert' but received 'update'.")
+  }
+})
+
+test('middleware error 2', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            after: async () => {
+              return {
+                operation: 'update',
+                continue: false,
+                params: { changes: {}, filter: {} },
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  try {
+    await entityManager2.user.insertOne({ record: { live: true } })
+  } catch (error) {
+    expect((error as Error).message).toBe("Invalid operation. Expecting 'insert' but received 'update'.")
+  }
+})
+
+test('middleware change reulst in after', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            after: async (args) => {
+              if (args.operation === 'insert') {
+                return {
+                  operation: 'insert',
+                  continue: false,
+                  insertedRecord: { id: args.insertedRecord.id, live: false },
+                }
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  const inserted = await entityManager2.user.insertOne({ record: { live: true } })
+  expect(inserted.live).toBe(false)
+  const found = await entityManager2.user.findOne({ filter: { id: inserted.id }})
+  expect(found?.live).toBe(true)
+})
+
 // ------------------------------------------------------------------------
 // ------------------------- COMPUTED FIELDS ------------------------------
 // ------------------------------------------------------------------------

@@ -1345,6 +1345,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   knex: Record<'default', Knex | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
   log?: T.LogInput<'Address' | 'Author' | 'AuthorBook' | 'Book' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Friends' | 'Organization' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -1391,6 +1392,7 @@ export class EntityManager<
               ],
               name: 'Address',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AddressDAO<MetadataType, OperationMetadataType>)
           : new AddressDAO({
               entityManager: this,
@@ -1405,6 +1407,7 @@ export class EntityManager<
               ],
               name: 'Address',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._address
@@ -1425,6 +1428,7 @@ export class EntityManager<
               ],
               name: 'Author',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AuthorDAO<MetadataType, OperationMetadataType>)
           : new AuthorDAO({
               entityManager: this,
@@ -1439,6 +1443,7 @@ export class EntityManager<
               ],
               name: 'Author',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._author
@@ -1459,6 +1464,7 @@ export class EntityManager<
               ],
               name: 'AuthorBook',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AuthorBookDAO<MetadataType, OperationMetadataType>)
           : new AuthorBookDAO({
               entityManager: this,
@@ -1473,6 +1479,7 @@ export class EntityManager<
               ],
               name: 'AuthorBook',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._authorBook
@@ -1490,6 +1497,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.book?.middlewares || []), ...(selectMiddleware('book', this.middlewares) as T.DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Book',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as BookDAO<MetadataType, OperationMetadataType>)
           : new BookDAO({
               entityManager: this,
@@ -1501,6 +1509,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.book?.middlewares || []), ...(selectMiddleware('book', this.middlewares) as T.DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Book',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._book
@@ -1518,6 +1527,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'City',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as CityDAO<MetadataType, OperationMetadataType>)
           : new CityDAO({
               entityManager: this,
@@ -1529,6 +1539,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'City',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._city
@@ -1549,6 +1560,7 @@ export class EntityManager<
               ],
               name: 'DefaultFieldsEntity',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>)
           : new DefaultFieldsEntityDAO({
               entityManager: this,
@@ -1563,6 +1575,7 @@ export class EntityManager<
               ],
               name: 'DefaultFieldsEntity',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._defaultFieldsEntity
@@ -1583,6 +1596,7 @@ export class EntityManager<
               ],
               name: 'Device',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>)
           : new DeviceDAO({
               entityManager: this,
@@ -1597,6 +1611,7 @@ export class EntityManager<
               ],
               name: 'Device',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._device
@@ -1614,6 +1629,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Dog',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DogDAO<MetadataType, OperationMetadataType>)
           : new DogDAO({
               entityManager: this,
@@ -1625,6 +1641,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Dog',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._dog
@@ -1645,6 +1662,7 @@ export class EntityManager<
               ],
               name: 'Friends',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as FriendsDAO<MetadataType, OperationMetadataType>)
           : new FriendsDAO({
               entityManager: this,
@@ -1659,6 +1677,7 @@ export class EntityManager<
               ],
               name: 'Friends',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._friends
@@ -1679,6 +1698,7 @@ export class EntityManager<
               ],
               name: 'Organization',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>)
           : new OrganizationDAO({
               entityManager: this,
@@ -1693,6 +1713,7 @@ export class EntityManager<
               ],
               name: 'Organization',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._organization
@@ -1710,6 +1731,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as UserDAO<MetadataType, OperationMetadataType>)
           : new UserDAO({
               entityManager: this,
@@ -1721,6 +1743,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._user

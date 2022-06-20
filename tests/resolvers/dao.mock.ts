@@ -415,6 +415,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   }
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
   log?: T.LogInput<'Like' | 'Post' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -446,6 +447,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.like?.middlewares || []), ...(selectMiddleware('like', this.middlewares) as T.DAOMiddleware<LikeDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Like',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._like
@@ -460,6 +462,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.post?.middlewares || []), ...(selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Post',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._post
@@ -474,6 +477,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'User',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._user

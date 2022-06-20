@@ -1,4 +1,4 @@
-import { hasKeys, intersection } from '../../../../utils/utils'
+import { hasKeys, intersection, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { AbstractFilterFields, equals } from '../../../drivers/in-memory/utils.memory'
 import { DAOGenerics } from '../../dao.types'
 import { EqualityOperators, LogicalOperators } from '../../filters/filters.types'
@@ -119,7 +119,7 @@ export function inferOperationSecurityDomain(domainKeys: string[], filter: Abstr
         return f.in
       }
     }
-    if (typeof filterElement === 'object') {
+    if (hasKeys(filterElement, [...MONGODB_QUERY_PREFIXS.values()])) {
       return []
     } else {
       return [filterElement]

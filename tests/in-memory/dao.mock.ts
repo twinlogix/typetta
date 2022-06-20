@@ -1515,6 +1515,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   }
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
   log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -1558,6 +1559,7 @@ export class EntityManager<
         ],
         name: 'Address',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._address
@@ -1572,6 +1574,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.audit?.middlewares || []), ...(selectMiddleware('audit', this.middlewares) as T.DAOMiddleware<AuditDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Audit',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._audit
@@ -1586,6 +1589,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'City',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._city
@@ -1603,6 +1607,7 @@ export class EntityManager<
         ],
         name: 'DefaultFieldsEntity',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._defaultFieldsEntity
@@ -1617,6 +1622,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.device?.middlewares || []), ...(selectMiddleware('device', this.middlewares) as T.DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Device',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._device
@@ -1631,6 +1637,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Dog',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._dog
@@ -1645,6 +1652,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.hotel?.middlewares || []), ...(selectMiddleware('hotel', this.middlewares) as T.DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Hotel',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._hotel
@@ -1662,6 +1670,7 @@ export class EntityManager<
         ],
         name: 'MockedEntity',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._mockedEntity
@@ -1679,6 +1688,7 @@ export class EntityManager<
         ],
         name: 'Organization',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._organization
@@ -1693,6 +1703,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.post?.middlewares || []), ...(selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Post',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._post
@@ -1710,6 +1721,7 @@ export class EntityManager<
         ],
         name: 'PostType',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._postType
@@ -1724,6 +1736,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'User',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._user
