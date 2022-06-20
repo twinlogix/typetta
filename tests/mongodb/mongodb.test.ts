@@ -188,7 +188,7 @@ test('findOne simple inner association with max depth', async () => {
   } catch (e) {
     expect((e as Error).message).toBe('Max depth is 0 but the specified projection reach a depth of 1')
   }
-  await dao.user.findOne({ projection: { friends: { friends: { firstName: true } } }, maxDepth: 3 })
+  await dao.user.findOne({ projection: { friends: { friends: true } }, maxDepth: 3 })
 })
 
 test('findOne simple foreignRef association', async () => {
