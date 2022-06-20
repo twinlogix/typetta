@@ -45,7 +45,7 @@ type User @entity @mongodb {
   usernamePasswordCredentials: UsernamePasswordCredentials @alias(value: "cred")
   firstName: String @alias(value: "name")
   lastName: String
-  live: Boolean!
+  live: Boolean! @custom(str: "123", f: 1.2, i: -2, b: true, n: null, l: [1, "2"], o: { a: 123 })
   localization: Coordinates
   title: LocalizedString
   amounts: [Decimal!] @alias(value: "amounts")

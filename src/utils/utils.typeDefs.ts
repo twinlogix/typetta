@@ -18,5 +18,4 @@ export const typeDefs = gql`
   directive @${Directives.DEFAULT}(from: String) on FIELD_DEFINITION
   directive @${Directives.QUANTITY_SCALAR} on SCALAR
   directive @${Directives.STRING_SCALAR} on SCALAR
-  directive @${Directives.SCHEMA}(metadata: [KeyValue!]!) on FIELD_DEFINITION
 `

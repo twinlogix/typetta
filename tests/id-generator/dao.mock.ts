@@ -93,11 +93,13 @@ export function aSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -169,11 +171,13 @@ export function bSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -239,11 +243,13 @@ export function cSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -315,11 +321,13 @@ export function dSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'db',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -391,11 +399,13 @@ export function eSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -461,11 +471,13 @@ export function fSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -545,6 +557,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   knex: Record<'default', Knex | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'both'>
   log?: T.LogInput<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -584,6 +597,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.a?.middlewares || []), ...(selectMiddleware('a', this.middlewares) as T.DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'A',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as ADAO<MetadataType, OperationMetadataType>)
           : new ADAO({
               entityManager: this,
@@ -594,6 +608,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.a?.middlewares || []), ...(selectMiddleware('a', this.middlewares) as T.DAOMiddleware<ADAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'A',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._a
@@ -611,6 +626,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.b?.middlewares || []), ...(selectMiddleware('b', this.middlewares) as T.DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'B',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as BDAO<MetadataType, OperationMetadataType>)
           : new BDAO({
               entityManager: this,
@@ -621,6 +637,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.b?.middlewares || []), ...(selectMiddleware('b', this.middlewares) as T.DAOMiddleware<BDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'B',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._b
@@ -638,6 +655,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.c?.middlewares || []), ...(selectMiddleware('c', this.middlewares) as T.DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'C',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as CDAO<MetadataType, OperationMetadataType>)
           : new CDAO({
               entityManager: this,
@@ -648,6 +666,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.c?.middlewares || []), ...(selectMiddleware('c', this.middlewares) as T.DAOMiddleware<CDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'C',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._c
@@ -665,6 +684,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.d?.middlewares || []), ...(selectMiddleware('d', this.middlewares) as T.DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'D',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DDAO<MetadataType, OperationMetadataType>)
           : new DDAO({
               entityManager: this,
@@ -676,6 +696,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.d?.middlewares || []), ...(selectMiddleware('d', this.middlewares) as T.DAOMiddleware<DDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'D',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._d
@@ -693,6 +714,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.e?.middlewares || []), ...(selectMiddleware('e', this.middlewares) as T.DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'E',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as EDAO<MetadataType, OperationMetadataType>)
           : new EDAO({
               entityManager: this,
@@ -704,6 +726,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.e?.middlewares || []), ...(selectMiddleware('e', this.middlewares) as T.DAOMiddleware<EDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'E',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._e
@@ -721,6 +744,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.f?.middlewares || []), ...(selectMiddleware('f', this.middlewares) as T.DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'F',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as FDAO<MetadataType, OperationMetadataType>)
           : new FDAO({
               entityManager: this,
@@ -732,6 +756,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.f?.middlewares || []), ...(selectMiddleware('f', this.middlewares) as T.DAOMiddleware<FDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'F',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._f

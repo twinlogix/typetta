@@ -13,7 +13,7 @@ A **data model** is made up of a set of entities. Such entities in Typetta are d
   - [Alias](#alias)
   - [Excluded Fields](#excluded-fields)
   - [Schema](#schema)
-    - [Schema Metadata](#schema-metadata)
+    - [Schema Directives](#schema-directives)
 
 ## Entity definition
 
@@ -306,9 +306,9 @@ Typetta automatically generates this schema:
   }
 }
 ```
-### Schema Metadata
+### Schema Directives
 
-Schema generation can be extended with some custom metadata via the `@schema` directive. This is particularly useful to implement middlewares with different behaviours based on domain model concepts. 
+Schema generation can be extended with any directive out of Typetta domains. Every unknown directives is added to the schema under `directives` field. This is particularly useful to implement middlewares with different behaviours based on domain model concepts. 
 
 Following an example of a custom metadata on a `dateOfBirth` field:
 
@@ -317,7 +317,7 @@ type User @entity @mongodb {
   id: ID! @id
   firstName: String
   lastName: String
-  dateOfBirth: Date! @schema(metadata: [{ key: "addDays", value: "1" }])
+  dateOfBirth: Date! @addDays(value: 1)
 }
 ```
 
@@ -338,8 +338,8 @@ And the schema resulting from it:
   dateOfBirth: {
     scalar: 'Date',
     required: true,
-    metadata: {
-      addDays: "1"
+    directives: {
+      addDays: { value: 1 }
     }
   }
 }
@@ -347,12 +347,12 @@ And the schema resulting from it:
 
 Now you can easily implement a middleware that, reading that schema, increment all the fields containing the `addDays` metadata by `n` days before insertion.
 
-Here's another example of a field with metadata that has more than one key.
+Here's another example of a field with a custom directive that has more than one key.
 
 ```typescript
 type SomeType @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
-  someField: Date @schema(metadata: [{ key: "keyOne", value: true }, { key: "keyTwo", value: [ "one", 2, "three", false ]}])
+  someField: Date @metadata(value: true, values: [ "one", 2, "three", false ], obj: { f: 1.1 }) @addDays(value: 2)
 }
 ```
 
@@ -371,14 +371,14 @@ And the schema resulting from it:
   someField: {
     type: 'scalar',
     scalar: 'Date',
-    metadata: {
-      'keyOne': 'true',
-      'keyTwo': 'one,2,three,false',
+    directives: {
+      metadata: {
+        value: true,
+        values: ['one', 2, 'three', false],
+        obj: { f: 1.1 }
+      },
+      addDays: { value: 2 }
     },
   },
 }
 ```
-
-This example also shows how arrays values are saved as comma separated values within in a string. In fact, every value is stored as a string in the metadata. 
-
-Additionally, you can only makes fields that are level deep for the metadata. Any data stored deeper will get lost. Therefore the following doesn't work:

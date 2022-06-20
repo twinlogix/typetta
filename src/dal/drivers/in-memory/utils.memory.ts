@@ -1,9 +1,10 @@
 import { LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
+import { hasKeys } from '../../../utils/utils'
 import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../../dao/filters/filters.types'
 import { IN_MEMORY_STATE } from './state.memory'
 import { ObjectId } from 'mongodb'
 
-type AbstractFilterFields = {
+export type AbstractFilterFields = {
   [K in string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators
 }
 type Filter<FilterFields extends AbstractFilterFields> = LogicalOperators<FilterFields> & FilterFields
@@ -99,10 +100,6 @@ function logicOperators<FilterFields extends AbstractFilterFields>(entity: unkno
 export function filterEntity<FilterFields extends AbstractFilterFields>(entity: unknown, filter: Filter<FilterFields> | undefined): boolean {
   if (!filter) {
     return true
-  }
-
-  function hasKeys(i: unknown, keys: string[]): boolean {
-    return i && typeof i === 'object' && keys.some((k) => k in i && typeof (i as Record<string, unknown>)[k] !== 'function') ? true : false
   }
 
   return (

@@ -329,6 +329,7 @@ export function addressSchema(): T.Schema<ScalarsSpecification> {
       dao: 'city',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -336,6 +337,7 @@ export function addressSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -414,11 +416,13 @@ export function auditSchema(): T.Schema<ScalarsSpecification> {
     changes: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     entityId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -427,6 +431,7 @@ export function auditSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
   }
 }
@@ -496,31 +501,37 @@ export function auditableSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     createdOn: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     deletedOn: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
     modifiedBy: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     modifiedOn: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     state: {
       type: 'scalar',
       scalar: 'String',
       required: true,
       isEnum: true,
+      directives: {},
     },
     versions: {
       type: 'relation',
@@ -531,6 +542,7 @@ export function auditableSchema(): T.Schema<ScalarsSpecification> {
       dao: 'audit',
       required: true,
       isList: true,
+      directives: {},
     },
   }
 }
@@ -543,6 +555,7 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -550,11 +563,13 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
   }
 }
@@ -622,6 +637,7 @@ export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
       scalar: 'Int',
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -629,27 +645,32 @@ export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     live: {
       type: 'scalar',
       scalar: 'Live',
       required: true,
       generationStrategy: 'generator',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     opt1: {
       type: 'scalar',
       scalar: 'Live',
       generationStrategy: 'middleware',
+      directives: {},
     },
     opt2: {
       type: 'scalar',
       scalar: 'Live',
       generationStrategy: 'generator',
+      directives: {},
     },
   }
 }
@@ -737,11 +758,13 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     user: {
       type: 'relation',
@@ -750,10 +773,12 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'userId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
   }
 }
@@ -822,11 +847,13 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     owner: {
       type: 'relation',
@@ -835,11 +862,13 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'ownerId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     ownerId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -907,6 +936,7 @@ export function embeddedUserSchema(): T.Schema<ScalarsSpecification> {
       schema: () => embeddedUser2Schema(),
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     user: {
       type: 'relation',
@@ -916,11 +946,13 @@ export function embeddedUserSchema(): T.Schema<ScalarsSpecification> {
       refTo: 'id',
       dao: 'user',
       required: true,
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -937,11 +969,13 @@ export function embeddedUser2Schema(): T.Schema<ScalarsSpecification> {
       refTo: 'id',
       dao: 'user',
       required: true,
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -957,10 +991,12 @@ export function embeddedUser3Schema(): T.Schema<ScalarsSpecification> {
       refFrom: '../userId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     value: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
   }
 }
@@ -972,6 +1008,7 @@ export function embeddedUser4Schema(): T.Schema<ScalarsSpecification> {
     e: {
       type: 'embedded',
       schema: () => embeddedUser5Schema(),
+      directives: {},
     },
     user: {
       type: 'relation',
@@ -980,6 +1017,7 @@ export function embeddedUser4Schema(): T.Schema<ScalarsSpecification> {
       refFrom: 'e.userId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
   }
 }
@@ -991,6 +1029,7 @@ export function embeddedUser5Schema(): T.Schema<ScalarsSpecification> {
     userId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
   }
 }
@@ -1004,32 +1043,38 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
       schema: () => auditableSchema(),
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
     embeddedUser3: {
       type: 'embedded',
       schema: () => embeddedUser3Schema(),
+      directives: {},
     },
     embeddedUser4: {
       type: 'embedded',
       schema: () => embeddedUser4Schema(),
+      directives: {},
     },
     embeddedUsers: {
       type: 'embedded',
       schema: () => embeddedUserSchema(),
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     embeddedUsers3: {
       type: 'embedded',
       schema: () => embeddedUser3Schema(),
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     embeddedUsers4: {
       type: 'embedded',
       schema: () => embeddedUser4Schema(),
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1038,19 +1083,23 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
     users: {
       type: 'embedded',
       schema: () => userCollectionSchema(),
+      directives: {},
     },
   }
 }
@@ -1123,11 +1172,13 @@ export function mockedEntitySchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     user: {
       type: 'relation',
@@ -1137,11 +1188,13 @@ export function mockedEntitySchema(): T.Schema<ScalarsSpecification> {
       refTo: 'id',
       dao: 'user',
       required: true,
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1226,6 +1279,7 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
     address: {
       type: 'embedded',
       schema: () => addressSchema(),
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1233,15 +1287,18 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     vatNumber: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
   }
 }
@@ -1331,20 +1388,24 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
       refTo: 'id',
       dao: 'user',
       required: true,
+      directives: {},
     },
     authorId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
       alias: 'aId',
+      directives: {},
     },
     body: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     clicks: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1352,20 +1413,24 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     metadata: {
       type: 'embedded',
       schema: () => postMetadataSchema(),
+      directives: {},
     },
     title: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     views: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1432,11 +1497,13 @@ export function postMetadataSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     visible: {
       type: 'scalar',
       scalar: 'Boolean',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1448,6 +1515,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     amount: {
       type: 'scalar',
       scalar: 'Decimal',
+      directives: {},
     },
     amounts: {
       type: 'scalar',
@@ -1455,11 +1523,13 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       isList: true,
       alias: 'amounts',
+      directives: {},
     },
     credentials: {
       type: 'embedded',
       schema: () => usernamePasswordCredentialsSchema(),
       isList: true,
+      directives: {},
     },
     dogs: {
       type: 'relation',
@@ -1470,20 +1540,23 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'dog',
       isListElementRequired: true,
       isList: true,
-      metadata: Object.fromEntries([['test', 'value']]),
+      directives: { schema: { metadata: [{ key: 'test', value: 'value' }] } },
     },
     embeddedPost: {
       type: 'embedded',
       schema: () => postSchema(),
+      directives: {},
     },
     embeddedUser: {
       type: 'embedded',
       schema: () => embeddedUser2Schema(),
+      directives: {},
     },
     firstName: {
       type: 'scalar',
       scalar: 'String',
       alias: 'name',
+      directives: {},
     },
     friends: {
       type: 'relation',
@@ -1494,6 +1567,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'user',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     friendsId: {
       type: 'scalar',
@@ -1501,6 +1575,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       isList: true,
       alias: 'fIds',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1509,32 +1584,39 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'generator',
       required: true,
       alias: 'ID',
+      directives: {},
     },
     int: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
     lastName: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     live: {
       type: 'scalar',
       scalar: 'Boolean',
       required: true,
+      directives: { custom: { str: '123', f: 1.2, i: -2, b: true, n: null, l: [1, '2'], o: { a: 123 } } },
     },
     localization: {
       type: 'scalar',
       scalar: 'Coordinates',
+      directives: {},
     },
     title: {
       type: 'scalar',
       scalar: 'LocalizedString',
+      directives: {},
     },
     usernamePasswordCredentials: {
       type: 'embedded',
       schema: () => usernamePasswordCredentialsSchema(),
       alias: 'cred',
+      directives: {},
     },
   }
 }
@@ -1607,6 +1689,7 @@ export function userCollectionSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       required: true,
       isList: true,
+      directives: {},
     },
     usersId: {
       type: 'scalar',
@@ -1614,6 +1697,7 @@ export function userCollectionSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       required: true,
       isList: true,
+      directives: {},
     },
   }
 }
@@ -1627,6 +1711,7 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
       scalar: 'Password',
       required: true,
       alias: 'pwd',
+      directives: {},
     },
     user: {
       type: 'relation',
@@ -1635,12 +1720,14 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
       refFrom: '../id',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     username: {
       type: 'scalar',
       scalar: 'String',
       required: true,
       alias: 'user',
+      directives: {},
     },
   }
 }
@@ -1667,6 +1754,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
   log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -1713,6 +1801,7 @@ export class EntityManager<
               ],
               name: 'Address',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AddressDAO<MetadataType, OperationMetadataType>)
           : new AddressDAO({
               entityManager: this,
@@ -1726,6 +1815,7 @@ export class EntityManager<
               ],
               name: 'Address',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._address
@@ -1746,6 +1836,7 @@ export class EntityManager<
               ],
               name: 'Audit',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AuditDAO<MetadataType, OperationMetadataType>)
           : new AuditDAO({
               entityManager: this,
@@ -1759,6 +1850,7 @@ export class EntityManager<
               ],
               name: 'Audit',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._audit
@@ -1776,6 +1868,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'City',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as CityDAO<MetadataType, OperationMetadataType>)
           : new CityDAO({
               entityManager: this,
@@ -1786,6 +1879,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'City',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._city
@@ -1806,6 +1900,7 @@ export class EntityManager<
               ],
               name: 'DefaultFieldsEntity',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>)
           : new DefaultFieldsEntityDAO({
               entityManager: this,
@@ -1819,6 +1914,7 @@ export class EntityManager<
               ],
               name: 'DefaultFieldsEntity',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._defaultFieldsEntity
@@ -1839,6 +1935,7 @@ export class EntityManager<
               ],
               name: 'Device',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>)
           : new DeviceDAO({
               entityManager: this,
@@ -1852,6 +1949,7 @@ export class EntityManager<
               ],
               name: 'Device',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._device
@@ -1869,6 +1967,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Dog',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DogDAO<MetadataType, OperationMetadataType>)
           : new DogDAO({
               entityManager: this,
@@ -1879,6 +1978,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Dog',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._dog
@@ -1899,6 +1999,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as HotelDAO<MetadataType, OperationMetadataType>)
           : new HotelDAO({
               entityManager: this,
@@ -1912,6 +2013,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._hotel
@@ -1929,6 +2031,7 @@ export class EntityManager<
         ],
         name: 'MockedEntity',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._mockedEntity
@@ -1949,6 +2052,7 @@ export class EntityManager<
               ],
               name: 'Organization',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>)
           : new OrganizationDAO({
               entityManager: this,
@@ -1962,6 +2066,7 @@ export class EntityManager<
               ],
               name: 'Organization',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._organization
@@ -1979,6 +2084,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.post?.middlewares || []), ...(selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Post',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as PostDAO<MetadataType, OperationMetadataType>)
           : new PostDAO({
               entityManager: this,
@@ -1989,6 +2095,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.post?.middlewares || []), ...(selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Post',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._post
@@ -2006,6 +2113,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as UserDAO<MetadataType, OperationMetadataType>)
           : new UserDAO({
               entityManager: this,
@@ -2016,6 +2124,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._user

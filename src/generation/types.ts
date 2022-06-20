@@ -1,3 +1,4 @@
+import { DirectiveNode } from 'graphql'
 import { DefaultGenerationStrategy, IdGenerationStrategy } from '../dal/dao/dao.types'
 import { TypeScriptTypettaPluginConfig } from './config'
 
@@ -40,7 +41,7 @@ export type TsTypettaGeneratorField = {
   isEnum: boolean
   defaultGenerationStrategy?: DefaultGenerationStrategy
   alias?: string
-  schemaMetadata?: { key: string; value: string }[]
+  customDirectives: DirectiveNode[]
 }
 
 export type TsTypettaGeneratorNode = {

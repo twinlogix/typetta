@@ -125,10 +125,12 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
     deletionDate: {
       type: 'scalar',
       scalar: 'Date',
+      directives: {},
     },
     description: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -137,17 +139,20 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'TenantId',
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
   }
 }
@@ -216,6 +221,7 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
     deletionDate: {
       type: 'scalar',
       scalar: 'Date',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -224,6 +230,7 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     room: {
       type: 'relation',
@@ -232,22 +239,26 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'roomId',
       refTo: 'id',
       dao: 'room',
+      directives: {},
     },
     roomId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'TenantId',
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -332,6 +343,7 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
     deletionDate: {
       type: 'scalar',
       scalar: 'Date',
+      directives: {},
     },
     hotel: {
       type: 'relation',
@@ -341,11 +353,13 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
       refTo: 'id',
       dao: 'hotel',
       required: true,
+      directives: {},
     },
     hotelId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -354,17 +368,20 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     size: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'TenantId',
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
   }
 }
@@ -436,11 +453,13 @@ export function tenantSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     info: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
   }
 }
@@ -510,19 +529,23 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       type: 'embedded',
       schema: () => usernamePasswordCredentialsSchema(),
       alias: 'cred',
+      directives: {},
     },
     deletionDate: {
       type: 'scalar',
       scalar: 'Date',
+      directives: {},
     },
     email: {
       type: 'scalar',
       scalar: 'Email',
       required: true,
+      directives: {},
     },
     firstName: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -531,10 +554,12 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     lastName: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     reservations: {
       type: 'relation',
@@ -545,12 +570,14 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'reservation',
       required: true,
       isList: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'TenantId',
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
   }
 }
@@ -620,11 +647,13 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
       type: 'scalar',
       scalar: 'Password',
       required: true,
+      directives: {},
     },
     username: {
       type: 'scalar',
       scalar: 'Username',
       required: true,
+      directives: {},
     },
   }
 }
@@ -645,6 +674,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
   log?: T.LogInput<'Hotel' | 'Reservation' | 'Room' | 'Tenant' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -685,6 +715,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as HotelDAO<MetadataType, OperationMetadataType>)
           : new HotelDAO({
               entityManager: this,
@@ -698,6 +729,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._hotel
@@ -718,6 +750,7 @@ export class EntityManager<
               ],
               name: 'Reservation',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as ReservationDAO<MetadataType, OperationMetadataType>)
           : new ReservationDAO({
               entityManager: this,
@@ -731,6 +764,7 @@ export class EntityManager<
               ],
               name: 'Reservation',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._reservation
@@ -748,6 +782,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.room?.middlewares || []), ...(selectMiddleware('room', this.middlewares) as T.DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Room',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as RoomDAO<MetadataType, OperationMetadataType>)
           : new RoomDAO({
               entityManager: this,
@@ -758,6 +793,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.room?.middlewares || []), ...(selectMiddleware('room', this.middlewares) as T.DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Room',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._room
@@ -778,6 +814,7 @@ export class EntityManager<
               ],
               name: 'Tenant',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as TenantDAO<MetadataType, OperationMetadataType>)
           : new TenantDAO({
               entityManager: this,
@@ -791,6 +828,7 @@ export class EntityManager<
               ],
               name: 'Tenant',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._tenant
@@ -808,6 +846,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as UserDAO<MetadataType, OperationMetadataType>)
           : new UserDAO({
               entityManager: this,
@@ -818,6 +857,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._user

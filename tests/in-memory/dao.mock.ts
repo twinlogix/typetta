@@ -264,6 +264,7 @@ export function addressSchema(): T.Schema<ScalarsSpecification> {
       dao: 'city',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -271,6 +272,7 @@ export function addressSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -349,11 +351,13 @@ export function auditSchema(): T.Schema<ScalarsSpecification> {
     changes: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     entityId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -362,6 +366,7 @@ export function auditSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
   }
 }
@@ -431,31 +436,37 @@ export function auditableSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     createdOn: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     deletedOn: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
     modifiedBy: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     modifiedOn: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     state: {
       type: 'scalar',
       scalar: 'String',
       required: true,
       isEnum: true,
+      directives: {},
     },
     versions: {
       type: 'relation',
@@ -466,6 +477,7 @@ export function auditableSchema(): T.Schema<ScalarsSpecification> {
       dao: 'audit',
       required: true,
       isList: true,
+      directives: {},
     },
   }
 }
@@ -478,6 +490,7 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -485,11 +498,13 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
   }
 }
@@ -557,6 +572,7 @@ export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
       scalar: 'Int',
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -564,27 +580,32 @@ export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     live: {
       type: 'scalar',
       scalar: 'Live',
       required: true,
       generationStrategy: 'generator',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     opt1: {
       type: 'scalar',
       scalar: 'Live',
       generationStrategy: 'middleware',
+      directives: {},
     },
     opt2: {
       type: 'scalar',
       scalar: 'Live',
       generationStrategy: 'generator',
+      directives: {},
     },
   }
 }
@@ -672,11 +693,13 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     user: {
       type: 'relation',
@@ -685,10 +708,12 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'userId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
   }
 }
@@ -757,11 +782,13 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     owner: {
       type: 'relation',
@@ -770,11 +797,13 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
       refFrom: 'ownerId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     ownerId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -842,6 +871,7 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
       schema: () => auditableSchema(),
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -850,11 +880,13 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
   }
 }
@@ -927,11 +959,13 @@ export function mockedEntitySchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     user: {
       type: 'relation',
@@ -941,11 +975,13 @@ export function mockedEntitySchema(): T.Schema<ScalarsSpecification> {
       refTo: 'id',
       dao: 'user',
       required: true,
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1030,6 +1066,7 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
     address: {
       type: 'embedded',
       schema: () => addressSchema(),
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1037,15 +1074,18 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     vatNumber: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
   }
 }
@@ -1135,20 +1175,24 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
       refTo: 'id',
       dao: 'user',
       required: true,
+      directives: {},
     },
     authorId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
       alias: 'aId',
+      directives: {},
     },
     body: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     clicks: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1156,20 +1200,24 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     metadata: {
       type: 'embedded',
       schema: () => postMetadataSchema(),
+      directives: {},
     },
     title: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     views: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1236,11 +1284,13 @@ export function postMetadataSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     visible: {
       type: 'scalar',
       scalar: 'Boolean',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1255,11 +1305,13 @@ export function postTypeSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1338,6 +1390,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     amount: {
       type: 'scalar',
       scalar: 'Decimal',
+      directives: {},
     },
     amounts: {
       type: 'scalar',
@@ -1345,11 +1398,13 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       isList: true,
       alias: 'amounts',
+      directives: {},
     },
     credentials: {
       type: 'embedded',
       schema: () => usernamePasswordCredentialsSchema(),
       isList: true,
+      directives: {},
     },
     dogs: {
       type: 'relation',
@@ -1360,15 +1415,18 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'dog',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     embeddedPost: {
       type: 'embedded',
       schema: () => postSchema(),
+      directives: {},
     },
     firstName: {
       type: 'scalar',
       scalar: 'String',
       alias: 'name',
+      directives: {},
     },
     friends: {
       type: 'relation',
@@ -1379,6 +1437,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'user',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     friendsId: {
       type: 'scalar',
@@ -1386,6 +1445,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       isList: true,
       alias: 'fIds',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1394,28 +1454,34 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'generator',
       required: true,
       alias: 'ID',
+      directives: {},
     },
     lastName: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     live: {
       type: 'scalar',
       scalar: 'Boolean',
       required: true,
+      directives: {},
     },
     localization: {
       type: 'scalar',
       scalar: 'Coordinates',
+      directives: {},
     },
     title: {
       type: 'scalar',
       scalar: 'LocalizedString',
+      directives: {},
     },
     usernamePasswordCredentials: {
       type: 'embedded',
       schema: () => usernamePasswordCredentialsSchema(),
       alias: 'cred',
+      directives: {},
     },
   }
 }
@@ -1483,12 +1549,14 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
       scalar: 'Password',
       required: true,
       alias: 'pwd',
+      directives: {},
     },
     username: {
       type: 'scalar',
       scalar: 'String',
       required: true,
       alias: 'user',
+      directives: {},
     },
   }
 }
@@ -1515,6 +1583,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   }
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
   log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -1558,6 +1627,7 @@ export class EntityManager<
         ],
         name: 'Address',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._address
@@ -1572,6 +1642,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.audit?.middlewares || []), ...(selectMiddleware('audit', this.middlewares) as T.DAOMiddleware<AuditDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Audit',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._audit
@@ -1586,6 +1657,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'City',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._city
@@ -1603,6 +1675,7 @@ export class EntityManager<
         ],
         name: 'DefaultFieldsEntity',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._defaultFieldsEntity
@@ -1617,6 +1690,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.device?.middlewares || []), ...(selectMiddleware('device', this.middlewares) as T.DAOMiddleware<DeviceDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Device',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._device
@@ -1631,6 +1705,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Dog',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._dog
@@ -1645,6 +1720,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.hotel?.middlewares || []), ...(selectMiddleware('hotel', this.middlewares) as T.DAOMiddleware<HotelDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Hotel',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._hotel
@@ -1662,6 +1738,7 @@ export class EntityManager<
         ],
         name: 'MockedEntity',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._mockedEntity
@@ -1679,6 +1756,7 @@ export class EntityManager<
         ],
         name: 'Organization',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._organization
@@ -1693,6 +1771,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.post?.middlewares || []), ...(selectMiddleware('post', this.middlewares) as T.DAOMiddleware<PostDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'Post',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._post
@@ -1710,6 +1789,7 @@ export class EntityManager<
         ],
         name: 'PostType',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._postType
@@ -1724,6 +1804,7 @@ export class EntityManager<
         middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
         name: 'User',
         logger: this.logger,
+        awaitLog: this.params.awaitLog,
       })
     }
     return this._user

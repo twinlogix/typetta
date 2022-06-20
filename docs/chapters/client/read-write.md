@@ -10,6 +10,7 @@ Below is a list of these operations:
   - [Find One](#find-one)
   - [Find All](#find-all)
   - [Find Page](#find-page)
+  - [Resolve Relations](#resolve-relations)
   - [Update One](#update-one)
   - [Update All](#update-all)
   - [Replace One](#replace-one)
@@ -26,7 +27,7 @@ type User @entity @mongodb {
   firstName: String
   lastName: String
   address: Address
-  posts: [Post!] @foreignRef(refFrom: "userId")
+  posts: [Post!]! @foreignRef(refFrom: "userId")
 }
 
 type Post @entity @mongodb {
@@ -147,6 +148,34 @@ The return of this query is the following object:
     }
   ]
 })
+```
+
+## Resolve Relations
+
+The [resolveRelations](/typedoc/classes/AbstractDAO.html#resolveRelations){:target="_blank"} API allows you to resolve some of the relations of a given input. It accepts partial entity and resolves the relations based on the given projection. It's mainly useful when, after an insert, you want to return an entity within a GraphQL resolver.
+
+Following an example of relations resolution:
+```typescript
+const user = await entityManager.user.insertOne({
+  record: {
+    firstName: "Mattia",
+    lastName: "Minotti"
+  }
+})
+
+await entityManager.post.insertOne({
+  record: {
+    userId: user.id,
+    content: "Hello"
+  }
+})
+
+const result = await entityManager.user.resolveRelations({
+  input: user,
+  projection: { firstName: true, posts: { content: true } }
+})
+
+// result.posts are all the posts of the user
 ```
 
 ## Update One

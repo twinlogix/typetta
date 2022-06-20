@@ -34,6 +34,10 @@ export type MiddlewareOutput<T extends DAOGenerics> =
   | UpdateMiddlewareOutput<T>
   | ReplaceMiddlewareOutput<T>
   | DeleteMiddlewareOutput<T>
+export type MiddlewareReturn<T extends DAOGenerics> = Omit<
+  FindMiddlewareOutput<T> | AggregateMiddlewareOutput<T> | InsertMiddlewareOutput<T> | UpdateMiddlewareOutput<T> | ReplaceMiddlewareOutput<T> | DeleteMiddlewareOutput<T>,
+  'params' | 'args'
+>
 
 export type SelectBeforeMiddlewareOutputType<T extends DAOGenerics, I extends MiddlewareInput<T>> = I['operation'] extends 'find'
   ? (FindMiddlewareInput<T> & Continue<true>) | (FindMiddlewareOutput<T> & Continue<false>)
@@ -63,8 +67,8 @@ export type SelectAfterMiddlewareOutputType<T extends DAOGenerics, I extends Mid
   ? DeleteMiddlewareOutput<T> & Continue<boolean>
   : never
 
-export type BeforeMiddlewareResult<T extends DAOGenerics> = (MiddlewareInput<T> & Continue<true>) | (MiddlewareOutput<T> & Continue<false>)
-export type AfterMiddlewareResult<T extends DAOGenerics> = Continue<boolean> & MiddlewareOutput<T>
+export type BeforeMiddlewareResult<T extends DAOGenerics> = (Continue<true> & MiddlewareInput<T>) | (Continue<false> & MiddlewareReturn<T>)
+export type AfterMiddlewareResult<T extends DAOGenerics> = (Continue<true> & MiddlewareOutput<T>) | (Continue<false> & MiddlewareReturn<T>)
 
 export type DAOMiddleware<T extends DAOGenerics> = {
   name?: string
