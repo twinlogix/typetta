@@ -1,14 +1,15 @@
+import { AbstractScalars } from '../../../..'
 import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../../drivers.types'
 import { Double, Int32 } from 'bson'
 
 export type DefaultMongoDBScalars = {
-  String: string
-  Boolean: boolean
-  Int: Int32
-  Float: Double
+  String: { type: string; isTextual: true; isQuantitative: false }
+  Boolean: { type: boolean; isTextual: false; isQuantitative: false }
+  Int: { type: Int32; isTextual: false; isQuantitative: true }
+  Float: { type: Double; isTextual: false; isQuantitative: true }
 }
 
-export type MongoDBDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = DataTypeAdapterMap<ModelScalars, DefaultMongoDBScalars>
+export type MongoDBDataTypeAdapterMap<ModelScalars extends AbstractScalars> = DataTypeAdapterMap<ModelScalars, DefaultMongoDBScalars>
 
 export const mongoDbAdapters: MongoDBDataTypeAdapterMap<DefaultModelScalars> = {
   String: identityAdapter(),

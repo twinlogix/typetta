@@ -1,19 +1,19 @@
 import { SecurityPolicyReadError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
-import { DAOContext, UserRoleParam } from './dao.mock'
+import { inMemoryMongoDb } from '../utils'
+import { EntityManager, UserRoleParams } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
-import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 
 type SecurityDomain = { hotelId?: string; userId?: string; tenantId?: number }
 type OperationSecurityDomain = { [K in keyof SecurityDomain]: SecurityDomain[K][] }
 type SecurityContext = Permission[]
-type SecureDAOContext = DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>
-let unsafeDao: SecureDAOContext
+type SecureEntityManager = EntityManager<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>
+let unsafeDao: SecureEntityManager
 let mongodb: {
   replSet: MongoMemoryReplSet
   connection: MongoClient
@@ -21,7 +21,7 @@ let mongodb: {
 }
 
 function createDao(securityContext: SecurityContext | undefined, db: Db) {
-  return new DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, never>({
+  return new EntityManager<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>({
     mongodb: {
       default: db,
     },
@@ -31,10 +31,18 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
       },
     },
     security: {
+      operationDomain: () => {
+        return [{}]
+      },
       applySecurity: securityContext != null,
       context: securityContext ?? [],
       policies: {
         hotel: {
+          domain: {
+            hotelId: null,
+            tenantId: null,
+            userId: null,
+          },
           permissions: {
             MANAGE_HOTEL: PERMISSION.ALLOW,
             ANALYST: { read: { totalCustomers: true } },
@@ -49,6 +57,11 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           defaultPermissions: PERMISSION.DENY,
         },
         room: {
+          domain: {
+            hotelId: null,
+            tenantId: null,
+            userId: null,
+          },
           permissions: {
             MANAGE_ROOM: { create: true },
           },
@@ -61,12 +74,12 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
   })
 }
 
-async function createSecureDaoContext(userId: string): Promise<SecureDAOContext> {
+async function createSecureEntityManager(userId: string): Promise<SecureEntityManager> {
   const user = await unsafeDao.user.findOne({ filter: { id: userId }, projection: { id: true, roles: { role: { permissions: true }, hotelId: true, userId: true, tenantId: true } } })
   if (!user) {
     throw new Error('User does not exists')
   }
-  function createSecurityContext(roles: UserRoleParam<{ role: { permissions: true } }>[]): SecurityContext {
+  function createSecurityContext(roles: UserRoleParams<{ role: { permissions: true } }>[]): SecurityContext {
     return Array.from(new Set(roles.flatMap((r) => r.role.permissions.flatMap((v) => (v ? [v] : [])))).values())
   }
   const securityContext = createSecurityContext(user.roles)
@@ -104,10 +117,10 @@ test('security test 1', async () => {
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_VIEWER' } })
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'ANALYST' } })
 
-  const dao = await createSecureDaoContext(user.id)
+  const entityManager = await createSecureEntityManager(user.id)
 
   try {
-    await dao.hotel.findAll({ filter: { name: { startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
+    await entityManager.hotel.findAll({ filter: { name: { startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {

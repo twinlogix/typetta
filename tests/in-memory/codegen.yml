@@ -16,6 +16,7 @@ generates:
         Password: string
   tests/in-memory/dao.mock.ts:
     config:
+      generationOutput: 'dao'
       skipTypename: true
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
@@ -24,3 +25,6 @@ generates:
       defaultIdGenerationStrategy: 'generator'
     plugins:
       - lib/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

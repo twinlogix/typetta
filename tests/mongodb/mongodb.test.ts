@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock } from '../../src'
+import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock, Projection } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { CityProjection, DAOContext, UserDAO, UserProjection } from './dao.mock'
-import { Scalars, State, User } from './models.mock'
+import { AST, EntityManager, ScalarsSpecification, UserDAO, UserParams, UserPlainModel } from './dao.mock'
+import { State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
 import { MongoClient, Db, Decimal128, ObjectId, ModifyResult } from 'mongodb'
@@ -19,9 +19,9 @@ jest.setTimeout(20000)
 let replSet: MongoMemoryReplSet
 let connection: MongoClient
 let db: Db
-type DAOContextType = DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
-let dao: DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>
-const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
+type EntityManagerType = EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }>
+let dao: EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }>
+const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'> = {
   ID: {
     generate: () => uuidv4(),
     dbToModel: (id: unknown) => {
@@ -47,8 +47,8 @@ const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'mongo'> = {
   },
 }
 
-function createDao(): DAOContext<{ conn: MongoClient; dao: () => DAOContextType }> {
-  return new DAOContext<{ conn: MongoClient; dao: () => DAOContextType }>({
+function createDao(): EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }> {
+  return new EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }>({
     mongodb: {
       default: db,
     },
@@ -91,7 +91,7 @@ test('empty find', async () => {
 })
 
 test('simple findAll', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, credentials: [{ username: 'user', password: '123456' }] } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', int: 0, live: true, credentials: [{ username: 'user', password: '123456' }] } })
 
   const users = await dao.user.findAll({})
   expect(users.length).toBe(1)
@@ -102,6 +102,7 @@ test('simple findAll', async () => {
   expect(users2.length).toBe(1)
   expect(users2[0].firstName).toBe('FirstName')
   expect(users2[0].lastName).toBe('LastName')
+  expect(users2[0].int).toBe(0)
 
   const users3 = await dao.user.findAll({ projection: { credentials: {}, firstName: true } })
   expect(users3[0].credentials).toBe(undefined)
@@ -111,15 +112,45 @@ test('simple findAll', async () => {
   expect(Object.keys(users5[0]).length).toBe(1)
   const users6 = await dao.user.findAll({ projection: { credentials: undefined } })
   expect(Object.keys(users6[0]).length).toBe(1)
+
+  await dao.user.updateOne({ filter: {}, changes: { int: null } })
+  const users7 = await dao.user.findAll({ filter: { id: { exists: true } } })
+  expect(users7[0].int).toBe(null)
 })
 
 test('simple findOne', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const u = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: '1FirstName', lastName: 'LastName', live: true } })
 
-  const user = await dao.user.findOne({})
+  const user = await dao.user.findOne({ filter: { id: u.id } })
   expect(user).toBeDefined()
   expect(user?.firstName).toBe('FirstName')
   expect(user?.lastName).toBe('LastName')
+
+  const user2 = await dao.user.findOne({ filter: { firstName: { eq: 'firstname' } } })
+  expect(user2).toBe(null)
+  const user3 = await dao.user.findOne({ filter: { firstName: { eq: 'firstname', mode: 'insensitive' } } })
+  expect(user3).toBeDefined()
+  expect(user3?.firstName).toBe('FirstName')
+  expect(user3?.lastName).toBe('LastName')
+})
+
+test('simple resolveRelations', async () => {
+  const u1 = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const u2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName', live: true } })
+  const results = await dao.user.resolveRelations({
+    input: { id: '', live: true, friendsId: [u1.id, u2.id] },
+    projection: { friends: { firstName: true }, live: true },
+    relations: {
+      friends: {
+        filter: { firstName: 'FirstName' },
+      },
+    },
+  })
+  expect(results.friends?.length).toBe(1)
+  expect((results.friends ?? [])[0].firstName).toBe('FirstName')
+  expect(results.live).toBe(true)
 })
 
 test('simple findOne multiple filter', async () => {
@@ -142,6 +173,22 @@ test('findOne simple inner association', async () => {
   const dog = await dao.dog.findOne({ projection: { owner: { firstName: true } } })
   expect(dog?.owner).toBeDefined()
   expect(dog?.owner?.firstName).toBe('FirstName')
+})
+
+test('findOne simple inner association with max depth', async () => {
+  try {
+    await dao.user.findOne({ projection: { friends: { friends: { firstName: true } } }, maxDepth: 2 })
+    fail()
+  } catch (e) {
+    expect((e as Error).message).toBe('Max depth is 2 but the specified projection reach a depth of 3')
+  }
+  try {
+    await dao.user.findOne({ projection: { firstName: true }, maxDepth: 0 })
+    fail()
+  } catch (e) {
+    expect((e as Error).message).toBe('Max depth is 0 but the specified projection reach a depth of 1')
+  }
+  await dao.user.findOne({ projection: { friends: { friends: true } }, maxDepth: 3 })
 })
 
 test('findOne simple foreignRef association', async () => {
@@ -230,7 +277,7 @@ test('safe find', async () => {
   expect(response[0].live).toBe(true)
 
   // Static projection
-  const response1 = await dao.user.findOne({ filter: { id: 'u2' }, projection: { live: true } })
+  const response1 = await dao.user.findOne({ filter: { id: 'u2' }, projection: UserDAO.projection({ live: true }) })
   typeAssert<Test<typeof response1, { live: boolean; __projection: { live: true } } | null>>()
   expect(response1).toBe(null)
 
@@ -242,9 +289,10 @@ test('safe find', async () => {
   expect(response2?.live).toBe(true)
 
   // Dynamic projection
-  const proj: UserProjection = { firstName: true, live: true }
+  const proj: Projection<'User', AST> = { firstName: true, live: true }
   const response3 = await dao.user.findOne({ projection: proj })
-  typeAssert<Test<typeof response3, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
+  const r = response3?.__projection
+  typeAssert<Test<typeof r, 'unknown' | undefined>>()
   expect(response3).toBeDefined()
   expect(response3?.firstName).toBe('FirstName')
   expect(response3?.live).toBe(true)
@@ -257,21 +305,21 @@ test('safe find', async () => {
   expect(response7?.live).toBe(true)
 
   // Static projection create before (do not use)
-  const proj3: PartialDeep<UserProjection> = { live: true }
+  const proj3: Projection<'User', AST> = { live: true }
   const response8 = await dao.user.findOne({ projection: proj3 })
   typeAssert<Test<typeof response8, (PartialDeep<User> & { __projection: 'unknown' }) | null>>()
   expect(response8).toBeDefined()
 
   // Whole object
   const response4 = await dao.user.findOne({ projection: true })
-  typeAssert<Test<typeof response4, (User & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response4, (UserPlainModel & { __projection: 'all' }) | null>>()
   expect(response4).toBeDefined()
   expect(response4?.firstName).toBe('FirstName')
   expect(response4?.live).toBe(true)
 
   // No projection
   const response5 = await dao.user.findOne({})
-  typeAssert<Test<typeof response5, (User & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response5, (UserPlainModel & { __projection: 'all' }) | null>>()
   expect(response5).toBeDefined()
   expect(response5?.firstName).toBe('FirstName')
   expect(response5?.live).toBe(true)
@@ -283,7 +331,7 @@ test('safe find', async () => {
 
   // All undefined projection
   const response9 = await dao.user.findOne()
-  typeAssert<Test<typeof response9, (User & { __projection: 'all' }) | null>>()
+  typeAssert<Test<typeof response9, (UserPlainModel & { __projection: 'all' }) | null>>()
   expect(response9).toBeDefined()
 
   // Info to projection
@@ -414,6 +462,9 @@ test('find with multiple sorts', async () => {
   const response1 = await dao.user.findAll({ sorts: [{ firstName: 'desc' }, { lastName: 'desc' }] })
   expect(response1[0].lastName).toBe('9')
   expect(response1[1].lastName).toBe('8')
+  const response2 = await dao.user.findAll({ sorts: [{ firstName: 'desc', lastName: 'desc' }] })
+  expect(response2[0].lastName).toBe('9')
+  expect(response2[1].lastName).toBe('8')
 })
 
 test('find with start and limit', async () => {
@@ -435,6 +486,23 @@ test('find with start and limit', async () => {
   expect(response5.length).toBe(2)
   expect(response5[0].firstName).toBe('8')
   expect(response5[1].firstName).toBe('9')
+})
+
+test('find with embedded that have inner refs', async () => {
+  await dao.user.insertOne({
+    record: {
+      id: '123',
+      firstName: 'FirstName',
+      embeddedUser: {
+        userId: '123',
+      },
+      live: true,
+    },
+  })
+
+  const user = await dao.user.findOne({})
+  expect(user?.embeddedUser?.userId).toBe('123')
+  expect((user?.embeddedUser as Record<string, unknown>)?.user).toBe(undefined)
 })
 
 // ------------------------------------------------------------------------
@@ -518,7 +586,7 @@ test('Insert default', async () => {
     expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
   }
 
-  const dao1 = new DAOContext({
+  const entityManager1 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -531,16 +599,16 @@ test('Insert default', async () => {
   })
 
   try {
-    await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
     fail()
   } catch (error: unknown) {
     expect(((error as Error).message as string).startsWith('Fields creationDate should have been generated from a middleware but it is undefined')).toBe(true)
   }
 
-  const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
+  const e1 = await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
   expect(e1.live).toBe(true)
 
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -557,13 +625,13 @@ test('Insert default', async () => {
     },
   })
 
-  const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
+  const e2 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
   expect(e2.live).toBe(true)
   expect(e2.creationDate).toBe(1234)
   expect(e2.opt1).toBe(undefined)
   expect(e2.opt2).toBe(true)
 
-  const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
+  const e3 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
   expect(e3.opt1).toBe(undefined)
 })
 
@@ -627,15 +695,26 @@ test('simple update', async () => {
   expect(user2?.firstName).toBe(user.firstName)
   expect(user2?.lastName).toBe('LastName')
 
-  await dao.user.updateOne({ filter: { id: user.id }, changes: { firstName: 'NewFirstName' } })
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { firstName: 'NewFirstName', live: null } })
   const user3 = await dao.user.findOne({ filter: { id: user.id } })
 
   expect(user3?.firstName).toBe('NewFirstName')
-  expect(user3?.lastName).toBe(user3?.lastName)
+  expect(user3?.lastName).toBe(user2?.lastName)
+  expect(user3?.live).toBe(true)
+
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { live: null } })
+  const user4 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user4?.live).toBe(true)
 })
 
 test('update embedded entity', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+
+  const user0 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { user: { firstName: true }, password: true } } })
+  expect(user0?.usernamePasswordCredentials).toBe(undefined)
+
+  const user1 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user1?.usernamePasswordCredentials).toBe(undefined)
 
   await dao.user.updateOne({ filter: { id: user.id }, changes: { usernamePasswordCredentials: { username: 'username', password: 'password' } } })
   const user2 = await dao.user.findOne({ filter: { id: user.id } })
@@ -657,6 +736,19 @@ test('update embedded entity', async () => {
   expect(user4?.usernamePasswordCredentials).toBeDefined()
   expect(user4?.usernamePasswordCredentials?.username).toBe('newUsername_2')
   expect(user4?.usernamePasswordCredentials?.password).toBe('5c29a959abce4eda5f0e7a4e7ea53dce4fa0f0abbe8eaa63717e2fed5f193d31')
+
+  await dao.user.updateOne({ filter: { id: user.id }, changes: { usernamePasswordCredentials: null } })
+  const user5 = await dao.user.findOne({ filter: { id: user.id } })
+  expect(user5?.usernamePasswordCredentials).toBe(null)
+
+  const user6 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { user: { firstName: true } } } })
+  expect(user6?.usernamePasswordCredentials).toBe(undefined)
+
+  const user7 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: true } })
+  expect(user7?.usernamePasswordCredentials).toBe(null)
+
+  const user8 = await dao.user.findOne({ filter: { id: user.id }, projection: { usernamePasswordCredentials: { username: true } } })
+  expect(user8?.usernamePasswordCredentials).toBe(undefined)
 })
 
 test('update with undefined', async () => {
@@ -760,10 +852,9 @@ test('insert embedded with inner refs', async () => {
 // ------------------------------ REPLACE ---------------------------------
 // ------------------------------------------------------------------------
 test('simple replace', async () => {
-  const user: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
   await dao.user.replaceOne({ filter: { id: user.id }, replace: { id: user.id, firstName: 'FirstName 1', live: true } })
   const user1 = await dao.user.findOne({ filter: { id: user.id } })
-
   expect(user1).toBeDefined()
   expect(user1?.firstName).toBe('FirstName 1')
 })
@@ -772,7 +863,7 @@ test('simple replace', async () => {
 // ------------------------------ DELETE ----------------------------------
 // ------------------------------------------------------------------------
 test('simple delete', async () => {
-  const user: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
 
   const user1 = await dao.user.findOne({ filter: { id: user.id } })
   expect(user1).toBeDefined()
@@ -787,7 +878,7 @@ test('simple delete', async () => {
 // --------------------------- GEOJSON FIELD ------------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve geojson field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, localization: { latitude: 1.111, longitude: 2.222 } } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, localization: { latitude: 1.111, longitude: 2.222 } } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, localization: true } })
   expect(user).toBeDefined()
@@ -821,7 +912,7 @@ test('insert and retrieve decimal field 2', async () => {
 })
 
 test('update and retrieve decimal field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amount: true } })
   expect(user).toBeDefined()
@@ -835,20 +926,26 @@ test('update and retrieve decimal field', async () => {
 })
 
 test('insert and retrieve decimal array field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amounts: [new BigNumber(1.02), new BigNumber(2.223)] } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amounts: [new BigNumber(1.02), new BigNumber(2.223)] } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amounts: true } })
   expect(user).toBeDefined()
   expect(user?.amounts?.length).toBe(2)
   expect((user?.amounts ?? [])[0].comparedTo(1.02)).toBe(0)
   expect((user?.amounts ?? [])[1].comparedTo(2.223)).toBe(0)
+
+  const user2 = await dao.user.findOne({ filter: { amounts: { in: [[new BigNumber(1.02)], [new BigNumber(1.02), new BigNumber(2.223)]] } }, projection: { id: true, amounts: true } })
+  expect(user2).toBeDefined()
+  expect(user2?.amounts?.length).toBe(2)
+  expect((user2?.amounts ?? [])[0].comparedTo(1.02)).toBe(0)
+  expect((user2?.amounts ?? [])[1].comparedTo(2.223)).toBe(0)
 })
 
 // ------------------------------------------------------------------------
 // ---------------------- LOCALIZED STRING FIELD --------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve localized string field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, title: true } })
   expect(user).toBeDefined()
@@ -861,7 +958,7 @@ test('insert and retrieve localized string field', async () => {
 // ------------------------------------------------------------------------
 test('middleware 1', async () => {
   let operationCount = 0
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     log: ['error', 'warning'],
     mongodb: {
       default: db,
@@ -872,7 +969,9 @@ test('middleware 1', async () => {
         middlewares: [
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
           {
-            before: async (args) => {
+            before: async (args, context) => {
+              expect(context.schema.live.directives.custom.str).toBe('123')
+              expect(context.schema.live.directives.custom.o).toStrictEqual({ a: 123 })
               if (args.operation === 'insert') {
                 if (args.params.record.id === 'u1' && args.params.record.firstName === 'Mario') {
                   throw new Error('is Mario')
@@ -961,38 +1060,38 @@ test('middleware 1', async () => {
   })
 
   try {
-    await dao2.user.insertOne({ record: { id: 'u1', firstName: 'Mario', live: true } })
+    await entityManager2.user.insertOne({ record: { id: 'u1', firstName: 'Mario', live: true } })
     fail()
   } catch (error) {
     expect((error as Error).message).toBe('is Mario')
   }
 
-  await dao2.user.insertOne({ record: { id: 'u1', firstName: 'Luigi', live: true } })
-  const u = await dao2.user.findOne({ filter: { id: 'u1' } })
+  await entityManager2.user.insertOne({ record: { id: 'u1', firstName: 'Luigi', live: true } })
+  const u = await entityManager2.user.findOne({ filter: { id: 'u1' } })
   expect(u?.firstName).toBe('LUIGI OK')
 
-  await dao2.user.updateOne({ filter: { id: 'u1' }, changes: { firstName: 'Mario' } })
-  const lastName = (await dao2.user.findOne({ filter: { id: 'u1' } }))?.lastName
+  await entityManager2.user.updateOne({ filter: { id: 'u1' }, changes: { firstName: 'Mario' } })
+  const lastName = (await entityManager2.user.findOne({ filter: { id: 'u1' } }))?.lastName
   expect(lastName).toBe('Bros')
 
-  await dao2.user.findAll({})
-  await dao2.user.deleteOne({ filter: { id: 'u1' } })
-  await dao2.user.findAll({})
-  expect(await dao2.user.exists({ filter: { id: 'u1' } })).toBe(true)
+  await entityManager2.user.findAll({})
+  await entityManager2.user.deleteOne({ filter: { id: 'u1' } })
+  await entityManager2.user.findAll({})
+  expect(await entityManager2.user.exists({ filter: { id: 'u1' } })).toBe(true)
 
-  await dao2.user.insertOne({ record: { id: 'u2', firstName: 'Mario', live: true } })
-  await dao2.user.deleteOne({ filter: { id: 'u2' } })
-  expect(await dao2.user.exists({ filter: { id: 'u2' } })).toBe(false)
+  await entityManager2.user.insertOne({ record: { id: 'u2', firstName: 'Mario', live: true } })
+  await entityManager2.user.deleteOne({ filter: { id: 'u2' } })
+  expect(await entityManager2.user.exists({ filter: { id: 'u2' } })).toBe(false)
 
-  await dao2.user.replaceOne({ filter: { id: 'u1' }, replace: { live: true, id: 'u3' } })
-  const luigi = await dao2.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } })
+  await entityManager2.user.replaceOne({ filter: { id: 'u1' }, replace: { live: true, id: 'u3' } })
+  const luigi = await entityManager2.user.findOne({ filter: { id: 'u3' }, projection: { firstName: true, live: true } })
   expect(luigi?.firstName).toBe('Luigi')
 
   expect(operationCount).toBe(4)
 })
 
 test('middleware 2', async () => {
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1028,12 +1127,12 @@ test('middleware 2', async () => {
       },
     },
   })
-  const mario = await dao2.user.findOne({})
+  const mario = await entityManager2.user.findOne({})
   expect(mario?.firstName).toBe('MARIO')
 })
 
 test('middleware options', async () => {
-  const dao2 = new DAOContext<{ m1?: string; m2?: string }, { m3: string }>({
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
     metadata: { m1: 'test1', m2: 'no' },
     mongodb: {
       default: db,
@@ -1053,14 +1152,102 @@ test('middleware options', async () => {
       },
     },
   })
-  await dao2.user.insertOne({ record: { live: true }, metadata: { m3: 'yes' } })
+  await entityManager2.user.insertOne({ record: { live: true }, metadata: { m3: 'yes' } })
+})
+
+test('middleware error 1', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            before: async () => {
+              return {
+                operation: 'update',
+                continue: false,
+                params: { changes: {}, filter: {} },
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  try {
+    await entityManager2.user.insertOne({ record: { live: true } })
+  } catch (error) {
+    expect((error as Error).message).toBe("Invalid operation. Expecting 'insert' but received 'update'.")
+  }
+})
+
+test('middleware error 2', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            after: async () => {
+              return {
+                operation: 'update',
+                continue: false,
+                params: { changes: {}, filter: {} },
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  try {
+    await entityManager2.user.insertOne({ record: { live: true } })
+  } catch (error) {
+    expect((error as Error).message).toBe("Invalid operation. Expecting 'insert' but received 'update'.")
+  }
+})
+
+test('middleware change reulst in after', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            after: async (args) => {
+              if (args.operation === 'insert') {
+                return {
+                  operation: 'insert',
+                  continue: false,
+                  insertedRecord: { id: args.insertedRecord.id, live: false },
+                }
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  const inserted = await entityManager2.user.insertOne({ record: { live: true } })
+  expect(inserted.live).toBe(false)
+  const found = await entityManager2.user.findOne({ filter: { id: inserted.id } })
+  expect(found?.live).toBe(true)
 })
 
 // ------------------------------------------------------------------------
 // ------------------------- COMPUTED FIELDS ------------------------------
 // ------------------------------------------------------------------------
 test('computed fields (one dependency - same level - one calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1090,7 +1277,7 @@ test('computed fields (one dependency - same level - one calculated)', async () 
 })
 
 test('computed fields (two dependencies - same level - one calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1099,7 +1286,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
       city: {
         middlewares: [
           computedField({
-            fieldsProjection: { computedAddressName: true } as CityProjection,
+            fieldsProjection: { computedAddressName: true },
             requiredProjection: { name: true, addressId: true },
             compute: async (city) => ({ computedAddressName: `${city.name}_${city.addressId}` }),
           }),
@@ -1113,7 +1300,7 @@ test('computed fields (two dependencies - same level - one calculated)', async (
 })
 
 test('computed fields (two dependencies - same level - two calculated)', async () => {
-  const customDao = new DAOContext({
+  const customDao = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1148,7 +1335,7 @@ test('computed fields (two dependencies - same level - two calculated)', async (
 })
 
 test('computed fields (one dependency - same level - one calculated - multiple models)', async () => {
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1166,17 +1353,17 @@ test('computed fields (one dependency - same level - one calculated - multiple m
     },
   })
 
-  await dao2.city.insertOne({ record: { id: 'c1', name: 'c1', addressId: 'address1' } })
-  await dao2.city.insertOne({ record: { id: 'c2', name: 'c1', addressId: 'address1' } })
-  await dao2.city.insertOne({ record: { id: 'c3', name: 'c1', addressId: 'address1' } })
-  const cities = await dao2.city.findAll({ projection: { id: true, computedName: true } })
+  await entityManager2.city.insertOne({ record: { id: 'c1', name: 'c1', addressId: 'address1' } })
+  await entityManager2.city.insertOne({ record: { id: 'c2', name: 'c1', addressId: 'address1' } })
+  await entityManager2.city.insertOne({ record: { id: 'c3', name: 'c1', addressId: 'address1' } })
+  const cities = await entityManager2.city.findAll({ projection: { id: true, computedName: true } })
   cities.forEach((c) => {
     expect(c?.computedName).toBe('Computed: c1')
   })
 })
 
 /*test('computed fields (one dependency - deep level - one calculated)', async () => {
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
@@ -1197,7 +1384,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
 })
 
 test('computed fields (two dependency - deep level - two calculated)', async () => {
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     idGenerators: { ID: () => uuidv4() },
     mongo: {
       default: db,
@@ -1226,7 +1413,7 @@ test('computed fields (two dependency - deep level - two calculated)', async () 
 // --------------------------- TRANSACTIONS -------------------------------
 // ------------------------------------------------------------------------
 
-test('Simple transaction', async () => {
+test('Simple transaction options', async () => {
   const session = connection.startSession()
   session.startTransaction({
     readConcern: { level: 'local' },
@@ -1242,6 +1429,28 @@ test('Simple transaction', async () => {
   expect(user1.live).toBe(true)
   expect(user2).toBe(null)
   expect(user3?.live).toBe(true)
+  expect(user4?.live).toBe(true)
+})
+
+test('Simple transaction functional', async () => {
+  const session = connection.startSession()
+  session.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+  await dao.transaction({ mongodb: { default: session } }, async (entityManager2) => {
+    const user1 = await entityManager2.user.insertOne({ record: { id: '123', live: true } })
+    const user2 = await entityManager2.user.findOne({ filter: { id: '123' } })
+    const user5 = await dao.user.findOne({ filter: { id: '123' } })
+    expect(user5).toBe(null)
+    expect(user1.live).toBe(true)
+    expect(user2?.live).toBe(true)
+  })
+  const user3 = await dao.user.findOne({ filter: { id: '123' } })
+  expect(user3).toBe(null)
+  const res = await session.commitTransaction()
+  expect(res.ok).toBe(1)
+  const user4 = await dao.user.findOne({ filter: { id: '123' } })
   expect(user4?.live).toBe(true)
 })
 
@@ -1509,7 +1718,7 @@ test('Mock entity', async () => {
 })
 
 test('Soft delete middleware', async () => {
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1521,25 +1730,25 @@ test('Soft delete middleware', async () => {
     },
   })
 
-  await dao2.user.insertOne({ record: { live: true, firstName: 'Mario' } })
-  await dao2.user.insertOne({ record: { live: true, firstName: 'Luigi' } })
+  await entityManager2.user.insertOne({ record: { live: true, firstName: 'Mario' } })
+  await entityManager2.user.insertOne({ record: { live: true, firstName: 'Luigi' } })
 
-  const users = await dao2.user.findAll()
+  const users = await entityManager2.user.findAll()
   expect(users.length).toBe(2)
 
-  await dao2.user.deleteOne({ filter: { firstName: 'Mario' } })
+  await entityManager2.user.deleteOne({ filter: { firstName: 'Mario' } })
 
   const deletedUser = await dao.user.findAll({ filter: { live: false } })
   expect(deletedUser.length).toBe(1)
   expect(deletedUser[0].firstName).toBe('Mario')
 
-  const liveUsers = await dao2.user.findAll({ filter: { firstName: { in: ['Mario', 'Luigi'] } } })
+  const liveUsers = await entityManager2.user.findAll({ filter: { firstName: { in: ['Mario', 'Luigi'] } } })
   expect(liveUsers.length).toBe(1)
   expect(liveUsers[0].firstName).toBe('Luigi')
 })
 
 test('Audit middlewares', async () => {
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1557,24 +1766,24 @@ test('Audit middlewares', async () => {
     },
   })
 
-  const { id } = await dao2.hotel.insertOne({ record: { name: 'h1' } })
-  await dao2.hotel.insertOne({ record: { name: 'H2' } })
-  await dao2.audit.insertOne({ record: { entityId: id, changes: 'NONE' } })
+  const { id } = await entityManager2.hotel.insertOne({ record: { name: 'h1' } })
+  await entityManager2.hotel.insertOne({ record: { name: 'H2' } })
+  await entityManager2.audit.insertOne({ record: { entityId: id, changes: 'NONE' } })
 
-  const hotels = await dao2.hotel.findAll()
+  const hotels = await entityManager2.hotel.findAll()
   expect(hotels.length).toBe(2)
   expect(hotels[0].audit.createdBy).toBe('userId1')
   expect(hotels[0].audit.createdOn).toBe(1)
   expect(hotels[0].audit.modifiedOn).toBe(1)
 
-  await dao2.hotel.updateOne({ filter: { name: 'h1' }, changes: { name: 'H1' } })
-  const h1 = await dao2.hotel.findOne({ filter: { name: 'H1' }, projection: { audit: { modifiedBy: true, modifiedOn: true, versions: true } } })
+  await entityManager2.hotel.updateOne({ filter: { name: 'h1' }, changes: { name: 'H1' } })
+  const h1 = await entityManager2.hotel.findOne({ filter: { name: 'H1' }, projection: { audit: { modifiedBy: true, modifiedOn: true, versions: true } } })
   expect(h1?.audit.modifiedOn).toBe(2)
   expect(h1?.audit.modifiedBy).toBe('userId2')
   expect(h1?.audit.versions[0]?.changes).toBe('NONE')
 
-  await dao2.hotel.deleteAll({ filter: { name: { in: ['H1', 'H2'] } } })
-  const hotels2 = await dao2.hotel.findAll()
+  await entityManager2.hotel.deleteAll({ filter: { name: { in: ['H1', 'H2'] } } })
+  const hotels2 = await entityManager2.hotel.findAll()
   expect(hotels2.length).toBe(0)
 
   const hotels3 = await dao.hotel.findAll()
@@ -1582,14 +1791,14 @@ test('Audit middlewares', async () => {
   expect(hotels3[0].audit.deletedOn).toBe(3)
   expect(hotels3[0].audit.modifiedBy).toBe('userId3')
 
-  await dao2.hotel.insertOne({ record: { name: 'H3' } })
-  await dao2.hotel.replaceOne({ replace: { name: 'H4' }, filter: { name: 'H3' } })
-  const h4 = await dao2.hotel.aggregate({ by: { 'audit.modifiedBy': true }, aggregations: { c: { operation: 'count' } } })
+  await entityManager2.hotel.insertOne({ record: { name: 'H3' } })
+  await entityManager2.hotel.replaceOne({ replace: { name: 'H4' }, filter: { name: 'H3' } })
+  const h4 = await entityManager2.hotel.aggregate({ by: { 'audit.modifiedBy': true }, aggregations: { c: { operation: 'count' } } })
   expect(h4[0]['audit.modifiedBy']).toBe('userId1')
 })
 
 test('Audit middlewares', async () => {
-  const dao2 = new DAOContext<never, { opts: 1 | 2 }>({
+  const entityManager2 = new EntityManager<never, { opts: 1 | 2 }>({
     mongodb: {
       default: db,
     },
@@ -1611,18 +1820,78 @@ test('Audit middlewares', async () => {
     },
   })
 
-  await dao2.city.insertOne({ record: { id: 'cesena', name: 'Cesena', addressId: 'address1' } })
+  await entityManager2.city.insertOne({ record: { id: 'cesena', name: 'Cesena', addressId: 'address1' } })
 
-  const cesena1 = await dao2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true }, metadata: { opts: 1 } })
-  const cesena2 = await dao2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true } })
+  const cesena1 = await entityManager2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true }, metadata: { opts: 1 } })
+  const cesena2 = await entityManager2.city.findOne({ filter: { id: 'cesena' }, projection: { id: true, computedName: true } })
 
   expect(cesena1?.computedName).toBe('Computed: Cesena')
   expect(cesena2?.computedName).toBe(undefined)
 })
 
+test('Inner ref inside embedded', async () => {
+  const u1 = await dao.user.insertOne({ record: { live: true, firstName: '1' } })
+  const u2 = await dao.user.insertOne({ record: { live: true, firstName: '2' } })
+  const u3 = await dao.user.insertOne({ record: { live: true, firstName: '3' } })
+  await dao.hotel.insertOne({
+    record: {
+      name: 'h',
+      users: { usersId: [u1.id, u2.id] },
+      embeddedUsers: [
+        { userId: u1.id, e: [{ userId: u3.id }] },
+        { userId: u2.id, e: [{ userId: u2.id }, { userId: u1.id }] },
+      ],
+      userId: u2.id,
+      embeddedUsers3: [{ value: null }, { value: 2 }],
+      embeddedUser4: { e: { userId: u3.id } },
+      embeddedUsers4: [{ e: { userId: u2.id } }, { e: { userId: u1.id } }, { e: { userId: 'asd' } }, { e: { userId: null } }],
+      audit: { createdBy: '', createdOn: 2, modifiedBy: '', modifiedOn: 1, state: State.ACTIVE },
+    },
+  })
+
+  //TODO: relations on innerRef not working because it's 1-1 but with array is [1-1] so it may have sense to introduce relations
+  const h = await dao.hotel.findOne({
+    projection: {
+      users: { users: { firstName: true } },
+      embeddedUsers: { user: { firstName: true }, e: { user: { firstName: true } } },
+      embeddedUser3: { user: { firstName: true } },
+      embeddedUsers3: { user: { firstName: true }, value: true },
+      embeddedUser4: { user: { firstName: true } },
+      embeddedUsers4: { user: { firstName: true } },
+    },
+  })
+  await dao.hotel.updateOne({ filter: {}, changes: { 'embeddedUser3.value': 2 } })
+  const h2 = await dao.hotel.findOne({
+    projection: {
+      embeddedUsers3: { user: { firstName: true } },
+      embeddedUser3: { user: { firstName: true }, value: true },
+    },
+  })
+
+  expect(h2?.embeddedUsers3).toBe(undefined)
+  expect((h?.embeddedUsers3 ?? [])[0]?.user?.firstName).toBe('2')
+  expect((h?.embeddedUsers3 ?? [])[0]?.value).toBe(null)
+  expect((h?.embeddedUsers3 ?? [])[1]?.user?.firstName).toBe('2')
+  expect((h?.embeddedUsers3 ?? [])[1]?.value).toBe(2)
+  expect(h?.embeddedUser3).toBe(undefined)
+  expect(h2?.embeddedUser3?.user?.firstName).toBe('2')
+  expect(h?.embeddedUser4?.user?.firstName).toBe('3')
+  expect((h?.embeddedUsers4 ?? [])[0].user?.firstName).toBe('2')
+  expect((h?.embeddedUsers4 ?? [])[1].user?.firstName).toBe('1')
+  expect((h?.embeddedUsers4 ?? [])[2].user).toBe(null)
+  expect((h?.embeddedUsers4 ?? [])[3].user).toBe(null)
+  expect(h?.users?.users[0].firstName).toBe('1')
+  expect(h?.users?.users[1].firstName).toBe('2')
+  expect((h?.embeddedUsers ?? [])[0].user.firstName).toBe('1')
+  expect((h?.embeddedUsers ?? [])[1].user.firstName).toBe('2')
+  expect(((h?.embeddedUsers ?? [])[0].e ?? [])[0].user.firstName).toBe('3')
+  expect(((h?.embeddedUsers ?? [])[1].e ?? [])[0].user.firstName).toBe('2')
+  expect(((h?.embeddedUsers ?? [])[1].e ?? [])[1].user.firstName).toBe('1')
+})
+
 test('Inserted record middleware', async () => {
   let i = 0
-  const customDao = new DAOContext({
+  const customDao = new EntityManager({
     mongodb: {
       default: db,
     },
@@ -1679,6 +1948,35 @@ test('Live query', async () => {
   }
   expect(state).toBe(3)
   clearTimeout(t)
+})
+
+test('Schema metadata', async () => {
+  let middlewareExecuted = false
+  const entityManager2 = new EntityManager({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      dog: {
+        middlewares: [
+          buildMiddleware({
+            beforeFind: async (params) => {
+              const field = (params.relationParents ?? [])[0].field
+              expect(field).toBe('dogs')
+              const schema = (params.relationParents ?? [])[0].schema
+              expect(schema[field].directives.schema).toStrictEqual({ metadata: [{ key: 'test', value: 'value' }] })
+              middlewareExecuted = true
+            },
+          }),
+        ],
+      },
+    },
+  })
+  const u = await entityManager2.user.insertOne({ record: { live: true } })
+  await entityManager2.dog.insertOne({ record: { name: 'Dog', ownerId: u.id } })
+  await entityManager2.user.findAll({ projection: { dogs: true } })
+  expect(middlewareExecuted).toBe(true)
 })
 
 // ------------------------------------------------------------------------

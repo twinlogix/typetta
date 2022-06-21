@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { computedField, inMemoryKnexConfig } from '../../src'
-import { DAOContext } from './dao.mock'
+import { computedField, flattenEmbeddeds, inMemoryKnexConfig } from '../../src'
+import { EntityManager, postSchema } from './dao.generated'
+import { PostUpdateInput } from './types.generated'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -8,28 +9,28 @@ import sha256 from 'sha256'
 jest.setTimeout(20000)
 
 let knexInstance: Knex<{ [K in string]: unknown }, unknown[]>
-let dao: DAOContext
+let dao: EntityManager
 
 let idCounter = 0
 
 beforeEach(async () => {
   knexInstance = knex(inMemoryKnexConfig())
-  dao = new DAOContext({
+  dao = new EntityManager({
     overrides: {
       user: {
         idGenerator: () => {
           idCounter = idCounter + 1
-          return 'user_' + idCounter
+          return { id: 'user_' + idCounter }
         },
         middlewares: [
           computedField({
             fieldsProjection: { averageViewsPerPost: true },
-            requiredProjection: { totalPostsViews: true, posts: {} },
+            requiredProjection: { totalPostsViews: true, posts: {} } as const,
             compute: async (u) => ({ averageViewsPerPost: (u.totalPostsViews || 0) / (u.posts?.length || 1) }),
           }),
           computedField({
             fieldsProjection: { totalPostsViews: true },
-            requiredProjection: { posts: { views: true } },
+            requiredProjection: { posts: { views: true } } as const,
             compute: async (u) => ({
               totalPostsViews: u.posts?.map((p) => p.views).reduce((p, c) => p + c, 0) || 0,
             }),
@@ -39,12 +40,12 @@ beforeEach(async () => {
       post: {
         idGenerator: () => {
           idCounter = idCounter + 1
-          return 'post_' + idCounter
+          return { id: 'post_' + idCounter }
         },
       },
       tag: {
         idGenerator: () => {
-          return 'tag_' + idCounter
+          return { id: 'tag_' + idCounter }
         },
       },
     },
@@ -118,14 +119,12 @@ test('Demo', async () => {
       'credentials.username': 'Pippo',
     },
     projection: {
-      firstName: false,
       averageViewsPerPost: true,
       posts: {
         title: true,
         author: {
           firstName: true,
         },
-        tagsId: true,
         tags: true,
       },
     },
@@ -282,4 +281,29 @@ test('Aggregate test 2', async () => {
   expect(aggregation2.length).toBe(2)
   expect(aggregation2.find((a) => a['metadata.region'] === 'it')?.count).toBe(25)
   expect(aggregation2.find((a) => a['metadata.region'] === 'en')?.count).toBe(1)
+})
+
+test('flattenEmbeddedFilter', () => {
+  const f: PostUpdateInput = {
+    authorId: '123',
+    metadata: {
+      region: 'it',
+    },
+  }
+  const r = flattenEmbeddeds(f, postSchema())
+  if (!r) {
+    fail()
+  }
+  expect(r['metadata.region']).toBe('it')
+  expect(r['metadata.typeId']).toBe(undefined)
+  expect(r.authorId).toBe('123')
+  expect(r.body).toBe(undefined)
+
+  const r1 = flattenEmbeddeds(
+    {
+      metadata: null,
+    },
+    postSchema(),
+  )
+  expect(r1.metadata).toBe(null)
 })

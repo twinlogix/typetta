@@ -1,13 +1,12 @@
 import { defaultValueMiddleware, mock } from '../../src'
-import { DAOContext } from './dao.mock'
-import { User } from './models.mock'
+import { EntityManager } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import sha256 from 'sha256'
 import { v4 as uuidv4 } from 'uuid'
 
 jest.setTimeout(20000)
 
-let dao: DAOContext
+let dao: EntityManager
 mock.compare = (l, r) => {
   if (l instanceof Date && r instanceof Date) {
     return l.getTime() - r.getTime()
@@ -18,7 +17,8 @@ mock.compare = (l, r) => {
 }
 
 beforeEach(async () => {
-  dao = new DAOContext({
+  mock.clearMemory()
+  dao = new EntityManager({
     scalars: {
       ID: {
         generate: () => uuidv4(),
@@ -63,12 +63,21 @@ test('simple findAll', async () => {
 })
 
 test('simple findOne', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const u = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: '1FirstName', lastName: 'LastName', live: true } })
 
-  const user = await dao.user.findOne({})
+  const user = await dao.user.findOne({ filter: { id: u.id } })
   expect(user).toBeDefined()
   expect(user?.firstName).toBe('FirstName')
   expect(user?.lastName).toBe('LastName')
+
+  const user2 = await dao.user.findOne({ filter: { firstName: { eq: 'firstname' } } })
+  expect(user2).toBe(null)
+  const user3 = await dao.user.findOne({ filter: { firstName: { eq: 'firstname', mode: 'insensitive' } } })
+  expect(user3).toBeDefined()
+  expect(user3?.firstName).toBe('FirstName')
+  expect(user3?.lastName).toBe('LastName')
 })
 
 test('simple findOne multiple filter', async () => {
@@ -340,6 +349,15 @@ test('insert and find embedded entity', async () => {
   expect(response[0].usernamePasswordCredentials?.password).toBe('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8')
 })
 
+test('set embedded to null', async () => {
+  await dao.post.insertOne({ record: { authorId: '123', title: 'T', views: 1, metadata: { region: 'it', visible: true } } })
+  const p1 = await dao.post.findOne({})
+  expect(p1?.metadata?.visible).toBe(true)
+  await dao.post.updateAll({ filter: {}, changes: { metadata: null } })
+  const p2 = await dao.post.findOne({})
+  expect(p2?.metadata).toBe(null)
+})
+
 test('insert generic test 1', async () => {
   const ins = await dao.user.insertOne({
     record: {
@@ -391,7 +409,7 @@ test('Insert default', async () => {
     expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
   }
 
-  const dao1 = new DAOContext({
+  const entityManager1 = new EntityManager({
     scalars: {
       Live: {
         generate: () => true,
@@ -400,16 +418,16 @@ test('Insert default', async () => {
   })
 
   try {
-    await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
     fail()
   } catch (error: unknown) {
     expect(((error as Error).message as string).startsWith('Fields creationDate should have been generated from a middleware but it is undefined')).toBe(true)
   }
 
-  const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
+  const e1 = await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
   expect(e1.live).toBe(true)
 
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     scalars: {
       Live: {
         generate: () => true,
@@ -422,13 +440,13 @@ test('Insert default', async () => {
     },
   })
 
-  const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
+  const e2 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
   expect(e2.live).toBe(true)
   expect(e2.creationDate).toBe(1234)
   expect(e2.opt1).toBe(undefined)
   expect(e2.opt2).toBe(true)
 
-  const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
+  const e3 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
   expect(e3.opt1).toBe(undefined)
 })
 
@@ -625,7 +643,7 @@ test('insert embedded with inner refs', async () => {
 // ------------------------------ REPLACE ---------------------------------
 // ------------------------------------------------------------------------
 test('simple replace', async () => {
-  const user: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
   await dao.user.replaceOne({ filter: { id: user.id }, replace: { id: user.id, firstName: 'FirstName 1', live: true } })
   const user1 = await dao.user.findOne({ filter: { id: user.id } })
 
@@ -637,7 +655,7 @@ test('simple replace', async () => {
 // ------------------------------ DELETE ----------------------------------
 // ------------------------------------------------------------------------
 test('simple delete', async () => {
-  const user: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
 
   const user1 = await dao.user.findOne({ filter: { id: user.id } })
   expect(user1).toBeDefined()
@@ -677,7 +695,7 @@ test('simple delete', async () => {
 // --------------------------- GEOJSON FIELD ------------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve geojson field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, localization: { latitude: 1.111, longitude: 2.222 } } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, localization: { latitude: 1.111, longitude: 2.222 } } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, localization: true } })
   expect(user).toBeDefined()
@@ -711,7 +729,7 @@ test('insert and retrieve decimal field 2', async () => {
 })
 
 test('update and retrieve decimal field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amount: new BigNumber(12.12) } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amount: true } })
   expect(user).toBeDefined()
@@ -725,7 +743,7 @@ test('update and retrieve decimal field', async () => {
 })
 
 test('insert and retrieve decimal array field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amounts: [new BigNumber(1.02), new BigNumber(2.223)] } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, amounts: [new BigNumber(1.02), new BigNumber(2.223)] } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, amounts: true } })
   expect(user).toBeDefined()
@@ -738,7 +756,7 @@ test('insert and retrieve decimal array field', async () => {
 // ---------------------- LOCALIZED STRING FIELD --------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve localized string field', async () => {
-  const iuser: User = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, title: true } })
   expect(user).toBeDefined()

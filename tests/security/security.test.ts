@@ -1,11 +1,11 @@
 import { SecurityPolicyReadError, SecurityPolicyWriteError } from '../../src'
 import { PERMISSION } from '../../src/dal/dao/middlewares/securityPolicy/security.policy'
-import { DAOContext, UserRoleParam } from './dao.mock'
+import { inMemoryMongoDb } from '../utils'
+import { EntityManager, UserRoleParams } from './dao.mock'
 import { Permission } from './models.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
-import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 
@@ -14,8 +14,8 @@ type OperationSecurityDomain = { [K in keyof SecurityDomain]: SecurityDomain[K][
 type SecurityContext = {
   [K in Permission]?: SecurityDomain[]
 }
-type SecureDAOContext = DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>
-let unsafeDao: SecureDAOContext
+type SecureEntityManager = EntityManager<never, { securityDomains: OperationSecurityDomain[] }, Permission, SecurityDomain>
+let unsafeDao: SecureEntityManager
 let mongodb: {
   replSet: MongoMemoryReplSet
   connection: MongoClient
@@ -23,7 +23,7 @@ let mongodb: {
 }
 
 function createDao(securityContext: SecurityContext | undefined, db: Db) {
-  return new DAOContext<never, { securityDomain: OperationSecurityDomain }, Permission, SecurityDomain>({
+  return new EntityManager<never, { securityDomains: OperationSecurityDomain[] }, Permission, SecurityDomain>({
     mongodb: {
       default: db,
     },
@@ -42,7 +42,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           domain: {
             hotelId: 'id',
             tenantId: 'tenantId',
-            userId: null,
+            //userId: null,
           },
           permissions: {
             MANAGE_HOTEL: PERMISSION.ALLOW,
@@ -61,7 +61,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           domain: {
             hotelId: 'hotelId',
             tenantId: 'tenantId',
-            userId: null,
+            //userId: null,
           },
           permissions: {
             MANAGE_ROOM: { create: true },
@@ -71,17 +71,17 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
       defaultPermission: {
         read: { id: true },
       },
-      operationDomain: (metadata) => metadata.securityDomain,
+      operationDomain: (metadata) => metadata?.securityDomains,
     },
   })
 }
 
-async function createSecureDaoContext(userId: string): Promise<SecureDAOContext> {
+async function createSecureEntityManager(userId: string): Promise<SecureEntityManager> {
   const user = await unsafeDao.user.findOne({ filter: { id: userId }, projection: { id: true, roles: { role: { permissions: true }, hotelId: true, userId: true, tenantId: true } } })
   if (!user) {
     throw new Error('User does not exists')
   }
-  function createSecurityContext(roles: UserRoleParam<{ role: { permissions: true }; hotelId: true; userId: true; tenantId: true }>[]): SecurityContext {
+  function createSecurityContext(roles: UserRoleParams<{ role: { permissions: true }; hotelId: true; userId: true; tenantId: true }>[]): SecurityContext {
     return Object.values(Permission).reduce((permissions, key) => {
       const domains = roles.flatMap((v) => {
         if (v.role.permissions.includes(key as Permission)) {
@@ -143,10 +143,61 @@ test('security test 1', async () => {
   await unsafeDao.hotel.insertOne({ record: { name: 'BHotel 1', totalCustomers: 2, id: 'h5', tenantId: 1 } })
   await unsafeDao.hotel.insertOne({ record: { name: 'AHotel 5', totalCustomers: 2, id: 'h5', tenantId: 3 } })
 
-  const dao = await createSecureDaoContext(user.id)
+  const entityManager = await createSecureEntityManager(user.id)
+
+  const res1 = await entityManager.hotel.findAll({
+    projection: { id: true, name: true },
+    metadata: { securityDomains: [] },
+  })
+  expect(res1.length).toBe(0)
+
+  const res2 = await entityManager.hotel.findAll({
+    projection: { tenantId: true },
+    metadata: { securityDomains: [{}] },
+  })
+  expect(res2.length).toBe(6)
+
+  const res3 = await entityManager.hotel.findAll({
+    projection: { id: true, tenantId: true },
+    metadata: { securityDomains: [{ hotelId: ['h1'], tenantId: [1] }, { hotelId: ['h3'] }] },
+  })
+  expect(res3.length).toBe(2)
+
+  const res4 = await entityManager.hotel.findAll({
+    projection: { id: true, tenantId: true, description: true },
+    filter: { $and: [{ id: 'h1' }, { tenantId: 1 }], $or: [{ id: 'h1', tenantId: 1 }, { id: 'h3' }] },
+  })
+  expect(res4.length).toBe(1)
+
+  const res5 = await entityManager.hotel.findAll({
+    projection: { tenantId: true },
+    filter: { name: { startsWith: 'AHotel' } },
+  })
+  expect(res5.length).toBe(5)
+
+  const res6 = await entityManager.hotel.findAll({
+    projection: { tenantId: true },
+    filter: () => ({ name: 'AHotel 1' }),
+  })
+  expect(res6.length).toBe(1)
+
+  const res7 = await entityManager.hotel.findAll({
+    projection: { tenantId: true, id: true },
+    filter: { $and: [{ id: 'h1' }, () => ({ name: 'AHotel 1' })] },
+  })
+  expect(res7.length).toBe(1)
+
+  const res8 = await entityManager.hotel.findAll({
+    projection: { tenantId: true },
+    filter: { $or: [{ id: 'h1' }, () => ({ name: 'AHotel 1' })] },
+  })
+  expect(res8.length).toBe(1)
 
   try {
-    await dao.hotel.findAll({ projection: { id: true, name: true }, filter: { name: { startsWith: 'AHotel' } }, metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [2, 10] } } })
+    await entityManager.hotel.findAll({
+      projection: { id: true, name: true },
+      filter: { name: { startsWith: 'AHotel' }, id: { in: ['h1', 'h2', 'h3'] }, tenantId: { in: [2, 10] } },
+    })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -157,10 +208,9 @@ test('security test 1', async () => {
     }
   }
   try {
-    await dao.hotel.findAll({
+    await entityManager.hotel.findAll({
       projection: { id: true, name: true, totalCustomers: true },
-      filter: { name: { startsWith: 'AHotel' } },
-      metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
+      filter: { name: { startsWith: 'AHotel' }, id: { in: ['h1', 'h2', 'h3'] }, tenantId: { in: [4, 2] } },
     })
     fail()
   } catch (error: unknown) {
@@ -173,7 +223,10 @@ test('security test 1', async () => {
   }
 
   try {
-    await dao.hotel.findAll({ projection: { id: true, name: true, totalCustomers: true }, filter: { name: { startsWith: 'AHotel' } } })
+    await entityManager.hotel.findAll({
+      projection: { id: true, name: true, totalCustomers: true },
+      filter: { name: { startsWith: 'AHotel' } },
+    })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -185,26 +238,43 @@ test('security test 1', async () => {
     }
   }
 
-  const hotels = await dao.hotel.findAll({
+  const hotels = await entityManager.hotel.findAll({
     projection: { id: true, name: true, totalCustomers: true },
-    filter: { name: { startsWith: 'AHotel' } },
-    metadata: { securityDomain: { hotelId: ['h1', 'h2'] } },
+    filter: { name: { startsWith: 'AHotel' }, id: { in: ['h1', 'h2'] } },
   })
   expect(hotels.length).toBe(2)
 
-  const hotels2 = await dao.hotel.findAll({
+  const hotels2 = await entityManager.hotel.findAll({
     projection: { id: true },
-    metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'] } },
+    metadata: { securityDomains: [{ hotelId: ['h1', 'h2', 'h3'] }] },
   })
   expect(hotels2.length).toBe(3)
 
+  const hotels3 = await entityManager.hotel.findAll({
+    projection: { id: true, name: true, totalCustomers: true },
+    filter: { $and: [{ name: { startsWith: 'AHotel' }, id: 'h1' }, () => ({ id: 'h1' })] },
+  })
+  expect(hotels3.length).toBe(1)
+
+  const hotels4 = await entityManager.hotel.findAll({
+    projection: { id: true, name: true, totalCustomers: true },
+    filter: { name: { startsWith: 'AHotel' }, id: 'h1', tenantId: 1, $and: [{ id: { in: ['h1', 'h2'] } }, { id: 'h1' }] },
+  })
+  expect(hotels4.length).toBe(1)
+
+  const hotels5 = await entityManager.hotel.findAll({
+    projection: { id: true, name: true, totalCustomers: true },
+    filter: { name: { startsWith: 'AHotel' }, id: 'h1', $and: [{ id: { in: ['h3', 'h4'] } }, { id: 'h5' }] },
+  })
+  expect(hotels5.length).toBe(0)
+
   try {
-    await dao.hotel.aggregate({
+    await entityManager.hotel.aggregate({
       by: {
         name: true,
       },
+      filter: { id: { in: ['h1', 'h2', 'h3'] }, tenantId: { in: [4, 2] } },
       aggregations: { v: { operation: 'sum', field: 'totalCustomers' } },
-      metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
     })
     fail()
   } catch (error: unknown) {
@@ -218,12 +288,12 @@ test('security test 1', async () => {
   }
 
   try {
-    await dao.hotel.aggregate({
+    await entityManager.hotel.aggregate({
       by: {
         totalCustomers: true,
       },
       aggregations: { v: { operation: 'count' } },
-      metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
+      metadata: { securityDomains: [{ hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] }] },
     })
     fail()
   } catch (error: unknown) {
@@ -236,14 +306,14 @@ test('security test 1', async () => {
     }
   }
 
-  const total = await dao.hotel.aggregate({
+  const total = await entityManager.hotel.aggregate({
     aggregations: { v: { operation: 'count' } },
-    metadata: { securityDomain: { hotelId: ['h1', 'h2', 'h3'], tenantId: [4, 2] } },
+    filter: { id: { in: ['h1', 'h2', 'h3'] }, tenantId: { in: [4, 2] } },
   })
-  expect(total.v).toBe(3)
+  expect(total.v).toBe(1)
 
   try {
-    await dao.reservation.aggregate({
+    await entityManager.reservation.aggregate({
       aggregations: { v: { operation: 'count' } },
     })
     fail()
@@ -257,13 +327,13 @@ test('security test 1', async () => {
     }
   }
 
-  const total2 = await dao.user.aggregate({
+  const total2 = await entityManager.user.aggregate({
     aggregations: { v: { operation: 'count' } },
   })
   expect(total2.v).toBe(1)
 
   try {
-    await dao.room.insertOne({ record: { description: 'room1', from: new Date(), hotelId: 'h12', tenantId: 99, to: new Date() } })
+    await entityManager.room.insertOne({ record: { description: 'room1', from: new Date(), hotelId: 'h12', tenantId: 99, to: new Date() } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyWriteError) {
@@ -273,7 +343,7 @@ test('security test 1', async () => {
     }
   }
 
-  await dao.room.insertOne({ record: { description: 'room1', from: new Date(), hotelId: 'h1', tenantId: 2, to: new Date() } })
+  await entityManager.room.insertOne({ record: { description: 'room1', from: new Date(), hotelId: 'h1', tenantId: 2, to: new Date() } })
 })
 
 test('security test 2', async () => {
@@ -285,10 +355,10 @@ test('security test 2', async () => {
     },
   })
 
-  const dao = await createSecureDaoContext(user.id)
+  const entityManager = await createSecureEntityManager(user.id)
 
   try {
-    await dao.hotel.findAll({ projection: { id: true, name: true } })
+    await entityManager.hotel.findAll({ projection: { id: true, name: true } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -309,10 +379,10 @@ test('security test 3', async () => {
     },
   })
 
-  const dao = await createSecureDaoContext(user.id)
+  const entityManager = await createSecureEntityManager(user.id)
 
   try {
-    await dao.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomain: { hotelId: ['none'] } } })
+    await entityManager.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomains: [{ hotelId: ['none'] }] } })
     fail()
   } catch (error: unknown) {
     if (error instanceof SecurityPolicyReadError) {
@@ -335,10 +405,10 @@ test('security test 4', async () => {
 
   await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER' } })
 
-  const dao = await createSecureDaoContext(user.id)
+  const entityManager = await createSecureEntityManager(user.id)
 
-  await dao.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomain: { hotelId: ['h1'] } } })
-  await dao.hotel.findAll({ projection: { id: true, name: true } })
+  await entityManager.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomains: [{ hotelId: ['h1'] }] } })
+  await entityManager.hotel.findAll({ projection: { id: true, name: true } })
 })
 
 afterEach(async () => {

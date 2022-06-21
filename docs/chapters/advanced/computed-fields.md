@@ -12,7 +12,7 @@ type User @entity @mongo {
 }
 ```
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   overrides: {
     user: {
       middlewares: [
@@ -26,7 +26,7 @@ const daoContext = new DAOContext({
           },
           compute: async (user) => {
             return {
-              fullName: `${user.fisrtName} ${user.lastName}`,
+              fullName: `${user.firstName} ${user.lastName}`,
             }
           }
         })

@@ -22,6 +22,8 @@ jobs:
         run: npm ci
       - name: Building
         run: npm run build
+      - name: Code generation
+        run: npm run generate
       - name: Test code generation
         run: npm run generate
       - name: Testing

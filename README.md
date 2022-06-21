@@ -14,7 +14,12 @@
     <img src="https://github.com/twinlogix/typetta/actions/workflows/build-and-test.yml/badge.svg" />    
     <a href="https://www.codacy.com/gh/twinlogix/typetta/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=twinlogix/typetta&amp;utm_campaign=Badge_Grade" target="_blank"><img alt="Codacy grade" src="https://img.shields.io/codacy/grade/3c49f8a206cf4deeb41b289d151434f7"></a>
     <img src="https://raw.githubusercontent.com/twinlogix/typetta/master/coverage/badge.svg" />
-    <a href="https://discord.com/channels/949666776030003220" target="_blank"><img src="https://img.shields.io/discord/949666776030003220?label=discord"/></a> 
+    <a href="https://discord.com/channels/949666776030003220" target="_blank"><img src="https://img.shields.io/discord/949666776030003220?label=discord"/>.     </a> 
+    <br/>
+    <br/>
+    <a href="https://twinlogix.github.io/typetta/">Docs</a>
+    <span>&nbsp;&nbsp;-&nbsp;&nbsp;</span>
+    <a href="https://github.com/twinlogix/typetta-examples">Examples</a>
   </div>
   <br/>
   <br/>
@@ -34,7 +39,9 @@ Starting from the model output of the domain analysis, Typetta provides a range 
 
 - Data Access Object (aka DAO) for each entity type that has a corresponding data source. Each DAO is an object that the developer can also query with advanced CRUD operations.
 
-- A DAOContext, a contextual object where the developer can configure each data source and retrieve the reference of any DAO.
+- An Entity Manager where the developer can configure each data source and retrieve the reference of any DAO.
+
+- A completely auto-generated GraphQL Endpoint with advanced CRUD operations to access and modify data.
 
 ## Main Functionalities
 
@@ -57,6 +64,7 @@ Below is a brief description of what makes Typetta awesome:
 - Embedded documents supported on MongoDB as well as SQL.
 - Automated code generation.
 - Effortless integration with GraphQL backends.
+- Optional automated GraphQL Endpoint generation for CRUD operations.
 - Transactions.
 - Logging.
 - Mocking.

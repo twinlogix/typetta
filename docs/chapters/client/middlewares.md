@@ -61,29 +61,29 @@ const middleware = {
 By contrast, the second parameter (``context`` in the example) contains the following fields:
 ```typescript
 {
-  // riferimento al driver MongoDB o all'oggeto knexjs
+  // MongoDB's driver reference or knexjs's driver reference
   driver: ...,
-  // oggetto contentene metadati passati al DAOContext o allo specifico DAO
+  // object that contains metadata passed to the EntityManager or to the specific DAO
   metadata: {...},
-  // oggetto generato che descrive la struttura dell'entità
+  // generated object that describes the structure of the entity
   schema: { ... };
-  // chiave del campo @id dell'entità
+  // key of the @id field of the entity
   idField: ...,
 }
 ```
 
 ## Applying a Middleware
 
-Each middleware can be applied to three different levels within a ``DAOContext``:
+Each middleware can be applied to three different levels within an ``EntityManager``:
   - [Middleware for a specific DAO](#middleware-for-a-specific-dao)
   - [Middleware for several DAOs](#middleware-for-several-daos)
-  - [Middleware for the whole DAOContext](#middleware-for-the-whole-daocontext)
+  - [Middleware for the whole EntityManager](#middleware-for-the-whole-entity-manager)
 
 ### Middleware for a specific DAO
 
-It is possible to assign a middleware to a single DAO through the ``overrides`` field of the constructor of each ``DAOContext``:
+It is possible to assign a middleware to a single DAO through the ``overrides`` field of the constructor of each ``EntityManager``:
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   overrides: {
     user: {
       middlewares: [
@@ -98,10 +98,10 @@ Note that a middleware created for a single entity can make use of TypeScript ty
 
 ### Middleware for several DAOs
 
-You may need to create middleware that must be applied to a subset of the entities in a ``DAOContext``. To do this, it is possible to define an override for each of these entities, as seen above, but this can be lengthy and difficult to maintain. Typetta provides a utility function with which you can define a middleware for a specific group of entities:
+You may need to create middleware that must be applied to a subset of the entities in an ``EntityManager``. To do this, it is possible to define an override for each of these entities, as seen above, but this can be lengthy and difficult to maintain. Typetta provides a utility function with which you can define a middleware for a specific group of entities:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   middlewares: [
     groupMiddleware.includes((
         {
@@ -118,7 +118,7 @@ const daoContext = new DAOContext({
 Similarly, you can also define a middleware for a group of identities using a logic of exclusion:
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   middlewares: [
     groupMiddleware.excludes((
         {
@@ -133,11 +133,11 @@ const daoContext = new DAOContext({
 
 Again in this case TypeScript performs type narrowing perfectly and allows the use within the middleware of the types resulting from the intersection between the types of all entities. In the above example, if all selected entities have an ``id`` field, the middleware can access that field.
 
-### Middleware for the whole DAOContext
+### Middleware for the whole EntityManager
 
-Lastly, you can create a middleware that is common to the whole ``DAOContext`` and then run it for each operation of each ``DAO``. To do this, simply configure the middleware as follows:
+Lastly, you can create a middleware that is common to the whole ``EntityManager`` and then run it for each operation of each ``DAO``. To do this, simply configure the middleware as follows:
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   middlewares: [
     middleware
   ]
@@ -149,7 +149,7 @@ const daoContext = new DAOContext({
 A middleware can edit the received inputs, returning a modified copy as output. This can be very useful for creating features that alternate or force certain DAO behaviours. For example, you can create middleware that forces the value of a filter to a certain value regardless of what the user defines.
 
 ```typescript
-const daoContext = new DAOContext({
+const entityManager = new EntityManager({
   middlewares: [
     {
       before: async (args, context) => {
@@ -225,7 +225,7 @@ TYPETTA MIDDLEWARES (after function)
 
 ```
 
-The order of the custom middleware, that is, those defined by the user, is determined by the order of the array with which they are configured on the ``DAO`` or ``DAOContext``. Using the `before` function, each middleware can edit the inputs of the operation and, with the `after` function, it can edit the outputs. Both input and output are passed to the next level until the last level at which point the results are returned to the caller.
+The order of the custom middleware, that is, those defined by the user, is determined by the order of the array with which they are configured on the ``DAO`` or ``EntityManager``. Using the `before` function, each middleware can edit the inputs of the operation and, with the `after` function, it can edit the outputs. Both input and output are passed to the next level until the last level at which point the results are returned to the caller.
 
 In the diagram you can see some middleware within Typetta. Indeed, the system uses this mechanism internally to implement some basic features that are already preconfigured.
 

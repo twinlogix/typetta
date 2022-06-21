@@ -2,14 +2,6 @@ export type DeepReadonly<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>
 }
 
-export type Truetizer<P> = P extends true
-  ? true
-  : P extends object
-  ? {
-      [K in keyof P]: P[K] extends object ? Truetizer<P[K]> : never | P[K] | true
-    }
-  : never /* | true*/
-
 /**
  * Expands object types recursively.
  */
@@ -60,10 +52,36 @@ type RecursiveKeyOfInner<TObj extends object, D extends number> = {
 
 type RecursiveKeyOfHandleValue<TValue, Text extends string, D extends number> = [D] extends [never]
   ? never
-  : TValue extends any[]
+  : TValue extends (infer O)[]
   ? Text
   : TValue extends object
   ? Text | `${Text}${RecursiveKeyOfInner<TValue, D>}`
   : Text
 
+export type RecursiveKeyOfLeaf<TObj extends object, DepthLimit extends number = 3> = {
+  [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValueLeaf<TObj[TKey], `${TKey}`, DepthLimit>
+}[keyof TObj & (string | number)]
+
+type RecursiveKeyOfInnerLeaf<TObj extends object, D extends number> = {
+  [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValueLeaf<TObj[TKey], `.${TKey}`, Prev[D]>
+}[keyof TObj & (string | number)]
+
+type RecursiveKeyOfHandleValueLeaf<TValue, Text extends string, D extends number> = [D] extends [never]
+  ? never
+  : TValue extends (infer O)[]
+  ? Text
+  : TValue extends object
+  ? `${Text}${RecursiveKeyOfInnerLeaf<TValue, D>}`
+  : Text
+
 export type OmitIfKnown<T, K extends keyof T> = [K] extends [any] ? any : Omit<T, K>
+
+export type DeepRequired<T> = Required<{
+  [K in keyof T]: Required<DeepRequired<T[K]>>
+}>
+
+export type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] }
+
+export type Difference<A, B> = A extends B ? never : A
+
+export type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N

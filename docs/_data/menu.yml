@@ -6,6 +6,8 @@ main:
         title: What is Typetta?
       - url: /chapters/overview/getting-started
         title: Getting Started
+      - url: /chapters/overview/typetta-yml
+        title: Config Reference
   - data-model:
     title: Data Model
     children:
@@ -18,8 +20,8 @@ main:
   - client:
     title: Typetta Client
     children:
-      - url: /chapters/client/context
-        title: Context
+      - url: /chapters/client/entity-manager
+        title: Entity Manager
       - url: /chapters/client/read-write
         title: Read and Write
       - url: /chapters/client/filters
@@ -44,6 +46,13 @@ main:
         title: Logging
       - url: /chapters/client/mocking
         title: Mocking
+  - graphql:
+    title: GraphQL
+    children:
+      - url: /chapters/graphql/working-with-graphql
+        title: Working with GraphQL
+      - url: /chapters/graphql/the-data-api
+        title: The Data API
   - advanced:
     title: Advanced Topics
     children:
@@ -61,8 +70,7 @@ main:
         title: Computed Fields
       - url: /chapters/advanced/type-safety
         title: Type Safety
-      - url: /chapters/advanced/graphql
-        title: Using with GraphQL
+
   - database-drivers:
     title: Database Drivers
     children:

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isEmptyProjection, LogArgs } from '../../../..'
+import { idInfoFromSchema, isEmptyProjection, LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterNullFields, filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
@@ -30,8 +30,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private tableName: string
   private knex: Knex<any, unknown[]>
 
-  protected constructor({ tableName, knex, idGenerator, ...params }: KnexJsDAOParams<T>) {
-    super({ ...params, driverContext: { tableName, knex }, idGenerator: idGenerator ?? params.daoContext.adapters.knex[params.idScalar]?.generate })
+  protected constructor({ tableName, knex, idGenerator, schema, ...params }: KnexJsDAOParams<T>) {
+    super({ ...params, driverContext: { tableName, knex }, schema, idGenerator: idGenerator ?? params.entityManager.adapters.knex[idInfoFromSchema(schema).idScalar]?.generate })
     this.tableName = tableName
     this.knex = knex
   }
@@ -54,11 +54,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         delete unflatted[schemaField.alias ?? key]
       }
     }
-    return transformObject(this.daoContext.adapters.knex, 'dbToModel', unflatted, this.schema)
+    return transformObject(this.entityManager.adapters.knex, 'dbToModel', unflatted, this.schema)
   }
 
   private modelToDb(object: PartialDeep<T['model']>): any {
-    const transformed = transformObject(this.daoContext.adapters.knex, 'modelToDB', object, this.schema)
+    const transformed = transformObject(this.entityManager.adapters.knex, 'modelToDB', object, this.schema)
     return flatEmbdeddedFields(this.schema, transformed)
   }
 
@@ -67,7 +67,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.daoContext.adapters.knex) : qb || this.qb()
+    return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.entityManager.adapters.knex) : qb || this.qb()
   }
 
   private buildSort(sort?: T['sort'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
@@ -93,7 +93,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private adaptUpdate(changes: T['update']): object {
-    return adaptUpdate({ update: changes, schema: this.schema, adapters: this.daoContext.adapters.knex })
+    return adaptUpdate({ update: changes, schema: this.schema, adapters: this.entityManager.adapters.knex })
   }
 
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
@@ -115,7 +115,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['projection']>[]> {
+  protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     return this.getRecords(params)
   }
 
@@ -192,11 +192,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     return this.runQuery(
       'insertOne',
       () => {
-        const r = filterNullFields<PartialDeep<T['model']>>(filterUndefiendFields<PartialDeep<T['model']>>(params.record))
+        const r = filterNullFields<PartialDeep<T['plainModel']>>(filterUndefiendFields<PartialDeep<T['plainModel']>>(params.record))
         const record = this.modelToDb(r)
         const query = this.qb().insert(record, '*')
         return this.buildTransaction(params.options, query)
@@ -205,9 +205,9 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         const inserted = records[0]
         if (typeof inserted === 'number') {
           const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] ?? inserted } as T['filter'], options: params.options, limit: 1 })
-          return insertedRetrieved[0] as Omit<T['model'], T['insertExcludedFields']>
+          return insertedRetrieved[0]
         }
-        return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
+        return this.dbToModel(inserted)
       },
     )
   }
@@ -252,16 +252,16 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   public async createTable(typeMap: Partial<Record<keyof T['scalars'], { singleType: string; arrayType?: string }>>, defaultType: { singleType: string; arrayType?: string }): Promise<void> {
     await this.knex.schema.createTable(this.tableName, (table) => {
       Object.entries(this.schema).forEach(([key, schemaField]) => {
-        if ('scalar' in schemaField) {
+        if (schemaField.type === 'scalar') {
           const specificType = typeMap[schemaField.scalar] ?? defaultType
-          const cb = table.specificType(schemaField.alias || key, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
+          const cb = table.specificType(schemaField.alias || key, schemaField.isList ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
           if (!schemaField.required) {
             cb.nullable()
           }
-        } else {
-          embeddedScalars(schemaField.alias || key, schemaField.embedded).forEach(([subKey, subSchemaField]) => {
+        } else if (schemaField.type === 'embedded') {
+          embeddedScalars(schemaField.alias || key, schemaField.schema()).forEach(([subKey, subSchemaField]) => {
             const specificType = typeMap[subSchemaField.scalar] ?? defaultType
-            const cb = table.specificType(subKey, schemaField.array ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
+            const cb = table.specificType(subKey, schemaField.isList ? specificType.arrayType ?? specificType.singleType : specificType.singleType)
             if (!subSchemaField.required) {
               cb.nullable()
             }
@@ -272,7 +272,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   }
 
   private async runQuery<R = undefined>(
-    operation: LogArgs<T['name']>['operation'],
+    operation: LogArgs<T['entity']>['operation'],
     queryBuilder: () => Knex.QueryBuilder<any, any> | { skipReason: string },
     transform?: (result: any) => R,
     skipDefault?: Awaited<R>,
@@ -282,28 +282,28 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     try {
       query = queryBuilder()
       if ('skipReason' in query) {
-        this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
+        await this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
         return skipDefault as Awaited<R>
       }
       const result = await query
       const records = transform ? await transform(result) : undefined
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.knexLog({ duration, operation, level: 'query', query, date: finish })
+      await this.knexLog({ duration, operation, level: 'query', query, date: finish })
       return records as Awaited<R>
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
+      await this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
       throw error
     }
   }
 
-  private knexLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }) {
-    this.log(this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
+  private async knexLog(args: Pick<LogArgs<T['entity']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: Knex.QueryBuilder<any, any> | string }): Promise<void> {
+    await this.log(() => this.createLog({ ...args, driver: 'knex', query: args.query ? (typeof args.query === 'string' ? args.query : args.query.toQuery().toString()) : undefined }))
   }
 
   protected _driver(): Exclude<LogArgs<string>['driver'], undefined> {
-    return 'mongo'
+    return 'knex'
   }
 }

@@ -18,6 +18,7 @@ import {
 import { PartialDeep } from 'type-fest'
 
 export type DAOSplitedMiddleware<T extends DAOGenerics> = {
+  name?: string
   beforeFind?: (
     params: FindParams<T>,
     context: MiddlewareContext<T>,
@@ -32,7 +33,7 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
     params: InsertParams<T>,
     context: MiddlewareContext<T>,
   ) => Promise<(Omit<InsertMiddlewareInput<T>, 'operation'> & Continue<true>) | (Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<false>) | void>
-  afterInsert?: (params: InsertParams<T>, insertedRecord: Omit<T['model'], T['insertExcludedFields']>, context: MiddlewareContext<T>) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
+  afterInsert?: (params: InsertParams<T>, insertedRecord: T['plainModel'], context: MiddlewareContext<T>) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
   beforeUpdate?: (
     params: UpdateParams<T>,
     context: MiddlewareContext<T>,
@@ -62,107 +63,112 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
 
 export function buildMiddleware<T extends DAOGenerics>(m: DAOSplitedMiddleware<T>): DAOMiddleware<T> {
   return {
-    before: async (args, context) => {
-      if (m.beforeFind && args.operation === 'find') {
-        const result = await m.beforeFind(args.params, context)
-        if (result) {
-          return {
-            operation: 'find',
-            ...result,
+    name: m.name,
+    before: Object.keys(m).find((k) => k.startsWith('before'))
+      ? async (args, context) => {
+          if (m.beforeFind && args.operation === 'find') {
+            const result = await m.beforeFind(args.params, context)
+            if (result) {
+              return {
+                operation: 'find',
+                ...result,
+              }
+            }
+          } else if (m.beforeInsert && args.operation === 'insert') {
+            const result = await m.beforeInsert(args.params, context)
+            if (result) {
+              return {
+                operation: 'insert',
+                ...result,
+              }
+            }
+          } else if (m.beforeUpdate && args.operation === 'update') {
+            const result = await m.beforeUpdate(args.params, context)
+            if (result) {
+              return {
+                operation: 'update',
+                ...result,
+              }
+            }
+          } else if (m.beforeReplace && args.operation === 'replace') {
+            const result = await m.beforeReplace(args.params, context)
+            if (result) {
+              return {
+                operation: 'replace',
+                ...result,
+              }
+            }
+          } else if (m.beforeDelete && args.operation === 'delete') {
+            const result = await m.beforeDelete(args.params, context)
+            if (result) {
+              return {
+                operation: 'delete',
+                ...result,
+              }
+            }
+          } else if (m.beforeAggregate && args.operation === 'aggregate') {
+            const result = await m.beforeAggregate(args.params, args.args, context)
+            if (result) {
+              return {
+                operation: 'aggregate',
+                ...result,
+              }
+            }
           }
         }
-      } else if (m.beforeInsert && args.operation === 'insert') {
-        const result = await m.beforeInsert(args.params, context)
-        if (result) {
-          return {
-            operation: 'insert',
-            ...result,
+      : undefined,
+    after: Object.keys(m).find((k) => k.startsWith('after'))
+      ? async (args, context) => {
+          if (m.afterFind && args.operation === 'find') {
+            const result = await m.afterFind(args.params, args.records, args.totalCount, context)
+            if (result) {
+              return {
+                operation: 'find',
+                ...result,
+              }
+            }
+          } else if (m.afterInsert && args.operation === 'insert') {
+            const result = await m.afterInsert(args.params, args.insertedRecord, context)
+            if (result) {
+              return {
+                operation: 'insert',
+                ...result,
+              }
+            }
+          } else if (m.afterUpdate && args.operation === 'update') {
+            const result = await m.afterUpdate(args.params, context)
+            if (result) {
+              return {
+                operation: 'update',
+                ...result,
+              }
+            }
+          } else if (m.afterReplace && args.operation === 'replace') {
+            const result = await m.afterReplace(args.params, context)
+            if (result) {
+              return {
+                operation: 'replace',
+                ...result,
+              }
+            }
+          } else if (m.afterDelete && args.operation === 'delete') {
+            const result = await m.afterDelete(args.params, context)
+            if (result) {
+              return {
+                operation: 'delete',
+                ...result,
+              }
+            }
+          } else if (m.afterAggregate && args.operation === 'aggregate') {
+            const result = await m.afterAggregate(args.params, args.args, context)
+            if (result) {
+              return {
+                operation: 'aggregate',
+                ...result,
+              }
+            }
           }
         }
-      } else if (m.beforeUpdate && args.operation === 'update') {
-        const result = await m.beforeUpdate(args.params, context)
-        if (result) {
-          return {
-            operation: 'update',
-            ...result,
-          }
-        }
-      } else if (m.beforeReplace && args.operation === 'replace') {
-        const result = await m.beforeReplace(args.params, context)
-        if (result) {
-          return {
-            operation: 'replace',
-            ...result,
-          }
-        }
-      } else if (m.beforeDelete && args.operation === 'delete') {
-        const result = await m.beforeDelete(args.params, context)
-        if (result) {
-          return {
-            operation: 'delete',
-            ...result,
-          }
-        }
-      } else if (m.beforeAggregate && args.operation === 'aggregate') {
-        const result = await m.beforeAggregate(args.params, args.args, context)
-        if (result) {
-          return {
-            operation: 'aggregate',
-            ...result,
-          }
-        }
-      }
-    },
-    after: async (args, context) => {
-      if (m.afterFind && args.operation === 'find') {
-        const result = await m.afterFind(args.params, args.records, args.totalCount, context)
-        if (result) {
-          return {
-            operation: 'find',
-            ...result,
-          }
-        }
-      } else if (m.afterInsert && args.operation === 'insert') {
-        const result = await m.afterInsert(args.params, args.insertedRecord, context)
-        if (result) {
-          return {
-            operation: 'insert',
-            ...result,
-          }
-        }
-      } else if (m.afterUpdate && args.operation === 'update') {
-        const result = await m.afterUpdate(args.params, context)
-        if (result) {
-          return {
-            operation: 'update',
-            ...result,
-          }
-        }
-      } else if (m.afterReplace && args.operation === 'replace') {
-        const result = await m.afterReplace(args.params, context)
-        if (result) {
-          return {
-            operation: 'replace',
-            ...result,
-          }
-        }
-      } else if (m.afterDelete && args.operation === 'delete') {
-        const result = await m.afterDelete(args.params, context)
-        if (result) {
-          return {
-            operation: 'delete',
-            ...result,
-          }
-        }
-      } else if (m.afterAggregate && args.operation === 'aggregate') {
-        const result = await m.afterAggregate(args.params, args.args, context)
-        if (result) {
-          return {
-            operation: 'aggregate',
-            ...result,
-          }
-        }
-      }
-    },
+      : undefined,
   }
 }

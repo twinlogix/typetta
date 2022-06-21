@@ -1,9 +1,21 @@
+import { AbstractScalars } from '..'
 import { Schema } from '../dal/dao/schemas/schemas.types'
-import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../dal/drivers/drivers.types'
-import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './generator'
+import { DataTypeAdapterMap, identityAdapter } from '../dal/drivers/drivers.types'
+import { TsTypettaGeneratorField, TsTypettaGeneratorNode } from './types'
 
-export function toFirstLower(typeName: string) {
+export function toFirstLower(typeName: string): string {
   return typeName.charAt(0).toLowerCase() + typeName.slice(1)
+}
+
+export function toFirstUpper(typeName: string): string {
+  return typeName.charAt(0).toUpperCase() + typeName.slice(1)
+}
+
+export function removeEmptyLines(s: string): string {
+  return s
+    .split('\n')
+    .filter((v) => v.trim().length !== 0)
+    .join('\n')
 }
 
 export function findID(node: TsTypettaGeneratorNode): TsTypettaGeneratorField | undefined {
@@ -28,21 +40,6 @@ export function getNode(code: string, typesMap: Map<string, TsTypettaGeneratorNo
     throw new Error(`Node with code ${code} not found!`)
   }
   return node
-}
-
-// example:
-// id -> id
-// entity.id -> entity.id
-// entity.../id -> id
-export function resolveParentPath(fieldPath: string): string {
-  const c: (string | null)[] = fieldPath.split('../').join('__PARENT__').split('.')
-  for (let i = 1; i < c.length; i++) {
-    const value = c[i]
-    if (value && value.includes('__PARENT__')) {
-      c[i - 1] = null
-    }
-  }
-  return c.flatMap((v) => (v === null ? [] : [v.split('__PARENT__').join('')])).join('.')
 }
 
 export function removeParentPath(fieldPath: string): string {
@@ -96,16 +93,16 @@ export function indentMultiline(str: string, count = 1): string {
  * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
  * @returns a new transformed object
  */
-export function transformObject<From extends { [key: string]: any }, To, ModelScalars extends DefaultModelScalars, DBScalars extends object>(
+export function transformObject<From extends { [key: string]: unknown }, To, ModelScalars extends AbstractScalars, DBScalars extends AbstractScalars>(
   adapters: DataTypeAdapterMap<ModelScalars, DBScalars>,
   direction: 'dbToModel' | 'modelToDB',
   object: From,
   schema: Schema<ModelScalars>,
 ): To {
-  if(object === null) {
+  if (object === null) {
     return null as unknown as To
   }
-  const result: any = {}
+  const result: Record<string, unknown> = {}
   const isModelToDB = direction === 'modelToDB'
   const isDbToModel = !isModelToDB
   for (const [fieldName, schemaField] of Object.entries(schema)) {
@@ -116,12 +113,12 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
       if (!schemaField.required && (value === null || value === undefined)) {
         result[destName] = value
       } else {
-        if ('scalar' in schemaField) {
+        if (schemaField.type === 'scalar') {
           const adapter = adapters[schemaField.scalar] ?? identityAdapter()
           const validator = adapter.validate
           const mapper =
             validator && isModelToDB
-              ? (data: ModelScalars[keyof ModelScalars]) => {
+              ? (data: ModelScalars[keyof ModelScalars]['type']) => {
                   const validation = validator(data)
                   if (validation === true) {
                     return adapter.modelToDB(data)
@@ -129,20 +126,20 @@ export function transformObject<From extends { [key: string]: any }, To, ModelSc
                   throw validation
                 }
               : adapter[direction]
-          if (Array.isArray(value) && schemaField.array) {
+          if (Array.isArray(value) && schemaField.isList) {
             result[destName] = adapter ? value.map((v) => mapper(v)) : value
           } else {
             result[destName] = adapter ? mapper(value) : value
           }
-        } else {
-          if (Array.isArray(value) && schemaField.array) {
-            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.embedded))
+        } else if (schemaField.type === 'embedded') {
+          if (Array.isArray(value) && schemaField.isList) {
+            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.schema()))
           } else {
-            result[destName] = transformObject(adapters, direction, value, schemaField.embedded)
+            result[destName] = transformObject(adapters, direction, value as { [key: string]: unknown }, schemaField.schema())
           }
         }
       }
     }
   }
-  return result
+  return result as To
 }

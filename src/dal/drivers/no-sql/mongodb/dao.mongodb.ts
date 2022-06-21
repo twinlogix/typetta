@@ -1,10 +1,11 @@
+import { idInfoFromSchema } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { LogArgs } from '../../../dao/log/log.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
-import { isEmptyProjection, projection } from '../../../dao/projections/projections.utils'
+import { isEmptyProjection } from '../../../dao/projections/projections.utils'
 import { AbstractFilter } from '../../sql/knexjs/utils.knexjs'
 import { MongoDBDAOGenerics, MongoDBDAOParams } from './dao.mongodb.types'
 import { adaptFilter, adaptProjection, adaptSorts, adaptUpdate, modelNameToDbName } from './utils.mongodb'
@@ -14,8 +15,8 @@ import { PartialDeep } from 'type-fest'
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
   private collection: Collection
 
-  protected constructor({ collection, idGenerator, ...params }: MongoDBDAOParams<T>) {
-    super({ ...params, driverContext: { collection }, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate })
+  protected constructor({ collection, idGenerator, schema, ...params }: MongoDBDAOParams<T>) {
+    super({ ...params, driverContext: { collection }, schema, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[idInfoFromSchema(schema).idScalar]?.generate })
     this.collection = collection
   }
 
@@ -24,11 +25,11 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private dbToModel(object: WithId<Document>): PartialDeep<T['model']> {
-    return transformObject(this.daoContext.adapters.mongo, 'dbToModel', object, this.schema)
+    return transformObject(this.entityManager.adapters.mongo, 'dbToModel', object, this.schema)
   }
 
   private modelToDb(object: T['insert'] | T['update']): OptionalId<Document> {
-    return transformObject(this.daoContext.adapters.mongo, 'modelToDB', object, this.schema)
+    return transformObject(this.entityManager.adapters.mongo, 'modelToDB', object, this.schema)
   }
 
   private buildProjection(projection?: AnyProjection<T['projection']>): Document | undefined {
@@ -36,7 +37,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
   }
 
   private buildFilter(filter?: T['filter']): Filter<Document> {
-    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.daoContext.adapters.mongo) : {}
+    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.entityManager.adapters.mongo) : {}
   }
 
   private buildSort(sort?: T['sort']): [string, SortDirection][] {
@@ -50,7 +51,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     if (typeof update === 'function') {
       return update()
     }
-    const set = adaptUpdate(update, this.schema, this.daoContext.adapters.mongo)
+    const set = adaptUpdate(update, this.schema, this.entityManager.adapters.mongo)
     return { $set: set }
   }
 
@@ -120,8 +121,6 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       const sort = args?.sorts
         ? [
             {
-              // eslint-disable-next-line
-              // @ts-ignore
               $sort: args.sorts.reduce<object>((p, s) => {
                 const [k, v] = Object.entries(s)[0]
                 return {
@@ -169,7 +168,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     })
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     return this.runQuery('insertOne', async () => {
       const record = this.modelToDb(filterUndefiendFields(params.record))
       const options = params.options ?? {}
@@ -180,7 +179,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
           if (!inserted) {
             throw new Error(`One just inserted document with id ${result.insertedId.toHexString()} was not retrieved correctly.`)
           }
-          return this.dbToModel(inserted) as Omit<T['model'], T['insertExcludedFields']>
+          return this.dbToModel(inserted)
         },
         () => `collection.insertOne(${JSON.stringify(record)})`,
       ]
@@ -230,7 +229,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     })
   }
 
-  private async runQuery<R>(operation: LogArgs<T['name']>['operation'], body: () => Promise<[() => Promise<R>, () => string]>): Promise<R> {
+  private async runQuery<R>(operation: LogArgs<T['entity']>['operation'], body: () => Promise<[() => Promise<R>, () => string]>): Promise<R> {
     const start = new Date()
     try {
       const [promiseGenerator, queryGenerator] = await body()
@@ -238,24 +237,24 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
         const result = await promiseGenerator()
         const finish = new Date()
         const duration = finish.getTime() - start.getTime()
-        this.mongoLog({ duration, operation, level: 'query', query: queryGenerator, date: finish })
+        await this.mongoLog({ duration, operation, level: 'query', query: queryGenerator, date: finish })
         return result
       } catch (error: unknown) {
         const finish = new Date()
         const duration = finish.getTime() - start.getTime()
-        this.mongoLog({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
+        await this.mongoLog({ error, duration, operation, level: 'error', query: queryGenerator, date: finish })
         throw error
       }
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      this.mongoLog({ error, duration, operation, level: 'error', date: finish })
+      await this.mongoLog({ error, duration, operation, level: 'error', date: finish })
       throw error
     }
   }
 
-  private mongoLog(args: Pick<LogArgs<T['name']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }) {
-    this.log(this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
+  private async mongoLog(args: Pick<LogArgs<T['entity']>, 'duration' | 'error' | 'operation' | 'level' | 'date'> & { query?: () => string }): Promise<void> {
+    await this.log(() => this.createLog({ ...args, driver: 'mongo', query: args.query ? args.query() : undefined }))
   }
 
   protected _driver(): 'mongo' | 'knex' {

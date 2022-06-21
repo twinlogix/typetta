@@ -23,7 +23,7 @@ export type AggregateMiddlewareOutput<T extends DAOGenerics> = {
   args?: AggregatePostProcessing<T, AggregateParams<T>>
   result: AggregateResults<T, AggregateParams<T>>
 }
-export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; insertedRecord: Omit<T['model'], T['insertExcludedFields']> }
+export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; insertedRecord: T['plainModel'] }
 export type UpdateMiddlewareOutput<T extends DAOGenerics> = { operation: 'update'; params: UpdateParams<T> }
 export type ReplaceMiddlewareOutput<T extends DAOGenerics> = { operation: 'replace'; params: ReplaceParams<T> }
 export type DeleteMiddlewareOutput<T extends DAOGenerics> = { operation: 'delete'; params: DeleteParams<T> }
@@ -34,6 +34,10 @@ export type MiddlewareOutput<T extends DAOGenerics> =
   | UpdateMiddlewareOutput<T>
   | ReplaceMiddlewareOutput<T>
   | DeleteMiddlewareOutput<T>
+export type MiddlewareReturn<T extends DAOGenerics> = Omit<
+  FindMiddlewareOutput<T> | AggregateMiddlewareOutput<T> | InsertMiddlewareOutput<T> | UpdateMiddlewareOutput<T> | ReplaceMiddlewareOutput<T> | DeleteMiddlewareOutput<T>,
+  'params' | 'args'
+>
 
 export type SelectBeforeMiddlewareOutputType<T extends DAOGenerics, I extends MiddlewareInput<T>> = I['operation'] extends 'find'
   ? (FindMiddlewareInput<T> & Continue<true>) | (FindMiddlewareOutput<T> & Continue<false>)
@@ -63,10 +67,11 @@ export type SelectAfterMiddlewareOutputType<T extends DAOGenerics, I extends Mid
   ? DeleteMiddlewareOutput<T> & Continue<boolean>
   : never
 
-export type BeforeMiddlewareResult<T extends DAOGenerics> = (MiddlewareInput<T> & Continue<true>) | (MiddlewareOutput<T> & Continue<false>)
-export type AfterMiddlewareResult<T extends DAOGenerics> = Continue<boolean> & MiddlewareOutput<T>
+export type BeforeMiddlewareResult<T extends DAOGenerics> = (Continue<true> & MiddlewareInput<T>) | (Continue<false> & MiddlewareReturn<T>)
+export type AfterMiddlewareResult<T extends DAOGenerics> = (Continue<true> & MiddlewareOutput<T>) | (Continue<false> & MiddlewareReturn<T>)
 
 export type DAOMiddleware<T extends DAOGenerics> = {
+  name?: string
   before?: <G extends MiddlewareInput<T>>(args: G, context: MiddlewareContext<T>) => Promise<BeforeMiddlewareResult<T> | void>
   after?: (args: MiddlewareOutput<T>, context: MiddlewareContext<T>) => Promise<AfterMiddlewareResult<T> | void>
 }

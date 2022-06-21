@@ -1,6 +1,6 @@
 scalar Coordinates @geopoint
 scalar LocalizedString
-scalar Decimal
+scalar Decimal @quantitative
 scalar Password
 scalar JSON
 scalar Live
@@ -16,6 +16,7 @@ type Device @entity @mongodb {
 type UsernamePasswordCredentials {
   username: String! @alias(value: "user")
   password: Password! @alias(value: "pwd")
+  user: User @innerRef(refFrom: "../id")
 }
 
 type City @entity @mongodb {
@@ -44,16 +45,18 @@ type User @entity @mongodb {
   usernamePasswordCredentials: UsernamePasswordCredentials @alias(value: "cred")
   firstName: String @alias(value: "name")
   lastName: String
-  live: Boolean!
+  live: Boolean! @custom(str: "123", f: 1.2, i: -2, b: true, n: null, l: [1, "2"], o: { a: 123 })
   localization: Coordinates
   title: LocalizedString
   amounts: [Decimal!] @alias(value: "amounts")
   amount: Decimal
   friendsId: [ID!] @alias(value: "fIds")
   friends: [User!] @innerRef
-  dogs: [Dog!] @foreignRef(refFrom: "ownerId")
+  dogs: [Dog!] @foreignRef(refFrom: "ownerId") @schema(metadata: [{ key: "test", value: "value" }])
   credentials: [UsernamePasswordCredentials]
   embeddedPost: Post
+  int: Int
+  embeddedUser: EmbeddedUser2
 }
 
 type Dog @entity @mongodb {
@@ -117,10 +120,47 @@ type Hotel @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   name: String!
   audit: Auditable! @default(from: "middleware")
+  users: UserCollection
+  userId: ID
+  embeddedUsers: [EmbeddedUser!]
+  embeddedUsers3: [EmbeddedUser3!]
+  embeddedUser3: EmbeddedUser3
+  embeddedUsers4: [EmbeddedUser4!]
+  embeddedUser4: EmbeddedUser4
 }
 
 type Audit @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   entityId: ID!
   changes: String
+}
+
+type UserCollection {
+  usersId: [ID!]!
+  users: [User!]! @innerRef
+}
+
+type EmbeddedUser {
+  userId: ID!
+  user: User! @innerRef
+  e: [EmbeddedUser2!]
+}
+
+type EmbeddedUser2 {
+  userId: ID!
+  user: User! @innerRef
+}
+
+type EmbeddedUser3 {
+  value: Int
+  user: User @innerRef(refFrom: "../userId")
+}
+
+type EmbeddedUser4 {
+  e: EmbeddedUser5
+  user: User @innerRef(refFrom: "e.userId")
+}
+
+type EmbeddedUser5 {
+  userId: ID
 }

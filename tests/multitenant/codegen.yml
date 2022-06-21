@@ -17,6 +17,7 @@ generates:
         Username: string
   tests/multitenant/dao.mock.ts:
     config:
+      generationOutput: 'dao'
       schemaImport: './schema.graphql'
       tsTypesImport: ./models.mock
       typettaImport: ../../src
@@ -25,3 +26,6 @@ generates:
       skipTypename: true
     plugins:
       - lib/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

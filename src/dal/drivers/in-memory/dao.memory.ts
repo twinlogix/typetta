@@ -1,37 +1,32 @@
-import { AbstractDAO, AnyProjection, filterEntity, iteratorLength, LogArgs, MONGODB_QUERY_PREFIXS, setTraversing, sort } from '../../..'
+import { AbstractDAO, AnyProjection, filterEntity, idInfoFromSchema, iteratorLength, LogArgs, MONGODB_QUERY_PREFIXS, setTraversing, sort } from '../../..'
 import { transformObject } from '../../../generation/utils'
 import { deepMerge } from '../../../utils/utils'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
+import { InMemoryStateManager } from './state.memory'
 import { compare, getByPath, mock, MockIdSpecification } from './utils.memory'
 import _ from 'lodash'
 import { PartialDeep } from 'type-fest'
 
 export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
-  private idIndex: Map<T['idType'] | string, number>
-  private emptyIndexes: number[]
-  private memory: (T['model'] | null)[]
+  private stateManager: InMemoryStateManager
   private mockIdSpecification: MockIdSpecification<unknown> | undefined
-
-  protected constructor({ idGenerator, ...params }: InMemoryDAOParams<T>) {
-    super({ ...params, idGenerator: idGenerator ?? params.daoContext.adapters.mongo[params.idScalar]?.generate, driverContext: {} })
-    this.memory = []
-    this.emptyIndexes = [0]
-    this.idIndex = new Map()
-
+  protected constructor({ idGenerator, schema, ...params }: InMemoryDAOParams<T>) {
+    super({ ...params, schema, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[idInfoFromSchema(schema).idScalar]?.generate, driverContext: {} })
     const s = this.schema[this.idField]
-    if (!('scalar' in s)) {
+    if (!(s.type === 'scalar')) {
       throw new Error('Id is an embedded field. Not supported.')
     }
     if (this.idGeneration === 'db' && (!mock.idSpecifications || !mock.idSpecifications[s.scalar as string] || !mock.idSpecifications[s.scalar as string].generate)) {
       throw new Error(`Id is generated from DB. For in-memory driver it's required to implement mock.idSpecifications.${s.scalar} in order to generate the id`)
     }
     this.mockIdSpecification = mock.idSpecifications ? mock.idSpecifications[s.scalar as string] : undefined
+    this.stateManager = new InMemoryStateManager(this.mockIdSpecification, params.name)
   }
 
   protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     const unorderedResults = [...this.entities(params.filter)].map((v) => v.record)
-    const results = (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
+    const results = (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? unorderedResults.length))
     return results.map((r) => _.cloneDeep(r))
     // projection are ignored since there is no performance advance
   }
@@ -136,37 +131,26 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     })
 
     const filteredResult = args?.having ? unorderedResults.filter((r) => filterEntity(r, args.having)) : unorderedResults
-    const sorted = args?.sorts ? sort(filteredResult, args.sorts) : filteredResult
-    const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? this.memory.length))
+    const sorted = args?.sorts ? sort<T['model']>(filteredResult, args.sorts) : filteredResult
+    const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? sorted.length))
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<Omit<T['model'], T['insertExcludedFields']>> {
+  protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     const record = deepMerge(params.record, this.generateRecordWithId())
-    const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
+    const t = transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
     const id = t[this.schema[this.idField].alias ?? this.idField]
-    const index = this.emptyIndexes.pop()
-    if (index != null) {
-      this.setIdIndex(id, index)
-      this.memory[index] = t
-    } else {
-      const index = this.memory.length
-      const sizeIncrement = this.memory.length > 512 ? 1024 : this.memory.length * 2
-      this.emptyIndexes = this.allocMemory(sizeIncrement - 1)
-        .map((v, i) => this.memory.length + 1 + i)
-        .reverse()
-      this.setIdIndex(id, index)
-      this.memory[index] = t
-    }
-    return _.cloneDeep(transformObject(this.daoContext.adapters.memory, 'dbToModel', t, this.schema))
+    this.stateManager.insertElement(id, t)
+    return _.cloneDeep(transformObject(this.entityManager.adapters.memory, 'dbToModel', t, this.schema))
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
     const changesObject = {}
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
-    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
+    const changes = transformObject(this.entityManager.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
-      this.memory[index] = deepMerge(record, changes)
+      const result = deepMerge(record, changes, false)
+      this.stateManager.updateElement(index, result)
       return
     }
   }
@@ -174,53 +158,36 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
     const changesObject = {}
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
-    const changes = transformObject(this.daoContext.adapters.memory, 'modelToDB', changesObject, this.schema)
+    const changes = transformObject(this.entityManager.adapters.memory, 'modelToDB', changesObject, this.schema)
     for (const { record, index } of this.entities(params.filter, false)) {
-      this.memory[index] = deepMerge(record, changes)
+      const result = deepMerge(record, changes, false)
+      this.stateManager.updateElement(index, result)
     }
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
     for (const { record, index } of this.entities(filterEntity)) {
-      const t = transformObject(this.daoContext.adapters.memory, 'modelToDB', deepMerge(params.replace, { [this.idField]: record[this.idField] }), this.schema)
-      this.memory[index] = t
+      const t = transformObject(this.entityManager.adapters.memory, 'modelToDB', deepMerge(params.replace, { [this.idField]: record[this.idField] }), this.schema)
+      this.stateManager.updateElement(index, deepMerge(record, t))
       break
     }
   }
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(params.filter)) {
-      this.memory[index] = null
-      this.idIndex.delete(record[this.idField])
-      this.emptyIndexes.push(index)
+    for (const { record, index } of this.entities(params.filter, false)) {
+      this.stateManager.deleteElement(record[this.schema[this.idField].alias ?? this.idField], index)
       break
     }
   }
 
   protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(params.filter)) {
-      this.memory[index] = null
-      this.idIndex.delete(record[this.idField])
-      this.emptyIndexes.push(index)
+    for (const { record, index } of this.entities(params.filter, false)) {
+      this.stateManager.deleteElement(record[this.schema[this.idField].alias ?? this.idField], index)
     }
   }
 
   protected _driver(): Exclude<LogArgs<string>['driver'], undefined> {
     return 'memory'
-  }
-
-  private getIdIndex(id: unknown): number | undefined {
-    if (this.mockIdSpecification?.stringify) {
-      return this.idIndex.get(this.mockIdSpecification?.stringify(id))
-    }
-    return this.idIndex.get(id)
-  }
-  private setIdIndex(id: unknown, index: number): void {
-    if (this.mockIdSpecification?.stringify) {
-      this.idIndex.set(this.mockIdSpecification?.stringify(id), index)
-    } else {
-      this.idIndex.set(id, index)
-    }
   }
 
   private getIndexes(filter: T['filter']): number[] | null {
@@ -238,16 +205,16 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
       if (filterKeys.includes(this.idField)) {
         if (typeof idFilter === 'object' && idFilterKeys.includes('in')) {
-          const indexes = (idFilter['in'] as T['idType'][]).map((id) => this.getIdIndex(id)).flatMap((i) => (i === undefined ? [] : [i]))
+          const indexes = (idFilter['in'] as T['idFields'][]).map((id) => this.stateManager.getIdIndex(id)).flatMap((i) => (i === undefined ? [] : [i]))
           return [...new Set(indexes)]
         } else if (typeof idFilter === 'object' && idFilterKeys.includes('eq')) {
-          const index = this.getIdIndex(idFilter['eq'])
+          const index = this.stateManager.getIdIndex(idFilter['eq'])
           if (index !== undefined) {
             return [index]
           }
           return []
         } else if (typeof idFilter !== 'object' || idFilterKeys.every((k) => !MONGODB_QUERY_PREFIXS.has(k))) {
-          const index = this.getIdIndex(idFilter)
+          const index = this.stateManager.getIdIndex(idFilter)
           if (index !== undefined) {
             return [index]
           }
@@ -261,9 +228,9 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     const indexes = this.getIndexes(filter)
     if (indexes) {
       for (const index of indexes) {
-        const record = this.memory[index]
+        const record = this.stateManager.getElement(index)
         if (record !== null) {
-          const t = transformObject(this.daoContext.adapters.memory, 'dbToModel', record, this.schema)
+          const t = transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema)
           if (filterEntity(t, filter)) {
             yield { record: transform ? t : record, index }
           }
@@ -271,22 +238,17 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       }
       return
     }
-    for (let i = 0; i < this.memory.length; i++) {
-      const record = this.memory[i]
+    for (const { index, record } of this.stateManager.elements()) {
       if (record !== null) {
-        const t = transformObject(this.daoContext.adapters.memory, 'dbToModel', record, this.schema)
+        const t = transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema)
         if (filterEntity(t, filter)) {
-          yield { record: transform ? t : record, index: i }
+          yield { record: transform ? t : record, index }
         }
       }
     }
   }
 
-  private allocMemory(n: number): (T['model'] | null)[] {
-    return Array(n).fill(null)
-  }
-
-  private generateRecordWithId(): Partial<Record<T['idKey'], T['model'][T['idKey']]>> {
+  private generateRecordWithId(): Partial<Record<T['idFields'], T['model'][T['idFields']]>> {
     if (this.idGeneration === 'db') {
       if (!this.mockIdSpecification?.generate) {
         throw new Error('UNREACHABLE')

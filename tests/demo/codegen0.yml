@@ -1,0 +1,23 @@
+overwrite: true
+schema: 'tests/demo/schema.graphql'
+documents: null
+generates:
+  tests/demo/dao.generated.ts:
+    config:
+      generationOutput: 'dao'
+      schemaImport: './schema.graphql'
+      tsTypesImport: ./types.generated
+      typettaImport: ../../src
+      namingConvention: keep
+      defaultIdGenerationStrategy: 'generator'
+    plugins:
+      - lib/generation/index.js
+  tests/demo/operations-types.generated.ts:
+    config:
+      generationOutput: 'operations'
+      namingConvention: keep
+    plugins:
+      - lib/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

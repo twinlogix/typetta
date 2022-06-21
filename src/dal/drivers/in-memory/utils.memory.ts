@@ -1,8 +1,10 @@
 import { LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
+import { hasKeys } from '../../../utils/utils'
 import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../../dao/filters/filters.types'
+import { IN_MEMORY_STATE } from './state.memory'
 import { ObjectId } from 'mongodb'
 
-type AbstractFilterFields = {
+export type AbstractFilterFields = {
   [K in string]: unknown | null | EqualityOperators<unknown> | QuantityOperators<unknown> | ElementOperators | StringOperators
 }
 type Filter<FilterFields extends AbstractFilterFields> = LogicalOperators<FilterFields> & FilterFields
@@ -26,9 +28,12 @@ export type MockIdSpecification<T> = {
 type MockOverrides = {
   compare?: (l: unknown, r: unknown) => number | void | null | undefined
   idSpecifications?: { [key: string]: MockIdSpecification<unknown> }
+  readonly clearMemory: () => void
 }
 export const mock: MockOverrides = {
   compare: undefined,
+  idSpecifications: undefined,
+  clearMemory: () => IN_MEMORY_STATE.clear(),
 }
 
 export function compare(l: unknown, r: unknown): number {
@@ -50,6 +55,12 @@ export function compare(l: unknown, r: unknown): number {
     if (typeof result === 'number') {
       return result
     }
+  }
+  if (l instanceof ObjectId && r instanceof ObjectId) {
+    return l.equals(r) ? 0 : l.toHexString().localeCompare(r.toHexString())
+  }
+  if (l instanceof Date && r instanceof Date) {
+    return l.getTime() - r.getTime()
   }
   if ((typeof l === 'bigint' || typeof l === 'number') && (typeof r === 'bigint' || typeof r === 'number')) {
     return l > r ? 1 : l < r ? -1 : 0
@@ -97,10 +108,6 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
     return true
   }
 
-  function hasKeys(i: unknown, keys: string[]): boolean {
-    return i && typeof i === 'object' && keys.some((k) => k in i && typeof (i as Record<string, unknown>)[k] !== 'function') ? true : false
-  }
-
   return (
     logicOperators(entity, filter) &&
     Object.entries(filter)
@@ -109,7 +116,12 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
         const value = getByPath(entity, key)
         if (hasKeys(f, ['eq', 'in', 'ne', 'nin'])) {
           const eo = f as EqualityOperators<unknown>
-          const eqResult = eo.eq != null ? equals(value, eo.eq) : true
+          const eqResult =
+            eo.eq != null
+              ? (f as Record<string, unknown>).mode === 'insensitive' && typeof value === 'string' && typeof eo.eq === 'string'
+                ? equals(value.toLocaleLowerCase(), eo.eq.toLocaleLowerCase())
+                : equals(value, eo.eq)
+              : true
           const neResult = eo.ne != null ? !equals(value, eo.ne) : true
           const inResult = eo.in ? eo.in.some((v) => equals(value, v)) : true
           const ninResult = eo.nin ? eo.nin.every((v) => !equals(value, v)) : true
@@ -125,7 +137,7 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
         }
         if (hasKeys(f, ['exists'])) {
           const eo = f as ElementOperators
-          return eo.exists === true ? value !== undefined : value === undefined
+          return eo.exists == null ? true : eo.exists === true ? value !== undefined : value === undefined
         }
         if (hasKeys(f, ['contains', 'startsWith', 'endsWith'])) {
           const so = f as StringOperators
@@ -163,8 +175,9 @@ export function sort<T>(entities: T[], sorts: { [K in keyof T]?: SortDirection }
   if (index < 0) {
     return entities
   }
-  const [sortKey, sortDirection] = Object.entries(sorts[index])[0] as [string, SortDirection]
-  const sortM = sortDirection === 'asc' ? 1 : -1
-  const sorted = entities.sort((a, b) => compare(getByPath(a, sortKey), getByPath(b, sortKey)) * sortM)
+  const sorted = Object.entries(sorts[index]).reduce((sorted, [sortKey, sortDirection]) => {
+    const sortM = sortDirection === 'asc' ? 1 : -1
+    return sorted.sort((a, b) => compare(getByPath(a, sortKey), getByPath(b, sortKey)) * sortM)
+  }, entities)
   return sort(sorted, sorts, index - 1)
 }

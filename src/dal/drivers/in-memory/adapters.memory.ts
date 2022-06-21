@@ -1,24 +1,18 @@
+import { AbstractScalars } from '../../..'
 import { DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from '../drivers.types'
-import { Double, Int32 } from 'bson'
 
 export type DefaultInMemoryScalars = {
-  String: string
-  Boolean: boolean
-  Int: Int32
-  Float: Double
+  String: { type: string; isTextual: true; isQuantitative: false }
+  Boolean: { type: boolean; isTextual: false; isQuantitative: false }
+  Int: { type: number; isTextual: false; isQuantitative: true }
+  Float: { type: number; isTextual: false; isQuantitative: true }
 }
 
-export type InMemoryDataTypeAdapterMap<ModelScalars extends DefaultModelScalars> = DataTypeAdapterMap<ModelScalars, DefaultInMemoryScalars>
+export type InMemoryDataTypeAdapterMap<ModelScalars extends AbstractScalars> = DataTypeAdapterMap<ModelScalars, DefaultInMemoryScalars>
 
 export const inMemoryAdapters: InMemoryDataTypeAdapterMap<DefaultModelScalars> = {
   String: identityAdapter(),
   Boolean: identityAdapter(),
-  Int: {
-    dbToModel: (data: Int32) => data.value,
-    modelToDB: (data: number) => new Int32(data),
-  },
-  Float: {
-    dbToModel: (data: Double) => data.value,
-    modelToDB: (data: number) => new Double(data),
-  },
+  Int: identityAdapter(),
+  Float: identityAdapter(),
 }

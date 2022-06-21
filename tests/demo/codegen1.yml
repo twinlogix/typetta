@@ -1,0 +1,38 @@
+overwrite: true
+schema: ['tests/demo/schema.graphql', 'tests/demo/operations-types.generated.ts']
+documents: null
+generates:
+  tests/demo/types.generated.ts:
+    plugins:
+      - 'typescript'
+    config:
+      enumsAsConst: true
+      inputMaybeValue: T | undefined
+      scalars:
+        DateTime: Date
+        Decimal: bignumber.js#BigNumber
+        Coordinates: ../../src#Coordinates
+        LocalizedString: ../types#LocalizedString
+        JSON: any
+        Password: string
+  tests/demo/resolvers.types.generated.ts:
+    plugins:
+      - add:
+          content:
+            - import { PartialDeep } from 'type-fest'
+            - import * as types from './types.generated'
+      - typescript-resolvers
+    config:
+      resolverTypeWrapperSignature: PartialDeep<T>
+      contextType: ./dao.generated#EntityManager
+      namespacedImportName: types
+  tests/demo/resolvers.generated.ts:
+    config:
+      generationOutput: resolvers
+      typettaImport: ../../src
+      tsTypesImport: ./resolvers.types.generated
+    plugins:
+      - lib/generation/index.js
+hooks:
+  afterAllFileWrite:
+    - prettier --write

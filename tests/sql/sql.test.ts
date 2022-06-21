@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Coordinates, defaultValueMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { LocalizedString } from '../types'
-import { DAOContext } from './dao.mock'
-import { Scalars } from './models.mock'
+import { EntityManager, ScalarsSpecification } from './dao.mock'
 import BigNumber from 'bignumber.js'
 import knex, { Knex } from 'knex'
 import sha256 from 'sha256'
@@ -11,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'
 jest.setTimeout(20000)
 
 let knexInstance: Knex<any, unknown[]>
-let dao: DAOContext<unknown>
+let dao: EntityManager<unknown>
 
 const config: Knex.Config = {
   client: 'sqlite3',
@@ -33,7 +32,7 @@ const config: Knex.Config = {
   },
 }
 
-const scalars: UserInputDriverDataTypeAdapterMap<Scalars, 'knex'> = {
+const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'> = {
   LocalizedString: {
     dbToModel: (o: unknown) => JSON.parse(o as string),
     modelToDB: (o: LocalizedString) => JSON.stringify(o),
@@ -75,7 +74,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   knexInstance = knex(config)
-  dao = new DAOContext({
+  dao = new EntityManager({
     log: { maxQueryExecutionTime: 100000 },
     knex: {
       default: knexInstance,
@@ -175,7 +174,7 @@ test('Inner ref', async () => {
   expect(device?.user?.credentials?.another?.test).toBe(null)
 })
 
-test('Simple transaction', async () => {
+test('Simple transaction trx', async () => {
   const trx = await knexInstance.transaction({ isolationLevel: 'snapshot' })
   await dao.device.insertOne({ record: { name: 'dev' }, options: { trx } })
   const dev1 = await dao.device.findOne({ filter: { name: 'dev' }, options: { trx } })
@@ -183,6 +182,18 @@ test('Simple transaction', async () => {
   await trx.rollback()
   const dev2 = await dao.device.findOne({ filter: { name: 'dev' } })
   expect(dev2).toBe(null)
+})
+
+test('Simple transaction function', async () => {
+  const trx = await knexInstance.transaction({ isolationLevel: 'snapshot' })
+  await dao.transaction({ knex: { default: trx } }, async (entityManager2) => {
+    await entityManager2.device.insertOne({ record: { name: 'dev' } })
+    const dev1 = await entityManager2.device.findOne({ filter: { name: 'dev' } })
+    expect(dev1?.name).toBe('dev')
+  })
+  await trx.rollback()
+  const dev3 = await dao.device.findOne({ filter: { name: 'dev' } })
+  expect(dev3).toBe(null)
 })
 
 // ------------------------------------------------------------------------
@@ -239,12 +250,22 @@ test('simple findAll with custom where', async () => {
 })
 
 test('simple findOne', async () => {
-  await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const u = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: 'FirstName1', lastName: 'LastName', live: true } })
+  await dao.user.insertOne({ record: { firstName: '1FirstName', lastName: 'LastName', live: true } })
 
-  const user = await dao.user.findOne({})
+  const user = await dao.user.findOne({ filter: { id: u.id } })
   expect(user).toBeDefined()
   expect(user?.firstName).toBe('FirstName')
   expect(user?.lastName).toBe('LastName')
+
+  const user2 = await dao.user.findOne({ filter: { firstName: { eq: 'firstname' } } })
+  expect(user2).toBe(null)
+  //ilike not supported on SQLLITE
+  //const user3 = await dao.user.findOne({ filter: { firstName: { eq: 'firstname', mode: 'insensitive' } } })
+  //expect(user3).toBeDefined()
+  //expect(user3?.firstName).toBe('FirstName')
+  //expect(user3?.lastName).toBe('LastName')
 })
 
 test('findOne simple inner association', async () => {
@@ -507,6 +528,28 @@ test('find with start and limit', async () => {
   expect(response5[1].firstName).toBe('9')
 })
 
+test('find with embedded that have inner refs', async () => {
+  await dao.user.insertOne({
+    record: {
+      id: 'abc',
+      firstName: 'FirstName',
+      embeddedDog: {
+        name: 'dog',
+        ownerId: 'abc',
+      },
+      live: true,
+    },
+  })
+
+  const user = await dao.user.findOne({})
+  expect(user?.embeddedDog?.ownerId).toBe('abc')
+  expect(user?.embeddedDog?.name).toBe('dog')
+  expect((user?.embeddedDog as Record<string, unknown>)?.owner).toBe(undefined)
+
+  //const user2 = await dao.user.findOne({ projection: { live: true, embeddedDog: true } })
+  //console.log(user2?.embeddedDog?.owner?.embeddedDog?.owner) //this should not be possible
+})
+
 test('simple insert', async () => {
   const response1 = await dao.user.findAll({})
   expect(response1.length).toBe(0)
@@ -558,7 +601,7 @@ test('insert generic test 1', async () => {
 })
 
 test('Insert default', async () => {
-  const dao0 = new DAOContext({
+  const entityManager0 = new EntityManager({
     knex: {
       default: knexInstance,
     },
@@ -569,13 +612,13 @@ test('Insert default', async () => {
   })
 
   try {
-    await dao0.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    await entityManager0.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
     fail()
   } catch (error: unknown) {
     expect(((error as Error).message as string).startsWith('Generator for scalar Live is needed for generate default fields live')).toBe(true)
   }
 
-  const dao1 = new DAOContext({
+  const entityManager1 = new EntityManager({
     knex: {
       default: knexInstance,
     },
@@ -590,16 +633,16 @@ test('Insert default', async () => {
   })
 
   try {
-    await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
+    await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1' } })
     fail()
   } catch (error: unknown) {
     expect(((error as Error).message as string).startsWith('Fields creationDate should have been generated from a middleware but it is undefined')).toBe(true)
   }
 
-  const e1 = await dao1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
+  const e1 = await entityManager1.defaultFieldsEntity.insertOne({ record: { id: 'id1', name: 'n1', creationDate: 123 } })
   expect(e1.live).toBe(true)
 
-  const dao2 = new DAOContext({
+  const entityManager2 = new EntityManager({
     knex: {
       default: knexInstance,
     },
@@ -618,13 +661,13 @@ test('Insert default', async () => {
     },
   })
 
-  const e2 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
+  const e2 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id2', name: 'n1' } })
   expect(e2.live).toBe(true)
   expect(e2.creationDate).toBe(1234)
   expect(e2.opt1).toBe(undefined)
   expect(e2.opt2).toBe(true)
 
-  const e3 = await dao2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
+  const e3 = await entityManager2.defaultFieldsEntity.insertOne({ record: { id: 'id3', name: 'n1', opt1: undefined } })
   expect(e3.opt1).toBe(undefined)
 })
 

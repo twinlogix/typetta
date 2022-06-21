@@ -10,7 +10,7 @@ Pagination of results can generally be done in two ways:
 Offset pagination uses two `skip` and `limit` parameters to define which record to start from and limit the total number of results. The following reading allows you to retrieve 10 users starting from the third (thus skipping the first two).
 
 ```typescript
-const users = await daoContext.user.findAll({
+const users = await entityManager.user.findAll({
   skip: 2,
   limit: 10
 })
