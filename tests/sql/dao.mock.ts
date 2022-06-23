@@ -237,10 +237,27 @@ export type AST = {
   }
 }
 
+export const schemas = {
+  Address: addressSchema,
+  Another: anotherSchema,
+  Author: authorSchema,
+  AuthorBook: authorBookSchema,
+  Book: bookSchema,
+  City: citySchema,
+  DefaultFieldsEntity: defaultFieldsEntitySchema,
+  Device: deviceSchema,
+  Dog: dogSchema,
+  Friends: friendsSchema,
+  Organization: organizationSchema,
+  User: userSchema,
+  UsernamePasswordCredentials: usernamePasswordCredentialsSchema,
+} as const
+
 export function addressSchema(): T.Schema<ScalarsSpecification> {
   return {
     cities: {
       type: 'relation',
+      astName: 'City',
       relation: 'foreign',
       schema: () => citySchema(),
       refFrom: 'addressId',
@@ -344,6 +361,7 @@ export function authorSchema(): T.Schema<ScalarsSpecification> {
   return {
     books: {
       type: 'relation',
+      astName: 'Book',
       relation: 'relationEntity',
       schema: () => bookSchema(),
       refThis: {
@@ -524,6 +542,7 @@ export function bookSchema(): T.Schema<ScalarsSpecification> {
   return {
     authors: {
       type: 'relation',
+      astName: 'Author',
       relation: 'relationEntity',
       schema: () => authorSchema(),
       refThis: {
@@ -825,6 +844,7 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
     },
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'userId',
@@ -914,6 +934,7 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
     },
     owner: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'ownerId',
@@ -1081,6 +1102,7 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
   return {
     address: {
       type: 'embedded',
+      astName: 'Address',
       schema: () => addressSchema(),
       directives: {},
     },
@@ -1199,6 +1221,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     bestFriend: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'bestFriendId',
@@ -1213,12 +1236,14 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     credentials: {
       type: 'embedded',
+      astName: 'UsernamePasswordCredentials',
       schema: () => usernamePasswordCredentialsSchema(),
       alias: 'cred',
       directives: {},
     },
     dogs: {
       type: 'relation',
+      astName: 'Dog',
       relation: 'foreign',
       schema: () => dogSchema(),
       refFrom: 'ownerId',
@@ -1230,6 +1255,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     embeddedDog: {
       type: 'embedded',
+      astName: 'Dog',
       schema: () => dogSchema(),
       directives: {},
     },
@@ -1241,6 +1267,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     friends: {
       type: 'relation',
+      astName: 'User',
       relation: 'relationEntity',
       schema: () => userSchema(),
       refThis: {
@@ -1353,6 +1380,7 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
   return {
     another: {
       type: 'embedded',
+      astName: 'Another',
       schema: () => anotherSchema(),
       alias: 'a',
       directives: {},

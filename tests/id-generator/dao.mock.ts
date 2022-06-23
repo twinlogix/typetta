@@ -84,6 +84,15 @@ export type AST = {
   }
 }
 
+export const schemas = {
+  A: aSchema,
+  B: bSchema,
+  C: cSchema,
+  D: dSchema,
+  E: eSchema,
+  F: fSchema,
+} as const
+
 export function aSchema(): T.Schema<ScalarsSpecification> {
   return {
     id: {

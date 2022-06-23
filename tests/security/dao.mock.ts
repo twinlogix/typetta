@@ -127,6 +127,15 @@ export type AST = {
   }
 }
 
+export const schemas = {
+  Hotel: hotelSchema,
+  Reservation: reservationSchema,
+  Role: roleSchema,
+  Room: roomSchema,
+  User: userSchema,
+  UserRole: userRoleSchema,
+} as const
+
 export function hotelSchema(): T.Schema<ScalarsSpecification> {
   return {
     description: {
@@ -237,6 +246,7 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
     },
     room: {
       type: 'relation',
+      astName: 'Room',
       relation: 'inner',
       schema: () => roomSchema(),
       refFrom: 'roomId',
@@ -437,6 +447,7 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
     },
     hotel: {
       type: 'relation',
+      astName: 'Hotel',
       relation: 'inner',
       schema: () => hotelSchema(),
       refFrom: 'hotelId',
@@ -558,6 +569,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     reservations: {
       type: 'relation',
+      astName: 'Reservation',
       relation: 'foreign',
       schema: () => reservationSchema(),
       refFrom: 'userId',
@@ -569,6 +581,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     roles: {
       type: 'relation',
+      astName: 'UserRole',
       relation: 'foreign',
       schema: () => userRoleSchema(),
       refFrom: 'refUserId',
@@ -667,6 +680,7 @@ export function userRoleSchema(): T.Schema<ScalarsSpecification> {
     },
     role: {
       type: 'relation',
+      astName: 'Role',
       relation: 'inner',
       schema: () => roleSchema(),
       refFrom: 'roleCode',

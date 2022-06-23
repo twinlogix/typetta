@@ -87,6 +87,13 @@ export type AST = {
   }
 }
 
+export const schemas = {
+  Like: likeSchema,
+  Metadata: metadataSchema,
+  Post: postSchema,
+  User: userSchema,
+} as const
+
 export function likeSchema(): T.Schema<ScalarsSpecification> {
   return {
     creationDate: {
@@ -219,6 +226,7 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
     },
     likes: {
       type: 'relation',
+      astName: 'User',
       relation: 'relationEntity',
       schema: () => userSchema(),
       refThis: {
@@ -238,6 +246,7 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
     },
     metadata: {
       type: 'embedded',
+      astName: 'Metadata',
       schema: () => metadataSchema(),
       directives: {},
     },
@@ -335,6 +344,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     likes: {
       type: 'relation',
+      astName: 'Post',
       relation: 'relationEntity',
       schema: () => postSchema(),
       refThis: {
@@ -354,6 +364,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     posts: {
       type: 'relation',
+      astName: 'Post',
       relation: 'foreign',
       schema: () => postSchema(),
       refFrom: 'userId',

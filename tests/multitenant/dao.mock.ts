@@ -120,6 +120,15 @@ export type AST = {
   }
 }
 
+export const schemas = {
+  Hotel: hotelSchema,
+  Reservation: reservationSchema,
+  Room: roomSchema,
+  Tenant: tenantSchema,
+  User: userSchema,
+  UsernamePasswordCredentials: usernamePasswordCredentialsSchema,
+} as const
+
 export function hotelSchema(): T.Schema<ScalarsSpecification> {
   return {
     deletionDate: {
@@ -234,6 +243,7 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
     },
     room: {
       type: 'relation',
+      astName: 'Room',
       relation: 'inner',
       schema: () => roomSchema(),
       refFrom: 'roomId',
@@ -347,6 +357,7 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
     },
     hotel: {
       type: 'relation',
+      astName: 'Hotel',
       relation: 'inner',
       schema: () => hotelSchema(),
       refFrom: 'hotelId',
@@ -527,6 +538,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     credentials: {
       type: 'embedded',
+      astName: 'UsernamePasswordCredentials',
       schema: () => usernamePasswordCredentialsSchema(),
       alias: 'cred',
       directives: {},
@@ -563,6 +575,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     reservations: {
       type: 'relation',
+      astName: 'Reservation',
       relation: 'foreign',
       schema: () => reservationSchema(),
       refFrom: 'userId',

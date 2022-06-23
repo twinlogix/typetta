@@ -24,15 +24,14 @@ export class TsTypettaGenerator extends TypettaGenerator {
       throw new Error('At least one entity is required for code generation. (@entity)')
     }
 
+    const typeNodes = [...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation')
     const imports = this.generateImports(typesMap).join('\n')
     const scalars = this.generateScalarsSpecification([...customScalarsMap.values()])
-    const ast = this.generateAST([...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation'))
-    const daos = [...typesMap.values()]
-      .filter((node) => node.name !== 'Query' && node.name !== 'Mutation')
-      .flatMap((node) => this.generateDAOs(node, typesMap))
-      .join('\n')
+    const ast = this.generateAST(typeNodes)
+    const schema = this.generateSchema(typeNodes)
+    const daos = typeNodes.map((node) => this.generateDAOs(node, typesMap)).join('\n')
     const entityManager = this.generateEntityManager(typesMap, customScalarsMap)
-    return [imports, scalars, ast, daos, entityManager].join('\n\n')
+    return [imports, scalars, ast, schema, daos, entityManager].join('\n\n')
   }
 
   private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
@@ -482,6 +481,12 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   // ----------------------------------------------- SCHEMA --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
+  public generateSchema(nodes: TsTypettaGeneratorNode[]): string {
+    const daoSchema = `export const schemas = {
+      ${nodes.map((node) => `${node.name}: ${toFirstLower(node.name)}Schema`).join(',\n')}
+    } as const`
+    return daoSchema
+  }
   public generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSchemaBody = indentMultiline(this.generateDAOSchemaFields(node, typesMap).join(',\n'))
     const daoSchema = `export function ${toFirstLower(node.name)}Schema(): T.Schema<ScalarsSpecification> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
@@ -544,6 +549,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         return [
           `'${field.name}': {
             type: 'embedded',
+            astName: '${field.graphqlType}',
             schema: () => ${schema}Schema(),
             ${decorators}
           }`,
@@ -557,6 +563,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         return [
           `'${field.name}': {
               type: 'relation',
+              astName: '${field.graphqlType}',
               relation: 'inner',
               schema: () => ${schema}Schema(),
               refFrom: '${refFrom}',
@@ -573,6 +580,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         return [
           `'${field.name}':{
               type: 'relation',
+              astName: '${field.graphqlType}',
               relation: 'foreign',
               schema: () => ${schema}Schema(),
               refFrom: '${refFrom}',
@@ -592,6 +600,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         return [
           `'${field.name}': { 
                type: 'relation',
+               astName: '${field.graphqlType}',
                relation: 'relationEntity',
                schema: () => ${schema}Schema(),
                refThis: {

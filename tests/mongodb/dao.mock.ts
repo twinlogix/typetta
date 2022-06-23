@@ -318,10 +318,34 @@ export type AST = {
   }
 }
 
+export const schemas = {
+  Address: addressSchema,
+  Audit: auditSchema,
+  Auditable: auditableSchema,
+  City: citySchema,
+  DefaultFieldsEntity: defaultFieldsEntitySchema,
+  Device: deviceSchema,
+  Dog: dogSchema,
+  EmbeddedUser: embeddedUserSchema,
+  EmbeddedUser2: embeddedUser2Schema,
+  EmbeddedUser3: embeddedUser3Schema,
+  EmbeddedUser4: embeddedUser4Schema,
+  EmbeddedUser5: embeddedUser5Schema,
+  Hotel: hotelSchema,
+  MockedEntity: mockedEntitySchema,
+  Organization: organizationSchema,
+  Post: postSchema,
+  PostMetadata: postMetadataSchema,
+  User: userSchema,
+  UserCollection: userCollectionSchema,
+  UsernamePasswordCredentials: usernamePasswordCredentialsSchema,
+} as const
+
 export function addressSchema(): T.Schema<ScalarsSpecification> {
   return {
     cities: {
       type: 'relation',
+      astName: 'City',
       relation: 'foreign',
       schema: () => citySchema(),
       refFrom: 'addressId',
@@ -535,6 +559,7 @@ export function auditableSchema(): T.Schema<ScalarsSpecification> {
     },
     versions: {
       type: 'relation',
+      astName: 'Audit',
       relation: 'foreign',
       schema: () => auditSchema(),
       refFrom: 'entityId',
@@ -768,6 +793,7 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
     },
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'userId',
@@ -857,6 +883,7 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
     },
     owner: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'ownerId',
@@ -933,6 +960,7 @@ export function embeddedUserSchema(): T.Schema<ScalarsSpecification> {
   return {
     e: {
       type: 'embedded',
+      astName: 'EmbeddedUser2',
       schema: () => embeddedUser2Schema(),
       isListElementRequired: true,
       isList: true,
@@ -940,6 +968,7 @@ export function embeddedUserSchema(): T.Schema<ScalarsSpecification> {
     },
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'userId',
@@ -963,6 +992,7 @@ export function embeddedUser2Schema(): T.Schema<ScalarsSpecification> {
   return {
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'userId',
@@ -986,6 +1016,7 @@ export function embeddedUser3Schema(): T.Schema<ScalarsSpecification> {
   return {
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: '../userId',
@@ -1007,11 +1038,13 @@ export function embeddedUser4Schema(): T.Schema<ScalarsSpecification> {
   return {
     e: {
       type: 'embedded',
+      astName: 'EmbeddedUser5',
       schema: () => embeddedUser5Schema(),
       directives: {},
     },
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'e.userId',
@@ -1040,6 +1073,7 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
   return {
     audit: {
       type: 'embedded',
+      astName: 'Auditable',
       schema: () => auditableSchema(),
       required: true,
       generationStrategy: 'middleware',
@@ -1047,16 +1081,19 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
     },
     embeddedUser3: {
       type: 'embedded',
+      astName: 'EmbeddedUser3',
       schema: () => embeddedUser3Schema(),
       directives: {},
     },
     embeddedUser4: {
       type: 'embedded',
+      astName: 'EmbeddedUser4',
       schema: () => embeddedUser4Schema(),
       directives: {},
     },
     embeddedUsers: {
       type: 'embedded',
+      astName: 'EmbeddedUser',
       schema: () => embeddedUserSchema(),
       isListElementRequired: true,
       isList: true,
@@ -1064,6 +1101,7 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
     },
     embeddedUsers3: {
       type: 'embedded',
+      astName: 'EmbeddedUser3',
       schema: () => embeddedUser3Schema(),
       isListElementRequired: true,
       isList: true,
@@ -1071,6 +1109,7 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
     },
     embeddedUsers4: {
       type: 'embedded',
+      astName: 'EmbeddedUser4',
       schema: () => embeddedUser4Schema(),
       isListElementRequired: true,
       isList: true,
@@ -1098,6 +1137,7 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
     },
     users: {
       type: 'embedded',
+      astName: 'UserCollection',
       schema: () => userCollectionSchema(),
       directives: {},
     },
@@ -1182,6 +1222,7 @@ export function mockedEntitySchema(): T.Schema<ScalarsSpecification> {
     },
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'userId',
@@ -1278,6 +1319,7 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
   return {
     address: {
       type: 'embedded',
+      astName: 'Address',
       schema: () => addressSchema(),
       directives: {},
     },
@@ -1382,6 +1424,7 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
   return {
     author: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'authorId',
@@ -1417,6 +1460,7 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
     },
     metadata: {
       type: 'embedded',
+      astName: 'PostMetadata',
       schema: () => postMetadataSchema(),
       directives: {},
     },
@@ -1527,12 +1571,14 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     credentials: {
       type: 'embedded',
+      astName: 'UsernamePasswordCredentials',
       schema: () => usernamePasswordCredentialsSchema(),
       isList: true,
       directives: {},
     },
     dogs: {
       type: 'relation',
+      astName: 'Dog',
       relation: 'foreign',
       schema: () => dogSchema(),
       refFrom: 'ownerId',
@@ -1544,11 +1590,13 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     embeddedPost: {
       type: 'embedded',
+      astName: 'Post',
       schema: () => postSchema(),
       directives: {},
     },
     embeddedUser: {
       type: 'embedded',
+      astName: 'EmbeddedUser2',
       schema: () => embeddedUser2Schema(),
       directives: {},
     },
@@ -1560,6 +1608,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     friends: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'friendsId',
@@ -1614,6 +1663,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
     },
     usernamePasswordCredentials: {
       type: 'embedded',
+      astName: 'UsernamePasswordCredentials',
       schema: () => usernamePasswordCredentialsSchema(),
       alias: 'cred',
       directives: {},
@@ -1681,6 +1731,7 @@ export function userCollectionSchema(): T.Schema<ScalarsSpecification> {
   return {
     users: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'usersId',
@@ -1715,6 +1766,7 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
     },
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: '../id',
