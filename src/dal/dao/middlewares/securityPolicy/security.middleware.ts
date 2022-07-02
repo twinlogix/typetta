@@ -134,17 +134,28 @@ export function securityPolicy<
           ? args.params.filter
           : undefined
       if (args.operation === 'find') {
-        const [contained, invalidFields] = isProjectionContained(crud.read ?? false, args.params.projection ?? true)
-        if (!contained) {
-          throw new SecurityPolicyReadError({
-            allowedProjection: crud.read ?? false,
-            requestedProjection: args.params.projection ?? true,
-            unauthorizedProjection: invalidFields,
-            permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]),
-            operationDomains: operationSecurityDomains,
-          })
+        if (context.specificOperation === 'exists' || context.specificOperation === 'count') {
+          if (!crud.read) {
+            throw new SecurityPolicyReadError({
+              allowedProjection: false,
+              requestedProjection: {},
+              unauthorizedProjection: {},
+              permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]),
+              operationDomains: operationSecurityDomains,
+            })
+          }
+        } else {
+          const [contained, invalidFields] = isProjectionContained(crud.read ?? false, args.params.projection ?? true)
+          if (!contained) {
+            throw new SecurityPolicyReadError({
+              allowedProjection: crud.read ?? false,
+              requestedProjection: args.params.projection ?? true,
+              unauthorizedProjection: invalidFields,
+              permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]),
+              operationDomains: operationSecurityDomains,
+            })
+          }
         }
-
         return { continue: true, operation: 'find', params: { ...args.params, filter } }
       }
 
