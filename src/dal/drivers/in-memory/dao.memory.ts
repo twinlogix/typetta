@@ -214,6 +214,9 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
           }
           return []
         } else if (typeof idFilter !== 'object' || idFilterKeys.every((k) => !MONGODB_QUERY_PREFIXS.has(k))) {
+          if (idFilter === null) {
+            return []
+          }
           const index = this.stateManager.getIdIndex(idFilter)
           if (index !== undefined) {
             return [index]

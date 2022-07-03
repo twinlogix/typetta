@@ -64,7 +64,7 @@ export class InMemoryStateManager {
   public getIdIndex(id: unknown): number | undefined {
     const state = this.getState()
     if (this.mockIdSpecification?.stringify) {
-      return state.idIndex.get(this.mockIdSpecification?.stringify(id))
+      return state.idIndex.get(this.mockIdSpecification.stringify(id))
     }
     return state.idIndex.get(id)
   }
@@ -72,7 +72,7 @@ export class InMemoryStateManager {
   public setIdIndex(id: unknown, index: number): void {
     const state = this.getState()
     if (this.mockIdSpecification?.stringify) {
-      state.idIndex.set(this.mockIdSpecification?.stringify(id), index)
+      state.idIndex.set(this.mockIdSpecification.stringify(id), index)
     } else {
       state.idIndex.set(id, index)
     }
@@ -81,7 +81,7 @@ export class InMemoryStateManager {
   public deleteIdIndex(id: unknown): void {
     const state = this.getState()
     if (this.mockIdSpecification?.stringify) {
-      state.idIndex.delete(this.mockIdSpecification?.stringify(id))
+      state.idIndex.delete(this.mockIdSpecification.stringify(id))
     } else {
       state.idIndex.delete(id)
     }
