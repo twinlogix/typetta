@@ -77,6 +77,15 @@ export class InputTypettaGenerator extends TypettaGenerator {
         endsWith: String
         mode: StringFilterMode
       }
+
+      input StringArrayFilterInput {
+        has: String!
+        eq: [String]
+        ne: [String]
+        in: [[String!]]
+        nin: [[String!]]
+        exists: Boolean
+      }
       
       input IntFilterInput {
         eq: Int
@@ -88,6 +97,15 @@ export class InputTypettaGenerator extends TypettaGenerator {
         gt: Int
         lte: Int
         lt: Int
+      }
+
+      input IntArrayFilterInput {
+        has: Int!
+        eq: [Int]
+        ne: [Int]
+        in: [[Int!]]
+        nin: [[Int!]]
+        exists: Boolean
       }
       
       input FloatFilterInput {
@@ -101,12 +119,30 @@ export class InputTypettaGenerator extends TypettaGenerator {
         lte: Float
         lt: Float
       }
+
+      input FloatArrayFilterInput {
+        has: Float!
+        eq: [Float]
+        ne: [Float]
+        in: [[Float!]]
+        nin: [[Float!]]
+        exists: Boolean
+      }
       
       input BooleanFilterInput {
         eq: Boolean
         ne: Boolean
         in: [Boolean!]
         nin: [Boolean!]
+        exists: Boolean
+      }
+
+      input BooleanArrayFilterInput {
+        has: Boolean!
+        eq: [Boolean]
+        ne: [Boolean]
+        in: [[Boolean!]]
+        nin: [[Boolean!]]
         exists: Boolean
       }
       
@@ -116,12 +152,21 @@ export class InputTypettaGenerator extends TypettaGenerator {
         in: [ID!]
         nin: [ID!]
         exists: ID
+      }
+      
+      input IDArrayFilterInput {
+        has: ID!
+        eq: [ID]
+        ne: [ID]
+        in: [[ID!]]
+        nin: [[ID!]]
+        exists: Boolean
       }`
   }
 
   private generateCustomScalars(customScalarsMap: Map<string, TsTypettaGeneratorScalar>): string {
     return Array.from(customScalarsMap.values())
-      .filter(s => !s.isEnum)
+      .filter((s) => !s.isEnum)
       .map((s) => `scalar ${s.name}`)
       .join('\n')
   }
@@ -140,14 +185,23 @@ export class InputTypettaGenerator extends TypettaGenerator {
           additionalFields.push(`gte: ${s.name}`, `gt: ${s.name}`, `lte: ${s.name}`, `lt: ${s.name}`)
         }
         return removeEmptyLines(`
-          input ${s.name}FilterInput {
-            eq: ${s.name}
-            ne: ${s.name}
-            in: [${s.name}!]
-            nin: [${s.name}!]
-            exists: Boolean
-            ${additionalFields.join('\n')}
-          }`)
+        input ${s.name}FilterInput {
+          eq: ${s.name}
+          ne: ${s.name}
+          in: [${s.name}!]
+          nin: [${s.name}!]
+          exists: Boolean
+          ${additionalFields.join('\n')}
+        }
+        input ${s.name}ArrayFilterInput {
+          has: ${s.name}!
+          eq: [${s.name}]
+          ne: [${s.name}]
+          in: [[${s.name}!]]
+          nin: [[${s.name}!]]
+          exists: Boolean
+          ${additionalFields.join('\n')}
+        }`)
       })
       .join('\n\n')
   }
@@ -157,7 +211,7 @@ export class InputTypettaGenerator extends TypettaGenerator {
       input ${node.name}FilterInput {
         ${this.flattenFields(node, typesMap)
           .filter((r) => r.kind === 'leaf' && r.parents.length === 0)
-          .map((r) => `${r.name}: ${r.field.graphqlType}FilterInput`)
+          .map((r) => `${r.name}: ${r.field.graphqlType + (r.field.isList ? 'Array' : '')}FilterInput`)
           .join('\n')}
           and_: [${node.name}FilterInput!]
           or_: [${node.name}FilterInput!]

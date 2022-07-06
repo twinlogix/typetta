@@ -18,6 +18,7 @@ type User @entity @sql {
   totalPostsViews: Int @exclude
   averageViewsPerPost: Float @exclude
   posts: [Post!] @foreignRef(refFrom: "authorId")
+  attributes: [String!]
 }
 
 type Post @entity @sql {

@@ -201,7 +201,25 @@ export function flattenEmbeddeds<T extends Record<string, unknown>, Scalars exte
   }) as FlattenEmbeddedFilter<T>
 }
 
-export function renameLogicalOperators<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {
+export function adaptResolverFilterToTypettaFilter<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {
+  const r1 = renameLogicalOperators(obj)
+  const r2 = renameHasOperator(r1)
+  return r2
+}
+
+function renameHasOperator<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {
+  return mapObject(obj, ([k, v]) => {
+    if (k === '$and') return [['$and', (v as Record<string, unknown>[]).map((ve) => renameHasOperator(ve))]]
+    if (k === '$or') return [['$or', (v as Record<string, unknown>[]).map((ve) => renameHasOperator(ve))]]
+    if (k === '$nor') return [['$nor', (v as Record<string, unknown>[]).map((ve) => renameHasOperator(ve))]]
+    if (v && typeof v === 'object' && 'has' in v) {
+      return [[k, (v as Record<string, unknown>).has]]
+    }
+    return [[k, v]]
+  }) as D['pureFilter']
+}
+
+function renameLogicalOperators<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {
   return mapObject(obj, ([k, v]) => {
     if (k === 'and_' || k === '$and') return [['$and', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]
     if (k === 'or_' || k === '$or') return [['$or', (v as Record<string, unknown>[]).map((ve) => renameLogicalOperators(ve))]]

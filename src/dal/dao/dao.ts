@@ -1,6 +1,6 @@
 import { daoRelationsFromSchema, idInfoFromSchema, Project } from '../..'
 import { equals } from '../../dal/drivers/in-memory/utils.memory'
-import { flattenEmbeddeds, getTraversing, mapObject, renameLogicalOperators, reversed, setTraversing } from '../../utils/utils'
+import { adaptResolverFilterToTypettaFilter, flattenEmbeddeds, getTraversing, mapObject, reversed, setTraversing } from '../../utils/utils'
 import {
   MiddlewareContext,
   DAO,
@@ -784,7 +784,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     )
     return {
       ...params,
-      filter: params.filter ? renameLogicalOperators(params.filter) : params.filter,
+      filter: params.filter ? adaptResolverFilterToTypettaFilter(params.filter) : params.filter,
       sorts: params.sorts ? (params.sorts.map((s: Record<string, unknown>) => flattenEmbeddeds(s, this.schema)) as T['pureSort']) : undefined,
       relations,
     }
@@ -805,14 +805,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       },
       update: async (params) => {
         await this.updateAll({
-          filter: renameLogicalOperators(params.filter),
+          filter: adaptResolverFilterToTypettaFilter(params.filter),
           changes: flattenEmbeddeds(params.changes, this.info.schema),
         })
         return true
       },
       delete: async (params) => {
         await this.deleteAll({
-          filter: renameLogicalOperators(params.filter),
+          filter: adaptResolverFilterToTypettaFilter(params.filter),
         })
         return true
       },
