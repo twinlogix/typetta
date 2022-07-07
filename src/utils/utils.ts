@@ -191,6 +191,9 @@ export function flattenEmbeddeds<T extends Record<string, unknown>, Scalars exte
   }
   return mapObject(obj, ([k, v]) => {
     const field = schema[k]
+    if (!field) {
+      return [[k, v]]
+    }
     if (field.type === 'embedded') {
       if (!v) {
         return [[`${prefix}${k}`, v]]
@@ -201,10 +204,23 @@ export function flattenEmbeddeds<T extends Record<string, unknown>, Scalars exte
   }) as FlattenEmbeddedFilter<T>
 }
 
-export function adaptResolverFilterToTypettaFilter<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {
+export function adaptResolverFilterToTypettaFilter<T extends Record<string, unknown>, D extends DAOGenerics, Scalars extends AbstractScalars>(obj: T, schema: Schema<Scalars>): D['pureFilter'] {
   const r1 = renameLogicalOperators(obj)
-  const r2 = renameHasOperator(r1)
-  return r2
+  const r2 = flattenEmbeddedsInFilter(r1, schema)
+  const r3 = renameHasOperator(r2)
+  return r3
+}
+
+function flattenEmbeddedsInFilter<T extends Record<string, unknown>, D extends DAOGenerics, Scalars extends AbstractScalars>(obj: T, schema: Schema<Scalars>): D['pureFilter'] {
+  return flattenEmbeddeds(
+    mapObject(obj, ([k, v]) => {
+      if (k === '$and') return [['$and', (v as Record<string, unknown>[]).map((ve) => flattenEmbeddedsInFilter(ve, schema))]]
+      if (k === '$or') return [['$or', (v as Record<string, unknown>[]).map((ve) => flattenEmbeddedsInFilter(ve, schema))]]
+      if (k === '$nor') return [['$nor', (v as Record<string, unknown>[]).map((ve) => flattenEmbeddedsInFilter(ve, schema))]]
+      return [[k, v]]
+    }),
+    schema,
+  ) as D['pureFilter']
 }
 
 function renameHasOperator<T extends Record<string, unknown>, D extends DAOGenerics>(obj: T): D['pureFilter'] {

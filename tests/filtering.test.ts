@@ -1,4 +1,5 @@
 import { adaptResolverFilterToTypettaFilter, filterEntity, mock } from '../src'
+import { userSchema } from './demo/dao.generated'
 
 test('filter test basic operators', async () => {
   const entity = {
@@ -200,6 +201,29 @@ test('filter test others', async () => {
 })
 
 test('adaptResolverFilterToTypettaFilter', () => {
-  const r1 = adaptResolverFilterToTypettaFilter({ and_: [{ v: { has: 123 }, or_: [{ v: { eq: [1, 2, 3] } }, { k: 2 }] }, { nor_: [{ id: '123' }] }] })
-  expect(r1).toStrictEqual({ $and: [{ v: 123, $or: [{ v: { eq: [1, 2, 3] } }, { k: 2 }] }, { $nor: [{ id: '123' }] }] })
+  const r1 = adaptResolverFilterToTypettaFilter(
+    {
+      and_: [
+        {
+          attributes: { has: '123' },
+          or_: [{ firstName: { eq: 'Mario' } }, { credentials: { username: { eq: 'mario' } } }],
+        },
+        {
+          nor_: [{ cr: { username: { has: 'm' } } }],
+        },
+      ],
+    },
+    userSchema(),
+  )
+  expect(r1).toStrictEqual({
+    $and: [
+      {
+        attributes: '123',
+        $or: [{ firstName: { eq: 'Mario' } }, { 'credentials.username': { eq: 'mario' } }],
+      },
+      {
+        $nor: [{ 'cr.username': 'm' }],
+      },
+    ],
+  })
 })

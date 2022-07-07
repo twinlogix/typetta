@@ -43,7 +43,8 @@ export class InputTypettaGenerator extends TypettaGenerator {
               const findInput = this.generateFindInput(n)
               return [filterInput, relationFilterInput, findInput]
             } else {
-              return []
+              const filterInput = this.generateFilterInput(n, typesMap)
+              return [filterInput]
             }
           })()
           return [removeEmptyLines([delimiter, insertInput, updateInput, sortInput, ...enitityInputs, delimiter].join('\n'))]
@@ -210,12 +211,24 @@ export class InputTypettaGenerator extends TypettaGenerator {
     return `
       input ${node.name}FilterInput {
         ${this.flattenFields(node, typesMap)
-          .filter((r) => r.kind === 'leaf' && r.parents.length === 0)
-          .map((r) => `${r.name}: ${r.field.graphqlType + (r.field.isList ? 'Array' : '')}FilterInput`)
+          .filter((r) => r.parents.length === 0)
+          .flatMap((r) => {
+            if (r.kind === 'leaf') {
+              return [`${r.name}: ${r.field.graphqlType + (r.field.isList ? 'Array' : '')}FilterInput`]
+            } else if (r.kind === 'node' && !r.field.isList) {
+              return [`${r.name}: ${r.field.graphqlType}FilterInput`]
+            }
+            return []
+          })
           .join('\n')}
-          and_: [${node.name}FilterInput!]
-          or_: [${node.name}FilterInput!]
-          nor_: [${node.name}FilterInput!]
+          ${
+            node.entity
+              ? `and_: [${node.name}FilterInput!]
+                 or_: [${node.name}FilterInput!]
+                 nor_: [${node.name}FilterInput!]`
+              : ''
+          }
+          
       }`
   }
 
