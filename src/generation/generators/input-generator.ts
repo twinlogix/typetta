@@ -70,8 +70,8 @@ export class InputTypettaGenerator extends TypettaGenerator {
       input StringFilterInput {
         eq: String
         ne: String
-        in: [String!]
-        nin: [String!]
+        in: [String]
+        nin: [String]
         exists: Boolean
         contains: String
         startsWith: String
@@ -80,19 +80,19 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }
 
       input StringArrayFilterInput {
-        has: String!
+        has: String
         eq: [String]
         ne: [String]
-        in: [[String!]]
-        nin: [[String!]]
+        in: [[String]]
+        nin: [[String]]
         exists: Boolean
       }
       
       input IntFilterInput {
         eq: Int
         ne: Int
-        in: [Int!]
-        nin: [Int!]
+        in: [Int]
+        nin: [Int]
         exists: Boolean
         gte: Int
         gt: Int
@@ -101,19 +101,19 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }
 
       input IntArrayFilterInput {
-        has: Int!
+        has: Int
         eq: [Int]
         ne: [Int]
-        in: [[Int!]]
-        nin: [[Int!]]
+        in: [[Int]]
+        nin: [[Int]]
         exists: Boolean
       }
       
       input FloatFilterInput {
         eq: Float
         ne: Float
-        in: [Float!]
-        nin: [Float!]
+        in: [Float]
+        nin: [Float]
         exists: Boolean
         gte: Float
         gt: Float
@@ -122,45 +122,45 @@ export class InputTypettaGenerator extends TypettaGenerator {
       }
 
       input FloatArrayFilterInput {
-        has: Float!
+        has: Float
         eq: [Float]
         ne: [Float]
-        in: [[Float!]]
-        nin: [[Float!]]
+        in: [[Float]]
+        nin: [[Float]]
         exists: Boolean
       }
       
       input BooleanFilterInput {
         eq: Boolean
         ne: Boolean
-        in: [Boolean!]
-        nin: [Boolean!]
+        in: [Boolean]
+        nin: [Boolean]
         exists: Boolean
       }
 
       input BooleanArrayFilterInput {
-        has: Boolean!
+        has: Boolean
         eq: [Boolean]
         ne: [Boolean]
-        in: [[Boolean!]]
-        nin: [[Boolean!]]
+        in: [[Boolean]]
+        nin: [[Boolean]]
         exists: Boolean
       }
       
       input IDFilterInput {
         eq: ID
         ne: ID
-        in: [ID!]
-        nin: [ID!]
+        in: [ID]
+        nin: [ID]
         exists: ID
       }
       
       input IDArrayFilterInput {
-        has: ID!
+        has: ID
         eq: [ID]
         ne: [ID]
-        in: [[ID!]]
-        nin: [[ID!]]
+        in: [[ID]]
+        nin: [[ID]]
         exists: Boolean
       }`
   }
@@ -189,17 +189,17 @@ export class InputTypettaGenerator extends TypettaGenerator {
         input ${s.name}FilterInput {
           eq: ${s.name}
           ne: ${s.name}
-          in: [${s.name}!]
-          nin: [${s.name}!]
+          in: [${s.name}]
+          nin: [${s.name}]
           exists: Boolean
           ${additionalFields.join('\n')}
         }
         input ${s.name}ArrayFilterInput {
-          has: ${s.name}!
+          has: ${s.name}
           eq: [${s.name}]
           ne: [${s.name}]
-          in: [[${s.name}!]]
-          nin: [[${s.name}!]]
+          in: [[${s.name}]]
+          nin: [[${s.name}]]
           exists: Boolean
           ${additionalFields.join('\n')}
         }`)
