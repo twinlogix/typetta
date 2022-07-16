@@ -86,7 +86,7 @@
     "lodash": "4.17.21",
     "object-hash": "2.2.0",
     "prettier": "2.7.1",
-    "type-fest": "2.13.1",
+    "type-fest": "2.14.0",
     "yaml": "2.1.1",
     "uuid": "8.3.2"
   },
