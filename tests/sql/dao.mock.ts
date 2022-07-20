@@ -237,10 +237,27 @@ export type AST = {
   }
 }
 
+export const schemas = {
+  Address: addressSchema,
+  Another: anotherSchema,
+  Author: authorSchema,
+  AuthorBook: authorBookSchema,
+  Book: bookSchema,
+  City: citySchema,
+  DefaultFieldsEntity: defaultFieldsEntitySchema,
+  Device: deviceSchema,
+  Dog: dogSchema,
+  Friends: friendsSchema,
+  Organization: organizationSchema,
+  User: userSchema,
+  UsernamePasswordCredentials: usernamePasswordCredentialsSchema,
+} as const
+
 export function addressSchema(): T.Schema<ScalarsSpecification> {
   return {
     cities: {
       type: 'relation',
+      astName: 'City',
       relation: 'foreign',
       schema: () => citySchema(),
       refFrom: 'addressId',
@@ -248,6 +265,7 @@ export function addressSchema(): T.Schema<ScalarsSpecification> {
       dao: 'city',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -255,6 +273,7 @@ export function addressSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -331,13 +350,18 @@ export function anotherSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       alias: 't',
+      directives: {},
     },
   }
 }
+
+export interface AnotherModel extends types.Another {}
+export interface AnotherPlainModel extends T.GenerateModel<'Another', AST, ScalarsSpecification, 'relation'> {}
 export function authorSchema(): T.Schema<ScalarsSpecification> {
   return {
     books: {
       type: 'relation',
+      astName: 'Book',
       relation: 'relationEntity',
       schema: () => bookSchema(),
       refThis: {
@@ -351,6 +375,7 @@ export function authorSchema(): T.Schema<ScalarsSpecification> {
       },
       relationEntity: { schema: () => authorBookSchema(), dao: 'authorBook' },
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -358,6 +383,7 @@ export function authorSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -424,11 +450,13 @@ export function authorBookSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     bookId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -436,6 +464,7 @@ export function authorBookSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -513,6 +542,7 @@ export function bookSchema(): T.Schema<ScalarsSpecification> {
   return {
     authors: {
       type: 'relation',
+      astName: 'Author',
       relation: 'relationEntity',
       schema: () => authorSchema(),
       refThis: {
@@ -526,6 +556,7 @@ export function bookSchema(): T.Schema<ScalarsSpecification> {
       },
       relationEntity: { schema: () => authorBookSchema(), dao: 'authorBook' },
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -533,6 +564,7 @@ export function bookSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
   }
 }
@@ -599,6 +631,7 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -606,11 +639,13 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
   }
 }
@@ -678,6 +713,7 @@ export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
       scalar: 'Int',
       required: true,
       generationStrategy: 'middleware',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -685,27 +721,32 @@ export function defaultFieldsEntitySchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'user',
       required: true,
+      directives: {},
     },
     live: {
       type: 'scalar',
       scalar: 'Live',
       required: true,
       generationStrategy: 'generator',
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     opt1: {
       type: 'scalar',
       scalar: 'Live',
       generationStrategy: 'middleware',
+      directives: {},
     },
     opt2: {
       type: 'scalar',
       scalar: 'Live',
       generationStrategy: 'generator',
+      directives: {},
     },
   }
 }
@@ -793,23 +834,28 @@ export function deviceSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     user: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'userId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
   }
 }
@@ -878,24 +924,29 @@ export function dogSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     owner: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'ownerId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     ownerId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -962,6 +1013,7 @@ export function friendsSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -969,11 +1021,13 @@ export function friendsSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     to: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -1048,7 +1102,9 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
   return {
     address: {
       type: 'embedded',
+      astName: 'Address',
       schema: () => addressSchema(),
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1056,15 +1112,18 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     vatNumber: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
   }
 }
@@ -1150,6 +1209,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'Decimal',
       alias: 'value',
+      directives: {},
     },
     amounts: {
       type: 'scalar',
@@ -1157,26 +1217,33 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       isList: true,
       alias: 'values',
+      directives: {},
     },
     bestFriend: {
       type: 'relation',
+      astName: 'User',
       relation: 'inner',
       schema: () => userSchema(),
       refFrom: 'bestFriendId',
       refTo: 'id',
       dao: 'user',
+      directives: {},
     },
     bestFriendId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
     credentials: {
       type: 'embedded',
+      astName: 'UsernamePasswordCredentials',
       schema: () => usernamePasswordCredentialsSchema(),
       alias: 'cred',
+      directives: {},
     },
     dogs: {
       type: 'relation',
+      astName: 'Dog',
       relation: 'foreign',
       schema: () => dogSchema(),
       refFrom: 'ownerId',
@@ -1184,18 +1251,23 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'dog',
       isListElementRequired: true,
       isList: true,
+      directives: {},
     },
     embeddedDog: {
       type: 'embedded',
+      astName: 'Dog',
       schema: () => dogSchema(),
+      directives: {},
     },
     firstName: {
       type: 'scalar',
       scalar: 'String',
       alias: 'name',
+      directives: {},
     },
     friends: {
       type: 'relation',
+      astName: 'User',
       relation: 'relationEntity',
       schema: () => userSchema(),
       refThis: {
@@ -1209,6 +1281,7 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       },
       relationEntity: { schema: () => friendsSchema(), dao: 'friends' },
       isList: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -1217,27 +1290,32 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'generator',
       required: true,
       alias: 'ID',
+      directives: {},
     },
     lastName: {
       type: 'scalar',
       scalar: 'String',
       alias: 'surname',
+      directives: {},
     },
     live: {
       type: 'scalar',
       scalar: 'Boolean',
       required: true,
       alias: 'active',
+      directives: {},
     },
     localization: {
       type: 'scalar',
       scalar: 'Coordinates',
       alias: 'l',
+      directives: {},
     },
     title: {
       type: 'scalar',
       scalar: 'LocalizedString',
       alias: 't',
+      directives: {},
     },
   }
 }
@@ -1302,23 +1380,30 @@ export function usernamePasswordCredentialsSchema(): T.Schema<ScalarsSpecificati
   return {
     another: {
       type: 'embedded',
+      astName: 'Another',
       schema: () => anotherSchema(),
       alias: 'a',
+      directives: {},
     },
     password: {
       type: 'scalar',
       scalar: 'Password',
       required: true,
       alias: 'pass',
+      directives: {},
     },
     username: {
       type: 'scalar',
       scalar: 'String',
       required: true,
       alias: 'user',
+      directives: {},
     },
   }
 }
+
+export interface UsernamePasswordCredentialsModel extends types.UsernamePasswordCredentials {}
+export interface UsernamePasswordCredentialsPlainModel extends T.GenerateModel<'UsernamePasswordCredentials', AST, ScalarsSpecification, 'relation'> {}
 
 export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {
   metadata?: MetadataType
@@ -1339,6 +1424,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   knex: Record<'default', Knex | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
   log?: T.LogInput<'Address' | 'Author' | 'AuthorBook' | 'Book' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Friends' | 'Organization' | 'User'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -1385,6 +1471,7 @@ export class EntityManager<
               ],
               name: 'Address',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AddressDAO<MetadataType, OperationMetadataType>)
           : new AddressDAO({
               entityManager: this,
@@ -1399,6 +1486,7 @@ export class EntityManager<
               ],
               name: 'Address',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._address
@@ -1419,6 +1507,7 @@ export class EntityManager<
               ],
               name: 'Author',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AuthorDAO<MetadataType, OperationMetadataType>)
           : new AuthorDAO({
               entityManager: this,
@@ -1433,6 +1522,7 @@ export class EntityManager<
               ],
               name: 'Author',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._author
@@ -1453,6 +1543,7 @@ export class EntityManager<
               ],
               name: 'AuthorBook',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as AuthorBookDAO<MetadataType, OperationMetadataType>)
           : new AuthorBookDAO({
               entityManager: this,
@@ -1467,6 +1558,7 @@ export class EntityManager<
               ],
               name: 'AuthorBook',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._authorBook
@@ -1484,6 +1576,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.book?.middlewares || []), ...(selectMiddleware('book', this.middlewares) as T.DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Book',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as BookDAO<MetadataType, OperationMetadataType>)
           : new BookDAO({
               entityManager: this,
@@ -1495,6 +1588,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.book?.middlewares || []), ...(selectMiddleware('book', this.middlewares) as T.DAOMiddleware<BookDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Book',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._book
@@ -1512,6 +1606,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'City',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as CityDAO<MetadataType, OperationMetadataType>)
           : new CityDAO({
               entityManager: this,
@@ -1523,6 +1618,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.city?.middlewares || []), ...(selectMiddleware('city', this.middlewares) as T.DAOMiddleware<CityDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'City',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._city
@@ -1543,6 +1639,7 @@ export class EntityManager<
               ],
               name: 'DefaultFieldsEntity',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DefaultFieldsEntityDAO<MetadataType, OperationMetadataType>)
           : new DefaultFieldsEntityDAO({
               entityManager: this,
@@ -1557,6 +1654,7 @@ export class EntityManager<
               ],
               name: 'DefaultFieldsEntity',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._defaultFieldsEntity
@@ -1577,6 +1675,7 @@ export class EntityManager<
               ],
               name: 'Device',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DeviceDAO<MetadataType, OperationMetadataType>)
           : new DeviceDAO({
               entityManager: this,
@@ -1591,6 +1690,7 @@ export class EntityManager<
               ],
               name: 'Device',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._device
@@ -1608,6 +1708,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Dog',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as DogDAO<MetadataType, OperationMetadataType>)
           : new DogDAO({
               entityManager: this,
@@ -1619,6 +1720,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.dog?.middlewares || []), ...(selectMiddleware('dog', this.middlewares) as T.DAOMiddleware<DogDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Dog',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._dog
@@ -1639,6 +1741,7 @@ export class EntityManager<
               ],
               name: 'Friends',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as FriendsDAO<MetadataType, OperationMetadataType>)
           : new FriendsDAO({
               entityManager: this,
@@ -1653,6 +1756,7 @@ export class EntityManager<
               ],
               name: 'Friends',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._friends
@@ -1673,6 +1777,7 @@ export class EntityManager<
               ],
               name: 'Organization',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as OrganizationDAO<MetadataType, OperationMetadataType>)
           : new OrganizationDAO({
               entityManager: this,
@@ -1687,6 +1792,7 @@ export class EntityManager<
               ],
               name: 'Organization',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._organization
@@ -1704,6 +1810,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as UserDAO<MetadataType, OperationMetadataType>)
           : new UserDAO({
               entityManager: this,
@@ -1715,6 +1822,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._user

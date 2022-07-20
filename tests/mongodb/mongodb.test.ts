@@ -136,6 +136,23 @@ test('simple findOne', async () => {
   expect(user3?.lastName).toBe('LastName')
 })
 
+test('simple resolveRelations', async () => {
+  const u1 = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const u2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName', live: true } })
+  const results = await dao.user.resolveRelations({
+    input: { id: '', live: true, friendsId: [u1.id, u2.id] },
+    projection: { friends: { firstName: true }, live: true },
+    relations: {
+      friends: {
+        filter: { firstName: 'FirstName' },
+      },
+    },
+  })
+  expect(results.friends?.length).toBe(1)
+  expect((results.friends ?? [])[0].firstName).toBe('FirstName')
+  expect(results.live).toBe(true)
+})
+
 test('simple findOne multiple filter', async () => {
   await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
   await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })
@@ -171,7 +188,7 @@ test('findOne simple inner association with max depth', async () => {
   } catch (e) {
     expect((e as Error).message).toBe('Max depth is 0 but the specified projection reach a depth of 1')
   }
-  await dao.user.findOne({ projection: { friends: { friends: { firstName: true } } }, maxDepth: 3 })
+  await dao.user.findOne({ projection: { friends: { friends: true } }, maxDepth: 3 })
 })
 
 test('findOne simple foreignRef association', async () => {
@@ -838,7 +855,6 @@ test('simple replace', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true } })
   await dao.user.replaceOne({ filter: { id: user.id }, replace: { id: user.id, firstName: 'FirstName 1', live: true } })
   const user1 = await dao.user.findOne({ filter: { id: user.id } })
-
   expect(user1).toBeDefined()
   expect(user1?.firstName).toBe('FirstName 1')
 })
@@ -953,7 +969,9 @@ test('middleware 1', async () => {
         middlewares: [
           projectionDependency({ fieldsProjection: { id: true }, requiredProjection: { live: true } }),
           {
-            before: async (args) => {
+            before: async (args, context) => {
+              expect(context.schema.live.directives.custom.str).toBe('123')
+              expect(context.schema.live.directives.custom.o).toStrictEqual({ a: 123 })
               if (args.operation === 'insert') {
                 if (args.params.record.id === 'u1' && args.params.record.firstName === 'Mario') {
                   throw new Error('is Mario')
@@ -1135,6 +1153,94 @@ test('middleware options', async () => {
     },
   })
   await entityManager2.user.insertOne({ record: { live: true }, metadata: { m3: 'yes' } })
+})
+
+test('middleware error 1', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            before: async () => {
+              return {
+                operation: 'update',
+                continue: false,
+                params: { changes: {}, filter: {} },
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  try {
+    await entityManager2.user.insertOne({ record: { live: true } })
+  } catch (error) {
+    expect((error as Error).message).toBe("Invalid operation. Expecting 'insert' but received 'update'.")
+  }
+})
+
+test('middleware error 2', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            after: async () => {
+              return {
+                operation: 'update',
+                continue: false,
+                params: { changes: {}, filter: {} },
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  try {
+    await entityManager2.user.insertOne({ record: { live: true } })
+  } catch (error) {
+    expect((error as Error).message).toBe("Invalid operation. Expecting 'insert' but received 'update'.")
+  }
+})
+
+test('middleware change reulst in after', async () => {
+  const entityManager2 = new EntityManager<{ m1?: string; m2?: string }, { m3: string }>({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      user: {
+        middlewares: [
+          {
+            after: async (args) => {
+              if (args.operation === 'insert') {
+                return {
+                  operation: 'insert',
+                  continue: false,
+                  insertedRecord: { id: args.insertedRecord.id, live: false },
+                }
+              }
+            },
+          },
+        ],
+      },
+    },
+  })
+  const inserted = await entityManager2.user.insertOne({ record: { live: true } })
+  expect(inserted.live).toBe(false)
+  const found = await entityManager2.user.findOne({ filter: { id: inserted.id } })
+  expect(found?.live).toBe(true)
 })
 
 // ------------------------------------------------------------------------
@@ -1830,7 +1936,7 @@ test('Schema metadata', async () => {
               const field = (params.relationParents ?? [])[0].field
               expect(field).toBe('dogs')
               const schema = (params.relationParents ?? [])[0].schema
-              expect(schema[field].metadata?.test).toBe('value')
+              expect(schema[field].directives.schema).toStrictEqual({ metadata: [{ key: 'test', value: 'value' }] })
               middlewareExecuted = true
             },
           }),

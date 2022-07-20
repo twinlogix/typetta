@@ -119,6 +119,7 @@ export type DAOParams<T extends DAOGenerics> = {
   pageSize?: number
   middlewares?: DAOMiddleware<T>[]
   logger?: LogFunction<T['entity']>
+  awaitLog?: boolean
   name: T['entity']
   datasource: string | null
 }

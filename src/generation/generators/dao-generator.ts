@@ -2,6 +2,7 @@ import { TypeScriptTypettaPluginConfig } from '../config'
 import { TsTypettaGeneratorField, TsTypettaGeneratorNode, TsTypettaGeneratorScalar, TypettaGenerator } from '../types'
 import { findField, findID, findNode, getID, getNode, removeParentPath, toFirstLower } from '../utils'
 import { DEFAULT_SCALARS, indentMultiline } from '@graphql-codegen/visitor-plugin-common'
+import { Kind, ValueNode } from 'graphql'
 
 export class TsTypettaGenerator extends TypettaGenerator {
   constructor(config: TypeScriptTypettaPluginConfig) {
@@ -23,15 +24,14 @@ export class TsTypettaGenerator extends TypettaGenerator {
       throw new Error('At least one entity is required for code generation. (@entity)')
     }
 
+    const typeNodes = [...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation')
     const imports = this.generateImports(typesMap).join('\n')
     const scalars = this.generateScalarsSpecification([...customScalarsMap.values()])
-    const ast = this.generateAST([...typesMap.values()].filter((node) => node.name !== 'Query' && node.name !== 'Mutation'))
-    const daos = [...typesMap.values()]
-      .filter((node) => node.name !== 'Query' && node.name !== 'Mutation')
-      .flatMap((node) => this.generateDAOs(node, typesMap))
-      .join('\n')
+    const ast = this.generateAST(typeNodes)
+    const schema = this.generateSchema(typeNodes)
+    const daos = typeNodes.map((node) => this.generateDAOs(node, typesMap)).join('\n')
     const entityManager = this.generateEntityManager(typesMap, customScalarsMap)
-    return [imports, scalars, ast, daos, entityManager].join('\n\n')
+    return [imports, scalars, ast, schema, daos, entityManager].join('\n\n')
   }
 
   private checkIds(typesMap: Map<string, TsTypettaGeneratorNode>) {
@@ -189,12 +189,13 @@ export class TsTypettaGenerator extends TypettaGenerator {
     if (node.entity) {
       const daoSchema = this.generateDAOSchema(node, typesMap)
       const daoParams = this.generateDAOParams(node)
-      const utilsType = this.generateUtillsType(node)
+      const utilsType = this.generateEntityUtilsType(node)
       const dao = this.generateDAO(node, typesMap)
       return [daoSchema, daoParams, utilsType, dao].join('\n\n')
     } else {
       const daoSchema = this.generateDAOSchema(node, typesMap)
-      return [daoSchema].join('\n\n')
+      const utilsType = this.generateUtilsType(node)
+      return [daoSchema, utilsType].join('\n\n')
     }
   }
 
@@ -292,7 +293,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
     const mongoDBParams = hasMongoDBEntites ? `,\nmongodb: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
     const adaptersParams = `,\nscalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, '${hasMongoDBEntites && hasSQLEntities ? 'both' : hasMongoDBEntites ? 'mongo' : 'knex'}'>`
-    const loggerParams = `,\nlog?: T.LogInput<${daoNamesType}>`
+    const loggerParams = `,\nlog?: T.LogInput<${daoNamesType}>,\nawaitLog?: boolean`
     const securityPolicyParam = ',\nsecurity?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>'
     const dbsInputParam =
       hasMongoDBEntites && hasSQLEntities
@@ -366,7 +367,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
         )}', this.middlewares) as T.DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
         const normalDaoInstance = `new ${node.name}DAO({ entityManager: this, datasource: ${datasource}, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
-        )}${entityManagerImplementationInit}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger })`
+        )}${entityManagerImplementationInit}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger, awaitLog: this.params.awaitLog })`
         const entityManagerInit =
           node.entity?.type === 'memory'
             ? `this._${toFirstLower(node.name)} = ${normalDaoInstance}`
@@ -374,7 +375,9 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
                 node.entity?.type === 'mongo' ? `const db = this.mongodb.${node.entity.source}` : node.entity?.type === 'sql' ? `const db = this.knex.${node.entity.source}` : ''
               }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ entityManager: this, datasource: null, metadata: this.metadata, ...this.overrides?.${toFirstLower(
                 node.name,
-              )}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
+              )}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger, awaitLog: this.params.awaitLog }) as unknown as ${
+                node.name
+              }DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
         const entityManagerGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(entityManagerInit)}\n}\nreturn this._${toFirstLower(node.name)}`
         return `get ${toFirstLower(node.name)}(): ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(entityManagerGet)}\n}`
       })
@@ -478,6 +481,12 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   // ----------------------------------------------- SCHEMA --------------------------------------------------
   // ---------------------------------------------------------------------------------------------------------
 
+  public generateSchema(nodes: TsTypettaGeneratorNode[]): string {
+    const daoSchema = `export const schemas = {
+      ${nodes.map((node) => `${node.name}: ${toFirstLower(node.name)}Schema`).join(',\n')}
+    } as const`
+    return daoSchema
+  }
   public generateDAOSchema(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string {
     const daoSchemaBody = indentMultiline(this.generateDAOSchemaFields(node, typesMap).join(',\n'))
     const daoSchema = `export function ${toFirstLower(node.name)}Schema(): T.Schema<ScalarsSpecification> {\n  return {\n` + daoSchemaBody + `\n  }\n}`
@@ -485,6 +494,33 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
   }
 
   public generateDAOSchemaFields(node: TsTypettaGeneratorNode, typesMap: Map<string, TsTypettaGeneratorNode>): string[] {
+    function resolveNodeValue(valueNode: ValueNode): unknown {
+      switch (valueNode.kind) {
+        case Kind.INT:
+          return Number(valueNode.value)
+        case Kind.STRING:
+          return valueNode.value
+        case Kind.FLOAT:
+          return Number(valueNode.value)
+        case Kind.BOOLEAN:
+          return valueNode.value
+        case Kind.ENUM:
+          return valueNode.value
+        case Kind.LIST:
+          return valueNode.values.map((v) => resolveNodeValue(v))
+        case Kind.NULL:
+          return null
+        case Kind.OBJECT:
+          return valueNode.fields.reduce((prev, f) => {
+            return {
+              ...prev,
+              [f.name.value]: resolveNodeValue(f.value),
+            }
+          }, {})
+        default:
+          return 'UNKNOWN VALUE NODE KIND'
+      }
+    }
     return node.fields.flatMap((field) => {
       const decorators = [
         field.isListElementRequired ? 'isListElementRequired: true' : null,
@@ -495,7 +531,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         field.isEnum ? 'isEnum: true' : null,
         field.alias ? `alias: '${field.alias}'` : null,
         field.defaultGenerationStrategy && !field.isID ? `generationStrategy: '${field.defaultGenerationStrategy}'` : null,
-        field.schemaMetadata ? `metadata: Object.fromEntries([${field.schemaMetadata.map((m) => `['${m.key}', '${m.value}']`).join(', ')}])` : '',
+        `directives: { ${field.customDirectives.map((d) => `'${d.name.value}': { ${d.arguments?.map((a) => `'${a.name.value}': ${JSON.stringify(resolveNodeValue(a.value))}`)} }`).join(',')} }`,
       ]
         .filter((v) => v != null)
         .join(',')
@@ -513,6 +549,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         return [
           `'${field.name}': {
             type: 'embedded',
+            astName: '${field.graphqlType}',
             schema: () => ${schema}Schema(),
             ${decorators}
           }`,
@@ -526,6 +563,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         return [
           `'${field.name}': {
               type: 'relation',
+              astName: '${field.graphqlType}',
               relation: 'inner',
               schema: () => ${schema}Schema(),
               refFrom: '${refFrom}',
@@ -542,6 +580,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         return [
           `'${field.name}':{
               type: 'relation',
+              astName: '${field.graphqlType}',
               relation: 'foreign',
               schema: () => ${schema}Schema(),
               refFrom: '${refFrom}',
@@ -561,6 +600,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         return [
           `'${field.name}': { 
                type: 'relation',
+               astName: '${field.graphqlType}',
                relation: 'relationEntity',
                schema: () => ${schema}Schema(),
                refThis: {
@@ -602,7 +642,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     return [daoGenerics, daoParams, inMemoryDaoParams].join('\n')
   }
 
-  private generateUtillsType(node: TsTypettaGeneratorNode): string {
+  private generateEntityUtilsType(node: TsTypettaGeneratorNode): string {
     return `
     export type ${node.name}IdFields = T.IdFields<'${node.name}', AST>
     export interface ${node.name}Model extends types.${node.name} {}
@@ -615,6 +655,12 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     export interface ${node.name}RelationsFindParams extends T.RelationsFindParams<'${node.name}', AST, ScalarsSpecification> {}
     export type ${node.name}Params<P extends ${node.name}Projection> = T.Params<'${node.name}', AST, ScalarsSpecification, P>
     export type ${node.name}CachedTypes = T.CachedTypes<${node.name}IdFields, ${node.name}Model, ${node.name}Insert, ${node.name}PlainModel, ${node.name}Projection, ${node.name}Update, ${node.name}Filter, ${node.name}SortElement, ${node.name}RelationsFindParams>`
+  }
+
+  private generateUtilsType(node: TsTypettaGeneratorNode): string {
+    return `
+    export interface ${node.name}Model extends types.${node.name} {}
+    export interface ${node.name}PlainModel extends T.GenerateModel<'${node.name}', AST, ScalarsSpecification, 'relation'> {}`
   }
 
   // ---------------------------------------------------------------------------------------------------------

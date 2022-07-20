@@ -5,6 +5,7 @@ The possibility of having an accurate logging system is a very important feature
   - [How to enable Logs](#how-to-enable-logs)
   - [Log long-running queries](#log-long-running-queries)
   - [Custom logger](#custom-logger)
+  - [Await async log](#await-async-log)
 
 ## How to enable Logs
 
@@ -72,5 +73,18 @@ new EntityManager({
   log: async ({ raw }) => {
     console.log(`My custom log is: ${raw}`)
   },
+})
+```
+
+## Await async log
+
+By default Typetta awaits the logger async operation. In order to skip the await you can set `awaitLog` to false. All the exceptions thrown by the logger are ignored either if the operations are awaited or not.
+
+```typescript
+new EntityManager({
+  log: async ({ raw }) => {
+    await sendLogToKinesis(`[TYPETTA]: ${raw}`)
+  },
+  awaitLog: false
 })
 ```

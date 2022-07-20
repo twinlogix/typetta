@@ -6,7 +6,7 @@ type Decorators = {
   required?: boolean
   isListElementRequired?: boolean
   alias?: string
-  metadata?: Record<string, string>
+  directives: Record<string, Record<string, unknown>>
   isEnum?: boolean
 } & (
   | {
@@ -18,10 +18,10 @@ type Decorators = {
 export type SchemaField<Scalars extends AbstractScalars> = Readonly<
   (
     | { type: 'scalar'; scalar: keyof Scalars }
-    | { type: 'embedded'; schema: () => Schema<Scalars> }
+    | { type: 'embedded'; astName: string; schema: () => Schema<Scalars> }
     | (
-        | { type: 'relation'; relation: 'inner'; schema: () => Schema<Scalars>; refFrom: string; refTo: string; dao: string }
-        | { type: 'relation'; relation: 'foreign'; schema: () => Schema<Scalars>; refFrom: string; refTo: string; dao: string }
+        | { type: 'relation'; astName: string; relation: 'inner'; schema: () => Schema<Scalars>; refFrom: string; refTo: string; dao: string }
+        | { type: 'relation'; astName: string; relation: 'foreign'; schema: () => Schema<Scalars>; refFrom: string; refTo: string; dao: string }
         | {
             type: 'relation'
             relation: 'relationEntity'

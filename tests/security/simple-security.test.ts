@@ -32,7 +32,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
     },
     security: {
       operationDomain: () => {
-        return {}
+        return [{}]
       },
       applySecurity: securityContext != null,
       context: securityContext ?? [],

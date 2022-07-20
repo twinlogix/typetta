@@ -127,11 +127,21 @@ export type AST = {
   }
 }
 
+export const schemas = {
+  Hotel: hotelSchema,
+  Reservation: reservationSchema,
+  Role: roleSchema,
+  Room: roomSchema,
+  User: userSchema,
+  UserRole: userRoleSchema,
+} as const
+
 export function hotelSchema(): T.Schema<ScalarsSpecification> {
   return {
     description: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -139,21 +149,25 @@ export function hotelSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     name: {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     totalCustomers: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
   }
 }
@@ -220,6 +234,7 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -227,29 +242,35 @@ export function reservationSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     room: {
       type: 'relation',
+      astName: 'Room',
       relation: 'inner',
       schema: () => roomSchema(),
       refFrom: 'roomId',
       refTo: 'id',
       dao: 'room',
+      directives: {},
     },
     roomId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
   }
 }
@@ -338,6 +359,7 @@ export function roleSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'user',
       required: true,
       isEnum: true,
+      directives: {},
     },
     permissions: {
       type: 'scalar',
@@ -345,6 +367,7 @@ export function roleSchema(): T.Schema<ScalarsSpecification> {
       required: true,
       isList: true,
       isEnum: true,
+      directives: {},
     },
   }
 }
@@ -414,25 +437,30 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'String',
       required: true,
+      directives: {},
     },
     from: {
       type: 'scalar',
       scalar: 'Date',
       required: true,
+      directives: {},
     },
     hotel: {
       type: 'relation',
+      astName: 'Hotel',
       relation: 'inner',
       schema: () => hotelSchema(),
       refFrom: 'hotelId',
       refTo: 'id',
       dao: 'hotel',
       required: true,
+      directives: {},
     },
     hotelId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -440,16 +468,19 @@ export function roomSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'Int',
       required: true,
+      directives: {},
     },
     to: {
       type: 'scalar',
       scalar: 'Date',
       required: true,
+      directives: {},
     },
   }
 }
@@ -516,10 +547,12 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       type: 'scalar',
       scalar: 'Email',
       required: true,
+      directives: {},
     },
     firstName: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -527,13 +560,16 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isId: true,
       generationStrategy: 'generator',
       required: true,
+      directives: {},
     },
     lastName: {
       type: 'scalar',
       scalar: 'String',
+      directives: {},
     },
     reservations: {
       type: 'relation',
+      astName: 'Reservation',
       relation: 'foreign',
       schema: () => reservationSchema(),
       refFrom: 'userId',
@@ -541,9 +577,11 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       dao: 'reservation',
       required: true,
       isList: true,
+      directives: {},
     },
     roles: {
       type: 'relation',
+      astName: 'UserRole',
       relation: 'foreign',
       schema: () => userRoleSchema(),
       refFrom: 'refUserId',
@@ -552,10 +590,12 @@ export function userSchema(): T.Schema<ScalarsSpecification> {
       isListElementRequired: true,
       required: true,
       isList: true,
+      directives: {},
     },
     totalPayments: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
   }
 }
@@ -621,6 +661,7 @@ export function userRoleSchema(): T.Schema<ScalarsSpecification> {
     hotelId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
     id: {
       type: 'scalar',
@@ -629,34 +670,41 @@ export function userRoleSchema(): T.Schema<ScalarsSpecification> {
       generationStrategy: 'db',
       required: true,
       alias: '_id',
+      directives: {},
     },
     refUserId: {
       type: 'scalar',
       scalar: 'ID',
       required: true,
+      directives: {},
     },
     role: {
       type: 'relation',
+      astName: 'Role',
       relation: 'inner',
       schema: () => roleSchema(),
       refFrom: 'roleCode',
       refTo: 'code',
       dao: 'role',
       required: true,
+      directives: {},
     },
     roleCode: {
       type: 'scalar',
       scalar: 'String',
       required: true,
       isEnum: true,
+      directives: {},
     },
     tenantId: {
       type: 'scalar',
       scalar: 'Int',
+      directives: {},
     },
     userId: {
       type: 'scalar',
       scalar: 'ID',
+      directives: {},
     },
   }
 }
@@ -745,6 +793,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
   log?: T.LogInput<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'User' | 'UserRole'>
+  awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
 type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>
@@ -786,6 +835,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as HotelDAO<MetadataType, OperationMetadataType>)
           : new HotelDAO({
               entityManager: this,
@@ -799,6 +849,7 @@ export class EntityManager<
               ],
               name: 'Hotel',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._hotel
@@ -819,6 +870,7 @@ export class EntityManager<
               ],
               name: 'Reservation',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as ReservationDAO<MetadataType, OperationMetadataType>)
           : new ReservationDAO({
               entityManager: this,
@@ -832,6 +884,7 @@ export class EntityManager<
               ],
               name: 'Reservation',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._reservation
@@ -849,6 +902,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.role?.middlewares || []), ...(selectMiddleware('role', this.middlewares) as T.DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Role',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as RoleDAO<MetadataType, OperationMetadataType>)
           : new RoleDAO({
               entityManager: this,
@@ -859,6 +913,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.role?.middlewares || []), ...(selectMiddleware('role', this.middlewares) as T.DAOMiddleware<RoleDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Role',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._role
@@ -876,6 +931,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.room?.middlewares || []), ...(selectMiddleware('room', this.middlewares) as T.DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Room',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as RoomDAO<MetadataType, OperationMetadataType>)
           : new RoomDAO({
               entityManager: this,
@@ -886,6 +942,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.room?.middlewares || []), ...(selectMiddleware('room', this.middlewares) as T.DAOMiddleware<RoomDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'Room',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._room
@@ -903,6 +960,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as UserDAO<MetadataType, OperationMetadataType>)
           : new UserDAO({
               entityManager: this,
@@ -913,6 +971,7 @@ export class EntityManager<
               middlewares: [...(this.overrides?.user?.middlewares || []), ...(selectMiddleware('user', this.middlewares) as T.DAOMiddleware<UserDAOGenerics<MetadataType, OperationMetadataType>>[])],
               name: 'User',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._user
@@ -933,6 +992,7 @@ export class EntityManager<
               ],
               name: 'UserRole',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             }) as unknown as UserRoleDAO<MetadataType, OperationMetadataType>)
           : new UserRoleDAO({
               entityManager: this,
@@ -946,6 +1006,7 @@ export class EntityManager<
               ],
               name: 'UserRole',
               logger: this.logger,
+              awaitLog: this.params.awaitLog,
             })
     }
     return this._userRole
