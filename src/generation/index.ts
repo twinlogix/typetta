@@ -4,9 +4,9 @@ import { InputTypettaGenerator } from './generators/input-generator'
 import { ResolverTypettaGenerator } from './generators/resolver-generator'
 import { TsTypettaGeneratorNode, TsTypettaGeneratorScalar } from './types'
 import { TsTypettaVisitor } from './visitor'
-import { Types, PluginFunction, PluginValidateFn } from '@graphql-codegen/plugin-helpers'
+import { Types, PluginFunction, PluginValidateFn, oldVisit } from '@graphql-codegen/plugin-helpers'
 import { transformSchemaAST } from '@graphql-codegen/schema-ast'
-import { visit, GraphQLSchema } from 'graphql'
+import { GraphQLSchema } from 'graphql'
 import { isObject } from 'lodash'
 import { extname } from 'path'
 
@@ -20,7 +20,7 @@ export const plugin: PluginFunction<TypeScriptTypettaPluginConfig> = async (sche
   }
   if (config.generationOutput) {
     const visitor = new TsTypettaVisitor(schema, config)
-    const visitorResult = visit(ast, { leave: visitor })
+    const visitorResult = oldVisit(ast, { leave: visitor })
     const definitions: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[] = visitorResult.definitions.filter(
       (d: unknown) => isObject(d) && ((d as TsTypettaGeneratorNode).type || (d as TsTypettaGeneratorScalar).type),
     )
