@@ -52,15 +52,14 @@
     "@typescript-eslint/eslint-plugin": "5.11.0",
     "@typescript-eslint/parser": "5.11.0",
     "@vscode/sqlite3": "5.0.8",
-    "apollo-server": "3.9.0",
-    "apollo-server-testing": "2.25.3",
+    "apollo-server": "3.10.0",
     "bignumber.js": "9.0.2",
     "eslint": "7.32.0",
     "jest": "27.5.1",
     "make-coverage-badge": "1.2.0",
-    "mongodb-memory-server": "8.4.2",
-    "prettier": "2.6.2",
-    "release-it": "15.0.0",
+    "mongodb-memory-server": "8.7.2",
+    "prettier": "2.7.1",
+    "release-it": "15.1.2",
     "rimraf": "3.0.2",
     "sha256": "0.2.0",
     "ts-jest": "27.1.5",
@@ -69,7 +68,7 @@
   },
   "dependencies": {
     "@graphql-codegen/add": "3.1.1",
-    "@graphql-codegen/cli": "2.7.0",
+    "@graphql-codegen/cli": "2.8.0",
     "@graphql-codegen/plugin-helpers": "2.4.2",
     "@graphql-codegen/schema-ast": "2.4.1",
     "@graphql-codegen/typescript": "2.6.0",
@@ -79,14 +78,14 @@
     "commander": "9.3.0",
     "dataloader": "2.1.0",
     "dedent": "0.7.0",
-    "graphql": "15.8.0",
+    "graphql": "16.5.0",
     "graphql-tag": "2.12.6",
     "inquirer": "8.2.4",
     "is-plain-object": "5.0.0",
     "lodash": "4.17.21",
     "object-hash": "2.2.0",
-    "prettier": "2.6.2",
-    "type-fest": "2.13.1",
+    "prettier": "2.7.1",
+    "type-fest": "2.14.0",
     "yaml": "2.1.1",
     "uuid": "8.3.2"
   },
@@ -95,7 +94,7 @@
     "mongodb": "4.7.0"
   },
   "resolutions": {
-    "graphql": "15.8.0"
+    "graphql": "16.5.0"
   },
   "jest": {
     "rootDir": "./",
