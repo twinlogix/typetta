@@ -1,4 +1,5 @@
-import { filterEntity, mock } from '../src'
+import { adaptResolverFilterToTypettaFilter, filterEntity, mock } from '../src'
+import { userSchema } from './demo/dao.generated'
 
 test('filter test basic operators', async () => {
   const entity = {
@@ -197,4 +198,32 @@ test('filter test others', async () => {
   expect(filterEntity(entity, { value: 1 })).toBe(false)
   expect(filterEntity(entity, { value2: 1 })).toBe(false)
   expect(filterEntity(entity, { value2: entity.value2 })).toBe(true)
+})
+
+test('adaptResolverFilterToTypettaFilter', () => {
+  const r1 = adaptResolverFilterToTypettaFilter(
+    {
+      and_: [
+        {
+          attributes: { has: '123' },
+          or_: [{ firstName: { eq: 'Mario' } }, { credentials: { username: { eq: 'mario' } } }],
+        },
+        {
+          nor_: [{ cr: { username: { has: 'm' } } }],
+        },
+      ],
+    },
+    userSchema(),
+  )
+  expect(r1).toStrictEqual({
+    $and: [
+      {
+        attributes: '123',
+        $or: [{ firstName: { eq: 'Mario' } }, { 'credentials.username': { eq: 'mario' } }],
+      },
+      {
+        $nor: [{ 'cr.username': 'm' }],
+      },
+    ],
+  })
 })

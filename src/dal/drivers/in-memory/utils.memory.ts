@@ -1,6 +1,10 @@
 import { LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
-import { hasKeys } from '../../../utils/utils'
+import { getSchemaFieldTraversing, hasKeys, modelValueToDbValue } from '../../../utils/utils'
 import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../../dao/filters/filters.types'
+import { AbstractScalars } from '../../dao/schemas/ast.types'
+import { Schema, SchemaField } from '../../dao/schemas/schemas.types'
+import { DataTypeAdapter, identityAdapter } from '../drivers.types'
+import { InMemoryDataTypeAdapterMap } from './adapters.memory'
 import { IN_MEMORY_STATE } from './state.memory'
 import { ObjectId } from 'mongodb'
 
@@ -87,46 +91,78 @@ export function equals(l: unknown, r: unknown): boolean {
   return compare(l, r) === 0
 }
 
-function logicOperators<FilterFields extends AbstractFilterFields>(entity: unknown, filter: Filter<FilterFields> | undefined): boolean {
+function logicOperators<FilterFields extends AbstractFilterFields, Scalars extends AbstractScalars>(
+  entity: unknown,
+  filter: Filter<FilterFields> | undefined,
+  schema?: Schema<Scalars>,
+  adapters?: InMemoryDataTypeAdapterMap<Scalars>,
+): boolean {
   if (filter && ('$and' in filter || '$or' in filter || '$nor' in filter)) {
-    const andResult = filter.$and ? filter.$and.map((f) => filterEntity(entity, f)).every((v) => v) : true
-    const orResult = filter.$or ? filter.$or.map((f) => filterEntity(entity, f)).some((v) => v) : true
-    const norResult = filter.$nor ? filter.$nor.map((f) => filterEntity(entity, f)).every((v) => !v) : true
+    const andResult = filter.$and ? filter.$and.map((f) => filterEntity(entity, f, schema, adapters)).every((v) => v) : true
+    const orResult = filter.$or ? filter.$or.map((f) => filterEntity(entity, f, schema, adapters)).some((v) => v) : true
+    const norResult = filter.$nor ? filter.$nor.map((f) => filterEntity(entity, f, schema, adapters)).every((v) => !v) : true
     return andResult && orResult && norResult
   }
   return true
 }
 
-export function filterEntity<FilterFields extends AbstractFilterFields>(entity: unknown, filter: Filter<FilterFields> | undefined): boolean {
+export function filterEntity<FilterFields extends AbstractFilterFields, Scalars extends AbstractScalars>(
+  entity: unknown,
+  filter: Filter<FilterFields> | undefined,
+  schema?: Schema<Scalars>,
+  adapters?: InMemoryDataTypeAdapterMap<Scalars>,
+): boolean {
   if (!filter) {
     return true
   }
 
   return (
-    logicOperators(entity, filter) &&
+    logicOperators(entity, filter, schema, adapters) &&
     Object.entries(filter)
       .filter((p) => !MONGODB_LOGIC_QUERY_PREFIXS.has(p[0]))
       .every(([key, f]) => {
         const value = getByPath(entity, key)
+        let adapter: DataTypeAdapter<unknown, unknown>
+        let schemaField: SchemaField<Scalars>
+        if (schema && adapters) {
+          const schemaField2 = getSchemaFieldTraversing(key, schema)
+          if (!schemaField2 || !('scalar' in schemaField2)) {
+            return false
+          }
+          schemaField = schemaField2
+          adapter = adapters[schemaField.scalar]
+          if (!adapter) {
+            throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
+          }
+        } else {
+          adapter = identityAdapter()
+          schemaField = {
+            type: 'scalar',
+            directives: {},
+            scalar: 'String',
+          }
+        }
+
         if (hasKeys(f, ['eq', 'in', 'ne', 'nin'])) {
           const eo = f as EqualityOperators<unknown>
+          const eq = eo.eq != null ? modelValueToDbValue(eo.eq, schemaField, adapter) : eo.eq
           const eqResult =
-            eo.eq != null
-              ? (f as Record<string, unknown>).mode === 'insensitive' && typeof value === 'string' && typeof eo.eq === 'string'
-                ? equals(value.toLocaleLowerCase(), eo.eq.toLocaleLowerCase())
-                : equals(value, eo.eq)
+            eq != null
+              ? (f as Record<string, unknown>).mode === 'insensitive' && typeof value === 'string' && typeof eq === 'string'
+                ? equals(value.toLocaleLowerCase(), eq.toLocaleLowerCase())
+                : equals(value, eq)
               : true
-          const neResult = eo.ne != null ? !equals(value, eo.ne) : true
-          const inResult = eo.in ? eo.in.some((v) => equals(value, v)) : true
-          const ninResult = eo.nin ? eo.nin.every((v) => !equals(value, v)) : true
+          const neResult = eo.ne != null ? !equals(value, modelValueToDbValue(eo.ne, schemaField, adapter)) : true
+          const inResult = eo.in ? eo.in.some((v) => equals(value, modelValueToDbValue(v, schemaField, adapter))) : true
+          const ninResult = eo.nin ? eo.nin.every((v) => !equals(value, modelValueToDbValue(v, schemaField, adapter))) : true
           return eqResult && neResult && inResult && ninResult
         }
         if (hasKeys(f, ['gte', 'gt', 'lte', 'lt'])) {
           const qo = f as QuantityOperators<unknown>
-          const gteResult = qo.gte != null ? compare(value, qo.gte) >= 0 : true
-          const gtResult = qo.gt != null ? compare(value, qo.gt) > 0 : true
-          const lteResult = qo.lte != null ? compare(value, qo.lte) <= 0 : true
-          const ltResult = qo.lt != null ? compare(value, qo.lt) < 0 : true
+          const gteResult = qo.gte != null ? compare(value, modelValueToDbValue(qo.gte, schemaField, adapter)) >= 0 : true
+          const gtResult = qo.gt != null ? compare(value, modelValueToDbValue(qo.gt, schemaField, adapter)) > 0 : true
+          const lteResult = qo.lte != null ? compare(value, modelValueToDbValue(qo.lte, schemaField, adapter)) <= 0 : true
+          const ltResult = qo.lt != null ? compare(value, modelValueToDbValue(qo.lt, schemaField, adapter)) < 0 : true
           return gteResult && gtResult && lteResult && ltResult
         }
         if (hasKeys(f, ['exists'])) {
@@ -160,7 +196,8 @@ export function filterEntity<FilterFields extends AbstractFilterFields>(entity: 
             }
           }
         }
-        return equals(value, f)
+        const asd = modelValueToDbValue(f, schemaField, adapter)
+        return equals(value, asd)
       })
   )
 }
