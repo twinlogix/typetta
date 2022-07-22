@@ -13,6 +13,7 @@ import {
   SortElement,
   TypeTraversal,
 } from '../..'
+import { MappedIterable } from '../../utils/iterable'
 import { OmitNever, IfAny } from '../../utils/utils.types'
 import { AbstractEntityManager } from '../entity-manager'
 import { LogFunction } from './log/log.types'
@@ -142,10 +143,23 @@ export type MiddlewareContext<T extends DAOGenerics> = {
 export type IdGenerationStrategy = 'user' | 'db' | 'generator'
 export type DefaultGenerationStrategy = 'middleware' | 'generator'
 
+export abstract class LiveQuery<T> implements AsyncIterable<T> {
+  public [Symbol.asyncIterator](): AsyncIterator<T> {
+    return this.asyncIterator()
+  }
+  public abstract close(): Promise<void>
+  public abstract asyncIterator(): AsyncIterator<T>
+  public map<O>(f: (t: T) => O): AsyncIterable<O> {
+    return new MappedIterable(this, f)
+  }
+}
+
 export interface DAO<T extends DAOGenerics> {
   findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]>
   findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']> | null>
-  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] }>
+  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
+    params?: FindParams<T, P>,
+  ): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
   aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
@@ -155,6 +169,19 @@ export interface DAO<T extends DAOGenerics> {
   replaceOne(params: ReplaceParams<T>): Promise<void>
   deleteOne(params: DeleteParams<T>): Promise<void>
   deleteAll(params: DeleteParams<T>): Promise<void>
+
+  liveFindAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
+    params?: FindParams<T, P> & { maxRateMs?: number },
+  ): LiveQuery<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]>
+  liveFindOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
+    params?: FindOneParams<T, P> & { maxRateMs?: number },
+  ): LiveQuery<Project<T['entity'], T['ast'], T['scalars'], P, T['types']> | null>
+  liveFindPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
+    params?: FindParams<T, P> & { maxRateMs?: number },
+  ): LiveQuery<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] }>
+  liveExists(params: FilterParams<T> & { maxRateMs?: number }): LiveQuery<boolean>
+  liveCount(params?: FilterParams<T> & { maxRateMs?: number }): LiveQuery<number>
+  liveAggregate<A extends AggregateParams<T>>(params: A & { maxRateMs?: number }, args?: AggregatePostProcessing<T, A>): LiveQuery<AggregateResults<T, A>>
 }
 
 export type CachedTypes<IdFields = any, Model = any, Insert = any, PlainModel = any, Projection = any, Update = any, Filter = any, SortElement = any, RelationsFindParams = any> = {
