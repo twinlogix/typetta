@@ -1472,6 +1472,31 @@ test('Simple transaction 2', async () => {
   }
 })
 
+test('Simple transaction 3', async () => {
+  await dao.user.insertOne({ record: { id: '123', live: true } })
+  const session1 = connection.startSession()
+  const session2 = connection.startSession()
+  session1.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+  session2.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+
+  const u1 = await dao.user.findOne({ filter: { id: '123' }, options: { session: session1 } })
+  if (u1?.live) {
+    await dao.user.updateOne({ filter: { id: '123' }, changes: { firstName: 'Luigi' }, options: { session: session1 } })
+  }
+  await dao.user.updateOne({ filter: { id: '124' }, changes: { live: false }, options: { session: session2 } })
+  const r2 = await session2.commitTransaction()
+  const r1 = await session1.commitTransaction()
+
+  const user = await dao.user.findOne()
+  console.log(r1, r2)
+})
+
 test('Aggregate test', async () => {
   for (let i = 0; i < 100; i++) {
     await dao.post.insertOne({
