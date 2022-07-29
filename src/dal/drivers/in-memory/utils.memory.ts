@@ -4,6 +4,7 @@ import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators
 import { AbstractScalars } from '../../dao/schemas/ast.types'
 import { Schema, SchemaField } from '../../dao/schemas/schemas.types'
 import { DataTypeAdapter, identityAdapter } from '../drivers.types'
+import { modelNameToDbName } from '../no-sql/mongodb/utils.mongodb'
 import { InMemoryDataTypeAdapterMap } from './adapters.memory'
 import { IN_MEMORY_STATE } from './state.memory'
 import { ObjectId } from 'mongodb'
@@ -120,12 +121,13 @@ export function filterEntity<FilterFields extends AbstractFilterFields, Scalars 
     logicOperators(entity, filter, schema, adapters) &&
     Object.entries(filter)
       .filter((p) => !MONGODB_LOGIC_QUERY_PREFIXS.has(p[0]))
-      .every(([key, f]) => {
-        const value = getByPath(entity, key)
+      .every(([keyF, f]) => {
         let adapter: DataTypeAdapter<unknown, unknown>
         let schemaField: SchemaField<Scalars>
+        let key: string
         if (schema && adapters) {
-          const schemaField2 = getSchemaFieldTraversing(key, schema)
+          const schemaField2 = getSchemaFieldTraversing(keyF, schema)
+          key = modelNameToDbName(keyF, schema)
           if (!schemaField2 || !('scalar' in schemaField2)) {
             return false
           }
@@ -136,12 +138,15 @@ export function filterEntity<FilterFields extends AbstractFilterFields, Scalars 
           }
         } else {
           adapter = identityAdapter()
+          key = keyF
           schemaField = {
             type: 'scalar',
             directives: {},
             scalar: 'String',
           }
         }
+
+        const value = getByPath(entity, key)
 
         if (hasKeys(f, ['eq', 'in', 'ne', 'nin'])) {
           const eo = f as EqualityOperators<unknown>

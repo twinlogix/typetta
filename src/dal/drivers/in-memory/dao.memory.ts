@@ -233,9 +233,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       for (const index of indexes) {
         const record = this.stateManager.getElement(index)
         if (record !== null) {
-          const t = transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema)
-          if (filterEntity(t, filter)) {
-            yield { record: transform ? t : record, index }
+          if (filterEntity(record, filter, this.schema, this.entityManager.adapters.memory)) {
+            yield { record: transform ? transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema) : record, index }
           }
         }
       }
@@ -243,9 +242,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
     for (const { index, record } of this.stateManager.elements()) {
       if (record !== null) {
-        const t = transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema)
-        if (filterEntity(t, filter)) {
-          yield { record: transform ? t : record, index }
+        if (filterEntity(record, filter, this.schema, this.entityManager.adapters.memory)) {
+          yield { record: transform ? transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema) : record, index }
         }
       }
     }
