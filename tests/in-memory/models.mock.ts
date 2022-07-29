@@ -113,6 +113,7 @@ export type Post = {
   clicks?: Maybe<Scalars['Int']>
   id: Scalars['ID']
   metadata?: Maybe<PostMetadata>
+  tags?: Maybe<Array<Scalars['ID']>>
   title: Scalars['String']
   views: Scalars['Int']
 }

@@ -756,7 +756,15 @@ test('insert and retrieve decimal array field', async () => {
 // ---------------------- LOCALIZED STRING FIELD --------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve localized string field', async () => {
-  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' }, usernamePasswordCredentials: { username: 'user', password: '123' }, credentials: [{ username: 'user', password: '123' }] } })
+  const iuser = await dao.user.insertOne({
+    record: {
+      firstName: 'FirstName',
+      live: true,
+      title: { it: 'Ciao', en: 'Hello' },
+      usernamePasswordCredentials: { username: 'user', password: '123' },
+      credentials: [{ username: 'user', password: '123' }],
+    },
+  })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, title: true } })
   expect(user).toBeDefined()
@@ -772,6 +780,22 @@ test('insert and retrieve localized string field', async () => {
   expect(user3).toBeDefined()
   expect(user3?.title?.en).toBe('Hello')
   expect(user3?.title?.it).toBe('Ciao')
+
+  await dao.user.updateOne({
+    filter: { id: iuser.id },
+    changes: {
+      embeddedPost: {
+        authorId: iuser.id,
+        title: 'Title',
+        views: 0,
+        tags: ['1', '2'],
+      },
+    },
+  })
+  const user4 = await dao.user.findOne({ filter: { 'embeddedPost.tags': '1' }, projection: { id: true, title: true } })
+  expect(user4).toBeDefined()
+  expect(user4?.title?.en).toBe('Hello')
+  expect(user4?.title?.it).toBe('Ciao')
 })
 
 // ------------------------------------------------------------------------

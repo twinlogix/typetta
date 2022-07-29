@@ -76,6 +76,7 @@ type Post @entity @memory {
   authorId: ID! @alias(value: "aId")
   author: User! @innerRef
   metadata: PostMetadata
+  tags: [ID!]
 }
 
 type PostMetadata {

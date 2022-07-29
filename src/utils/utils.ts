@@ -40,7 +40,7 @@ export function modelValueToDbValue<Scalars extends AbstractScalars>(
       }
     }
   }
-  return schemaField.isList ? (value as Scalars[keyof Scalars]['type'][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as Scalars[keyof Scalars]['type'])
+  return schemaField.isList && Array.isArray(value) ? (value as Scalars[keyof Scalars]['type'][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as Scalars[keyof Scalars]['type'])
 }
 
 export function* reversed<T>(array: T[]): Iterable<T> {

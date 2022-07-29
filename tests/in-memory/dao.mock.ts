@@ -168,6 +168,7 @@ export type AST = {
       clicks: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
       metadata: { type: 'embedded'; isList: false; astName: 'PostMetadata'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      tags: { type: 'scalar'; isList: true; astName: 'ID'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       title: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       views: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
@@ -1232,6 +1233,13 @@ export function postSchema(): T.Schema<ScalarsSpecification> {
       type: 'embedded',
       astName: 'PostMetadata',
       schema: () => postMetadataSchema(),
+      directives: {},
+    },
+    tags: {
+      type: 'scalar',
+      scalar: 'ID',
+      isListElementRequired: true,
+      isList: true,
       directives: {},
     },
     title: {
