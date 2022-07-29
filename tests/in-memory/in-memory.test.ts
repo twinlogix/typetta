@@ -756,12 +756,22 @@ test('insert and retrieve decimal array field', async () => {
 // ---------------------- LOCALIZED STRING FIELD --------------------------
 // ------------------------------------------------------------------------
 test('insert and retrieve localized string field', async () => {
-  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' } } })
+  const iuser = await dao.user.insertOne({ record: { firstName: 'FirstName', live: true, title: { it: 'Ciao', en: 'Hello' }, usernamePasswordCredentials: { username: 'user', password: '123' }, credentials: [{ username: 'user', password: '123' }] } })
 
   const user = await dao.user.findOne({ filter: { id: iuser.id }, projection: { id: true, title: true } })
   expect(user).toBeDefined()
   expect(user?.title?.en).toBe('Hello')
   expect(user?.title?.it).toBe('Ciao')
+
+  const user2 = await dao.user.findOne({ filter: { 'usernamePasswordCredentials.username': 'user' }, projection: { id: true, title: true } })
+  expect(user2).toBeDefined()
+  expect(user2?.title?.en).toBe('Hello')
+  expect(user2?.title?.it).toBe('Ciao')
+
+  const user3 = await dao.user.findOne({ filter: { 'credentials.username': 'user' }, projection: { id: true, title: true } })
+  expect(user3).toBeDefined()
+  expect(user3?.title?.en).toBe('Hello')
+  expect(user3?.title?.it).toBe('Ciao')
 })
 
 // ------------------------------------------------------------------------

@@ -16,12 +16,15 @@ type Filter<FilterFields extends AbstractFilterFields> = LogicalOperators<Filter
 
 export function getByPath(object: unknown, path: string): unknown {
   const [key, ...tail] = path.split('.')
-  if (object && typeof object === 'object') {
+  if (object && typeof object === 'object' && !Array.isArray(object)) {
     const value = (object as { [K in string]: unknown })[key]
     if (tail.length > 0) {
       return getByPath(value, tail.join('.'))
     }
     return value
+  }
+  if (object && typeof object === 'object' && Array.isArray(object)) {
+    return object.map((v) => getByPath(v, path))
   }
   return undefined
 }
@@ -201,8 +204,8 @@ export function filterEntity<FilterFields extends AbstractFilterFields, Scalars 
             }
           }
         }
-        const asd = modelValueToDbValue(f, schemaField, adapter)
-        return equals(value, asd)
+        const adaptedF = modelValueToDbValue(f, schemaField, adapter)
+        return equals(value, adaptedF)
       })
   )
 }
