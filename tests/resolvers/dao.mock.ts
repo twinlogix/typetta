@@ -595,14 +595,15 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
 export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
   entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
   operationMetadataType: OperationMetadataType
-  params: {
+  entityManagerParams: {
     metadata: MetadataType
     middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
     overrides: {
-      like: Pick<LikeDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
-      post: Pick<PostDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
-      user: Pick<UserDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      like?: Pick<Partial<LikeDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     }
+
     scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
     log: T.LogInput<'Like' | 'Post' | 'User'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>

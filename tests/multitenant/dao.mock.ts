@@ -984,16 +984,18 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
 export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
   entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
   operationMetadataType: OperationMetadataType
-  params: {
+  entityManagerParams: {
     metadata: MetadataType
     middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
     overrides: {
-      hotel: Pick<HotelDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
-      reservation: Pick<ReservationDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
-      room: Pick<RoomDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
-      tenant: Pick<TenantDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
-      user: Pick<UserDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      hotel?: Pick<Partial<HotelDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      reservation?: Pick<Partial<ReservationDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      room?: Pick<Partial<RoomDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      tenant?: Pick<Partial<TenantDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     }
+    mongodb: Record<'default', M.Db | 'mock'>
+
     scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
     log: T.LogInput<'Hotel' | 'Reservation' | 'Room' | 'Tenant' | 'User'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>

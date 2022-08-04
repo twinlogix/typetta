@@ -480,12 +480,14 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
       export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
         entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
         operationMetadataType: OperationMetadataType
-        params: {
+        entityManagerParams: {
           metadata: MetadataType
           middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
           overrides: {
-            ${contextDAOParamsDeclarations(false)}
+            ${contextDAOParamsDeclarations(true)}
           }
+          ${mongoDBParams}
+          ${knexJsParams}
           scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, '${scalarsDriverType}'>
           log: T.LogInput<${daoNamesType}>
           security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
