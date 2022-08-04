@@ -1940,3 +1940,36 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
+
+export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
+  entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+  operationMetadataType: OperationMetadataType
+  params: {
+    metadata: MetadataType
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    overrides: {
+      address: Pick<AddressDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      audit: Pick<AuditDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      city: Pick<CityDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      defaultFieldsEntity: Pick<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      device: Pick<DeviceDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      dog: Pick<DogDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      hotel: Pick<HotelDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      mockedEntity: Pick<MockedEntityDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      organization: Pick<OrganizationDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      post: Pick<PostDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      postType: Pick<PostTypeDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      user: Pick<UserDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+    }
+    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
+    log: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'User'>
+    security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
+  }
+  security: {
+    context: T.DAOSecurityContext<SecurityDomain, Permissions>
+    policies: Required<T.DAOSecurityPolicies<DAOGenericsMap<MetadataType, OperationMetadataType>, Permissions, SecurityDomain>>
+    permissions: Permissions
+    domain: SecurityDomain
+  }
+  daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+}

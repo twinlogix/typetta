@@ -980,3 +980,29 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
+
+export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
+  entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+  operationMetadataType: OperationMetadataType
+  params: {
+    metadata: MetadataType
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    overrides: {
+      hotel: Pick<HotelDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      reservation: Pick<ReservationDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      room: Pick<RoomDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      tenant: Pick<TenantDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      user: Pick<UserDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+    }
+    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
+    log: T.LogInput<'Hotel' | 'Reservation' | 'Room' | 'Tenant' | 'User'>
+    security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
+  }
+  security: {
+    context: T.DAOSecurityContext<SecurityDomain, Permissions>
+    policies: Required<T.DAOSecurityPolicies<DAOGenericsMap<MetadataType, OperationMetadataType>, Permissions, SecurityDomain>>
+    permissions: Permissions
+    domain: SecurityDomain
+  }
+  daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+}

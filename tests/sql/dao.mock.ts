@@ -1967,3 +1967,35 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
+
+export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
+  entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+  operationMetadataType: OperationMetadataType
+  params: {
+    metadata: MetadataType
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    overrides: {
+      address: Pick<AddressDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      author: Pick<AuthorDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      authorBook: Pick<AuthorBookDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      book: Pick<BookDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      city: Pick<CityDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      defaultFieldsEntity: Pick<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>, 'middlewares' | 'metadata'>
+      device: Pick<DeviceDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      dog: Pick<DogDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      friends: Pick<FriendsDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      organization: Pick<OrganizationDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+      user: Pick<UserDAOParams<MetadataType, OperationMetadataType>, 'idGenerator' | 'middlewares' | 'metadata'>
+    }
+    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
+    log: T.LogInput<'Address' | 'Author' | 'AuthorBook' | 'Book' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Friends' | 'Organization' | 'User'>
+    security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
+  }
+  security: {
+    context: T.DAOSecurityContext<SecurityDomain, Permissions>
+    policies: Required<T.DAOSecurityPolicies<DAOGenericsMap<MetadataType, OperationMetadataType>, Permissions, SecurityDomain>>
+    permissions: Permissions
+    domain: SecurityDomain
+  }
+  daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+}
