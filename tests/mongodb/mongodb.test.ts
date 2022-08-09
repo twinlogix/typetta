@@ -4,7 +4,7 @@
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock, Projection } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { AST, EntityManager, ScalarsSpecification, UserDAO, UserParams, UserPlainModel } from './dao.mock'
+import { AST, EntityManager, ScalarsSpecification, UserDAO, UserPlainModel } from './dao.mock'
 import { State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -32,9 +32,9 @@ const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'> 
     },
   },
   Password: {
-    dbToModel: (o: unknown) => o as string,
-    modelToDB: (o: string) => sha256(o),
-    validate: (o: string) => {
+    dbToModel: async (o: unknown) => o as string,
+    modelToDB: async (o: string) => sha256(o),
+    validate: async (o: string) => {
       if (o.length < 3) {
         return new Error('Password must be 3 character or more.')
       }
