@@ -79,16 +79,16 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       name: 'Typetta - Check default field presence',
       beforeInsert: async (params, context) => {
         const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.generationStrategy === 'generator' && v.type === 'scalar' ? [[k, v] as const] : []))
-        const record = fieldsToGenerate.reduce((record, [key, schema]) => {
+        let record = params.record
+        for (const [key, schema] of fieldsToGenerate) {
           const generator = this.entityManager.adapters[context.daoDriver][schema.scalar].generate
           if (record[key] == null && generator) {
-            return {
+            record = {
               ...record,
-              [key]: generator(),
+              [key]: await generator(),
             }
           }
-          return record
-        }, params.record)
+        }
         const fieldsToHave = Object.entries(schema).flatMap(([k, v]) => (v.generationStrategy === 'middleware' ? [[k, v] as const] : []))
         fieldsToHave.forEach(([key, schema]) => {
           if (schema.required && record[key] == null) {

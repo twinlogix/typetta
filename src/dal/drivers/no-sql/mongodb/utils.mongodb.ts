@@ -2,6 +2,7 @@ import { AbstractScalars } from '../../../..'
 import {
   getSchemaFieldTraversing,
   mapObject,
+  mapObjectAsync,
   modelValueToDbValue,
   MONGODB_ARRAY_VALUE_QUERY_PREFIXS,
   MONGODB_LOGIC_QUERY_PREFIXS,
@@ -60,21 +61,25 @@ export function modelNameToDbName<Scalars extends AbstractScalars>(name: string,
   }
 }
 
-export function adaptFilter<Scalars extends AbstractScalars, T extends DAOGenerics>(filter: T['filter'], schema: Schema<Scalars>, adapters: MongoDBDataTypeAdapterMap<Scalars>): Filter<Document> {
+export function adaptFilter<Scalars extends AbstractScalars, T extends DAOGenerics>(
+  filter: T['filter'],
+  schema: Schema<Scalars>,
+  adapters: MongoDBDataTypeAdapterMap<Scalars>,
+): Promise<Filter<Document>> {
   if (typeof filter === 'function') {
     return filter()
   }
-  return mapObject(filter, ([k, v]) => {
+  return mapObjectAsync(filter, async ([k, v]) => {
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField) {
       if (schemaField.type === 'relation') {
         return []
       }
-      const adapted = adaptToSchema(v, adapters, schemaField)
+      const adapted = await adaptToSchema(v, adapters, schemaField)
       return [[columnName, adapted]]
     } else if (MONGODB_LOGIC_QUERY_PREFIXS.has(k)) {
-      return [[columnName, (v as AbstractFilter[]).map((f) => adaptFilter(f, schema, adapters))]]
+      return [[columnName, await Promise.all((v as AbstractFilter[]).map((f) => adaptFilter(f, schema, adapters)))]]
     } else {
       // k is not in schema and is not a logical operator, ignore
       return []
@@ -82,11 +87,11 @@ export function adaptFilter<Scalars extends AbstractScalars, T extends DAOGeneri
   })
 }
 
-function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Scalars[keyof Scalars]['type'] | Scalars[keyof Scalars]['type'][]>(
+async function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Scalars[keyof Scalars]['type'] | Scalars[keyof Scalars]['type'][]>(
   value: unknown,
   adapters: MongoDBDataTypeAdapterMap<Scalars>,
   schemaField: SchemaField<Scalars>,
-): unknown {
+): Promise<unknown> {
   if (schemaField.type === 'scalar') {
     // filter on scalar type
     const adapter = adapters[schemaField.scalar]
@@ -95,18 +100,18 @@ function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Scalars[k
     } else if (typeof value === 'object' && value !== null && Object.keys(value).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
       // mongodb query
       const filter = value as Record<string, unknown>
-      const mappedFilter = mapObject(filter, ([fk, fv]) => {
+      const mappedFilter = await mapObjectAsync(filter, async ([fk, fv]) => {
         if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
           if (fk === 'eq' && 'mode' in filter && filter.mode === 'insensitive') {
             return [
               ['$options', 'i'],
-              ['$regex', `^${modelValueToDbValue(fv as Scalar, schemaField, adapter)}$`],
+              ['$regex', `^${await modelValueToDbValue(fv as Scalar, schemaField, adapter)}$`],
             ]
           }
-          return [[`$${fk}`, modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
+          return [[`$${fk}`, await modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
-          return [[`$${fk}`, (fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter))]]
+          return [[`$${fk}`, await Promise.all((fv as Scalar[]).map((fve) => modelValueToDbValue(fve, schemaField, adapter)))]]
         }
         if (MONGODB_STRING_QUERY_PREFIX.has(fk)) {
           return []
@@ -152,8 +157,8 @@ function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Scalars[k
   }
 }
 
-export function adaptUpdate<Scalars extends AbstractScalars, UpdateType>(update: UpdateType, schema: Schema<Scalars>, adapters: MongoDBDataTypeAdapterMap<Scalars>): Document {
-  return mapObject(update as unknown as Record<string, Scalars[keyof Scalars]['type'] | Scalars[keyof Scalars]['type'][]>, ([k, v]) => {
+export function adaptUpdate<Scalars extends AbstractScalars, UpdateType>(update: UpdateType, schema: Schema<Scalars>, adapters: MongoDBDataTypeAdapterMap<Scalars>): Promise<Document> {
+  return mapObjectAsync(update as unknown as Record<string, Scalars[keyof Scalars]['type'] | Scalars[keyof Scalars]['type'][]>, async ([k, v]) => {
     if (v === undefined) {
       return []
     }
@@ -164,12 +169,12 @@ export function adaptUpdate<Scalars extends AbstractScalars, UpdateType>(update:
         return [[columnName, null]]
       }
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
-      return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
+      return [[columnName, await modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField && schemaField.type === 'embedded') {
       if (schemaField.isList) {
-        return [[columnName, v === null ? null : (v as unknown[]).map((ve) => (ve === null ? null : adaptUpdate(ve, schemaField.schema(), adapters)))]]
+        return [[columnName, v === null ? null : await Promise.all((v as unknown[]).map(async (ve) => (ve === null ? null : await adaptUpdate(ve, schemaField.schema(), adapters))))]]
       }
-      return [[columnName, v === null ? null : adaptUpdate(v, schemaField.schema(), adapters)]]
+      return [[columnName, v === null ? null : await adaptUpdate(v, schemaField.schema(), adapters)]]
     } else {
       return []
     }

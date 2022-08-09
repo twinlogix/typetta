@@ -20,42 +20,42 @@ export function getSchemaFieldTraversing<Scalars extends AbstractScalars>(key: s
   }
 }
 
-export function modelValueToDbValue<Scalars extends AbstractScalars>(
+export async function modelValueToDbValue<Scalars extends AbstractScalars>(
   value: Scalars[keyof Scalars]['type'] | Scalars[keyof Scalars]['type'][],
   schemaField: SchemaField<Scalars>,
   adapter: DataTypeAdapter<Scalars[keyof Scalars]['type'], unknown>,
-): unknown {
+): Promise<unknown> {
   if (adapter.validate) {
     if (schemaField.isList) {
       for (const v of value as Scalars[keyof Scalars]['type'][]) {
-        const validation = adapter.validate(v)
+        const validation = await adapter.validate(v)
         if (validation !== true) {
           throw validation
         }
       }
     } else {
-      const validation = adapter.validate(value as Scalars[keyof Scalars])
+      const validation = await adapter.validate(value as Scalars[keyof Scalars])
       if (validation !== true) {
         throw validation
       }
     }
   }
-  return schemaField.isList && Array.isArray(value) ? (value as Scalars[keyof Scalars]['type'][]).map((e) => adapter.modelToDB(e)) : adapter.modelToDB(value as Scalars[keyof Scalars]['type'])
+  if (schemaField.isList && Array.isArray(value)) {
+    const results = []
+    for (const e of value as Scalars[keyof Scalars]['type'][]) {
+      const r = await adapter.modelToDB(e)
+      results.push(r)
+    }
+    return results
+  } else {
+    return adapter.modelToDB(value as Scalars[keyof Scalars]['type'])
+  }
 }
 
 export function* reversed<T>(array: T[]): Iterable<T> {
   for (let i = array.length - 1; i >= 0; i--) {
     yield array[i]
   }
-}
-
-export function iteratorLength(iterator: Iterable<unknown>): number {
-  let count = 0
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  for (const _v of iterator) {
-    count++
-  }
-  return count
 }
 
 export const MONGODB_LOGIC_QUERY_PREFIXS = new Set(['$or', '$and', '$nor'])
@@ -175,6 +175,16 @@ export function filterNullFields<T extends Record<string, unknown>>(obj: T): T {
 
 export function mapObject<T extends Record<string, unknown>>(obj: T, f: (p: [string, T[keyof T]]) => [string, unknown][]): Record<string, unknown> {
   return Object.fromEntries(Object.entries(obj).flatMap(([k, v]) => f([k, v as T[keyof T]])))
+}
+
+export async function mapObjectAsync<T extends Record<string, unknown>>(obj: T, f: (p: [string, T[keyof T]]) => Promise<[string, unknown][]>): Promise<Record<string, unknown>> {
+  const entries = []
+  for (const [k, v] of Object.entries(obj)) {
+    const e = await f([k, v as T[keyof T]])
+    entries.push(...e)
+  }
+  const result = Object.fromEntries(entries)
+  return result
 }
 
 export function hasKeys(i: unknown, keys: string[]): boolean {

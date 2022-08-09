@@ -1,5 +1,5 @@
 import { AbstractScalars, AggregatePostProcessing } from '../../../..'
-import { getSchemaFieldTraversing, mapObject, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
+import { getSchemaFieldTraversing, mapObjectAsync, modelValueToDbValue, MONGODB_QUERY_PREFIXS } from '../../../../utils/utils'
 import { AggregateParams, DAOGenerics } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators, LogicalOperators } from '../../../dao/filters/filters.types'
 import { GenericProjection } from '../../../dao/projections/projections.types'
@@ -27,16 +27,16 @@ export function modelNameToDbName<Scalars extends AbstractScalars>(name: string,
   }
 }
 
-export function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
+export async function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   filter: T['filter'],
   schema: Schema<ScalarsType>,
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>,
-): Knex.QueryBuilder<TRecord, TResult> {
+): Promise<{ builder: Knex.QueryBuilder<TRecord, TResult> }> {
   if (typeof filter === 'function') {
-    return filter(builder)
+    return { builder: filter(builder) }
   }
-  Object.entries(filter).forEach(([k, v]) => {
+  for (const [k, v] of Object.entries(filter)) {
     const schemaField = getSchemaFieldTraversing(k, schema)
     if (schemaField) {
       if (schemaField.isList) {
@@ -50,22 +50,22 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
           }
           const vr = v as Record<string, unknown>
-          Object.entries(v).forEach(([fk, fv]) => {
+          for (const [fk, fv] of Object.entries(v)) {
             const av = () => adapter.modelToDB(fv) as any
-            const avs = () => (fv as any[]).map((fve) => adapter.modelToDB(fve) as any)
+            const avs = () => Promise.all((fv as any[]).map((fve) => adapter.modelToDB(fve) as any))
             // prettier-ignore
             switch (fk) {
               case 'exists': fv == null ? null : fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
               case 'eq': 
-                if(vr.mode && vr.mode === 'insensitive') { builder.whereILike(columnName, av()) }
-                else { builder.where(columnName, av()) } break
-              case 'gte': builder.where(columnName, '>=', av()); break
-              case 'gt': builder.where(columnName, '>', av()); break
-              case 'lte': builder.where(columnName, '<=', av()); break
-              case 'lt': builder.where(columnName, '<', av()); break
-              case 'ne': builder.not.where(columnName, av()); break
-              case 'in': builder.whereIn(columnName, avs()); break
-              case 'nin': builder.not.whereIn(columnName, avs()); break
+                if(vr.mode && vr.mode === 'insensitive') { builder.whereILike(columnName, await av()) }
+                else { builder.where(columnName, await av()) } break
+              case 'gte': builder.where(columnName, '>=', await av()); break
+              case 'gt': builder.where(columnName, '>', await av()); break
+              case 'lte': builder.where(columnName, '<=', await av()); break
+              case 'lt': builder.where(columnName, '<', await av()); break
+              case 'ne': builder.not.where(columnName, await av()); break
+              case 'in': builder.whereIn(columnName, await avs()); break
+              case 'nin': builder.not.whereIn(columnName, await avs()); break
               case 'contains': 
                 if(vr.mode && vr.mode === 'sensitive') {
                   builder.whereLike(columnName, `%${fv}%`)
@@ -90,7 +90,7 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
               case 'mode': break
               default: throw new Error(`${fk} query is not supported on sql entity.`)
             }
-          })
+          }
         } else {
           if (v === null) {
             builder.whereNull(columnName)
@@ -99,44 +99,38 @@ export function buildWhereConditions<TRecord, TResult, ScalarsType extends Defau
             if (!adapter) {
               throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
             }
-            builder.where(columnName, adapter.modelToDB(v as any) as any)
+            builder.where(columnName, (await adapter.modelToDB(v as any)) as any)
           }
         }
       } else {
         throw new Error('Filtering on embedded types is not supported.')
       }
     } else if (k === '$or') {
-      builder.orWhere((qb) => {
-        for (const f of v as AbstractFilter[]) {
-          buildWhereConditions(qb.or, f, schema, adapters)
-        }
-      })
+      for (const f of v as AbstractFilter[]) {
+        await buildWhereConditions(builder.or, f, schema, adapters)
+      }
     } else if (k === '$and') {
-      builder.andWhere((qb) => {
-        for (const f of v as AbstractFilter[]) {
-          buildWhereConditions(qb, f, schema, adapters)
-        }
-      })
+      for (const f of v as AbstractFilter[]) {
+        await buildWhereConditions(builder, f, schema, adapters)
+      }
     } else if (k === '$nor') {
-      builder.not.orWhere((qb) => {
-        for (const f of v as AbstractFilter[]) {
-          buildWhereConditions(qb.or, f, schema, adapters)
-        }
-      })
+      for (const f of v as AbstractFilter[]) {
+        await buildWhereConditions(builder.not.or, f, schema, adapters)
+      }
     } else {
       // throw new Error(`${k} is not a scalar in the schema. (Filtering on embedded types is not supported.)`)
     }
-  })
-  return builder
+  }
+  return { builder }
 }
 
-export function buildHavingConditions<TRecord, TResult>(
+export async function buildHavingConditions<TRecord, TResult>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   having: Exclude<AggregatePostProcessing<DAOGenerics, AggregateParams<DAOGenerics>>['having'], undefined>,
-): Knex.QueryBuilder<TRecord, TResult> {
-  Object.entries(having).forEach(([k, v]) => {
+): Promise<{ builder: Knex.QueryBuilder<TRecord, TResult> }> {
+  for (const [k, v] of Object.entries(having)) {
     if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
-      Object.entries(v).forEach(([fk, fv]) => {
+      for (const [fk, fv] of Object.entries(v)) {
         // prettier-ignore
         switch (fk) {
           case 'exists': fv ? builder.whereNotNull(k) : builder.whereNull(k); break
@@ -150,7 +144,7 @@ export function buildHavingConditions<TRecord, TResult>(
           case 'nin': builder.havingNotIn(k, fv as number[]); break
           default: throw new Error(`${fk} query is not supported on sql entity.`)
         }
-      })
+      }
     } else {
       if (v === null) {
         // builder.havingNull(columnName)
@@ -158,15 +152,15 @@ export function buildHavingConditions<TRecord, TResult>(
         builder.having(k, '=', v as number)
       }
     }
-  })
-  return builder
+  }
+  return { builder }
 }
 
-export function buildSelect<TRecord, TResult, Scalars extends AbstractScalars>(
+export async function buildSelect<TRecord, TResult, Scalars extends AbstractScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   projection: GenericProjection,
   schema: Schema<Scalars>,
-): Knex.QueryBuilder<TRecord, TResult> {
+): Promise<{ builder: Knex.QueryBuilder<TRecord, TResult> }> {
   function embeddedColumns(prefix: string, s: Schema<Scalars>, proj: GenericProjection): string[] {
     return Object.entries(s).flatMap(([k, v]) => {
       if (proj === true || (typeof proj === 'object' && k in proj)) {
@@ -204,20 +198,20 @@ export function buildSelect<TRecord, TResult, Scalars extends AbstractScalars>(
       }),
     )
   }
-  return builder
+  return { builder }
 }
 
-export function buildSort<TRecord, TResult, Scalars extends AbstractScalars>(
+export async function buildSort<TRecord, TResult, Scalars extends AbstractScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   sort: AbstractSort[],
   schema: Schema<Scalars>,
-): Knex.QueryBuilder<TRecord, TResult> {
-  sort.forEach((s) => {
-    Object.entries(s).forEach(([sortKey, sortDirection]) => {
+): Promise<{ builder: Knex.QueryBuilder<TRecord, TResult> }> {
+  for (const s of sort) {
+    for (const [sortKey, sortDirection] of Object.entries(s)) {
       builder.orderBy(modelNameToDbName(sortKey, schema), sortDirection)
-    })
-  })
-  return builder
+    }
+  }
+  return { builder }
 }
 
 export function flatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Schema<Scalars>, object: any) {
@@ -309,7 +303,7 @@ export function embeddedScalars<Scalars extends AbstractScalars>(
   })
 }
 
-export function adaptUpdate<ScalarsType extends AbstractScalars, UpdateType>({
+export async function adaptUpdate<ScalarsType extends AbstractScalars, UpdateType>({
   update,
   schema,
   adapters,
@@ -317,16 +311,16 @@ export function adaptUpdate<ScalarsType extends AbstractScalars, UpdateType>({
   update: UpdateType
   schema: Schema<ScalarsType>
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>
-}): object {
-  return mapObject(update as any, ([k, v]) => {
+}): Promise<object> {
+  return mapObjectAsync(update as any, async ([k, v]) => {
     if (v === undefined) return []
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField && schemaField.type === 'scalar') {
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
-      return [[columnName, modelValueToDbValue(v, schemaField, adapter)]]
+      return [[columnName, await modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField && schemaField.type === 'embedded') {
-      const adapted = adaptUpdate({ update: v, schema: schemaField.schema(), adapters })
+      const adapted = await adaptUpdate({ update: v, schema: schemaField.schema(), adapters })
       return Object.entries(adapted).map(([sk, sv]) => {
         return [concatEmbeddedNames(columnName, sk), sv]
       })

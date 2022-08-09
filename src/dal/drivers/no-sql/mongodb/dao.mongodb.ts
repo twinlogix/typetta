@@ -20,15 +20,15 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     this.collection = collection
   }
 
-  private dbsToModels(objects: WithId<Document>[]): PartialDeep<T['model']>[] {
-    return objects.map((o) => this.dbToModel(o))
+  private dbsToModels(objects: WithId<Document>[]): Promise<PartialDeep<T['model']>[]> {
+    return Promise.all(objects.map((o) => this.dbToModel(o)))
   }
 
-  private dbToModel(object: WithId<Document>): PartialDeep<T['model']> {
+  private dbToModel(object: WithId<Document>): Promise<PartialDeep<T['model']>> {
     return transformObject(this.entityManager.adapters.mongo, 'dbToModel', object, this.schema)
   }
 
-  private modelToDb(object: T['insert'] | T['update']): OptionalId<Document> {
+  private modelToDb(object: T['insert'] | T['update']): Promise<OptionalId<Document>> {
     return transformObject(this.entityManager.adapters.mongo, 'modelToDB', object, this.schema)
   }
 
@@ -36,8 +36,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return adaptProjection(projection, this.schema) as Document
   }
 
-  private buildFilter(filter?: T['filter']): Filter<Document> {
-    return filter ? adaptFilter(filter as unknown as AbstractFilter, this.schema, this.entityManager.adapters.mongo) : {}
+  private async buildFilter(filter?: T['filter']): Promise<Filter<Document>> {
+    return filter ? await adaptFilter(filter as unknown as AbstractFilter, this.schema, this.entityManager.adapters.mongo) : {}
   }
 
   private buildSort(sort?: T['sort']): [string, SortDirection][] {
@@ -47,17 +47,17 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     return sort ? adaptSorts(sort, this.schema) : []
   }
 
-  private buildChanges(update: T['update']) {
+  private async buildChanges(update: T['update']): Promise<T['update']> {
     if (typeof update === 'function') {
       return update()
     }
-    const set = adaptUpdate(update, this.schema, this.entityManager.adapters.mongo)
+    const set = await adaptUpdate(update, this.schema, this.entityManager.adapters.mongo)
     return { $set: set }
   }
 
   protected _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     return this.runQuery('findAll', async () => {
-      const filter = this.buildFilter(params.filter)
+      const filter = await this.buildFilter(params.filter)
       const projection = isEmptyProjection(params.projection) ? { [this.schema[this.idField].alias ?? this.idField]: true } : this.buildProjection(params.projection)
       const sort = this.buildSort(params.sorts)
       const options = { projection, sort, skip: params.skip, limit: params.limit ?? this.pageSize } as FindOptions
@@ -67,7 +67,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
             return []
           }
           const results = await this.collection.find(filter, { ...(params.options ?? {}), ...options }).toArray()
-          const records = this.dbsToModels(results)
+          const records = await this.dbsToModels(results)
           return records
         },
         () => `collection.find(${JSON.stringify(filter)}, ${JSON.stringify(options)})`,
@@ -87,7 +87,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected _count(params: FilterParams<T>): Promise<number> {
     return this.runQuery('count', async () => {
-      const filter = this.buildFilter(params.filter)
+      const filter = await this.buildFilter(params.filter)
       const options = params.options ?? {}
       return [() => this.collection.countDocuments(filter, options), () => `collection.countDocuments(${JSON.stringify(filter)})`]
     })
@@ -131,7 +131,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
             },
           ]
         : []
-      const filter = params.filter ? [{ $match: this.buildFilter(params.filter) }] : []
+      const filter = params.filter ? [{ $match: await this.buildFilter(params.filter) }] : []
       const having = args?.having ? [{ $match: mapObject(args.having, ([k, v]) => (typeof v === 'object' ? [[k, mapObject(v, ([fk, fv]) => [[`$${fk}`, fv]])]] : [[k, v]])) }] : []
       const skip = params.skip != null ? [{ $skip: params.skip }] : []
       const limit = params.limit != null ? [{ $limit: params.limit }] : []
@@ -170,7 +170,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     return this.runQuery('insertOne', async () => {
-      const record = this.modelToDb(filterUndefiendFields(params.record))
+      const record = await this.modelToDb(filterUndefiendFields(params.record))
       const options = params.options ?? {}
       return [
         async () => {
@@ -188,8 +188,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
     await this.runQuery('updateOne', async () => {
-      const changes = this.buildChanges(params.changes)
-      const filter = this.buildFilter(params.filter)
+      const changes = await this.buildChanges(params.changes)
+      const filter = await this.buildFilter(params.filter)
       const options = { ...(params.options ?? {}), upsert: false, ignoreUndefined: true }
       return [() => this.collection.updateOne(filter, changes, options), () => `collection.updateOne(${JSON.stringify(filter)}, ${JSON.stringify(changes)})`]
     })
@@ -197,8 +197,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
     await this.runQuery('updateAll', async () => {
-      const changes = this.buildChanges(params.changes)
-      const filter = this.buildFilter(params.filter)
+      const changes = await this.buildChanges(params.changes)
+      const filter = await this.buildFilter(params.filter)
       const options = { ...(params.options ?? {}), upsert: false, ignoreUndefined: true }
       return [() => this.collection.updateMany(filter, changes, options), () => `collection.updateMany(${JSON.stringify(filter)}, ${JSON.stringify(changes)})`]
     })
@@ -206,8 +206,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
     await this.runQuery('replaceOne', async () => {
-      const replace = this.modelToDb(params.replace)
-      const filter = this.buildFilter(params.filter)
+      const replace = await this.modelToDb(params.replace)
+      const filter = await this.buildFilter(params.filter)
       const options = params.options ?? {}
       return [() => this.collection.replaceOne(filter, replace, options), () => `collection.replaceOne(${JSON.stringify(filter)}, ${JSON.stringify(replace)})`]
     })
@@ -215,7 +215,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
     await this.runQuery('deleteOne', async () => {
-      const filter = this.buildFilter(params.filter)
+      const filter = await this.buildFilter(params.filter)
       const options = params.options ?? {}
       return [() => this.collection.deleteOne(filter, options), () => `collection.deleteOne(${JSON.stringify(filter)})`]
     })
@@ -223,7 +223,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
 
   protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
     await this.runQuery('deleteAll', async () => {
-      const filter = this.buildFilter(params.filter)
+      const filter = await this.buildFilter(params.filter)
       const options = params.options ?? {}
       return [() => this.collection.deleteMany(filter, options), () => `collection.deleteMany(${JSON.stringify(filter)})`]
     })

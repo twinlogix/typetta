@@ -1,4 +1,4 @@
-import { AbstractDAO, AnyProjection, filterEntity, idInfoFromSchema, iteratorLength, LogArgs, MONGODB_QUERY_PREFIXS, setTraversing, sort } from '../../..'
+import { AbstractDAO, AnyProjection, filterEntity, idInfoFromSchema, LogArgs, MONGODB_QUERY_PREFIXS, setTraversing, sort } from '../../..'
 import { transformObject } from '../../../generation/utils'
 import { deepMerge } from '../../../utils/utils'
 import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
@@ -25,7 +25,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   }
 
   protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
-    const unorderedResults = [...this.entities(params.filter)].map((v) => v.record)
+    const unorderedResults = (await this.entitiesArray(params.filter)).map((v) => v.record)
     const results = (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? unorderedResults.length))
     return results.map((r) => _.cloneDeep(r))
     // projection are ignored since there is no performance advance
@@ -40,14 +40,14 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   protected async _exists(params: FilterParams<T>): Promise<boolean> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const _v of this.entities(params.filter)) {
+    for await (const _v of this.entities(params.filter)) {
       return true
     }
     return false
   }
 
   protected async _count(params: FilterParams<T>): Promise<number> {
-    return iteratorLength(this.entities(params.filter))
+    return (await this.entitiesArray(params.filter)).length
   }
 
   protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
@@ -59,7 +59,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
         return previous
       }, {} as Record<K, O[]>)
 
-    const records = [...this.entities(params.filter)]
+    const records = await this.entitiesArray(params.filter)
 
     if (records.length === 0 && !params.by) {
       return Object.entries(params.aggregations).reduce((p, [k, aggregation]) => {
@@ -130,25 +130,32 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       }, group[0].group)
     })
 
-    const filteredResult = args?.having ? unorderedResults.filter((r) => filterEntity(r, args.having)) : unorderedResults
+    const filteredResult = args?.having ? [] : unorderedResults
+    if (args?.having) {
+      for (const record of unorderedResults) {
+        if (await filterEntity(record, args.having)) {
+          filteredResult.push(record)
+        }
+      }
+    }
     const sorted = args?.sorts ? sort<T['model']>(filteredResult, args.sorts) : filteredResult
     const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? sorted.length))
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
+  protected async _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     const record = deepMerge(params.record, this.generateRecordWithId())
-    const t = transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema) as T['insert']
+    const t = (await transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema)) as T['insert']
     const id = t[this.schema[this.idField].alias ?? this.idField]
     this.stateManager.insertElement(id, t)
-    return _.cloneDeep(transformObject(this.entityManager.adapters.memory, 'dbToModel', t, this.schema))
+    return _.cloneDeep(await transformObject(this.entityManager.adapters.memory, 'dbToModel', t, this.schema))
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {
     const changesObject = {}
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
-    const changes = transformObject(this.entityManager.adapters.memory, 'modelToDB', changesObject, this.schema)
-    for (const { record, index } of this.entities(params.filter, false)) {
+    const changes = await transformObject(this.entityManager.adapters.memory, 'modelToDB', changesObject, this.schema)
+    for await (const { record, index } of this.entities(params.filter, false)) {
       const result = deepMerge(record, changes, false)
       this.stateManager.updateElement(index, result)
       return
@@ -158,30 +165,30 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   protected async _updateAll(params: UpdateParams<T>): Promise<void> {
     const changesObject = {}
     Object.entries(params.changes).forEach(([k, v]) => setTraversing(changesObject, k, v))
-    const changes = transformObject(this.entityManager.adapters.memory, 'modelToDB', changesObject, this.schema)
-    for (const { record, index } of this.entities(params.filter, false)) {
+    const changes = await transformObject(this.entityManager.adapters.memory, 'modelToDB', changesObject, this.schema)
+    for await (const { record, index } of this.entities(params.filter, false)) {
       const result = deepMerge(record, changes, false)
       this.stateManager.updateElement(index, result)
     }
   }
 
   protected async _replaceOne(params: ReplaceParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(filterEntity)) {
-      const t = transformObject(this.entityManager.adapters.memory, 'modelToDB', deepMerge(params.replace, { [this.idField]: record[this.idField] }), this.schema)
+    for await (const { record, index } of this.entities(filterEntity)) {
+      const t = await transformObject(this.entityManager.adapters.memory, 'modelToDB', deepMerge(params.replace, { [this.idField]: record[this.idField] }), this.schema)
       this.stateManager.updateElement(index, deepMerge(record, t))
       break
     }
   }
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(params.filter, false)) {
+    for await (const { record, index } of this.entities(params.filter, false)) {
       this.stateManager.deleteElement(record[this.schema[this.idField].alias ?? this.idField], index)
       break
     }
   }
 
   protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
-    for (const { record, index } of this.entities(params.filter, false)) {
+    for await (const { record, index } of this.entities(params.filter, false)) {
       this.stateManager.deleteElement(record[this.schema[this.idField].alias ?? this.idField], index)
     }
   }
@@ -227,14 +234,22 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
     return null
   }
-  private *entities(filter: T['filter'] = undefined, transform = true): Iterable<{ record: T['model']; index: number }> {
+
+  private async entitiesArray(filter: T['filter'] = undefined, transform = true): Promise<{ record: T['model']; index: number }[]> {
+    const result: { record: T['model']; index: number }[] = []
+    for await (const e of this.entities(filter, transform)) {
+      result.push(e)
+    }
+    return result
+  }
+  private async *entities(filter: T['filter'] = undefined, transform = true): AsyncIterable<{ record: T['model']; index: number }> {
     const indexes = this.getIndexes(filter)
     if (indexes) {
       for (const index of indexes) {
         const record = this.stateManager.getElement(index)
         if (record !== null) {
-          if (filterEntity(record, filter, this.schema, this.entityManager.adapters.memory)) {
-            yield { record: transform ? transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema) : record, index }
+          if (await filterEntity(record, filter, this.schema, this.entityManager.adapters.memory)) {
+            yield { record: transform ? await transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema) : record, index }
           }
         }
       }
@@ -242,8 +257,8 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     }
     for (const { index, record } of this.stateManager.elements()) {
       if (record !== null) {
-        if (filterEntity(record, filter, this.schema, this.entityManager.adapters.memory)) {
-          yield { record: transform ? transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema) : record, index }
+        if (await filterEntity(record, filter, this.schema, this.entityManager.adapters.memory)) {
+          yield { record: transform ? await transformObject(this.entityManager.adapters.memory, 'dbToModel', record, this.schema) : record, index }
         }
       }
     }

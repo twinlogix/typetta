@@ -93,12 +93,12 @@ export function indentMultiline(str: string, count = 1): string {
  * @param embeddedOverride optionally, an override adapter for embedded types (typically JSON)
  * @returns a new transformed object
  */
-export function transformObject<From extends { [key: string]: unknown }, To, ModelScalars extends AbstractScalars, DBScalars extends AbstractScalars>(
+export async function transformObject<From extends { [key: string]: unknown }, To, ModelScalars extends AbstractScalars, DBScalars extends AbstractScalars>(
   adapters: DataTypeAdapterMap<ModelScalars, DBScalars>,
   direction: 'dbToModel' | 'modelToDB',
   object: From,
   schema: Schema<ModelScalars>,
-): To {
+): Promise<To> {
   if (object === null) {
     return null as unknown as To
   }
@@ -118,8 +118,8 @@ export function transformObject<From extends { [key: string]: unknown }, To, Mod
           const validator = adapter.validate
           const mapper =
             validator && isModelToDB
-              ? (data: ModelScalars[keyof ModelScalars]['type']) => {
-                  const validation = validator(data)
+              ? async (data: ModelScalars[keyof ModelScalars]['type']) => {
+                  const validation = await validator(data)
                   if (validation === true) {
                     return adapter.modelToDB(data)
                   }
@@ -127,15 +127,15 @@ export function transformObject<From extends { [key: string]: unknown }, To, Mod
                 }
               : adapter[direction]
           if (Array.isArray(value) && schemaField.isList) {
-            result[destName] = adapter ? value.map((v) => mapper(v)) : value
+            result[destName] = adapter ? await Promise.all(value.map((v) => mapper(v))) : value
           } else {
-            result[destName] = adapter ? mapper(value) : value
+            result[destName] = adapter ? await mapper(value) : value
           }
         } else if (schemaField.type === 'embedded') {
           if (Array.isArray(value) && schemaField.isList) {
-            result[destName] = value.map((v) => transformObject(adapters, direction, v, schemaField.schema()))
+            result[destName] = await Promise.all(value.map((v) => transformObject(adapters, direction, v, schemaField.schema())))
           } else {
-            result[destName] = transformObject(adapters, direction, value as { [key: string]: unknown }, schemaField.schema())
+            result[destName] = await transformObject(adapters, direction, value as { [key: string]: unknown }, schemaField.schema())
           }
         }
       }
