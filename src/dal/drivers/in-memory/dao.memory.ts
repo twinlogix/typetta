@@ -47,7 +47,12 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   }
 
   protected async _count(params: FilterParams<T>): Promise<number> {
-    return (await this.entitiesArray(params.filter)).length
+    let count = 0
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for await (const _ of this.entities(params.filter)) {
+      count++
+    }
+    return count
   }
 
   protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
