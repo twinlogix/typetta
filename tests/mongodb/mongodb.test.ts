@@ -4,7 +4,7 @@
 import { computedField, projectionDependency, buildMiddleware, UserInputDriverDataTypeAdapterMap, defaultValueMiddleware, softDelete, audit, selectMiddleware, mock, Projection } from '../../src'
 import { inMemoryMongoDb } from '../utils'
 import { Test, typeAssert } from '../utils.test'
-import { AST, EntityManager, ScalarsSpecification, UserDAO, UserParams, UserPlainModel } from './dao.mock'
+import { AST, EntityManager, ScalarsSpecification, UserDAO, UserPlainModel } from './dao.mock'
 import { State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
@@ -32,9 +32,9 @@ const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'> 
     },
   },
   Password: {
-    dbToModel: (o: unknown) => o as string,
-    modelToDB: (o: string) => sha256(o),
-    validate: (o: string) => {
+    dbToModel: async (o: unknown) => o as string,
+    modelToDB: async (o: string) => sha256(o),
+    validate: async (o: string) => {
       if (o.length < 3) {
         return new Error('Password must be 3 character or more.')
       }
@@ -1490,11 +1490,8 @@ test('Simple transaction 3', async () => {
     await dao.user.updateOne({ filter: { id: '123' }, changes: { firstName: 'Luigi' }, options: { session: session1 } })
   }
   await dao.user.updateOne({ filter: { id: '124' }, changes: { live: false }, options: { session: session2 } })
-  const r2 = await session2.commitTransaction()
-  const r1 = await session1.commitTransaction()
-
-  const user = await dao.user.findOne()
-  console.log(r1, r2)
+  await session2.commitTransaction()
+  await session1.commitTransaction()
 })
 
 test('Aggregate test', async () => {
