@@ -51,8 +51,8 @@ export async function buildWhereConditions<TRecord, TResult, ScalarsType extends
           }
           const vr = v as Record<string, unknown>
           for (const [fk, fv] of Object.entries(v)) {
-            const av = () => adapter.modelToDB(fv) as any
-            const avs = () => Promise.all((fv as any[]).map((fve) => adapter.modelToDB(fve) as any))
+            const av = () => adapter.modelToDB(fv) as Knex.Value
+            const avs = () => Promise.all((fv as any[]).map((fve) => adapter.modelToDB(fve) as Knex.Value))
             // prettier-ignore
             switch (fk) {
               case 'exists': fv == null ? null : fv ? builder.whereNotNull(columnName) : builder.whereNull(columnName); break
@@ -99,7 +99,7 @@ export async function buildWhereConditions<TRecord, TResult, ScalarsType extends
             if (!adapter) {
               throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
             }
-            builder.where(columnName, (await adapter.modelToDB(v as any)) as any)
+            builder.where(columnName, (await adapter.modelToDB(v as any)) as Knex.Value)
           }
         }
       } else {
@@ -214,14 +214,14 @@ export async function buildSort<TRecord, TResult, Scalars extends AbstractScalar
   return { builder }
 }
 
-export function flatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Schema<Scalars>, object: any) {
-  function flat(prefix: string, schemaFiled: { schema: () => Schema<Scalars> }, value: any): [string, unknown][] {
+export function flatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Schema<Scalars>, object: Record<string, unknown>) {
+  function flat(prefix: string, schemaFiled: { schema: () => Schema<Scalars> }, value: Record<string, unknown>): [string, unknown][] {
     return Object.entries(schemaFiled.schema()).flatMap(([k, subSchemaField]) => {
       const key = subSchemaField.alias ?? k
       if (key in value) {
         const name = concatEmbeddedNames(prefix, key)
         if (subSchemaField.type === 'embedded') {
-          return flat(name, subSchemaField, value[key])
+          return flat(name, subSchemaField, value[key] as Record<string, unknown>)
         } else {
           return [[name, value[key]]]
         }
@@ -232,7 +232,7 @@ export function flatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Sch
   return Object.entries(schema).reduce((result, [k, schemaFiled]) => {
     const name = schemaFiled.alias || k
     if (schemaFiled.type === 'embedded' && name in object) {
-      const flatted = { ...result, ...Object.fromEntries(flat(name, schemaFiled, object[name])) }
+      const flatted = { ...result, ...Object.fromEntries(flat(name, schemaFiled, object[name] as Record<string, unknown>)) }
       delete flatted[name]
       return flatted
     }
@@ -240,7 +240,7 @@ export function flatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Sch
   }, object)
 }
 
-export function unflatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Schema<Scalars>, object: any) {
+export function unflatEmbdeddedFields<Scalars extends AbstractScalars>(schema: Schema<Scalars>, object: Record<string, unknown>) {
   function unflat(prefix: string, schemaFiled: { schema: () => Schema<Scalars> }, value: { [key: string]: unknown }, toDelete: string[] = []): [object | undefined, string[]] {
     const res = Object.entries(schemaFiled.schema()).reduce(
       ([record, oldToDelete], [k, subSchemaField]) => {
@@ -303,7 +303,7 @@ export function embeddedScalars<Scalars extends AbstractScalars>(
   })
 }
 
-export async function adaptUpdate<ScalarsType extends AbstractScalars, UpdateType>({
+export async function adaptUpdate<ScalarsType extends AbstractScalars, UpdateType extends Record<string, unknown>>({
   update,
   schema,
   adapters,
@@ -311,8 +311,8 @@ export async function adaptUpdate<ScalarsType extends AbstractScalars, UpdateTyp
   update: UpdateType
   schema: Schema<ScalarsType>
   adapters: KnexJSDataTypeAdapterMap<ScalarsType>
-}): Promise<object> {
-  return mapObjectAsync(update as any, async ([k, v]) => {
+}): Promise<Record<string, unknown>> {
+  return mapObjectAsync(update, async ([k, v]) => {
     if (v === undefined) return []
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
@@ -320,7 +320,7 @@ export async function adaptUpdate<ScalarsType extends AbstractScalars, UpdateTyp
       const adapter = adapters[schemaField.scalar] ?? identityAdapter()
       return [[columnName, await modelValueToDbValue(v, schemaField, adapter)]]
     } else if (schemaField && schemaField.type === 'embedded') {
-      const adapted = await adaptUpdate({ update: v, schema: schemaField.schema(), adapters })
+      const adapted = await adaptUpdate({ update: v as Record<string, unknown>, schema: schemaField.schema(), adapters })
       return Object.entries(adapted).map(([sk, sv]) => {
         return [concatEmbeddedNames(columnName, sk), sv]
       })

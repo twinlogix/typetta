@@ -58,8 +58,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return result as PartialDeep<T['model']>
   }
 
-  private async modelToDb(object: PartialDeep<T['model']>): Promise<any> {
-    const transformed = await transformObject(this.entityManager.adapters.knex, 'modelToDB', object, this.schema)
+  private async modelToDb(object: PartialDeep<T['model']>): Promise<Record<string, unknown>> {
+    const transformed: Record<string, unknown> = await transformObject(this.entityManager.adapters.knex, 'modelToDB', object, this.schema)
     return flatEmbdeddedFields(this.schema, transformed)
   }
 
@@ -93,7 +93,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return { builder: (qb || this.qb()).update(updates) }
   }
 
-  private adaptUpdate(changes: T['update']): Promise<object> {
+  private adaptUpdate(changes: T['update']): Promise<Record<string, unknown>> {
     return adaptUpdate({ update: changes, schema: this.schema, adapters: this.entityManager.adapters.knex })
   }
 
@@ -218,7 +218,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _updateOne(params: UpdateParams<T>): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected _updateOne(_params: UpdateParams<T>): Promise<void> {
     return this.runQuery('updateOne', async () => {
       throw new Error(`Operation not supported. Use updateAll specifying the primary key field (${this.idField}) in order to update only one row.`)
     })
@@ -235,13 +236,15 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     })
   }
 
-  protected _replaceOne(params: ReplaceParams<T>): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected _replaceOne(_params: ReplaceParams<T>): Promise<void> {
     return this.runQuery('replaceOne', async () => {
       throw new Error(`Operation not supported.`)
     })
   }
 
-  protected _deleteOne(params: DeleteParams<T>): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected _deleteOne(_params: DeleteParams<T>): Promise<void> {
     return this.runQuery('deleteOne', async () => {
       throw new Error(`Operation not supported. Use deleteAll specifying the primary key field (${this.idField}) in order to delete only one row.`)
     })
