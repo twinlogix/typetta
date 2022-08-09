@@ -886,3 +886,32 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
+
+export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
+  entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+  operationMetadataType: OperationMetadataType
+  entityManagerParams: {
+    metadata: MetadataType
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    overrides: {
+      a?: Pick<Partial<ADAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      b?: Pick<Partial<BDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      c?: Pick<Partial<CDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      d?: Pick<Partial<DDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      e?: Pick<Partial<EDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      f?: Pick<Partial<FDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+    }
+    mongodb: Record<'a' | 'default', M.Db | 'mock'>
+    knex: Record<'default', Knex | 'mock'>
+    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'both'>
+    log: T.LogInput<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>
+    security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
+  }
+  security: {
+    context: T.DAOSecurityContext<SecurityDomain, Permissions>
+    policies: Required<T.DAOSecurityPolicies<DAOGenericsMap<MetadataType, OperationMetadataType>, Permissions, SecurityDomain>>
+    permissions: Permissions
+    domain: SecurityDomain
+  }
+  daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+}

@@ -194,7 +194,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
       return [daoSchema, daoParams, utilsType, dao].join('\n\n')
     } else {
       const daoSchema = this.generateDAOSchema(node, typesMap)
-      const utilsType = this.generateUtilsType(node)
+      const utilsType = this.generateNodeUtilsType(node)
       return [daoSchema, utilsType].join('\n\n')
     }
   }
@@ -278,21 +278,23 @@ export class TsTypettaGenerator extends TypettaGenerator {
       .filter((node) => node.entity)
       .map((node) => `'${node.name}'`)
       .join(' | ')
-    const contextDAOParamsDeclarations = Array.from(typesMap.values())
-      .filter((node) => node.entity)
-      .map((node) => {
-        return `${toFirstLower(node.name)}?: Pick<Partial<${node.name}DAOParams<MetadataType, OperationMetadataType>>, ${
-          node.fields.find((f) => f.isID)?.idGenerationStrategy === 'generator' ? "'idGenerator' | " : ''
-        }'middlewares' | 'metadata'>`
-      })
-      .join(',\n')
+    const contextDAOParamsDeclarations = (optional: boolean) =>
+      Array.from(typesMap.values())
+        .filter((node) => node.entity)
+        .map((node) => {
+          return `${toFirstLower(node.name)}${optional ? '?' : ''}: Pick<${optional ? 'Partial<' : ''}${node.name}DAOParams<MetadataType, OperationMetadataType>${optional ? '>' : ''}, ${
+            node.fields.find((f) => f.isID)?.idGenerationStrategy === 'generator' ? "'idGenerator' | " : ''
+          }'middlewares' | 'metadata'>`
+        })
+        .join(',\n')
 
     const metadata = `metadata?: MetadataType`
     const middlewares = `\nmiddlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]`
-    const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations)}\n}`
+    const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations(true))}\n}`
     const mongoDBParams = hasMongoDBEntites ? `,\nmongodb: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
-    const adaptersParams = `,\nscalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, '${hasMongoDBEntites && hasSQLEntities ? 'both' : hasMongoDBEntites ? 'mongo' : 'knex'}'>`
+    const scalarsDriverType = hasMongoDBEntites && hasSQLEntities ? 'both' : hasMongoDBEntites ? 'mongo' : 'knex'
+    const adaptersParams = `,\nscalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, '${scalarsDriverType}'>`
     const loggerParams = `,\nlog?: T.LogInput<${daoNamesType}>,\nawaitLog?: boolean`
     const securityPolicyParam = ',\nsecurity?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>'
     const dbsInputParam =
@@ -390,14 +392,14 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
       'constructor(params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {\n' +
       indentMultiline(
         `super({\n  ...params,\n  scalars: params.scalars ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [${scalarsNameList.map((v) => `'${v}'`).join(', ')}]) : undefined\n})
-this.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares || []
-this.logger = T.logInputToLogger(params.log)
-if(params.security && params.security.applySecurity !== false) {
-  const securityMiddlewares = T.createSecurityPolicyMiddlewares(params.security)
-  const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
-  this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
-}
-this.params = params`,
+        this.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares || []
+        this.logger = T.logInputToLogger(params.log)
+        if(params.security && params.security.applySecurity !== false) {
+          const securityMiddlewares = T.createSecurityPolicyMiddlewares(params.security)
+          const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
+          this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
+        }
+        this.params = params`,
       ) +
       '\n}'
 
@@ -424,57 +426,82 @@ this.params = params`,
     const entityManagerMiddleware = `type EntityManagerMiddleware<MetadataType = never, OperationMetadataType = never> = T.DAOMiddleware<DAOGenericsUnion<MetadataType, OperationMetadataType>>`
 
     const utilsCode = `
-type DAOName = keyof DAOGenericsMap<never, never>
-type DAOGenericsMap<MetadataType, OperationMetadataType> = {
-${Array.from(typesMap.values())
-  .filter((node) => node.entity)
-  .map((n) => `  ${toFirstLower(n.name)}: ${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
-  .join('\n')}
-}
-type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
-type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
-  | IncludeGroupMiddleware<N, MetadataType, OperationMetadataType>
-  | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
-type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
-  include: { [K in N]: true }
-  middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
-}
-type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
-  exclude: { [K in N]: true }
-  middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
-}
-export const groupMiddleware = {
-  includes<N extends DAOName, MetadataType, OperationMetadataType>(
-    include: { [K in N]: true },
-    middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
-  ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
-    return { include, middleware }
-  },
-  excludes<N extends DAOName, MetadataType, OperationMetadataType>(
-    exclude: { [K in N]: true },
-    middleware: ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>['middleware'],
-  ): ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
-    return { exclude, middleware }
-  },
-}
-function selectMiddleware<MetadataType, OperationMetadataType>(
-  name: DAOName,
-  middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<DAOName, MetadataType, OperationMetadataType>)[],
-): EntityManagerMiddleware<MetadataType, OperationMetadataType>[] {
-  return middlewares.flatMap((m) =>
-    'include' in m
-      ? Object.keys(m.include).includes(name)
-        ? [m.middleware]
-        : []
-      : 'exclude' in m
-      ? !Object.keys(m.exclude).includes(name)
-        ? [m.middleware as EntityManagerMiddleware<MetadataType, OperationMetadataType>]
-        : []
-      : [m],
-  )
-}
-`
-    return [[entityManagerParamsExport, entityManagerMiddleware, entityManagerExport, utilsCode].join('\n')].join('\n')
+      type DAOName = keyof DAOGenericsMap<never, never>
+      type DAOGenericsMap<MetadataType, OperationMetadataType> = {
+      ${Array.from(typesMap.values())
+        .filter((node) => node.entity)
+        .map((n) => `  ${toFirstLower(n.name)}: ${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
+        .join('\n')}
+      }
+      type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
+      type GroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> =
+        | IncludeGroupMiddleware<N, MetadataType, OperationMetadataType>
+        | ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>
+      type IncludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
+        include: { [K in N]: true }
+        middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>
+      }
+      type ExcludeGroupMiddleware<N extends DAOName, MetadataType, OperationMetadataType> = {
+        exclude: { [K in N]: true }
+        middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[Exclude<DAOName, N>]>
+      }
+      export const groupMiddleware = {
+        includes<N extends DAOName, MetadataType, OperationMetadataType>(
+          include: { [K in N]: true },
+          middleware: T.DAOMiddleware<DAOGenericsMap<MetadataType, OperationMetadataType>[N]>,
+        ): IncludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
+          return { include, middleware }
+        },
+        excludes<N extends DAOName, MetadataType, OperationMetadataType>(
+          exclude: { [K in N]: true },
+          middleware: ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType>['middleware'],
+        ): ExcludeGroupMiddleware<N, MetadataType, OperationMetadataType> {
+          return { exclude, middleware }
+        },
+      }
+      function selectMiddleware<MetadataType, OperationMetadataType>(
+        name: DAOName,
+        middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<DAOName, MetadataType, OperationMetadataType>)[],
+      ): EntityManagerMiddleware<MetadataType, OperationMetadataType>[] {
+        return middlewares.flatMap((m) =>
+          'include' in m
+            ? Object.keys(m.include).includes(name)
+              ? [m.middleware]
+              : []
+            : 'exclude' in m
+            ? !Object.keys(m.exclude).includes(name)
+              ? [m.middleware as EntityManagerMiddleware<MetadataType, OperationMetadataType>]
+              : []
+            : [m],
+        )
+      }`
+
+    const utilsType = `
+      export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
+        entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+        operationMetadataType: OperationMetadataType
+        entityManagerParams: {
+          metadata: MetadataType
+          middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+          overrides: {
+            ${contextDAOParamsDeclarations(true)}
+          }
+          ${mongoDBParams}
+          ${knexJsParams}
+          scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, '${scalarsDriverType}'>
+          log: T.LogInput<${daoNamesType}>
+          security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
+        }
+        security: {
+          context: T.DAOSecurityContext<SecurityDomain, Permissions>
+          policies: Required<T.DAOSecurityPolicies<DAOGenericsMap<MetadataType, OperationMetadataType>, Permissions, SecurityDomain>>
+          permissions: Permissions
+          domain: SecurityDomain
+        }
+        daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+      }`
+
+    return [[entityManagerParamsExport, entityManagerMiddleware, entityManagerExport, utilsCode, utilsType].join('\n')].join('\n')
   }
 
   // ---------------------------------------------------------------------------------------------------------
@@ -657,7 +684,7 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
     export type ${node.name}CachedTypes = T.CachedTypes<${node.name}IdFields, ${node.name}Model, ${node.name}Insert, ${node.name}PlainModel, ${node.name}Projection, ${node.name}Update, ${node.name}Filter, ${node.name}SortElement, ${node.name}RelationsFindParams>`
   }
 
-  private generateUtilsType(node: TsTypettaGeneratorNode): string {
+  private generateNodeUtilsType(node: TsTypettaGeneratorNode): string {
     return `
     export interface ${node.name}Model extends types.${node.name} {}
     export interface ${node.name}PlainModel extends T.GenerateModel<'${node.name}', AST, ScalarsSpecification, 'relation'> {}`

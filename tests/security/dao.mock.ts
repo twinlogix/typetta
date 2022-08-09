@@ -1119,3 +1119,32 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
       : [m],
   )
 }
+
+export type EntityManagerTypes<MetadataType = never, OperationMetadataType = never, Permissions extends string = never, SecurityDomain extends Record<string, unknown> = never> = {
+  entityManager: EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
+  operationMetadataType: OperationMetadataType
+  entityManagerParams: {
+    metadata: MetadataType
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    overrides: {
+      hotel?: Pick<Partial<HotelDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      reservation?: Pick<Partial<ReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      role?: Pick<Partial<RoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      room?: Pick<Partial<RoomDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      userRole?: Pick<Partial<UserRoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+    }
+    mongodb: Record<'default', M.Db | 'mock'>
+
+    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
+    log: T.LogInput<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'User' | 'UserRole'>
+    security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
+  }
+  security: {
+    context: T.DAOSecurityContext<SecurityDomain, Permissions>
+    policies: Required<T.DAOSecurityPolicies<DAOGenericsMap<MetadataType, OperationMetadataType>, Permissions, SecurityDomain>>
+    permissions: Permissions
+    domain: SecurityDomain
+  }
+  daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+}
