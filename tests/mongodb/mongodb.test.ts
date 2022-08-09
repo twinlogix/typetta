@@ -1490,11 +1490,8 @@ test('Simple transaction 3', async () => {
     await dao.user.updateOne({ filter: { id: '123' }, changes: { firstName: 'Luigi' }, options: { session: session1 } })
   }
   await dao.user.updateOne({ filter: { id: '124' }, changes: { live: false }, options: { session: session2 } })
-  const r2 = await session2.commitTransaction()
-  const r1 = await session1.commitTransaction()
-
-  const user = await dao.user.findOne()
-  console.log(r1, r2)
+  await session2.commitTransaction()
+  await session1.commitTransaction()
 })
 
 test('Aggregate test', async () => {

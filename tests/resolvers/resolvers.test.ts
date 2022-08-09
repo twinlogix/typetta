@@ -10,8 +10,8 @@ const entityManager: EntityManager = new EntityManager({
     ID: { generate: () => uuid() },
     Date: { generate: () => new Date() },
   },
-  log: async (args) => {
-    console.log(args.operation, args.dao, JSON.parse(args.query ?? '{}')?.filter, JSON.parse(args.query ?? '{}')?.sorts)
+  log: async () => {
+    // console.log(args.operation, args.dao, JSON.parse(args.query ?? '{}')?.filter, JSON.parse(args.query ?? '{}')?.sorts)
   },
 })
 
