@@ -40,11 +40,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return this.knex(this.tableName)
   }
 
-  private dbsToModels(objects: any[]): PartialDeep<T['model']>[] {
-    return objects.map((o) => this.dbToModel(o))
+  private dbsToModels(objects: any[]): Promise<PartialDeep<T['model']>[]> {
+    return Promise.all(objects.map((o) => this.dbToModel(o)))
   }
 
-  private dbToModel(object: any): PartialDeep<T['model']> {
+  private async dbToModel(object: any): Promise<PartialDeep<T['model']>> {
     const unflatted = unflatEmbdeddedFields(this.schema, object)
     //Remove null fields
     for (const key of Object.keys(this.schema)) {
@@ -54,25 +54,26 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         delete unflatted[schemaField.alias ?? key]
       }
     }
-    return transformObject(this.entityManager.adapters.knex, 'dbToModel', unflatted, this.schema)
+    const result = await transformObject(this.entityManager.adapters.knex, 'dbToModel', unflatted, this.schema)
+    return result as PartialDeep<T['model']>
   }
 
-  private modelToDb(object: PartialDeep<T['model']>): any {
-    const transformed = transformObject(this.entityManager.adapters.knex, 'modelToDB', object, this.schema)
+  private async modelToDb(object: PartialDeep<T['model']>): Promise<Record<string, unknown>> {
+    const transformed: Record<string, unknown> = await transformObject(this.entityManager.adapters.knex, 'modelToDB', object, this.schema)
     return flatEmbdeddedFields(this.schema, transformed)
   }
 
-  private buildSelect<P extends AnyProjection<T['projection']>>(projection?: P, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    return projection ? buildSelect(qb || this.qb(), projection as GenericProjection, this.schema) : qb || this.qb()
+  private async buildSelect<P extends AnyProjection<T['projection']>>(projection?: P, qb?: Knex.QueryBuilder<any, any>): Promise<{ builder: Knex.QueryBuilder<any, any> }> {
+    return projection ? buildSelect(qb || this.qb(), projection as GenericProjection, this.schema) : { builder: qb || this.qb() }
   }
 
-  private buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.entityManager.adapters.knex) : qb || this.qb()
+  private async buildWhere(filter?: T['filter'], qb?: Knex.QueryBuilder<any, any>): Promise<{ builder: Knex.QueryBuilder<any, any> }> {
+    return filter ? buildWhereConditions(qb || this.qb(), filter as AbstractFilter, this.schema, this.entityManager.adapters.knex) : { builder: qb || this.qb() }
   }
 
-  private buildSort(sort?: T['sort'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
+  private async buildSort(sort?: T['sort'], qb?: Knex.QueryBuilder<any, any>): Promise<{ builder: Knex.QueryBuilder<any, any> }> {
     if (typeof sort === 'function') {
-      return sort(qb || this.qb())
+      return { builder: sort(qb || this.qb()) }
     }
     return buildSort(qb || this.qb(), (sort || []) as unknown as AbstractSort[], this.schema)
   }
@@ -81,34 +82,37 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return options?.trx ? (qb || this.qb()).transacting(options.trx) : qb || this.qb()
   }
 
-  private buildUpdate(changes: T['update'], qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> | null {
+  private async buildUpdate(changes: T['update'], qb?: Knex.QueryBuilder<any, any>): Promise<{ builder: Knex.QueryBuilder<any, any> } | null> {
     if (typeof changes === 'function') {
-      return changes(qb || this.qb())
+      return { builder: changes(qb || this.qb()) }
     }
-    const updates = this.adaptUpdate(changes)
+    const updates = await this.adaptUpdate(changes)
     if (Object.keys(updates).length === 0) {
       return null
     }
-    return (qb || this.qb()).update(updates)
+    return { builder: (qb || this.qb()).update(updates) }
   }
 
-  private adaptUpdate(changes: T['update']): object {
+  private adaptUpdate(changes: T['update']): Promise<Record<string, unknown>> {
     return adaptUpdate({ update: changes, schema: this.schema, adapters: this.entityManager.adapters.knex })
   }
 
   private async getRecords<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     return this.runQuery(
       'findAll',
-      () => {
+      async () => {
         if (params.limit === 0) {
           return { skipReason: 'Limit is 0. Skip.' }
         }
-        const select = isEmptyProjection(params.projection) ? this.qb().select([this.schema[this.idField].alias ?? this.idField]) : this.buildSelect(params.projection)
-        const where = this.buildWhere(params.filter, select)
-        const sort = this.buildSort(params.sorts, where)
-        return this.buildTransaction(params.options, sort)
-          .limit(params.limit ?? this.pageSize)
-          .offset(params.skip ?? 0)
+
+        const select = isEmptyProjection(params.projection) ? { builder: this.qb().select([this.schema[this.idField].alias ?? this.idField]) } : await this.buildSelect(params.projection)
+        const where = await this.buildWhere(params.filter, select.builder)
+        const sort = await this.buildSort(params.sorts, where.builder)
+        return {
+          builder: this.buildTransaction(params.options, sort.builder)
+            .limit(params.limit ?? this.pageSize)
+            .offset(params.skip ?? 0),
+        }
       },
       (results) => this.dbsToModels(results),
       [],
@@ -135,10 +139,10 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   protected _count(params: FilterParams<T>): Promise<number> {
     return this.runQuery(
       'count',
-      () => {
+      async () => {
         const count = this.qb().count(this.idField, { as: 'all' })
-        const where = this.buildWhere(params.filter, count)
-        return this.buildTransaction(params.options, where)
+        const where = await this.buildWhere(params.filter, count)
+        return { builder: this.buildTransaction(params.options, where.builder) }
       },
       (result) => result[0].all as number,
     )
@@ -154,7 +158,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
      */
     return this.runQuery(
       'aggregate',
-      () => {
+      async () => {
         if (params.by && Object.keys(params.by).length === 0) {
           throw new Error("'by' params must contains at least one key.")
         }
@@ -162,14 +166,16 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         const aggregations = Object.entries(params.aggregations).map(([k, v]) => {
           return this.knex.raw(`${v.operation.toUpperCase()}(${v.field == null ? '*' : modelNameToDbName(v.field as string, this.schema)}) as ${k}`)
         })
-        const where = this.buildWhere(params.filter)
-        const sort = this.buildSort(args?.sorts, where)
-        const select = sort.select([...byColumns, ...aggregations])
+        const where = await this.buildWhere(params.filter)
+        const sort = await this.buildSort(args?.sorts, where.builder)
+        const select = sort.builder.select([...byColumns, ...aggregations])
         const groupBy = byColumns.length > 0 ? select.groupBy(byColumns) : select.groupByRaw('(SELECT 1)')
-        const having = args?.having ? buildHavingConditions(groupBy, args.having) : groupBy
-        return this.buildTransaction(params.options, having)
-          .limit(params.limit ?? this.pageSize)
-          .offset(params.skip ?? 0)
+        const having = args?.having ? await buildHavingConditions(groupBy, args.having) : { builder: groupBy }
+        return {
+          builder: this.buildTransaction(params.options, having.builder)
+            .limit(params.limit ?? this.pageSize)
+            .offset(params.skip ?? 0),
+        }
       },
       async (results) => {
         Object.keys(params.by || {}).forEach((v) => {
@@ -195,11 +201,11 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     return this.runQuery(
       'insertOne',
-      () => {
+      async () => {
         const r = filterNullFields<PartialDeep<T['plainModel']>>(filterUndefiendFields<PartialDeep<T['plainModel']>>(params.record))
-        const record = this.modelToDb(r)
+        const record = await this.modelToDb(r)
         const query = this.qb().insert(record, '*')
-        return this.buildTransaction(params.options, query)
+        return { builder: this.buildTransaction(params.options, query) }
       },
       async (records) => {
         const inserted = records[0]
@@ -212,40 +218,43 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _updateOne(params: UpdateParams<T>): Promise<void> {
-    return this.runQuery('updateOne', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected _updateOne(_params: UpdateParams<T>): Promise<void> {
+    return this.runQuery('updateOne', async () => {
       throw new Error(`Operation not supported. Use updateAll specifying the primary key field (${this.idField}) in order to update only one row.`)
     })
   }
 
   protected _updateAll(params: UpdateParams<T>): Promise<void> {
-    return this.runQuery('updateAll', () => {
-      const update = this.buildUpdate(params.changes)
+    return this.runQuery('updateAll', async () => {
+      const update = await this.buildUpdate(params.changes)
       if (update === null) {
         return { skipReason: 'No changes. Skip.' }
       }
-      const where = this.buildWhere(params.filter, update)
-      return this.buildTransaction(params.options, where)
+      const where = await this.buildWhere(params.filter, update.builder)
+      return { builder: this.buildTransaction(params.options, where.builder) }
     })
   }
 
-  protected _replaceOne(params: ReplaceParams<T>): Promise<void> {
-    return this.runQuery('replaceOne', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected _replaceOne(_params: ReplaceParams<T>): Promise<void> {
+    return this.runQuery('replaceOne', async () => {
       throw new Error(`Operation not supported.`)
     })
   }
 
-  protected _deleteOne(params: DeleteParams<T>): Promise<void> {
-    return this.runQuery('deleteOne', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected _deleteOne(_params: DeleteParams<T>): Promise<void> {
+    return this.runQuery('deleteOne', async () => {
       throw new Error(`Operation not supported. Use deleteAll specifying the primary key field (${this.idField}) in order to delete only one row.`)
     })
   }
 
   protected _deleteAll(params: DeleteParams<T>): Promise<void> {
-    return this.runQuery('deleteAll', () => {
+    return this.runQuery('deleteAll', async () => {
       const deleteQ = this.qb().delete()
-      const where = this.buildWhere(params.filter, deleteQ)
-      return this.buildTransaction(params.options, where)
+      const where = await this.buildWhere(params.filter, deleteQ)
+      return { builder: this.buildTransaction(params.options, where.builder) }
     })
   }
 
@@ -273,28 +282,28 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
 
   private async runQuery<R = undefined>(
     operation: LogArgs<T['entity']>['operation'],
-    queryBuilder: () => Knex.QueryBuilder<any, any> | { skipReason: string },
+    queryBuilder: () => Promise<{ builder: Knex.QueryBuilder<any, any> } | { skipReason: string }>,
     transform?: (result: any) => R,
     skipDefault?: Awaited<R>,
   ): Promise<Awaited<R>> {
     const start = new Date()
-    let query: Knex.QueryBuilder<any, any> | undefined | { skipReason: string }
+    let query: { builder: Knex.QueryBuilder<any, any> } | { skipReason: string } = { skipReason: 'Failure in query builder' }
     try {
-      query = queryBuilder()
+      query = await queryBuilder()
       if ('skipReason' in query) {
         await this.knexLog({ duration: 0, operation, level: 'query', query: query.skipReason, date: start })
         return skipDefault as Awaited<R>
       }
-      const result = await query
+      const result = await query.builder
       const records = transform ? await transform(result) : undefined
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      await this.knexLog({ duration, operation, level: 'query', query, date: finish })
+      await this.knexLog({ duration, operation, level: 'query', query: query.builder, date: finish })
       return records as Awaited<R>
     } catch (error: unknown) {
       const finish = new Date()
       const duration = finish.getTime() - start.getTime()
-      await this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query : undefined, date: finish })
+      await this.knexLog({ error, duration, operation, level: 'error', query: query && !('skipReason' in query) ? query.builder : undefined, date: finish })
       throw error
     }
   }

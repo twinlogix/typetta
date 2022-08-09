@@ -12,10 +12,10 @@ export type DataTypeAdapterMap<ModelScalars extends AbstractScalars, DBScalars e
 }
 
 export type DataTypeAdapter<ModelType, DBType> = {
-  modelToDB: (data: ModelType) => DBType
-  dbToModel: (data: DBType) => ModelType
-  validate?: (data: ModelType) => Error | true
-  generate?: () => ModelType
+  modelToDB: (data: ModelType) => Promise<DBType> | DBType
+  dbToModel: (data: DBType) => Promise<ModelType> | ModelType
+  validate?: (data: ModelType) => Promise<Error | true> | Error | true
+  generate?: () => Promise<ModelType> | ModelType
 }
 
 export function identityAdapter<T>(): DataTypeAdapter<T, T> {
