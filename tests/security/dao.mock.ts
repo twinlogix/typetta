@@ -1063,7 +1063,7 @@ export class EntityManager<
     )
   }
 
-  protected clone(): this {
+  public clone(): this {
     return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
 }

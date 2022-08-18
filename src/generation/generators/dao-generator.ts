@@ -326,7 +326,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
       .join(', ')
     const execQueryF =
       `public async execQuery<T>(run: (dbs: { ${dbsInputParam} }, entities: { ${entitiesInputParam} }) => Promise<T>): Promise<T> {\n` + `  return run({ ${dbsParam} }, { ${entitiesParam} })\n` + `}`
-    const cloneF = `protected clone(): this {\n  return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this\n}`
+    const cloneF = `public clone(): this {\n  return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this\n}`
     const createTableBody = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'sql' ? [`this.${toFirstLower(node.name)}.createTable(args.typeMap ?? {}, args.defaultType)`] : []
