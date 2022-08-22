@@ -52,6 +52,12 @@ export function compare(l: unknown, r: unknown): number {
   if (Array.isArray(r)) {
     return Number.NaN
   }
+  if (l instanceof ObjectId && r instanceof ObjectId) {
+    return l.equals(r) ? 0 : l.toHexString().localeCompare(r.toHexString())
+  }
+  if (l instanceof Date && r instanceof Date) {
+    return l.getTime() - r.getTime()
+  }
   if (mock.compare) {
     const result = mock.compare(l, r)
     if (typeof result === 'number') {
