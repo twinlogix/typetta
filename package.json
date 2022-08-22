@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "main": "lib/index.js",
   "bin": {
     "typetta": "lib/cli/index.js"
@@ -42,9 +42,9 @@
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "3.3.0",
     "@types/dedent": "0.7.0",
-    "@types/inquirer": "8.2.2",
+    "@types/inquirer": "8.2.3",
     "@types/jest": "27.5.2",
-    "@types/lodash": "4.14.182",
+    "@types/lodash": "4.14.184",
     "@types/node": "12.20.55",
     "@types/object-hash": "2.2.1",
     "@types/sha256": "0.2.0",
@@ -52,14 +52,14 @@
     "@typescript-eslint/eslint-plugin": "5.11.0",
     "@typescript-eslint/parser": "5.11.0",
     "@vscode/sqlite3": "5.0.8",
-    "apollo-server": "3.10.0",
+    "apollo-server": "3.10.1",
     "bignumber.js": "9.0.2",
     "eslint": "7.32.0",
     "jest": "27.5.1",
     "make-coverage-badge": "1.2.0",
     "mongodb-memory-server": "8.8.0",
     "prettier": "2.7.1",
-    "release-it": "15.1.4",
+    "release-it": "15.3.0",
     "rimraf": "3.0.2",
     "sha256": "0.2.0",
     "ts-jest": "27.1.5",
@@ -68,11 +68,11 @@
   },
   "dependencies": {
     "@graphql-codegen/add": "3.2.0",
-    "@graphql-codegen/cli": "2.9.1",
+    "@graphql-codegen/cli": "2.11.6",
     "@graphql-codegen/plugin-helpers": "2.4.2",
     "@graphql-codegen/schema-ast": "2.5.0",
     "@graphql-codegen/typescript": "2.7.1",
-    "@graphql-codegen/typescript-resolvers": "2.6.7",
+    "@graphql-codegen/typescript-resolvers": "2.7.2",
     "@graphql-codegen/visitor-plugin-common": "2.10.0",
     "chalk": "4.1.2",
     "commander": "9.3.0",
@@ -91,7 +91,7 @@
   },
   "peerDependencies": {
     "knex": "1.0.7",
-    "mongodb": "4.7.0"
+    "mongodb": "4.9.0"
   },
   "resolutions": {
     "graphql": "16.5.0"

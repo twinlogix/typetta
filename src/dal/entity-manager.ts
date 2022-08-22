@@ -61,5 +61,5 @@ export abstract class AbstractEntityManager<
     }
   }
 
-  protected abstract clone(): this
+  public abstract clone(): this
 }
