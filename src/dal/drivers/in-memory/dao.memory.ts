@@ -151,7 +151,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   protected async _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
     const record = deepMerge(params.record, this.generateRecordWithId())
     const t = (await transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema)) as T['insert']
-    const id = t[this.schema[this.idField].alias ?? this.idField]
+    const id = t[this.dbIdField]
     this.stateManager.insertElement(id, t)
     return _.cloneDeep(await transformObject(this.entityManager.adapters.memory, 'dbToModel', t, this.schema))
   }
@@ -187,14 +187,14 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   protected async _deleteOne(params: DeleteParams<T>): Promise<void> {
     for await (const { record, index } of this.entities(params.filter, false)) {
-      this.stateManager.deleteElement(record[this.schema[this.idField].alias ?? this.idField], index)
+      this.stateManager.deleteElement(record[this.dbIdField], index)
       break
     }
   }
 
   protected async _deleteAll(params: DeleteParams<T>): Promise<void> {
     for await (const { record, index } of this.entities(params.filter, false)) {
-      this.stateManager.deleteElement(record[this.schema[this.idField].alias ?? this.idField], index)
+      this.stateManager.deleteElement(record[this.dbIdField], index)
     }
   }
 

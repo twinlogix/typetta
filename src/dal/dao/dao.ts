@@ -723,6 +723,10 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     }
   }
 
+  protected get dbIdField(): string {
+    return this.schema[this.idField].alias ?? this.idField
+  }
+
   private ignoreNullsWhenRequired(changes: T['update']): T['update'] {
     function isNullAndRequired(schema: Schema<T['scalars']>, key: string, value: string): boolean {
       if (value !== null) {

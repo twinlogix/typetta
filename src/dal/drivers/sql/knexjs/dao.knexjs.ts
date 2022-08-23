@@ -105,7 +105,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
           return { skipReason: 'Limit is 0. Skip.' }
         }
 
-        const select = isEmptyProjection(params.projection) ? { builder: this.qb().select([this.schema[this.idField].alias ?? this.idField]) } : await this.buildSelect(params.projection)
+        const select = isEmptyProjection(params.projection) ? { builder: this.qb().select([this.dbIdField]) } : await this.buildSelect(params.projection)
         const where = await this.buildWhere(params.filter, select.builder)
         const sort = await this.buildSort(params.sorts, where.builder)
         return {
