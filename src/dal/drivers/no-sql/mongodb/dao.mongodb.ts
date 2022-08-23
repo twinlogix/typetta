@@ -60,7 +60,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       const filter = await this.buildFilter(params.filter)
       const projection = isEmptyProjection(params.projection) ? { [this.dbIdField]: true } : this.buildProjection(params.projection)
       const sort = this.buildSort(params.sorts)
-      /*if (sort.length > 0 && sort.map((v) => v[0]).includes(this.dbIdField)) { // see #288
+      /*if (sort.length > 0 && !sort.map((v) => v[0]).includes(this.dbIdField)) { // see #288
         sort.push([this.dbIdField, 1])
       }*/
       const options = { projection, sort, skip: params.skip, limit: params.limit ?? this.pageSize } as FindOptions
