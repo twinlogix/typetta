@@ -76,6 +76,24 @@ export type Room = {
   to: Scalars['Date']
 }
 
+export type SpecialAnd = {
+  __typename?: 'SpecialAnd'
+  hotelId1: Scalars['ID']
+  hotelId2: Scalars['ID']
+  id: Scalars['ID']
+  tenantId1: Scalars['Int']
+  tenantId2: Scalars['Int']
+}
+
+export type SpecialOr = {
+  __typename?: 'SpecialOr'
+  hotelId1: Scalars['ID']
+  hotelId2: Scalars['ID']
+  id: Scalars['ID']
+  tenantId1: Scalars['Int']
+  tenantId2: Scalars['Int']
+}
+
 export type User = {
   __typename?: 'User'
   email: Scalars['Email']

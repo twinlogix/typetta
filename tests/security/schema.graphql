@@ -81,3 +81,20 @@ type Room @entity @mongodb {
 
   tenantId: Int!
 }
+
+
+type SpecialOr @entity @mongodb {
+  id: ID! @id
+  hotelId1: ID!
+  tenantId1: Int!
+  hotelId2: ID!
+  tenantId2: Int!
+}
+
+type SpecialAnd @entity @mongodb {
+  id: ID! @id
+  hotelId1: ID!
+  tenantId1: Int!
+  hotelId2: ID!
+  tenantId2: Int!
+}

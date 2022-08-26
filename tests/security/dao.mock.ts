@@ -73,6 +73,34 @@ export type AST = {
       rawSorts: () => M.Sort
     }
   }
+  SpecialAnd: {
+    fields: {
+      hotelId1: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      hotelId2: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      tenantId1: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      tenantId2: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
+  }
+  SpecialOr: {
+    fields: {
+      hotelId1: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      hotelId2: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      tenantId1: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      tenantId2: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
+  }
   User: {
     fields: {
       email: { type: 'scalar'; isList: false; astName: 'Email'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
@@ -132,6 +160,8 @@ export const schemas = {
   Reservation: reservationSchema,
   Role: roleSchema,
   Room: roomSchema,
+  SpecialAnd: specialAndSchema,
+  SpecialOr: specialOrSchema,
   User: userSchema,
   UserRole: userRoleSchema,
 } as const
@@ -541,6 +571,218 @@ export class InMemoryRoomDAO<MetadataType, OperationMetadataType> extends T.Abst
     })
   }
 }
+export function specialAndSchema(): T.Schema<ScalarsSpecification> {
+  return {
+    hotelId1: {
+      type: 'scalar',
+      scalar: 'ID',
+      required: true,
+      directives: {},
+    },
+    hotelId2: {
+      type: 'scalar',
+      scalar: 'ID',
+      required: true,
+      directives: {},
+    },
+    id: {
+      type: 'scalar',
+      scalar: 'ID',
+      isId: true,
+      generationStrategy: 'generator',
+      required: true,
+      directives: {},
+    },
+    tenantId1: {
+      type: 'scalar',
+      scalar: 'Int',
+      required: true,
+      directives: {},
+    },
+    tenantId2: {
+      type: 'scalar',
+      scalar: 'Int',
+      required: true,
+      directives: {},
+    },
+  }
+}
+
+type SpecialAndDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'SpecialAnd',
+  AST,
+  ScalarsSpecification,
+  SpecialAndCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
+export type SpecialAndDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.MongoDBDAOParams<SpecialAndDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+export type InMemorySpecialAndDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<SpecialAndDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+
+export type SpecialAndIdFields = T.IdFields<'SpecialAnd', AST>
+export interface SpecialAndModel extends types.SpecialAnd {}
+export interface SpecialAndInsert extends T.Insert<'SpecialAnd', AST, ScalarsSpecification> {}
+export interface SpecialAndPlainModel extends T.GenerateModel<'SpecialAnd', AST, ScalarsSpecification, 'relation'> {}
+export interface SpecialAndProjection extends T.Projection<'SpecialAnd', AST> {}
+export interface SpecialAndUpdate extends T.Update<'SpecialAnd', AST, ScalarsSpecification> {}
+export interface SpecialAndFilter extends T.Filter<'SpecialAnd', AST, ScalarsSpecification> {}
+export interface SpecialAndSortElement extends T.SortElement<'SpecialAnd', AST> {}
+export interface SpecialAndRelationsFindParams extends T.RelationsFindParams<'SpecialAnd', AST, ScalarsSpecification> {}
+export type SpecialAndParams<P extends SpecialAndProjection> = T.Params<'SpecialAnd', AST, ScalarsSpecification, P>
+export type SpecialAndCachedTypes = T.CachedTypes<
+  SpecialAndIdFields,
+  SpecialAndModel,
+  SpecialAndInsert,
+  SpecialAndPlainModel,
+  SpecialAndProjection,
+  SpecialAndUpdate,
+  SpecialAndFilter,
+  SpecialAndSortElement,
+  SpecialAndRelationsFindParams
+>
+
+export class SpecialAndDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<SpecialAndDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'SpecialAnd', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'SpecialAnd', AST>, P2 extends T.Projection<'SpecialAnd', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'SpecialAnd', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'SpecialAnd', AST>, P1, P2>
+  }
+  public constructor(params: SpecialAndDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: specialAndSchema(),
+    })
+  }
+}
+
+export class InMemorySpecialAndDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<SpecialAndDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'SpecialAnd', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'SpecialAnd', AST>, P2 extends T.Projection<'SpecialAnd', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'SpecialAnd', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'SpecialAnd', AST>, P1, P2>
+  }
+  public constructor(params: InMemorySpecialAndDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: specialAndSchema(),
+    })
+  }
+}
+export function specialOrSchema(): T.Schema<ScalarsSpecification> {
+  return {
+    hotelId1: {
+      type: 'scalar',
+      scalar: 'ID',
+      required: true,
+      directives: {},
+    },
+    hotelId2: {
+      type: 'scalar',
+      scalar: 'ID',
+      required: true,
+      directives: {},
+    },
+    id: {
+      type: 'scalar',
+      scalar: 'ID',
+      isId: true,
+      generationStrategy: 'generator',
+      required: true,
+      directives: {},
+    },
+    tenantId1: {
+      type: 'scalar',
+      scalar: 'Int',
+      required: true,
+      directives: {},
+    },
+    tenantId2: {
+      type: 'scalar',
+      scalar: 'Int',
+      required: true,
+      directives: {},
+    },
+  }
+}
+
+type SpecialOrDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'SpecialOr',
+  AST,
+  ScalarsSpecification,
+  SpecialOrCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
+export type SpecialOrDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.MongoDBDAOParams<SpecialOrDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+export type InMemorySpecialOrDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<SpecialOrDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+
+export type SpecialOrIdFields = T.IdFields<'SpecialOr', AST>
+export interface SpecialOrModel extends types.SpecialOr {}
+export interface SpecialOrInsert extends T.Insert<'SpecialOr', AST, ScalarsSpecification> {}
+export interface SpecialOrPlainModel extends T.GenerateModel<'SpecialOr', AST, ScalarsSpecification, 'relation'> {}
+export interface SpecialOrProjection extends T.Projection<'SpecialOr', AST> {}
+export interface SpecialOrUpdate extends T.Update<'SpecialOr', AST, ScalarsSpecification> {}
+export interface SpecialOrFilter extends T.Filter<'SpecialOr', AST, ScalarsSpecification> {}
+export interface SpecialOrSortElement extends T.SortElement<'SpecialOr', AST> {}
+export interface SpecialOrRelationsFindParams extends T.RelationsFindParams<'SpecialOr', AST, ScalarsSpecification> {}
+export type SpecialOrParams<P extends SpecialOrProjection> = T.Params<'SpecialOr', AST, ScalarsSpecification, P>
+export type SpecialOrCachedTypes = T.CachedTypes<
+  SpecialOrIdFields,
+  SpecialOrModel,
+  SpecialOrInsert,
+  SpecialOrPlainModel,
+  SpecialOrProjection,
+  SpecialOrUpdate,
+  SpecialOrFilter,
+  SpecialOrSortElement,
+  SpecialOrRelationsFindParams
+>
+
+export class SpecialOrDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<SpecialOrDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'SpecialOr', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'SpecialOr', AST>, P2 extends T.Projection<'SpecialOr', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'SpecialOr', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'SpecialOr', AST>, P1, P2>
+  }
+  public constructor(params: SpecialOrDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: specialOrSchema(),
+    })
+  }
+}
+
+export class InMemorySpecialOrDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<SpecialOrDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'SpecialOr', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'SpecialOr', AST>, P2 extends T.Projection<'SpecialOr', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'SpecialOr', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'SpecialOr', AST>, P1, P2>
+  }
+  public constructor(params: InMemorySpecialOrDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: specialOrSchema(),
+    })
+  }
+}
 export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     email: {
@@ -787,12 +1029,14 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     reservation?: Pick<Partial<ReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     role?: Pick<Partial<RoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     room?: Pick<Partial<RoomDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    specialAnd?: Pick<Partial<SpecialAndDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    specialOr?: Pick<Partial<SpecialOrDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     userRole?: Pick<Partial<UserRoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   }
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
-  log?: T.LogInput<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'User' | 'UserRole'>
+  log?: T.LogInput<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
   awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
@@ -807,6 +1051,8 @@ export class EntityManager<
   private _reservation: ReservationDAO<MetadataType, OperationMetadataType> | undefined
   private _role: RoleDAO<MetadataType, OperationMetadataType> | undefined
   private _room: RoomDAO<MetadataType, OperationMetadataType> | undefined
+  private _specialAnd: SpecialAndDAO<MetadataType, OperationMetadataType> | undefined
+  private _specialOr: SpecialOrDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
   private _userRole: UserRoleDAO<MetadataType, OperationMetadataType> | undefined
 
@@ -817,7 +1063,7 @@ export class EntityManager<
 
   private middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
 
-  private logger?: T.LogFunction<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'User' | 'UserRole'>
+  private logger?: T.LogFunction<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
 
   get hotel(): HotelDAO<MetadataType, OperationMetadataType> {
     if (!this._hotel) {
@@ -947,6 +1193,76 @@ export class EntityManager<
     }
     return this._room
   }
+  get specialAnd(): SpecialAndDAO<MetadataType, OperationMetadataType> {
+    if (!this._specialAnd) {
+      const db = this.mongodb.default
+      this._specialAnd =
+        db === 'mock'
+          ? (new InMemorySpecialAndDAO({
+              entityManager: this,
+              datasource: null,
+              metadata: this.metadata,
+              ...this.overrides?.specialAnd,
+              middlewares: [
+                ...(this.overrides?.specialAnd?.middlewares || []),
+                ...(selectMiddleware('specialAnd', this.middlewares) as T.DAOMiddleware<SpecialAndDAOGenerics<MetadataType, OperationMetadataType>>[]),
+              ],
+              name: 'SpecialAnd',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            }) as unknown as SpecialAndDAO<MetadataType, OperationMetadataType>)
+          : new SpecialAndDAO({
+              entityManager: this,
+              datasource: 'default',
+              metadata: this.metadata,
+              ...this.overrides?.specialAnd,
+              collection: db.collection('specialAnds'),
+              middlewares: [
+                ...(this.overrides?.specialAnd?.middlewares || []),
+                ...(selectMiddleware('specialAnd', this.middlewares) as T.DAOMiddleware<SpecialAndDAOGenerics<MetadataType, OperationMetadataType>>[]),
+              ],
+              name: 'SpecialAnd',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            })
+    }
+    return this._specialAnd
+  }
+  get specialOr(): SpecialOrDAO<MetadataType, OperationMetadataType> {
+    if (!this._specialOr) {
+      const db = this.mongodb.default
+      this._specialOr =
+        db === 'mock'
+          ? (new InMemorySpecialOrDAO({
+              entityManager: this,
+              datasource: null,
+              metadata: this.metadata,
+              ...this.overrides?.specialOr,
+              middlewares: [
+                ...(this.overrides?.specialOr?.middlewares || []),
+                ...(selectMiddleware('specialOr', this.middlewares) as T.DAOMiddleware<SpecialOrDAOGenerics<MetadataType, OperationMetadataType>>[]),
+              ],
+              name: 'SpecialOr',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            }) as unknown as SpecialOrDAO<MetadataType, OperationMetadataType>)
+          : new SpecialOrDAO({
+              entityManager: this,
+              datasource: 'default',
+              metadata: this.metadata,
+              ...this.overrides?.specialOr,
+              collection: db.collection('specialOrs'),
+              middlewares: [
+                ...(this.overrides?.specialOr?.middlewares || []),
+                ...(selectMiddleware('specialOr', this.middlewares) as T.DAOMiddleware<SpecialOrDAOGenerics<MetadataType, OperationMetadataType>>[]),
+              ],
+              name: 'SpecialOr',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            })
+    }
+    return this._specialOr
+  }
   get user(): UserDAO<MetadataType, OperationMetadataType> {
     if (!this._user) {
       const db = this.mongodb.default
@@ -1045,6 +1361,8 @@ export class EntityManager<
         reservation: M.Collection<M.Document> | null
         role: M.Collection<M.Document> | null
         room: M.Collection<M.Document> | null
+        specialAnd: M.Collection<M.Document> | null
+        specialOr: M.Collection<M.Document> | null
         user: M.Collection<M.Document> | null
         userRole: M.Collection<M.Document> | null
       },
@@ -1057,6 +1375,8 @@ export class EntityManager<
         reservation: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('reservations'),
         role: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('roles'),
         room: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('rooms'),
+        specialAnd: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('specialAnds'),
+        specialOr: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('specialOrs'),
         user: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('users'),
         userRole: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('userRoles'),
       },
@@ -1074,6 +1394,8 @@ type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   reservation: ReservationDAOGenerics<MetadataType, OperationMetadataType>
   role: RoleDAOGenerics<MetadataType, OperationMetadataType>
   room: RoomDAOGenerics<MetadataType, OperationMetadataType>
+  specialAnd: SpecialAndDAOGenerics<MetadataType, OperationMetadataType>
+  specialOr: SpecialOrDAOGenerics<MetadataType, OperationMetadataType>
   user: UserDAOGenerics<MetadataType, OperationMetadataType>
   userRole: UserRoleDAOGenerics<MetadataType, OperationMetadataType>
 }
@@ -1131,13 +1453,15 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
       reservation?: Pick<Partial<ReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       role?: Pick<Partial<RoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       room?: Pick<Partial<RoomDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      specialAnd?: Pick<Partial<SpecialAndDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      specialOr?: Pick<Partial<SpecialOrDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       userRole?: Pick<Partial<UserRoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     }
     mongodb: Record<'default', M.Db | 'mock'>
 
     scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
-    log: T.LogInput<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'User' | 'UserRole'>
+    log: T.LogInput<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
   }
   security: {

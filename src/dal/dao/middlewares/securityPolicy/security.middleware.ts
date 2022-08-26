@@ -110,7 +110,15 @@ export function securityPolicy<
           ? inferOperationSecurityDomain(
               Object.entries(input.domainMap)
                 .filter((v) => v[1] != null)
-                .map((v) => v[1] as string),
+                .flatMap((v) => {
+                  const domain = v[1] as string | { or: string[] } | { and: string[] }
+                  if (typeof domain === 'object' && 'or' in domain) {
+                    return domain.or
+                  } else if (typeof domain === 'object' && 'and' in domain) {
+                    return domain.and
+                  }
+                  return [domain]
+                }),
               args.params.filter,
             )
           : [{} as SecurityDomain]

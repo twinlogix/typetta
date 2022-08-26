@@ -38,7 +38,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
         permissions: securityContext ?? {},
       },
       policies: {
-        hotel: {
+        /*hotel: {
           domain: {
             hotelId: 'id',
             tenantId: 'tenantId',
@@ -65,6 +65,24 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           },
           permissions: {
             MANAGE_ROOM: { create: true },
+          },
+        },*/
+        specialOr: {
+          domain: {
+            hotelId: { or: ['hotelId1', 'hotelId2'] },
+            tenantId: { or: ['tenantId1', 'tenantId2'] },
+          },
+          permissions: {
+            MANAGE_HOTEL: PERMISSION.ALLOW,
+          },
+        },
+        specialAnd: {
+          domain: {
+            hotelId: { and: ['hotelId1', 'hotelId2'] },
+            tenantId: { and: ['tenantId1', 'tenantId2'] },
+          },
+          permissions: {
+            MANAGE_HOTEL: PERMISSION.ALLOW,
           },
         },
       },
@@ -409,6 +427,61 @@ test('security test 4', async () => {
 
   await entityManager.hotel.findAll({ projection: { id: true, name: true }, metadata: { securityDomains: [{ hotelId: ['h1'] }] } })
   await entityManager.hotel.findAll({ projection: { id: true, name: true } })
+})
+
+test('security test 5', async () => {
+  const user = await unsafeDao.user.insertOne({
+    record: {
+      id: 'u1',
+      email: 'mario@domain.com',
+      firstName: 'Mario',
+    },
+  })
+  await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER', hotelId: 'h1' } })
+  await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER', hotelId: 'h2' } })
+  await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER', tenantId: 1 } })
+  await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER', tenantId: 2 } })
+
+  await unsafeDao.specialOr.insertOne({ record: { hotelId1: 'h1', hotelId2: 'h3', tenantId1: 3, tenantId2: 4 } })
+  await unsafeDao.specialOr.insertOne({ record: { hotelId1: 'h3', hotelId2: 'h2', tenantId1: 3, tenantId2: 4 } })
+  await unsafeDao.specialOr.insertOne({ record: { hotelId1: 'h3', hotelId2: 'h4', tenantId1: 1, tenantId2: 4 } })
+  await unsafeDao.specialOr.insertOne({ record: { hotelId1: 'h3', hotelId2: 'h4', tenantId1: 3, tenantId2: 2 } })
+  await unsafeDao.specialOr.insertOne({ record: { hotelId1: 'h3', hotelId2: 'h4', tenantId1: 3, tenantId2: 5 } })
+
+  const entityManager = await createSecureEntityManager(user.id)
+
+  const r1 = await entityManager.specialOr.findAll({ filter: { $or: [{ hotelId1: 'h1' }, { hotelId2: 'h2' }, { tenantId1: 1 }, { tenantId2: 2 }] } })
+  expect(r1.length).toBe(4)
+
+  try {
+    await entityManager.specialOr.findAll({ filter: { hotelId1: 'h3' } })
+    fail()
+  } catch (error: unknown) {
+    if (error instanceof SecurityPolicyReadError) {
+      expect(error.allowedProjection).toStrictEqual({ id: true })
+      expect(error.unauthorizedProjection).toStrictEqual(true)
+    } else {
+      fail()
+    }
+  }
+
+  await unsafeDao.specialAnd.insertOne({ record: { hotelId1: 'h1', hotelId2: 'h1', tenantId1: 1, tenantId2: 1 } })
+  await unsafeDao.specialAnd.insertOne({ record: { hotelId1: 'h3', hotelId2: 'h2', tenantId1: 3, tenantId2: 4 } })
+
+  try {
+    await entityManager.specialAnd.findAll({ filter: { hotelId1: 'h3' } })
+    fail()
+  } catch (error: unknown) {
+    if (error instanceof SecurityPolicyReadError) {
+      expect(error.allowedProjection).toStrictEqual({ id: true })
+      expect(error.unauthorizedProjection).toStrictEqual(true)
+    } else {
+      fail()
+    }
+  }
+
+  const r2 = await entityManager.specialAnd.findAll({ filter: { $and: [{ hotelId1: 'h1' }, { hotelId2: 'h1' }, { tenantId1: 1 }, { tenantId2: 1 }] } })
+  expect(r2.length).toBe(1)
 })
 
 afterEach(async () => {

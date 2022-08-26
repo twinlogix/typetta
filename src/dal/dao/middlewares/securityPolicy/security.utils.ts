@@ -37,9 +37,27 @@ export function createSecurityPolicyMiddlewares<
                         const mappedAtom = Object.fromEntries(
                           Object.entries(atom).flatMap(([k, v]) => {
                             const key = k as keyof SecurityDomain
+                            const domainM = domainMap[key] as string | null | { or: string[] } | { and: string[] }
+                            if (domainM && typeof domainM === 'object' && 'or' in domainM) {
+                              return [[`__or__${key}`, domainM.or.map((domain) => [domain, v])]]
+                            }
+                            if (domainM && typeof domainM === 'object' && 'and' in domainM) {
+                              return domainM.and.map((domain) => [domain, v])
+                            }
                             return domainMap[key] != null ? [[domainMap[key], v]] : []
                           }),
                         )
+                        const ors = Object.entries(mappedAtom).filter((v) => v[0].startsWith('__or__'))
+                        if (ors.length > 0) {
+                          const copy = Object.fromEntries(Object.entries(mappedAtom).filter((v) => !v[0].startsWith('__or__')))
+                          const mappedAtoms = ors.reduce(
+                            (p, c) => {
+                              return (c[1] as [string, unknown][]).flatMap(([k, v]) => p.map((cop) => ({ ...cop, [k]: v })))
+                            },
+                            [copy],
+                          )
+                          return mappedAtoms
+                        }
                         return Object.keys(mappedAtom).length > 0 ? [mappedAtom] : []
                       })
                 return mappedSecurityDomains === true || mappedSecurityDomains.length > 0 ? [[permission, mappedSecurityDomains]] : []
