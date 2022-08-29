@@ -70,7 +70,7 @@
     "@graphql-codegen/add": "3.2.0",
     "@graphql-codegen/cli": "2.11.6",
     "@graphql-codegen/plugin-helpers": "2.4.2",
-    "@graphql-codegen/schema-ast": "2.5.0",
+    "@graphql-codegen/schema-ast": "2.5.1",
     "@graphql-codegen/typescript": "2.7.2",
     "@graphql-codegen/typescript-resolvers": "2.7.2",
     "@graphql-codegen/visitor-plugin-common": "2.10.0",
