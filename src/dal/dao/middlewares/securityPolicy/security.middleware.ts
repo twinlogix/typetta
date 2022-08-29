@@ -26,7 +26,7 @@ export function securityPolicy<
   securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
   securityDomains: (metadata: T['operationMetadata'] | undefined) => SecurityDomain[] | undefined
   defaultPermission?: CRUDPermission<T>
-  domainMap?: { [K in keyof Required<SecurityDomain>]?: keyof T['model'] | null }
+  domainMap?: { [K in keyof Required<SecurityDomain>]?: keyof T['model'] | { or: (keyof T['model'])[] } | { and: (keyof T['model'])[] } | null }
 }): DAOMiddleware<T> {
   type RelatedSecurityContext = {
     domain: SecurityContextPermission[] | true

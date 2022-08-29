@@ -84,7 +84,7 @@ export function createSecurityPolicyMiddlewares<
                     } else if (typeof domain === 'object' && 'and' in domain) {
                       return domain.and.map((k) => [k, v])
                     }
-                    return domainMap[key] != null ? [[domain, v]] : []
+                    return domain != null ? [[domain, v]] : []
                   }),
                 ),
               )
@@ -92,7 +92,11 @@ export function createSecurityPolicyMiddlewares<
             },
             domainMap: domainMap as
               | {
-                  [x: string]: keyof DAOGenericsMap[keyof DAOGenericsMap]['model'] | null
+                  [x: string]:
+                    | keyof DAOGenericsMap[keyof DAOGenericsMap]['model']
+                    | { or: (keyof DAOGenericsMap[keyof DAOGenericsMap]['model'])[] }
+                    | { and: (keyof DAOGenericsMap[keyof DAOGenericsMap]['model'])[] }
+                    | null
                 }
               | undefined,
             defaultPermission,

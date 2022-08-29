@@ -38,7 +38,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
         permissions: securityContext ?? {},
       },
       policies: {
-        /*hotel: {
+        hotel: {
           domain: {
             hotelId: 'id',
             tenantId: 'tenantId',
@@ -66,7 +66,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
           permissions: {
             MANAGE_ROOM: { create: true },
           },
-        },*/
+        },
         specialOr: {
           domain: {
             hotelId: { or: ['hotelId1', 'hotelId2'] },
