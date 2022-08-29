@@ -78,7 +78,13 @@ export function createSecurityPolicyMiddlewares<
                 Object.fromEntries(
                   Object.entries(securityDomain).flatMap(([k, v]) => {
                     const key = k as keyof SecurityDomain
-                    return domainMap[key] != null ? [[domainMap[key], v]] : []
+                    const domain = domainMap[key] as string | { or: string[] } | { and: string[] }
+                    if (typeof domain === 'object' && 'or' in domain) {
+                      return domain.or.map((k) => [k, v])
+                    } else if (typeof domain === 'object' && 'and' in domain) {
+                      return domain.and.map((k) => [k, v])
+                    }
+                    return domainMap[key] != null ? [[domain, v]] : []
                   }),
                 ),
               )
