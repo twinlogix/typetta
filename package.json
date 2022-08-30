@@ -1,6 +1,6 @@
 {
   "name": "@twinlogix/typetta",
-  "version": "2.1.13",
+  "version": "2.1.14",
   "main": "lib/index.js",
   "bin": {
     "typetta": "lib/cli/index.js"
