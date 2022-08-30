@@ -215,6 +215,11 @@ test('simple findAll', async () => {
   expect(users[0].firstName).toBe('FirstName')
   expect(users[0].lastName).toBe('LastName')
 
+  const users1 = await dao.user.findAll({ filter: { firstName: undefined } })
+  expect(users1.length).toBe(1)
+  expect(users1[0].firstName).toBe('FirstName')
+  expect(users1[0].lastName).toBe('LastName')
+
   const users2 = await dao.user.findAll({ filter: { id: { exists: true } } })
   expect(users2.length).toBe(1)
   expect(users2[0].firstName).toBe('FirstName')

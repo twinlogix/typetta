@@ -205,8 +205,12 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
   private getIndexes(filter: T['filter']): number[] | null {
     if (filter) {
       const idFilter = filter[this.idField]
-      const filterKeys = Object.keys(filter)
-      const idFilterKeys = Object.keys(idFilter ?? {})
+      const filterKeys = Object.entries(filter)
+        .filter((v) => v[1] !== undefined)
+        .map((v) => v[0])
+      const idFilterKeys = Object.entries(idFilter ?? {})
+        .filter((v) => v[1] !== undefined)
+        .map((v) => v[0])
       if (typeof idFilter === 'object' && filterKeys.includes('$and')) {
         const indexes = (filter['$and'] as T['filter'][]).map((f) => this.getIndexes(f)).flatMap((i) => (i === null ? [] : [new Set(i)]))
         if (indexes.length !== 0) {

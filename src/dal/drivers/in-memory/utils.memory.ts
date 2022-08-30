@@ -125,7 +125,7 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
     return false
   }
 
-  for (const [keyF, f] of Object.entries(filter).filter((p) => !MONGODB_LOGIC_QUERY_PREFIXS.has(p[0]))) {
+  for (const [keyF, f] of Object.entries(filter).filter((p) => p[1] !== undefined && !MONGODB_LOGIC_QUERY_PREFIXS.has(p[0]))) {
     let adapter: DataTypeAdapter<unknown, unknown>
     let schemaField: SchemaField<Scalars>
     let key: string

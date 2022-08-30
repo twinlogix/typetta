@@ -70,6 +70,9 @@ export function adaptFilter<Scalars extends AbstractScalars, T extends DAOGeneri
     return filter()
   }
   return mapObjectAsync(filter, async ([k, v]) => {
+    if(v === undefined) {
+      return []
+    }
     const schemaField = getSchemaFieldTraversing(k, schema)
     const columnName = modelNameToDbName(k, schema)
     if (schemaField) {
