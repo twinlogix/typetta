@@ -236,15 +236,15 @@ test('simple findAll', async () => {
 })
 
 test('nulls find', async () => {
-  await dao.user.insertOne({ record: { live: true, amount: new BigNumber(1) } })
-  await dao.user.insertOne({ record: { live: true, amount: null } })
+  await dao.user.insertOne({ record: { live: true, firstName: '' } })
+  await dao.user.insertOne({ record: { live: true, firstName: null } })
   await dao.user.insertOne({ record: { live: true } })
 
-  const users1 = await dao.user.findAll({ filter: { amount: null } })
-  const users2 = await dao.user.findAll({ filter: { amount: { eq: null } } })
-  const users3 = await dao.user.findAll({ filter: { amount: { exists: false } } })
-  const users4 = await dao.user.findAll({ filter: { amount: { exists: true } } })
-  const users5 = await dao.user.findAll({ filter: { amount: undefined } })
+  const users1 = await dao.user.findAll({ filter: { firstName: null } })
+  const users2 = await dao.user.findAll({ filter: { firstName: { eq: null } } })
+  const users3 = await dao.user.findAll({ filter: { firstName: { exists: false } } })
+  const users4 = await dao.user.findAll({ filter: { firstName: { exists: true } } })
+  const users5 = await dao.user.findAll({ filter: { firstName: undefined } })
 
   expect(users1.length).toBe(2)
   expect(users2.length).toBe(2)
