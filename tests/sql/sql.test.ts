@@ -235,6 +235,24 @@ test('simple findAll', async () => {
   expect(Object.keys(users6[0]).length).toBe(1)
 })
 
+test('nulls find', async () => {
+  await dao.user.insertOne({ record: { live: true, amount: new BigNumber(1) } })
+  await dao.user.insertOne({ record: { live: true, amount: null } })
+  await dao.user.insertOne({ record: { live: true } })
+
+  const users1 = await dao.user.findAll({ filter: { amount: null } })
+  const users2 = await dao.user.findAll({ filter: { amount: { eq: null } } })
+  const users3 = await dao.user.findAll({ filter: { amount: { exists: false } } })
+  const users4 = await dao.user.findAll({ filter: { amount: { exists: true } } })
+  const users5 = await dao.user.findAll({ filter: { amount: undefined } })
+
+  expect(users1.length).toBe(2)
+  expect(users2.length).toBe(2)
+  expect(users3.length).toBe(2)
+  expect(users4.length).toBe(1)
+  expect(users5.length).toBe(3)
+})
+
 test('simple findOne multiple filter', async () => {
   await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
   await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })

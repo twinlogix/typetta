@@ -154,9 +154,9 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
 
     if (hasKeys(f, ['eq', 'in', 'ne', 'nin'])) {
       const eo = f as EqualityOperators<unknown>
-      const eq = eo.eq != null ? await modelValueToDbValue(eo.eq, schemaField, adapter) : eo.eq
+      const eq = eo.eq !== undefined ? await modelValueToDbValue(eo.eq, schemaField, adapter) : eo.eq
       const eqResult =
-        eq != null
+        eq !== undefined
           ? (f as Record<string, unknown>).mode === 'insensitive' && typeof value === 'string' && typeof eq === 'string'
             ? equals(value.toLocaleLowerCase(), eq.toLocaleLowerCase())
             : equals(value, eq)
@@ -177,7 +177,7 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
         }
         return true
       }
-      const neResult = eo.ne != null ? !equals(value, await modelValueToDbValue(eo.ne, schemaField, adapter)) : true
+      const neResult = eo.ne !== undefined ? !equals(value, await modelValueToDbValue(eo.ne, schemaField, adapter)) : true
       const inResult = eo.in ? await asyncSome(eo.in, async (v) => equals(value, await modelValueToDbValue(v, schemaField, adapter))) : true
       const ninResult = eo.nin ? await asyncEvery(eo.nin, async (v) => !equals(value, await modelValueToDbValue(v, schemaField, adapter))) : true
       if (!(eqResult && neResult && inResult && ninResult)) {
@@ -194,7 +194,7 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
       }
     } else if (hasKeys(f, ['exists'])) {
       const eo = f as ElementOperators
-      if (!(eo.exists == null ? true : eo.exists === true ? value !== undefined : value === undefined)) {
+      if (!(eo.exists == null ? true : eo.exists === true ? value !== undefined && value !== null : value === undefined || value === null)) {
         return false
       }
     } else if (hasKeys(f, ['contains', 'startsWith', 'endsWith'])) {

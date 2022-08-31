@@ -47,17 +47,32 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected readonly driverContext: T['driverContext']
   protected readonly schema: Schema<T['scalars']>
   protected readonly idGenerator?: DAOParams<T>['idGenerator']
+  protected readonly idScalarGenerator?: () => T['insert'][T['idFields']]
   private readonly logger?: LogFunction<T['entity']>
   private readonly awaitLog: boolean
   protected readonly datasource: string | null
 
-  protected constructor({ datasource, idGenerator, entityManager, name, logger, awaitLog, pageSize = 50, middlewares = [], schema, metadata, driverContext }: DAOParams<T>) {
+  protected constructor({
+    datasource,
+    idGenerator,
+    idScalarGenerator,
+    entityManager,
+    name,
+    logger,
+    awaitLog,
+    pageSize = 50,
+    middlewares = [],
+    schema,
+    metadata,
+    driverContext,
+  }: DAOParams<T> & { idScalarGenerator?: () => T['insert'][T['idFields']] }) {
     this.dataLoaders = new Map<string, DataLoader<T['filter'][keyof T['filter']], PartialDeep<T['model']>[]>>()
     this.dataLoaderRefs = new Map<string, string[]>()
     const { idField, idScalar, idGeneration } = idInfoFromSchema(schema)
     this.idField = idField
     this.idGeneration = idGeneration
     this.idGenerator = idGenerator
+    this.idScalarGenerator = idScalarGenerator
     this.entityManager = entityManager
     this.pageSize = pageSize
     this.relations = daoRelationsFromSchema(schema)
@@ -65,7 +80,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.logger = logger
     this.awaitLog = awaitLog ?? true
     this.datasource = datasource
-    if (this.idGeneration === 'generator' && !this.idGenerator) {
+    if (this.idGeneration === 'generator' && !this.idGenerator && !this.idScalarGenerator) {
       throw new Error(`ID generator for scalar ${idScalar} is missing. Define one in EntityManager or in DAOParams.`)
     }
     Object.entries(schema)
@@ -199,11 +214,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       {
         name: 'Typetta - Default field from generator',
         before: async (args, context) => {
-          if (args.operation === 'insert' && this.idGeneration === 'generator' && this.idGenerator && !Object.keys(args.params.record).includes(context.idField)) {
-            return {
-              continue: true,
-              operation: args.operation,
-              params: { ...args.params, record: { ...args.params.record, ...this.idGenerator() } },
+          if (args.operation === 'insert' && this.idGeneration === 'generator' && !Object.keys(args.params.record).includes(context.idField)) {
+            const id = this.idGenerator ? this.idGenerator() : this.idScalarGenerator ? { [context.idField]: this.idScalarGenerator() } : null
+            if (id) {
+              return {
+                continue: true,
+                operation: args.operation,
+                params: { ...args.params, record: { ...args.params.record, ...id } },
+              }
             }
           }
         },

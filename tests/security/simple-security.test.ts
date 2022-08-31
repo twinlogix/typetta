@@ -104,7 +104,7 @@ beforeEach(async () => {
   await unsafeDao.role.insertOne({ record: { code: 'ANALYST', permissions: ['ANALYST'] } })
 })
 
-test('security test 1', async () => {
+test('simple security test 1', async () => {
   const user = await unsafeDao.user.insertOne({
     record: {
       id: 'u1',

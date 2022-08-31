@@ -30,8 +30,8 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
   private tableName: string
   private knex: Knex<any, unknown[]>
 
-  protected constructor({ tableName, knex, idGenerator, schema, ...params }: KnexJsDAOParams<T>) {
-    super({ ...params, driverContext: { tableName, knex }, schema, idGenerator: idGenerator ?? params.entityManager.adapters.knex[idInfoFromSchema(schema).idScalar]?.generate })
+  protected constructor({ tableName, knex, schema, ...params }: KnexJsDAOParams<T>) {
+    super({ ...params, driverContext: { tableName, knex }, schema, idScalarGenerator: params.entityManager.adapters.knex[idInfoFromSchema(schema).idScalar]?.generate })
     this.tableName = tableName
     this.knex = knex
   }

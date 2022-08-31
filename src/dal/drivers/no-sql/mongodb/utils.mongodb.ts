@@ -70,7 +70,7 @@ export function adaptFilter<Scalars extends AbstractScalars, T extends DAOGeneri
     return filter()
   }
   return mapObjectAsync(filter, async ([k, v]) => {
-    if(v === undefined) {
+    if (v === undefined) {
       return []
     }
     const schemaField = getSchemaFieldTraversing(k, schema)
@@ -111,6 +111,9 @@ async function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Sca
               ['$regex', `^${await modelValueToDbValue(fv as Scalar, schemaField, adapter)}$`],
             ]
           }
+          if (fk === 'eq' && fv === null) {
+            return [['$type', 10]]
+          }
           return [[`$${fk}`, await modelValueToDbValue(fv as Scalar, schemaField, adapter)]]
         }
         if (MONGODB_ARRAY_VALUE_QUERY_PREFIXS.has(fk)) {
@@ -123,7 +126,11 @@ async function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Sca
           if (fv == null) {
             return []
           }
-          return [[`$${fk}`, fv]]
+          if (fv === false) {
+            return [['$eq', null]]
+          } else {
+            return [['$ne', null]]
+          }
         }
         return [[fk, fv]]
       })
@@ -149,7 +156,7 @@ async function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Sca
     } else {
       // plain value
       if (value === null) {
-        return null
+        return { $type: 10 }
       } else if (value !== undefined) {
         return modelValueToDbValue(value as Scalar, schemaField, adapter)
       }

@@ -141,6 +141,29 @@ test('simple findOne', async () => {
   expect(user3?.lastName).toBe('LastName')
 })
 
+test('nulls find', async () => {
+  await dao.user.insertOne({ record: { live: true, amount: new BigNumber(1) } })
+  await dao.user.insertOne({ record: { live: true, amount: null } })
+  await dao.user.insertOne({ record: { live: true } })
+
+  const users1 = await dao.user.findAll({ filter: { amount: null } })
+  const users2 = await dao.user.findAll({ filter: { amount: { eq: null } } })
+  const users3 = await dao.user.findAll({ filter: { amount: { exists: false } } })
+  const users4 = await dao.user.findAll({ filter: { amount: { exists: true } } })
+  const users5 = await dao.user.findAll({ filter: { amount: undefined } })
+
+  expect(users1.length).toBe(1)
+  expect(users1[0].amount).toBe(null)
+  expect(users2.length).toBe(1)
+  expect(users2[0].amount).toBe(null)
+  expect(users3.length).toBe(2)
+  expect(users3.find((v) => v.amount === null)?.amount).toBe(null)
+  expect(users3.find((v) => v.amount === undefined)?.amount).toBe(undefined)
+  expect(users4.length).toBe(1)
+  expect(users4[0].amount?.toNumber()).toBe(1)
+  expect(users5.length).toBe(3)
+})
+
 test('simple resolveRelations', async () => {
   const u1 = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   const u2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName', live: true } })

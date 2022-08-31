@@ -25,6 +25,9 @@ export async function modelValueToDbValue<Scalars extends AbstractScalars>(
   schemaField: SchemaField<Scalars>,
   adapter: DataTypeAdapter<Scalars[keyof Scalars]['type'], unknown>,
 ): Promise<unknown> {
+  if(value === null) {
+    return null
+  }
   if (adapter.validate) {
     if (schemaField.isList) {
       for (const v of value as Scalars[keyof Scalars]['type'][]) {

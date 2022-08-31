@@ -11,8 +11,8 @@ import { PartialDeep } from 'type-fest'
 export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends AbstractDAO<T> {
   private stateManager: InMemoryStateManager
   private mockIdSpecification: MockIdSpecification<unknown> | undefined
-  protected constructor({ idGenerator, schema, ...params }: InMemoryDAOParams<T>) {
-    super({ ...params, schema, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[idInfoFromSchema(schema).idScalar]?.generate, driverContext: {} })
+  protected constructor({ schema, ...params }: InMemoryDAOParams<T>) {
+    super({ ...params, schema, idScalarGenerator: params.entityManager.adapters.mongo[idInfoFromSchema(schema).idScalar]?.generate, driverContext: {} })
     const s = this.schema[this.idField]
     if (!(s.type === 'scalar')) {
       throw new Error('Id is an embedded field. Not supported.')

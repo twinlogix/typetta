@@ -100,11 +100,11 @@ test('filter test basic operators', async () => {
   //ElementOperators
   expect(await filterEntity(entity, { array: { exists: true } })).toBe(true)
   expect(await filterEntity(entity, { age: { exists: true } })).toBe(true)
-  expect(await filterEntity(entity, { image: { exists: true } })).toBe(true)
+  expect(await filterEntity(entity, { image: { exists: true } })).toBe(false)
   expect(await filterEntity(entity, { none: { exists: true } })).toBe(false)
   expect(await filterEntity(entity, { array: { exists: false } })).toBe(false)
   expect(await filterEntity(entity, { age: { exists: false } })).toBe(false)
-  expect(await filterEntity(entity, { image: { exists: false } })).toBe(false)
+  expect(await filterEntity(entity, { image: { exists: false } })).toBe(true)
   expect(await filterEntity(entity, { none: { exists: false } })).toBe(true)
   expect(await filterEntity(entity, { 'profile.none': { exists: false } })).toBe(true)
   expect(await filterEntity(entity, { 'profile.none.none': { exists: false } })).toBe(true)

@@ -15,8 +15,8 @@ import { PartialDeep } from 'type-fest'
 export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDAO<T> {
   private collection: Collection
 
-  protected constructor({ collection, idGenerator, schema, ...params }: MongoDBDAOParams<T>) {
-    super({ ...params, driverContext: { collection }, schema, idGenerator: idGenerator ?? params.entityManager.adapters.mongo[idInfoFromSchema(schema).idScalar]?.generate })
+  protected constructor({ collection, schema, ...params }: MongoDBDAOParams<T>) {
+    super({ ...params, driverContext: { collection }, schema, idScalarGenerator: params.entityManager.adapters.mongo[idInfoFromSchema(schema).idScalar]?.generate })
     this.collection = collection
   }
 
