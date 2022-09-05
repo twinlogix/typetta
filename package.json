@@ -78,7 +78,7 @@
     "commander": "9.4.0",
     "dataloader": "2.1.0",
     "dedent": "0.7.0",
-    "graphql": "16.5.0",
+    "graphql": "16.6.0",
     "graphql-tag": "2.12.6",
     "inquirer": "8.2.4",
     "is-plain-object": "5.0.0",
@@ -94,7 +94,7 @@
     "mongodb": "4.9.0"
   },
   "resolutions": {
-    "graphql": "16.5.0"
+    "graphql": "16.6.0"
   },
   "jest": {
     "rootDir": "./",
