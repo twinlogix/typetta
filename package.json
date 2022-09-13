@@ -52,7 +52,7 @@
     "@typescript-eslint/eslint-plugin": "5.11.0",
     "@typescript-eslint/parser": "5.11.0",
     "@vscode/sqlite3": "5.0.8",
-    "apollo-server": "3.10.1",
+    "apollo-server": "3.10.2",
     "bignumber.js": "9.0.2",
     "eslint": "7.32.0",
     "jest": "27.5.1",
@@ -67,18 +67,18 @@
     "typescript": "4.5.5"
   },
   "dependencies": {
-    "@graphql-codegen/add": "3.2.0",
+    "@graphql-codegen/add": "3.2.1",
     "@graphql-codegen/cli": "2.11.6",
     "@graphql-codegen/plugin-helpers": "2.4.2",
     "@graphql-codegen/schema-ast": "2.5.0",
-    "@graphql-codegen/typescript": "2.7.2",
+    "@graphql-codegen/typescript": "2.7.3",
     "@graphql-codegen/typescript-resolvers": "2.7.2",
     "@graphql-codegen/visitor-plugin-common": "2.10.0",
     "chalk": "4.1.2",
     "commander": "9.4.0",
     "dataloader": "2.1.0",
     "dedent": "0.7.0",
-    "graphql": "16.5.0",
+    "graphql": "16.6.0",
     "graphql-tag": "2.12.6",
     "inquirer": "8.2.4",
     "is-plain-object": "5.0.0",
@@ -91,10 +91,10 @@
   },
   "peerDependencies": {
     "knex": "1.0.7",
-    "mongodb": "4.9.0"
+    "mongodb": "4.9.1"
   },
   "resolutions": {
-    "graphql": "16.5.0"
+    "graphql": "16.6.0"
   },
   "jest": {
     "rootDir": "./",
