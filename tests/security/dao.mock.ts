@@ -1447,7 +1447,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
   operationMetadataType: OperationMetadataType
   entityManagerParams: {
     metadata: MetadataType
-    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>
     overrides: {
       hotel?: Pick<Partial<HotelDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       reservation?: Pick<Partial<ReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>

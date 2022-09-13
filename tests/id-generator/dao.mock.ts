@@ -892,7 +892,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
   operationMetadataType: OperationMetadataType
   entityManagerParams: {
     metadata: MetadataType
-    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>
     overrides: {
       a?: Pick<Partial<ADAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       b?: Pick<Partial<BDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>

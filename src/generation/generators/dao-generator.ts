@@ -430,7 +430,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
       type DAOGenericsMap<MetadataType, OperationMetadataType> = {
       ${Array.from(typesMap.values())
         .filter((node) => node.entity)
-        .map((n) => `  ${toFirstLower(n.name)}: ${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
+        .map((n) => `${toFirstLower(n.name)}: ${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
         .join('\n')}
       }
       type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
@@ -482,7 +482,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
         operationMetadataType: OperationMetadataType
         entityManagerParams: {
           metadata: MetadataType
-          middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+          middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>
           overrides: {
             ${contextDAOParamsDeclarations(true)}
           }
