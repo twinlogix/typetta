@@ -194,6 +194,7 @@ export interface HotelFilter extends T.Filter<'Hotel', AST, ScalarsSpecification
 export interface HotelSortElement extends T.SortElement<'Hotel', AST> {}
 export interface HotelRelationsFindParams extends T.RelationsFindParams<'Hotel', AST, ScalarsSpecification> {}
 export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, ScalarsSpecification, P>
+export type HotelProject<P extends HotelProjection> = T.Project<'Hotel', AST, ScalarsSpecification, P>
 export type HotelCachedTypes = T.CachedTypes<HotelIdFields, HotelModel, HotelInsert, HotelPlainModel, HotelProjection, HotelUpdate, HotelFilter, HotelSortElement, HotelRelationsFindParams>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -301,6 +302,7 @@ export interface ReservationFilter extends T.Filter<'Reservation', AST, ScalarsS
 export interface ReservationSortElement extends T.SortElement<'Reservation', AST> {}
 export interface ReservationRelationsFindParams extends T.RelationsFindParams<'Reservation', AST, ScalarsSpecification> {}
 export type ReservationParams<P extends ReservationProjection> = T.Params<'Reservation', AST, ScalarsSpecification, P>
+export type ReservationProject<P extends ReservationProjection> = T.Project<'Reservation', AST, ScalarsSpecification, P>
 export type ReservationCachedTypes = T.CachedTypes<
   ReservationIdFields,
   ReservationModel,
@@ -425,6 +427,7 @@ export interface RoomFilter extends T.Filter<'Room', AST, ScalarsSpecification> 
 export interface RoomSortElement extends T.SortElement<'Room', AST> {}
 export interface RoomRelationsFindParams extends T.RelationsFindParams<'Room', AST, ScalarsSpecification> {}
 export type RoomParams<P extends RoomProjection> = T.Params<'Room', AST, ScalarsSpecification, P>
+export type RoomProject<P extends RoomProjection> = T.Project<'Room', AST, ScalarsSpecification, P>
 export type RoomCachedTypes = T.CachedTypes<RoomIdFields, RoomModel, RoomInsert, RoomPlainModel, RoomProjection, RoomUpdate, RoomFilter, RoomSortElement, RoomRelationsFindParams>
 
 export class RoomDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<RoomDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -503,6 +506,7 @@ export interface TenantFilter extends T.Filter<'Tenant', AST, ScalarsSpecificati
 export interface TenantSortElement extends T.SortElement<'Tenant', AST> {}
 export interface TenantRelationsFindParams extends T.RelationsFindParams<'Tenant', AST, ScalarsSpecification> {}
 export type TenantParams<P extends TenantProjection> = T.Params<'Tenant', AST, ScalarsSpecification, P>
+export type TenantProject<P extends TenantProjection> = T.Project<'Tenant', AST, ScalarsSpecification, P>
 export type TenantCachedTypes = T.CachedTypes<TenantIdFields, TenantModel, TenantInsert, TenantPlainModel, TenantProjection, TenantUpdate, TenantFilter, TenantSortElement, TenantRelationsFindParams>
 
 export class TenantDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<TenantDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -623,6 +627,7 @@ export interface UserFilter extends T.Filter<'User', AST, ScalarsSpecification> 
 export interface UserSortElement extends T.SortElement<'User', AST> {}
 export interface UserRelationsFindParams extends T.RelationsFindParams<'User', AST, ScalarsSpecification> {}
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
+export type UserProject<P extends UserProjection> = T.Project<'User', AST, ScalarsSpecification, P>
 export type UserCachedTypes = T.CachedTypes<UserIdFields, UserModel, UserInsert, UserPlainModel, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {

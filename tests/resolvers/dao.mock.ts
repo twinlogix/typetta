@@ -151,6 +151,7 @@ export interface LikeFilter extends T.Filter<'Like', AST, ScalarsSpecification> 
 export interface LikeSortElement extends T.SortElement<'Like', AST> {}
 export interface LikeRelationsFindParams extends T.RelationsFindParams<'Like', AST, ScalarsSpecification> {}
 export type LikeParams<P extends LikeProjection> = T.Params<'Like', AST, ScalarsSpecification, P>
+export type LikeProject<P extends LikeProjection> = T.Project<'Like', AST, ScalarsSpecification, P>
 export type LikeCachedTypes = T.CachedTypes<LikeIdFields, LikeModel, LikeInsert, LikePlainModel, LikeProjection, LikeUpdate, LikeFilter, LikeSortElement, LikeRelationsFindParams>
 
 export class LikeDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<LikeDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -284,6 +285,7 @@ export interface PostFilter extends T.Filter<'Post', AST, ScalarsSpecification> 
 export interface PostSortElement extends T.SortElement<'Post', AST> {}
 export interface PostRelationsFindParams extends T.RelationsFindParams<'Post', AST, ScalarsSpecification> {}
 export type PostParams<P extends PostProjection> = T.Params<'Post', AST, ScalarsSpecification, P>
+export type PostProject<P extends PostProjection> = T.Project<'Post', AST, ScalarsSpecification, P>
 export type PostCachedTypes = T.CachedTypes<PostIdFields, PostModel, PostInsert, PostPlainModel, PostProjection, PostUpdate, PostFilter, PostSortElement, PostRelationsFindParams>
 
 export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -402,6 +404,7 @@ export interface UserFilter extends T.Filter<'User', AST, ScalarsSpecification> 
 export interface UserSortElement extends T.SortElement<'User', AST> {}
 export interface UserRelationsFindParams extends T.RelationsFindParams<'User', AST, ScalarsSpecification> {}
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
+export type UserProject<P extends UserProjection> = T.Project<'User', AST, ScalarsSpecification, P>
 export type UserCachedTypes = T.CachedTypes<UserIdFields, UserModel, UserInsert, UserPlainModel, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
