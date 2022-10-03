@@ -44,7 +44,7 @@
     "@types/dedent": "0.7.0",
     "@types/inquirer": "8.2.3",
     "@types/jest": "27.5.2",
-    "@types/lodash": "4.14.185",
+    "@types/lodash": "4.14.186",
     "@types/node": "12.20.55",
     "@types/object-hash": "2.2.1",
     "@types/sha256": "0.2.0",
