@@ -33,7 +33,7 @@ export type Address = {
 export type Audit = {
   __typename?: 'Audit'
   changes?: Maybe<Scalars['String']>
-  entityId: Scalars['ID']
+  entityId: Scalars['MongoID']
   id: Scalars['ID']
 }
 
@@ -121,7 +121,7 @@ export type Hotel = {
   embeddedUsers?: Maybe<Array<EmbeddedUser>>
   embeddedUsers3?: Maybe<Array<EmbeddedUser3>>
   embeddedUsers4?: Maybe<Array<EmbeddedUser4>>
-  id: Scalars['ID']
+  id: Scalars['MongoID']
   name: Scalars['String']
   userId?: Maybe<Scalars['ID']>
   users?: Maybe<UserCollection>

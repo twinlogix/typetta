@@ -711,6 +711,25 @@ test('replace validation fails', async () => {
   }
 })
 
+test('replace with same id', async () => {
+  const hotel1 = await dao.hotel.insertOne({
+    record: {
+      name: 'H1',
+      audit: { createdBy: '', createdOn: 0, modifiedBy: '', modifiedOn: 0, state: State.ACTIVE },
+    },
+  })
+  await dao.hotel.replaceOne({
+    filter: { id: hotel1.id },
+    replace: {
+      name: 'H2',
+      audit: { createdBy: '', createdOn: 1, modifiedBy: '', modifiedOn: 1, state: State.ACTIVE },
+    },
+  })
+  const hotel2 = await dao.hotel.findOne()
+  expect(hotel1.id.toHexString()).toBe(hotel2?.id.toHexString())
+  expect(hotel2?.name).toBe('H2')
+})
+
 // ------------------------------------------------------------------------
 // ------------------------------ UPDATE ----------------------------------
 // ------------------------------------------------------------------------
@@ -1952,14 +1971,14 @@ test('Inserted record middleware', async () => {
           buildMiddleware({
             afterInsert: async (args, insertedRecord) => {
               i++
-              expect(insertedRecord.id.length).toBe(24)
+              expect(insertedRecord.id.toHexString().length).toBe(24)
             },
           }),
           {
             after: async (args) => {
               if (args.operation === 'insert') {
                 i++
-                expect(args.insertedRecord.id.length).toBe(24)
+                expect(args.insertedRecord.id.toHexString().length).toBe(24)
               }
             },
           },

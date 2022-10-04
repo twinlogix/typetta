@@ -117,7 +117,7 @@ type Auditable {
 }
 
 type Hotel @entity @mongodb {
-  id: ID! @id(from: "db") @alias(value: "_id")
+  id: MongoID! @id(from: "db") @alias(value: "_id")
   name: String!
   audit: Auditable! @default(from: "middleware")
   users: UserCollection
@@ -131,7 +131,7 @@ type Hotel @entity @mongodb {
 
 type Audit @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
-  entityId: ID!
+  entityId: MongoID!
   changes: String
 }
 
