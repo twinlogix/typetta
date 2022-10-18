@@ -303,6 +303,7 @@ export interface AddressFilter extends T.Filter<'Address', AST, ScalarsSpecifica
 export interface AddressSortElement extends T.SortElement<'Address', AST> {}
 export interface AddressRelationsFindParams extends T.RelationsFindParams<'Address', AST, ScalarsSpecification> {}
 export type AddressParams<P extends AddressProjection> = T.Params<'Address', AST, ScalarsSpecification, P>
+export type AddressProject<P extends AddressProjection> = T.Project<'Address', AST, ScalarsSpecification, P>
 export type AddressCachedTypes = T.CachedTypes<
   AddressIdFields,
   AddressModel,
@@ -413,6 +414,7 @@ export interface AuthorFilter extends T.Filter<'Author', AST, ScalarsSpecificati
 export interface AuthorSortElement extends T.SortElement<'Author', AST> {}
 export interface AuthorRelationsFindParams extends T.RelationsFindParams<'Author', AST, ScalarsSpecification> {}
 export type AuthorParams<P extends AuthorProjection> = T.Params<'Author', AST, ScalarsSpecification, P>
+export type AuthorProject<P extends AuthorProjection> = T.Project<'Author', AST, ScalarsSpecification, P>
 export type AuthorCachedTypes = T.CachedTypes<AuthorIdFields, AuthorModel, AuthorInsert, AuthorPlainModel, AuthorProjection, AuthorUpdate, AuthorFilter, AuthorSortElement, AuthorRelationsFindParams>
 
 export class AuthorDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<AuthorDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -497,6 +499,7 @@ export interface AuthorBookFilter extends T.Filter<'AuthorBook', AST, ScalarsSpe
 export interface AuthorBookSortElement extends T.SortElement<'AuthorBook', AST> {}
 export interface AuthorBookRelationsFindParams extends T.RelationsFindParams<'AuthorBook', AST, ScalarsSpecification> {}
 export type AuthorBookParams<P extends AuthorBookProjection> = T.Params<'AuthorBook', AST, ScalarsSpecification, P>
+export type AuthorBookProject<P extends AuthorBookProjection> = T.Project<'AuthorBook', AST, ScalarsSpecification, P>
 export type AuthorBookCachedTypes = T.CachedTypes<
   AuthorBookIdFields,
   AuthorBookModel,
@@ -594,6 +597,7 @@ export interface BookFilter extends T.Filter<'Book', AST, ScalarsSpecification> 
 export interface BookSortElement extends T.SortElement<'Book', AST> {}
 export interface BookRelationsFindParams extends T.RelationsFindParams<'Book', AST, ScalarsSpecification> {}
 export type BookParams<P extends BookProjection> = T.Params<'Book', AST, ScalarsSpecification, P>
+export type BookProject<P extends BookProjection> = T.Project<'Book', AST, ScalarsSpecification, P>
 export type BookCachedTypes = T.CachedTypes<BookIdFields, BookModel, BookInsert, BookPlainModel, BookProjection, BookUpdate, BookFilter, BookSortElement, BookRelationsFindParams>
 
 export class BookDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<BookDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -675,6 +679,7 @@ export interface CityFilter extends T.Filter<'City', AST, ScalarsSpecification> 
 export interface CitySortElement extends T.SortElement<'City', AST> {}
 export interface CityRelationsFindParams extends T.RelationsFindParams<'City', AST, ScalarsSpecification> {}
 export type CityParams<P extends CityProjection> = T.Params<'City', AST, ScalarsSpecification, P>
+export type CityProject<P extends CityProjection> = T.Project<'City', AST, ScalarsSpecification, P>
 export type CityCachedTypes = T.CachedTypes<CityIdFields, CityModel, CityInsert, CityPlainModel, CityProjection, CityUpdate, CityFilter, CitySortElement, CityRelationsFindParams>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -779,6 +784,7 @@ export interface DefaultFieldsEntityFilter extends T.Filter<'DefaultFieldsEntity
 export interface DefaultFieldsEntitySortElement extends T.SortElement<'DefaultFieldsEntity', AST> {}
 export interface DefaultFieldsEntityRelationsFindParams extends T.RelationsFindParams<'DefaultFieldsEntity', AST, ScalarsSpecification> {}
 export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = T.Params<'DefaultFieldsEntity', AST, ScalarsSpecification, P>
+export type DefaultFieldsEntityProject<P extends DefaultFieldsEntityProjection> = T.Project<'DefaultFieldsEntity', AST, ScalarsSpecification, P>
 export type DefaultFieldsEntityCachedTypes = T.CachedTypes<
   DefaultFieldsEntityIdFields,
   DefaultFieldsEntityModel,
@@ -885,6 +891,7 @@ export interface DeviceFilter extends T.Filter<'Device', AST, ScalarsSpecificati
 export interface DeviceSortElement extends T.SortElement<'Device', AST> {}
 export interface DeviceRelationsFindParams extends T.RelationsFindParams<'Device', AST, ScalarsSpecification> {}
 export type DeviceParams<P extends DeviceProjection> = T.Params<'Device', AST, ScalarsSpecification, P>
+export type DeviceProject<P extends DeviceProjection> = T.Project<'Device', AST, ScalarsSpecification, P>
 export type DeviceCachedTypes = T.CachedTypes<DeviceIdFields, DeviceModel, DeviceInsert, DevicePlainModel, DeviceProjection, DeviceUpdate, DeviceFilter, DeviceSortElement, DeviceRelationsFindParams>
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -976,6 +983,7 @@ export interface DogFilter extends T.Filter<'Dog', AST, ScalarsSpecification> {}
 export interface DogSortElement extends T.SortElement<'Dog', AST> {}
 export interface DogRelationsFindParams extends T.RelationsFindParams<'Dog', AST, ScalarsSpecification> {}
 export type DogParams<P extends DogProjection> = T.Params<'Dog', AST, ScalarsSpecification, P>
+export type DogProject<P extends DogProjection> = T.Project<'Dog', AST, ScalarsSpecification, P>
 export type DogCachedTypes = T.CachedTypes<DogIdFields, DogModel, DogInsert, DogPlainModel, DogProjection, DogUpdate, DogFilter, DogSortElement, DogRelationsFindParams>
 
 export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -1057,6 +1065,7 @@ export interface FriendsFilter extends T.Filter<'Friends', AST, ScalarsSpecifica
 export interface FriendsSortElement extends T.SortElement<'Friends', AST> {}
 export interface FriendsRelationsFindParams extends T.RelationsFindParams<'Friends', AST, ScalarsSpecification> {}
 export type FriendsParams<P extends FriendsProjection> = T.Params<'Friends', AST, ScalarsSpecification, P>
+export type FriendsProject<P extends FriendsProjection> = T.Project<'Friends', AST, ScalarsSpecification, P>
 export type FriendsCachedTypes = T.CachedTypes<
   FriendsIdFields,
   FriendsModel,
@@ -1156,6 +1165,7 @@ export interface OrganizationFilter extends T.Filter<'Organization', AST, Scalar
 export interface OrganizationSortElement extends T.SortElement<'Organization', AST> {}
 export interface OrganizationRelationsFindParams extends T.RelationsFindParams<'Organization', AST, ScalarsSpecification> {}
 export type OrganizationParams<P extends OrganizationProjection> = T.Params<'Organization', AST, ScalarsSpecification, P>
+export type OrganizationProject<P extends OrganizationProjection> = T.Project<'Organization', AST, ScalarsSpecification, P>
 export type OrganizationCachedTypes = T.CachedTypes<
   OrganizationIdFields,
   OrganizationModel,
@@ -1345,6 +1355,7 @@ export interface UserFilter extends T.Filter<'User', AST, ScalarsSpecification> 
 export interface UserSortElement extends T.SortElement<'User', AST> {}
 export interface UserRelationsFindParams extends T.RelationsFindParams<'User', AST, ScalarsSpecification> {}
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
+export type UserProject<P extends UserProjection> = T.Project<'User', AST, ScalarsSpecification, P>
 export type UserCachedTypes = T.CachedTypes<UserIdFields, UserModel, UserInsert, UserPlainModel, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -1973,7 +1984,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
   operationMetadataType: OperationMetadataType
   entityManagerParams: {
     metadata: MetadataType
-    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>
     overrides: {
       address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       author?: Pick<Partial<AuthorDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>

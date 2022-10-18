@@ -430,7 +430,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
       type DAOGenericsMap<MetadataType, OperationMetadataType> = {
       ${Array.from(typesMap.values())
         .filter((node) => node.entity)
-        .map((n) => `  ${toFirstLower(n.name)}: ${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
+        .map((n) => `${toFirstLower(n.name)}: ${n.name}DAOGenerics<MetadataType, OperationMetadataType>`)
         .join('\n')}
       }
       type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
@@ -482,7 +482,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
         operationMetadataType: OperationMetadataType
         entityManagerParams: {
           metadata: MetadataType
-          middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+          middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>
           overrides: {
             ${contextDAOParamsDeclarations(true)}
           }
@@ -681,6 +681,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     export interface ${node.name}SortElement extends T.SortElement<'${node.name}', AST> {}
     export interface ${node.name}RelationsFindParams extends T.RelationsFindParams<'${node.name}', AST, ScalarsSpecification> {}
     export type ${node.name}Params<P extends ${node.name}Projection> = T.Params<'${node.name}', AST, ScalarsSpecification, P>
+    export type ${node.name}Project<P extends ${node.name}Projection> = T.Project<'${node.name}', AST, ScalarsSpecification, P>
     export type ${node.name}CachedTypes = T.CachedTypes<${node.name}IdFields, ${node.name}Model, ${node.name}Insert, ${node.name}PlainModel, ${node.name}Projection, ${node.name}Update, ${node.name}Filter, ${node.name}SortElement, ${node.name}RelationsFindParams>`
   }
 

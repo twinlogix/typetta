@@ -141,6 +141,7 @@ export interface AFilter extends T.Filter<'A', AST, ScalarsSpecification> {}
 export interface ASortElement extends T.SortElement<'A', AST> {}
 export interface ARelationsFindParams extends T.RelationsFindParams<'A', AST, ScalarsSpecification> {}
 export type AParams<P extends AProjection> = T.Params<'A', AST, ScalarsSpecification, P>
+export type AProject<P extends AProjection> = T.Project<'A', AST, ScalarsSpecification, P>
 export type ACachedTypes = T.CachedTypes<AIdFields, AModel, AInsert, APlainModel, AProjection, AUpdate, AFilter, ASortElement, ARelationsFindParams>
 
 export class ADAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<ADAOGenerics<MetadataType, OperationMetadataType>> {
@@ -213,6 +214,7 @@ export interface BFilter extends T.Filter<'B', AST, ScalarsSpecification> {}
 export interface BSortElement extends T.SortElement<'B', AST> {}
 export interface BRelationsFindParams extends T.RelationsFindParams<'B', AST, ScalarsSpecification> {}
 export type BParams<P extends BProjection> = T.Params<'B', AST, ScalarsSpecification, P>
+export type BProject<P extends BProjection> = T.Project<'B', AST, ScalarsSpecification, P>
 export type BCachedTypes = T.CachedTypes<BIdFields, BModel, BInsert, BPlainModel, BProjection, BUpdate, BFilter, BSortElement, BRelationsFindParams>
 
 export class BDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<BDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -291,6 +293,7 @@ export interface CFilter extends T.Filter<'C', AST, ScalarsSpecification> {}
 export interface CSortElement extends T.SortElement<'C', AST> {}
 export interface CRelationsFindParams extends T.RelationsFindParams<'C', AST, ScalarsSpecification> {}
 export type CParams<P extends CProjection> = T.Params<'C', AST, ScalarsSpecification, P>
+export type CProject<P extends CProjection> = T.Project<'C', AST, ScalarsSpecification, P>
 export type CCachedTypes = T.CachedTypes<CIdFields, CModel, CInsert, CPlainModel, CProjection, CUpdate, CFilter, CSortElement, CRelationsFindParams>
 
 export class CDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<CDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -369,6 +372,7 @@ export interface DFilter extends T.Filter<'D', AST, ScalarsSpecification> {}
 export interface DSortElement extends T.SortElement<'D', AST> {}
 export interface DRelationsFindParams extends T.RelationsFindParams<'D', AST, ScalarsSpecification> {}
 export type DParams<P extends DProjection> = T.Params<'D', AST, ScalarsSpecification, P>
+export type DProject<P extends DProjection> = T.Project<'D', AST, ScalarsSpecification, P>
 export type DCachedTypes = T.CachedTypes<DIdFields, DModel, DInsert, DPlainModel, DProjection, DUpdate, DFilter, DSortElement, DRelationsFindParams>
 
 export class DDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<DDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -441,6 +445,7 @@ export interface EFilter extends T.Filter<'E', AST, ScalarsSpecification> {}
 export interface ESortElement extends T.SortElement<'E', AST> {}
 export interface ERelationsFindParams extends T.RelationsFindParams<'E', AST, ScalarsSpecification> {}
 export type EParams<P extends EProjection> = T.Params<'E', AST, ScalarsSpecification, P>
+export type EProject<P extends EProjection> = T.Project<'E', AST, ScalarsSpecification, P>
 export type ECachedTypes = T.CachedTypes<EIdFields, EModel, EInsert, EPlainModel, EProjection, EUpdate, EFilter, ESortElement, ERelationsFindParams>
 
 export class EDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<EDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -519,6 +524,7 @@ export interface FFilter extends T.Filter<'F', AST, ScalarsSpecification> {}
 export interface FSortElement extends T.SortElement<'F', AST> {}
 export interface FRelationsFindParams extends T.RelationsFindParams<'F', AST, ScalarsSpecification> {}
 export type FParams<P extends FProjection> = T.Params<'F', AST, ScalarsSpecification, P>
+export type FProject<P extends FProjection> = T.Project<'F', AST, ScalarsSpecification, P>
 export type FCachedTypes = T.CachedTypes<FIdFields, FModel, FInsert, FPlainModel, FProjection, FUpdate, FFilter, FSortElement, FRelationsFindParams>
 
 export class FDAO<MetadataType, OperationMetadataType> extends T.AbstractKnexJsDAO<FDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -892,7 +898,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
   operationMetadataType: OperationMetadataType
   entityManagerParams: {
     metadata: MetadataType
-    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>
     overrides: {
       a?: Pick<Partial<ADAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       b?: Pick<Partial<BDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>

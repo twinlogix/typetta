@@ -394,6 +394,7 @@ export interface AddressFilter extends T.Filter<'Address', AST, ScalarsSpecifica
 export interface AddressSortElement extends T.SortElement<'Address', AST> {}
 export interface AddressRelationsFindParams extends T.RelationsFindParams<'Address', AST, ScalarsSpecification> {}
 export type AddressParams<P extends AddressProjection> = T.Params<'Address', AST, ScalarsSpecification, P>
+export type AddressProject<P extends AddressProjection> = T.Project<'Address', AST, ScalarsSpecification, P>
 export type AddressCachedTypes = T.CachedTypes<
   AddressIdFields,
   AddressModel,
@@ -488,6 +489,7 @@ export interface AuditFilter extends T.Filter<'Audit', AST, ScalarsSpecification
 export interface AuditSortElement extends T.SortElement<'Audit', AST> {}
 export interface AuditRelationsFindParams extends T.RelationsFindParams<'Audit', AST, ScalarsSpecification> {}
 export type AuditParams<P extends AuditProjection> = T.Params<'Audit', AST, ScalarsSpecification, P>
+export type AuditProject<P extends AuditProjection> = T.Project<'Audit', AST, ScalarsSpecification, P>
 export type AuditCachedTypes = T.CachedTypes<AuditIdFields, AuditModel, AuditInsert, AuditPlainModel, AuditProjection, AuditUpdate, AuditFilter, AuditSortElement, AuditRelationsFindParams>
 
 export class AuditDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<AuditDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -624,6 +626,7 @@ export interface CityFilter extends T.Filter<'City', AST, ScalarsSpecification> 
 export interface CitySortElement extends T.SortElement<'City', AST> {}
 export interface CityRelationsFindParams extends T.RelationsFindParams<'City', AST, ScalarsSpecification> {}
 export type CityParams<P extends CityProjection> = T.Params<'City', AST, ScalarsSpecification, P>
+export type CityProject<P extends CityProjection> = T.Project<'City', AST, ScalarsSpecification, P>
 export type CityCachedTypes = T.CachedTypes<CityIdFields, CityModel, CityInsert, CityPlainModel, CityProjection, CityUpdate, CityFilter, CitySortElement, CityRelationsFindParams>
 
 export class CityDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<CityDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -728,6 +731,7 @@ export interface DefaultFieldsEntityFilter extends T.Filter<'DefaultFieldsEntity
 export interface DefaultFieldsEntitySortElement extends T.SortElement<'DefaultFieldsEntity', AST> {}
 export interface DefaultFieldsEntityRelationsFindParams extends T.RelationsFindParams<'DefaultFieldsEntity', AST, ScalarsSpecification> {}
 export type DefaultFieldsEntityParams<P extends DefaultFieldsEntityProjection> = T.Params<'DefaultFieldsEntity', AST, ScalarsSpecification, P>
+export type DefaultFieldsEntityProject<P extends DefaultFieldsEntityProjection> = T.Project<'DefaultFieldsEntity', AST, ScalarsSpecification, P>
 export type DefaultFieldsEntityCachedTypes = T.CachedTypes<
   DefaultFieldsEntityIdFields,
   DefaultFieldsEntityModel,
@@ -834,6 +838,7 @@ export interface DeviceFilter extends T.Filter<'Device', AST, ScalarsSpecificati
 export interface DeviceSortElement extends T.SortElement<'Device', AST> {}
 export interface DeviceRelationsFindParams extends T.RelationsFindParams<'Device', AST, ScalarsSpecification> {}
 export type DeviceParams<P extends DeviceProjection> = T.Params<'Device', AST, ScalarsSpecification, P>
+export type DeviceProject<P extends DeviceProjection> = T.Project<'Device', AST, ScalarsSpecification, P>
 export type DeviceCachedTypes = T.CachedTypes<DeviceIdFields, DeviceModel, DeviceInsert, DevicePlainModel, DeviceProjection, DeviceUpdate, DeviceFilter, DeviceSortElement, DeviceRelationsFindParams>
 
 export class DeviceDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<DeviceDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -925,6 +930,7 @@ export interface DogFilter extends T.Filter<'Dog', AST, ScalarsSpecification> {}
 export interface DogSortElement extends T.SortElement<'Dog', AST> {}
 export interface DogRelationsFindParams extends T.RelationsFindParams<'Dog', AST, ScalarsSpecification> {}
 export type DogParams<P extends DogProjection> = T.Params<'Dog', AST, ScalarsSpecification, P>
+export type DogProject<P extends DogProjection> = T.Project<'Dog', AST, ScalarsSpecification, P>
 export type DogCachedTypes = T.CachedTypes<DogIdFields, DogModel, DogInsert, DogPlainModel, DogProjection, DogUpdate, DogFilter, DogSortElement, DogRelationsFindParams>
 
 export class DogDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<DogDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -1172,6 +1178,7 @@ export interface HotelFilter extends T.Filter<'Hotel', AST, ScalarsSpecification
 export interface HotelSortElement extends T.SortElement<'Hotel', AST> {}
 export interface HotelRelationsFindParams extends T.RelationsFindParams<'Hotel', AST, ScalarsSpecification> {}
 export type HotelParams<P extends HotelProjection> = T.Params<'Hotel', AST, ScalarsSpecification, P>
+export type HotelProject<P extends HotelProjection> = T.Project<'Hotel', AST, ScalarsSpecification, P>
 export type HotelCachedTypes = T.CachedTypes<HotelIdFields, HotelModel, HotelInsert, HotelPlainModel, HotelProjection, HotelUpdate, HotelFilter, HotelSortElement, HotelRelationsFindParams>
 
 export class HotelDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<HotelDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -1268,6 +1275,7 @@ export interface MockedEntityFilter extends T.Filter<'MockedEntity', AST, Scalar
 export interface MockedEntitySortElement extends T.SortElement<'MockedEntity', AST> {}
 export interface MockedEntityRelationsFindParams extends T.RelationsFindParams<'MockedEntity', AST, ScalarsSpecification> {}
 export type MockedEntityParams<P extends MockedEntityProjection> = T.Params<'MockedEntity', AST, ScalarsSpecification, P>
+export type MockedEntityProject<P extends MockedEntityProjection> = T.Project<'MockedEntity', AST, ScalarsSpecification, P>
 export type MockedEntityCachedTypes = T.CachedTypes<
   MockedEntityIdFields,
   MockedEntityModel,
@@ -1373,6 +1381,7 @@ export interface OrganizationFilter extends T.Filter<'Organization', AST, Scalar
 export interface OrganizationSortElement extends T.SortElement<'Organization', AST> {}
 export interface OrganizationRelationsFindParams extends T.RelationsFindParams<'Organization', AST, ScalarsSpecification> {}
 export type OrganizationParams<P extends OrganizationProjection> = T.Params<'Organization', AST, ScalarsSpecification, P>
+export type OrganizationProject<P extends OrganizationProjection> = T.Project<'Organization', AST, ScalarsSpecification, P>
 export type OrganizationCachedTypes = T.CachedTypes<
   OrganizationIdFields,
   OrganizationModel,
@@ -1504,6 +1513,7 @@ export interface PostFilter extends T.Filter<'Post', AST, ScalarsSpecification> 
 export interface PostSortElement extends T.SortElement<'Post', AST> {}
 export interface PostRelationsFindParams extends T.RelationsFindParams<'Post', AST, ScalarsSpecification> {}
 export type PostParams<P extends PostProjection> = T.Params<'Post', AST, ScalarsSpecification, P>
+export type PostProject<P extends PostProjection> = T.Project<'Post', AST, ScalarsSpecification, P>
 export type PostCachedTypes = T.CachedTypes<PostIdFields, PostModel, PostInsert, PostPlainModel, PostProjection, PostUpdate, PostFilter, PostSortElement, PostRelationsFindParams>
 
 export class PostDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<PostDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -1696,6 +1706,7 @@ export interface UserFilter extends T.Filter<'User', AST, ScalarsSpecification> 
 export interface UserSortElement extends T.SortElement<'User', AST> {}
 export interface UserRelationsFindParams extends T.RelationsFindParams<'User', AST, ScalarsSpecification> {}
 export type UserParams<P extends UserProjection> = T.Params<'User', AST, ScalarsSpecification, P>
+export type UserProject<P extends UserProjection> = T.Project<'User', AST, ScalarsSpecification, P>
 export type UserCachedTypes = T.CachedTypes<UserIdFields, UserModel, UserInsert, UserPlainModel, UserProjection, UserUpdate, UserFilter, UserSortElement, UserRelationsFindParams>
 
 export class UserDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<UserDAOGenerics<MetadataType, OperationMetadataType>> {
@@ -2322,7 +2333,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
   operationMetadataType: OperationMetadataType
   entityManagerParams: {
     metadata: MetadataType
-    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType>
+    middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>
     overrides: {
       address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       audit?: Pick<Partial<AuditDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
