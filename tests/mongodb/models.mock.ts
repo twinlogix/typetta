@@ -169,6 +169,12 @@ export enum State {
   INACTIVE = 'INACTIVE',
 }
 
+export type Test = {
+  __typename?: 'Test'
+  id: Scalars['ID']
+  name?: Maybe<Scalars['String']>
+}
+
 export type User = {
   __typename?: 'User'
   amount?: Maybe<Scalars['Decimal']>

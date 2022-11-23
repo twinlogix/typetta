@@ -250,6 +250,17 @@ export type AST = {
       rawSorts: never
     }
   }
+  Test: {
+    fields: {
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+      name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
+  }
   User: {
     fields: {
       amount: { type: 'scalar'; isList: false; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
@@ -336,6 +347,7 @@ export const schemas = {
   Organization: organizationSchema,
   Post: postSchema,
   PostMetadata: postMetadataSchema,
+  Test: testSchema,
   User: userSchema,
   UserCollection: userCollectionSchema,
   UsernamePasswordCredentials: usernamePasswordCredentialsSchema,
@@ -1564,6 +1576,85 @@ export function postMetadataSchema(): T.Schema<ScalarsSpecification> {
 
 export interface PostMetadataModel extends types.PostMetadata {}
 export interface PostMetadataPlainModel extends T.GenerateModel<'PostMetadata', AST, ScalarsSpecification, 'relation'> {}
+export function testSchema(): T.Schema<ScalarsSpecification> {
+  return {
+    id: {
+      type: 'scalar',
+      scalar: 'ID',
+      isId: true,
+      generationStrategy: 'db',
+      required: true,
+      alias: '_id',
+      directives: {},
+    },
+    name: {
+      type: 'scalar',
+      scalar: 'String',
+      directives: {},
+    },
+  }
+}
+
+type TestDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'Test',
+  AST,
+  ScalarsSpecification,
+  TestCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
+export type TestDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.MongoDBDAOParams<TestDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+export type InMemoryTestDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<TestDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+
+export type TestIdFields = T.IdFields<'Test', AST>
+export interface TestModel extends types.Test {}
+export interface TestInsert extends T.Insert<'Test', AST, ScalarsSpecification> {}
+export interface TestPlainModel extends T.GenerateModel<'Test', AST, ScalarsSpecification, 'relation'> {}
+export interface TestProjection extends T.Projection<'Test', AST> {}
+export interface TestUpdate extends T.Update<'Test', AST, ScalarsSpecification> {}
+export interface TestFilter extends T.Filter<'Test', AST, ScalarsSpecification> {}
+export interface TestSortElement extends T.SortElement<'Test', AST> {}
+export interface TestRelationsFindParams extends T.RelationsFindParams<'Test', AST, ScalarsSpecification> {}
+export type TestParams<P extends TestProjection> = T.Params<'Test', AST, ScalarsSpecification, P>
+export type TestProject<P extends TestProjection> = T.Project<'Test', AST, ScalarsSpecification, P>
+export type TestCachedTypes = T.CachedTypes<TestIdFields, TestModel, TestInsert, TestPlainModel, TestProjection, TestUpdate, TestFilter, TestSortElement, TestRelationsFindParams>
+
+export class TestDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<TestDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Test', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Test', AST>, P2 extends T.Projection<'Test', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Test', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Test', AST>, P1, P2>
+  }
+  public constructor(params: TestDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: testSchema(),
+    })
+  }
+}
+
+export class InMemoryTestDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<TestDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Test', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Test', AST>, P2 extends T.Projection<'Test', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Test', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Test', AST>, P1, P2>
+  }
+  public constructor(params: InMemoryTestDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: testSchema(),
+    })
+  }
+}
 export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     amount: {
@@ -1812,11 +1903,12 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     mockedEntity?: Pick<Partial<MockedEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    test?: Pick<Partial<TestDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
-  log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'User'>
+  log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'Test' | 'User'>
   awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
@@ -1837,6 +1929,7 @@ export class EntityManager<
   private _mockedEntity: MockedEntityDAO<MetadataType, OperationMetadataType> | undefined
   private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined
+  private _test: TestDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
 
   private params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
@@ -1846,7 +1939,7 @@ export class EntityManager<
 
   private middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
 
-  private logger?: T.LogFunction<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'User'>
+  private logger?: T.LogFunction<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'Test' | 'User'>
 
   get address(): AddressDAO<MetadataType, OperationMetadataType> {
     if (!this._address) {
@@ -2163,6 +2256,35 @@ export class EntityManager<
     }
     return this._post
   }
+  get test(): TestDAO<MetadataType, OperationMetadataType> {
+    if (!this._test) {
+      const db = this.mongodb.default
+      this._test =
+        db === 'mock'
+          ? (new InMemoryTestDAO({
+              entityManager: this,
+              datasource: null,
+              metadata: this.metadata,
+              ...this.overrides?.test,
+              middlewares: [...(this.overrides?.test?.middlewares || []), ...(selectMiddleware('test', this.middlewares) as T.DAOMiddleware<TestDAOGenerics<MetadataType, OperationMetadataType>>[])],
+              name: 'Test',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            }) as unknown as TestDAO<MetadataType, OperationMetadataType>)
+          : new TestDAO({
+              entityManager: this,
+              datasource: 'default',
+              metadata: this.metadata,
+              ...this.overrides?.test,
+              collection: db.collection('tests'),
+              middlewares: [...(this.overrides?.test?.middlewares || []), ...(selectMiddleware('test', this.middlewares) as T.DAOMiddleware<TestDAOGenerics<MetadataType, OperationMetadataType>>[])],
+              name: 'Test',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            })
+    }
+    return this._test
+  }
   get user(): UserDAO<MetadataType, OperationMetadataType> {
     if (!this._user) {
       const db = this.mongodb.default
@@ -2245,6 +2367,7 @@ export class EntityManager<
         hotel: M.Collection<M.Document> | null
         organization: M.Collection<M.Document> | null
         post: M.Collection<M.Document> | null
+        test: M.Collection<M.Document> | null
         user: M.Collection<M.Document> | null
       },
     ) => Promise<T>,
@@ -2261,6 +2384,7 @@ export class EntityManager<
         hotel: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('hotels'),
         organization: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('organizations'),
         post: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('posts'),
+        test: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('tests'),
         user: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('users'),
       },
     )
@@ -2283,6 +2407,7 @@ type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   mockedEntity: MockedEntityDAOGenerics<MetadataType, OperationMetadataType>
   organization: OrganizationDAOGenerics<MetadataType, OperationMetadataType>
   post: PostDAOGenerics<MetadataType, OperationMetadataType>
+  test: TestDAOGenerics<MetadataType, OperationMetadataType>
   user: UserDAOGenerics<MetadataType, OperationMetadataType>
 }
 type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
@@ -2345,12 +2470,13 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
       mockedEntity?: Pick<Partial<MockedEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      test?: Pick<Partial<TestDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     }
     mongodb: Record<'default', M.Db | 'mock'>
 
     scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
-    log: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'User'>
+    log: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'Test' | 'User'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
   }
   security: {

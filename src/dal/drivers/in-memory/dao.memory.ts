@@ -26,7 +26,10 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   protected async _findAll<P extends AnyProjection<T['projection']>>(params: FindParams<T, P>): Promise<PartialDeep<T['model']>[]> {
     const unorderedResults = (await this.entitiesArray(params.filter)).map((v) => v.record)
-    const results = (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? unorderedResults.length))
+    const results = (params.sorts ? sort(unorderedResults, params.sorts) : unorderedResults).slice(
+      params.skip ?? 0,
+      (params.skip ?? 0) + (params.limit === 'unlimited' ? unorderedResults.length : params.limit ?? this.pageSize),
+    )
     return results.map((r) => _.cloneDeep(r))
     // projection are ignored since there is no performance advance
   }
@@ -144,7 +147,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       }
     }
     const sorted = args?.sorts ? sort<T['model']>(filteredResult, args.sorts) : filteredResult
-    const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit ?? sorted.length))
+    const result = sorted.slice(params.skip ?? 0, (params.skip ?? 0) + (params.limit === 'unlimited' ? sorted.length : params.limit ?? this.pageSize))
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 

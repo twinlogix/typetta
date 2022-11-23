@@ -78,8 +78,12 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return buildSort(qb || this.qb(), (sort || []) as unknown as AbstractSort[], this.schema)
   }
 
-  private buildTransaction(options?: Pick<T['driverFilterOptions'], 'trx'>, qb?: Knex.QueryBuilder<any, any>): Knex.QueryBuilder<any, any> {
-    return options?.trx ? (qb || this.qb()).transacting(options.trx) : qb || this.qb()
+  private buildTransaction(options?: Pick<T['driverFilterOptions'], 'trx'>, qb?: Knex.QueryBuilder<any, any>, limit?: number | 'unlimited', offset?: number): Knex.QueryBuilder<any, any> {
+    const b = options?.trx ? (qb || this.qb()).transacting(options.trx) : qb || this.qb()
+    if (limit !== 'unlimited') {
+      return b.limit(limit ?? this.pageSize).offset(offset ?? 0)
+    }
+    return b.offset(offset ?? 0)
   }
 
   private async buildUpdate(changes: T['update'], qb?: Knex.QueryBuilder<any, any>): Promise<{ builder: Knex.QueryBuilder<any, any> } | null> {
@@ -109,9 +113,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         const where = await this.buildWhere(params.filter, select.builder)
         const sort = await this.buildSort(params.sorts, where.builder)
         return {
-          builder: this.buildTransaction(params.options, sort.builder)
-            .limit(params.limit ?? this.pageSize)
-            .offset(params.skip ?? 0),
+          builder: this.buildTransaction(params.options, sort.builder, params.limit, params.skip),
         }
       },
       (results) => this.dbsToModels(results),
@@ -172,9 +174,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
         const groupBy = byColumns.length > 0 ? select.groupBy(byColumns) : select.groupByRaw('(SELECT 1)')
         const having = args?.having ? await buildHavingConditions(groupBy, args.having) : { builder: groupBy }
         return {
-          builder: this.buildTransaction(params.options, having.builder)
-            .limit(params.limit ?? this.pageSize)
-            .offset(params.skip ?? 0),
+          builder: this.buildTransaction(params.options, having.builder, params.limit, params.skip),
         }
       },
       async (results) => {
