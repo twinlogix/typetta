@@ -164,3 +164,8 @@ type EmbeddedUser4 {
 type EmbeddedUser5 {
   userId: ID
 }
+
+type Test @entity @mongodb {
+  id: ID! @id(from: "db") @alias(value: "_id")
+  name: String
+}

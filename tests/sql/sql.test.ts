@@ -253,6 +253,14 @@ test('nulls find', async () => {
   expect(users5.length).toBe(3)
 })
 
+test('unlimited', async () => {
+  for (let i = 0; i < 1000; i++) {
+    await dao.user.insertOne({ record: { live: true, firstName: i.toString() } })
+  }
+  const users = await dao.user.findAll({ limit: 'unlimited' })
+  expect(users.length).toBe(1000)
+})
+
 test('simple findOne multiple filter', async () => {
   await dao.user.insertOne({ record: { firstName: '1', lastName: '2', live: true } })
   await dao.user.insertOne({ record: { firstName: '2', lastName: '2', live: true } })

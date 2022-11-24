@@ -63,7 +63,12 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       /*if (sort.length > 0 && !sort.map((v) => v[0]).includes(this.dbIdField)) { // see #288
         sort.push([this.dbIdField, 1])
       }*/
-      const options = { projection, sort, skip: params.skip, limit: params.limit ?? this.pageSize } as FindOptions
+      const options = {
+        projection,
+        sort,
+        skip: params.skip,
+        limit: params.limit === 'unlimited' ? undefined : params.limit ?? this.pageSize,
+      } as FindOptions
       return [
         async () => {
           if (params.limit === 0) {
@@ -137,7 +142,7 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       const filter = params.filter ? [{ $match: await this.buildFilter(params.filter) }] : []
       const having = args?.having ? [{ $match: mapObject(args.having, ([k, v]) => (typeof v === 'object' ? [[k, mapObject(v, ([fk, fv]) => [[`$${fk}`, fv]])]] : [[k, v]])) }] : []
       const skip = params.skip != null ? [{ $skip: params.skip }] : []
-      const limit = params.limit != null ? [{ $limit: params.limit }] : []
+      const limit = params.limit === 'unlimited' ? [] : [{ $limit: params.limit ?? this.pageSize }]
       const options = params.options ?? {}
       const pipeline = [...filter, { $group: { _id: groupId, ...aggregation } }, ...having, ...sort, ...skip, ...limit]
       return [

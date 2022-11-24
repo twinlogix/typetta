@@ -37,7 +37,7 @@ export type RelationsFindParams<Entity extends string, AST extends AbstractSynta
               filter?: Filter<ASTName, AST, Scalars> | AST[Entity]['driverSpecification']['rawFilter']
               sorts?: SortElement<ASTName, AST>[] | AST[Entity]['driverSpecification']['rawSorts']
               skip?: number
-              limit?: number
+              limit?: number | 'unlimited'
               relations?: RelationsFindParams<ASTName, AST, Scalars>
             }
           : never
@@ -62,7 +62,7 @@ export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<Fil
 }
 
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
-  limit?: number
+  limit?: number | 'unlimited'
 }
 
 export type InsertParams<T extends DAOGenerics> = {
@@ -92,7 +92,7 @@ export type AggregateParams<T extends DAOGenerics> = {
   filter?: T['filter']
   aggregations: AggregationFields<T>
   skip?: number
-  limit?: number
+  limit?: number | 'unlimited'
 } & OperationParams<T>
 
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
@@ -145,7 +145,9 @@ export type DefaultGenerationStrategy = 'middleware' | 'generator'
 export interface DAO<T extends DAOGenerics> {
   findAll<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]>
   findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindOneParams<T, P>): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']> | null>
-  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params?: FindParams<T, P>): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] }>
+  findPage<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
+    params?: FindParams<T, P>,
+  ): Promise<{ totalCount: number; records: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] }>
   exists(params: FilterParams<T>): Promise<boolean>
   count(params?: FilterParams<T>): Promise<number>
   aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>

@@ -164,6 +164,14 @@ test('nulls find', async () => {
   expect(users5.length).toBe(3)
 })
 
+test('unlimited', async () => {
+  for (let i = 0; i < 1000; i++) {
+    await dao.user.insertOne({ record: { live: true, firstName: i.toString() } })
+  }
+  const users = await dao.user.findAll({ limit: 'unlimited' })
+  expect(users.length).toBe(1000)
+})
+
 test('simple resolveRelations', async () => {
   const u1 = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   const u2 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName', live: true } })
@@ -2011,4 +2019,38 @@ afterAll(async () => {
   if (replSet) {
     await replSet.stop()
   }
+})
+
+/**
+ *
+ * #START TRANSACTION
+ * const u1 = await user.findOne({ name: "asd" })
+ * if(!u1) {
+ *  await user.insertOne({ name: "asd" })
+ * }
+ * #END TRANSACTION
+ *
+ */
+
+test('Mad transaction 3', async () => {
+  await dao.execQuery(async (dbs, collections) => {
+    const asd = await collections.test?.createIndex({ name: 1 }, { name: 'nameIndex' })
+    const lol = await collections.test?.indexExists('nameIndex')
+    console.log(lol)
+  })
+  const session1 = connection.startSession()
+  const session2 = connection.startSession()
+  session1.startTransaction({ readConcern: 'local', writeConcern: { w: 'majority' } })
+  session2.startTransaction({ readConcern: 'local', writeConcern: { w: 'majority' } })
+  const u1 = await dao.test.findOne({ filter: { name: 'Mario' }, options: { session: session1 } })
+  if (!u1) {
+    await dao.test.insertOne({ record: { name: 'Mario' }, options: { session: session1 } })
+  }
+  const u2 = await dao.test.findOne({ filter: { name: 'Mario1' }, options: { session: session2 } })
+  if (!u2) {
+    await dao.test.insertOne({ record: { name: 'Mario1' }, options: { session: session2 } })
+  }
+  await session1.commitTransaction()
+  await session2.commitTransaction()
+  console.log('ok')
 })
