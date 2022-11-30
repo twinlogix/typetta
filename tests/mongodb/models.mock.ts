@@ -86,6 +86,9 @@ export type Dog = {
 export type EmbeddedUser = {
   __typename?: 'EmbeddedUser'
   e?: Maybe<Array<EmbeddedUser2>>
+  id?: Maybe<Scalars['String']>
+  test?: Maybe<Test>
+  test1?: Maybe<Array<Test>>
   user: User
   userId: Scalars['ID']
 }
@@ -171,6 +174,7 @@ export enum State {
 
 export type Test = {
   __typename?: 'Test'
+  embeddedId?: Maybe<Scalars['String']>
   id: Scalars['ID']
   name?: Maybe<Scalars['String']>
 }

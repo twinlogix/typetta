@@ -126,6 +126,9 @@ export type AST = {
   EmbeddedUser: {
     fields: {
       e: { type: 'embedded'; isList: true; astName: 'EmbeddedUser2'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      test: { type: 'relation'; relation: 'foreign'; isList: false; astName: 'Test'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      test1: { type: 'relation'; relation: 'foreign'; isList: true; astName: 'Test'; isRequired: false; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       user: { type: 'relation'; relation: 'inner'; isList: false; astName: 'User'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
@@ -252,6 +255,7 @@ export type AST = {
   }
   Test: {
     fields: {
+      embeddedId: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
       id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
       name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
@@ -984,6 +988,33 @@ export function embeddedUserSchema(): T.Schema<ScalarsSpecification> {
       isList: true,
       directives: {},
     },
+    id: {
+      type: 'scalar',
+      scalar: 'String',
+      directives: {},
+    },
+    test: {
+      type: 'relation',
+      astName: 'Test',
+      relation: 'foreign',
+      schema: () => testSchema(),
+      refFrom: 'embeddedId',
+      refTo: 'id',
+      dao: 'test',
+      directives: {},
+    },
+    test1: {
+      type: 'relation',
+      astName: 'Test',
+      relation: 'foreign',
+      schema: () => testSchema(),
+      refFrom: 'embeddedId',
+      refTo: 'id',
+      dao: 'test',
+      isListElementRequired: true,
+      isList: true,
+      directives: {},
+    },
     user: {
       type: 'relation',
       astName: 'User',
@@ -1578,6 +1609,11 @@ export interface PostMetadataModel extends types.PostMetadata {}
 export interface PostMetadataPlainModel extends T.GenerateModel<'PostMetadata', AST, ScalarsSpecification, 'relation'> {}
 export function testSchema(): T.Schema<ScalarsSpecification> {
   return {
+    embeddedId: {
+      type: 'scalar',
+      scalar: 'String',
+      directives: {},
+    },
     id: {
       type: 'scalar',
       scalar: 'ID',

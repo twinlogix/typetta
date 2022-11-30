@@ -227,7 +227,7 @@ test('findOne simple inner association with max depth', async () => {
   await dao.user.findOne({ projection: { friends: { friends: true } }, maxDepth: 3 })
 })
 
-test('findOne simple foreignRef association', async () => {
+test('findOne simple foreignRef association 1', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
   await dao.dog.insertOne({ record: { name: 'Pippo', ownerId: user.id } })
@@ -1398,6 +1398,131 @@ test('computed fields (one dependency - same level - one calculated - multiple m
   })
 })
 
+test('Embedded with foreign 1', async () => {
+  const dao = new EntityManager({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      hotel: {
+        middlewares: [
+          softDelete(() => ({ changes: { 'audit.deletedOn': 3, 'audit.state': State.DELETED, 'audit.modifiedBy': 'userId3' }, filter: { 'audit.state': { ne: State.DELETED } } })),
+          audit(() => ({
+            changes: { 'audit.modifiedOn': 2, 'audit.modifiedBy': 'userId2' },
+            insert: { audit: { createdBy: 'userId1', createdOn: 1, modifiedBy: 'userId1', modifiedOn: 1, state: State.ACTIVE } },
+          })),
+        ],
+      },
+    },
+  })
+  await dao.test.insertOne({
+    record: {
+      embeddedId: '1',
+      name: 'NICE1'
+    },
+  })
+  await dao.test.insertOne({
+    record: {
+      embeddedId: '2',
+      name: 'NICE2'
+    },
+  })
+  await dao.hotel.insertOne({
+    record: {
+      name: 'h1',
+      embeddedUsers: [
+        {
+          userId: '',
+          id: '2',
+        },
+        {
+          userId: '',
+          id: '1',
+        },
+      ],
+    },
+  })
+  const result = await dao.hotel.findOne({
+    projection: {
+      id: true,
+      embeddedUsers: {
+        test: {
+          name: true
+        }
+      }
+    }
+  })
+  expect((result?.embeddedUsers ?? [])[0].test?.name).toBe('NICE2')
+  expect((result?.embeddedUsers ?? [])[1].test?.name).toBe('NICE1')
+})
+
+test('Embedded with foreign 2', async () => {
+  const dao = new EntityManager({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      hotel: {
+        middlewares: [
+          softDelete(() => ({ changes: { 'audit.deletedOn': 3, 'audit.state': State.DELETED, 'audit.modifiedBy': 'userId3' }, filter: { 'audit.state': { ne: State.DELETED } } })),
+          audit(() => ({
+            changes: { 'audit.modifiedOn': 2, 'audit.modifiedBy': 'userId2' },
+            insert: { audit: { createdBy: 'userId1', createdOn: 1, modifiedBy: 'userId1', modifiedOn: 1, state: State.ACTIVE } },
+          })),
+        ],
+      },
+    },
+  })
+  await dao.test.insertOne({
+    record: {
+      embeddedId: '1',
+      name: 'NICE1'
+    },
+  })
+  await dao.test.insertOne({
+    record: {
+      embeddedId: '2',
+      name: 'NICE2'
+    },
+  })
+  await dao.test.insertOne({
+    record: {
+      embeddedId: '2',
+      name: 'NICE3'
+    },
+  })
+  await dao.hotel.insertOne({
+    record: {
+      name: 'h1',
+      embeddedUsers: [
+        {
+          userId: '',
+          id: '2',
+        },
+        {
+          userId: '',
+          id: '1',
+        },
+      ],
+    },
+  })
+  const result = await dao.hotel.findOne({
+    projection: {
+      id: true,
+      embeddedUsers: {
+        test1: {
+          name: true
+        }
+      }
+    }
+  })
+  expect(((result?.embeddedUsers ?? [])[0].test1 ?? [])[0].name).toBe('NICE2')
+  expect(((result?.embeddedUsers ?? [])[0].test1 ?? [])[1].name).toBe('NICE3')
+  expect(((result?.embeddedUsers ?? [])[1].test1 ?? [])[0].name).toBe('NICE1')
+})
+
 /*test('computed fields (one dependency - deep level - one calculated)', async () => {
   const entityManager2 = new EntityManager({
     idGenerators: { ID: () => uuidv4() },
@@ -2031,26 +2156,3 @@ afterAll(async () => {
  * #END TRANSACTION
  *
  */
-
-test('Mad transaction 3', async () => {
-  await dao.execQuery(async (dbs, collections) => {
-    const asd = await collections.test?.createIndex({ name: 1 }, { name: 'nameIndex' })
-    const lol = await collections.test?.indexExists('nameIndex')
-    console.log(lol)
-  })
-  const session1 = connection.startSession()
-  const session2 = connection.startSession()
-  session1.startTransaction({ readConcern: 'local', writeConcern: { w: 'majority' } })
-  session2.startTransaction({ readConcern: 'local', writeConcern: { w: 'majority' } })
-  const u1 = await dao.test.findOne({ filter: { name: 'Mario' }, options: { session: session1 } })
-  if (!u1) {
-    await dao.test.insertOne({ record: { name: 'Mario' }, options: { session: session1 } })
-  }
-  const u2 = await dao.test.findOne({ filter: { name: 'Mario1' }, options: { session: session2 } })
-  if (!u2) {
-    await dao.test.insertOne({ record: { name: 'Mario1' }, options: { session: session2 } })
-  }
-  await session1.commitTransaction()
-  await session2.commitTransaction()
-  console.log('ok')
-})

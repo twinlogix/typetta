@@ -456,13 +456,17 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           }
         } else if (relation.reference === 'inner') {
           for (const record of records) {
+            const projection = params.projection ?? {}
+            setTraversing(projection, relation.refTo, true)
             const keys = getTraversing(record, relation.refFrom)
-            const results = keys.length > 0 ? await this.entityManager.dao(relation.dao).findAllWithBatching(params, relation.refTo, keys) : []
+            const results = keys.length > 0 ? await this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refTo, keys) : []
             this.setResult(record, relation, results)
           }
         } else if (relation.reference === 'foreign') {
           for (const record of records) {
-            const results = await this.entityManager.dao(relation.dao).findAllWithBatching(params, relation.refFrom, getTraversing(record, relation.refTo))
+            const projection = params.projection ?? {}
+            setTraversing(projection, relation.refFrom, true)
+            const results = await this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refFrom, getTraversing(record, relation.refTo))
             this.setResult(record, relation, results)
           }
         }
@@ -473,12 +477,38 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   private setResult(record: PartialDeep<T['model']>, relation: DAORelation, results: unknown[]) {
     if (relation.type === '1-n') {
-      setTraversing(record, relation.field, results)
+      if (relation.reference === 'inner') {
+        const map = mapObject(
+          _.groupBy(results, (r) => getTraversing(r, relation.refTo)[0]),
+          ([k, vs]) => [[k, _.uniqBy(vs, (v) => getTraversing(v, relation.refTo)[0])]],
+        )
+        try {
+          this.setInnerRefResults(map, { type: relation.type, refFrom: relation.refFrom, field: relation.field, schema: this.schema, required: relation.required }, record)
+        } catch (e: unknown) {
+          throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}. Details: ${(e as Error).message}`)
+        }
+      } else if (relation.reference === 'foreign') {
+        const map = _.groupBy(results, (r) => getTraversing(r, relation.refFrom)[0])
+        try {
+          this.setInnerRefResults(map, { type: relation.type, refFrom: relation.refTo, field: relation.field, schema: this.schema, required: relation.required }, record)
+        } catch (e: unknown) {
+          throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}. Details: ${(e as Error).message}`)
+        }
+      } else {
+        setTraversing(record, relation.field, results)
+      }
     } else {
       if (relation.reference === 'inner') {
         const map = _.mapKeys(results, (r) => getTraversing(r, relation.refTo)[0])
         try {
-          this.setInnerRefResults(map, { refFrom: relation.refFrom, field: relation.field, schema: this.schema, required: relation.required }, record)
+          this.setInnerRefResults(map, { type: relation.type, refFrom: relation.refFrom, field: relation.field, schema: this.schema, required: relation.required }, record)
+        } catch (e: unknown) {
+          throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}. Details: ${(e as Error).message}`)
+        }
+      } else if (relation.reference === 'foreign') {
+        const map = _.mapKeys(results, (r) => getTraversing(r, relation.refFrom)[0])
+        try {
+          this.setInnerRefResults(map, { type: relation.type, refFrom: relation.refTo, field: relation.field, schema: this.schema, required: relation.required }, record)
         } catch (e: unknown) {
           throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}. Details: ${(e as Error).message}`)
         }
@@ -497,7 +527,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   private setInnerRefResults(
     results: _.Dictionary<unknown>,
-    reference: { refFrom: string; field: string; ref?: Record<string, unknown>; schema: Schema<T['scalars']>; required: boolean },
+    reference: { type: '1-n' | '1-1'; refFrom: string; field: string; ref?: Record<string, unknown>; schema: Schema<T['scalars']>; required: boolean },
     record: PartialDeep<T['model']>,
   ) {
     const [subRefFrom, ...tailRefFrom] = reference.refFrom.split('.')
@@ -513,7 +543,17 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       if (reference.ref == null && reference.required) {
         throw new Error(`Broken inner ref: from: ${reference.refFrom}, field: ${reference.field}`)
       }
-      record[subField] = reference.ref ? results[reference.ref.toString()] ?? null : null
+      record[subField] = reference.ref
+        ? Array.isArray(reference.ref)
+          ? reference.ref
+              .map((r) => results[r.toString()] ?? null)
+              .filter((v) => v != null)
+              .flat()
+          : results[reference.ref.toString()] ?? null
+        : null
+      if (reference.type === '1-n' && record[subField] === null) {
+        record[subField] = []
+      }
       if (record[subField] === null && reference.required) {
         throw new Error(`Broken inner ref: from: ${reference.refFrom}, field: ${reference.field}`)
       }

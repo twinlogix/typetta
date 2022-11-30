@@ -138,7 +138,7 @@ test('findOne simple inner association', async () => {
   expect(dog?.owner?.firstName).toBe('FirstName')
 })
 
-test('findOne simple foreignRef association', async () => {
+test('findOne simple foreignRef association 1', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
   await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
   await dao.dog.insertOne({ record: { name: 'Pippo', ownerId: user.id } })

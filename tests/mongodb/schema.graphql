@@ -144,6 +144,10 @@ type EmbeddedUser {
   userId: ID!
   user: User! @innerRef
   e: [EmbeddedUser2!]
+
+  id: String
+  test: Test @foreignRef(refFrom: "embeddedId", refTo: "id")
+  test1: [Test!] @foreignRef(refFrom: "embeddedId", refTo: "id")
 }
 
 type EmbeddedUser2 {
@@ -168,4 +172,5 @@ type EmbeddedUser5 {
 type Test @entity @mongodb {
   id: ID! @id(from: "db") @alias(value: "_id")
   name: String
+  embeddedId: String
 }
