@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -539,6 +541,40 @@ test('find with embedded that have inner refs', async () => {
   const user = await dao.user.findOne({})
   expect(user?.embeddedUser?.userId).toBe('123')
   expect((user?.embeddedUser as Record<string, unknown>)?.user).toBe(undefined)
+})
+
+test('find iterable', async () => {
+  for (let i = 0; i < 100; i++) {
+    await dao.user.insertOne({ record: { firstName: '' + i, lastName: '' + (9 - i), live: true } })
+  }
+  const it = dao.user.findAllIterable({ sorts: [{ firstName: 'asc' }], limit: 2 })
+  for await (const user of it) {
+    expect(['1', '0']).toContain(user.firstName)
+  }
+  for await (const user of it) {
+    console.log(user)
+    throw 'Unreachable'
+  }
+  let count = 0
+  for await (const user of dao.user.findAllIterable()) {
+    count++
+  }
+  expect(count).toBe(100)
+  count = 0
+  for await (const user of dao.user.findAllIterable({ limit: 'unlimited' })) {
+    count++
+  }
+  expect(count).toBe(100)
+  count = 0
+  for await (const user of dao.user.findAllIterable({ skip: 20, limit: 'unlimited' })) {
+    count++
+  }
+  expect(count).toBe(80)
+  count = 0
+  for await (const user of dao.user.findAllIterable({ skip: 20, limit: 81 })) {
+    count++
+  }
+  expect(count).toBe(80)
 })
 
 // ------------------------------------------------------------------------
@@ -1419,13 +1455,13 @@ test('Embedded with foreign 1', async () => {
   await dao.test.insertOne({
     record: {
       embeddedId: '1',
-      name: 'NICE1'
+      name: 'NICE1',
     },
   })
   await dao.test.insertOne({
     record: {
       embeddedId: '2',
-      name: 'NICE2'
+      name: 'NICE2',
     },
   })
   await dao.hotel.insertOne({
@@ -1448,10 +1484,10 @@ test('Embedded with foreign 1', async () => {
       id: true,
       embeddedUsers: {
         test: {
-          name: true
-        }
-      }
-    }
+          name: true,
+        },
+      },
+    },
   })
   expect((result?.embeddedUsers ?? [])[0].test?.name).toBe('NICE2')
   expect((result?.embeddedUsers ?? [])[1].test?.name).toBe('NICE1')
@@ -1478,19 +1514,19 @@ test('Embedded with foreign 2', async () => {
   await dao.test.insertOne({
     record: {
       embeddedId: '1',
-      name: 'NICE1'
+      name: 'NICE1',
     },
   })
   await dao.test.insertOne({
     record: {
       embeddedId: '2',
-      name: 'NICE2'
+      name: 'NICE2',
     },
   })
   await dao.test.insertOne({
     record: {
       embeddedId: '2',
-      name: 'NICE3'
+      name: 'NICE3',
     },
   })
   await dao.hotel.insertOne({
@@ -1513,10 +1549,10 @@ test('Embedded with foreign 2', async () => {
       id: true,
       embeddedUsers: {
         test1: {
-          name: true
-        }
-      }
-    }
+          name: true,
+        },
+      },
+    },
   })
   expect(((result?.embeddedUsers ?? [])[0].test1 ?? [])[0].name).toBe('NICE2')
   expect(((result?.embeddedUsers ?? [])[0].test1 ?? [])[1].name).toBe('NICE3')

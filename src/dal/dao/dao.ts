@@ -248,6 +248,64 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     })
   }
 
+  findAllIterable<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): AsyncIterable<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>> {
+    let used = false
+    return {
+      [Symbol.asyncIterator]: () => {
+        if (used) {
+          return {
+            next: async () => ({
+              value: null,
+              done: true,
+            }),
+          }
+        } else {
+          used = true
+          const results: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] = []
+          let index = params.skip ?? 0
+          const limit = params.limit === 'unlimited' ? this.pageSize : params.limit ?? this.pageSize
+          let returned = 0
+          return {
+            next: async () => {
+              if (returned === params.limit) {
+                return { value: null, done: true }
+              }
+              if (results.length > 0) {
+                const result = results.pop()
+                if (result) {
+                  returned++
+                  return { value: result }
+                } else {
+                  return { value: null, done: true }
+                }
+              }
+              const newEntries = await this.findAll({
+                ...params,
+                skip: index,
+                sorts: params.sorts ?? [{ [this.idField]: 'asc' }],
+                limit: typeof params.limit === 'number' ? Math.min(limit, params.limit - returned) : limit,
+              })
+              index += limit
+              newEntries.reverse()
+              results.push(...newEntries)
+              if (results.length === 0) {
+                return { value: null, done: true }
+              } else {
+                const result = results.pop()
+                if (result) {
+                  returned++
+                  return { value: result }
+                } else {
+                  return { value: null, done: true }
+                }
+              }
+            },
+          }
+        }
+      },
+    }
+  }
+
   async findOne<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindOneParams<T, P> = {}): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']> | null> {
     const results = await this.findAll({ ...params, limit: 1 })
     return results.length > 0 ? results[0] : null

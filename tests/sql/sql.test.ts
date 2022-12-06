@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Coordinates, defaultValueMiddleware, UserInputDriverDataTypeAdapterMap } from '../../src'
 import { LocalizedString } from '../types'
@@ -377,6 +379,40 @@ test('findOne self innerRef association', async () => {
   })
   const friend = (users[1].friends || [])[0]
   expect(friend?.friends?.length).toBe(3)
+})
+
+test('find iterable', async () => {
+  for (let i = 0; i < 100; i++) {
+    await dao.user.insertOne({ record: { firstName: '' + i, lastName: '' + (9 - i), live: true } })
+  }
+  const it = dao.user.findAllIterable({ sorts: [{ firstName: 'asc' }], limit: 2 })
+  for await (const user of it) {
+    expect(['1', '0']).toContain(user.firstName)
+  }
+  for await (const user of it) {
+    console.log(user)
+    throw 'Unreachable'
+  }
+  let count = 0
+  for await (const user of dao.user.findAllIterable()) {
+    count++
+  }
+  expect(count).toBe(100)
+  count = 0
+  for await (const user of dao.user.findAllIterable({ limit: 'unlimited' })) {
+    count++
+  }
+  expect(count).toBe(100)
+  count = 0
+  for await (const user of dao.user.findAllIterable({ skip: 20, limit: 'unlimited' })) {
+    count++
+  }
+  expect(count).toBe(80)
+  count = 0
+  for await (const user of dao.user.findAllIterable({ skip: 20, limit: 81 })) {
+    count++
+  }
+  expect(count).toBe(80)
 })
 
 // TODO: ask @minox86 if this behaviuor is desired
