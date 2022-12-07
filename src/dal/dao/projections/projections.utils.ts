@@ -300,3 +300,109 @@ export function getProjectionDepth<T extends DAOGenerics>(projection: GenericPro
   }, 0)
   return 1 + depth
 }
+
+export function isProjectionIntersectedWithSchema<T extends DAOGenerics>(p1: T['projection'], p2: T['projection'], schema: Schema<T['scalars']>) {
+  if (p1 === true && p2 === true) {
+    return true
+  }
+  if (p2 === true) {
+    return isProjectingFields(p1, schema)
+  }
+  if (p1 === true) {
+    return isProjectingFields(p2, schema)
+  }
+  for (const key of Object.keys(p1)) {
+    const schemaField = schema[key]
+    if (p2[key]) {
+      if (schemaField.type === 'scalar') {
+        return true
+      }
+      if (isProjectionIntersectedWithSchema(p1[key], p2[key], schemaField.schema())) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
+function isProjectingFields<T extends DAOGenerics>(p: T['projection'], schema: Schema<T['scalars']>): boolean {
+  if (p === true) {
+    return true
+  }
+  for (const key of Object.keys(p)) {
+    const schemaField = schema[key]
+    if (schemaField.type === 'scalar') {
+      return true
+    }
+    if (schemaField.type === 'embedded') {
+      if (isProjectingFields(p[key], schemaField.schema())) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
+export function mergeProjectionsWithSchema<T extends DAOGenerics>(p1: T['projection'], p2: T['projection'], schema: Schema<T['scalars']>): T['projection'] {
+  const p1ProjectingRelations = isProjectingRelations(p1, schema)
+  const p2ProjectingRelations = isProjectingRelations(p2, schema)
+  if (!p1ProjectingRelations && !p2ProjectingRelations) {
+    return mergeProjections(p1, p2)
+  }
+  if (p1 === true && p2 === true) {
+    return true
+  }
+  if (p2 === true) {
+    p2 = generateEmbeddedScalarProjection(schema)
+  }
+  if (p1 === true) {
+    p1 = generateEmbeddedScalarProjection(schema)
+  }
+
+  const entries: [string, unknown][] = []
+  for (const key of Object.keys(schema)) {
+    const schemaField = schema[key]
+    if (p1[key] && !p2[key]) {
+      entries.push([key, p1[key]])
+    } else if (p2[key] && !p1[key]) {
+      entries.push([key, p2[key]])
+    } else if (!p1[key] && !p2[key]) {
+      continue
+    } else if (schemaField.type === 'scalar') {
+      entries.push([key, true])
+    } else if (schemaField.type === 'embedded' || schemaField.type === 'relation') {
+      const subProj = mergeProjectionsWithSchema(p1[key], p2[key], schemaField.schema())
+      entries.push([key, subProj])
+    }
+  }
+  return Object.fromEntries(entries)
+}
+
+function generateEmbeddedScalarProjection<T extends DAOGenerics>(schema: Schema<T['scalars']>) {
+  const entries: [string, GenericProjection][] = []
+  for (const key of Object.keys(schema)) {
+    const schemaField = schema[key]
+    if (schemaField.type === 'scalar' || schemaField.type === 'embedded') {
+      entries.push([key, true])
+    }
+  }
+  return Object.fromEntries(entries)
+}
+
+function isProjectingRelations<T extends DAOGenerics>(p: T['projection'], schema: Schema<T['scalars']>): boolean {
+  if (p === true) {
+    return false
+  }
+  for (const key of Object.keys(p)) {
+    const schemaField = schema[key]
+    if (schemaField.type === 'relation') {
+      return true
+    }
+    if (schemaField.type === 'embedded') {
+      if (isProjectingRelations(p[key], schemaField.schema())) {
+        return true
+      }
+    }
+  }
+  return false
+}

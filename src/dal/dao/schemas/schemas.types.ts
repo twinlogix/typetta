@@ -4,6 +4,7 @@ import { AbstractScalars } from './ast.types'
 type Decorators = {
   isList?: boolean
   required?: boolean
+  excluded?: boolean
   isListElementRequired?: boolean
   alias?: string
   directives: Record<string, Record<string, unknown>>

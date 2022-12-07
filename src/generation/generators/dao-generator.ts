@@ -554,6 +554,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
         field.isID ? 'isId: true' : null,
         field.isID ? `generationStrategy: '${field.idGenerationStrategy || this.config.defaultIdGenerationStrategy || 'generator'}'` : null,
         field.isRequired ? 'required: true' : null,
+        field.isExcluded ? 'excluded: true' : null,
         field.isList ? 'isList: true' : null,
         field.isEnum ? 'isEnum: true' : null,
         field.alias ? `alias: '${field.alias}'` : null,
@@ -562,7 +563,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
       ]
         .filter((v) => v != null)
         .join(',')
-      if (field.type.kind === 'scalar' && !field.isExcluded) {
+      if (field.type.kind === 'scalar') {
         const scalar = field.isEnum ? 'String' : field.graphqlType
         return [
           `'${field.name}': {
@@ -571,7 +572,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
             ${decorators}
           }`,
         ]
-      } else if (field.type.kind === 'embedded' && !field.isExcluded) {
+      } else if (field.type.kind === 'embedded') {
         const schema = toFirstLower(field.graphqlType)
         return [
           `'${field.name}': {

@@ -637,6 +637,18 @@ export function citySchema(): T.Schema<ScalarsSpecification> {
       required: true,
       directives: {},
     },
+    computedAddressName: {
+      type: 'scalar',
+      scalar: 'String',
+      excluded: true,
+      directives: {},
+    },
+    computedName: {
+      type: 'scalar',
+      scalar: 'String',
+      excluded: true,
+      directives: {},
+    },
     id: {
       type: 'scalar',
       scalar: 'ID',
@@ -1113,6 +1125,12 @@ export function organizationSchema(): T.Schema<ScalarsSpecification> {
       type: 'embedded',
       astName: 'Address',
       schema: () => addressSchema(),
+      directives: {},
+    },
+    computedName: {
+      type: 'scalar',
+      scalar: 'String',
+      excluded: true,
       directives: {},
     },
     id: {

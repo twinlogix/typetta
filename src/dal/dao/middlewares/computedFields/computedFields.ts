@@ -1,7 +1,7 @@
 import { deepMerge } from '../../../../utils/utils'
 import { DAOGenerics, FindParams, MiddlewareContext } from '../../dao.types'
 import { AnyProjection, GenericProjection } from '../../projections/projections.types'
-import { isProjectionIntersected } from '../../projections/projections.utils'
+import { isProjectionIntersectedWithSchema } from '../../projections/projections.utils'
 import { Project } from '../../schemas/ast.types'
 import { DAOMiddleware } from '../middlewares.types'
 import { projectionDependency } from '../projection/projectionDependecy'
@@ -21,7 +21,7 @@ export function computedField<T extends DAOGenerics, P1 extends AnyProjection<T[
         for (const record of args.records) {
           if (
             record &&
-            isProjectionIntersected(args.params.projection ? (args.params.projection as GenericProjection) : true, options.fieldsProjection ? (options.fieldsProjection as GenericProjection) : true)
+            isProjectionIntersectedWithSchema(args.params.projection ? (args.params.projection as GenericProjection) : true, options.fieldsProjection ? (options.fieldsProjection as GenericProjection) : true, context.schema)
           ) {
             computedRecords.push(deepMerge(record, await options.compute(record as Project<T['entity'], T['ast'], T['scalars'], P1>, args.params, context)))
           } else {
