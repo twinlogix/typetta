@@ -40,7 +40,7 @@
     "url": "https://github.com/twinlogix/typetta/issues"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "3.3.1",
+    "@trivago/prettier-plugin-sort-imports": "3.4.0",
     "@types/dedent": "0.7.0",
     "@types/inquirer": "8.2.5",
     "@types/jest": "27.5.2",
