@@ -20,7 +20,7 @@ export const plugin: PluginFunction<TypeScriptTypettaPluginConfig> = async (sche
   }
   if (config.generationOutput) {
     const visitor = new TsTypettaVisitor(schema, config)
-    const visitorResult = oldVisit(ast, { leave: visitor })
+    const visitorResult = oldVisit(ast, { leave: visitor as any })
     const definitions: (TsTypettaGeneratorNode | TsTypettaGeneratorScalar)[] = visitorResult.definitions.filter(
       (d: unknown) => isObject(d) && ((d as TsTypettaGeneratorNode).type || (d as TsTypettaGeneratorScalar).type),
     )
