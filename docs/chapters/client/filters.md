@@ -346,6 +346,8 @@ await entityManager.user.findAll({
 })
 ```
 
+While using the MongoDB driver the fitler `{ name: { exists: true } }` will returns all the documents where name is null or the field is not present. To search only for names that are exactly null the filter `{ name: { eq: null } }` can be used.
+
 ## Advanced, driver-dependent filters
 
 Typetta, like many other ORMs, offers the ability [to directly access database features](raw-databse-access) in order to provide maximum flexibility to the user. As for the filters, this allows you to create conditions that are completely dependent on the underlying driver.
