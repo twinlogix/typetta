@@ -9,6 +9,7 @@ Below is a list of these operations:
   - [Insert One](#insert-one)
   - [Find One](#find-one)
   - [Find All](#find-all)
+  - [Find All Iterable](#find-all-iterable)
   - [Find Page](#find-page)
   - [Resolve Relations](#resolve-relations)
   - [Update One](#update-one)
@@ -149,6 +150,31 @@ The return of this query is the following object:
   ]
 })
 ```
+
+## Find All Iterable
+
+The [findAllIterable](/typedoc/classes/AbstractDAO.html#findAllIterable){:target="_blank"} API allows you to search for all records by filtering one or more of their fields. The only difference with the findAll is that the records are returned with a lazy async iterable.
+
+Below is an example of user search filtering by city:
+
+```typescript
+const users = entityManager.user.findAllIterable({
+  filter: {
+    "address.city": "Milan"
+  },
+  sorts: [
+    {
+      lastName: SortDirection.DESC
+    }
+  ]
+})
+for await(const user of users) {
+  console.log(user)
+  break //can break anytime
+}
+```
+
+The return of this query is an array of users living in Milan, sorted by last name in alphabetical order.
 
 ## Resolve Relations
 

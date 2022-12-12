@@ -16,6 +16,21 @@ const users = await entityManager.user.findAll({
 })
 ```
 
+`limit` by default is set to the `pageSize` (by default it's 50). The following example will return a maximum o 50 users.
+```typescript
+const users = await entityManager.user.findAll({
+  skip: 2
+})
+```
+
+In order to get all the users the field `limit` must be set to `'unlimited'`.
+```typescript
+const users = await entityManager.user.findAll({
+  skip: 2,
+  limit: 'unlimited'
+})
+```
+
 ## Cursor pagination *[coming soon]*
 
 This feature is not yet available and is currently being designed.
