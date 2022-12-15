@@ -313,6 +313,9 @@ export function isProjectionIntersectedWithSchema<T extends DAOGenerics>(p1: T['
   }
   for (const key of Object.keys(p1)) {
     const schemaField = schema[key]
+    if (!schemaField) {
+      continue
+    }
     if (p2[key]) {
       if (schemaField.type === 'scalar') {
         return true
@@ -331,6 +334,9 @@ function isProjectingFields<T extends DAOGenerics>(p: T['projection'], schema: S
   }
   for (const key of Object.keys(p)) {
     const schemaField = schema[key]
+    if (!schemaField) {
+      continue
+    }
     if (schemaField.type === 'scalar') {
       return true
     }
@@ -395,6 +401,9 @@ function isProjectingRelations<T extends DAOGenerics>(p: T['projection'], schema
   }
   for (const key of Object.keys(p)) {
     const schemaField = schema[key]
+    if (!schemaField) {
+      continue
+    }
     if (schemaField.type === 'relation') {
       return true
     }

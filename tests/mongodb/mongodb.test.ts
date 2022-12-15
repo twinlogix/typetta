@@ -1428,7 +1428,7 @@ test('computed fields (one dependency - same level - one calculated - multiple m
   await entityManager2.city.insertOne({ record: { id: 'c1', name: 'c1', addressId: 'address1' } })
   await entityManager2.city.insertOne({ record: { id: 'c2', name: 'c1', addressId: 'address1' } })
   await entityManager2.city.insertOne({ record: { id: 'c3', name: 'c1', addressId: 'address1' } })
-  const cities = await entityManager2.city.findAll({ projection: { id: true, computedName: true } })
+  const cities = await entityManager2.city.findAll({ projection: { __typename: true, id: true, computedName: true } })
   cities.forEach((c) => {
     expect(c?.computedName).toBe('Computed: c1')
   })
