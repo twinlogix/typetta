@@ -208,9 +208,11 @@ test('isChangesContainedInProjection test', () => {
 test('getProjection test', () => {
   expect(getProjection(true, '')).toBe(true)
   expect(getProjection(false, '')).toBe(false)
+  expect(getProjection(true, 'a')).toBe(false)
   expect(getProjection({ a: true }, '')).toStrictEqual({ a: true })
   expect(getProjection({ a: true }, 'a')).toBe(true)
   expect(getProjection({ a: true }, 'b')).toBe(false)
+  expect(getProjection({ a: true }, 'a.b')).toBe(false)
   expect(getProjection({ a: { b: { c: true } } }, '')).toStrictEqual({ a: { b: { c: true } } })
   expect(getProjection({ a: { b: { c: true } } }, 'a')).toStrictEqual({ b: { c: true } })
   expect(getProjection({ a: { b: { c: true } } }, 'a.b')).toStrictEqual({ c: true })

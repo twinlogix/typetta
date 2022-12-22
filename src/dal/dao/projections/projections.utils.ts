@@ -158,24 +158,27 @@ function fragmentToProjections<ProjectionType>(info: any, proj: any, selection: 
   }
 }
 
-export function getProjection(projections: GenericProjection, path: string): GenericProjection {
-  if (typeof projections === 'boolean') {
-    return projections
+export function getProjection(projection: GenericProjection, path: string): GenericProjection {
+  if (typeof projection === 'boolean') {
+    if(path !== '') {
+      return false
+    }
+    return projection
   } else {
     const pathSplitted = path.split('.')
     if (path === '') {
-      return projections
+      return projection
     } else if (pathSplitted.length === 1) {
-      const subProjection = projections[pathSplitted[0]]
+      const subProjection = projection[pathSplitted[0]]
       if (subProjection) {
         return subProjection
       } else {
         return false
       }
     } else {
-      const subProjection = projections[pathSplitted[0]]
+      const subProjection = projection[pathSplitted[0]]
       if (subProjection === true) {
-        return true
+        return false
       } else if (typeof subProjection === 'object') {
         return getProjection(subProjection, pathSplitted.slice(1).join('.'))
       } else {

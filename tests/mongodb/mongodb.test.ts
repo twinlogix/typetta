@@ -577,6 +577,30 @@ test('find iterable', async () => {
   expect(count).toBe(80)
 })
 
+test('find all inside array of embedded with relation', async () => {
+  const dao = new EntityManager({
+    mongodb: {
+      default: db,
+    },
+    scalars,
+    overrides: {
+      hotel: {
+        middlewares: [
+          audit(() => ({
+            changes: { 'audit.modifiedOn': 2, 'audit.modifiedBy': 'userId2' },
+            insert: { audit: { createdBy: 'userId1', createdOn: 1, modifiedBy: 'userId1', modifiedOn: 1, state: State.ACTIVE } },
+          })),
+        ],
+      },
+    },
+  })
+  const user = await dao.user.insertOne({ record: { live: true } })
+  await dao.hotel.insertOne({ record: { name: 'h1', embeddedUsers: [{ userId: user.id }], embeddedUser3: { value: 1 }, userId: user.id } })
+  const result = await dao.hotel.findOne({ projection: { name: true, embeddedUsers: true, embeddedUser3: true } })
+  expect(result?.embeddedUsers).toStrictEqual([{ userId: user.id }])
+  expect(result?.embeddedUser3).toStrictEqual({ value: 1 })
+})
+
 // ------------------------------------------------------------------------
 // -------------------------- INSERT --------------------------------------
 // ------------------------------------------------------------------------
