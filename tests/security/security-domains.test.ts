@@ -43,4 +43,16 @@ test('infer operation security domain', () => {
   expect(d10.length).toBe(2)
   expect(d10[0]).toStrictEqual({})
   expect(d10[1]).toStrictEqual({ id: [2], userId: [2] })
+
+  const d11 = inferOperationSecurityDomain(domainKeys, { id: 1, userId: 2, $and: [{}, {}] })
+  expect(d11.length).toBe(1)
+  expect(d11[0]).toStrictEqual({ id: [1], userId: [2] })
+
+  const d12 = inferOperationSecurityDomain(domainKeys, { $and: [{ id: 2 }, { id: { in: [1, 2] }, userId: 2 }, () => 1] })
+  expect(d12.length).toBe(1)
+  expect(d12[0]).toStrictEqual({ id: [2], userId: [2] })
+
+  const d13 = inferOperationSecurityDomain(domainKeys, { $and: [() => 1, () => 1] })
+  expect(d13.length).toBe(1)
+  expect(Object.keys(d13[0]).length).toBe(0)
 })

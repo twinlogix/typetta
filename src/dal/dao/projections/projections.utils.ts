@@ -71,6 +71,9 @@ export function infoToProjection<ProjectionType>(info: GraphQLResolveInfo, defau
       (proj: any, selection: any) => {
         switch (selection.kind) {
           case 'Field':
+            if (selection.name.value === '__typename') {
+              return proj
+            }
             if (selection && selection.selectionSet && selection.selectionSet.selections) {
               if (proj[selection.name.value] === true) {
                 return proj
@@ -160,7 +163,7 @@ function fragmentToProjections<ProjectionType>(info: any, proj: any, selection: 
 
 export function getProjection(projection: GenericProjection, path: string): GenericProjection {
   if (typeof projection === 'boolean') {
-    if(path !== '') {
+    if (path !== '') {
       return false
     }
     return projection

@@ -168,7 +168,10 @@ export function inferOperationSecurityDomain(domainKeys: string[], filter: Abstr
   if (hasKeys(filter, ['$and', '$or'])) {
     const f = filter as LogicalOperators<unknown>
     if (f.$and) {
-      const andSecurityDomain = f.$and.flatMap((af) => inferOperationSecurityDomain(domainKeys, af))
+      if (f.$and.every((af) => typeof af === 'function')) {
+        return [{}]
+      }
+      const andSecurityDomain = f.$and.flatMap((af) => (typeof af === 'function' ? [] : inferOperationSecurityDomain(domainKeys, af)))
       const result = intersectSecurityDomains(domainKeys, [securityDomain, ...andSecurityDomain])
       securityDomain = result
     }
