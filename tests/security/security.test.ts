@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'
 jest.setTimeout(20000)
 
 type SecurityDomain = { hotelId?: string; userId?: string; tenantId?: number }
-type OperationSecurityDomain = { [K in keyof SecurityDomain]: SecurityDomain[K][] }
+type OperationSecurityDomain = { [K in keyof SecurityDomain]: Exclude<SecurityDomain[K], undefined>[] }
 type SecurityContext = {
   [K in Permission]?: SecurityDomain[]
 }
