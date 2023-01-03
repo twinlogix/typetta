@@ -90,6 +90,36 @@ export function createSecurityPolicyMiddlewares<
               )
               return mappedSecurityDomains
             },
+            securityDomainsInjector: (operationDomains, metadata) => {
+              if (!('injectOperationDomain' in contextPolicy) || !contextPolicy.injectOperationDomain) return metadata
+              if (!domainMap) return contextPolicy.injectOperationDomain(operationDomains as any, metadata)
+              const mappedOperationDomains = operationDomains.map((operationDomain) => {
+                const andMap = new Map<string, Set<DAOGenericsMap[keyof DAOGenericsMap]['plainModel'][string]>>()
+                const mappedOperationDomain = Object.fromEntries(
+                  Object.entries(operationDomain).flatMap(([key, value]) => {
+                    if (!value) return []
+                    for (const [k, v] of Object.entries(domainMap)) {
+                      if (typeof v === 'string') {
+                        if (v === key) return [[k, value]]
+                      } else if (typeof v === 'object' && v && 'or' in v) {
+                        if (v.or.includes(key)) return [[k, value]]
+                      } else if (typeof v === 'object' && v && 'and' in v) {
+                        if (v.and.includes(key)) {
+                          const set = andMap.get(k) ?? new Set<DAOGenericsMap[keyof DAOGenericsMap]['plainModel'][string]>()
+                          for (const e of value) set.add(e)
+                          andMap.set(k, set)
+                          return [[k, [...set.values()]]]
+                        }
+                      }
+                    }
+                    return []
+                  }),
+                )
+                return mappedOperationDomain
+              })
+              const result = contextPolicy.injectOperationDomain(mappedOperationDomains as any, metadata)
+              return result
+            },
             domainMap: domainMap as
               | {
                   [x: string]:
@@ -112,6 +142,7 @@ export function createSecurityPolicyMiddlewares<
         defaultPermission: contextDefaultPermission,
         securityContext: () => ({}),
         securityDomains: () => undefined,
+        securityDomainsInjector: undefined,
       })
     : undefined
   return { middlewares, others }

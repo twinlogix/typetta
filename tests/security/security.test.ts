@@ -90,6 +90,7 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
         read: { id: true },
       },
       operationDomain: (metadata) => metadata?.securityDomains,
+      injectOperationDomain: (operationDomain, metadata) => (metadata ? { ...metadata, securityDomains: operationDomain } : { securityDomains: operationDomain }),
     },
   })
 }

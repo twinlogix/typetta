@@ -25,6 +25,7 @@ export function securityPolicy<
   permissions: Permissions<T, Permission>
   securityContext: (metadata: T['metadata']) => SecurityContext<Permission, SecurityContextPermission>
   securityDomains: (metadata: T['operationMetadata'] | undefined) => SecurityDomain[] | undefined
+  securityDomainsInjector?: (securityDomains: SecurityDomain[], metadata: T['operationMetadata'] | undefined) => T['operationMetadata'] | undefined
   defaultPermission?: CRUDPermission<T>
   domainMap?: { [K in keyof Required<SecurityDomain>]?: keyof T['model'] | { or: (keyof T['model'])[] } | { and: (keyof T['model'])[] } | null }
 }): DAOMiddleware<T> {
@@ -105,25 +106,31 @@ export function securityPolicy<
       }
 
       // infer operationSecurityDomain from filter
-      const inferredOperationSecurityDomain = () =>
-        input.domainMap && args.params.filter
-          ? inferOperationSecurityDomain(
-              Object.entries(input.domainMap)
-                .filter((v) => v[1] != null)
-                .flatMap((v) => {
-                  const domain = v[1] as string | { or: string[] } | { and: string[] }
-                  if (typeof domain === 'object' && 'or' in domain) {
-                    return domain.or
-                  } else if (typeof domain === 'object' && 'and' in domain) {
-                    return domain.and
-                  }
-                  return [domain]
-                }),
-              args.params.filter,
-            )
-          : [{} as SecurityDomain]
+      let operationSecurityDomainIsInferred = false
+      const inferredOperationSecurityDomain = () => {
+        const result =
+          input.domainMap && args.params.filter
+            ? inferOperationSecurityDomain(
+                Object.entries(input.domainMap)
+                  .filter((v) => v[1] != null)
+                  .flatMap((v) => {
+                    const domain = v[1] as string | { or: string[] } | { and: string[] }
+                    if (typeof domain === 'object' && 'or' in domain) {
+                      return domain.or
+                    } else if (typeof domain === 'object' && 'and' in domain) {
+                      return domain.and
+                    }
+                    return [domain]
+                  }),
+                args.params.filter,
+              )
+            : [{} as SecurityDomain]
+        operationSecurityDomainIsInferred = true
+        return result
+      }
       const givenOperationSecurityDomains = input.securityDomains(args.params.metadata)
       const operationSecurityDomains = givenOperationSecurityDomains ?? (inferredOperationSecurityDomain() as SecurityDomain[])
+      const metadata = operationSecurityDomainIsInferred && input.securityDomainsInjector ? input.securityDomainsInjector(operationSecurityDomains, args.params.metadata) : args.params.metadata
       const crud = getCrudPolicy(operationSecurityDomains, relatedSecurityContext)
 
       const isValidFilter = givenOperationSecurityDomains ? givenOperationSecurityDomains.some((osd) => Object.keys(osd).length > 0) : false
@@ -164,7 +171,7 @@ export function securityPolicy<
             })
           }
         }
-        return { continue: true, operation: 'find', params: { ...args.params, filter } }
+        return { continue: true, operation: 'find', params: { ...args.params, metadata, filter } }
       }
 
       if (args.operation === 'aggregate') {
@@ -183,28 +190,28 @@ export function securityPolicy<
             operationDomains: operationSecurityDomains,
           })
         }
-        return { continue: true, operation: 'aggregate', params: { ...args.params, filter } }
+        return { continue: true, operation: 'aggregate', params: { ...args.params, metadata, filter } }
       }
 
       if (args.operation === 'update') {
         if (!crud.update) {
           throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomains })
         }
-        return { continue: true, operation: 'update', params: { ...args.params, filter } }
+        return { continue: true, operation: 'update', params: { ...args.params, metadata, filter } }
       }
 
       if (args.operation === 'replace') {
         if (!crud.update) {
           throw new SecurityPolicyUpdateError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomains })
         }
-        return { continue: true, operation: 'replace', params: { ...args.params, filter } }
+        return { continue: true, operation: 'replace', params: { ...args.params, metadata, filter } }
       }
 
       if (args.operation === 'delete') {
         if (!crud.delete) {
           throw new SecurityPolicyDeleteError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]), operationDomains: operationSecurityDomains })
         }
-        return { continue: true, operation: 'delete', params: { ...args.params, filter } }
+        return { continue: true, operation: 'delete', params: { ...args.params, metadata, filter } }
       }
     },
   }
