@@ -1,9 +1,9 @@
 import { SecurityPolicyReadError } from '../../src'
+import { inMemoryMongoDb } from '../utils'
 import { EntityManager } from './dao.mock'
 import { MongoClient, Db } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { v4 as uuidv4 } from 'uuid'
-import { inMemoryMongoDb } from '../utils'
 
 jest.setTimeout(20000)
 
@@ -57,7 +57,6 @@ function createDao2() {
     },
   })
 }
-
 
 beforeAll(async () => {
   mongodb = await inMemoryMongoDb()

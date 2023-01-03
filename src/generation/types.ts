@@ -1,6 +1,6 @@
-import { DirectiveNode } from 'graphql'
 import { DefaultGenerationStrategy, IdGenerationStrategy } from '../dal/dao/dao.types'
 import { TypeScriptTypettaPluginConfig } from './config'
+import { DirectiveNode } from 'graphql'
 
 export abstract class TypettaGenerator {
   protected config: TypeScriptTypettaPluginConfig
