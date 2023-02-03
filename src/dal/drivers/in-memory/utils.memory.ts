@@ -198,30 +198,36 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
         return false
       }
     } else if (hasKeys(f, ['contains', 'startsWith', 'endsWith'])) {
-      const so = f as StringOperators
-      if (typeof value !== 'string') {
+      const pass = (Array.isArray(value) ? value : [value]).some((value) => {
+        const so = f as StringOperators
+        if (typeof value !== 'string') {
+          return false
+        }
+        if ((f as Record<string, unknown>).mode && (f as Record<string, unknown>).mode === 'sensitive') {
+          if ('contains' in so && so.contains && !value.includes(so.contains)) {
+            return false
+          }
+          if ('startsWith' in so && so.startsWith && !value.startsWith(so.startsWith)) {
+            return false
+          }
+          if ('endsWith' in so && so.endsWith && !value.endsWith(so.endsWith)) {
+            return false
+          }
+        } else {
+          if ('contains' in so && so.contains && !value.toLocaleLowerCase().includes(so.contains.toLocaleLowerCase())) {
+            return false
+          }
+          if ('startsWith' in so && so.startsWith && !value.toLocaleLowerCase().startsWith(so.startsWith.toLocaleLowerCase())) {
+            return false
+          }
+          if ('endsWith' in so && so.endsWith && !value.toLocaleLowerCase().endsWith(so.endsWith.toLocaleLowerCase())) {
+            return false
+          }
+        }
+        return true
+      })
+      if(!pass) {
         return false
-      }
-      if ((f as Record<string, unknown>).mode && (f as Record<string, unknown>).mode === 'sensitive') {
-        if ('contains' in so && so.contains && !value.includes(so.contains)) {
-          return false
-        }
-        if ('startsWith' in so && so.startsWith && !value.startsWith(so.startsWith)) {
-          return false
-        }
-        if ('endsWith' in so && so.endsWith && !value.endsWith(so.endsWith)) {
-          return false
-        }
-      } else {
-        if ('contains' in so && so.contains && !value.toLocaleLowerCase().includes(so.contains.toLocaleLowerCase())) {
-          return false
-        }
-        if ('startsWith' in so && so.startsWith && !value.toLocaleLowerCase().startsWith(so.startsWith.toLocaleLowerCase())) {
-          return false
-        }
-        if ('endsWith' in so && so.endsWith && !value.toLocaleLowerCase().endsWith(so.endsWith.toLocaleLowerCase())) {
-          return false
-        }
       }
     } else {
       const adaptedF = await modelValueToDbValue(f, schemaField, adapter)
