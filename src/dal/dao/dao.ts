@@ -245,9 +245,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         beforeResults.params.projection,
         beforeResults.params.relations,
         beforeResults.params.operationId,
-        params.relationParents,
-        params.options,
-        params.metadata,
+        beforeResults.params.relationParents,
+        beforeResults.params.options,
+        beforeResults.params.metadata,
       )
       const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecords }, beforeResults.middlewareIndex, 'findAll')
       if (isRootOperation) {
@@ -332,9 +332,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         beforeResults.params.projection,
         beforeResults.params.relations,
         beforeResults.params.operationId,
-        params.relationParents,
-        params.options,
-        params.metadata,
+        beforeResults.params.relationParents,
+        beforeResults.params.options,
+        beforeResults.params.metadata,
       )
       const afterResults = await this.executeAfterMiddlewares({ operation: 'find', params: beforeResults.params, records: resolvedRecords, totalCount }, beforeResults.middlewareIndex, 'findPage')
       if (isRootOperation) {

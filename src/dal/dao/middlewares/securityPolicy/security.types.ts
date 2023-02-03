@@ -30,7 +30,8 @@ export type EntityManagerSecurtyPolicy<DAOGenericsMap extends { [K in string]: D
   policies?: DAOSecurityPolicies<DAOGenericsMap, Permissions, SecurityDomain>
   defaultPermission?: CRUDPermission<DAOGenericsMap[keyof DAOGenericsMap]>
 } & ([SecurityDomain] extends [never]
-  ? { operationDomain?: never }
+  ? { operationDomain?: never; injectOperationDomain?: never }
   : {
-      operationDomain?: (metadata: OperationMetadataType | undefined) => { [K in keyof SecurityDomain]: SecurityDomain[K][] }[] | undefined
+      operationDomain?: (metadata: OperationMetadataType | undefined) => { [K in keyof SecurityDomain]: Exclude<SecurityDomain[K], undefined>[] }[] | undefined
+      injectOperationDomain?: (operationDomain: { [K in keyof SecurityDomain]: Exclude<SecurityDomain[K], undefined>[] }[], metadata: OperationMetadataType | undefined) => OperationMetadataType | undefined
     })
