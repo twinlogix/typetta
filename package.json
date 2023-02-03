@@ -86,7 +86,7 @@
     "object-hash": "2.2.0",
     "prettier": "2.8.1",
     "type-fest": "2.19.0",
-    "yaml": "2.2.0",
+    "yaml": "2.2.1",
     "uuid": "8.3.2"
   },
   "peerDependencies": {
