@@ -392,10 +392,43 @@ test('find iterable', async () => {
 
 test('contains in array', async () => {
   await dao.user.insertOne({ record: { live: true, credentials: [] } })
-  await dao.user.insertOne({ record: { live: true, credentials: [{ username: '1', password: '12345' }, { username: 'testt', password: '12345' }] } })
-  await dao.user.insertOne({ record: { live: true, credentials: [{ username: 'atest', password: '12345' }, { username: '', password: '12345' }] } })
-  await dao.user.insertOne({ record: { live: true, credentials: [{ username: '1', password: '12345' }, { username: '2', password: '12345' }, { username: '3', password: '12345' }] } })
-  await dao.user.insertOne({ record: { live: true, credentials: [{ username: '1', password: '12345' }, { username: 'test', password: '12345' }] } })
+  await dao.user.insertOne({
+    record: {
+      live: true,
+      credentials: [
+        { username: '1', password: '12345' },
+        { username: 'testt', password: '12345' },
+      ],
+    },
+  })
+  await dao.user.insertOne({
+    record: {
+      live: true,
+      credentials: [
+        { username: 'atest', password: '12345' },
+        { username: '', password: '12345' },
+      ],
+    },
+  })
+  await dao.user.insertOne({
+    record: {
+      live: true,
+      credentials: [
+        { username: '1', password: '12345' },
+        { username: '2', password: '12345' },
+        { username: '3', password: '12345' },
+      ],
+    },
+  })
+  await dao.user.insertOne({
+    record: {
+      live: true,
+      credentials: [
+        { username: '1', password: '12345' },
+        { username: 'test', password: '12345' },
+      ],
+    },
+  })
   const result = await dao.user.findAll({ filter: { 'credentials.username': { contains: 'test' } } })
   expect(result.length).toBe(3)
 })

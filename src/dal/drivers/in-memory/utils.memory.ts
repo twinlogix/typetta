@@ -226,7 +226,7 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
         }
         return true
       })
-      if(!pass) {
+      if (!pass) {
         return false
       }
     } else {
