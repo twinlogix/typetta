@@ -59,7 +59,7 @@
     "jest": "27.5.1",
     "make-coverage-badge": "1.2.0",
     "mongodb-memory-server": "8.10.2",
-    "prettier": "2.8.1",
+    "prettier": "2.8.3",
     "release-it": "15.5.1",
     "rimraf": "3.0.2",
     "sha256": "0.2.0",
@@ -85,7 +85,7 @@
     "is-plain-object": "5.0.0",
     "lodash": "4.17.21",
     "object-hash": "2.2.0",
-    "prettier": "2.8.1",
+    "prettier": "2.8.3",
     "type-fest": "2.19.0",
     "yaml": "2.2.1",
     "uuid": "8.3.2"
