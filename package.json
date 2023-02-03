@@ -60,7 +60,7 @@
     "make-coverage-badge": "1.2.0",
     "mongodb-memory-server": "8.11.4",
     "prettier": "2.8.3",
-    "release-it": "15.5.1",
+    "release-it": "15.6.0",
     "rimraf": "3.0.2",
     "sha256": "0.2.0",
     "ts-jest": "27.1.5",
