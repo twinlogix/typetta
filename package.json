@@ -92,7 +92,7 @@
   },
   "peerDependencies": {
     "knex": "1.0.7",
-    "mongodb": "4.13.0"
+    "mongodb": "4.14.0"
   },
   "resolutions": {
     "graphql": "16.6.0"
