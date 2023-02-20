@@ -78,10 +78,10 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     return buildSort(qb || this.qb(), (sort || []) as unknown as AbstractSort[], this.schema)
   }
 
-  private buildTransaction(options?: Pick<T['driverFilterOptions'], 'trx'>, qb?: Knex.QueryBuilder<any, any>, limit?: number | 'unlimited', offset?: number): Knex.QueryBuilder<any, any> {
+  private buildTransaction(options?: Pick<T['driverFilterOptions'], 'trx'>, qb?: Knex.QueryBuilder<any, any>, limit?: number, offset?: number): Knex.QueryBuilder<any, any> {
     const b = options?.trx ? (qb || this.qb()).transacting(options.trx) : qb || this.qb()
-    if (limit !== 'unlimited') {
-      return b.limit(limit ?? this.pageSize).offset(offset ?? 0)
+    if (limit != null) {
+      return b.limit(limit).offset(offset ?? 0)
     }
     return b.offset(offset ?? 0)
   }

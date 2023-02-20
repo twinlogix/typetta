@@ -37,7 +37,7 @@ export type RelationsFindParams<Entity extends string, AST extends AbstractSynta
               filter?: Filter<ASTName, AST, Scalars> | AST[Entity]['driverSpecification']['rawFilter']
               sorts?: SortElement<ASTName, AST>[] | AST[Entity]['driverSpecification']['rawSorts']
               skip?: number
-              limit?: number | 'unlimited'
+              limit?: number
               relations?: RelationsFindParams<ASTName, AST, Scalars>
             }
           : never
@@ -62,7 +62,7 @@ export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<Fil
 }
 
 export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOneParams<T, P> & {
-  limit?: number | 'unlimited'
+  limit?: number
 }
 
 export type InsertParams<T extends DAOGenerics> = {
@@ -92,7 +92,7 @@ export type AggregateParams<T extends DAOGenerics> = {
   filter?: T['filter']
   aggregations: AggregationFields<T>
   skip?: number
-  limit?: number | 'unlimited'
+  limit?: number
 } & OperationParams<T>
 
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {

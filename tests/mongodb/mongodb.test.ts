@@ -62,7 +62,6 @@ function createDao(): EntityManager<{ conn: MongoClient; dao: () => EntityManage
     overrides: {
       user: {},
     },
-    log: { maxQueryExecutionTime: 100000 },
   })
 }
 
@@ -170,7 +169,7 @@ test('unlimited', async () => {
   for (let i = 0; i < 1000; i++) {
     await dao.user.insertOne({ record: { live: true, firstName: i.toString() } })
   }
-  const users = await dao.user.findAll({ limit: 'unlimited' })
+  const users = await dao.user.findAll({})
   expect(users.length).toBe(1000)
 })
 
@@ -211,6 +210,19 @@ test('findOne simple inner association', async () => {
   const dog = await dao.dog.findOne({ projection: { owner: { firstName: true } } })
   expect(dog?.owner).toBeDefined()
   expect(dog?.owner?.firstName).toBe('FirstName')
+})
+
+test('data loader', async () => {
+  const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true } })
+  const user1 = await dao.user.insertOne({ record: { firstName: 'FirstName2', lastName: 'LastName2', live: true } })
+  await dao.dog.insertOne({ record: { name: 'Charlie', ownerId: user.id } })
+  await dao.dog.insertOne({ record: { name: 'Mario', ownerId: user.id } })
+  await dao.dog.insertOne({ record: { name: 'Charlie1', ownerId: user1.id } })
+  await dao.dog.insertOne({ record: { name: 'Mario1', ownerId: user1.id } })
+
+  const user2 = await dao.user.findAll({ projection: { dogs: { name: true } }, relations: { dogs: { filter: { name: { startsWith: 'Charlie' } } } } })
+  expect(user2.length).toBe(2)
+  expect(user2[0].dogs?.length).toBe(1)
 })
 
 test('findOne simple inner association with max depth', async () => {
@@ -561,12 +573,12 @@ test('find iterable', async () => {
   }
   expect(count).toBe(100)
   count = 0
-  for await (const user of dao.user.findAllIterable({ limit: 'unlimited' })) {
+  for await (const user of dao.user.findAllIterable({})) {
     count++
   }
   expect(count).toBe(100)
   count = 0
-  for await (const user of dao.user.findAllIterable({ skip: 20, limit: 'unlimited' })) {
+  for await (const user of dao.user.findAllIterable({ skip: 20 })) {
     count++
   }
   expect(count).toBe(80)
@@ -2039,6 +2051,15 @@ test('Audit middlewares', async () => {
   const h4 = await entityManager2.hotel.aggregate({ by: { 'audit.modifiedBy': true }, aggregations: { c: { operation: 'count' } } })
   expect(h4[0]['audit.modifiedBy']).toBe('userId1')
 })
+
+/*test('asd', async () => {
+  const bill1 = await dao.bill.insertOne({ record: { description: '123', }})
+  const bill2 = await dao.bill.insertOne({ record: { description: '1234', }})
+ await dao.production.insertOne({ record: { total: 1, bills: [{billId: bill1.id, quota: 1}, {billId: bill2.id, quota: 2}]}})
+
+ const res = await dao.production.findAll({ projection: { total: true, bills: { bill: { description: true }, quota: true}}})
+ console.log(res)
+})*/
 
 test('Audit middlewares', async () => {
   const entityManager2 = new EntityManager<never, { opts: 1 | 2 }>({

@@ -33,5 +33,8 @@ export type EntityManagerSecurtyPolicy<DAOGenericsMap extends { [K in string]: D
   ? { operationDomain?: never; injectOperationDomain?: never }
   : {
       operationDomain?: (metadata: OperationMetadataType | undefined) => { [K in keyof SecurityDomain]: Exclude<SecurityDomain[K], undefined>[] }[] | undefined
-      injectOperationDomain?: (operationDomain: { [K in keyof SecurityDomain]: Exclude<SecurityDomain[K], undefined>[] }[], metadata: OperationMetadataType | undefined) => OperationMetadataType | undefined
+      injectOperationDomain?: (
+        operationDomain: { [K in keyof SecurityDomain]: Exclude<SecurityDomain[K], undefined>[] }[],
+        metadata: OperationMetadataType | undefined,
+      ) => OperationMetadataType | undefined
     })

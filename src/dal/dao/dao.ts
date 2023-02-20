@@ -272,7 +272,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           used = true
           const results: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] = []
           let index = params.skip ?? 0
-          const limit = params.limit === 'unlimited' ? this.pageSize : params.limit ?? this.pageSize
+          const limit = params.limit ?? this.pageSize
           let returned = 0
           return {
             next: async () => {
@@ -379,7 +379,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   }
 
   protected async loadAll<P extends AnyProjection<T['projection']>, K extends keyof T['filter']>(
-    params: Omit<FindParams<T, P>, 'start' | 'limit' | 'filter'>,
+    params: FindParams<T, P>,
     filterKey: K,
     filterValues: T['filter'][K][],
     buildFilter?: (filterKey: K, filterValues: readonly T['filter'][K][]) => T['filter'],
@@ -388,9 +388,18 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       (params.operationId ?? '') +
       filterKey +
       '-' +
-      objectHash({ sort: params.sorts, projection: params.projection, metadata: params.metadata, relations: params.relations, maxDepth: params.maxDepth } || null, {
-        respectType: false,
-      })
+      objectHash(
+        {
+          filter: params.filter,
+          projection: params.projection,
+          metadata: params.metadata,
+          relations: params.relations,
+          maxDepth: params.maxDepth,
+        } || null,
+        {
+          respectType: false,
+        },
+      )
     const hasKeyF = (record: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>, key: T['filter'][K]) => getTraversing(record, filterKey as string).some((v) => equals(v, key))
     const buildFilterF = buildFilter ?? ((key, values) => ({ [key]: { in: values } }))
     if (!this.dataLoaders.has(hash)) {
@@ -398,7 +407,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
         async (keys) => {
           const proj = _.cloneDeep(params.projection)
           setTraversing(proj, filterKey as string, true)
-          const records = await this.findAll({ ...params, projection: proj, filter: buildFilterF(filterKey, keys) })
+          const records = await this.findAll({ ...params, projection: proj, filter: params.filter ? { $and: [buildFilterF(filterKey, keys), params.filter] } : buildFilterF(filterKey, keys) })
           return keys.map((key) => records.filter((r) => hasKeyF(r, key))) as PartialDeep<T['model']>[]
         },
         {
@@ -530,31 +539,39 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             relation.refThis.refFrom,
             records.flatMap((r) => getTraversing(r, relation.refThis.refTo)),
           )
+          const promises = []
           for (const record of records) {
             const filterValues = rels
               .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
               .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom))
-            if (filterValues.length > 0) {
-              const results = await this.entityManager.dao(relation.refOther.dao).findAllWithBatching(params, relation.refOther.refTo, filterValues)
-              this.setResult(record, relation, results)
-            } else {
-              this.setResult(record, relation, [])
-            }
+            promises.push(filterValues.length > 0 ? await this.entityManager.dao(relation.refOther.dao).findAllWithBatching(params, relation.refOther.refTo, filterValues) : [])
+          }
+          const results = await Promise.all(promises)
+          for (let i = 0; i < records.length; i++) {
+            this.setResult(records[i], relation, results[i])
           }
         } else if (relation.reference === 'inner') {
+          const promises = []
           for (const record of records) {
             const projection = params.projection ?? {}
             setTraversing(projection, relation.refTo, true)
             const keys = getTraversing(record, relation.refFrom)
-            const results = keys.length > 0 ? await this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refTo, keys) : []
-            this.setResult(record, relation, results)
+            promises.push(keys.length > 0 ? await this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refTo, keys) : [])
+          }
+          const results = await Promise.all(promises)
+          for (let i = 0; i < records.length; i++) {
+            this.setResult(records[i], relation, results[i])
           }
         } else if (relation.reference === 'foreign') {
+          const promises = []
           for (const record of records) {
             const projection = params.projection ?? {}
             setTraversing(projection, relation.refFrom, true)
-            const results = await this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refFrom, getTraversing(record, relation.refTo))
-            this.setResult(record, relation, results)
+            promises.push(this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refFrom, getTraversing(record, relation.refTo)))
+          }
+          const results = await Promise.all(promises)
+          for (let i = 0; i < records.length; i++) {
+            this.setResult(records[i], relation, results[i])
           }
         }
       }
@@ -669,7 +686,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     filterValues: T['filter'][K] | T['filter'][K][],
   ): Promise<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[]> {
     const values = Array.isArray(filterValues) ? filterValues : [filterValues]
-    if (params.skip != null || params.limit != null || params.filter != null || params.sorts != null) {
+    if (params.skip != null || params.limit != null || params.sorts != null) {
       return this.findAll({ ...params, filter: params.filter ? { $and: [{ [filterKey]: { in: values } }, params.filter] } : { [filterKey]: { in: values } } })
     }
     return await this.loadAll(params, filterKey, values)

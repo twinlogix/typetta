@@ -95,7 +95,7 @@ test('unlimited', async () => {
   for (let i = 0; i < 1000; i++) {
     await dao.user.insertOne({ record: { live: true, firstName: i.toString() } })
   }
-  const users = await dao.user.findAll({ limit: 'unlimited' })
+  const users = await dao.user.findAll({})
   expect(users.length).toBe(1000)
 })
 
@@ -374,12 +374,12 @@ test('find iterable', async () => {
   }
   expect(count).toBe(100)
   count = 0
-  for await (const user of dao.user.findAllIterable({ limit: 'unlimited' })) {
+  for await (const user of dao.user.findAllIterable({})) {
     count++
   }
   expect(count).toBe(100)
   count = 0
-  for await (const user of dao.user.findAllIterable({ skip: 20, limit: 'unlimited' })) {
+  for await (const user of dao.user.findAllIterable({ skip: 20 })) {
     count++
   }
   expect(count).toBe(80)
