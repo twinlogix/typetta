@@ -37,7 +37,7 @@ export const Permission = {
   VIEW_HOTEL: 'VIEW_HOTEL',
 } as const
 
-export type Permission = typeof Permission[keyof typeof Permission]
+export type Permission = (typeof Permission)[keyof typeof Permission]
 export type Reservation = {
   __typename?: 'Reservation'
   hotelId: Scalars['ID']
@@ -64,7 +64,7 @@ export const RoleCode = {
   TENANT_ADMIN: 'TENANT_ADMIN',
 } as const
 
-export type RoleCode = typeof RoleCode[keyof typeof RoleCode]
+export type RoleCode = (typeof RoleCode)[keyof typeof RoleCode]
 export type Room = {
   __typename?: 'Room'
   description: Scalars['String']
