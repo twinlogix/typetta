@@ -84,7 +84,7 @@ export function createSecurityPolicyMiddlewares<
                     } else if (typeof domain === 'object' && 'and' in domain) {
                       return domain.and.map((k) => [k, v])
                     }
-                    return domain != null ? [[domain, v]] : []
+                    return domain != null ? [[domain, v]] : [[key, v]]
                   }),
                 ),
               )
