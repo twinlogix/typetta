@@ -31,6 +31,41 @@ export type AST = {
       rawSorts: () => M.Sort
     }
   }
+  HotelMultiReservation: {
+    fields: {
+      hotelId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      multiReservationId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
+  }
+  MultiReservation: {
+    fields: {
+      description: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
+      properties: {
+        type: 'relation'
+        relation: 'relationEntity'
+        isList: true
+        astName: 'Hotel'
+        isRequired: true
+        isListElementRequired: true
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+      tenantId: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: () => M.Filter<M.Document>
+      rawUpdate: () => M.UpdateFilter<M.Document>
+      rawSorts: () => M.Sort
+    }
+  }
   Reservation: {
     fields: {
       hotelId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
@@ -157,6 +192,8 @@ export type AST = {
 
 export const schemas = {
   Hotel: hotelSchema,
+  HotelMultiReservation: hotelMultiReservationSchema,
+  MultiReservation: multiReservationSchema,
   Reservation: reservationSchema,
   Role: roleSchema,
   Room: roomSchema,
@@ -256,6 +293,228 @@ export class InMemoryHotelDAO<MetadataType, OperationMetadataType> extends T.Abs
     super({
       ...params,
       schema: hotelSchema(),
+    })
+  }
+}
+export function hotelMultiReservationSchema(): T.Schema<ScalarsSpecification> {
+  return {
+    hotelId: {
+      type: 'scalar',
+      scalar: 'ID',
+      required: true,
+      directives: {},
+    },
+    id: {
+      type: 'scalar',
+      scalar: 'ID',
+      isId: true,
+      generationStrategy: 'generator',
+      required: true,
+      directives: {},
+    },
+    multiReservationId: {
+      type: 'scalar',
+      scalar: 'ID',
+      required: true,
+      directives: {},
+    },
+  }
+}
+
+type HotelMultiReservationDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'HotelMultiReservation',
+  AST,
+  ScalarsSpecification,
+  HotelMultiReservationCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
+export type HotelMultiReservationDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.MongoDBDAOParams<HotelMultiReservationDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+export type InMemoryHotelMultiReservationDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<HotelMultiReservationDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+
+export type HotelMultiReservationIdFields = T.IdFields<'HotelMultiReservation', AST>
+export interface HotelMultiReservationModel extends types.HotelMultiReservation {}
+export interface HotelMultiReservationInsert extends T.Insert<'HotelMultiReservation', AST, ScalarsSpecification> {}
+export interface HotelMultiReservationPlainModel extends T.GenerateModel<'HotelMultiReservation', AST, ScalarsSpecification, 'relation'> {}
+export interface HotelMultiReservationProjection extends T.Projection<'HotelMultiReservation', AST> {}
+export interface HotelMultiReservationUpdate extends T.Update<'HotelMultiReservation', AST, ScalarsSpecification> {}
+export interface HotelMultiReservationFilter extends T.Filter<'HotelMultiReservation', AST, ScalarsSpecification> {}
+export interface HotelMultiReservationSortElement extends T.SortElement<'HotelMultiReservation', AST> {}
+export interface HotelMultiReservationRelationsFindParams extends T.RelationsFindParams<'HotelMultiReservation', AST, ScalarsSpecification> {}
+export type HotelMultiReservationParams<P extends HotelMultiReservationProjection> = T.Params<'HotelMultiReservation', AST, ScalarsSpecification, P>
+export type HotelMultiReservationProject<P extends HotelMultiReservationProjection> = T.Project<'HotelMultiReservation', AST, ScalarsSpecification, P>
+export type HotelMultiReservationCachedTypes = T.CachedTypes<
+  HotelMultiReservationIdFields,
+  HotelMultiReservationModel,
+  HotelMultiReservationInsert,
+  HotelMultiReservationPlainModel,
+  HotelMultiReservationProjection,
+  HotelMultiReservationUpdate,
+  HotelMultiReservationFilter,
+  HotelMultiReservationSortElement,
+  HotelMultiReservationRelationsFindParams
+>
+
+export class HotelMultiReservationDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<HotelMultiReservationDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'HotelMultiReservation', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'HotelMultiReservation', AST>, P2 extends T.Projection<'HotelMultiReservation', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'HotelMultiReservation', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'HotelMultiReservation', AST>, P1, P2>
+  }
+  public constructor(params: HotelMultiReservationDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: hotelMultiReservationSchema(),
+    })
+  }
+}
+
+export class InMemoryHotelMultiReservationDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<HotelMultiReservationDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'HotelMultiReservation', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'HotelMultiReservation', AST>, P2 extends T.Projection<'HotelMultiReservation', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'HotelMultiReservation', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'HotelMultiReservation', AST>, P1, P2>
+  }
+  public constructor(params: InMemoryHotelMultiReservationDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: hotelMultiReservationSchema(),
+    })
+  }
+}
+export function multiReservationSchema(): T.Schema<ScalarsSpecification> {
+  return {
+    description: {
+      type: 'scalar',
+      scalar: 'String',
+      required: true,
+      directives: {},
+    },
+    id: {
+      type: 'scalar',
+      scalar: 'ID',
+      isId: true,
+      generationStrategy: 'generator',
+      required: true,
+      directives: {},
+    },
+    properties: {
+      type: 'relation',
+      astName: 'Hotel',
+      relation: 'relationEntity',
+      schema: () => hotelSchema(),
+      refThis: {
+        refFrom: 'multiReservationId',
+        refTo: 'id',
+      },
+      refOther: {
+        refFrom: 'hotelId',
+        refTo: 'id',
+        dao: 'hotel',
+      },
+      relationEntity: { schema: () => hotelMultiReservationSchema(), dao: 'hotelMultiReservation' },
+      isListElementRequired: true,
+      required: true,
+      isList: true,
+      directives: {},
+    },
+    tenantId: {
+      type: 'scalar',
+      scalar: 'Int',
+      required: true,
+      directives: {},
+    },
+  }
+}
+
+type MultiReservationDAOGenerics<MetadataType, OperationMetadataType> = T.MongoDBDAOGenerics<
+  'MultiReservation',
+  AST,
+  ScalarsSpecification,
+  MultiReservationCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
+export type MultiReservationDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.MongoDBDAOParams<MultiReservationDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+export type InMemoryMultiReservationDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<MultiReservationDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+
+export type MultiReservationIdFields = T.IdFields<'MultiReservation', AST>
+export interface MultiReservationModel extends types.MultiReservation {}
+export interface MultiReservationInsert extends T.Insert<'MultiReservation', AST, ScalarsSpecification> {}
+export interface MultiReservationPlainModel extends T.GenerateModel<'MultiReservation', AST, ScalarsSpecification, 'relation'> {}
+export interface MultiReservationProjection extends T.Projection<'MultiReservation', AST> {}
+export interface MultiReservationUpdate extends T.Update<'MultiReservation', AST, ScalarsSpecification> {}
+export interface MultiReservationFilter extends T.Filter<'MultiReservation', AST, ScalarsSpecification> {}
+export interface MultiReservationSortElement extends T.SortElement<'MultiReservation', AST> {}
+export interface MultiReservationRelationsFindParams extends T.RelationsFindParams<'MultiReservation', AST, ScalarsSpecification> {}
+export type MultiReservationParams<P extends MultiReservationProjection> = T.Params<'MultiReservation', AST, ScalarsSpecification, P>
+export type MultiReservationProject<P extends MultiReservationProjection> = T.Project<'MultiReservation', AST, ScalarsSpecification, P>
+export type MultiReservationCachedTypes = T.CachedTypes<
+  MultiReservationIdFields,
+  MultiReservationModel,
+  MultiReservationInsert,
+  MultiReservationPlainModel,
+  MultiReservationProjection,
+  MultiReservationUpdate,
+  MultiReservationFilter,
+  MultiReservationSortElement,
+  MultiReservationRelationsFindParams
+>
+
+export class MultiReservationDAO<MetadataType, OperationMetadataType> extends T.AbstractMongoDBDAO<MultiReservationDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'MultiReservation', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'MultiReservation', AST>, P2 extends T.Projection<'MultiReservation', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'MultiReservation', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'MultiReservation', AST>, P1, P2>
+  }
+  public constructor(params: MultiReservationDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: multiReservationSchema(),
+    })
+  }
+}
+
+export class InMemoryMultiReservationDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<MultiReservationDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'MultiReservation', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'MultiReservation', AST>, P2 extends T.Projection<'MultiReservation', AST>>(
+    p1: P1,
+    p2: P2,
+  ): T.SelectProjection<T.Projection<'MultiReservation', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'MultiReservation', AST>, P1, P2>
+  }
+  public constructor(params: InMemoryMultiReservationDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: multiReservationSchema(),
     })
   }
 }
@@ -1034,6 +1293,8 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   middlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
   overrides?: {
     hotel?: Pick<Partial<HotelDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    hotelMultiReservation?: Pick<Partial<HotelMultiReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+    multiReservation?: Pick<Partial<MultiReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     reservation?: Pick<Partial<ReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     role?: Pick<Partial<RoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     room?: Pick<Partial<RoomDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
@@ -1044,7 +1305,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   }
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
-  log?: T.LogInput<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
+  log?: T.LogInput<'Hotel' | 'HotelMultiReservation' | 'MultiReservation' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
   awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
@@ -1056,6 +1317,8 @@ export class EntityManager<
   SecurityDomain extends Record<string, unknown> = never,
 > extends T.AbstractEntityManager<'default', never, ScalarsSpecification, MetadataType> {
   private _hotel: HotelDAO<MetadataType, OperationMetadataType> | undefined
+  private _hotelMultiReservation: HotelMultiReservationDAO<MetadataType, OperationMetadataType> | undefined
+  private _multiReservation: MultiReservationDAO<MetadataType, OperationMetadataType> | undefined
   private _reservation: ReservationDAO<MetadataType, OperationMetadataType> | undefined
   private _role: RoleDAO<MetadataType, OperationMetadataType> | undefined
   private _room: RoomDAO<MetadataType, OperationMetadataType> | undefined
@@ -1071,7 +1334,7 @@ export class EntityManager<
 
   private middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
 
-  private logger?: T.LogFunction<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
+  private logger?: T.LogFunction<'Hotel' | 'HotelMultiReservation' | 'MultiReservation' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
 
   get hotel(): HotelDAO<MetadataType, OperationMetadataType> {
     if (!this._hotel) {
@@ -1107,6 +1370,76 @@ export class EntityManager<
             })
     }
     return this._hotel
+  }
+  get hotelMultiReservation(): HotelMultiReservationDAO<MetadataType, OperationMetadataType> {
+    if (!this._hotelMultiReservation) {
+      const db = this.mongodb.default
+      this._hotelMultiReservation =
+        db === 'mock'
+          ? (new InMemoryHotelMultiReservationDAO({
+              entityManager: this,
+              datasource: null,
+              metadata: this.metadata,
+              ...this.overrides?.hotelMultiReservation,
+              middlewares: [
+                ...(this.overrides?.hotelMultiReservation?.middlewares || []),
+                ...(selectMiddleware('hotelMultiReservation', this.middlewares) as T.DAOMiddleware<HotelMultiReservationDAOGenerics<MetadataType, OperationMetadataType>>[]),
+              ],
+              name: 'HotelMultiReservation',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            }) as unknown as HotelMultiReservationDAO<MetadataType, OperationMetadataType>)
+          : new HotelMultiReservationDAO({
+              entityManager: this,
+              datasource: 'default',
+              metadata: this.metadata,
+              ...this.overrides?.hotelMultiReservation,
+              collection: db.collection('hotelMultiReservations'),
+              middlewares: [
+                ...(this.overrides?.hotelMultiReservation?.middlewares || []),
+                ...(selectMiddleware('hotelMultiReservation', this.middlewares) as T.DAOMiddleware<HotelMultiReservationDAOGenerics<MetadataType, OperationMetadataType>>[]),
+              ],
+              name: 'HotelMultiReservation',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            })
+    }
+    return this._hotelMultiReservation
+  }
+  get multiReservation(): MultiReservationDAO<MetadataType, OperationMetadataType> {
+    if (!this._multiReservation) {
+      const db = this.mongodb.default
+      this._multiReservation =
+        db === 'mock'
+          ? (new InMemoryMultiReservationDAO({
+              entityManager: this,
+              datasource: null,
+              metadata: this.metadata,
+              ...this.overrides?.multiReservation,
+              middlewares: [
+                ...(this.overrides?.multiReservation?.middlewares || []),
+                ...(selectMiddleware('multiReservation', this.middlewares) as T.DAOMiddleware<MultiReservationDAOGenerics<MetadataType, OperationMetadataType>>[]),
+              ],
+              name: 'MultiReservation',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            }) as unknown as MultiReservationDAO<MetadataType, OperationMetadataType>)
+          : new MultiReservationDAO({
+              entityManager: this,
+              datasource: 'default',
+              metadata: this.metadata,
+              ...this.overrides?.multiReservation,
+              collection: db.collection('multiReservations'),
+              middlewares: [
+                ...(this.overrides?.multiReservation?.middlewares || []),
+                ...(selectMiddleware('multiReservation', this.middlewares) as T.DAOMiddleware<MultiReservationDAOGenerics<MetadataType, OperationMetadataType>>[]),
+              ],
+              name: 'MultiReservation',
+              logger: this.logger,
+              awaitLog: this.params.awaitLog,
+            })
+    }
+    return this._multiReservation
   }
   get reservation(): ReservationDAO<MetadataType, OperationMetadataType> {
     if (!this._reservation) {
@@ -1366,6 +1699,8 @@ export class EntityManager<
       dbs: { mongodb: Record<'default', M.Db | 'mock'> },
       entities: {
         hotel: M.Collection<M.Document> | null
+        hotelMultiReservation: M.Collection<M.Document> | null
+        multiReservation: M.Collection<M.Document> | null
         reservation: M.Collection<M.Document> | null
         role: M.Collection<M.Document> | null
         room: M.Collection<M.Document> | null
@@ -1380,6 +1715,8 @@ export class EntityManager<
       { mongodb: this.mongodb },
       {
         hotel: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('hotels'),
+        hotelMultiReservation: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('hotelMultiReservations'),
+        multiReservation: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('multiReservations'),
         reservation: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('reservations'),
         role: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('roles'),
         room: this.mongodb.default === 'mock' ? null : this.mongodb.default.collection('rooms'),
@@ -1399,6 +1736,8 @@ export class EntityManager<
 type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   hotel: HotelDAOGenerics<MetadataType, OperationMetadataType>
+  hotelMultiReservation: HotelMultiReservationDAOGenerics<MetadataType, OperationMetadataType>
+  multiReservation: MultiReservationDAOGenerics<MetadataType, OperationMetadataType>
   reservation: ReservationDAOGenerics<MetadataType, OperationMetadataType>
   role: RoleDAOGenerics<MetadataType, OperationMetadataType>
   room: RoomDAOGenerics<MetadataType, OperationMetadataType>
@@ -1458,6 +1797,8 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     middleware: EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>
     overrides: {
       hotel?: Pick<Partial<HotelDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      hotelMultiReservation?: Pick<Partial<HotelMultiReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
+      multiReservation?: Pick<Partial<MultiReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       reservation?: Pick<Partial<ReservationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       role?: Pick<Partial<RoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       room?: Pick<Partial<RoomDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
@@ -1469,7 +1810,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     mongodb: Record<'default', M.Db | 'mock'>
 
     scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
-    log: T.LogInput<'Hotel' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
+    log: T.LogInput<'Hotel' | 'HotelMultiReservation' | 'MultiReservation' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
   }
   security: {

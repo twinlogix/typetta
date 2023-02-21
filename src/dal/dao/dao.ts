@@ -535,6 +535,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           const rels = await this.entityManager.dao(relation.relationDao).loadAll(
             {
               projection: { [relation.refThis.refFrom]: true, [relation.refOther.refFrom]: true },
+              options,
+              metadata,
+              operationId,
             },
             relation.refThis.refFrom,
             records.flatMap((r) => getTraversing(r, relation.refThis.refTo)),

@@ -25,6 +25,21 @@ export type Hotel = {
   totalCustomers: Scalars['Int']
 }
 
+export type HotelMultiReservation = {
+  __typename?: 'HotelMultiReservation'
+  hotelId: Scalars['ID']
+  id: Scalars['ID']
+  multiReservationId: Scalars['ID']
+}
+
+export type MultiReservation = {
+  __typename?: 'MultiReservation'
+  description: Scalars['String']
+  id: Scalars['ID']
+  properties: Array<Hotel>
+  tenantId: Scalars['Int']
+}
+
 export const Permission = {
   ANALYST: 'ANALYST',
   MANAGE_HOTEL: 'MANAGE_HOTEL',

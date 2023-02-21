@@ -85,12 +85,27 @@ function createDao(securityContext: SecurityContext | undefined, db: Db) {
             MANAGE_HOTEL: PERMISSION.ALLOW,
           },
         },
+        hotelMultiReservation: {
+          domain: {},
+          defaultPermissions: PERMISSION.ALLOW,
+        },
+        multiReservation: {
+          domain: {
+            tenantId: 'tenantId',
+          },
+          defaultPermissions: PERMISSION.DENY,
+          permissions: {
+            MANAGE_HOTEL: PERMISSION.ALLOW,
+          },
+        },
       },
       defaultPermission: {
         read: { id: true },
       },
       operationDomain: (metadata) => metadata?.securityDomains,
-      injectOperationDomain: (operationDomain, metadata) => (metadata ? { ...metadata, securityDomains: operationDomain } : { securityDomains: operationDomain }),
+      injectOperationDomain: (operationDomain, metadata) => {
+        return metadata ? { ...metadata, securityDomains: operationDomain } : { securityDomains: operationDomain }
+      },
     },
   })
 }
@@ -483,6 +498,39 @@ test('security test 5', async () => {
 
   const r2 = await entityManager.specialAnd.findAll({ filter: { $and: [{ hotelId1: 'h1' }, { hotelId2: 'h1' }, { tenantId1: 1 }, { tenantId2: 1 }] } })
   expect(r2.length).toBe(1)
+})
+
+test('security test 6', async () => {
+  const user = await unsafeDao.user.insertOne({
+    record: {
+      id: 'u1',
+      email: 'mario@domain.com',
+      firstName: 'Mario',
+    },
+  })
+  //await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER', hotelId: 'h1' } })
+  await unsafeDao.userRole.insertOne({ record: { refUserId: user.id, roleCode: 'HOTEL_OWNER', tenantId: 1 } })
+
+  await unsafeDao.hotel.insertOne({ record: { id: 'h1', name: 'Hotel 1', tenantId: 1, totalCustomers: 1 } })
+  await unsafeDao.hotel.insertOne({ record: { id: 'h2', name: 'Hotel 2', tenantId: 1, totalCustomers: 2 } })
+  await unsafeDao.multiReservation.insertOne({ record: { id: 'r1', description: 'R1', tenantId: 1 } })
+  await unsafeDao.multiReservation.insertOne({ record: { id: 'r2', description: 'R2', tenantId: 1 } })
+  await unsafeDao.hotelMultiReservation.insertOne({ record: { hotelId: 'h1', multiReservationId: 'r1' } })
+  await unsafeDao.hotelMultiReservation.insertOne({ record: { hotelId: 'h2', multiReservationId: 'r1' } })
+  await unsafeDao.hotelMultiReservation.insertOne({ record: { hotelId: 'h1', multiReservationId: 'r2' } })
+  await unsafeDao.hotelMultiReservation.insertOne({ record: { hotelId: 'h2', multiReservationId: 'r2' } })
+
+  const entityManager = await createSecureEntityManager(user.id)
+
+  const r1 = await entityManager.multiReservation.findAll({
+    filter: { tenantId: 1, description: 'R1' },
+    projection: {
+      properties: {
+        name: true,
+      },
+    },
+  })
+  expect(r1[0].properties.length).toBe(2)
 })
 
 afterEach(async () => {

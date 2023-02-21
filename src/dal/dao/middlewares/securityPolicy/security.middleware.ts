@@ -135,11 +135,23 @@ export function securityPolicy<
 
       const isValidFilter = givenOperationSecurityDomains ? givenOperationSecurityDomains.some((osd) => Object.keys(osd).length > 0) : false
       const domainFiltersOr = givenOperationSecurityDomains
-        ? givenOperationSecurityDomains.map((osd) => ({
-            $and: Object.entries(osd).map(([k, v]) => ({ [k]: { in: v } })),
-          }))
+        ? givenOperationSecurityDomains.map((osd) => {
+            const ands = Object.entries(osd).map(([k, v]) => ({ [k]: { in: v } }))
+            if (ands.length === 1) {
+              return ands[0]
+            }
+            return { $and: ands }
+          })
         : null
-      const domainFilters = domainFiltersOr ? (domainFiltersOr.length > 0 ? (isValidFilter ? { $or: domainFiltersOr } : null) : { [context.idField]: null }) : null
+      const domainFilters = domainFiltersOr
+        ? domainFiltersOr.length > 0
+          ? isValidFilter
+            ? domainFiltersOr.length === 1
+              ? domainFiltersOr[0]
+              : { $or: domainFiltersOr }
+            : null
+          : { [context.idField]: null }
+        : null
       const filter =
         'filter' in args.params && args.params.filter != null && domainFilters
           ? { $and: [args.params.filter, domainFilters] }
