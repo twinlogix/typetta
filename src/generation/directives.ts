@@ -1,4 +1,4 @@
-export type Directives = typeof Directives[keyof typeof Directives]
+export type Directives = (typeof Directives)[keyof typeof Directives]
 export const Directives = {
   ID: 'id',
   ENTITY: 'entity',

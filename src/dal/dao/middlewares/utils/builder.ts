@@ -1,4 +1,4 @@
-import { AggregateParams, AggregatePostProcessing, DAOGenerics, DeleteParams, FindParams, InsertParams, MiddlewareContext, ReplaceParams, UpdateParams } from '../../dao.types'
+import { AggregateParams, AggregatePostProcessing, DAOGenerics, DeleteParams, FindParams, InsertAllParams, MiddlewareContext, ReplaceParams, UpdateParams } from '../../dao.types'
 import {
   AggregateMiddlewareInput,
   AggregateMiddlewareOutput,
@@ -30,10 +30,10 @@ export type DAOSplitedMiddleware<T extends DAOGenerics> = {
     context: MiddlewareContext<T>,
   ) => Promise<(Omit<FindMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
   beforeInsert?: (
-    params: InsertParams<T>,
+    params: InsertAllParams<T>,
     context: MiddlewareContext<T>,
   ) => Promise<(Omit<InsertMiddlewareInput<T>, 'operation'> & Continue<true>) | (Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<false>) | void>
-  afterInsert?: (params: InsertParams<T>, insertedRecord: T['plainModel'], context: MiddlewareContext<T>) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
+  afterInsert?: (params: InsertAllParams<T>, insertedRecords: T['plainModel'][], context: MiddlewareContext<T>) => Promise<(Omit<InsertMiddlewareOutput<T>, 'operation'> & Continue<boolean>) | void>
   beforeUpdate?: (
     params: UpdateParams<T>,
     context: MiddlewareContext<T>,
@@ -128,7 +128,7 @@ export function buildMiddleware<T extends DAOGenerics>(m: DAOSplitedMiddleware<T
               }
             }
           } else if (m.afterInsert && args.operation === 'insert') {
-            const result = await m.afterInsert(args.params, args.insertedRecord, context)
+            const result = await m.afterInsert(args.params, args.insertedRecords, context)
             if (result) {
               return {
                 operation: 'insert',

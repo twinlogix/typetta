@@ -3,7 +3,7 @@ import { AbstractScalars, AbstractSyntaxTree, CachedTypes } from '../../../..'
 import { DAOGenerics, DAOParams } from '../../../dao/dao.types'
 import { AbstractEntityManager } from '../../../entity-manager'
 import { DefaultModelScalars } from '../../drivers.types'
-import { Collection, CountOptions, DeleteOptions, FindOptions, InsertOneOptions, ReplaceOptions, UpdateOptions } from 'mongodb'
+import { Collection, CountOptions, DeleteOptions, FindOptions, BulkWriteOptions, ReplaceOptions, UpdateOptions } from 'mongodb'
 
 export type MongoDBDAOGenerics<
   Entity extends string = any,
@@ -23,7 +23,7 @@ export type MongoDBDAOGenerics<
   { collection: Collection },
   CountOptions,
   FindOptions,
-  InsertOneOptions,
+  BulkWriteOptions,
   UpdateOptions,
   ReplaceOptions,
   DeleteOptions,

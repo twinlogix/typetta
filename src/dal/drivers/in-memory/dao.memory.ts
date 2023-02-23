@@ -1,7 +1,7 @@
 import { AbstractDAO, AnyProjection, filterEntity, idInfoFromSchema, LogArgs, MONGODB_QUERY_PREFIXS, setTraversing, sort } from '../../..'
 import { transformObject } from '../../../generation/utils'
 import { deepMerge } from '../../../utils/utils'
-import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
+import { FindParams, FilterParams, InsertAllParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../dao/dao.types'
 import { InMemoryDAOGenerics, InMemoryDAOParams } from './dao.memory.types'
 import { InMemoryStateManager } from './state.memory'
 import { compare, getByPath, mock, MockIdSpecification } from './utils.memory'
@@ -148,12 +148,16 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
     return (params.by ? result : result[0]) as AggregateResults<T, A>
   }
 
-  protected async _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
-    const record = deepMerge(params.record, this.generateRecordWithId())
-    const t = (await transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema)) as T['insert']
-    const id = t[this.dbIdField]
-    this.stateManager.insertElement(id, t)
-    return _.cloneDeep(await transformObject(this.entityManager.adapters.memory, 'dbToModel', t, this.schema))
+  protected async _insertAll(params: InsertAllParams<T>): Promise<T['plainModel'][]> {
+    const records = []
+    for (const r of params.records) {
+      const record = deepMerge(r, this.generateRecordWithId())
+      const t = (await transformObject(this.entityManager.adapters.memory, 'modelToDB', record, this.schema)) as T['insert']
+      const id = t[this.dbIdField]
+      this.stateManager.insertElement(id, t)
+      records.push(_.cloneDeep(await transformObject(this.entityManager.adapters.memory, 'dbToModel', t, this.schema)))
+    }
+    return records
   }
 
   protected async _updateOne(params: UpdateParams<T>): Promise<void> {

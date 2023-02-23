@@ -1081,14 +1081,14 @@ test('middleware 1', async () => {
               expect(context.schema.live.directives.custom.str).toBe('123')
               expect(context.schema.live.directives.custom.o).toStrictEqual({ a: 123 })
               if (args.operation === 'insert') {
-                if (args.params.record.id === 'u1' && args.params.record.firstName === 'Mario') {
+                if (args.params.records[0] && args.params.records[0].id === 'u1' && args.params.records[0] && args.params.records[0].firstName === 'Mario') {
                   throw new Error('is Mario')
                 }
-                if (args.params.record.firstName) {
+                if (args.params.records[0] && args.params.records[0].firstName) {
                   return {
                     continue: true,
                     operation: 'insert',
-                    params: { ...args.params, record: { ...args.params.record, firstName: args.params.record.firstName?.toUpperCase() } },
+                    params: { ...args.params, records: [{ ...args.params.records[0], firstName: args.params.records[0].firstName?.toUpperCase() }] },
                   }
                 }
               }
@@ -1132,12 +1132,12 @@ test('middleware 1', async () => {
             },
             after: async (args, context) => {
               if (args.operation === 'insert') {
-                if (args.params.record?.id === 'u1' && args.insertedRecord.firstName) {
+                if (args.params.records[0] && args.params.records[0].id === 'u1' && args.insertedRecords[0] && args.insertedRecords[0].firstName) {
                   return {
                     continue: true,
                     operation: 'insert',
                     params: args.params,
-                    insertedRecord: { ...args.insertedRecord, firstName: args.insertedRecord.firstName + ' OK' },
+                    insertedRecords: [{ ...args.insertedRecords[0], firstName: args.insertedRecords[0].firstName + ' OK' }],
                   }
                 }
               }
@@ -1336,7 +1336,7 @@ test('middleware change reulst in after', async () => {
                 return {
                   operation: 'insert',
                   continue: false,
-                  insertedRecord: { id: args.insertedRecord.id, live: false },
+                  insertedRecords: [{ id: args.insertedRecords[0].id, live: false }],
                 }
               }
             },
@@ -2164,16 +2164,16 @@ test('Inserted record middleware', async () => {
       hotel: {
         middlewares: [
           buildMiddleware({
-            afterInsert: async (args, insertedRecord) => {
+            afterInsert: async (args, insertedRecords) => {
               i++
-              expect(insertedRecord.id.length).toBe(24)
+              expect(insertedRecords[0].id.length).toBe(24)
             },
           }),
           {
             after: async (args) => {
               if (args.operation === 'insert') {
                 i++
-                expect(args.insertedRecord.id.length).toBe(24)
+                expect(args.insertedRecords[0].id.length).toBe(24)
               }
             },
           },
@@ -2183,6 +2183,24 @@ test('Inserted record middleware', async () => {
   })
   await customDao.hotel.insertOne({ record: { name: 'Hotel', audit: { createdBy: '', createdOn: 0, modifiedBy: '', modifiedOn: 0, state: State.ACTIVE } } })
   expect(i).toBe(2)
+})
+
+test('insertAll test', async () => {
+  const users = await dao.user.insertAll({
+    records: [
+      { live: true, firstName: '1' },
+      { live: true, firstName: '2' },
+      { live: true, firstName: '3' },
+      { live: true, firstName: '4' },
+      { live: true, firstName: '5' },
+    ],
+  })
+  expect(users.length).toBe(5)
+  expect(users[0].firstName).toBe('1')
+  expect(users[1].firstName).toBe('2')
+  expect(users[2].firstName).toBe('3')
+  expect(users[3].firstName).toBe('4')
+  expect(users[4].firstName).toBe('5')
 })
 
 test('Schema metadata', async () => {

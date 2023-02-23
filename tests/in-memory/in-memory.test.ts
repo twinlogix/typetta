@@ -564,6 +564,24 @@ test('Insert default', async () => {
   expect(e3.opt1).toBe(undefined)
 })
 
+test('insertAll test', async () => {
+  const users = await dao.user.insertAll({
+    records: [
+      { live: true, firstName: '1' },
+      { live: true, firstName: '2' },
+      { live: true, firstName: '3' },
+      { live: true, firstName: '4' },
+      { live: true, firstName: '5' },
+    ],
+  })
+  expect(users.length).toBe(5)
+  expect(users[0].firstName).toBe('1')
+  expect(users[1].firstName).toBe('2')
+  expect(users[2].firstName).toBe('3')
+  expect(users[3].firstName).toBe('4')
+  expect(users[4].firstName).toBe('5')
+})
+
 test('update validation fails', async () => {
   await dao.user.insertOne({
     record: {

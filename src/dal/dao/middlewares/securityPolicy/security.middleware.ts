@@ -97,10 +97,12 @@ export function securityPolicy<
       const relatedSecurityContext = getRelatedSecurityContext(context)
 
       if (args.operation === 'insert') {
-        const cruds = relatedSecurityContext.flatMap((rsc) => (rsc.domain === true || rsc.domain.some((atom) => isContained(args.params.record, atom)) ? [rsc.crud] : []))
-        const crud = cruds.length > 0 ? PERMISSION.or(cruds) : input.defaultPermission ?? PERMISSION.DENY
-        if (!crud.create) {
-          throw new SecurityPolicyWriteError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]) })
+        for (const record of args.params.records) {
+          const cruds = relatedSecurityContext.flatMap((rsc) => (rsc.domain === true || rsc.domain.some((atom) => isContained(record, atom)) ? [rsc.crud] : []))
+          const crud = cruds.length > 0 ? PERMISSION.or(cruds) : input.defaultPermission ?? PERMISSION.DENY
+          if (!crud.create) {
+            throw new SecurityPolicyWriteError({ permissions: relatedSecurityContext.map((policy) => [policy.permission, policy.domain]) })
+          }
         }
         return
       }

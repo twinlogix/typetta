@@ -1,10 +1,10 @@
-import { MiddlewareContext, DeleteParams, FindParams, InsertParams, ReplaceParams, UpdateParams, DAOGenerics, AggregateParams, AggregateResults, AggregatePostProcessing } from '../dao.types'
+import { MiddlewareContext, DeleteParams, FindParams, ReplaceParams, UpdateParams, DAOGenerics, AggregateParams, AggregateResults, AggregatePostProcessing, InsertAllParams } from '../dao.types'
 import { PartialDeep } from 'type-fest'
 
 export type Continue<T extends boolean> = { continue: T }
 export type FindMiddlewareInput<T extends DAOGenerics> = { operation: 'find'; params: FindParams<T> }
 export type AggregateMiddlewareInput<T extends DAOGenerics> = { operation: 'aggregate'; params: AggregateParams<T>; args?: AggregatePostProcessing<T, AggregateParams<T>> }
-export type InsertMiddlewareInput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T> }
+export type InsertMiddlewareInput<T extends DAOGenerics> = { operation: 'insert'; params: InsertAllParams<T> }
 export type UpdateMiddlewareInput<T extends DAOGenerics> = { operation: 'update'; params: UpdateParams<T> }
 export type ReplaceMiddlewareInput<T extends DAOGenerics> = { operation: 'replace'; params: ReplaceParams<T> }
 export type DeleteMiddlewareInput<T extends DAOGenerics> = { operation: 'delete'; params: DeleteParams<T> }
@@ -23,7 +23,7 @@ export type AggregateMiddlewareOutput<T extends DAOGenerics> = {
   args?: AggregatePostProcessing<T, AggregateParams<T>>
   result: AggregateResults<T, AggregateParams<T>>
 }
-export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertParams<T>; insertedRecord: T['plainModel'] }
+export type InsertMiddlewareOutput<T extends DAOGenerics> = { operation: 'insert'; params: InsertAllParams<T>; insertedRecords: T['plainModel'][] }
 export type UpdateMiddlewareOutput<T extends DAOGenerics> = { operation: 'update'; params: UpdateParams<T> }
 export type ReplaceMiddlewareOutput<T extends DAOGenerics> = { operation: 'replace'; params: ReplaceParams<T> }
 export type DeleteMiddlewareOutput<T extends DAOGenerics> = { operation: 'delete'; params: DeleteParams<T> }

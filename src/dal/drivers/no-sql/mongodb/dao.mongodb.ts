@@ -2,7 +2,7 @@ import { idInfoFromSchema } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
-import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
+import { FindParams, FilterParams, InsertAllParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { LogArgs } from '../../../dao/log/log.types'
 import { AnyProjection } from '../../../dao/projections/projections.types'
 import { isEmptyProjection } from '../../../dao/projections/projections.utils'
@@ -176,20 +176,22 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
     })
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
-    return this.runQuery('insertOne', async () => {
-      const record = await this.modelToDb(filterUndefiendFields(params.record))
-      const options = params.options ?? {}
+  protected _insertAll(params: InsertAllParams<T>): Promise<T['plainModel'][]> {
+    return this.runQuery('insertAll', async () => {
+      const records = (await Promise.all(params.records.map((record) => this.modelToDb(filterUndefiendFields(record))))).flat()
+      const options = params.options ? { ordered: true, ...params.options } : { ordered: true }
       return [
         async () => {
-          const result = await this.collection.insertOne(record, options)
-          const inserted = await this.collection.findOne({ _id: result.insertedId }, options)
+          const result = await this.collection.insertMany(records, options)
+          const inserted = await this.collection
+            .find({ _id: { $in: Object.values(result.insertedIds) } }, params.retrieveOptions ? { session: params.options?.session, ...params.retrieveOptions } : { session: params.options?.session })
+            .toArray()
           if (!inserted) {
-            throw new Error(`One just inserted document with id ${result.insertedId.toHexString()} was not retrieved correctly.`)
+            throw new Error(`One just inserted documents with ids ${Object.values(result.insertedIds).map((id) => id.toHexString())} was not retrieved correctly.`)
           }
-          return this.dbToModel(inserted)
+          return this.dbsToModels(inserted)
         },
-        () => `collection.insertOne(${JSON.stringify(record)})`,
+        () => `collection.insertAll(${JSON.stringify(records)})`,
       ]
     })
   }

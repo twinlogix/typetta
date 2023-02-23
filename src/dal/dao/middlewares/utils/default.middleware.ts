@@ -6,9 +6,15 @@ export function defaultValueMiddleware<T extends DAOGenerics, K extends keyof T[
   return buildMiddleware({
     name: 'Typetta - Default value',
     beforeInsert: async (params, context) => {
-      if (params.record[field] === undefined) {
-        return { continue: true, params: { ...params, record: { ...params.record, [field]: value(context.metadata) } } }
+      const records = []
+      for (const record of params.records) {
+        if (record[field] === undefined) {
+          records.push({ ...record, [field]: value(context.metadata) })
+        } else {
+          records.push(record)
+        }
       }
+      return { continue: true, params: { ...params, records } }
     },
   })
 }

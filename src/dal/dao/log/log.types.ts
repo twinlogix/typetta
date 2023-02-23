@@ -5,7 +5,7 @@ export type LogArgs<DAOName extends string> = {
   raw: string
   date: Date
   level: LogLevel
-  operation?: 'count' | 'findAll' | 'findPage' | 'exists' | 'aggregate' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'deleteOne' | 'deleteAll' | 'middlewareBefore' | 'middlewareAfter'
+  operation?: 'count' | 'findAll' | 'findPage' | 'exists' | 'aggregate' | 'insertAll' | 'updateOne' | 'updateAll' | 'replaceOne' | 'deleteOne' | 'deleteAll' | 'middlewareBefore' | 'middlewareAfter'
   dao?: DAOName
   driver?: DriverType
   query?: string

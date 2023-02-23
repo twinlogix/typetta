@@ -19,6 +19,7 @@ import {
   DriverType,
   IdGenerationStrategy,
   OperationParams,
+  InsertAllParams,
 } from './dao.types'
 import { LogArgs, LogFunction } from './log/log.types'
 import { BeforeMiddlewareResult, DAOMiddleware, MiddlewareInput, MiddlewareOutput, SelectAfterMiddlewareOutputType, SelectBeforeMiddlewareOutputType } from './middlewares/middlewares.types'
@@ -95,23 +96,26 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       name: 'Typetta - Check default field presence',
       beforeInsert: async (params, context) => {
         const fieldsToGenerate = Object.entries(context.schema).flatMap(([k, v]) => (v.generationStrategy === 'generator' && v.type === 'scalar' ? [[k, v] as const] : []))
-        let record = params.record
-        for (const [key, schema] of fieldsToGenerate) {
-          const generator = this.entityManager.adapters[context.daoDriver][schema.scalar].generate
-          if (record[key] == null && generator) {
-            record = {
-              ...record,
-              [key]: await generator(),
+        const records = []
+        for (let record of params.records) {
+          for (const [key, schema] of fieldsToGenerate) {
+            const generator = this.entityManager.adapters[context.daoDriver][schema.scalar].generate
+            if (record[key] == null && generator) {
+              record = {
+                ...record,
+                [key]: await generator(),
+              }
             }
           }
+          records.push(record)
+          const fieldsToHave = Object.entries(schema).flatMap(([k, v]) => (v.generationStrategy === 'middleware' ? [[k, v] as const] : []))
+          fieldsToHave.forEach(([key, schema]) => {
+            if (schema.required && record[key] == null) {
+              throw new Error(`Fields ${key} should have been generated from a middleware but it is ${record[key]}`)
+            }
+          })
         }
-        const fieldsToHave = Object.entries(schema).flatMap(([k, v]) => (v.generationStrategy === 'middleware' ? [[k, v] as const] : []))
-        fieldsToHave.forEach(([key, schema]) => {
-          if (schema.required && record[key] == null) {
-            throw new Error(`Fields ${key} should have been generated from a middleware but it is ${record[key]}`)
-          }
-        })
-        return { continue: true, params: { ...params, record } }
+        return { continue: true, params: { ...params, records } }
       },
     })
     this.middlewares = [
@@ -215,14 +219,22 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       {
         name: 'Typetta - Default field from generator',
         before: async (args, context) => {
-          if (args.operation === 'insert' && this.idGeneration === 'generator' && !Object.keys(args.params.record).includes(context.idField)) {
-            const id = this.idGenerator ? this.idGenerator() : this.idScalarGenerator ? { [context.idField]: this.idScalarGenerator() } : null
-            if (id) {
-              return {
-                continue: true,
-                operation: args.operation,
-                params: { ...args.params, record: { ...args.params.record, ...id } },
+          if (args.operation === 'insert' && this.idGeneration === 'generator') {
+            const records = []
+            for (const record of args.params.records) {
+              if (Object.keys(record).includes(context.idField)) {
+                records.push(record)
+                continue
               }
+              const id = this.idGenerator ? this.idGenerator() : this.idScalarGenerator ? { [context.idField]: this.idScalarGenerator() } : null
+              if (id) {
+                records.push({ ...record, ...id })
+              }
+            }
+            return {
+              continue: true,
+              operation: args.operation,
+              params: { ...args.params, records },
             }
           }
         },
@@ -483,6 +495,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       input: I
       projection: P
       relations?: T['relations']
+      options?: T['driverFindOptions']
     } & OperationParams<T>,
   ): Promise<I extends Array<unknown> ? Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] : Project<T['entity'], T['ast'], T['scalars'], P, T['types']>> {
     const operationId = uuidv4()
@@ -695,13 +708,21 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return await this.loadAll(params, filterKey, values)
   }
 
-  async insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
-    return this.logOperation('insertOne', params, async () => {
-      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params }, 'insertOne')
-      const insertedRecord = beforeResults.continue ? await this._insertOne(beforeResults.params) : beforeResults.insertedRecord
-      const afterResults = await this.executeAfterMiddlewares({ operation: 'insert', params: beforeResults.params, insertedRecord }, beforeResults.middlewareIndex, 'insertOne')
-      return afterResults.insertedRecord
+  async insertAll(params: InsertAllParams<T>): Promise<T['plainModel'][]> {
+    return this.logOperation('insertAll', params, async () => {
+      const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params }, 'insertAll')
+      const insertedRecords = beforeResults.continue ? await this._insertAll(beforeResults.params) : beforeResults.insertedRecords
+      const afterResults = await this.executeAfterMiddlewares({ operation: 'insert', params: beforeResults.params, insertedRecords }, beforeResults.middlewareIndex, 'insertAll')
+      return afterResults.insertedRecords
     })
+  }
+
+  async insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
+    const results = await this.insertAll({ ...params, records: [params.record] })
+    if (results.length < 1) {
+      throw new Error('Typetta: no result in insertOne')
+    }
+    return results[0]
   }
 
   async updateOne(params: UpdateParams<T>): Promise<void> {
@@ -921,7 +942,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   protected abstract _exists(params: FilterParams<T>): Promise<boolean>
   protected abstract _count(params: FilterParams<T>): Promise<number>
   protected abstract _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
-  protected abstract _insertOne(params: InsertParams<T>): Promise<T['plainModel']>
+  protected abstract _insertAll(params: InsertAllParams<T>): Promise<T['plainModel'][]>
   protected abstract _updateOne(params: UpdateParams<T>): Promise<void>
   protected abstract _updateAll(params: UpdateParams<T>): Promise<void>
   protected abstract _replaceOne(params: ReplaceParams<T>): Promise<void>

@@ -13,10 +13,8 @@ export function audit<T extends DAOGenerics>(
   return buildMiddleware({
     name: 'Typetta - Audit',
     beforeInsert: async (params, context) => {
-      return {
-        continue: true,
-        params: { ...params, record: deepMerge(input(context.metadata, { insert: params, context, args: { operation: 'insert', params } }).insert, params.record) },
-      }
+      const records = params.records.map((r) => deepMerge(input(context.metadata, { insert: { ...params, record: r }, context, args: { operation: 'insert', params } }).insert, r))
+      return { continue: true, params: { ...params, records } }
     },
     beforeReplace: async (params, context) => {
       return {

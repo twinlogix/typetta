@@ -29,12 +29,17 @@ export function tenantSecurityPolicy<T extends DAOGenerics, TenantIdKey extends 
     beforeInsert: async (params, context) => {
       const tenantId = getTenantId(context)
       if (!tenantId) return
-      if (params.record[key] == null) {
-        return { continue: true, params: { ...params, record: { ...params.record, [key]: tenantId } } }
+      const records = []
+      for (const record of params.records) {
+        if (record[key] == null) {
+          records.push({ ...record, [key]: tenantId })
+        } else if (record[key] !== tenantId) {
+          throw new Error(`${ERROR_PREFIX}Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${record[key]} instead.`)
+        } else {
+          records.push(record)
+        }
       }
-      if (params.record[key] !== tenantId) {
-        throw new Error(`${ERROR_PREFIX}Invalid tenant ID in insert. Current selected tenant ID is ${tenantId}, but received ${params.record[key]} instead.`)
-      }
+      return { continue: true, params: { ...params, records } }
     },
     beforeFind: async (params, context) => {
       const tenantId = getTenantId(context)

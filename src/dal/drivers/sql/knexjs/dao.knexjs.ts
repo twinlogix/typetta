@@ -3,7 +3,7 @@ import { idInfoFromSchema, isEmptyProjection, LogArgs } from '../../../..'
 import { transformObject } from '../../../../generation/utils'
 import { filterNullFields, filterUndefiendFields, mapObject } from '../../../../utils/utils'
 import { AbstractDAO } from '../../../dao/dao'
-import { FindParams, FilterParams, InsertParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
+import { FindParams, FilterParams, InsertAllParams, UpdateParams, ReplaceParams, DeleteParams, AggregateParams, AggregatePostProcessing, AggregateResults } from '../../../dao/dao.types'
 import { EqualityOperators, QuantityOperators, ElementOperators } from '../../../dao/filters/filters.types'
 import { AnyProjection, GenericProjection } from '../../../dao/projections/projections.types'
 import { KnexJsDAOGenerics, KnexJsDAOParams } from './dao.knexjs.types'
@@ -198,22 +198,25 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
     )
   }
 
-  protected _insertOne(params: InsertParams<T>): Promise<T['plainModel']> {
+  protected _insertAll(params: InsertAllParams<T>): Promise<T['plainModel'][]> {
     return this.runQuery(
-      'insertOne',
+      'insertAll',
       async () => {
-        const r = filterNullFields<PartialDeep<T['plainModel']>>(filterUndefiendFields<PartialDeep<T['plainModel']>>(params.record))
-        const record = await this.modelToDb(r)
-        const query = this.qb().insert(record, '*')
+        const r = params.records.map((r) => filterNullFields<PartialDeep<T['plainModel']>>(filterUndefiendFields<PartialDeep<T['plainModel']>>(r)))
+        const records = (await Promise.all(r.map((r) => this.modelToDb(r)))).flat()
+        const query = this.qb().insert(records, '*')
         return { builder: this.buildTransaction(params.options, query) }
       },
       async (records) => {
         const inserted = records[0]
         if (typeof inserted === 'number') {
-          const insertedRetrieved = await this._findAll({ filter: { [this.idField]: (params.record as any)[this.idField] ?? inserted } as T['filter'], options: params.options, limit: 1 })
-          return insertedRetrieved[0]
+          const insertedRetrieved = await this._findAll({
+            filter: { [this.idField]: { in: params.records.map((r, i) => r[this.idField] ?? records[i]) } } as T['filter'],
+            options: params.options,
+          })
+          return insertedRetrieved
         }
-        return this.dbToModel(inserted)
+        return this.dbsToModels(inserted)
       },
     )
   }

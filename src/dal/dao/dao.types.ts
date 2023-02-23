@@ -25,7 +25,6 @@ import { ClientSession } from 'mongodb'
 
 export type OperationParams<T extends DAOGenerics> = {
   metadata?: T['operationMetadata']
-  options?: T['driverFilterOptions']
 }
 
 export type RelationsFindParams<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = Partial<
@@ -49,11 +48,11 @@ export type RelationsFindParams<Entity extends string, AST extends AbstractSynta
 export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
   relations?: T['relations']
+  options?: T['driverFindOptions']
 } & OperationParams<T>
 
-export type FindOneParams<T extends DAOGenerics, P = T['projection']> = Omit<FilterParams<T>, 'options'> & {
+export type FindOneParams<T extends DAOGenerics, P = T['projection']> = FilterParams<T> & {
   projection?: P
-  options?: T['driverFindOptions']
   skip?: number
   sorts?: T['sort']
   operationId?: string
@@ -67,20 +66,31 @@ export type FindParams<T extends DAOGenerics, P = T['projection']> = FindOnePara
 
 export type InsertParams<T extends DAOGenerics> = {
   record: T['insert']
+  options?: T['driverInsertOptions']
+  retrieveOptions?: T['driverFindOptions']
+} & OperationParams<T>
+
+export type InsertAllParams<T extends DAOGenerics> = {
+  records: T['insert'][]
+  options?: T['driverInsertOptions']
+  retrieveOptions?: T['driverFindOptions']
 } & OperationParams<T>
 
 export type UpdateParams<T extends DAOGenerics> = {
   filter: T['filter']
   changes: T['update']
+  options?: T['driverUpdateOptions']
 } & OperationParams<T>
 
 export type ReplaceParams<T extends DAOGenerics> = {
   filter: T['filter']
   replace: T['insert']
+  options?: T['driverReplaceOptions']
 } & OperationParams<T>
 
 export type DeleteParams<T extends DAOGenerics> = {
   filter: T['filter']
+  options?: T['driverDeleteOptions']
 } & OperationParams<T>
 
 export type AggregationFields<T extends DAOGenerics> = {
@@ -93,6 +103,7 @@ export type AggregateParams<T extends DAOGenerics> = {
   aggregations: AggregationFields<T>
   skip?: number
   limit?: number
+  options?: T['driverFilterOptions']
 } & OperationParams<T>
 
 export type AggregatePostProcessing<T extends DAOGenerics, A extends AggregateParams<T>> = {
@@ -133,7 +144,7 @@ export type MiddlewareContext<T extends DAOGenerics> = {
   idField: T['idFields']
   driver: T['driverContext']
   metadata?: T['metadata']
-  specificOperation: 'findAll' | 'findOne' | 'insertOne' | 'updateOne' | 'updateAll' | 'replaceOne' | 'replaceAll' | 'deleteOne' | 'deleteAll' | 'aggregate' | 'count' | 'exists' | 'findPage'
+  specificOperation: 'findAll' | 'findOne' | 'insertAll' | 'updateOne' | 'updateAll' | 'replaceOne' | 'replaceAll' | 'deleteOne' | 'deleteAll' | 'aggregate' | 'count' | 'exists' | 'findPage'
   logger?: LogFunction<T['entity']>
   dao: DAO<T>
   entityManager: T['entityManager']
@@ -152,6 +163,7 @@ export interface DAO<T extends DAOGenerics> {
   count(params?: FilterParams<T>): Promise<number>
   aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>>
   insertOne(params: InsertParams<T>): Promise<T['insert']>
+  insertAll(params: InsertAllParams<T>): Promise<T['insert'][]>
   updateOne(params: UpdateParams<T>): Promise<void>
   updateAll(params: UpdateParams<T>): Promise<void>
   replaceOne(params: ReplaceParams<T>): Promise<void>
