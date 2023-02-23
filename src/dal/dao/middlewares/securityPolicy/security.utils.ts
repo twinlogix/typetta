@@ -39,7 +39,7 @@ export function createSecurityPolicyMiddlewares<
                             const key = k as keyof SecurityDomain
                             const domainM = domainMap[key] as string | null | { or: string[] } | { and: string[] }
                             if (domainM && typeof domainM === 'object' && 'or' in domainM) {
-                              return [[`__or__${key}`, domainM.or.map((domain) => [domain, v])]]
+                              return [[`__or__${key.toString()}`, domainM.or.map((domain) => [domain, v])]]
                             }
                             if (domainM && typeof domainM === 'object' && 'and' in domainM) {
                               return domainM.and.map((domain) => [domain, v])

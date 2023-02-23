@@ -18,7 +18,7 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
       throw new Error('Id is an embedded field. Not supported.')
     }
     if (this.idGeneration === 'db' && (!mock.idSpecifications || !mock.idSpecifications[s.scalar as string] || !mock.idSpecifications[s.scalar as string].generate)) {
-      throw new Error(`Id is generated from DB. For in-memory driver it's required to implement mock.idSpecifications.${s.scalar} in order to generate the id`)
+      throw new Error(`Id is generated from DB. For in-memory driver it's required to implement mock.idSpecifications.${s.scalar.toString()} in order to generate the id`)
     }
     this.mockIdSpecification = mock.idSpecifications ? mock.idSpecifications[s.scalar as string] : undefined
     this.stateManager = new InMemoryStateManager(this.mockIdSpecification, params.name)
@@ -225,10 +225,10 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
       if (filterKeys.includes(this.idField)) {
         if (typeof idFilter === 'object' && idFilterKeys.includes('in')) {
-          const indexes = (idFilter['in'] as T['idFields'][]).map((id) => this.stateManager.getIdIndex(id)).flatMap((i) => (i === undefined ? [] : [i]))
+          const indexes = ((idFilter as any)['in'] as T['idFields'][]).map((id) => this.stateManager.getIdIndex(id)).flatMap((i) => (i === undefined ? [] : [i]))
           return [...new Set(indexes)]
         } else if (typeof idFilter === 'object' && idFilterKeys.includes('eq')) {
-          const index = this.stateManager.getIdIndex(idFilter['eq'])
+          const index = this.stateManager.getIdIndex((idFilter as any)['eq'])
           if (index !== undefined) {
             return [index]
           }

@@ -27,7 +27,7 @@ export function modelNameToDbName<Scalars extends AbstractScalars>(name: string,
   }
 }
 
-export async function buildWhereConditions<TRecord, TResult, ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
+export async function buildWhereConditions<TRecord extends Record<string, unknown>, TResult, ScalarsType extends DefaultModelScalars, T extends DAOGenerics>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   filter: T['filter'],
   schema: Schema<ScalarsType>,
@@ -47,7 +47,7 @@ export async function buildWhereConditions<TRecord, TResult, ScalarsType extends
         if (typeof v === 'object' && v !== null && Object.keys(v).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
           const adapter = adapters[schemaField.scalar]
           if (!adapter) {
-            throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
+            throw new Error(`Adapter for scalar ${schemaField.scalar.toString()} not found. ${Object.keys(adapters)}`)
           }
           const vr = v as Record<string, unknown>
           for (const [fk, fv] of Object.entries(v)) {
@@ -97,7 +97,7 @@ export async function buildWhereConditions<TRecord, TResult, ScalarsType extends
           } else if (v !== undefined) {
             const adapter = adapters[schemaField.scalar]
             if (!adapter) {
-              throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
+              throw new Error(`Adapter for scalar ${schemaField.scalar.toString()} not found. ${Object.keys(adapters)}`)
             }
             builder.where(columnName, (await adapter.modelToDB(v as any)) as Knex.Value)
           }
@@ -124,7 +124,7 @@ export async function buildWhereConditions<TRecord, TResult, ScalarsType extends
   return { builder }
 }
 
-export async function buildHavingConditions<TRecord, TResult>(
+export async function buildHavingConditions<TRecord extends Record<string, unknown>, TResult>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   having: Exclude<AggregatePostProcessing<DAOGenerics, AggregateParams<DAOGenerics>>['having'], undefined>,
 ): Promise<{ builder: Knex.QueryBuilder<TRecord, TResult> }> {
@@ -156,7 +156,7 @@ export async function buildHavingConditions<TRecord, TResult>(
   return { builder }
 }
 
-export async function buildSelect<TRecord, TResult, Scalars extends AbstractScalars>(
+export async function buildSelect<TRecord extends Record<string, unknown>, TResult, Scalars extends AbstractScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   projection: GenericProjection,
   schema: Schema<Scalars>,
@@ -201,7 +201,7 @@ export async function buildSelect<TRecord, TResult, Scalars extends AbstractScal
   return { builder }
 }
 
-export async function buildSort<TRecord, TResult, Scalars extends AbstractScalars>(
+export async function buildSort<TRecord extends Record<string, unknown>, TResult, Scalars extends AbstractScalars>(
   builder: Knex.QueryBuilder<TRecord, TResult>,
   sort: AbstractSort[],
   schema: Schema<Scalars>,
