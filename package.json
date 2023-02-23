@@ -43,7 +43,7 @@
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "3.4.0",
     "@types/dedent": "0.7.0",
-    "@types/inquirer": "8.2.5",
+    "@types/inquirer": "8.2.6",
     "@types/jest": "27.5.2",
     "@types/lodash": "4.14.191",
     "@types/node": "12.20.55",
