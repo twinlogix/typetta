@@ -583,7 +583,8 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           for (const record of records) {
             const projection = params.projection ?? {}
             setTraversing(projection, relation.refFrom, true)
-            promises.push(this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refFrom, getTraversing(record, relation.refTo)))
+            const keys = getTraversing(record, relation.refTo)
+            promises.push(this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refFrom, keys))
           }
           const results = await Promise.all(promises)
           for (let i = 0; i < records.length; i++) {
@@ -608,7 +609,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           throw new Error(`dao: ${this.name}, a relation field is required but the relation reference is broken: ${JSON.stringify(relation)}. Details: ${(e as Error).message}`)
         }
       } else if (relation.reference === 'foreign') {
-        const map = _.groupBy(results, (r) => getTraversing(r, relation.refFrom)[0])
+        const map2 = results.flatMap((r) => {
+          const res = getTraversing(r, relation.refFrom)
+          return res.map((key) => [key, r] as const)
+        })
+        const map = mapObject(
+          _.groupBy(map2, ([key, _]) => key),
+          ([k, v]) => [[k, _.uniq(v.map((e) => e[1]))]],
+        )
         try {
           this.setInnerRefResults(map, { type: relation.type, refFrom: relation.refTo, field: relation.field, schema: this.schema, required: relation.required }, record)
         } catch (e: unknown) {
@@ -663,14 +671,16 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       if (reference.ref == null && reference.required) {
         throw new Error(`Broken inner ref: from: ${reference.refFrom}, field: ${reference.field}`)
       }
-      record[subField] = reference.ref
-        ? Array.isArray(reference.ref)
-          ? reference.ref
-              .map((r) => results[r.toString()] ?? null)
-              .filter((v) => v != null)
-              .flat()
-          : results[reference.ref.toString()] ?? null
-        : null
+      if (reference.ref && Array.isArray(reference.ref)) {
+        record[subField] = reference.ref
+          .map((r) => results[r.toString()] ?? null)
+          .filter((v) => v != null)
+          .flat()
+      } else if (reference.ref) {
+        record[subField] = results[reference.ref.toString()] ?? null
+      } else {
+        record[subField] = null
+      }
       if (reference.type === '1-n' && record[subField] === null) {
         record[subField] = []
       }

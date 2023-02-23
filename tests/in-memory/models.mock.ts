@@ -46,6 +46,13 @@ export type Auditable = {
   versions: Array<Maybe<Audit>>
 }
 
+export type Bill = {
+  __typename?: 'Bill'
+  description: Scalars['String']
+  id: Scalars['ID']
+  productions: Array<Production>
+}
+
 export type City = {
   __typename?: 'City'
   addressId: Scalars['ID']
@@ -128,6 +135,20 @@ export type PostType = {
   __typename?: 'PostType'
   id: Scalars['ID']
   name: Scalars['String']
+}
+
+export type Production = {
+  __typename?: 'Production'
+  bills: Array<ProductionBill>
+  id: Scalars['ID']
+  total: Scalars['Int']
+}
+
+export type ProductionBill = {
+  __typename?: 'ProductionBill'
+  bill: Bill
+  billId: Scalars['ID']
+  quota: Scalars['Int']
 }
 
 export enum State {

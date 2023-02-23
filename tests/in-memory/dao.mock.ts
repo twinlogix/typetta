@@ -66,6 +66,28 @@ export type AST = {
       rawSorts: never
     }
   }
+  Bill: {
+    fields: {
+      description: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+      productions: {
+        type: 'relation'
+        relation: 'foreign'
+        isList: true
+        astName: 'Production'
+        isRequired: true
+        isListElementRequired: true
+        isExcluded: false
+        isId: false
+        generationStrategy: 'undefined'
+      }
+    }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
+  }
   City: {
     fields: {
       addressId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
@@ -200,6 +222,30 @@ export type AST = {
       rawSorts: never
     }
   }
+  Production: {
+    fields: {
+      bills: { type: 'embedded'; isList: true; astName: 'ProductionBill'; isRequired: true; isListElementRequired: true; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'db' }
+      total: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
+  }
+  ProductionBill: {
+    fields: {
+      bill: { type: 'relation'; relation: 'inner'; isList: false; astName: 'Bill'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      billId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+      quota: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
+    }
+    driverSpecification: {
+      rawFilter: never
+      rawUpdate: never
+      rawSorts: never
+    }
+  }
   User: {
     fields: {
       amount: { type: 'scalar'; isList: false; astName: 'Decimal'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
@@ -258,6 +304,7 @@ export const schemas = {
   Address: addressSchema,
   Audit: auditSchema,
   Auditable: auditableSchema,
+  Bill: billSchema,
   City: citySchema,
   DefaultFieldsEntity: defaultFieldsEntitySchema,
   Device: deviceSchema,
@@ -268,6 +315,8 @@ export const schemas = {
   Post: postSchema,
   PostMetadata: postMetadataSchema,
   PostType: postTypeSchema,
+  Production: productionSchema,
+  ProductionBill: productionBillSchema,
   User: userSchema,
   UsernamePasswordCredentials: usernamePasswordCredentialsSchema,
 } as const
@@ -507,6 +556,98 @@ export function auditableSchema(): T.Schema<ScalarsSpecification> {
 
 export interface AuditableModel extends types.Auditable {}
 export interface AuditablePlainModel extends T.GenerateModel<'Auditable', AST, ScalarsSpecification, 'relation'> {}
+export function billSchema(): T.Schema<ScalarsSpecification> {
+  return {
+    description: {
+      type: 'scalar',
+      scalar: 'String',
+      required: true,
+      directives: {},
+    },
+    id: {
+      type: 'scalar',
+      scalar: 'ID',
+      isId: true,
+      generationStrategy: 'db',
+      required: true,
+      directives: {},
+    },
+    productions: {
+      type: 'relation',
+      astName: 'Production',
+      relation: 'foreign',
+      schema: () => productionSchema(),
+      refFrom: 'bills.billId',
+      refTo: 'id',
+      dao: 'production',
+      isListElementRequired: true,
+      required: true,
+      isList: true,
+      directives: {},
+    },
+  }
+}
+
+type BillDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
+  'Bill',
+  AST,
+  ScalarsSpecification,
+  BillCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
+export type BillDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<BillDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+export type InMemoryBillDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<BillDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+
+export type BillIdFields = T.IdFields<'Bill', AST>
+export interface BillModel extends types.Bill {}
+export interface BillInsert extends T.Insert<'Bill', AST, ScalarsSpecification> {}
+export interface BillPlainModel extends T.GenerateModel<'Bill', AST, ScalarsSpecification, 'relation'> {}
+export interface BillProjection extends T.Projection<'Bill', AST> {}
+export interface BillUpdate extends T.Update<'Bill', AST, ScalarsSpecification> {}
+export interface BillFilter extends T.Filter<'Bill', AST, ScalarsSpecification> {}
+export interface BillSortElement extends T.SortElement<'Bill', AST> {}
+export interface BillRelationsFindParams extends T.RelationsFindParams<'Bill', AST, ScalarsSpecification> {}
+export type BillParams<P extends BillProjection> = T.Params<'Bill', AST, ScalarsSpecification, P>
+export type BillProject<P extends BillProjection> = T.Project<'Bill', AST, ScalarsSpecification, P>
+export type BillCachedTypes = T.CachedTypes<BillIdFields, BillModel, BillInsert, BillPlainModel, BillProjection, BillUpdate, BillFilter, BillSortElement, BillRelationsFindParams>
+
+export class BillDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<BillDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Bill', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Bill', AST>, P2 extends T.Projection<'Bill', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Bill', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Bill', AST>, P1, P2>
+  }
+  public constructor(params: BillDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: billSchema(),
+    })
+  }
+}
+
+export class InMemoryBillDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<BillDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Bill', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Bill', AST>, P2 extends T.Projection<'Bill', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Bill', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Bill', AST>, P1, P2>
+  }
+  public constructor(params: InMemoryBillDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: billSchema(),
+    })
+  }
+}
 export function citySchema(): T.Schema<ScalarsSpecification> {
   return {
     addressId: {
@@ -1449,6 +1590,134 @@ export class InMemoryPostTypeDAO<MetadataType, OperationMetadataType> extends T.
     })
   }
 }
+export function productionSchema(): T.Schema<ScalarsSpecification> {
+  return {
+    bills: {
+      type: 'embedded',
+      astName: 'ProductionBill',
+      schema: () => productionBillSchema(),
+      isListElementRequired: true,
+      required: true,
+      isList: true,
+      directives: {},
+    },
+    id: {
+      type: 'scalar',
+      scalar: 'ID',
+      isId: true,
+      generationStrategy: 'db',
+      required: true,
+      directives: {},
+    },
+    total: {
+      type: 'scalar',
+      scalar: 'Int',
+      required: true,
+      directives: {},
+    },
+  }
+}
+
+type ProductionDAOGenerics<MetadataType, OperationMetadataType> = T.InMemoryDAOGenerics<
+  'Production',
+  AST,
+  ScalarsSpecification,
+  ProductionCachedTypes,
+  MetadataType,
+  OperationMetadataType,
+  EntityManager<MetadataType, OperationMetadataType>
+>
+export type ProductionDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<ProductionDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+export type InMemoryProductionDAOParams<MetadataType, OperationMetadataType> = Omit<
+  T.InMemoryDAOParams<ProductionDAOGenerics<MetadataType, OperationMetadataType>>,
+  'idGenerator' | 'idField' | 'schema' | 'idScalar' | 'idGeneration'
+>
+
+export type ProductionIdFields = T.IdFields<'Production', AST>
+export interface ProductionModel extends types.Production {}
+export interface ProductionInsert extends T.Insert<'Production', AST, ScalarsSpecification> {}
+export interface ProductionPlainModel extends T.GenerateModel<'Production', AST, ScalarsSpecification, 'relation'> {}
+export interface ProductionProjection extends T.Projection<'Production', AST> {}
+export interface ProductionUpdate extends T.Update<'Production', AST, ScalarsSpecification> {}
+export interface ProductionFilter extends T.Filter<'Production', AST, ScalarsSpecification> {}
+export interface ProductionSortElement extends T.SortElement<'Production', AST> {}
+export interface ProductionRelationsFindParams extends T.RelationsFindParams<'Production', AST, ScalarsSpecification> {}
+export type ProductionParams<P extends ProductionProjection> = T.Params<'Production', AST, ScalarsSpecification, P>
+export type ProductionProject<P extends ProductionProjection> = T.Project<'Production', AST, ScalarsSpecification, P>
+export type ProductionCachedTypes = T.CachedTypes<
+  ProductionIdFields,
+  ProductionModel,
+  ProductionInsert,
+  ProductionPlainModel,
+  ProductionProjection,
+  ProductionUpdate,
+  ProductionFilter,
+  ProductionSortElement,
+  ProductionRelationsFindParams
+>
+
+export class ProductionDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<ProductionDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Production', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Production', AST>, P2 extends T.Projection<'Production', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Production', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Production', AST>, P1, P2>
+  }
+  public constructor(params: ProductionDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: productionSchema(),
+    })
+  }
+}
+
+export class InMemoryProductionDAO<MetadataType, OperationMetadataType> extends T.AbstractInMemoryDAO<ProductionDAOGenerics<MetadataType, OperationMetadataType>> {
+  public static projection<P extends T.Projection<'Production', AST>>(p: P) {
+    return p
+  }
+  public static mergeProjection<P1 extends T.Projection<'Production', AST>, P2 extends T.Projection<'Production', AST>>(p1: P1, p2: P2): T.SelectProjection<T.Projection<'Production', AST>, P1, P2> {
+    return T.mergeProjections(p1, p2) as T.SelectProjection<T.Projection<'Production', AST>, P1, P2>
+  }
+  public constructor(params: InMemoryProductionDAOParams<MetadataType, OperationMetadataType>) {
+    super({
+      ...params,
+      schema: productionSchema(),
+    })
+  }
+}
+export function productionBillSchema(): T.Schema<ScalarsSpecification> {
+  return {
+    bill: {
+      type: 'relation',
+      astName: 'Bill',
+      relation: 'inner',
+      schema: () => billSchema(),
+      refFrom: 'billId',
+      refTo: 'id',
+      dao: 'bill',
+      required: true,
+      directives: {},
+    },
+    billId: {
+      type: 'scalar',
+      scalar: 'ID',
+      required: true,
+      directives: {},
+    },
+    quota: {
+      type: 'scalar',
+      scalar: 'Int',
+      required: true,
+      directives: {},
+    },
+  }
+}
+
+export interface ProductionBillModel extends types.ProductionBill {}
+export interface ProductionBillPlainModel extends T.GenerateModel<'ProductionBill', AST, ScalarsSpecification, 'relation'> {}
 export function userSchema(): T.Schema<ScalarsSpecification> {
   return {
     amount: {
@@ -1640,6 +1909,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
   overrides?: {
     address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     audit?: Pick<Partial<AuditDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+    bill?: Pick<Partial<BillDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     city?: Pick<Partial<CityDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     defaultFieldsEntity?: Pick<Partial<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
@@ -1649,10 +1919,11 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     postType?: Pick<Partial<PostTypeDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+    production?: Pick<Partial<ProductionDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
-  log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'User'>
+  log?: T.LogInput<'Address' | 'Audit' | 'Bill' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'Production' | 'User'>
   awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
 }
@@ -1665,6 +1936,7 @@ export class EntityManager<
 > extends T.AbstractEntityManager<never, never, ScalarsSpecification, MetadataType> {
   private _address: AddressDAO<MetadataType, OperationMetadataType> | undefined
   private _audit: AuditDAO<MetadataType, OperationMetadataType> | undefined
+  private _bill: BillDAO<MetadataType, OperationMetadataType> | undefined
   private _city: CityDAO<MetadataType, OperationMetadataType> | undefined
   private _defaultFieldsEntity: DefaultFieldsEntityDAO<MetadataType, OperationMetadataType> | undefined
   private _device: DeviceDAO<MetadataType, OperationMetadataType> | undefined
@@ -1674,6 +1946,7 @@ export class EntityManager<
   private _organization: OrganizationDAO<MetadataType, OperationMetadataType> | undefined
   private _post: PostDAO<MetadataType, OperationMetadataType> | undefined
   private _postType: PostTypeDAO<MetadataType, OperationMetadataType> | undefined
+  private _production: ProductionDAO<MetadataType, OperationMetadataType> | undefined
   private _user: UserDAO<MetadataType, OperationMetadataType> | undefined
 
   private params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>
@@ -1682,7 +1955,9 @@ export class EntityManager<
 
   private middlewares: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]
 
-  private logger?: T.LogFunction<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'User'>
+  private logger?: T.LogFunction<
+    'Address' | 'Audit' | 'Bill' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'Production' | 'User'
+  >
 
   get address(): AddressDAO<MetadataType, OperationMetadataType> {
     if (!this._address) {
@@ -1716,6 +1991,21 @@ export class EntityManager<
       })
     }
     return this._audit
+  }
+  get bill(): BillDAO<MetadataType, OperationMetadataType> {
+    if (!this._bill) {
+      this._bill = new BillDAO({
+        entityManager: this,
+        datasource: null,
+        metadata: this.metadata,
+        ...this.overrides?.bill,
+        middlewares: [...(this.overrides?.bill?.middlewares || []), ...(selectMiddleware('bill', this.middlewares) as T.DAOMiddleware<BillDAOGenerics<MetadataType, OperationMetadataType>>[])],
+        name: 'Bill',
+        logger: this.logger,
+        awaitLog: this.params.awaitLog,
+      })
+    }
+    return this._bill
   }
   get city(): CityDAO<MetadataType, OperationMetadataType> {
     if (!this._city) {
@@ -1864,6 +2154,24 @@ export class EntityManager<
     }
     return this._postType
   }
+  get production(): ProductionDAO<MetadataType, OperationMetadataType> {
+    if (!this._production) {
+      this._production = new ProductionDAO({
+        entityManager: this,
+        datasource: null,
+        metadata: this.metadata,
+        ...this.overrides?.production,
+        middlewares: [
+          ...(this.overrides?.production?.middlewares || []),
+          ...(selectMiddleware('production', this.middlewares) as T.DAOMiddleware<ProductionDAOGenerics<MetadataType, OperationMetadataType>>[]),
+        ],
+        name: 'Production',
+        logger: this.logger,
+        awaitLog: this.params.awaitLog,
+      })
+    }
+    return this._production
+  }
   get user(): UserDAO<MetadataType, OperationMetadataType> {
     if (!this._user) {
       this._user = new UserDAO({
@@ -1917,6 +2225,7 @@ type DAOName = keyof DAOGenericsMap<never, never>
 type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   address: AddressDAOGenerics<MetadataType, OperationMetadataType>
   audit: AuditDAOGenerics<MetadataType, OperationMetadataType>
+  bill: BillDAOGenerics<MetadataType, OperationMetadataType>
   city: CityDAOGenerics<MetadataType, OperationMetadataType>
   defaultFieldsEntity: DefaultFieldsEntityDAOGenerics<MetadataType, OperationMetadataType>
   device: DeviceDAOGenerics<MetadataType, OperationMetadataType>
@@ -1926,6 +2235,7 @@ type DAOGenericsMap<MetadataType, OperationMetadataType> = {
   organization: OrganizationDAOGenerics<MetadataType, OperationMetadataType>
   post: PostDAOGenerics<MetadataType, OperationMetadataType>
   postType: PostTypeDAOGenerics<MetadataType, OperationMetadataType>
+  production: ProductionDAOGenerics<MetadataType, OperationMetadataType>
   user: UserDAOGenerics<MetadataType, OperationMetadataType>
 }
 type DAOGenericsUnion<MetadataType, OperationMetadataType> = DAOGenericsMap<MetadataType, OperationMetadataType>[DAOName]
@@ -1980,6 +2290,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     overrides: {
       address?: Pick<Partial<AddressDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       audit?: Pick<Partial<AuditDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      bill?: Pick<Partial<BillDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       city?: Pick<Partial<CityDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       defaultFieldsEntity?: Pick<Partial<DefaultFieldsEntityDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       device?: Pick<Partial<DeviceDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
@@ -1989,11 +2300,12 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
       organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       post?: Pick<Partial<PostDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
       postType?: Pick<Partial<PostTypeDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
+      production?: Pick<Partial<ProductionDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
       user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     }
 
     scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
-    log: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'User'>
+    log: T.LogInput<'Address' | 'Audit' | 'Bill' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'Production' | 'User'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
   }
   security: {

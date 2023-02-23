@@ -16,7 +16,9 @@ mock.compare = (l, r) => {
     return l.comparedTo(r)
   }
 }
-
+mock.idSpecifications = {
+  ID: { generate: () => uuidv4() },
+}
 beforeEach(async () => {
   mock.clearMemory()
   dao = new EntityManager({
@@ -431,6 +433,55 @@ test('contains in array', async () => {
   })
   const result = await dao.user.findAll({ filter: { 'credentials.username': { contains: 'test' } } })
   expect(result.length).toBe(3)
+})
+
+test('n-m with embedded', async () => {
+  const bills = await dao.bill.insertAll({ records: [{ description: '1' }, { description: '2' }, { description: '3' }] })
+  await dao.production.insertAll({
+    records: [
+      {
+        total: 1,
+        bills: [
+          { billId: bills[0].id, quota: 1 },
+          { billId: bills[1].id, quota: 2 },
+          { billId: bills[2].id, quota: 3 },
+        ],
+      },
+      {
+        total: 2,
+        bills: [
+          { billId: bills[2].id, quota: 10 },
+          { billId: bills[1].id, quota: 20 },
+        ],
+      },
+      {
+        total: 3,
+        bills: [
+          { billId: bills[2].id, quota: 10 },
+          { billId: bills[2].id, quota: 11 },
+        ],
+      },
+    ],
+  })
+
+  const bills2 = await dao.bill.findAll({
+    projection: { description: true, productions: { total: true } },
+  })
+  expect(bills2.length).toBe(3)
+  expect(bills2[0].productions.length).toBe(1)
+  expect(bills2[1].productions.length).toBe(2)
+  expect(bills2[2].productions.length).toBe(3)
+  const productions = await dao.production.findAll({
+    projection: { bills: { bill: { description: true } } },
+  })
+  expect(productions.length).toBe(3)
+  expect(productions[0].bills[0].bill.description).toBe('1')
+  expect(productions[0].bills[1].bill.description).toBe('2')
+  expect(productions[0].bills[2].bill.description).toBe('3')
+  expect(productions[1].bills[0].bill.description).toBe('3')
+  expect(productions[1].bills[1].bill.description).toBe('2')
+  expect(productions[2].bills[0].bill.description).toBe('3')
+  expect(productions[2].bills[1].bill.description).toBe('3')
 })
 
 // ------------------------------------------------------------------------

@@ -129,3 +129,22 @@ type Audit @entity @memory {
   entityId: ID!
   changes: String
 }
+
+
+type Bill @entity @memory {
+  id: ID! @id(from: "db")
+  description: String!
+  productions: [Production!]! @foreignRef(refFrom: "bills.billId")
+}
+
+type Production @entity @memory {
+  id: ID! @id(from: "db")
+  total: Int!
+  bills: [ProductionBill!]!
+}
+
+type ProductionBill {
+  billId: ID! 
+  bill: Bill! @innerRef
+  quota: Int!
+} 
