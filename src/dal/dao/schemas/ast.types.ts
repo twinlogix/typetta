@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Difference, OmitNever } from '../../../utils/utils.types'
 import { CachedTypes } from '../dao.types'
-import { AnyProjection } from '../projections/projections.types'
 import { SortDirection } from '../sorts/sorts.types'
 import { GraphQLResolveInfo } from 'graphql'
 import { PartialDeep } from 'type-fest'
@@ -40,7 +39,7 @@ export type Projection<Entity extends string, AST extends AbstractSyntaxTree> =
       [Field in keyof AST[Entity]['fields']]?: true | (AST[Entity]['fields'][Field]['type'] extends 'embedded' | 'relation' ? Projection<AST[Entity]['fields'][Field]['astName'], AST> : never)
     }
 
-type Selector<ProjectionType extends Record<string, unknown>, P extends AnyProjection<ProjectionType> | GraphQLResolveInfo> = Record<string, unknown> extends Required<P>
+type Selector<ProjectionType extends Record<string, unknown> | true, P> = Record<string, unknown> extends Required<P>
   ? 'empty'
   : [true] extends [P]
   ? 'all'
