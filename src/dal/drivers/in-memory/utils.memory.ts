@@ -138,7 +138,7 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
       schemaField = schemaField2
       adapter = adapters[schemaField.scalar]
       if (!adapter) {
-        throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
+        throw new Error(`Adapter for scalar ${schemaField.scalar.toString()} not found. ${Object.keys(adapters)}`)
       }
     } else {
       adapter = identityAdapter()

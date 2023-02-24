@@ -64,8 +64,9 @@
     "rimraf": "3.0.2",
     "sha256": "0.2.0",
     "ts-jest": "27.1.5",
-    "typedoc": "0.22.17",
-    "typescript": "4.5.5"
+    "typedoc": "0.23.25",
+    "typescript": "4.9.5",
+    "sqlite3": "5.1.4"
   },
   "dependencies": {
     "@graphql-codegen/add": "3.2.3",
@@ -91,8 +92,8 @@
     "uuid": "8.3.2"
   },
   "peerDependencies": {
-    "knex": "1.0.7",
-    "mongodb": "4.14.0"
+    "knex": "2.4.2",
+    "mongodb": "5.0.1"
   },
   "resolutions": {
     "graphql": "16.6.0"

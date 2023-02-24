@@ -216,7 +216,7 @@ export class AbstractKnexJsDAO<T extends KnexJsDAOGenerics> extends AbstractDAO<
           })
           return insertedRetrieved
         }
-        return this.dbsToModels(inserted)
+        return this.dbsToModels(records)
       },
     )
   }

@@ -182,7 +182,7 @@ export type CachedTypes<IdFields = any, Model = any, Insert = any, PlainModel = 
   sortElement: SortElement
   relationsFindParams: RelationsFindParams
 }
-export type DAOGenerics<
+export interface DAOGenerics<
   Entity extends string = any,
   AST extends AbstractSyntaxTree = any,
   Scalars extends AbstractScalars<keyof DefaultModelScalars> = any,
@@ -197,7 +197,7 @@ export type DAOGenerics<
   DriverReplaceOptions = any,
   DriverDeleteOptions = any,
   EntityManager extends AbstractEntityManager<string, string, Scalars, MetadataType> = AbstractEntityManager<string, string, Scalars, MetadataType>,
-> = {
+> {
   ast: AST
   entity: Entity
   idFields: IfAny<AST, any, Types['idFields']>
@@ -207,7 +207,7 @@ export type DAOGenerics<
   pureFilter: IfAny<AST, any, Types['filter']>
   filter: IfAny<AST, any, (Types['filter'] | AST[Entity]['driverSpecification']['rawFilter']) & LogicalOperators<Types['filter'] | AST[Entity]['driverSpecification']['rawFilter']>>
   rawFilter: IfAny<AST, any, AST[Entity]['driverSpecification']['rawFilter']>
-  projection: IfAny<AST, any, Types['projection']>
+  projection: IfAny<AST, any, Types['projection'] | true>
   pureSort: IfAny<AST, any, Types['sortElement']>
   rawSort: IfAny<AST, any, AST[Entity]['driverSpecification']['rawSorts']>
   sort: IfAny<AST, any, Types['sortElement'][] | AST[Entity]['driverSpecification']['rawSorts']>

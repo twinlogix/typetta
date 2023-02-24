@@ -99,7 +99,7 @@ async function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Sca
     // filter on scalar type
     const adapter = adapters[schemaField.scalar]
     if (!adapter) {
-      throw new Error(`Adapter for scalar ${schemaField.scalar} not found. ${Object.keys(adapters)}`)
+      throw new Error(`Adapter for scalar ${schemaField.scalar.toString()} not found. ${Object.keys(adapters)}`)
     } else if (typeof value === 'object' && value !== null && Object.keys(value).some((kv) => MONGODB_QUERY_PREFIXS.has(kv))) {
       // mongodb query
       const filter = value as Record<string, unknown>
@@ -191,7 +191,7 @@ export function adaptUpdate<Scalars extends AbstractScalars, UpdateType>(update:
   })
 }
 
-export function adaptSorts<SortType, Scalars extends AbstractScalars>(sort: SortType[], schema: Schema<Scalars>): [string, SortDirection][] {
+export function adaptSorts<SortType extends { [key: string]: SortDirection }, Scalars extends AbstractScalars>(sort: SortType[], schema: Schema<Scalars>): [string, SortDirection][] {
   return sort.flatMap((s) => {
     return Object.entries(s).map(([k, v]) => {
       if (k === '$textScore') {
