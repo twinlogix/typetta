@@ -1865,9 +1865,24 @@ test('Text filter test', async () => {
   const found7 = (await dao.organization.findAll({ filter: { name: { startsWith: 'Mic', endsWith: 'oft', mode: 'sensitive' } } })).map((o) => o.name)
   const found8 = (await dao.organization.findAll({ filter: { name: { startsWith: 'mic', endsWith: 'oft', mode: 'insensitive' } } })).map((o) => o.name)
 
-  await dao.execQuery(async (dbs, entities) => {
-    await entities.organization?.createIndex({ name: 'text' }, { name: 'nameIndex' })
+  const plan = await dao.planIndexes({
+    indexes: {
+      mongodb: {
+        Organization: [{ name: 'nameIndex', specs: { name: 'text' } }],
+      },
+    },
   })
+  const result = await dao.applyIndexes({ plan })
+  expect(result.mongodb.created[0].name).toBe('nameIndex')
+  const result1 = await dao.applyIndexes({
+    indexes: {
+      mongodb: {
+        Organization: [{ name: 'nameIndex2', specs: { name: 'text' } }],
+      },
+    },
+  })
+  expect(result1.mongodb.created[0].name).toBe('nameIndex2')
+  expect(result1.mongodb.deleted[0].name).toBe('nameIndex')
   const found10 = (await dao.organization.findAll({ filter: () => ({ $text: { $search: 'Microsoft' } }), sorts: () => [['score', { $meta: 'textScore' }]] })).map((o) => o.name)
 
   expect(found1.length).toBe(2)

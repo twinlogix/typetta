@@ -22,6 +22,7 @@ export type AST = {
       value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'mongodb'
       rawFilter: () => M.Filter<M.Document>
       rawUpdate: () => M.UpdateFilter<M.Document>
       rawSorts: () => M.Sort
@@ -33,6 +34,7 @@ export type AST = {
       value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'mongodb'
       rawFilter: () => M.Filter<M.Document>
       rawUpdate: () => M.UpdateFilter<M.Document>
       rawSorts: () => M.Sort
@@ -44,6 +46,7 @@ export type AST = {
       value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'mongodb'
       rawFilter: () => M.Filter<M.Document>
       rawUpdate: () => M.UpdateFilter<M.Document>
       rawSorts: () => M.Sort
@@ -55,6 +58,7 @@ export type AST = {
       value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -66,6 +70,7 @@ export type AST = {
       value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -77,6 +82,7 @@ export type AST = {
       value: { type: 'scalar'; isList: false; astName: 'Int'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -827,6 +833,14 @@ export class EntityManager<
     )
   }
 
+  public planIndexes(args: { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }): Promise<T.IndexesPlanResults> {
+    return super.planIndexes(args, schemas)
+  }
+
+  public applyIndexes(args: ({ plan: T.IndexesPlanResults } | { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }) & { logs?: boolean }): Promise<T.IndexesApplyResults> {
+    return super.applyIndexes(args, schemas)
+  }
+
   public clone(): this {
     return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
@@ -920,4 +934,5 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     domain: SecurityDomain
   }
   daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+  mongodbIndexes: T.MongoDBIndexes<AST, ScalarsSpecification>
 }

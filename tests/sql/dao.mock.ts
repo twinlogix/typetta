@@ -23,6 +23,7 @@ export type AST = {
       id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -31,6 +32,7 @@ export type AST = {
   Another: {
     fields: { test: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' } }
     driverSpecification: {
+      type: 'memory'
       rawFilter: never
       rawUpdate: never
       rawSorts: never
@@ -52,6 +54,7 @@ export type AST = {
       id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -64,6 +67,7 @@ export type AST = {
       id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -85,6 +89,7 @@ export type AST = {
       id: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: true; generationStrategy: 'generator' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -99,6 +104,7 @@ export type AST = {
       name: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -114,6 +120,7 @@ export type AST = {
       opt2: { type: 'scalar'; isList: false; astName: 'Live'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'generator' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -127,6 +134,7 @@ export type AST = {
       userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -140,6 +148,7 @@ export type AST = {
       ownerId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -152,6 +161,7 @@ export type AST = {
       to: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -166,6 +176,7 @@ export type AST = {
       vatNumber: { type: 'scalar'; isList: false; astName: 'String'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -218,6 +229,7 @@ export type AST = {
       title: { type: 'scalar'; isList: false; astName: 'LocalizedString'; isRequired: false; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'knexjs'
       rawFilter: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawUpdate: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
       rawSorts: (builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>
@@ -230,6 +242,7 @@ export type AST = {
       username: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'memory'
       rawFilter: never
       rawUpdate: never
       rawSorts: never
@@ -1918,6 +1931,14 @@ export class EntityManager<
     )
   }
 
+  public planIndexes(args: { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }): Promise<T.IndexesPlanResults> {
+    return super.planIndexes(args, schemas)
+  }
+
+  public applyIndexes(args: ({ plan: T.IndexesPlanResults } | { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }) & { logs?: boolean }): Promise<T.IndexesApplyResults> {
+    return super.applyIndexes(args, schemas)
+  }
+
   public clone(): this {
     return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
@@ -2028,4 +2049,5 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     domain: SecurityDomain
   }
   daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+  mongodbIndexes: T.MongoDBIndexes<AST, ScalarsSpecification>
 }
