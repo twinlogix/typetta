@@ -252,6 +252,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
         return `${node.name}: {
           fields: { ${node.fields.map((f) => generateASTNodes(f)).join(',\n')} }, 
           driverSpecification: { 
+            type: '${node.entity?.type === 'mongo' ? 'mongodb' : node.entity?.type === 'sql' ? 'knexjs' : 'memory'}',
             rawFilter: ${
               node.entity?.type === 'mongo' ? '() => M.Filter<M.Document>' : node.entity?.type === 'sql' ? '(builder: Knex.QueryBuilder<any, any>) => Knex.QueryBuilder<any, any>' : 'never'
             }, 
@@ -326,6 +327,14 @@ export class TsTypettaGenerator extends TypettaGenerator {
       .join(', ')
     const execQueryF =
       `public async execQuery<T>(run: (dbs: { ${dbsInputParam} }, entities: { ${entitiesInputParam} }) => Promise<T>): Promise<T> {\n` + `  return run({ ${dbsParam} }, { ${entitiesParam} })\n` + `}`
+    const applyIndexesF = `
+      public planIndexes(args: { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }): Promise<T.IndexesPlanResults> {
+        return super.planIndexes(args, schemas)
+      }
+    
+      public applyIndexes(args: ({ plan: T.IndexesPlanResults } | { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }) & { logs?: boolean }): Promise<T.IndexesApplyResults> {
+        return super.applyIndexes(args, schemas)
+      }`
     const cloneF = `public clone(): this {\n  return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this\n}`
     const createTableBody = Array.from(typesMap.values())
       .flatMap((node) => {
@@ -412,6 +421,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
       entityManagerGetters,
       entityManagerConstructor,
       execQueryF,
+      applyIndexesF,
       cloneF,
       createTableF,
     ].join('\n\n')
@@ -499,6 +509,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
           domain: SecurityDomain
         }
         daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+        mongodbIndexes: T.MongoDBIndexes<AST, ScalarsSpecification>
       }`
 
     return [[entityManagerParamsExport, entityManagerMiddleware, entityManagerExport, utilsCode, utilsType].join('\n')].join('\n')

@@ -27,6 +27,7 @@ export type AbstractSyntaxTree<Entities extends string = string, Scalars extends
   [K in Entities]: {
     fields: AbstractSyntaxTreeFields<Entities, Scalars>
     driverSpecification: {
+      type: 'mongodb' | 'knexjs' | 'memory'
       rawFilter: unknown
       rawUpdate: unknown
       rawSorts: unknown

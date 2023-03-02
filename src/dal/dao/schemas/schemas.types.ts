@@ -46,4 +46,4 @@ export type SchemaField<Scalars extends AbstractScalars> = Readonly<
     Decorators
 >
 
-export type Schema<Scalars extends AbstractScalars> = Readonly<{ [key: string]: SchemaField<Scalars> }>
+export type Schema<Scalars extends AbstractScalars = AbstractScalars> = Readonly<{ [key: string]: SchemaField<Scalars> }>

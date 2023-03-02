@@ -25,6 +25,7 @@ export type AST = {
       tenantId: { type: 'scalar'; isList: false; astName: 'TenantId'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
     }
     driverSpecification: {
+      type: 'mongodb'
       rawFilter: () => M.Filter<M.Document>
       rawUpdate: () => M.UpdateFilter<M.Document>
       rawSorts: () => M.Sort
@@ -40,6 +41,7 @@ export type AST = {
       userId: { type: 'scalar'; isList: false; astName: 'ID'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'mongodb'
       rawFilter: () => M.Filter<M.Document>
       rawUpdate: () => M.UpdateFilter<M.Document>
       rawSorts: () => M.Sort
@@ -55,6 +57,7 @@ export type AST = {
       tenantId: { type: 'scalar'; isList: false; astName: 'TenantId'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
     }
     driverSpecification: {
+      type: 'mongodb'
       rawFilter: () => M.Filter<M.Document>
       rawUpdate: () => M.UpdateFilter<M.Document>
       rawSorts: () => M.Sort
@@ -66,6 +69,7 @@ export type AST = {
       info: { type: 'scalar'; isList: false; astName: 'String'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'mongodb'
       rawFilter: () => M.Filter<M.Document>
       rawUpdate: () => M.UpdateFilter<M.Document>
       rawSorts: () => M.Sort
@@ -102,6 +106,7 @@ export type AST = {
       tenantId: { type: 'scalar'; isList: false; astName: 'TenantId'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'middleware' }
     }
     driverSpecification: {
+      type: 'mongodb'
       rawFilter: () => M.Filter<M.Document>
       rawUpdate: () => M.UpdateFilter<M.Document>
       rawSorts: () => M.Sort
@@ -113,6 +118,7 @@ export type AST = {
       username: { type: 'scalar'; isList: false; astName: 'Username'; isRequired: true; isListElementRequired: false; isExcluded: false; isId: false; generationStrategy: 'undefined' }
     }
     driverSpecification: {
+      type: 'memory'
       rawFilter: never
       rawUpdate: never
       rawSorts: never
@@ -930,6 +936,14 @@ export class EntityManager<
     )
   }
 
+  public planIndexes(args: { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }): Promise<T.IndexesPlanResults> {
+    return super.planIndexes(args, schemas)
+  }
+
+  public applyIndexes(args: ({ plan: T.IndexesPlanResults } | { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }) & { logs?: boolean }): Promise<T.IndexesApplyResults> {
+    return super.applyIndexes(args, schemas)
+  }
+
   public clone(): this {
     return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this
   }
@@ -1012,4 +1026,5 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     domain: SecurityDomain
   }
   daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
+  mongodbIndexes: T.MongoDBIndexes<AST, ScalarsSpecification>
 }
