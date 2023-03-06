@@ -78,7 +78,7 @@
     "@graphql-codegen/visitor-plugin-common": "2.13.8",
     "chalk": "4.1.2",
     "commander": "9.5.0",
-    "dataloader": "2.2.1",
+    "dataloader": "2.2.2",
     "dedent": "0.7.0",
     "graphql": "16.6.0",
     "graphql-tag": "2.12.6",
