@@ -1,4 +1,4 @@
-import { AbstractScalars, equals, Indexes, IndexesApplyResults, IndexesPlanResults, Schema } from '..'
+import { AbstractScalars, equals, Indexes, IndexesApplyResults, IndexesPlanResults, Schema, TypettaCache } from '..'
 import { toFirstLower } from '../generation/utils'
 import { AbstractDAO } from './dao/dao'
 import { DAOGenerics, TransactionData } from './dao/dao.types'
@@ -21,8 +21,9 @@ export abstract class AbstractEntityManager<
   public adapters: DriverDataTypeAdapterMap<Scalars>
   public metadata?: MetadataType
   private transactionData: TransactionData<MongoDBDatasources, KnexDataSources> | null = null
+  public readonly cache?: TypettaCache
 
-  public constructor(args?: { scalars?: DriverDataTypeAdapterMap<Scalars>; metadata?: MetadataType; idGenerators?: { [K in keyof Scalars]?: () => Scalars[K] } }) {
+  public constructor(args: { scalars?: DriverDataTypeAdapterMap<Scalars>; metadata?: MetadataType; idGenerators?: { [K in keyof Scalars]?: () => Scalars[K] }; cache?: { engine: TypettaCache } }) {
     this.adapters = args?.scalars
       ? args.scalars
       : ({
@@ -30,6 +31,7 @@ export abstract class AbstractEntityManager<
           mongo: mongoDbAdapters,
           memory: inMemoryAdapters,
         } as DriverDataTypeAdapterMap<Scalars>)
+    this.cache = args.cache?.engine
     this.metadata = args?.metadata
   }
 

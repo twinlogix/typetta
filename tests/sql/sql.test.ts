@@ -34,7 +34,7 @@ const config: Knex.Config = {
   },
 }
 
-const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'> = {
+const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification> = {
   LocalizedString: {
     dbToModel: (o: unknown) => JSON.parse(o as string),
     modelToDB: (o: LocalizedString) => JSON.stringify(o),

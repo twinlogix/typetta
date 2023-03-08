@@ -614,6 +614,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           return res.map((key) => [key, r] as const)
         })
         const map = mapObject(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           _.groupBy(map2, ([key, _]) => key),
           ([k, v]) => [[k, _.uniq(v.map((e) => e[1]))]],
         )
@@ -810,7 +811,6 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
       const result = await before(input, middlewareContext)
       const end = new Date()
       await this.log(() => this.createLog({ date: start, level: 'debug', duration: end.getTime() - start.getTime(), operation: 'middlewareBefore', query: name ?? 'Unnamend middleware' }))
-
       if (!result) {
         continue
       }

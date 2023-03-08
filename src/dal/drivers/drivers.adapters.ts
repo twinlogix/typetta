@@ -1,41 +1,39 @@
 import { AbstractScalars } from '../..'
-import { DataTypeAdapter, DefaultModelScalars, identityAdapter } from './drivers.types'
+import { DataTypeAdapter, DataTypeAdapterMap, DefaultModelScalars, identityAdapter } from './drivers.types'
 import { inMemoryAdapters, InMemoryDataTypeAdapterMap } from './in-memory/adapters.memory'
 import { DefaultMongoDBScalars, mongoDbAdapters, MongoDBDataTypeAdapterMap } from './no-sql/mongodb/adapters.mongodb'
 import { DefaultKnexJsScalars, knexJsAdapters, KnexJSDataTypeAdapterMap } from './sql/knexjs/adapters.knexjs'
 
-type Drivers = 'both' | 'mongo' | 'knex'
-export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends AbstractScalars, D extends Drivers> = Omit<
+export declare type UserInputDriverDataTypeAdapterMap<ModelScalars extends AbstractScalars> = Omit<
   {
-    [key in keyof ModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key]['type'], unknown, unknown, D>
+    [key in keyof ModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key]['type'], unknown, unknown>
   },
   keyof DefaultModelScalars
 > & {
-  [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key]['type'], DefaultMongoDBScalars[key]['type'], DefaultKnexJsScalars[key]['type'], D>
+  [key in keyof DefaultModelScalars]?: UserInputDataTypeAdapter<ModelScalars[key]['type'], DefaultMongoDBScalars[key]['type'], DefaultKnexJsScalars[key]['type']>
 }
 
 export type DriverDataTypeAdapterMap<ModelScalars extends AbstractScalars> = {
   knex: KnexJSDataTypeAdapterMap<ModelScalars>
   mongo: MongoDBDataTypeAdapterMap<ModelScalars>
   memory: InMemoryDataTypeAdapterMap<ModelScalars>
+  cache: DataTypeAdapterMap<ModelScalars, Record<string, never>>
 }
 
-export type UserInputDataTypeAdapter<ModelType, MongoDBType, KenxDBType, D extends Drivers> = Partial<DataTypeAdapter<ModelType, KenxDBType | MongoDBType>> &
-  (D extends 'both'
-    ? {
-        knex?: Partial<DataTypeAdapter<ModelType, KenxDBType>>
-        mongo?: Partial<DataTypeAdapter<ModelType, MongoDBType>>
-        memory?: Partial<DataTypeAdapter<ModelType, MongoDBType>>
-      }
-    : unknown)
+export type UserInputDataTypeAdapter<ModelType, MongoDBType, KenxDBType> = Partial<DataTypeAdapter<ModelType, KenxDBType | MongoDBType>> & {
+  knex?: Partial<DataTypeAdapter<ModelType, KenxDBType>>
+  mongo?: Partial<DataTypeAdapter<ModelType, MongoDBType>>
+  memory?: Partial<DataTypeAdapter<ModelType, MongoDBType>>
+  cache?: Partial<DataTypeAdapter<ModelType, string>>
+}
 
 export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends DefaultModelScalars>(
-  input: UserInputDriverDataTypeAdapterMap<ModelScalars, 'both' | 'knex' | 'mongo'>,
+  input: UserInputDriverDataTypeAdapterMap<ModelScalars>,
   scalars: string[],
 ): DriverDataTypeAdapterMap<ModelScalars> {
   const mappedInput = { ...scalars.reduce((p, s) => ({ ...p, [s]: {} }), {}), ...input }
   const knex = Object.entries(mappedInput).reduce<KnexJSDataTypeAdapterMap<ModelScalars>>((map, [scalarName, dta]) => {
-    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown, 'both'>
+    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown>
     const oldAdapter = map[scalarName as keyof ModelScalars]
     return {
       ...map,
@@ -48,7 +46,7 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
     } as KnexJSDataTypeAdapterMap<ModelScalars>
   }, knexJsAdapters as KnexJSDataTypeAdapterMap<ModelScalars>)
   const mongo = Object.entries(mappedInput).reduce<MongoDBDataTypeAdapterMap<ModelScalars>>((map, [scalarName, dta]) => {
-    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown, 'both'>
+    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown>
     const oldAdapter = map[scalarName as keyof ModelScalars]
     return {
       ...map,
@@ -61,7 +59,7 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
     } as MongoDBDataTypeAdapterMap<ModelScalars>
   }, mongoDbAdapters as MongoDBDataTypeAdapterMap<ModelScalars>)
   const memory = Object.entries(mappedInput).reduce<InMemoryDataTypeAdapterMap<ModelScalars>>((map, [scalarName, dta]) => {
-    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown, 'both'>
+    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown>
     const oldAdapter = map[scalarName as keyof ModelScalars]
     return {
       ...map,
@@ -73,9 +71,18 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
       },
     } as InMemoryDataTypeAdapterMap<ModelScalars>
   }, inMemoryAdapters as InMemoryDataTypeAdapterMap<ModelScalars>)
-  return {
-    knex,
-    mongo,
-    memory,
-  }
+  const cache = Object.entries(mappedInput).reduce<DataTypeAdapterMap<ModelScalars, Record<string, never>>>((map, [scalarName, dta]) => {
+    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown>
+    const oldAdapter = map[scalarName as keyof ModelScalars]
+    return {
+      ...map,
+      [scalarName]: {
+        modelToDB: adapter.cache?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter().modelToDB,
+        dbToModel: adapter.cache?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter().dbToModel,
+        validate: adapter.cache?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter()?.validate,
+        generate: adapter.cache?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter()?.generate,
+      },
+    } as DataTypeAdapterMap<ModelScalars, Record<string, never>>
+  }, inMemoryAdapters as DataTypeAdapterMap<ModelScalars, Record<string, never>>)
+  return { knex, mongo, memory, cache }
 }

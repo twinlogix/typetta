@@ -15,6 +15,7 @@ import {
 } from '../..'
 import { OmitNever, IfAny } from '../../utils/utils.types'
 import { AbstractEntityManager } from '../entity-manager'
+import { TypettaCache } from './cache/cache.types'
 import { LogFunction } from './log/log.types'
 import { DAOMiddleware } from './middlewares/middlewares.types'
 import { AnyProjection } from './projections/projections.types'
@@ -133,6 +134,7 @@ export type DAOParams<T extends DAOGenerics> = {
   awaitLog?: boolean
   name: T['entity']
   datasource: string | null
+  cache?: TypettaCache
 }
 
 export type DriverType = 'mongo' | 'knex' | 'memory'

@@ -289,13 +289,18 @@ export class TsTypettaGenerator extends TypettaGenerator {
         })
         .join(',\n')
 
+    const cacheDao = () =>
+      Array.from(typesMap.values())
+        .filter((node) => node.entity)
+        .map((node) => `${toFirstLower(node.name)}?: true | { ms: number }`)
+
     const metadata = `metadata?: MetadataType`
     const middlewares = `\nmiddlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]`
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations(true))}\n}`
+    const cache = `\ncache?: { engine: T.TypettaCache, entities: { ${cacheDao()} } }`
     const mongoDBParams = hasMongoDBEntites ? `,\nmongodb: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
-    const scalarsDriverType = hasMongoDBEntites && hasSQLEntities ? 'both' : hasMongoDBEntites ? 'mongo' : 'knex'
-    const adaptersParams = `,\nscalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, '${scalarsDriverType}'>`
+    const adaptersParams = `,\nscalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>`
     const loggerParams = `,\nlog?: T.LogInput<${daoNamesType}>,\nawaitLog?: boolean`
     const securityPolicyParam = ',\nsecurity?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>'
     const dbsInputParam =
@@ -350,7 +355,7 @@ export class TsTypettaGenerator extends TypettaGenerator {
 
     const entityManagerParamsExport = `
 export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions extends string, SecurityDomain extends Record<string, unknown>> = {\n${indentMultiline(
-      `${metadata}${middlewares}${overrides}${mongoDBParams}${knexJsParams}${adaptersParams}${loggerParams}${securityPolicyParam}`,
+      `${metadata}${middlewares}${overrides}${cache}${mongoDBParams}${knexJsParams}${adaptersParams}${loggerParams}${securityPolicyParam}`,
     )}\n}`
 
     const daoDeclarations = Array.from(typesMap.values())
@@ -378,7 +383,10 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
         )}', this.middlewares) as T.DAOMiddleware<${node.name}DAOGenerics<MetadataType, OperationMetadataType>>[]]`
         const normalDaoInstance = `new ${node.name}DAO({ entityManager: this, datasource: ${datasource}, metadata: this.metadata, ...this.overrides?.${toFirstLower(
           node.name,
-        )}${entityManagerImplementationInit}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger, awaitLog: this.params.awaitLog })`
+        )}${entityManagerImplementationInit}${entityManagerMiddlewareInit}, name: '${node.name}', 
+        logger: this.logger, 
+        awaitLog: this.params.awaitLog,
+       })`
         const entityManagerInit =
           node.entity?.type === 'memory'
             ? `this._${toFirstLower(node.name)} = ${normalDaoInstance}`
@@ -386,9 +394,10 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
                 node.entity?.type === 'mongo' ? `const db = this.mongodb.${node.entity.source}` : node.entity?.type === 'sql' ? `const db = this.knex.${node.entity.source}` : ''
               }\nthis._${toFirstLower(node.name)} = db === 'mock' ? (new InMemory${node.name}DAO({ entityManager: this, datasource: null, metadata: this.metadata, ...this.overrides?.${toFirstLower(
                 node.name,
-              )}${entityManagerMiddlewareInit}, name: '${node.name}', logger: this.logger, awaitLog: this.params.awaitLog }) as unknown as ${
-                node.name
-              }DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
+              )}${entityManagerMiddlewareInit}, name: '${node.name}', 
+              logger: this.logger, 
+              awaitLog: this.params.awaitLog,
+              }) as unknown as ${node.name}DAO<MetadataType, OperationMetadataType>) : ${normalDaoInstance}`
         const entityManagerGet = `if(!this._${toFirstLower(node.name)}) {\n${indentMultiline(entityManagerInit)}\n}\nreturn this._${toFirstLower(node.name)}`
         return `get ${toFirstLower(node.name)}(): ${node.name}DAO<MetadataType, OperationMetadataType> {\n${indentMultiline(entityManagerGet)}\n}`
       })
@@ -401,12 +410,15 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
       'constructor(params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {\n' +
       indentMultiline(
         `super({\n  ...params,\n  scalars: params.scalars ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [${scalarsNameList.map((v) => `'${v}'`).join(', ')}]) : undefined\n})
-        this.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares || []
+        this.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares ?? []
         this.logger = T.logInputToLogger(params.log)
         if(params.security && params.security.applySecurity !== false) {
           const securityMiddlewares = T.createSecurityPolicyMiddlewares(params.security)
           const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
-          this.middlewares = [...(params.middlewares ?? []), ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
+          this.middlewares = [...this.middlewares, ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
+        }
+        if (params.cache) {
+          this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities)]
         }
         this.params = params`,
       ) +
@@ -498,7 +510,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
           }
           ${mongoDBParams}
           ${knexJsParams}
-          scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, '${scalarsDriverType}'>
+          scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
           log: T.LogInput<${daoNamesType}>
           security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
         }

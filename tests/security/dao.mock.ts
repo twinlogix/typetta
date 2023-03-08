@@ -1313,8 +1313,23 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     userRole?: Pick<Partial<UserRoleDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   }
+  cache?: {
+    engine: T.TypettaCache
+    entities: {
+      hotel?: true | { ms: number }
+      hotelMultiReservation?: true | { ms: number }
+      multiReservation?: true | { ms: number }
+      reservation?: true | { ms: number }
+      role?: true | { ms: number }
+      room?: true | { ms: number }
+      specialAnd?: true | { ms: number }
+      specialOr?: true | { ms: number }
+      user?: true | { ms: number }
+      userRole?: true | { ms: number }
+    }
+  }
   mongodb: Record<'default', M.Db | 'mock'>
-  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
+  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
   log?: T.LogInput<'Hotel' | 'HotelMultiReservation' | 'MultiReservation' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
   awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
@@ -1688,7 +1703,7 @@ export class EntityManager<
     })
     this.overrides = params.overrides
     this.mongodb = params.mongodb
-    this.middlewares = params.middlewares || []
+    this.middlewares = params.middlewares ?? []
     this.logger = T.logInputToLogger(params.log)
     if (params.security && params.security.applySecurity !== false) {
       const securityMiddlewares = T.createSecurityPolicyMiddlewares(params.security)
@@ -1696,10 +1711,13 @@ export class EntityManager<
         ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map((k) => [k, true])) as any, securityMiddlewares.others as any)]
         : []
       this.middlewares = [
-        ...(params.middlewares ?? []),
+        ...this.middlewares,
         ...defaultMiddleware,
         ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({ [name]: true } as any, middleware as any)),
       ]
+    }
+    if (params.cache) {
+      this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities)]
     }
     this.params = params
   }
@@ -1827,7 +1845,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     }
     mongodb: Record<'default', M.Db | 'mock'>
 
-    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'mongo'>
+    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
     log: T.LogInput<'Hotel' | 'HotelMultiReservation' | 'MultiReservation' | 'Reservation' | 'Role' | 'Room' | 'SpecialAnd' | 'SpecialOr' | 'User' | 'UserRole'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
   }

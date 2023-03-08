@@ -1940,7 +1940,26 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     production?: Pick<Partial<ProductionDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
-  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
+  cache?: {
+    engine: T.TypettaCache
+    entities: {
+      address?: true | { ms: number }
+      audit?: true | { ms: number }
+      bill?: true | { ms: number }
+      city?: true | { ms: number }
+      defaultFieldsEntity?: true | { ms: number }
+      device?: true | { ms: number }
+      dog?: true | { ms: number }
+      hotel?: true | { ms: number }
+      mockedEntity?: true | { ms: number }
+      organization?: true | { ms: number }
+      post?: true | { ms: number }
+      postType?: true | { ms: number }
+      production?: true | { ms: number }
+      user?: true | { ms: number }
+    }
+  }
+  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
   log?: T.LogInput<'Address' | 'Audit' | 'Bill' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'Production' | 'User'>
   awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
@@ -2214,7 +2233,7 @@ export class EntityManager<
         : undefined,
     })
     this.overrides = params.overrides
-    this.middlewares = params.middlewares || []
+    this.middlewares = params.middlewares ?? []
     this.logger = T.logInputToLogger(params.log)
     if (params.security && params.security.applySecurity !== false) {
       const securityMiddlewares = T.createSecurityPolicyMiddlewares(params.security)
@@ -2222,10 +2241,13 @@ export class EntityManager<
         ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map((k) => [k, true])) as any, securityMiddlewares.others as any)]
         : []
       this.middlewares = [
-        ...(params.middlewares ?? []),
+        ...this.middlewares,
         ...defaultMiddleware,
         ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({ [name]: true } as any, middleware as any)),
       ]
+    }
+    if (params.cache) {
+      this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities)]
     }
     this.params = params
   }
@@ -2330,7 +2352,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
       user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     }
 
-    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'knex'>
+    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
     log: T.LogInput<'Address' | 'Audit' | 'Bill' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'PostType' | 'Production' | 'User'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
   }

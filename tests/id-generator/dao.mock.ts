@@ -574,9 +574,13 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     e?: Pick<Partial<EDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     f?: Pick<Partial<FDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
   }
+  cache?: {
+    engine: T.TypettaCache
+    entities: { a?: true | { ms: number }; b?: true | { ms: number }; c?: true | { ms: number }; d?: true | { ms: number }; e?: true | { ms: number }; f?: true | { ms: number } }
+  }
   mongodb: Record<'a' | 'default', M.Db | 'mock'>
   knex: Record<'default', Knex | 'mock'>
-  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'both'>
+  scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
   log?: T.LogInput<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>
   awaitLog?: boolean
   security?: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
@@ -791,7 +795,7 @@ export class EntityManager<
     this.overrides = params.overrides
     this.mongodb = params.mongodb
     this.knex = params.knex
-    this.middlewares = params.middlewares || []
+    this.middlewares = params.middlewares ?? []
     this.logger = T.logInputToLogger(params.log)
     if (params.security && params.security.applySecurity !== false) {
       const securityMiddlewares = T.createSecurityPolicyMiddlewares(params.security)
@@ -799,10 +803,13 @@ export class EntityManager<
         ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map((k) => [k, true])) as any, securityMiddlewares.others as any)]
         : []
       this.middlewares = [
-        ...(params.middlewares ?? []),
+        ...this.middlewares,
         ...defaultMiddleware,
         ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({ [name]: true } as any, middleware as any)),
       ]
+    }
+    if (params.cache) {
+      this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities)]
     }
     this.params = params
   }
@@ -923,7 +930,7 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     }
     mongodb: Record<'a' | 'default', M.Db | 'mock'>
     knex: Record<'default', Knex | 'mock'>
-    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification, 'both'>
+    scalars: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
     log: T.LogInput<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>
     security: T.EntityManagerSecurtyPolicy<DAOGenericsMap<MetadataType, OperationMetadataType>, OperationMetadataType, Permissions, SecurityDomain>
   }
