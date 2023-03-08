@@ -652,19 +652,37 @@ test('find with cache', async () => {
     scalars,
     cache: {
       engine: new MemoryTypettaCache({ byteLimit: 500 }),
-      entities: {
-        user: true,
-        dog: { ms: 0 },
-      },
     },
   })
   const u1 = await entityManager.user.insertOne({ record: { firstName: 'Mario', live: true, amount: new BigNumber(0) } })
   const u2 = await entityManager.user.insertOne({ record: { firstName: 'Luigi', live: true } })
   await entityManager.dog.insertOne({ record: { name: '123', ownerId: u1.id } })
   await entityManager.dog.insertOne({ record: { name: '321', ownerId: u2.id } })
-  const result1 = await entityManager.user.findAll({ filter: { live: true }, sorts: [{ firstName: 'asc' }], limit: 5, projection: { amount: true, firstName: true, id: true, dogs: { name: true } } })
+  const result1 = await entityManager.user.findAll({
+    filter: { live: true },
+    sorts: [{ firstName: 'asc' }],
+    limit: 5,
+    projection: { amount: true, firstName: true, id: true, dogs: { name: true } },
+    cache: true,
+    relations: {
+      dogs: {
+        cache: { ms: 0 },
+      },
+    },
+  })
   result1[0].firstName = 'lol'
-  const result2 = await entityManager.user.findAll({ filter: { live: true }, sorts: [{ firstName: 'asc' }], limit: 5, projection: { firstName: true, amount: true, id: true, dogs: { name: true } } })
+  const result2 = await entityManager.user.findAll({
+    filter: { live: true },
+    sorts: [{ firstName: 'asc' }],
+    limit: 5,
+    projection: { firstName: true, amount: true, id: true, dogs: { name: true } },
+    cache: true,
+    relations: {
+      dogs: {
+        cache: { ms: 0 },
+      },
+    },
+  })
   expect(result1.length).toBe(2)
   expect(result2.length).toBe(2)
   expect((result2[0] ?? {}).firstName).toBe('Luigi')
@@ -672,14 +690,71 @@ test('find with cache', async () => {
   const stats = await entityManager.cache?.stats()
   expect(stats).toStrictEqual({ hits: 1, misses: 3, sets: 3, cached: 2 })
 
-  await entityManager.user.findAll({ limit: 1, projection: { amount: true, firstName: true, id: true } })
-  await entityManager.user.findAll({ limit: 1, projection: { amount: true, firstName: true, id: true } })
-  await entityManager.user.findAll({ limit: 1, projection: { amount: true, firstName: true, id: true } })
-  await entityManager.user.findAll({ limit: 2, projection: { amount: true, firstName: true, id: true } })
-  await entityManager.user.findAll({ limit: 3, projection: { amount: true, firstName: true, id: true } })
-  await entityManager.user.findAll({ limit: 4, projection: { amount: true, firstName: true, id: true } })
+  await entityManager.user.findAll({ limit: 1, projection: { amount: true, firstName: true, id: true }, cache: true })
+  await entityManager.user.findAll({ limit: 1, projection: { amount: true, firstName: true, id: true }, cache: true })
+  await entityManager.user.findAll({ limit: 1, projection: { amount: true, firstName: true, id: true }, cache: true })
+  await entityManager.user.findAll({ limit: 2, projection: { amount: true, firstName: true, id: true }, cache: true })
+  await entityManager.user.findAll({ limit: 3, projection: { amount: true, firstName: true, id: true }, cache: true })
+  await entityManager.user.findAll({ limit: 4, projection: { amount: true, firstName: true, id: true }, cache: true })
   const stats2 = await entityManager.cache?.stats()
-  expect(stats2).toStrictEqual({ hits: 3, misses: 7, sets: 7, cached: 3 })
+  expect(stats2).toStrictEqual({ hits: 3, misses: 7, sets: 7, cached: 2 })
+})
+
+test('find with group cache', async () => {
+  const entityManager = new EntityManager({
+    mongodb: { default: db },
+    scalars,
+  })
+  const u1 = await entityManager.user.insertOne({ record: { firstName: 'Mario', live: true, amount: new BigNumber(0) } })
+  const u2 = await entityManager.user.insertOne({ record: { firstName: 'Luigi', live: true } })
+
+  const result1 = await entityManager.user.findAll({
+    filter: { live: true },
+    sorts: [{ firstName: 'asc' }],
+    projection: { amount: true, firstName: true, id: true },
+    cache: { group: 'live' },
+  })
+  expect(result1.length).toBe(2)
+  const result2 = await entityManager.user.findAll({
+    filter: { live: true },
+    sorts: [{ firstName: 'asc' }],
+    projection: { amount: true, firstName: true, id: true },
+    cache: { group: 'live2' },
+  })
+  expect(result2.length).toBe(2)
+  await entityManager.user.updateOne({ filter: { id: u2.id }, changes: { live: false } })
+  const result3 = await entityManager.user.findAll({
+    filter: { live: true },
+    sorts: [{ firstName: 'asc' }],
+    projection: { amount: true, firstName: true, id: true },
+    cache: { group: 'live' },
+  })
+  expect(result3.length).toBe(2)
+  const result4 = await entityManager.user.findAll({
+    filter: { live: true },
+    sorts: [{ firstName: 'asc' }],
+    projection: { amount: true, firstName: true, id: true },
+    cache: { group: 'live2' },
+  })
+  expect(result4.length).toBe(2)
+  await entityManager.user.updateOne({ filter: { id: u2.id }, changes: { live: false }, cache: { groups: ['live'] } })
+  await entityManager.user.updateOne({ filter: { id: u2.id }, changes: { live: false } })
+  const result5 = await entityManager.user.findAll({
+    filter: { live: true },
+    sorts: [{ firstName: 'asc' }],
+    projection: { amount: true, firstName: true, id: true },
+    cache: { group: 'live' },
+  })
+  expect(result5.length).toBe(1)
+  const result6 = await entityManager.user.findAll({
+    filter: { live: true },
+    sorts: [{ firstName: 'asc' }],
+    projection: { amount: true, firstName: true, id: true },
+    cache: { group: 'live2' },
+  })
+  expect(result6.length).toBe(2)
+  const stats = await entityManager.cache?.stats()
+  expect(stats).toStrictEqual({ hits: 3, misses: 3, sets: 3, cached: 2 })
 })
 
 // ------------------------------------------------------------------------

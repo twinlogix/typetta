@@ -539,6 +539,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           skip: relationFilter?.skip,
           sorts: relationFilter?.sorts,
           relations: relationFilter?.relations,
+          cache: relationFilter?.cache,
           options,
           metadata,
           operationId,
@@ -860,7 +861,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     return input as unknown as SelectAfterMiddlewareOutputType<T, I>
   }
 
-  private infoToProjection<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P>): FindParams<T, P> {
+  private infoToProjection<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: Omit<FindParams<T, P>, 'cache'>): FindParams<T, P> {
     if (params.projection && typeof params.projection === 'object' && (typeof params.projection.path === 'object' || typeof params.projection.schema === 'object')) {
       const info = params.projection as GraphQLResolveInfo
       return {
@@ -873,7 +874,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
 
   private async logOperation<R>(
     operation: LogArgs<T['entity']>['operation'],
-    params: FindParams<T> | FindOneParams<T> | InsertParams<T> | UpdateParams<T> | ReplaceParams<T> | DeleteParams<T>,
+    params: FindParams<T> | FindOneParams<T> | InsertParams<T> | InsertAllParams<T> | UpdateParams<T> | ReplaceParams<T> | DeleteParams<T>,
     body: () => Promise<R>,
   ): Promise<R> {
     if (this.logger) {

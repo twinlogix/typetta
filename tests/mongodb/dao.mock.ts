@@ -1981,23 +1981,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     test?: Pick<Partial<TestDAOParams<MetadataType, OperationMetadataType>>, 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
-  cache?: {
-    engine: T.TypettaCache
-    entities: {
-      address?: true | { ms: number }
-      audit?: true | { ms: number }
-      city?: true | { ms: number }
-      defaultFieldsEntity?: true | { ms: number }
-      device?: true | { ms: number }
-      dog?: true | { ms: number }
-      hotel?: true | { ms: number }
-      mockedEntity?: true | { ms: number }
-      organization?: true | { ms: number }
-      post?: true | { ms: number }
-      test?: true | { ms: number }
-      user?: true | { ms: number }
-    }
-  }
+  cache?: { engine: T.TypettaCache; entities?: T.CacheConfiguration<DAOGenericsMap<MetadataType, OperationMetadataType>> }
   mongodb: Record<'default', M.Db | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
   log?: T.LogInput<'Address' | 'Audit' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Hotel' | 'MockedEntity' | 'Organization' | 'Post' | 'Test' | 'User'>
@@ -2408,6 +2392,7 @@ export class EntityManager<
   }
 
   constructor(params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
+    params.cache = params.cache ?? { engine: new T.MemoryTypettaCache() }
     super({
       ...params,
       scalars: params.scalars
@@ -2443,9 +2428,7 @@ export class EntityManager<
         ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({ [name]: true } as any, middleware as any)),
       ]
     }
-    if (params.cache) {
-      this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities)]
-    }
+    this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities ?? {})]
     this.params = params
   }
 

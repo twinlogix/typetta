@@ -3,7 +3,7 @@ import _ from 'lodash'
 
 export class MemoryTypettaCache implements TypettaCache {
   private readonly cache = new Map<string, { expiration?: number; value: Buffer; hits: number }>()
-  private readonly byteLimit?: number
+  private readonly byteLimit: number
   private readonly hitMap = new Map<number, Set<string>>()
   private readonly expirationMap = new Map<number, Set<string>>()
   private currentBytes = 0
@@ -16,10 +16,11 @@ export class MemoryTypettaCache implements TypettaCache {
     if (args?.byteLimit && args.byteLimit <= 0) {
       throw new Error('Invalid byte limit')
     }
-    this.byteLimit = args?.byteLimit
+    this.byteLimit = args?.byteLimit ?? 10 * 1024 * 1024
   }
 
-  async set(key: string, value: Buffer, ttlMs?: number | undefined): Promise<void> {
+  async set(dao: string, group: string, key: string, value: Buffer, ttlMs?: number | undefined): Promise<void> {
+    const k = `${dao}:${group}:${key}`
     const now = new Date().getTime()
     this.currentBytes += value.length
     if (this.firstExpiresAt <= now) {
@@ -32,15 +33,15 @@ export class MemoryTypettaCache implements TypettaCache {
           return expireAt <= now
         })
         .flatMap((v) => [...v[1].values()])
-      for (const k of expired) {
-        if (k === key) continue // in order to keep hits
+      for (const ek of expired) {
+        if (ek === k) continue // in order to keep hits
         const o = this.deleteKey(k)
         if (o) {
           this.currentBytes -= o.value.length
         }
       }
     }
-    while (this.byteLimit && this.currentBytes >= this.byteLimit) {
+    while (this.currentBytes >= this.byteLimit) {
       const results = _.sortBy([...this.hitMap.entries()], ([hits]) => hits)
       if (results.length === 0) {
         break
@@ -60,20 +61,29 @@ export class MemoryTypettaCache implements TypettaCache {
     if (expiration && expiration < this.firstExpiresAt) {
       this.firstExpiresAt = expiration
     }
-    const old = this.deleteKey(key)
-    this.setKey(key, { expiration, value, hits: old?.hits ?? 0 })
+    const old = this.deleteKey(k)
+    this.setKey(k, { expiration, value, hits: old?.hits ?? 0 })
   }
 
-  async get(key: string): Promise<Buffer | null> {
-    const result = this.cache.get(key)
+  async get(dao: string, group: string, key: string): Promise<Buffer | null> {
+    const k = `${dao}:${group}:${key}`
+    const result = this.cache.get(k)
     if (result && (result.expiration == null || result.expiration > new Date().getTime())) {
       this.hits++
-      this.deleteKey(key)
-      this.setKey(key, { ...result, hits: result.hits + 1 })
+      this.deleteKey(k)
+      this.setKey(k, { ...result, hits: result.hits + 1 })
       return result.value
     }
     this.misses++
     return null
+  }
+
+  async delete(dao: string, groups: string[]): Promise<void> {
+    const toFind = groups.map(g => `${dao}:${g}:`)
+    const keys = [...this.cache.keys()].filter(k => toFind.some(f => k.startsWith(f)))
+    for(const key of keys) {
+      this.deleteKey(key)
+    }
   }
 
   async stats(): Promise<{ hits: number; misses: number; sets: number; cached: number }> {

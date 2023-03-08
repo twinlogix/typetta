@@ -2,6 +2,8 @@
 import {
   AbstractScalars,
   AbstractSyntaxTree,
+  CacheReadConfiguration,
+  CacheWriteConfiguration,
   DefaultModelScalars,
   EqualityOperators,
   Expand,
@@ -38,6 +40,7 @@ export type RelationsFindParams<Entity extends string, AST extends AbstractSynta
               sorts?: SortElement<ASTName, AST>[] | AST[Entity]['driverSpecification']['rawSorts']
               skip?: number
               limit?: number
+              cache?: CacheReadConfiguration
               relations?: RelationsFindParams<ASTName, AST, Scalars>
             }
           : never
@@ -50,6 +53,7 @@ export type FilterParams<T extends DAOGenerics> = {
   filter?: T['filter']
   relations?: T['relations']
   options?: T['driverFindOptions']
+  cache?: CacheReadConfiguration
 } & OperationParams<T>
 
 export type FindOneParams<T extends DAOGenerics, P = T['projection']> = FilterParams<T> & {
@@ -69,29 +73,34 @@ export type InsertParams<T extends DAOGenerics> = {
   record: T['insert']
   options?: T['driverInsertOptions']
   retrieveOptions?: T['driverFindOptions']
+  cache?: CacheWriteConfiguration
 } & OperationParams<T>
 
 export type InsertAllParams<T extends DAOGenerics> = {
   records: T['insert'][]
   options?: T['driverInsertOptions']
   retrieveOptions?: T['driverFindOptions']
+  cache?: CacheWriteConfiguration
 } & OperationParams<T>
 
 export type UpdateParams<T extends DAOGenerics> = {
   filter: T['filter']
   changes: T['update']
   options?: T['driverUpdateOptions']
+  cache?: CacheWriteConfiguration
 } & OperationParams<T>
 
 export type ReplaceParams<T extends DAOGenerics> = {
   filter: T['filter']
   replace: T['insert']
   options?: T['driverReplaceOptions']
+  cache?: CacheWriteConfiguration
 } & OperationParams<T>
 
 export type DeleteParams<T extends DAOGenerics> = {
   filter: T['filter']
   options?: T['driverDeleteOptions']
+  cache?: CacheWriteConfiguration
 } & OperationParams<T>
 
 export type AggregationFields<T extends DAOGenerics> = {

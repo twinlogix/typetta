@@ -1463,22 +1463,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     organization?: Pick<Partial<OrganizationDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
     user?: Pick<Partial<UserDAOParams<MetadataType, OperationMetadataType>>, 'idGenerator' | 'middlewares' | 'metadata'>
   }
-  cache?: {
-    engine: T.TypettaCache
-    entities: {
-      address?: true | { ms: number }
-      author?: true | { ms: number }
-      authorBook?: true | { ms: number }
-      book?: true | { ms: number }
-      city?: true | { ms: number }
-      defaultFieldsEntity?: true | { ms: number }
-      device?: true | { ms: number }
-      dog?: true | { ms: number }
-      friends?: true | { ms: number }
-      organization?: true | { ms: number }
-      user?: true | { ms: number }
-    }
-  }
+  cache?: { engine: T.TypettaCache; entities?: T.CacheConfiguration<DAOGenericsMap<MetadataType, OperationMetadataType>> }
   knex: Record<'default', Knex | 'mock'>
   scalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>
   log?: T.LogInput<'Address' | 'Author' | 'AuthorBook' | 'Book' | 'City' | 'DefaultFieldsEntity' | 'Device' | 'Dog' | 'Friends' | 'Organization' | 'User'>
@@ -1887,6 +1872,7 @@ export class EntityManager<
   }
 
   constructor(params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {
+    params.cache = params.cache ?? { engine: new T.MemoryTypettaCache() }
     super({
       ...params,
       scalars: params.scalars
@@ -1908,9 +1894,7 @@ export class EntityManager<
         ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({ [name]: true } as any, middleware as any)),
       ]
     }
-    if (params.cache) {
-      this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities)]
-    }
+    this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities ?? {})]
     this.params = params
   }
 

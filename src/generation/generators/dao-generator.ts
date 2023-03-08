@@ -289,15 +289,10 @@ export class TsTypettaGenerator extends TypettaGenerator {
         })
         .join(',\n')
 
-    const cacheDao = () =>
-      Array.from(typesMap.values())
-        .filter((node) => node.entity)
-        .map((node) => `${toFirstLower(node.name)}?: true | { ms: number }`)
-
     const metadata = `metadata?: MetadataType`
     const middlewares = `\nmiddlewares?: (EntityManagerMiddleware<MetadataType, OperationMetadataType> | GroupMiddleware<any, MetadataType, OperationMetadataType>)[]`
     const overrides = `\noverrides?: { \n${indentMultiline(contextDAOParamsDeclarations(true))}\n}`
-    const cache = `\ncache?: { engine: T.TypettaCache, entities: { ${cacheDao()} } }`
+    const cache = `\ncache?: { engine: T.TypettaCache, entities?: T.CacheConfiguration<DAOGenericsMap<MetadataType, OperationMetadataType>> }`
     const mongoDBParams = hasMongoDBEntites ? `,\nmongodb: ${mongoSourcesType}` : ''
     const knexJsParams = hasSQLEntities ? `,\nknex: ${sqlSourcesType}` : ''
     const adaptersParams = `,\nscalars?: T.UserInputDriverDataTypeAdapterMap<ScalarsSpecification>`
@@ -409,7 +404,9 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
     const entityManagerConstructor =
       'constructor(params: EntityManagerParams<MetadataType, OperationMetadataType, Permissions, SecurityDomain>) {\n' +
       indentMultiline(
-        `super({\n  ...params,\n  scalars: params.scalars ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [${scalarsNameList.map((v) => `'${v}'`).join(', ')}]) : undefined\n})
+        `
+        params.cache = params.cache ?? { engine: new T.MemoryTypettaCache() }
+        super({\n  ...params,\n  scalars: params.scalars ? T.userInputDataTypeAdapterToDataTypeAdapter(params.scalars, [${scalarsNameList.map((v) => `'${v}'`).join(', ')}]) : undefined\n})
         this.overrides = params.overrides${mongoDBConstructor}${knexJsContsructor}\nthis.middlewares = params.middlewares ?? []
         this.logger = T.logInputToLogger(params.log)
         if(params.security && params.security.applySecurity !== false) {
@@ -417,9 +414,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
           const defaultMiddleware = securityMiddlewares.others ? [groupMiddleware.excludes(Object.fromEntries(Object.keys(securityMiddlewares.middlewares).map(k => [k, true])) as any, securityMiddlewares.others as any)] : []
           this.middlewares = [...this.middlewares, ...defaultMiddleware, ...Object.entries(securityMiddlewares.middlewares).map(([name, middleware]) => groupMiddleware.includes({[name]: true} as any, middleware as any))]
         }
-        if (params.cache) {
-          this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities)]
-        }
+        this.middlewares = [...this.middlewares, T.cache(params.cache.engine, params.cache.entities ?? {})]
         this.params = params`,
       ) +
       '\n}'
