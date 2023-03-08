@@ -78,10 +78,10 @@ export class MemoryTypettaCache implements TypettaCache {
     return null
   }
 
-  async delete(dao: string, groups: string[]): Promise<void> {
-    const toFind = groups.map(g => `${dao}:${g}:`)
-    const keys = [...this.cache.keys()].filter(k => toFind.some(f => k.startsWith(f)))
-    for(const key of keys) {
+  async delete(dao: string, groups?: string[]): Promise<void> {
+    const toFind = groups ? groups.map((g) => `${dao}:${g}:`) : [`${dao}:`]
+    const keys = [...this.cache.keys()].filter((k) => toFind.some((f) => k.startsWith(f)))
+    for (const key of keys) {
       this.deleteKey(key)
     }
   }

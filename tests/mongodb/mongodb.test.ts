@@ -738,7 +738,7 @@ test('find with group cache', async () => {
   })
   expect(result4.length).toBe(2)
   await entityManager.user.updateOne({ filter: { id: u2.id }, changes: { live: false }, cache: { groups: ['live'] } })
-  await entityManager.user.updateOne({ filter: { id: u2.id }, changes: { live: false } })
+  await entityManager.user.updateOne({ filter: { id: u2.id }, changes: { live: false }, cache: false })
   const result5 = await entityManager.user.findAll({
     filter: { live: true },
     sorts: [{ firstName: 'asc' }],
