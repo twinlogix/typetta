@@ -7,6 +7,7 @@ Each DAO, regardless of its data source, whether SQL or MongoDB, offers the main
 Below is a list of these operations:
 
   - [Insert One](#insert-one)
+  - [Insert All](#insert-all)
   - [Find One](#find-one)
   - [Find All](#find-all)
   - [Find All Iterable](#find-all-iterable)
@@ -67,7 +68,38 @@ const user = await entityManager.user.insertOne({
 })
 ```
 
-The returned object represents a User and, in the case of a self-generated ID, also contains the id created by the system or database, depending on the option chosen.
+## Insert All
+
+The [insertAll](/typedoc/classes/AbstractDAO.html#insertAll){:target="_blank"} API allows you to insert many records. The API requests all required fields of the affected entities except for the ID if it is self-generated.
+
+Here is an example of creating a user:
+
+```typescript
+const users = await entityManager.user.insertAll({
+  records: [
+    {
+      firstName: "Mattia",
+      lastName: "Minotti",
+      address: {
+        street: "Via Piave 48",
+        city: "Milan",
+        country: "Italy"
+      }
+    },
+    {
+      firstName: "Edoardo",
+      lastName: "Barbieri",
+      address: {
+        street: "Via Piave 49",
+        city: "Milan",
+        country: "Italy"
+      }
+    }
+  ]
+})
+```
+
+The returned objects represents an array of User and, in the case of a self-generated ID, also contains the id for each entity created by the system or database, depending on the option chosen.
 
 ## Find One
 

@@ -72,6 +72,8 @@ main:
         title: Type Safety
       - url: /chapters/advanced/cache
         title: Caching
+      - url: /chapters/advanced/index-manager
+        title: Index Manager
 
   - database-drivers:
     title: Database Drivers
