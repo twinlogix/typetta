@@ -15,8 +15,7 @@ export class RedisTypettaCache implements TypettaCache {
   }
   async set(dao: string, group: string, key: string, value: Buffer, ttlMs?: number | undefined): Promise<void> {
     try {
-      const result = await this.client.set(`${this.keyPrefix}${dao}:${group}:${key}`, value, { PX: ttlMs })
-      console.log(result)
+      await this.client.set(`${this.keyPrefix}${dao}:${group}:${key}`, value, { PX: ttlMs })
       this.sets++
     } catch (error) {
       await this.onError(error)
