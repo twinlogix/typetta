@@ -5,7 +5,7 @@ import { DAOMiddleware } from '../middlewares.types'
 import objectHash from 'object-hash'
 
 export type CacheReadConfiguration = { ms: number; group?: string } | { ms?: number; group: string } | boolean
-export type CacheWriteConfiguration = { groups: string[] } | boolean
+export type CacheWriteConfiguration = { groups: string[] | 'all' } | boolean
 export type CacheConfiguration<T extends Record<string, DAOGenerics>> = {
   [K in keyof T]?: { ms: number } | true
 }
@@ -37,18 +37,12 @@ export function cache<T extends DAOGenerics>(cache: TypettaCache, entities: Reco
         if (__cache__) {
           const stringifiedRecords = await Promise.all(args.records.map((r) => transformObject(context.entityManager.adapters.cache, 'modelToDB', r, context.schema)))
           const expiration = typeof settings === 'object' && 'ms' in settings ? settings.ms : originalSettings && typeof originalSettings === 'object' ? originalSettings.ms : undefined
-          await cache.set(
-            context.daoName,
-            __cache__.group,
-            __cache__.key,
-            Buffer.from(JSON.stringify({ records: stringifiedRecords, totalCount: args.totalCount })),
-            expiration,
-          )
+          await cache.set(context.daoName, __cache__.group, __cache__.key, Buffer.from(JSON.stringify({ records: stringifiedRecords, totalCount: args.totalCount })), expiration)
         }
       } else if (args.operation === 'delete' || args.operation === 'insert' || args.operation === 'update' || args.operation === 'replace') {
         const settings = args.params.cache ?? entities[toFirstLower(context.daoName)]
         if (!settings) return
-        const groups = settings === true || 'ms' in settings ? undefined : settings.groups
+        const groups = settings === true || 'ms' in settings ? [DEFAULT_CACHE_GROUP] : settings.groups === 'all' ? undefined : settings.groups
         await cache.delete(context.daoName, groups)
       }
     },
