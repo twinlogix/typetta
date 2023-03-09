@@ -70,6 +70,8 @@ main:
         title: Computed Fields
       - url: /chapters/advanced/type-safety
         title: Type Safety
+      - url: /chapters/advanced/index-manager
+        title: Index Manager
 
   - database-drivers:
     title: Database Drivers
