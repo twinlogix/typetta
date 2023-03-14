@@ -93,7 +93,7 @@
   },
   "peerDependencies": {
     "knex": "2.4.2",
-    "mongodb": "5.0.1",
+    "mongodb": "5.1.0",
     "redis": "4.6.5"
   },
   "resolutions": {
