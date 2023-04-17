@@ -2063,6 +2063,30 @@ test('Text filter test', async () => {
   expect(found14[0]).toBe('abcd')
 })
 
+test('Transaction conflict', async () => {
+  await dao.user.insertOne({ record: { firstName: 'Mario', live: true } })
+
+  const session1 = connection.startSession()
+  session1.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+  const session2 = connection.startSession()
+  session2.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+
+  await dao.user.updateAll({ filter: { firstName: 'Mario' }, changes: { lastName: '1' }, options: { session: session1 } })
+  await dao.user.updateAll({ filter: { firstName: 'Mario' }, changes: { lastName: '2' }, options: { session: session2 } })
+
+  await session1.commitTransaction()
+  await session2.commitTransaction()
+
+  const users = await dao.user.findAll({})
+  console.log(users)
+})
+
 test('Raw update', async () => {
   const user = await dao.user.insertOne({ record: { firstName: 'FirstName', lastName: 'LastName', live: true, amounts: [new BigNumber(1)] } })
   await dao.user.updateOne({ filter: { id: user.id }, changes: () => ({ $push: { amounts: dao.adapters.mongo.Decimal.modelToDB(new BigNumber(2)) } as any }) })

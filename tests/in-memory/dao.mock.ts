@@ -2237,11 +2237,11 @@ export class EntityManager<
     return run({}, {})
   }
 
-  public planIndexes(args: { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }): Promise<T.IndexesPlanResults> {
+  public planIndexes(args: { indexes: Partial<T.Indexes<AST>> }): Promise<T.IndexesPlanResults> {
     return super.planIndexes(args, schemas)
   }
 
-  public applyIndexes(args: ({ plan: T.IndexesPlanResults } | { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }) & { logs?: boolean }): Promise<T.IndexesApplyResults> {
+  public applyIndexes(args: ({ plan: T.IndexesPlanResults } | { indexes: Partial<T.Indexes<AST>> }) & { logs?: boolean }): Promise<T.IndexesApplyResults> {
     return super.applyIndexes(args, schemas)
   }
 
@@ -2344,5 +2344,5 @@ export type EntityManagerTypes<MetadataType = never, OperationMetadataType = nev
     domain: SecurityDomain
   }
   daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
-  mongodbIndexes: T.MongoDBIndexes<AST, ScalarsSpecification>
+  mongodbIndexes: T.MongoDBIndexes<AST>
 }

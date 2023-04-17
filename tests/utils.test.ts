@@ -7,18 +7,14 @@ import {
   isProjectionIntersected,
   mergeProjections,
   projection,
-  infoToProjection,
   IntersectGenericProjection,
   intersectProjections,
   isEmptyProjection,
   setTraversing,
   Projection,
+  compare,
 } from '../src'
 import { AST } from './mongodb/dao.mock'
-import { ApolloServer } from 'apollo-server'
-// import { createTestClient } from 'apollo-server-testing'
-import { getNamedType, GraphQLResolveInfo } from 'graphql'
-import gql from 'graphql-tag'
 
 type Pass = 'pass'
 export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T; expected: U }) : { actual: T; expected: U }
@@ -26,156 +22,6 @@ export type Test<T, U> = [T] extends [U] ? ([U] extends [T] ? Pass : { actual: T
 export function typeAssert<T extends Pass>(param?: T): T | undefined {
   return param
 }
-
-// test('infoToProjection test', async () => {
-//   const typeDefs = gql`
-//     interface I {
-//       res: String
-//       a: String
-//       b: String
-//       tt: TT
-//     }
-
-//     type TT {
-//       aa: Int
-//       bb: Float
-//     }
-
-//     type T implements I {
-//       res: String
-//       a: String
-//       b: String
-//       c: String
-//       tt: TT
-//       listTT: [TT!]
-//     }
-
-//     type Query {
-//       testInfoToProjection: I!
-//     }
-//   `
-
-//   const resolvers = {
-//     Query: {
-//       testInfoToProjection: async (parent: any, args: any, ctx: any, info: GraphQLResolveInfo) => {
-//         return { res: JSON.stringify(infoToProjection(info, undefined, info.fieldNodes[0], getNamedType(info.returnType), info.schema)), __typename: 'T' }
-//       },
-//     },
-//   }
-
-//   const server = new ApolloServer({ typeDefs, resolvers })
-//   const { query } = createTestClient(server)
-
-//   let response
-
-//   response = await query({ query: `{ testInfoToProjection { res } }` })
-//   expect(JSON.parse(response.data.testInfoToProjection.res)).toEqual({ res: true })
-
-//   response = await query({
-//     query: `
-//     {
-//         testInfoToProjection {
-//             res
-//             tt {
-//                 aa
-//             }
-//         }
-//     }`,
-//   })
-//   expect(JSON.parse(response.data.testInfoToProjection.res)).toEqual({ res: true, tt: { aa: true } })
-
-//   response = await query({
-//     query: `
-//     {
-//         testInfoToProjection {
-//             ... on T {
-//                 res
-//                 a
-//             }
-//         }
-//     }`,
-//   })
-//   expect(JSON.parse(response.data.testInfoToProjection.res)).toEqual({ res: true, a: true })
-
-//   response = await query({
-//     query: `
-//     {
-//         testInfoToProjection {
-//             ... on T {
-//                 res
-//                 a
-//                 c
-//             }
-//         }
-//     }`,
-//   })
-//   expect(JSON.parse(response.data.testInfoToProjection.res)).toEqual({ res: true, a: true, t: { c: true } })
-
-//   response = await query({
-//     query: `
-//     {
-//         testInfoToProjection {
-//             res
-//             tt {
-//                 ... on TT {
-//                     aa
-//                 }
-//             }
-//         }
-//     }`,
-//   })
-//   expect(JSON.parse(response.data.testInfoToProjection.res)).toEqual({ res: true, tt: { aa: true } })
-
-//   response = await query({
-//     query: `
-//     {
-//         testInfoToProjection {
-//             res
-//             ... on T {
-//                 listTT {
-//                     ... on TT {
-//                         aa
-//                     }
-//                 }
-//             }
-//         }
-//     }`,
-//   })
-//   expect(JSON.parse(response.data.testInfoToProjection.res)).toEqual({ res: true, t: { listTT: { aa: true } } })
-// })
-
-// test('union test', async () => {
-//   const typeDefs = gql`
-//     type A {
-//       a1: Int
-//       a2: Float
-//     }
-
-//     type B {
-//       b1: String
-//       b2: String
-//     }
-
-//     union AB = A | B
-
-//     type Query {
-//       testUnion: [AB!]
-//     }
-//   `
-
-//   const resolvers = {
-//     Query: {
-//       testUnion: async (parent: any, args: any, ctx: any, info: any) => {
-//         return []
-//       },
-//     },
-//   }
-
-//   const server = new ApolloServer({ typeDefs, resolvers })
-//   const { query } = createTestClient(server)
-
-//   await query({ query: `{ testUnion { ... on A { a1 } } }` })
-// })
 
 test('isProjectionIntersected test', () => {
   expect(isProjectionIntersected(true, true)).toBe(true)
@@ -531,4 +377,15 @@ test('setTraversing', () => {
   expect(obj.name.__proto__).not.toBe('value')
   setTraversing(obj, '__proto__', 'value')
   expect(obj.__proto__).not.toBe('value')
+})
+
+test('compare', () => {
+  expect(compare(0, 0) === 0).toBe(true)
+  expect(compare(1, 0) > 0).toBe(true)
+  expect(compare(1, '1') !== 0).toBe(true)
+  expect(compare({ a: 1 }, { b: 1 }) !== 0).toBe(true)
+  expect(compare({ a: 1 }, { a: 1, d: 1 }) !== 0).toBe(true)
+  expect(compare({ a: 1, d: 1 }, { a: 1 }) !== 0).toBe(true)
+  expect(compare({ a: 1 }, { a: 2 }) !== 0).toBe(true)
+  expect(compare({ a: 1 }, { a: 1 }) === 0).toBe(true)
 })

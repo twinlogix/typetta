@@ -244,13 +244,13 @@ export type SortElement<Entity extends string, AST extends AbstractSyntaxTree> =
   [K in RecursiveScalarKeys<Entity, AST>]?: SortDirection
 }
 
-type FieldFromPath<Entity extends string, AST extends AbstractSyntaxTree, Path> = Path extends `${infer R}.${infer T}`
+export type FieldFromPath<Entity extends string, AST extends AbstractSyntaxTree, Path> = Path extends `${infer R}.${infer T}`
   ? FieldFromPath<AST[Entity]['fields'][R]['astName'], AST, T>
   : Path extends keyof AST[Entity]['fields']
   ? AST[Entity]['fields'][Path]
   : never
 
-type RecursiveScalarKeys<Entity extends string, AST extends AbstractSyntaxTree> = {
+export type RecursiveScalarKeys<Entity extends string, AST extends AbstractSyntaxTree> = {
   [K in keyof AST[Entity]['fields'] & string]: AST[Entity]['fields'][K] extends { type: infer Type; isExcluded: infer IsExcluded; astName: infer ASTName }
     ? Type extends 'scalar'
       ? IsExcluded extends true

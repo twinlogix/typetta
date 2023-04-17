@@ -76,6 +76,25 @@ export function compare(l: unknown, r: unknown): number {
   if (l && typeof l === 'object' && typeof (l as { equals: unknown }).equals === 'function') {
     return (l as { equals: (v: unknown) => unknown }).equals(r) ? 0 : Number.NaN
   }
+  if (typeof l === 'object' && typeof r === 'object') {
+    if (l === r) {
+      return 0
+    }
+    if (l === null || r === null) {
+      return -1
+    }
+    let processed = 0
+    for (const [key, value] of Object.entries(l)) {
+      processed++
+      if (compare(value, (r as Record<string, unknown>)[key]) !== 0) {
+        return -1
+      }
+    }
+    if (Object.keys(r).length !== processed) {
+      return -1
+    }
+    return 0
+  }
   return l === r ? 0 : Number.NaN
 }
 

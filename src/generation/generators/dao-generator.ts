@@ -328,11 +328,11 @@ export class TsTypettaGenerator extends TypettaGenerator {
     const execQueryF =
       `public async execQuery<T>(run: (dbs: { ${dbsInputParam} }, entities: { ${entitiesInputParam} }) => Promise<T>): Promise<T> {\n` + `  return run({ ${dbsParam} }, { ${entitiesParam} })\n` + `}`
     const applyIndexesF = `
-      public planIndexes(args: { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }): Promise<T.IndexesPlanResults> {
+      public planIndexes(args: { indexes: Partial<T.Indexes<AST>> }): Promise<T.IndexesPlanResults> {
         return super.planIndexes(args, schemas)
       }
     
-      public applyIndexes(args: ({ plan: T.IndexesPlanResults } | { indexes: Partial<T.Indexes<AST, ScalarsSpecification>> }) & { logs?: boolean }): Promise<T.IndexesApplyResults> {
+      public applyIndexes(args: ({ plan: T.IndexesPlanResults } | { indexes: Partial<T.Indexes<AST>> }) & { logs?: boolean }): Promise<T.IndexesApplyResults> {
         return super.applyIndexes(args, schemas)
       }`
     const cloneF = `public clone(): this {\n  return new EntityManager<MetadataType, OperationMetadataType, Permissions, SecurityDomain>(this.params) as this\n}`
@@ -516,7 +516,7 @@ export type EntityManagerParams<MetadataType, OperationMetadataType, Permissions
           domain: SecurityDomain
         }
         daoGenericsMap: DAOGenericsMap<MetadataType, OperationMetadataType>
-        mongodbIndexes: T.MongoDBIndexes<AST, ScalarsSpecification>
+        mongodbIndexes: T.MongoDBIndexes<AST>
       }`
 
     return [[entityManagerParamsExport, entityManagerMiddleware, entityManagerExport, utilsCode, utilsType].join('\n')].join('\n')

@@ -1,10 +1,24 @@
-import { Update } from '../schemas/ast.types'
-import { AbstractSyntaxTree, AbstractScalars } from '../schemas/ast.types'
+import { OmitNever } from '../../../utils/utils.types'
+import { AbstractSyntaxTree, FieldFromPath, RecursiveScalarKeys } from '../schemas/ast.types'
 import { CreateIndexesOptions, IndexDirection } from 'mongodb'
 
-type MongoDBIndex<AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, K extends keyof AST> = {
+
+
+type Specs<Entity extends string, AST extends AbstractSyntaxTree> = Partial<
+  OmitNever<{
+    [K in RecursiveScalarKeys<Entity, AST>]: FieldFromPath<Entity, AST, K> extends {
+      isExcluded: infer IsExluded
+    }
+      ? IsExluded extends true
+        ? never
+        : IndexDirection
+      : never
+  }>
+>
+
+type MongoDBIndex<AST extends AbstractSyntaxTree, K extends keyof AST> = {
   name: string
-  specs: { [F in keyof (K extends string ? Update<K, AST, Scalars> : never)]?: IndexDirection }
+  specs: K extends string ? Specs<K, AST> : never
   opts?: Omit<CreateIndexesOptions, 'name'>
 }
 
@@ -12,9 +26,9 @@ type MongoEntities<AST extends AbstractSyntaxTree> = {
   [K in keyof AST]: AST[K]['driverSpecification']['type'] extends 'mongodb' ? K : never
 }[keyof AST]
 
-export type MongoDBIndexes<AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = { [K in MongoEntities<AST>]: MongoDBIndex<AST, Scalars, K>[] }
-export type Indexes<AST extends AbstractSyntaxTree = AbstractSyntaxTree, Scalars extends AbstractScalars = AbstractScalars> = {
-  mongodb?: Partial<MongoDBIndexes<AST, Scalars>>
+export type MongoDBIndexes<AST extends AbstractSyntaxTree> = { [K in MongoEntities<AST>]: MongoDBIndex<AST, K>[] }
+export type Indexes<AST extends AbstractSyntaxTree = AbstractSyntaxTree> = {
+  mongodb?: Partial<MongoDBIndexes<AST>>
 }
 
 export type IndexesPlanResults = {
