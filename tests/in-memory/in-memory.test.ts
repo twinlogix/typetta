@@ -435,6 +435,47 @@ test('contains in array', async () => {
   expect(result.length).toBe(3)
 })
 
+test('find with embedded', async () => {
+  const u1 = await dao.user.insertOne({
+    record: {
+      firstName: 'A',
+      live: true,
+      credentials: [
+        { username: '1', password: '111' },
+        { username: '2', password: '222' },
+      ],
+    },
+  })
+  const u2 = await dao.user.insertOne({
+    record: {
+      firstName: 'B',
+      live: true,
+      credentials: [
+        { username: '2', password: '222' },
+        { username: '3', password: '333' },
+      ],
+    },
+  })
+  const u3 = await dao.user.insertOne({
+    record: {
+      firstName: 'C',
+      live: true,
+      credentials: [{ username: '2', password: '222' }],
+    },
+  })
+  const r1 = await dao.user.findAll({ filter: { credentials: { eq: { username: '1', password: '111' } } } })
+  expect(r1.length).toBe(1)
+  expect(r1[0].id).toBe(u1.id)
+  const r2 = await dao.user.findAll({ filter: { credentials: { eq: [{ username: '2', password: '222' }] } } })
+  expect(r2.length).toBe(1)
+  expect(r2[0].id).toBe(u3.id)
+  const r3 = await dao.user.findAll({ filter: { credentials: { eq: { username: '2', password: '222' } } }, sorts: [{ firstName: 'asc' }] })
+  expect(r3.length).toBe(3)
+  expect(r3[0].id).toBe(u1.id)
+  expect(r3[1].id).toBe(u2.id)
+  expect(r3[2].id).toBe(u3.id)
+})
+
 test('n-m with embedded', async () => {
   const bills = await dao.bill.insertAll({ records: [{ description: '1' }, { description: '2' }, { description: '3' }] })
   await dao.production.insertAll({

@@ -52,7 +52,6 @@
     "@types/uuid": "8.3.4",
     "@typescript-eslint/eslint-plugin": "5.53.0",
     "@typescript-eslint/parser": "5.53.0",
-    "@vscode/sqlite3": "5.1.2",
     "apollo-server": "3.12.0",
     "bignumber.js": "9.1.1",
     "eslint": "7.32.0",

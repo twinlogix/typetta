@@ -160,6 +160,14 @@ export type Filter<Entity extends string, AST extends AbstractSyntaxTree, Scalar
             | (IsTextual extends true ? { contains?: T; startsWith?: T; endsWith?: T; mode?: 'sensitive' | 'insensitive' } : never)
       : never
     : never
+} & {
+  [K in RecursiveEmbeddedKeys<Entity, AST>]?: FieldFromPath<Entity, AST, K> extends { astName: infer ASTName; isList: infer IsList }
+    ? UpdateEmbeddedModel<ASTName & string, AST, Scalars> extends infer T
+      ? IsList extends true
+        ? { eq?: T | null | (T | null)[]; ne?: T | null | (T | null)[]; exists?: boolean | null }
+        : { eq?: T | null; ne?: T | null; exists?: boolean | null }
+      : never
+    : never
 }
 
 export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars> = DecorateModelInsert<

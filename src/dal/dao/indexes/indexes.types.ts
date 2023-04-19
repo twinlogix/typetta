@@ -2,8 +2,6 @@ import { OmitNever } from '../../../utils/utils.types'
 import { AbstractSyntaxTree, FieldFromPath, RecursiveScalarKeys } from '../schemas/ast.types'
 import { CreateIndexesOptions, IndexDirection } from 'mongodb'
 
-
-
 type Specs<Entity extends string, AST extends AbstractSyntaxTree> = Partial<
   OmitNever<{
     [K in RecursiveScalarKeys<Entity, AST>]: FieldFromPath<Entity, AST, K> extends {

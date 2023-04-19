@@ -45,8 +45,12 @@ const scalars: UserInputDriverDataTypeAdapterMap<ScalarsSpecification> = {
   },
   Decimal: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dbToModel: (o: any) => (typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)),
-    modelToDB: (o: BigNumber) => o,
+    dbToModel: (o: any) => {
+      return typeof o === 'string' ? (o.split(',').map((v) => new BigNumber(v)) as any) : new BigNumber(o)
+    },
+    modelToDB: (o: BigNumber) => {
+      return o
+    },
   },
   JSON: {
     dbToModel: (o: unknown) => JSON.parse(o as string),

@@ -1,4 +1,5 @@
 import { LogicalOperators, MONGODB_LOGIC_QUERY_PREFIXS, SortDirection } from '../../..'
+import { transformObject } from '../../../generation/utils'
 import { getSchemaFieldTraversing, hasKeys, modelValueToDbValue } from '../../../utils/utils'
 import { ElementOperators, EqualityOperators, QuantityOperators, StringOperators } from '../../dao/filters/filters.types'
 import { AbstractScalars } from '../../dao/schemas/ast.types'
@@ -151,13 +152,23 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
     if (schema && adapters) {
       const schemaField2 = getSchemaFieldTraversing(keyF, schema)
       key = modelNameToDbName(keyF, schema)
-      if (!schemaField2 || !('scalar' in schemaField2)) {
+      if (!schemaField2) {
         return false
       }
-      schemaField = schemaField2
-      adapter = adapters[schemaField.scalar]
-      if (!adapter) {
-        throw new Error(`Adapter for scalar ${schemaField.scalar.toString()} not found. ${Object.keys(adapters)}`)
+      if ('scalar' in schemaField2) {
+        schemaField = schemaField2
+        adapter = adapters[schemaField.scalar]
+        if (!adapter) {
+          throw new Error(`Adapter for scalar ${schemaField.scalar.toString()} not found. ${Object.keys(adapters)}`)
+        }
+      } else {
+        schemaField = schemaField2
+        adapter = {
+          modelToDB: async (value) => {
+            return transformObject(adapters, 'modelToDB', value as Record<string, unknown>, schemaField2.schema())
+          },
+          dbToModel: (value) => value,
+        }
       }
     } else {
       adapter = identityAdapter()

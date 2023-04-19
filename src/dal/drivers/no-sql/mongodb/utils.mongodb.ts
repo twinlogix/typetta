@@ -1,4 +1,5 @@
 import { AbstractScalars } from '../../../..'
+import { transformObject } from '../../../../generation/utils'
 import {
   getSchemaFieldTraversing,
   mapObject,
@@ -162,8 +163,32 @@ async function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Sca
       }
     }
   } else if (schemaField.type === 'embedded') {
-    // filter on embedded type
-    return adaptFilter(value as AbstractFilter, schemaField.schema(), adapters)
+    const adapter = (v: unknown) => {
+      if (Array.isArray(v)) {
+        return Promise.all((v as Record<string, unknown>[]).map((e) => transformObject(adapters, 'modelToDB', e, schemaField.schema())))
+      }
+      return transformObject(adapters, 'modelToDB', v as Record<string, unknown>, schemaField.schema())
+    }
+    const mappedFilter = await mapObjectAsync(value as Record<string, unknown>, async ([fk, fv]) => {
+      if (MONGODB_SINGLE_VALUE_QUERY_PREFIXS.has(fk)) {
+        if (fk === 'eq' && fv === null) {
+          return [['$type', 10]]
+        }
+        return [[`$${fk}`, await adapter(fv)]]
+      }
+      if (fk === 'exists') {
+        if (fv == null) {
+          return []
+        }
+        if (fv === false) {
+          return [['$eq', null]]
+        } else {
+          return [['$ne', null]]
+        }
+      }
+      return [[fk, fv]]
+    })
+    return mappedFilter
   }
 }
 
