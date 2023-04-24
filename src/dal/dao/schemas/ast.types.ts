@@ -270,7 +270,7 @@ export type RecursiveScalarKeys<Entity extends string, AST extends AbstractSynta
     : never
 }[keyof AST[Entity]['fields'] & string]
 
-type RecursiveEmbeddedKeys<Entity extends string, AST extends AbstractSyntaxTree> = {
+export type RecursiveEmbeddedKeys<Entity extends string, AST extends AbstractSyntaxTree> = {
   [K in keyof AST[Entity]['fields'] & string]: AST[Entity]['fields'][K] extends { type: infer Type; isExcluded: infer IsExcluded; astName: infer ASTName }
     ? Type extends 'embedded'
       ? IsExcluded extends true
