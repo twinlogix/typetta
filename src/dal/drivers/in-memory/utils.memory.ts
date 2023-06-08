@@ -153,9 +153,14 @@ export async function filterEntity<FilterFields extends AbstractFilterFields, Sc
       const schemaField2 = getSchemaFieldTraversing(keyF, schema)
       key = modelNameToDbName(keyF, schema)
       if (!schemaField2) {
-        return false
-      }
-      if ('scalar' in schemaField2) {
+        adapter = identityAdapter()
+        key = keyF
+        schemaField = {
+          type: 'scalar',
+          directives: {},
+          scalar: 'String',
+        }
+      } else if ('scalar' in schemaField2) {
         schemaField = schemaField2
         adapter = adapters[schemaField.scalar]
         if (!adapter) {
