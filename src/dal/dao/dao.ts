@@ -723,7 +723,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
   async insertAll(params: InsertAllParams<T>): Promise<T['plainModel'][]> {
     return this.logOperation('insertAll', params, async () => {
       const beforeResults = await this.executeBeforeMiddlewares({ operation: 'insert', params }, 'insertAll')
-      const insertedRecords = beforeResults.continue ? await this._insertAll(beforeResults.params) : beforeResults.insertedRecords
+      const insertedRecords = beforeResults.continue ? (beforeResults.params.records.length === 0 ? [] : await this._insertAll(beforeResults.params)) : beforeResults.insertedRecords
       const afterResults = await this.executeAfterMiddlewares({ operation: 'insert', params: beforeResults.params, insertedRecords }, beforeResults.middlewareIndex, 'insertAll')
       return afterResults.insertedRecords
     })
