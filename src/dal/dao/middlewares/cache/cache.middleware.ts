@@ -7,16 +7,17 @@ import objectHash from 'object-hash'
 export type CacheReadConfiguration = { ms: number; group?: string } | { ms?: number; group: string } | boolean
 export type CacheWriteConfiguration = { groups: string[] | 'all' } | boolean
 export type CacheConfiguration<T extends Record<string, DAOGenerics>> = {
-  [K in keyof T]?: { ms: number } | true
+  [K in keyof T]?: { ms: number } | true | 'invalidate-only'
 }
 export const DEFAULT_CACHE_GROUP = 'default'
-export function cache<T extends DAOGenerics>(cache: TypettaCache, entities: Record<string, true | { ms: number }>): DAOMiddleware<T> {
+export function cache<T extends DAOGenerics>(cache: TypettaCache, entities: Record<string, true | { ms: number } | 'invalidate-only'>): DAOMiddleware<T> {
   return {
     name: 'Typetta - Cache',
     before: async (args, context) => {
       if (args.operation === 'find') {
         const settings = args.params.cache ?? entities[toFirstLower(context.daoName)]
         if (!settings) return
+        if (settings === 'invalidate-only') return
         const group = (args.params.cache && typeof args.params.cache === 'object' && 'group' in args.params.cache ? args.params.cache.group : null) ?? DEFAULT_CACHE_GROUP
         const key = findKey(args.params, context.specificOperation)
         const result = await cache.get(context.daoName, group, key)
@@ -33,6 +34,7 @@ export function cache<T extends DAOGenerics>(cache: TypettaCache, entities: Reco
         const originalSettings = entities[toFirstLower(context.daoName)]
         const settings = args.params.cache ?? entities[toFirstLower(context.daoName)]
         if (!settings) return
+        if (settings === 'invalidate-only') return
         const __cache__ = args.params.metadata?.__cache__
         if (__cache__) {
           const stringifiedRecords = await Promise.all(args.records.map((r) => transformObject(context.entityManager.adapters.cache, 'modelToDB', r, context.schema)))
@@ -42,7 +44,7 @@ export function cache<T extends DAOGenerics>(cache: TypettaCache, entities: Reco
       } else if (args.operation === 'delete' || args.operation === 'insert' || args.operation === 'update' || args.operation === 'replace') {
         const settings = args.params.cache ?? entities[toFirstLower(context.daoName)]
         if (!settings) return
-        const groups = settings === true || 'ms' in settings ? [DEFAULT_CACHE_GROUP] : settings.groups === 'all' ? undefined : settings.groups
+        const groups = settings === 'invalidate-only' ? undefined : settings === true || 'ms' in settings ? [DEFAULT_CACHE_GROUP] : settings.groups === 'all' ? undefined : settings.groups
         if (context.entityManager.isTransacting()) {
           context.entityManager.addPostTransactionProcessing(() => cache.delete(context.daoName, groups))
         } else {
