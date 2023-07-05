@@ -14,6 +14,9 @@ export class RedisTypettaCache implements TypettaCache {
     this.onError = args.onError ?? (() => Promise.resolve())
   }
   async set(dao: string, group: string, key: string, value: Buffer, ttlMs?: number | undefined): Promise<void> {
+    if (!this.client.isReady) {
+      return
+    }
     try {
       await this.client.set(`${this.keyPrefix}${dao}:${group}:${key}`, value, { PX: ttlMs })
       this.sets++
@@ -22,6 +25,9 @@ export class RedisTypettaCache implements TypettaCache {
     }
   }
   async get(dao: string, group: string, key: string): Promise<Buffer | null> {
+    if (!this.client.isReady) {
+      return null
+    }
     try {
       const result = await this.client.get(this.client.commandOptions({ returnBuffers: true }), `${this.keyPrefix}${dao}:${group}:${key}`)
       if (result) {
@@ -36,6 +42,9 @@ export class RedisTypettaCache implements TypettaCache {
     }
   }
   async delete(dao: string, groups?: string[] | undefined): Promise<void> {
+    if (!this.client.isReady) {
+      return
+    }
     const toFind = groups ? groups.map((g) => `${this.keyPrefix}${dao}:${g}:*`) : [`${this.keyPrefix}${dao}:*`]
     const keys: string[] = []
     try {

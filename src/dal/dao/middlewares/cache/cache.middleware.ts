@@ -43,7 +43,11 @@ export function cache<T extends DAOGenerics>(cache: TypettaCache, entities: Reco
         const settings = args.params.cache ?? entities[toFirstLower(context.daoName)]
         if (!settings) return
         const groups = settings === true || 'ms' in settings ? [DEFAULT_CACHE_GROUP] : settings.groups === 'all' ? undefined : settings.groups
-        await cache.delete(context.daoName, groups)
+        if (context.entityManager.isTransacting()) {
+          context.entityManager.addPostTransactionProcessing(() => cache.delete(context.daoName, groups))
+        } else {
+          await cache.delete(context.daoName, groups)
+        }
       }
     },
   }

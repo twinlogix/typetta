@@ -33,6 +33,7 @@ export abstract class AbstractEntityManager<
         } as DriverDataTypeAdapterMap<Scalars>)
     this.cache = args.cache?.engine
     this.metadata = args?.metadata
+    this.postTransactions = []
   }
 
   public dao(daoName: string): AbstractDAO<DAOGenerics> {
@@ -158,6 +159,18 @@ export abstract class AbstractEntityManager<
     } catch (e) {
       dao.transactionData = null
       throw e
+    }
+  }
+
+  private postTransactions: (() => Promise<void>)[]
+  public addPostTransactionProcessing(f: () => Promise<void>) {
+    this.postTransactions.push(f)
+  }
+  public async executePostTransactionProcessing(): Promise<void> {
+    const fs = [...this.postTransactions]
+    this.postTransactions = []
+    for (const f of fs) {
+      await f()
     }
   }
 
