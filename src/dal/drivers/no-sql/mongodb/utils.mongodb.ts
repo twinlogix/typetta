@@ -174,6 +174,12 @@ async function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Sca
         if (fk === 'eq' && fv === null) {
           return [['$type', 10]]
         }
+        if (fk === 'eq' && !Array.isArray(fv) && schemaField.isList) {
+          return [[`$elemMatch`, await adapter(fv)]]
+        }
+        if (fk === 'neq' && !Array.isArray(fv) && schemaField.isList) {
+          return [['$neq', { $elemMatch: await adapter(fv) }]]
+        }
         return [[`$${fk}`, await adapter(fv)]]
       }
       if (fk === 'exists') {
