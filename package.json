@@ -91,7 +91,7 @@
     "uuid": "8.3.2"
   },
   "peerDependencies": {
-    "knex": "2.4.2",
+    "knex": "2.5.1",
     "mongodb": "5.8.0",
     "redis": "4.6.7"
   },
