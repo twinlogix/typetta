@@ -1,7 +1,6 @@
 import { Coordinates } from '../../src'
-import { LocalizedString } from '../types'
 import { BigNumber } from 'bignumber.js'
-
+import { LocalizedString } from '../types'
 export type Maybe<T> = T | null
 export type InputMaybe<T> = Maybe<T>
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
