@@ -151,15 +151,9 @@ export abstract class AbstractEntityManager<
 
   public async transaction<T>(transaction: TransactionData<MongoDBDatasources, KnexDataSources>, f: (dao: this['Transaction']) => Promise<T>): Promise<T> {
     const dao = this.clone()
-    try {
-      dao.transactionData = transaction
-      const result = await f(dao as this & { __transaction_enabled__: true })
-      dao.transactionData = null
-      return result
-    } catch (e) {
-      dao.transactionData = null
-      throw e
-    }
+    dao.transactionData = transaction
+    const result = await f(dao as this & { __transaction_enabled__: true })
+    return result
   }
 
   private postTransactions: (() => Promise<void>)[]

@@ -1872,6 +1872,25 @@ test('Simple transaction functional', async () => {
   expect(user4?.live).toBe(true)
 })
 
+test('Transaction functional fails if closed', async () => {
+  const session = connection.startSession()
+  session.startTransaction({
+    readConcern: { level: 'local' },
+    writeConcern: { w: 'majority' },
+  })
+  const transactingEntityManager: EntityManager<{ conn: MongoClient; dao: () => EntityManagerType }> = dao.clone()
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //@ts-ignore
+  transactingEntityManager.transactionData = { mongodb: { default: session } } //inject transaction data unsafely
+  await transactingEntityManager.user.insertOne({ record: { id: '123', live: true } })
+  const user2 = await dao.user.findOne({ filter: { id: '123' } })
+  expect(user2).toBe(null)
+  await session.commitTransaction()
+  const user3 = await dao.user.findOne({ filter: { id: '123' } })
+  expect(user3?.live).toBe(true)
+  expect(transactingEntityManager.user.insertOne({ record: { id: '124', live: true } })).rejects.toThrowError()
+})
+
 test('Simple transaction 2', async () => {
   await dao.user.insertOne({ record: { id: '123', live: true } })
   const session = connection.startSession()

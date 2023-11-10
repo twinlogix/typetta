@@ -121,12 +121,15 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     this.middlewares = [
       {
         name: 'Typetta - Transaction injector',
-        before: async (args) => {
+        before: async (args, { daoName, specificOperation }) => {
           if (this.entityManager.isTransacting() && this.datasource !== null) {
             const driver = this._driver()
             if (driver === 'mongo') {
               const session = this.entityManager.getMongoSession(this.datasource)
               if (session) {
+                if (!session.transaction.isActive) {
+                  throw new Error(`Operation ${specificOperation} of dao ${daoName} should be executed in transaction but the current MongoDB session transaction is not active.`)
+                }
                 return {
                   continue: true,
                   ...args,
@@ -143,6 +146,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             if (driver === 'knex') {
               const trx = this.entityManager.getKenxTransaction(this.datasource)
               if (trx) {
+                if (trx.isCompleted()) {
+                  throw new Error(`Operation ${specificOperation} of dao ${daoName} should be executed in transaction but the current Knex Transaction is already completed.`)
+                }
                 return {
                   continue: true,
                   ...args,
