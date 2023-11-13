@@ -57,12 +57,15 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
 
   protected async _aggregate<A extends AggregateParams<T>>(params: A, args?: AggregatePostProcessing<T, A>): Promise<AggregateResults<T, A>> {
     const groupBy = <O, K extends string>(list: O[], getKey: (item: O) => K) =>
-      list.reduce((previous, currentItem) => {
-        const group = getKey(currentItem)
-        if (!previous[group]) previous[group] = []
-        previous[group].push(currentItem)
-        return previous
-      }, {} as Record<K, O[]>)
+      list.reduce(
+        (previous, currentItem) => {
+          const group = getKey(currentItem)
+          if (!previous[group]) previous[group] = []
+          previous[group].push(currentItem)
+          return previous
+        },
+        {} as Record<K, O[]>,
+      )
 
     const records = await this.entitiesArray(params.filter)
 
@@ -120,10 +123,10 @@ export class AbstractInMemoryDAO<T extends InMemoryDAOGenerics> extends Abstract
             return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string) as number).reduce((p, c) => p + c, 0) / records.length }
           }
           if (aggregation.operation === 'max') {
-            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string)).reduce((p, c) => (compare(p, c) > 0 ? p : c), records[0]) }
+            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string)).reduce((p, c) => (compare(p, c) > 0 ? p : c), getByPath(records[0], aggregation.field as string)) }
           }
           if (aggregation.operation === 'min') {
-            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string)).reduce((p, c) => (compare(p, c) < 0 ? p : c), records[0]) }
+            return { ...p, [k]: records.map((v) => getByPath(v, aggregation.field as string)).reduce((p, c) => (compare(p, c) < 0 ? p : c), getByPath(records[0], aggregation.field as string)) }
           }
           return p
         }
