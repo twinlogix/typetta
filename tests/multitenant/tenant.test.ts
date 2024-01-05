@@ -47,7 +47,7 @@ function createDao(tenantId: number, db: Db): EntityManager<DaoMetadata> {
         },
       },
       TenantId: {
-        dbToModel: (o: unknown) => o as number,
+        dbToModel: (o: unknown) => o instanceof Int32 ? o.value : o as number,
         modelToDB: (o: number) => new Int32(o as number),
         validate: (o: number) => {
           if (Number.isInteger(o) && o > 0) {

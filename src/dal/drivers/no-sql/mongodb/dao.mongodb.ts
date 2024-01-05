@@ -183,7 +183,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       return [
         async () => {
           await this.collection.insertMany(records, options)
-          return this.dbsToModels(records as any)
+          const results = await this.dbsToModels(records as any)
+          return results
         },
         () => `collection.insertAll(${JSON.stringify(records)})`,
       ]
