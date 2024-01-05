@@ -182,14 +182,8 @@ export class AbstractMongoDBDAO<T extends MongoDBDAOGenerics> extends AbstractDA
       const options = params.options ? { ordered: true, ...params.options } : { ordered: true }
       return [
         async () => {
-          const result = await this.collection.insertMany(records, options)
-          const inserted = await this.collection
-            .find({ _id: { $in: Object.values(result.insertedIds) } }, params.retrieveOptions ? { session: params.options?.session, ...params.retrieveOptions } : { session: params.options?.session })
-            .toArray()
-          if (!inserted) {
-            throw new Error(`One just inserted documents with ids ${Object.values(result.insertedIds).map((id) => id.toHexString())} was not retrieved correctly.`)
-          }
-          return this.dbsToModels(inserted)
+          await this.collection.insertMany(records, options)
+          return this.dbsToModels(records as any)
         },
         () => `collection.insertAll(${JSON.stringify(records)})`,
       ]
