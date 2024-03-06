@@ -567,7 +567,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             const filterValues = rels
               .filter((r: unknown) => getTraversing(r, relation.refThis.refFrom)[0] === getTraversing(record, relation.refThis.refTo)[0])
               .flatMap((r: unknown) => getTraversing(r, relation.refOther.refFrom))
-            promises.push(filterValues.length > 0 ? await this.entityManager.dao(relation.refOther.dao).findAllWithBatching(params, relation.refOther.refTo, filterValues) : [])
+            promises.push(filterValues.length > 0 ? this.entityManager.dao(relation.refOther.dao).findAllWithBatching(params, relation.refOther.refTo, filterValues) : [])
           }
           const results = await Promise.all(promises)
           for (let i = 0; i < records.length; i++) {
@@ -579,7 +579,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             const projection = params.projection ?? {}
             setTraversing(projection, relation.refTo, true)
             const keys = getTraversing(record, relation.refFrom)
-            promises.push(keys.length > 0 ? await this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refTo, keys) : [])
+            promises.push(keys.length > 0 ? this.entityManager.dao(relation.dao).findAllWithBatching({ ...params, projection }, relation.refTo, keys) : [])
           }
           const results = await Promise.all(promises)
           for (let i = 0; i < records.length; i++) {
