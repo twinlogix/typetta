@@ -302,18 +302,18 @@ export class TsTypettaGenerator extends TypettaGenerator {
       hasMongoDBEntites && hasSQLEntities
         ? `mongodb: ${mongoSourcesType}, knex: ${sqlSourcesType}`
         : hasSQLEntities
-        ? `knex: ${sqlSourcesType}`
-        : hasMongoDBEntites
-        ? `mongodb: ${mongoSourcesType}`
-        : ''
+          ? `knex: ${sqlSourcesType}`
+          : hasMongoDBEntites
+            ? `mongodb: ${mongoSourcesType}`
+            : ''
     const dbsParam = hasMongoDBEntites && hasSQLEntities ? 'mongodb: this.mongodb, knex: this.knex' : hasSQLEntities ? 'knex: this.knex' : hasMongoDBEntites ? 'mongodb: this.mongodb' : ''
     const entitiesInputParam = Array.from(typesMap.values())
       .flatMap((node) => {
         return node.entity?.type === 'mongo'
           ? [`${toFirstLower(node.name)}: M.Collection<M.Document> | null`]
           : node.entity?.type === 'sql'
-          ? [`${toFirstLower(node.name)}: Knex.QueryBuilder<any, unknown[]> | null`]
-          : []
+            ? [`${toFirstLower(node.name)}: Knex.QueryBuilder<any, unknown[]> | null`]
+            : []
       })
       .join(', ')
     const entitiesParam = Array.from(typesMap.values())
@@ -321,8 +321,8 @@ export class TsTypettaGenerator extends TypettaGenerator {
         return node.entity?.type === 'mongo'
           ? [`${toFirstLower(node.name)}: this.mongodb.${node.entity.source} === 'mock' ? null : this.mongodb.${node.entity.source}.collection('${node.entity.collection}')`]
           : node.entity?.type === 'sql'
-          ? [`${toFirstLower(node.name)}: this.knex.${node.entity.source} === 'mock' ? null : this.knex.${node.entity.source}.table('${node.entity.table}')`]
-          : []
+            ? [`${toFirstLower(node.name)}: this.knex.${node.entity.source} === 'mock' ? null : this.knex.${node.entity.source}.table('${node.entity.table}')`]
+            : []
       })
       .join(', ')
     const execQueryF =

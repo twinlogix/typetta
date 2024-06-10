@@ -57,8 +57,7 @@
     "eslint": "8.51.0",
     "jest": "27.5.1",
     "make-coverage-badge": "1.2.0",
-    "mongodb-memory-server": "8.13.0",
-    "prettier": "3.0.3",
+    "mongodb-memory-server": "9.3.0",
     "release-it": "15.11.0",
     "rimraf": "3.0.2",
     "sha256": "0.2.0",
@@ -85,14 +84,14 @@
     "is-plain-object": "5.0.0",
     "lodash": "4.17.21",
     "object-hash": "2.2.0",
-    "prettier": "3.0.3",
-    "type-fest": "2.19.0",
-    "yaml": "2.3.3",
-    "uuid": "8.3.2"
+    "prettier": "3.3.1",
+    "type-fest": "4.19.0",
+    "yaml": "2.4.3",
+    "uuid": "9.0.1"
   },
   "peerDependencies": {
     "knex": "2.5.1",
-    "mongodb": "5.8.0",
+    "mongodb": "6.7.0",
     "redis": "4.6.7"
   },
   "resolutions": {

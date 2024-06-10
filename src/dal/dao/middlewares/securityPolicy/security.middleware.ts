@@ -158,10 +158,10 @@ export function securityPolicy<
         'filter' in args.params && args.params.filter != null && domainFilters
           ? { $and: [args.params.filter, domainFilters] }
           : domainFilters
-          ? domainFilters
-          : 'filter' in args.params
-          ? args.params.filter
-          : undefined
+            ? domainFilters
+            : 'filter' in args.params
+              ? args.params.filter
+              : undefined
       if (args.operation === 'find') {
         if (context.specificOperation === 'exists' || context.specificOperation === 'count') {
           if (!crud.read) {

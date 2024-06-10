@@ -35,78 +35,79 @@ export type AbstractSyntaxTree<Entities extends string = string, Scalars extends
   }
 }
 
-export type Projection<Entity extends string, AST extends AbstractSyntaxTree> =
-  | {
-      [Field in keyof AST[Entity]['fields']]?: true | (AST[Entity]['fields'][Field]['type'] extends 'embedded' | 'relation' ? Projection<AST[Entity]['fields'][Field]['astName'], AST> : never)
-    }
+export type Projection<Entity extends string, AST extends AbstractSyntaxTree> = {
+  [Field in keyof AST[Entity]['fields']]?: true | (AST[Entity]['fields'][Field]['type'] extends 'embedded' | 'relation' ? Projection<AST[Entity]['fields'][Field]['astName'], AST> : never)
+}
 
-type Selector<ProjectionType extends Record<string, unknown> | true, P> = Record<string, unknown> extends Required<P>
-  ? 'empty'
-  : [true] extends [P]
-  ? 'all'
-  : P extends undefined
-  ? 'all'
-  : [ProjectionType] extends [P]
-  ? 'unknown'
-  : P extends GraphQLResolveInfo
-  ? 'unknown'
-  : 'specific'
+type Selector<ProjectionType extends Record<string, unknown> | true, P> =
+  Record<string, unknown> extends Required<P>
+    ? 'empty'
+    : [true] extends [P]
+      ? 'all'
+      : P extends undefined
+        ? 'all'
+        : [ProjectionType] extends [P]
+          ? 'unknown'
+          : P extends GraphQLResolveInfo
+            ? 'unknown'
+            : 'specific'
 
 export type Project<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P, Cache extends CachedTypes | null = null> = 0 extends 1 & Cache
   ? any
   : Selector<Projection<Entity, AST>, P> extends infer S
-  ? S extends 'empty'
-    ? { __projection: 'empty' }
-    : S extends 'unknown'
-    ? Cache extends { model: infer Model }
-      ? PartialDeep<Model> & { __projection: 'unknown' }
-      : PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
-    : S extends 'all'
-    ? Cache extends { insertResult: infer InsertResult }
-      ? InsertResult & { __projection: 'all' }
-      : GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
-    : DecorateModel<
-        OmitNever<{
-          [K in keyof P]: K extends keyof AST[Entity]['fields']
-            ? AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
-              ? ASTName extends string
-                ? P[K] extends true
-                  ? Type extends 'scalar'
-                    ? Scalars[ASTName]['type']
-                    : GenerateModel<ASTName, AST, Scalars, 'relation'>
-                  : Project<ASTName, AST, Scalars, P[K]>
-                : never
-              : never
-            : never
-        }>,
-        Entity,
-        AST
-      > & { __projection: P }
-  : never
+    ? S extends 'empty'
+      ? { __projection: 'empty' }
+      : S extends 'unknown'
+        ? Cache extends { model: infer Model }
+          ? PartialDeep<Model> & { __projection: 'unknown' }
+          : PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
+        : S extends 'all'
+          ? Cache extends { insertResult: infer InsertResult }
+            ? InsertResult & { __projection: 'all' }
+            : GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
+          : DecorateModel<
+              OmitNever<{
+                [K in keyof P]: K extends keyof AST[Entity]['fields']
+                  ? AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
+                    ? ASTName extends string
+                      ? P[K] extends true
+                        ? Type extends 'scalar'
+                          ? Scalars[ASTName]['type']
+                          : GenerateModel<ASTName, AST, Scalars, 'relation'>
+                        : Project<ASTName, AST, Scalars, P[K]>
+                      : never
+                    : never
+                  : never
+              }>,
+              Entity,
+              AST
+            > & { __projection: P }
+    : never
 
-export type Params<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P> = P extends Record<string, never>
-  ? { __projection: 'empty' }
-  : [Projection<Entity, AST>] extends [P]
-  ? PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
-  : P extends true
-  ? GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
-  : DecorateModel<
-      OmitNever<{
-        [K in keyof P]: K extends keyof AST[Entity]['fields']
-          ? AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
-            ? ASTName extends string
-              ? P[K] extends true
-                ? Type extends 'scalar'
-                  ? Scalars[ASTName]['type']
-                  : GenerateModel<ASTName, AST, Scalars, 'relation'>
-                : Params<ASTName, AST, Scalars, P[K]>
-              : never
-            : never
-          : never
-      }>,
-      Entity,
-      AST
-    > & { __projection?: P }
+export type Params<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, P> =
+  P extends Record<string, never>
+    ? { __projection: 'empty' }
+    : [Projection<Entity, AST>] extends [P]
+      ? PartialDeep<GenerateModel<Entity, AST, Scalars, 'relation'>> & { __projection: 'unknown' }
+      : P extends true
+        ? GenerateModel<Entity, AST, Scalars, 'relation'> & { __projection: 'all' }
+        : DecorateModel<
+            OmitNever<{
+              [K in keyof P]: K extends keyof AST[Entity]['fields']
+                ? AST[Entity]['fields'][K] extends { astName: infer ASTName; type: infer Type }
+                  ? ASTName extends string
+                    ? P[K] extends true
+                      ? Type extends 'scalar'
+                        ? Scalars[ASTName]['type']
+                        : GenerateModel<ASTName, AST, Scalars, 'relation'>
+                      : Params<ASTName, AST, Scalars, P[K]>
+                    : never
+                  : never
+                : never
+            }>,
+            Entity,
+            AST
+          > & { __projection?: P }
 
 export type GenerateModel<Entity extends string, AST extends AbstractSyntaxTree, Scalars extends AbstractScalars, ExcludedType extends string = never> = DecorateModel<
   OmitNever<{
@@ -115,8 +116,8 @@ export type GenerateModel<Entity extends string, AST extends AbstractSyntaxTree,
         ? Type extends ExcludedType
           ? never
           : Type extends 'scalar'
-          ? Scalars[ASTName]['type']
-          : GenerateModel<ASTName, AST, Scalars, ExcludedType>
+            ? Scalars[ASTName]['type']
+            : GenerateModel<ASTName, AST, Scalars, ExcludedType>
         : never
       : never
   }>,
@@ -176,12 +177,12 @@ export type Insert<Entity extends string, AST extends AbstractSyntaxTree, Scalar
       ? IsExcluded extends true
         ? never
         : GenerationStrategy extends 'db'
-        ? never
-        : Type extends 'scalar'
-        ? Scalars[ASTName & string]['type']
-        : Type extends 'embedded'
-        ? Insert<ASTName & string, AST, Scalars>
-        : never
+          ? never
+          : Type extends 'scalar'
+            ? Scalars[ASTName & string]['type']
+            : Type extends 'embedded'
+              ? Insert<ASTName & string, AST, Scalars>
+              : never
       : never
   }>,
   Entity,
@@ -194,12 +195,12 @@ type UpdateEmbeddedModel<Entity extends string, AST extends AbstractSyntaxTree, 
       ? IsExluded extends true
         ? never
         : ASTName extends string
-        ? Type extends 'relation'
-          ? never
-          : Type extends 'scalar'
-          ? Scalars[ASTName]['type']
-          : UpdateEmbeddedModel<ASTName, AST, Scalars>
-        : never
+          ? Type extends 'relation'
+            ? never
+            : Type extends 'scalar'
+              ? Scalars[ASTName]['type']
+              : UpdateEmbeddedModel<ASTName, AST, Scalars>
+          : never
       : never
   }>,
   Entity,
@@ -219,16 +220,16 @@ export type Update<Entity extends string, AST extends AbstractSyntaxTree, Scalar
         ? IsExluded extends true
           ? never
           : ASTName extends keyof Scalars
-          ? Scalars[ASTName]['type'] extends infer T
-            ? GenerationStrategy extends 'db'
-              ? never
-              : IsList extends true
-              ? IsListElementRequired extends true
-                ? T[] | null
-                : (T | null)[] | null
-              : T | null
+            ? Scalars[ASTName]['type'] extends infer T
+              ? GenerationStrategy extends 'db'
+                ? never
+                : IsList extends true
+                  ? IsListElementRequired extends true
+                    ? T[] | null
+                    : (T | null)[] | null
+                  : T | null
+              : never
             : never
-          : never
         : never
     } & {
       [K in RecursiveEmbeddedKeys<Entity, AST>]: FieldFromPath<Entity, AST, K> extends {
@@ -255,8 +256,8 @@ export type SortElement<Entity extends string, AST extends AbstractSyntaxTree> =
 export type FieldFromPath<Entity extends string, AST extends AbstractSyntaxTree, Path> = Path extends `${infer R}.${infer T}`
   ? FieldFromPath<AST[Entity]['fields'][R]['astName'], AST, T>
   : Path extends keyof AST[Entity]['fields']
-  ? AST[Entity]['fields'][Path]
-  : never
+    ? AST[Entity]['fields'][Path]
+    : never
 
 export type RecursiveScalarKeys<Entity extends string, AST extends AbstractSyntaxTree> = {
   [K in keyof AST[Entity]['fields'] & string]: AST[Entity]['fields'][K] extends { type: infer Type; isExcluded: infer IsExcluded; astName: infer ASTName }
@@ -265,8 +266,8 @@ export type RecursiveScalarKeys<Entity extends string, AST extends AbstractSynta
         ? never
         : K
       : Type extends 'embedded'
-      ? `${K}.${RecursiveScalarKeys<ASTName & string, AST>}`
-      : never
+        ? `${K}.${RecursiveScalarKeys<ASTName & string, AST>}`
+        : never
     : never
 }[keyof AST[Entity]['fields'] & string]
 
@@ -303,9 +304,9 @@ export type OptionalInsertFields<Entity extends string, AST extends AbstractSynt
         ? never
         : K
       : GenerationStrategy extends 'middleware'
-      ? K
-      : GenerationStrategy extends 'generator'
-      ? K
-      : never
+        ? K
+        : GenerationStrategy extends 'generator'
+          ? K
+          : never
     : never
 }[keyof AST[Entity]['fields']]

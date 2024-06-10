@@ -12,7 +12,10 @@ import { DirectiveNode, GraphQLSchema, ObjectTypeDefinitionNode, ScalarTypeDefin
 type Directivable = { directives?: ReadonlyArray<DirectiveNode> }
 
 export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig, ParsedConfig> {
-  constructor(private _schema: GraphQLSchema, pluginConfig: TypeScriptTypettaPluginConfig) {
+  constructor(
+    private _schema: GraphQLSchema,
+    pluginConfig: TypeScriptTypettaPluginConfig,
+  ) {
     super(pluginConfig, {
       scalars: buildScalars(_schema, pluginConfig.scalars!, DEFAULT_SCALARS),
     } as Partial<ParsedConfig> as any)
@@ -229,10 +232,10 @@ export class TsTypettaVisitor extends BaseVisitor<TypeScriptTypettaPluginConfig,
       entity: mongoEntityDirective
         ? { type: 'mongo', collection, source: mongoSource }
         : sqlEntityDirective
-        ? { type: 'sql', table, source: knexSource }
-        : memoryEntityDirective
-        ? { type: 'memory' }
-        : undefined,
+          ? { type: 'sql', table, source: knexSource }
+          : memoryEntityDirective
+            ? { type: 'memory' }
+            : undefined,
       fields,
     }
   }

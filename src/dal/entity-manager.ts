@@ -73,7 +73,7 @@ export abstract class AbstractEntityManager<
             if (!index) {
               return false
             }
-            const li2 = { ...li }
+            const li2: Partial<typeof li> = { ...li }
             delete li2.v
             delete li2.background
             delete li2.key
@@ -93,7 +93,7 @@ export abstract class AbstractEntityManager<
           const indexesToDrop = loadedIndexes.filter((li) => li.name !== '_id_' && !indexesThatAreEquals.find((i) => li.name === i.name))
           const indexesToCreate = (indexes as Record<string, unknown>[]).filter((i) => !indexesThatAreEquals.find((li) => li.name === i.name))
           for (const index of indexesToDrop) {
-            result.mongodb.toDelete.push({ collection: key, name: index.name })
+            result.mongodb.toDelete.push({ collection: key, name: index.name ?? '' })
           }
           for (const index of indexesToCreate) {
             const specs = Object.fromEntries(

@@ -1841,9 +1841,8 @@ test('Simple transaction options', async () => {
   const user1 = await dao.user.insertOne({ record: { id: '123', live: true }, options })
   const user2 = await dao.user.findOne({ filter: { id: '123' } })
   const user3 = await dao.user.findOne({ filter: { id: '123' }, options })
-  const res = await session.commitTransaction()
+  await session.commitTransaction()
   const user4 = await dao.user.findOne({ filter: { id: '123' } })
-  expect(res.ok).toBe(1)
   expect(user1.live).toBe(true)
   expect(user2).toBe(null)
   expect(user3?.live).toBe(true)
@@ -1866,8 +1865,7 @@ test('Simple transaction functional', async () => {
   })
   const user3 = await dao.user.findOne({ filter: { id: '123' } })
   expect(user3).toBe(null)
-  const res = await session.commitTransaction()
-  expect(res.ok).toBe(1)
+  await session.commitTransaction()
   const user4 = await dao.user.findOne({ filter: { id: '123' } })
   expect(user4?.live).toBe(true)
 })
@@ -2016,11 +2014,11 @@ test('Aggregate test 2', async () => {
           i % 4 === 0
             ? null
             : i % 4 === 1
-            ? undefined
-            : {
-                region: i % 4 === 2 ? 'it' : 'en',
-                visible: i % 2 === 0 || i === 99,
-              },
+              ? undefined
+              : {
+                  region: i % 4 === 2 ? 'it' : 'en',
+                  visible: i % 2 === 0 || i === 99,
+                },
       },
     })
   }

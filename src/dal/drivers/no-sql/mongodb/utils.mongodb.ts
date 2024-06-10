@@ -141,18 +141,18 @@ async function adaptToSchema<Scalars extends AbstractScalars, Scalar extends Sca
         'contains' in filter && 'startsWith' in filter && 'endsWith' in filter
           ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains}).*(?<=${filter.endsWith}$)`) }
           : 'startsWith' in filter && 'endsWith' in filter
-          ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.endsWith}$)`) }
-          : 'contains' in filter && 'startsWith' in filter
-          ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains})`) }
-          : 'contains' in filter && 'endsWith' in filter
-          ? { $options, $regex: new RegExp(`(${filter.contains}).*(?<=${filter.endsWith}$)`) }
-          : 'contains' in filter
-          ? { $options, $regex: filter.contains }
-          : 'startsWith' in filter
-          ? { $options, $regex: new RegExp(`^${filter.startsWith}`) }
-          : 'endsWith' in filter
-          ? { $options, $regex: new RegExp(`${filter.endsWith}$`) }
-          : {}
+            ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.endsWith}$)`) }
+            : 'contains' in filter && 'startsWith' in filter
+              ? { $options, $regex: new RegExp(`(^${filter.startsWith}).*(?<=${filter.contains})`) }
+              : 'contains' in filter && 'endsWith' in filter
+                ? { $options, $regex: new RegExp(`(${filter.contains}).*(?<=${filter.endsWith}$)`) }
+                : 'contains' in filter
+                  ? { $options, $regex: filter.contains }
+                  : 'startsWith' in filter
+                    ? { $options, $regex: new RegExp(`^${filter.startsWith}`) }
+                    : 'endsWith' in filter
+                      ? { $options, $regex: new RegExp(`${filter.endsWith}$`) }
+                      : {}
       return { ...mappedFilter, ...stringFilter }
     } else {
       // plain value

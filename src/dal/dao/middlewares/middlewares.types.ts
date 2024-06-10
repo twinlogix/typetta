@@ -42,30 +42,30 @@ export type MiddlewareReturn<T extends DAOGenerics> = Omit<
 export type SelectBeforeMiddlewareOutputType<T extends DAOGenerics, I extends MiddlewareInput<T>> = I['operation'] extends 'find'
   ? (FindMiddlewareInput<T> & Continue<true>) | (FindMiddlewareOutput<T> & Continue<false>)
   : I['operation'] extends 'aggregate'
-  ? (AggregateMiddlewareInput<T> & Continue<true>) | (AggregateMiddlewareOutput<T> & Continue<false>)
-  : I['operation'] extends 'insert'
-  ? (InsertMiddlewareInput<T> & Continue<true>) | (InsertMiddlewareOutput<T> & Continue<false>)
-  : I['operation'] extends 'update'
-  ? (UpdateMiddlewareInput<T> & Continue<true>) | (UpdateMiddlewareOutput<T> & Continue<false>)
-  : I['operation'] extends 'replace'
-  ? (ReplaceMiddlewareInput<T> & Continue<true>) | (ReplaceMiddlewareOutput<T> & Continue<false>)
-  : I['operation'] extends 'delete'
-  ? (DeleteMiddlewareInput<T> & Continue<true>) | (DeleteMiddlewareOutput<T> & Continue<false>)
-  : never
+    ? (AggregateMiddlewareInput<T> & Continue<true>) | (AggregateMiddlewareOutput<T> & Continue<false>)
+    : I['operation'] extends 'insert'
+      ? (InsertMiddlewareInput<T> & Continue<true>) | (InsertMiddlewareOutput<T> & Continue<false>)
+      : I['operation'] extends 'update'
+        ? (UpdateMiddlewareInput<T> & Continue<true>) | (UpdateMiddlewareOutput<T> & Continue<false>)
+        : I['operation'] extends 'replace'
+          ? (ReplaceMiddlewareInput<T> & Continue<true>) | (ReplaceMiddlewareOutput<T> & Continue<false>)
+          : I['operation'] extends 'delete'
+            ? (DeleteMiddlewareInput<T> & Continue<true>) | (DeleteMiddlewareOutput<T> & Continue<false>)
+            : never
 
 export type SelectAfterMiddlewareOutputType<T extends DAOGenerics, I extends MiddlewareInput<T>> = I['operation'] extends 'find'
   ? FindMiddlewareOutput<T> & Continue<boolean>
   : I['operation'] extends 'aggregate'
-  ? AggregateMiddlewareOutput<T> & Continue<boolean>
-  : I['operation'] extends 'insert'
-  ? InsertMiddlewareOutput<T> & Continue<boolean>
-  : I['operation'] extends 'update'
-  ? UpdateMiddlewareOutput<T> & Continue<boolean>
-  : I['operation'] extends 'replace'
-  ? ReplaceMiddlewareOutput<T> & Continue<boolean>
-  : I['operation'] extends 'delete'
-  ? DeleteMiddlewareOutput<T> & Continue<boolean>
-  : never
+    ? AggregateMiddlewareOutput<T> & Continue<boolean>
+    : I['operation'] extends 'insert'
+      ? InsertMiddlewareOutput<T> & Continue<boolean>
+      : I['operation'] extends 'update'
+        ? UpdateMiddlewareOutput<T> & Continue<boolean>
+        : I['operation'] extends 'replace'
+          ? ReplaceMiddlewareOutput<T> & Continue<boolean>
+          : I['operation'] extends 'delete'
+            ? DeleteMiddlewareOutput<T> & Continue<boolean>
+            : never
 
 export type BeforeMiddlewareResult<T extends DAOGenerics> = (Continue<true> & MiddlewareInput<T>) | (Continue<false> & MiddlewareReturn<T>)
 export type AfterMiddlewareResult<T extends DAOGenerics> = (Continue<true> & MiddlewareOutput<T>) | (Continue<false> & MiddlewareReturn<T>)

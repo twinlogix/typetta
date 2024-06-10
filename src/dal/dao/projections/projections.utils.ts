@@ -7,8 +7,8 @@ import { PartialDeep } from 'type-fest'
 export type SelectProjection<ProjectionType extends GenericProjection, P1 extends ProjectionType, P2 extends ProjectionType> = ProjectionType extends P1
   ? ProjectionType
   : ProjectionType extends P2
-  ? ProjectionType
-  : MergeGenericProjection<P1, P2>
+    ? ProjectionType
+    : MergeGenericProjection<P1, P2>
 
 export function mergeGenericProjection<P1 extends GenericProjection, P2 extends GenericProjection>(p1: P1, p2: P2): MergeGenericProjection<P1, P2> {
   return mergeProjections(p1, p2)

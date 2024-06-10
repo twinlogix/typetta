@@ -71,18 +71,21 @@ export function userInputDataTypeAdapterToDataTypeAdapter<ModelScalars extends D
       },
     } as InMemoryDataTypeAdapterMap<ModelScalars>
   }, inMemoryAdapters as InMemoryDataTypeAdapterMap<ModelScalars>)
-  const cache = Object.entries(mappedInput).reduce<DataTypeAdapterMap<ModelScalars, Record<string, never>>>((map, [scalarName, dta]) => {
-    const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown>
-    const oldAdapter = map[scalarName as keyof ModelScalars]
-    return {
-      ...map,
-      [scalarName]: {
-        modelToDB: adapter.cache?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter().modelToDB,
-        dbToModel: adapter.cache?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter().dbToModel,
-        validate: adapter.cache?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter()?.validate,
-        generate: adapter.cache?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter()?.generate,
-      },
-    } as DataTypeAdapterMap<ModelScalars, Record<string, never>>
-  }, inMemoryAdapters as DataTypeAdapterMap<ModelScalars, Record<string, never>>)
+  const cache = Object.entries(mappedInput).reduce<DataTypeAdapterMap<ModelScalars, Record<string, never>>>(
+    (map, [scalarName, dta]) => {
+      const adapter = dta as UserInputDataTypeAdapter<unknown, unknown, unknown>
+      const oldAdapter = map[scalarName as keyof ModelScalars]
+      return {
+        ...map,
+        [scalarName]: {
+          modelToDB: adapter.cache?.modelToDB ?? adapter.modelToDB ?? oldAdapter?.modelToDB ?? identityAdapter().modelToDB,
+          dbToModel: adapter.cache?.dbToModel ?? adapter.dbToModel ?? oldAdapter?.dbToModel ?? identityAdapter().dbToModel,
+          validate: adapter.cache?.validate ?? adapter.validate ?? oldAdapter?.validate ?? identityAdapter()?.validate,
+          generate: adapter.cache?.generate ?? adapter.generate ?? oldAdapter?.generate ?? identityAdapter()?.generate,
+        },
+      } as DataTypeAdapterMap<ModelScalars, Record<string, never>>
+    },
+    inMemoryAdapters as DataTypeAdapterMap<ModelScalars, Record<string, never>>,
+  )
   return { knex, mongo, memory, cache }
 }

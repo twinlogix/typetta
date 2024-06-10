@@ -903,10 +903,10 @@ function selectMiddleware<MetadataType, OperationMetadataType>(
         ? [m.middleware]
         : []
       : 'exclude' in m
-      ? !Object.keys(m.exclude).includes(name)
-        ? [m.middleware as EntityManagerMiddleware<MetadataType, OperationMetadataType>]
-        : []
-      : [m],
+        ? !Object.keys(m.exclude).includes(name)
+          ? [m.middleware as EntityManagerMiddleware<MetadataType, OperationMetadataType>]
+          : []
+        : [m],
   )
 }
 

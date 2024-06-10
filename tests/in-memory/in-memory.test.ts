@@ -1111,11 +1111,11 @@ test('Aggregate test 2', async () => {
           i % 4 === 0
             ? null
             : i % 4 === 1
-            ? undefined
-            : {
-                region: i % 4 === 2 ? 'it' : 'en',
-                visible: i % 2 === 0 || i === 99,
-              },
+              ? undefined
+              : {
+                  region: i % 4 === 2 ? 'it' : 'en',
+                  visible: i % 2 === 0 || i === 99,
+                },
       },
     })
   }

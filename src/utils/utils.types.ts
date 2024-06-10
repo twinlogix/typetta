@@ -31,14 +31,14 @@ export type Coordinates = {
 export type TypeTraversal<T, Path extends string> = T extends null
   ? null
   : T extends undefined
-  ? undefined
-  : Path extends keyof T
-  ? T[Path]
-  : Path extends `${infer R}.${infer F}`
-  ? R extends keyof T
-    ? TypeTraversal<T[R], F>
-    : never
-  : never
+    ? undefined
+    : Path extends keyof T
+      ? T[Path]
+      : Path extends `${infer R}.${infer F}`
+        ? R extends keyof T
+          ? TypeTraversal<T[R], F>
+          : never
+        : never
 
 type Prev = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...0[]]
 
@@ -53,10 +53,10 @@ type RecursiveKeyOfInner<TObj extends object, D extends number> = {
 type RecursiveKeyOfHandleValue<TValue, Text extends string, D extends number> = [D] extends [never]
   ? never
   : TValue extends (infer O)[]
-  ? Text
-  : TValue extends object
-  ? Text | `${Text}${RecursiveKeyOfInner<TValue, D>}`
-  : Text
+    ? Text
+    : TValue extends object
+      ? Text | `${Text}${RecursiveKeyOfInner<TValue, D>}`
+      : Text
 
 export type RecursiveKeyOfLeaf<TObj extends object, DepthLimit extends number = 3> = {
   [TKey in keyof TObj & (string | number)]: RecursiveKeyOfHandleValueLeaf<TObj[TKey], `${TKey}`, DepthLimit>
@@ -69,10 +69,10 @@ type RecursiveKeyOfInnerLeaf<TObj extends object, D extends number> = {
 type RecursiveKeyOfHandleValueLeaf<TValue, Text extends string, D extends number> = [D] extends [never]
   ? never
   : TValue extends (infer O)[]
-  ? Text
-  : TValue extends object
-  ? `${Text}${RecursiveKeyOfInnerLeaf<TValue, D>}`
-  : Text
+    ? Text
+    : TValue extends object
+      ? `${Text}${RecursiveKeyOfInnerLeaf<TValue, D>}`
+      : Text
 
 export type OmitIfKnown<T, K extends keyof T> = [K] extends [any] ? any : Omit<T, K>
 
