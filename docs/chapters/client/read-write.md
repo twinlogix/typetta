@@ -208,6 +208,18 @@ for await(const user of users) {
 
 The return of this query is an array of users living in Milan, sorted by last name in alphabetical order.
 
+Under the hood, the iterable fetches records in chunks. By default the chunk size is the DAO-level `pageSize` (50 if not configured). You can override it per-call with the `pageSize` option, which is independent from `limit` (which caps the total number of records returned):
+
+```typescript
+// Iterate all matching records, 200 per DB round-trip
+for await (const user of entityManager.user.findAllIterable({
+  filter: { "address.city": "Milan" },
+  pageSize: 200,
+})) {
+  // ...
+}
+```
+
 ## Resolve Relations
 
 The [resolveRelations](/typedoc/classes/AbstractDAO.html#resolveRelations){:target="_blank"} API allows you to resolve some of the relations of a given input. It accepts partial entity and resolves the relations based on the given projection. It's mainly useful when, after an insert, you want to return an entity within a GraphQL resolver.
