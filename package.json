@@ -87,7 +87,7 @@
     "prettier": "3.3.1",
     "type-fest": "4.19.0",
     "yaml": "2.4.3",
-    "uuid": "9.0.1"
+    "uuid": "14.0.0"
   },
   "peerDependencies": {
     "knex": "2.5.1",
