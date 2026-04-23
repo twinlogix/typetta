@@ -275,7 +275,9 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
     })
   }
 
-  findAllIterable<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(params: FindParams<T, P> = {}): AsyncIterable<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>> {
+  findAllIterable<P extends AnyProjection<T['projection']> | GraphQLResolveInfo>(
+    params: FindParams<T, P> & { pageSize?: number } = {},
+  ): AsyncIterable<Project<T['entity'], T['ast'], T['scalars'], P, T['types']>> {
     let used = false
     return {
       [Symbol.asyncIterator]: () => {
@@ -290,7 +292,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
           used = true
           const results: Project<T['entity'], T['ast'], T['scalars'], P, T['types']>[] = []
           let index = params.skip ?? 0
-          const limit = params.limit ?? this.pageSize
+          const pageSize = params.pageSize ?? params.limit ?? this.pageSize
           let returned = 0
           return {
             next: async () => {
@@ -306,13 +308,14 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
                   return { value: null, done: true }
                 }
               }
+              const pageLimit = typeof params.limit === 'number' ? Math.min(pageSize, params.limit - returned) : pageSize
               const newEntries = await this.findAll({
                 ...params,
                 skip: index,
                 sorts: params.sorts ?? [{ [this.idField]: 'asc' }],
-                limit: typeof params.limit === 'number' ? Math.min(limit, params.limit - returned) : limit,
+                limit: pageLimit,
               })
-              index += limit
+              index += pageLimit
               newEntries.reverse()
               results.push(...newEntries)
               if (results.length === 0) {

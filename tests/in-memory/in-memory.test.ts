@@ -392,6 +392,30 @@ test('find iterable', async () => {
   expect(count).toBe(80)
 })
 
+test('find iterable with custom page size', async () => {
+  const TOTAL_DOCS = 300
+  const PAGE_SIZE = 100
+  for (let i = 0; i < TOTAL_DOCS; i++) {
+    await dao.user.insertOne({ record: { firstName: '' + i, live: true } })
+  }
+
+  const findAllSpy = jest.spyOn(dao.user, 'findAll')
+
+  let count = 0
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const _u of dao.user.findAllIterable({ pageSize: PAGE_SIZE })) {
+    count++
+  }
+
+  expect(count).toBe(TOTAL_DOCS)
+  expect(findAllSpy).toHaveBeenCalledTimes(TOTAL_DOCS / PAGE_SIZE + 1)
+  for (const [callArgs] of findAllSpy.mock.calls) {
+    expect(callArgs?.limit).toBe(PAGE_SIZE)
+  }
+
+  findAllSpy.mockRestore()
+})
+
 test('contains in array', async () => {
   await dao.user.insertOne({ record: { live: true, credentials: [] } })
   await dao.user.insertOne({
