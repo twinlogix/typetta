@@ -22,7 +22,7 @@ import { AST, EntityManager, ScalarsSpecification, UserDAO, UserPlainModel } fro
 import { State, User } from './models.mock'
 import BigNumber from 'bignumber.js'
 import { GraphQLResolveInfo } from 'graphql'
-import { MongoClient, Db, Decimal128, ObjectId, ModifyResult } from 'mongodb'
+import { MongoClient, Db, Decimal128, ObjectId } from 'mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import sha256 from 'sha256'
 import { PartialDeep } from 'type-fest'
@@ -1897,14 +1897,18 @@ test('Simple transaction 2', async () => {
     writeConcern: { w: 'majority' },
   })
   const options = { session }
-  await dao.user.updateOne({ filter: { id: '123' }, changes: { live: false }, options })
+  // the first operation pins the transaction snapshot
+  const user1 = await dao.user.findOne({ filter: { id: '123' }, options })
+  expect(user1?.live).toBe(true)
+  // a write outside the transaction modifies a document that the transaction later tries to modify:
+  // the transaction aborts with a write conflict (MongoDB docs, "In-progress Transactions and Write Conflicts").
+  // The opposite order (transaction writes first, outside write later) is not testable since MongoDB 7.0:
+  // the outside write blocks until the transaction ends.
   await dao.user.deleteOne({ filter: { id: '123' } })
-  try {
-    await session.commitTransaction()
-    fail()
-  } catch (error: unknown) {
-    expect((error as ModifyResult).ok).toBe(0)
-  }
+  await expect(dao.user.updateOne({ filter: { id: '123' }, changes: { live: false }, options })).rejects.toMatchObject({ codeName: 'WriteConflict' })
+  await session.abortTransaction()
+  const user2 = await dao.user.findOne({ filter: { id: '123' } })
+  expect(user2).toBe(null)
 })
 
 test('Simple transaction 3', async () => {
