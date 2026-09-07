@@ -48,7 +48,7 @@
     "@types/lodash": "4.14.195",
     "@types/node": "18.18.5",
     "@types/object-hash": "2.2.1",
-    "@types/sha256": "0.2.0",
+    "@types/sha256": "0.2.2",
     "@types/uuid": "8.3.4",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "@typescript-eslint/parser": "5.62.0",
