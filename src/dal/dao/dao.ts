@@ -127,7 +127,7 @@ export abstract class AbstractDAO<T extends DAOGenerics> implements DAO<T> {
             if (driver === 'mongo') {
               const session = this.entityManager.getMongoSession(this.datasource)
               if (session) {
-                if (!session.transaction.isActive) {
+                if (!session.inTransaction()) {
                   throw new Error(`Operation ${specificOperation} of dao ${daoName} should be executed in transaction but the current MongoDB session transaction is not active.`)
                 }
                 return {

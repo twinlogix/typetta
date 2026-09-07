@@ -13,9 +13,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
-      - name: Update npm
-        run: npm install -g npm@7
+          node-version: '24'
       - name: Node version
         run: node --version && npm --version
       - name: Installing node packages

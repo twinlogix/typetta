@@ -57,7 +57,7 @@
     "eslint": "8.51.0",
     "jest": "27.5.1",
     "make-coverage-badge": "1.2.0",
-    "mongodb-memory-server": "9.3.0",
+    "mongodb-memory-server": "11.2.0",
     "release-it": "15.11.0",
     "rimraf": "3.0.2",
     "sha256": "0.2.0",
@@ -91,7 +91,7 @@
   },
   "peerDependencies": {
     "knex": "2.5.1",
-    "mongodb": "6.7.0",
+    "mongodb": "^6.7.0 || ^7.0.0",
     "redis": "4.6.7"
   },
   "resolutions": {
