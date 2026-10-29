@@ -7,7 +7,7 @@
   },
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.prod.json",
+    "build": "node init && tsc -p tsconfig.prod.json",
     "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --no-cache --forceExit --coverage && make-coverage-badge",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --no-cache --forceExit",
     "lint": "eslint . --quiet --ext .js,.jsx,.ts,.tsx",
@@ -78,21 +78,23 @@
     "commander": "9.5.0",
     "dataloader": "2.2.2",
     "dedent": "0.7.0",
+    "dotenv": "^8.2.0",
     "graphql": "16.8.1",
     "graphql-tag": "2.12.6",
     "inquirer": "8.2.6",
     "is-plain-object": "5.0.0",
     "lodash": "4.17.21",
+    "node-fetch": "^3.3.2",
     "object-hash": "2.2.0",
     "prettier": "3.3.1",
     "type-fest": "4.19.0",
-    "yaml": "2.4.3",
-    "uuid": "9.0.1"
+    "uuid": "9.0.1",
+    "yaml": "2.4.3"
   },
   "peerDependencies": {
     "knex": "2.5.1",
     "mongodb": "^6.7.0 || ^7.0.0",
-    "redis": "4.6.7"
+    "redis": "4.7.1"
   },
   "resolutions": {
     "graphql": "16.8.1"
