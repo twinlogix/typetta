@@ -4,3 +4,4 @@ lib
 docs/_site
 tests/**/*.generated.*
 tests/cli/example
+config.bat
